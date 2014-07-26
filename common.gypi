@@ -41,6 +41,9 @@
           ['target_arch=="x64"', {
             'msvs_configuration_platform': 'x64',
           }],
+					['OS!="mac"', {
+						'ldflags': [ '-framework Carbon'],
+					}],
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
@@ -93,6 +96,9 @@
           ['OS!="mac" and OS!="win"', {
             'cflags': [ '-fno-omit-frame-pointer' ],
           }],
+					['OS!="mac"', {
+						'ldflags': [ '-framework Carbon'],
+					}],
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
@@ -198,6 +204,9 @@
       ['OS=="mac"', {
         'defines': ['_DARWIN_USE_64_BIT_INODE=1'],
         'xcode_settings': {
+					'PROJECT_DIR': '<@(DEPTH)/build',
+					'SYMROOT': '<@(DEPTH)/build',
+					'OBJROOT': '<@(DEPTH)/build',
           'ALWAYS_SEARCH_USER_PATHS': 'NO',
           'GCC_CW_ASM_SYNTAX': 'NO',                # No -fasm-blocks
           'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic
@@ -207,11 +216,14 @@
           'GCC_ENABLE_PASCAL_STRINGS': 'NO',        # No -mpascal-strings
           'GCC_THREADSAFE_STATICS': 'NO',           # -fno-threadsafe-statics
           'PREBINDING': 'NO',                       # No -Wl,-prebind
-          'MACOSX_DEPLOYMENT_TARGET': '10.5',       # -mmacosx-version-min=10.5
+          'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.5
           'USE_HEADERMAP': 'NO',
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
           ],
+					'OTHER_LDFLAGS':[
+						'-framework Carbon', '-framework AppKit'
+					],
           'WARNING_CFLAGS': [
             '-Wall',
             '-Wendif-labels',
@@ -239,4 +251,3 @@
     ],
   }
 }
-
