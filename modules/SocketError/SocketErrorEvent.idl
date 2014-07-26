@@ -1,0 +1,3 @@
+interface SocketErrorEvent : Event {
+    readonly    attribute SocketError error;
+};

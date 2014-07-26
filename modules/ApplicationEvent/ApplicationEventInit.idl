@@ -1,0 +1,3 @@
+dictionary ApplicationEventInit : EventInit {
+    Application application;
+};

@@ -1,0 +1,7 @@
+enum ReadyState {
+    "opening",
+    "open",
+    "closing",
+    "closed",
+    "halfclosed"
+};

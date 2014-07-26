@@ -1,0 +1,17 @@
+[Constructor (optional UDPOptions options)]
+interface UDPSocket {
+    readonly    attribute DOMString       localAddress;
+    readonly    attribute unsigned short  localPort;
+    readonly    attribute DOMString?      remoteAddress;
+    readonly    attribute unsigned short? remotePort;
+    readonly    attribute boolean         addressReuse;
+    readonly    attribute boolean         loopback;
+    readonly    attribute ReadyState      readyState;
+    readonly    attribute Promise         opened;
+    readonly    attribute Promise         closed;
+    readonly    attribute ReadableStream  output;
+    readonly    attribute WriteableStream input;
+    Promise close ();
+    void    joinMulticast (DOMString multicastGroupAddress);
+    void    leaveMulticast (DOMString multicastGroupAddress);
+};
