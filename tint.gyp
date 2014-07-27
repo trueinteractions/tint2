@@ -74,7 +74,7 @@
 		],
 
 		'sources': [
-			'Main.mm',
+			'src/Main_mac.mm',
 			'libraries/node/src/fs_event_wrap.cc',
 			'libraries/node/src/cares_wrap.cc',
 			'libraries/node/src/handle_wrap.cc',

@@ -24,5 +24,5 @@
                  'target_arch': 'x64',
                  'v8_enable_gdbjit': 0,
                  'v8_no_strict_aliasing': 1,
-                 'v8_use_snapshot': 'true'}}
+                 'v8_use_snapshot': 'false'}}
 

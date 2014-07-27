@@ -12,4 +12,4 @@ if [ ! -f "./libraries/node/config.gypi" ]; then
 	./configure
 	cd ../..
 fi
-./tools/gyp/gyp tint.gyp -D gyp_output_dir=build --generator-output=build --depth=$PWD -Dtarget_arch=x64 -I./libraries/node/config.gypi -I./libraries/node/common.gypi -Dnode_build_type=static_library
+./tools/gyp/gyp tint.gyp -D gyp_output_dir=build --generator-output=build --depth=$PWD -Dtarget_arch=x64 -I./config.gypi -I./common.gypi -Dnode_build_type=static_library

@@ -4,4 +4,4 @@
 [submodule "libraries/node"]
 	path = libraries/node
 	url = https://github.com/joyent/node.git
-	branch = v0.10.29-release
+	branch = v0.10.21-release
