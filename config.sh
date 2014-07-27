@@ -12,4 +12,12 @@ if [ ! -f "./libraries/node/config.gypi" ]; then
 	./configure
 	cd ../..
 fi
-./tools/gyp/gyp tint.gyp -D gyp_output_dir=build --generator-output=build --depth=$PWD -Dtarget_arch=x64 -I./config.gypi -I./common.gypi -Dnode_build_type=static_library
+
+if [ ! -d "./build" ]; then
+	mkdir build
+fi
+
+# -Dtarget_arch=x64 
+
+./tools/gyp/gyp tint.gyp -f $GYP_GENERATORS -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./config.gypi -I./common.gypi
+./tools/gyp/gyp tint.gyp -f ninja -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./config.gypi -I./common.gypi

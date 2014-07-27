@@ -1,15 +1,15 @@
 {
   'variables': {
     'werror': '',                     # Turn off -Werror in V8 build.
-    'visibility%': 'hidden',          # V8's visibility setting
-    'target_arch%': 'ia32',           # set v8's target architecture
-    'host_arch%': 'ia32',             # set v8's host architecture
+    'visibility%': 'normal',          # V8's visibility setting
+    'target_arch%': 'x64',           # set v8's target architecture
+    'host_arch%': 'x64',             # set v8's host architecture
     'want_separate_host_toolset%': 0, # V8 should not build target and host
     'library%': 'static_library',     # allow override to 'shared_library' for DLL/.so builds
     'component%': 'static_library',   # NB. these names match with what V8 expects
     'msvs_multi_core_compile': '0',   # we do enable multicore compiles, but not using the V8 way
     'gcc_version%': 'unknown',
-    'clang%': 0,
+    'clang%': 1,
     'python%': 'python',
 
     # Turn on optimizations that may trigger compiler bugs.
@@ -204,6 +204,7 @@
       ['OS=="mac"', {
         'defines': ['_DARWIN_USE_64_BIT_INODE=1'],
         'xcode_settings': {
+					'SDKROOT': '<!(xcrun --show-sdk-path)',
 					'PROJECT_DIR': '<@(DEPTH)/build',
 					'SYMROOT': '<@(DEPTH)/build',
 					'OBJROOT': '<@(DEPTH)/build',
@@ -214,12 +215,20 @@
           'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',        # -fno-exceptions
           'GCC_ENABLE_CPP_RTTI': 'NO',              # -fno-rtti
           'GCC_ENABLE_PASCAL_STRINGS': 'NO',        # No -mpascal-strings
+					'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',
+					'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',
           'GCC_THREADSAFE_STATICS': 'NO',           # -fno-threadsafe-statics
           'PREBINDING': 'NO',                       # No -Wl,-prebind
-          'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.5
+          'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.7
           'USE_HEADERMAP': 'NO',
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
+            '-g', 
+            '-stdlib=libc++',
+          ],
+          'OTHER_CPLUSPLUSFLAGS': [
+            '-g', 
+            '-stdlib=libc++'
           ],
 					'OTHER_LDFLAGS':[
 						'-framework Carbon', '-framework AppKit'
@@ -229,6 +238,8 @@
             '-Wendif-labels',
             '-W',
             '-Wno-unused-parameter',
+            '-fobjc-arc',
+            '-fobjc-runtime=macosx',
           ],
         },
         'target_conditions': [
