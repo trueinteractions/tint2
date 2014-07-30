@@ -1,4 +1,3 @@
-
 $ = require('../../nodobjc');
 $.import('Foundation',0);
 $.import('Cocoa',0);
@@ -47,6 +46,7 @@ application.addEventListener('launch', function() {
 	});
 	this.mainWindow.addEventListener('close', function() {
 		//console.log('window close');
+		process.exit();
 	});
 
 	//TODO: Garbage Collection may ruin us if we don't assign it to this?..
@@ -104,18 +104,27 @@ application.addEventListener('launch', function() {
 		var url = textfield.text;
 		if(url.indexOf(':') == -1) url = "http://"+url;
 		this.webView.location = url;
+		console.log('setting center');
+		textfield.alignment = 'center';
 	});
 	textfield.addEventListener('inputstart', function() {
+		console.log('setting left');
+		//textfield.alignment = 'left';
 	});
 
+	textfield.alignment = 'center';
+	textfield.linewrap = false;
+	textfield.scrollable = true;
 	var backButton = new Button();
 	backButton.image = 'back';
 	backButton.addEventListener('click',function() {
+		this.webView.back();
 	});
 
 	var forwardButton = new Button();
 	forwardButton.image = 'forward';
 	forwardButton.addEventListener('click',function() {
+		this.webView.forward();
 	});
 
 	var toolbar = new Toolbar();
@@ -126,12 +135,11 @@ application.addEventListener('launch', function() {
 	toolbar.appendChild("space");
 	toolbar.appendChild(textfield);
 	toolbar.appendChild("space");
-
-	//textfield.width = 400;
-	//textfield.widthMaximum = 450;
-	//textfield.widthMinimum = 150;
-	//textfield.widthCanResize = true;
-	//textfield.rightMarginCanResize = true;
+	textfield.width = 400;
+	textfield.widthMaximum = 450;
+	textfield.widthMinimum = 20;
+	textfield.widthCanResize = true;
+	textfield.rightMarginCanResize = true;
 
 	//console.assert(textfield.width == 350, 'width not set');
 	//console.assert(textfield.widthMaximum == 450, 'widthMaximum not set');

@@ -32,8 +32,8 @@ module.exports = (function() {
 			if(!toolbarCache[parseInt(identifier)]) {
 				var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',identifier);
 				var child = children[parseInt(identifier)-1];
-				//toolbarItem('setMaxSize',$.NSMakeSize(child.preferredMaximumWidth,child.preferredMaximumHeight));
-				//toolbarItem('setMinSize',$.NSMakeSize(child.preferredMinimumWidth,child.preferredMinimumHeight));
+				toolbarItem('setMaxSize',$.NSMakeSize(child.widthMaximum,child.heightMaximum));
+				toolbarItem('setMinSize',$.NSMakeSize(child.widthMinimum,child.heightMinimum));
 				toolbarItem('setView',child.internal);
 				toolbarCache[parseInt(identifier)] = toolbarItem;
 			}

@@ -12,6 +12,9 @@ module.exports = (function() {
       if(options.width) _width = options.width;
       if(options.height) _height = options.height;
 
+      // NO IDEA WHY BUT SETTING THE MAX HEIGHT AND WIDTH
+      // OF ANY OBJECT SOMEHOW CORRUPTS THE VALUES OF SUBVIEW'S
+      // THAT TRY AND SET THE HEIGHT/WIDTH.
       Object.defineProperty(target, 'heightMinimum', {
         get:function() { return _minHeight; }.bind(this),
         set:function(e) { 
@@ -21,7 +24,10 @@ module.exports = (function() {
             var _size = $nativeObj('minSize');
             _size.width = _minWidth;
             _size.height = _minHeight;
-            $nativeObj('setMinSize',_size);
+            if(options.type == "window")
+              $nativeObj('setContentMinSize',_size);
+            else
+              $nativeObj('setMinSize',_size);
           }
           fireEvent('boundschange');
         }.bind(this)
@@ -36,7 +42,10 @@ module.exports = (function() {
             var _size = $nativeObj('maxSize');
             _size.width = _maxWidth;
             _size.height = _maxHeight;
-            $nativeObj('setMaxSize',_size);
+            if(options.type == "window")
+              $nativeObj('setContentMaxSize',_size);
+            else
+              $nativeObj('setMaxSize',_size);
           }
           fireEvent('boundschange');
         }.bind(this)
@@ -50,7 +59,10 @@ module.exports = (function() {
             var _size = $nativeObj('minSize');
             _size.width = _minWidth;
             _size.height = _minHeight;
-            $nativeObj('setMinSize',_size);
+            if(options.type == "window")
+              $nativeObj('setContentMinSize',_size);
+            else
+              $nativeObj('setMinSize',_size);
           }
           fireEvent('boundschange');
         }.bind(this)
@@ -65,25 +77,44 @@ module.exports = (function() {
             var _size = $nativeObj('maxSize');
             _size.width = _maxWidth;
             _size.height = _maxHeight;
-            $nativeObj('setMaxSize',_size);
+            if(options.type == "window")
+              $nativeObj('setContentMaxSize',_size);
+            else
+              $nativeObj('setMaxSize',_size);
+
           }
           fireEvent('boundschange');
         }.bind(this)
       });
 
+      if(options.hasmaxmin) {
+        var maxSize = $.NSMakeSize(_maxWidth,_maxHeight);
+        var minSize = $.NSMakeSize(_minWidth,_minHeight);
+
+        if(options.type == "window") 
+          $nativeObj('setContentMaxSize', maxSize);
+        else
+          $nativeObj('setMaxSize', maxSize);
+        if(options.type == "window") 
+          $nativeObj('setContentMinSize', minSize);
+        else
+          $nativeObj('setMinSize',minSize);
+      }
+
       Object.defineProperty(target, 'width', {
         get:function() { return _width; }.bind(this),
         set:function(e) { 
+          //TODO: If this has not been properly added to a view sometimes width is ignored and
+          // we need to simply ignore the width value for the moment (E.g., we've been added to
+          // a toolbar that ignores frames and returns invalid numbers if necessary.)
           _width = e;
           var _rect = $nativeObj('frame');
           _rect.size.height = _height;
           _rect.size.width = _width;
           if(options.type == 'window')
-            $nativeObj('setFrame', _rect, 'display', true, 'animate', global.application.preferences.animateWhenPossible);
+            $nativeObj('setFrame', _rect, 'display', true, 'animate', global.application.preferences.animateWhenPossible ? true : false);
           else
             $nativeObj('setFrame', _rect);
-          //var _rect2 = $nativeObj('frame');
-          //console.assert(_rect.size.width == _rect2.size.width, 'setting frame failed rect: ',_rect, ' rect2:', _rect2);
         }.bind(this)
       });
 
@@ -95,7 +126,7 @@ module.exports = (function() {
           _rect.size.height = _height;
           _rect.size.width = _width;
           if(options.type == 'window')
-            $nativeObj('setFrame', _rect, 'display', true, 'animate', global.application.preferences.animateWhenPossible);
+            $nativeObj('setFrame', _rect, 'display', true, 'animate', global.application.preferences.animateWhenPossible ? true : false);
           else
             $nativeObj('setFrame', _rect);
         }.bind(this)

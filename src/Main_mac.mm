@@ -9,31 +9,50 @@ static char **init_argv;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @property() bool locked;
-@property() bool initialized;
 @property() v8::Handle<v8::Object> process_l;
+@property() NSTimer* timer;
 @end
 
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-	_locked = false;
+	self.locked = true;
+
+	//
+	// IMPORTANT: DO NOT SET THIS RESOLUTION TIME LOWER THAN 0.156 (preferably 0.016 ~ 60fps),
+	//
+	// See NSTimer class for more information. The tolerance can be adjusted but is safe at checking
+	// the event loop every 0.016 + 0.100 seconds.  Node requires a high-resolution timer for server event loops, however it
+	// indirectly reduces battery life of laptops considerably while running.  We are forcing the UV/CF event
+	// loop into the recommended Apple "maximum" timer and can back off when in energy savings mode to
+	// act like other normal NSApplication's. Setting this lower than 0.0156 or setting the tolerance lower
+	// than 0.1 will cause significant (est. 3~5%) performance drop and lesser battery life.
+	// If you need a higher timer res, use NSOpenGL views and a seperate shared memory process to render
+	// to the rect specified by the app, then immediately shutdown. Note: any native webviews use their own
+	// timers, any webkit related javascript/webgl is not subject to this rule.
+	self.timer = [NSTimer scheduledTimerWithTimeInterval:0.016
+																										target:self
+																									selector:@selector(helperTimer)
+																									userInfo:nil
+																									 repeats:true];
+	[self.timer setTolerance:0.1];
+	// Create all the objects, load modules, do everything.
+	// so your next reading stop should be node::Load()!
+	node::Load(self.process_l);
+	self.locked = false;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
+	self.locked = true;
+	[self.timer invalidate];
 	node::EmitExit(_process_l);
 }
 
 - (void) helperTimer {
-	if(_locked) return;
-	_locked = true;
-	if(!_initialized) {
-		// Create all the objects, load modules, do everything.
-		// so your next reading stop should be node::Load()!
-		node::Load(_process_l);
-		_initialized = true;
-	}
+	if(self.locked) return;
+	self.locked = true;
 	uv_run(uv_default_loop(), UV_RUN_NOWAIT);
-	_locked = false;
+	self.locked = false;
 }
 @end
 
@@ -60,22 +79,6 @@ int main(int argc, char * argv[]) {
 		delegate.process_l = node::SetupProcessObject(init_argc, init_argv);
 		v8_typed_array::AttachBindings(context->Global());
 
-		delegate.locked = true;
-		delegate.initialized = false;
-		//
-		// IMPORTANT: DO NOT SET THIS RESOLUTION TIME LOWER THAN 0.156 (preferably 0.016 ~ 60fps),
-		//
-		// See NSTimer class for more information. The tolerance can be adjusted but is safe at checking
-		// the event loop every 0.55 seconds.  Node requires a high-resolution timer for server event loops, however it
-		// indirectly reduces battery life of laptops considerably while running.  We are forcing the UV/CF event
-		// loop into the recommended Apple "maximum" timer and can back off when in energy savings mode to
-		// act like other normal NSApplication's. Setting this lower than 0.0156 or setting the tolerance lower
-		// than 0.55 will cause significant (est. 3~5%) performance drop and lesser battery life.
-		// If you need a higher timer res, use NSOpenGL views and a seperate shared memory process to render
-		// to the rect specified by the app, then immediately shutdown. Note: any native webviews use their own
-		// timers, any webkit related javascript/webgl is not subject to this rule.
-		NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.016 target:delegate selector:@selector(helperTimer) userInfo:nil repeats:true];
-		[timer setTolerance:0.55];
 		[app setDelegate:delegate];
 		[app setActivationPolicy:NSApplicationActivationPolicyAccessory];
 		[app run];
