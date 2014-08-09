@@ -232,16 +232,16 @@ module.exports = (function() {
     });
 
     var WindowDelegate = $.NSObject.extend('WindowDelegate'+Math.round(Math.random()*10000));
-    WindowDelegate.addMethod('init', '@@:', function(self) { return self; });
-    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) { fireEvent('close'); return $.YES; });
-    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('enter-fullscreen'); });
-    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('leave-fullscreen'); });
-    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('focus'); });
-    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('blur'); });
-    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('minimize'); });
-    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('restore'); });
-    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { fireEvent('move'); });
-    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { fireEvent('resize'); });
+    WindowDelegate.addInstanceMethod('init', '@@:', function(self) { return self; });
+    WindowDelegate.addInstanceMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) { fireEvent('close'); return $.YES; });
+    WindowDelegate.addInstanceMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('enter-fullscreen'); });
+    WindowDelegate.addInstanceMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('leave-fullscreen'); });
+    WindowDelegate.addInstanceMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('focus'); });
+    WindowDelegate.addInstanceMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('blur'); });
+    WindowDelegate.addInstanceMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('minimize'); });
+    WindowDelegate.addInstanceMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('restore'); });
+    WindowDelegate.addInstanceMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { fireEvent('move'); });
+    WindowDelegate.addInstanceMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { fireEvent('resize'); });
     /* // seg faults?!
     WindowDelegate.addMethod('windowShouldZoom:toFrame:', 'B@:@@@', function(self, cmd, window, newFrame) {
       var value = fireEvent('state');

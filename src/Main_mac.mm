@@ -35,7 +35,7 @@ static char **init_argv;
 																									selector:@selector(helperTimer)
 																									userInfo:nil
 																									 repeats:true];
-	[self.timer setTolerance:0.1];
+	[self.timer setTolerance:0.0016];
 	// Create all the objects, load modules, do everything.
 	// so your next reading stop should be node::Load()!
 	node::Load(self.process_l);

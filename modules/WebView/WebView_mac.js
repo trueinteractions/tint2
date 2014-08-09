@@ -3,6 +3,7 @@ module.exports = (function() {
 
   function WebView() {
     // TODO: Perhaps NSMakeRect auto casts with NSValue for convenience? possible memory leak though..
+    // TODO: WebView seems to crash with Adobe Flash at times.
     var $webview = $.WebView('alloc')
                             ('initWithFrame',$.NSMakeRect(0,0,500,480) 
                             ,'frameName',$('main')
@@ -60,29 +61,23 @@ module.exports = (function() {
 
     // Track and fireback all frame load events.
     var WebFrameLoadDelegate = $.NSObject.extend('WebFrameLoadDelegate'+Math.round(Math.random()*10000));
-    WebFrameLoadDelegate.addMethod('init', '@@:', function(self) { return self; });
-    WebFrameLoadDelegate.addMethod('webView:didCancelClientRedirectForFrame:','v@:@@', function(self,_cmd,frame) { setTimeout(function(){ fireEvent('cancel'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('init', '@@:', function(self) { return self; });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didCancelClientRedirectForFrame:','v@:@@', function(self,_cmd,frame) { setTimeout(function(){ fireEvent('cancel'); },100); });
     //WebFrameLoadDelegate.addMethod('webView:didClearWindowObject:forFrame:','v@:@@@', function(self,_cmd,win,frame) { });
-    WebFrameLoadDelegate.addMethod('webView:didFailLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { setTimeout(function(){ fireEvent('error'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { setTimeout(function(){ fireEvent('error'); },100); })
-    WebFrameLoadDelegate.addMethod('webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function(self, _cmd, title, frame) { setTimeout(function() { fireEvent('redirect'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:didReceiveTitle:forFrame:', 'v@:@@@', function(self, _cmd, title, frame) { setTimeout(function() { fireEvent('title'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('loading'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('load'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('request'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('unload'); },100);  });
-    WebFrameLoadDelegate.addMethod('webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { setTimeout(function() { fireEvent('locationchange'); },100); });
-    WebFrameLoadDelegate.addMethod('webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', function(self, _cmd, sender,url,seconds,date,frame) { setTimeout(function() { fireEvent('locationchange'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didFailLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { setTimeout(function(){ fireEvent('error'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { setTimeout(function(){ fireEvent('error'); },100); })
+    WebFrameLoadDelegate.addInstanceMethod('webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function(self, _cmd, title, frame) { setTimeout(function() { fireEvent('redirect'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didReceiveTitle:forFrame:', 'v@:@@@', function(self, _cmd, title, frame) { setTimeout(function() { fireEvent('title'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('loading'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('load'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('request'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { setTimeout(function() { fireEvent('unload'); },100);  });
+    WebFrameLoadDelegate.addInstanceMethod('webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { setTimeout(function() { fireEvent('locationchange'); },100); });
+    WebFrameLoadDelegate.addInstanceMethod('webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', function(self, _cmd, sender,url,seconds,date,frame) { setTimeout(function() { fireEvent('locationchange'); },100); });
     WebFrameLoadDelegate.register();
 
     var webFrameLoadDelegateInstance = WebFrameLoadDelegate('alloc')('init');
     $webview('setFrameLoadDelegate', webFrameLoadDelegateInstance);
-
-    process.on('exit',function() { 
-        $webview;
-        WebFrameLoadDelegate;
-        webFrameLoadDelegateInstance;
-    });
 
     // Apply sizing functions for NSView widgets
     utilities.attachSizeProperties($webview, this, fireEvent);

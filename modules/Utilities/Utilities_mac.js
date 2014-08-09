@@ -134,13 +134,15 @@ module.exports = (function() {
 
       Object.defineProperty(target, 'widthActual', {
         get:function() { 
-          return $nativeObj('frame').size.width; 
+          if(options.type == 'window') return $nativeObj('contentView')('frame').size.width;
+          else return $nativeObj('frame').size.width; 
         }.bind(this)
       });
 
       Object.defineProperty(target, 'heightActual', {
         get:function() { 
-          return $nativeObj('frame').size.height; 
+          if(options.type == 'window') return $nativeObj('contentView')('frame').size.height;
+          else return $nativeObj('frame').size.height; 
         }.bind(this)
       });
 

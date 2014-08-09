@@ -14,15 +14,10 @@ module.exports = (function() {
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
 
     var NSMenuItemDelegate = $.NSObject.extend('NSMenuItemDelegate'+Math.round(Math.random()*10000));
-    NSMenuItemDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    NSMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
+    NSMenuItemDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
+    NSMenuItemDelegate.addInstanceMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
     NSMenuItemDelegate.register();
     var NSMenuItemDelegateInstance = NSMenuItemDelegate('alloc')('init');
-    
-    process.on('exit', function() {
-      NSMenuItemDelegate;
-      NSMenuItemDelegateInstance;
-    });
 
   	var $menu = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
     $menu('setTarget',NSMenuItemDelegateInstance);

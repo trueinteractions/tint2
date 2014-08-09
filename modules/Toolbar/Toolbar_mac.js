@@ -1,6 +1,5 @@
 module.exports = (function() {
 	function Toolbar() {
-
 		var $toolbar = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
 		var children = [];
 		var toolbarCache = [];
@@ -11,8 +10,8 @@ module.exports = (function() {
 		$toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
 
 		var $NSToolbarDelegateClass = $.NSObject.extend('ToolbarDelegate'+Math.round(Math.random()*10000));
-		$NSToolbarDelegateClass.addMethod('init:','@@:', function(self) { return self; });
-		$NSToolbarDelegateClass.addMethod('toolbarAllowedItemIdentifiers:','@@:', function(toolbar) { 
+		$NSToolbarDelegateClass.addInstanceMethod('init:','@@:', function(self) { return self; });
+		$NSToolbarDelegateClass.addInstanceMethod('toolbarAllowedItemIdentifiers:','@@:', function(toolbar) { 
 			var $NSArrayChildren = $.NSMutableArray('alloc')('init');
 			//TODO: RELEASE NSArrayChildren ?
 			children.forEach(function(item,index,arr) {
@@ -20,7 +19,7 @@ module.exports = (function() {
 			});
 			return $NSArrayChildren;
 		});
-		$NSToolbarDelegateClass.addMethod('toolbarDefaultItemIdentifiers:','@@:', function(toolbar) { 
+		$NSToolbarDelegateClass.addInstanceMethod('toolbarDefaultItemIdentifiers:','@@:', function(toolbar) { 
 			var $NSArrayChildren = $.NSMutableArray('alloc')('init');
 			//TODO: RELEASE NSArrayChildren ?
 			children.forEach(function(item,index,arr) {
@@ -28,7 +27,7 @@ module.exports = (function() {
 			});
 			return $NSArrayChildren;
 		});
-		$NSToolbarDelegateClass.addMethod('toolbar:itemForItemIdentifier:willBeInsertedIntoToolbar:','@@:@@B', function(self, cmd, toolbar, identifier, willBeInserted) {
+		$NSToolbarDelegateClass.addInstanceMethod('toolbar:itemForItemIdentifier:willBeInsertedIntoToolbar:','@@:@@B', function(self, cmd, toolbar, identifier, willBeInserted) {
 			if(!toolbarCache[parseInt(identifier)]) {
 				var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',identifier);
 				var child = children[parseInt(identifier)-1];

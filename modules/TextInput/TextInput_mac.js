@@ -14,11 +14,11 @@ module.exports = (function() {
     // 500 is just a guess, 22 is the standard size xib/nib files seem to output. 
   	var $text = $.NSTextField('alloc')('initWithFrame', $.NSMakeRect(0,0,200,20) );
     var NSTextFieldDelegate = $.NSObject.extend('NSTextFieldDelegate'+Math.round(Math.random()*10000));
-    NSTextFieldDelegate.addMethod('init:', '@@:', function(self) { return self; });
+    NSTextFieldDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
     //NSTextFieldDelegate.addMethod('mouseDown:','v@:@', function(self, _cmd, control) { console.log('mouse down.'); });
-    NSTextFieldDelegate.addMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { fireEvent('input'); });
-    NSTextFieldDelegate.addMethod('controlTextDidBeginEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputstart')});
-    NSTextFieldDelegate.addMethod('controlTextDidEndEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputend')});
+    //NSTextFieldDelegate.addInstanceMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { fireEvent('input'); });
+    //NSTextFieldDelegate.addInstanceMethod('controlTextDidBeginEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputstart')});
+    NSTextFieldDelegate.addInstanceMethod('controlTextDidEndEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputend')});
     NSTextFieldDelegate.register();
     var NSTextFieldDelegateInstance = NSTextFieldDelegate('alloc')('init');
     $text('setDelegate',NSTextFieldDelegateInstance);
@@ -26,12 +26,7 @@ module.exports = (function() {
     //$text('setAction','mouseDown:');
     //$text('sendActionOn',$.NSLeftMouseDownMask);
 
-    process.on('exit', function() {
-      NSTextFieldDelegate;
-      NSTextFieldDelegateInstance;
-    });
-
-    Object.defineProperty(this, 'text', {
+    Object.defineProperty(this, 'value', {
       get:function() { return $text('stringValue')('UTF8String'); },
       set:function(e) { $text('setStringValue',$(e)); }
     });
@@ -59,9 +54,9 @@ module.exports = (function() {
       }
     });
 
-    Object.defineProperty(this, 'hidden', {
-      get:function() { return $text('isHidden'); },
-      set:function(e) { $text('setHidden',e); }
+    Object.defineProperty(this, 'visible', {
+      get:function() { return !$text('isHidden'); },
+      set:function(e) { $text('setHidden',e ? false : true); }
     });
 
     Object.defineProperty(this, 'readonly', {

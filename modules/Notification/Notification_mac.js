@@ -2,18 +2,18 @@ module.exports = (function() {
   // TODO: The return back isn't awknowledged
   // this causes the NSNotificationCenter to only
   // work when the app is not in focus.
-  var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
-  NSUserNotificationCenterDelegate.addMethod('init:', '@@:', function(self) { return self; });
-  NSUserNotificationCenterDelegate.addMethod('userNotificationCenters:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { 
+  /*var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
+  NSUserNotificationCenterDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
+  NSUserNotificationCenterDelegate.addInstanceMethod('userNotificationCenters:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { 
     return $.YES;
   });
-  NSUserNotificationCenterDelegate.addMethod('userNotificationCenters:didActivateNotification:','B@:@@', function(self,_cmd,center,notify) {  });
-  NSUserNotificationCenterDelegate.addMethod('userNotificationCenters:didDeliverNotification:','B@:@@', function(self,_cmd,center,notify) {  });
+  NSUserNotificationCenterDelegate.addInstanceMethod('userNotificationCenters:didActivateNotification:','B@:@@', function(self,_cmd,center,notify) {  });
+  NSUserNotificationCenterDelegate.addInstanceMethod('userNotificationCenters:didDeliverNotification:','B@:@@', function(self,_cmd,center,notify) {  });
   NSUserNotificationCenterDelegate.register();
   var userNotifyInstance = NSUserNotificationCenterDelegate('alloc')('init');
   var center = $.NSUserNotificationCenter('defaultUserNotificationCenter');
   if(center != null) 
-    center('setDelegate',userNotifyInstance);
+    center('setDelegate',userNotifyInstance);*/
 
   function Notification() 
   {
@@ -77,11 +77,11 @@ module.exports = (function() {
         $notify('setHasActionButton',$.YES);
       }      
       //Get the default notification center
-      if(center == null)
+      /*if(center == null)
         console.warn('Attempted to deliver notification, but only packaged apps main send/recieve notifcations.');
       else {
         center('deliverNotification',$notify);
-      }
+      }*/
       // causes:
       //(node) warning: possible EventEmitter memory leak detected. 11 listeners added. Use emitter.setMaxListeners() to increase limit.
       //process.on('exit', function() {

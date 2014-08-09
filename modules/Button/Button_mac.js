@@ -17,22 +17,17 @@ module.exports = (function() {
     $button('cell')('setWraps',$.NO);
 
     var NSButtonDelegate = $.NSObject.extend('NSButtonDelegate'+Math.round(Math.random()*10000));
-    NSButtonDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    NSButtonDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
-    NSButtonDelegate.addMethod('mouseDown:','v@:@@', function(self,_cmd,frame,o) { fireEvent('mousedown'); });
-    NSButtonDelegate.addMethod('mouseUp:','v@:@', function(self,_cmd,frame) { fireEvent('mouseup'); });
+    NSButtonDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
+    NSButtonDelegate.addInstanceMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
+    NSButtonDelegate.addInstanceMethod('mouseDown:','v@:@@', function(self,_cmd,frame,o) { fireEvent('mousedown'); });
+    NSButtonDelegate.addInstanceMethod('mouseUp:','v@:@', function(self,_cmd,frame) { fireEvent('mouseup'); });
     NSButtonDelegate.register();
     var NSButtonDelegateInstance = NSButtonDelegate('alloc')('init');
     
     $button('setTarget',NSButtonDelegateInstance);
     $button('setAction','click:');
-    
-    process.on('exit', function() {
-      NSButtonDelegate;
-      NSButtonDelegateInstance;
-    });
 
-    Object.defineProperty(this, 'label', {
+    Object.defineProperty(this, 'value', {
       get:function() { return $button('title') },
       set:function(e) { return $button('setTitle', $(e)); }
     });
@@ -42,9 +37,9 @@ module.exports = (function() {
       set:function(e) { return $button('setEnabled',e); }
     });
 
-    Object.defineProperty(this, 'hidden', {
-      get:function() { return $button('isHidden'); },
-      set:function(e) { return $button('setHidden',e); }
+    Object.defineProperty(this, 'visible', {
+      get:function() { return !$button('isHidden'); },
+      set:function(e) { return $button('setHidden',!e); }
     });
 
     Object.defineProperty(this, 'image', {
