@@ -136,7 +136,7 @@ var ex = {};
 
 	function setupShell(name, cmd) {
 		execAndPump("mkdir "+name+"-test", function() {
-			execAndPump("cp -a -p ../Shell.app "+name+"-test", function() {
+			execAndPump("cp -a -p tools/Shell.app "+name+"-test", function() {
 				execAndPump("cp -a -p ../build/Release/tint "+name+"-test/Shell.app/Contents/MacOS/Runtime", function() {
 					execAndPump("cp "+name+".js ./"+name+"-test/Shell.app/Contents/Resources/test.js", function() {
 						execAndPump("cat tools/shell-stub.js >> ./"+name+"-test/Shell.app/Contents/Resources/test.js", cmd, notok)

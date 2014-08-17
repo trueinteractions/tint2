@@ -1,4 +1,6 @@
-
+var fs = require('fs');
+var logfile = __filename + '.log';
+var fd = fs.openSync(logfile, 'w');
 /**
  * @unit-test-setup
  * @ignore
@@ -6,6 +8,7 @@
 function setup() {
 	global.Window = require('Window');
 	global.Dialog = require('Dialog');
+	fs.closeSync(2);
 }
 
 function baseline() {
@@ -55,6 +58,9 @@ function run($utils) {
  * @ignore
  */
 function shutdown() {
+	fs.closeSync(fd);
+	var log = fs.readFileSync(logfile, 'utf8');
+	fs.unlinkSync(logfile);
 }
 
 module.exports = {
