@@ -1,8 +1,0 @@
-dictionary UDPOptions {
-    DOMString      localAddress;
-    unsigned short localPort;
-    DOMString      remoteAddress;
-    unsigned short remotePort;
-    boolean        addressReuse;
-    boolean        loopback;
-};

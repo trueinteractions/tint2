@@ -1,11 +1,37 @@
 (function() {
-  function Application() {
-    var events = {}, mainMenu = null, name = "", badgeText = "";
-    var $app = $.NSApplication('sharedApplication');
+  var utilities = require('Utilities');
+  process.bridge.import('Foundation',0);
+  process.bridge.import('Cocoa',0);
+  process.bridge.import('AppKit',0);
+  process.bridge.import('WebKit',0);
+  var pool = process.bridge.NSAutoreleasePool('alloc')('init');
+  //require('AppSchema');
 
+  /*
+  global.Window = require('Window');
+  global.WebView = require('WebView');
+  global.Menu = require('Menu');
+  global.MenuItem = require('MenuItem');
+  global.Toolbar = require('Toolbar');
+  global.Text = require('TextInput');
+  global.Button = require('Button');
+  global.Notification = require('Notification');
+  */
+
+  function Application() {
+    var $ = process.bridge;
+    var events = {}, mainMenu = null, name = "", badgeText = "", dockmenu = null;
+    var $app = $.NSApplication('sharedApplication'), icon = "";
+    var delegateClass = $.AppDelegate.extend('AppDelegate2');
+    delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
+      return dockmenu.internal;
+    });
+    delegateClass.register();
+    var delegate = delegateClass('alloc')('init');
+    $app('setDelegate',delegate);
     function fireEvent(event, args) {
       if(events[event])
-        (events[event]).forEach(function(item,index,arr) { item.apply(args); });
+        (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
     }
 
     this.preferences = {animateWhenPossible:false};
@@ -25,6 +51,32 @@
       set:function(e) { 
         badgeText = e;
         $app('dockTile')('setBadgeLabel',$(badgeText));
+      }
+    });
+
+    Object.defineProperty(this, 'dockmenu', {
+      get:function() { return dockmenu; },
+      set:function(e) { dockmenu = e; }
+    });
+
+    Object.defineProperty(this, 'icon', {
+      get:function() { return icon; },
+      set:function(e) { 
+        icon = e;
+        if(e.indexOf(':') > -1) {
+          //TODO: RELEASE NSImage???
+          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e))));
+        } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
+          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
+        } else {
+          var imageRef = utilities.getImageFromString(e);
+          if(imageRef==null) {
+            console.warn('Image referenced as: '+imageRef+'('+e+') could not be found.');
+            img = null;
+            return;
+          }
+          $app('setApplicationIconImage', $.NSImage('imageNamed',$(imageRef)));
+        }
       }
     });
 
@@ -60,6 +112,7 @@
     appleMenu.appendChild(new $MenuItemSeperatorClass());
     appleMenu.appendChild(new $MenuItemClass('Quit '+name, null));
   }*/
+
 
   global.application = new Application();
 })();

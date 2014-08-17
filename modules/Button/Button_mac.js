@@ -1,11 +1,12 @@
 module.exports = (function() {
-  var utilities = require('../Utilities/Utilities_mac.js');
+  var utilities = require('Utilities');
 
   function Button() 
   {
+    var $ = process.bridge;
     var events = {}, img = null, text = "";
 
-    function fireEvent(event, args) { if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(args); }); }
+    function fireEvent(event, args) { if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); }); }
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
 
@@ -17,10 +18,10 @@ module.exports = (function() {
     $button('cell')('setWraps',$.NO);
 
     var NSButtonDelegate = $.NSObject.extend('NSButtonDelegate'+Math.round(Math.random()*10000));
-    NSButtonDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
-    NSButtonDelegate.addInstanceMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
-    NSButtonDelegate.addInstanceMethod('mouseDown:','v@:@@', function(self,_cmd,frame,o) { fireEvent('mousedown'); });
-    NSButtonDelegate.addInstanceMethod('mouseUp:','v@:@', function(self,_cmd,frame) { fireEvent('mouseup'); });
+    NSButtonDelegate.addMethod('init:', '@@:', function(self) { return self; });
+    NSButtonDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
+    NSButtonDelegate.addMethod('mouseDown:','v@:@@', function(self,_cmd,frame,o) { fireEvent('mousedown'); });
+    NSButtonDelegate.addMethod('mouseUp:','v@:@', function(self,_cmd,frame) { fireEvent('mouseup'); });
     NSButtonDelegate.register();
     var NSButtonDelegateInstance = NSButtonDelegate('alloc')('init');
     

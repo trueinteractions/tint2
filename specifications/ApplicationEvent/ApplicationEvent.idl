@@ -1,0 +1,4 @@
+[Constructor(DOMString type, Application eventInitDict)]
+interface ApplicationEvent : Event {
+    readonly    attribute Application application;
+};

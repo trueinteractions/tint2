@@ -1,0 +1,7 @@
+dictionary TCPOptions {
+    DOMString      localAddress;
+    unsigned short localPort;
+    boolean        addressReuse;
+    boolean        noDelay;
+    boolean        useSecureTransport;
+};

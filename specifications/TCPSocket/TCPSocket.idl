@@ -1,0 +1,17 @@
+[Constructor (DOMString remoteAddress, unsigned short remotePort, 
+                 optional TCPOptions options)]
+interface TCPSocket {
+    readonly    attribute DOMString       remoteAddress;
+    readonly    attribute unsigned short  remotePort;
+    readonly    attribute DOMString       localAddress;
+    readonly    attribute unsigned short  localPort;
+    readonly    attribute boolean         addressReuse;
+    readonly    attribute boolean         noDelay;
+    readonly    attribute ReadyState      readyState;
+    readonly    attribute Promise         opened;
+    readonly    attribute Promise         closed;
+    readonly    attribute ReadableStream  output;
+    readonly    attribute WriteableStream input;
+    Promise close ();
+    void    halfClose ();
+};

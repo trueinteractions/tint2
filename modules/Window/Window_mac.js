@@ -1,5 +1,6 @@
 module.exports = (function() {
-  var utilities = require('../Utilities/Utilities_mac.js');
+  var utilities = require('Utilities');
+  var $ = process.bridge;
 
   function Window() {
     var $defaultStyleMask = $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSMiniaturizableWindowMask | $.NSResizableWindowMask | $.NSTexturedBackgroundWindowMask;
@@ -23,7 +24,7 @@ module.exports = (function() {
     function fireEvent(event, args) {
       var returnvalue = undefined;
       if(events[event]) {
-        var tmp = (events[event]).forEach(function(item,index,arr) { item.apply(args); });
+        var tmp = (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
         if(typeof(tmp) != 'undefined') returnvalue = tmp;
       }
       return returnvalue;
@@ -85,8 +86,9 @@ module.exports = (function() {
         if(e == 'center') 
           $window('center');
         else {
+          var height = $.NSScreen('mainScreen')('frame').size.height;
           var rect = $window('frame');
-          rect.origin.y = e;
+          rect.origin.y = height - e;
           $window('setFrame', rect, 'display', $.YES, 'animate', $.NO);
         }
       }
@@ -171,6 +173,10 @@ module.exports = (function() {
       set:function(e) { $window('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); }
     });
 
+    Object.defineProperty(this, 'internal', {
+      get:function() { return $window; }
+    });
+
     Object.defineProperty(this, 'resizable', {
       get:function() { return $window('styleMask') | $.NSResizableWindowMask; },
       set:function(e) {
@@ -195,6 +201,10 @@ module.exports = (function() {
       if(children.indexOf(control) != -1) children.splice(children.indexOf(control),1);
       $window('contentsView')('willRemoveSubview',control.internal);
       control.internal('removeFromSuperview');
+    }
+
+    this.bringToFront = function() {
+      $window('makeKeyAndOrderFront',$window);
     }
 
     Object.defineProperty(this, 'backgroundColor', {
@@ -232,32 +242,26 @@ module.exports = (function() {
     });
 
     var WindowDelegate = $.NSObject.extend('WindowDelegate'+Math.round(Math.random()*10000));
-    WindowDelegate.addInstanceMethod('init', '@@:', function(self) { return self; });
-    WindowDelegate.addInstanceMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) { fireEvent('close'); return $.YES; });
-    WindowDelegate.addInstanceMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('enter-fullscreen'); });
-    WindowDelegate.addInstanceMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('leave-fullscreen'); });
-    WindowDelegate.addInstanceMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('focus'); });
-    WindowDelegate.addInstanceMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('blur'); });
-    WindowDelegate.addInstanceMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('minimize'); });
-    WindowDelegate.addInstanceMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('restore'); });
-    WindowDelegate.addInstanceMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { fireEvent('move'); });
-    WindowDelegate.addInstanceMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { fireEvent('resize'); });
-    /* // seg faults?!
-    WindowDelegate.addMethod('windowShouldZoom:toFrame:', 'B@:@@@', function(self, cmd, window, newFrame) {
-      var value = fireEvent('state');
-      if(typeof(value) == 'undefined') value = true;
-      return value ? $.YES : $.NO;
-    });*/
+    WindowDelegate.addMethod('init', '@@:', function(self) { return self; });
+    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) { fireEvent('close'); return $.YES; });
+    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('enter-fullscreen'); });
+    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('leave-fullscreen'); });
+    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('focus'); });
+    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('blur'); });
+    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('minimize'); });
+    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('restore'); });
+    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { fireEvent('move'); });
+    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { fireEvent('resize'); });
+    WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { delete this; }.bind(this));
+    //WindowDelegate.addMethod('windowShouldZoom:toFrame:', ['B',['@',$.selector,'@',$.NSRect]], function(self, cmd, window, newFrame) {
+    //  var value = fireEvent('state');
+    //  if(typeof(value) == 'undefined') value = true;
+    //  return value ? $.YES : $.NO;
+    //  return false;
+    //});
 
     var windowDelegateInstance = WindowDelegate('alloc')('init');
     $window('setDelegate', windowDelegateInstance);
-
-    // causes:
-    //(node) warning: possible EventEmitter memory leak detected. 11 listeners added. Use emitter.setMaxListeners() to increase limit.
-    //process.on('exit', function() {
-    //  windowDelegateInstance;
-    //  WindowDelegate;
-    //});
   }
 
   return Window;

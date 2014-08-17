@@ -1,0 +1,3 @@
+interface ConnectEvent : Event {
+    readonly    attribute TCPSocket connectedSocket;
+};

@@ -17,6 +17,19 @@
     'node_use_systemtap%': 'false',
     'node_shared_openssl%': 'false',
     'library_files': [
+      'modules/Application/Application_mac.js',
+			'modules/Button/Button_mac.js',
+			'modules/Menu/Menu_mac.js',
+			'modules/Menu/MenuItem_mac.js',
+      'modules/Notification/Notification_mac.js',
+      'modules/TextInput/TextInput_mac.js',
+      'modules/Toolbar/Toolbar_mac.js',
+      'modules/Utilities/Utilities_base.js',
+      'modules/Utilities/Utilities_mac.js',
+      'modules/Utilities/AppSchema_mac.js',
+      'modules/WebView/WebView_mac.js',
+			'modules/Window/Window_mac.js',
+			'modules/Dialog/Dialog_mac.js',
       'libraries/node/src/node.js',
       'libraries/node/lib/_debugger.js',
       'libraries/node/lib/_linklist.js',
@@ -79,7 +92,7 @@
       ],
 
       'sources': [
-        'src/Main_mac.mm',
+        'modules/Runtime/Main_mac.mm',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
         'libraries/node/src/handle_wrap.cc',
@@ -372,13 +385,48 @@
           ],
               'action': [
                 '<(python)',
-                'libraries/node/tools/js2c.py',
+                'tools/js2c.py',
                 '<@(_outputs)',
                 '<@(_inputs)',
               ],
         },
       ],
     }, # end node_js2c
+    #{
+    #  'target_name': 'node_js2c',
+    #  'type': 'none',
+    #  'toolsets': ['host'],
+    #  'actions': [
+    #    {
+    #      'action_name': 'node_js2c',
+    #      'inputs': [
+    #        '<@(library_files)',
+    #        './config.gypi',
+    #      ],
+    #      'outputs': [
+    #        '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
+    #      ],
+    #      'conditions': [
+    #        [ 'node_use_dtrace=="false"'
+    #          ' and node_use_etw=="false"'
+    #          ' and node_use_systemtap=="false"',
+    #        {
+    #            'inputs': ['libraries/node/src/macros.py']
+    #          }
+    #          ],
+    #        [ 'node_use_perfctr=="false"', {
+    #          'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
+    #        }]
+    #      ],
+    #          'action': [
+    #            '<(python)',
+    #            'libraries/node/tools/js2c.py',
+    #            '<@(_outputs)',
+    #            '<@(_inputs)',
+    #          ],
+    #    },
+    #  ],
+    #}, # end node_js2c
     {
       'target_name': 'node_dtrace_header',
       'type': 'none',

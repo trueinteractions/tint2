@@ -1,0 +1,8 @@
+interface ApplicationManagement {
+    DOMRequest getAll ();
+    [TreatNonCallableAsNull]
+                attribute EventHandler oninstall;
+    [TreatNonCallableAsNull]
+                attribute EventHandler onuninstall;
+    DOMRequest applyUpdate (Application application);
+};

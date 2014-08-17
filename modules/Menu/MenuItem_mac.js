@@ -1,21 +1,22 @@
 module.exports = (function() {
   function MenuItem(titlestring,keystring,keymodifiers) 
   {
+    var $ = process.bridge;
     if(typeof(keystring)=='undefined') keystring = "";
     if(typeof(keymodifiers)=='undefined') keymodifiers = "";
 
     var events = {};
 
     function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(args); });
+      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
     }
 
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
 
     var NSMenuItemDelegate = $.NSObject.extend('NSMenuItemDelegate'+Math.round(Math.random()*10000));
-    NSMenuItemDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
-    NSMenuItemDelegate.addInstanceMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
+    NSMenuItemDelegate.addMethod('init:', '@@:', function(self) { return self; });
+    NSMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
     NSMenuItemDelegate.register();
     var NSMenuItemDelegateInstance = NSMenuItemDelegate('alloc')('init');
 

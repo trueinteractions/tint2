@@ -1,5 +1,0 @@
-interface DownloadRequest : DOMRequest {
-    void cancel ();
-                attribute double       progress;
-                attribute EventHandler onprogress;
-};

@@ -1,0 +1,5 @@
+dictionary UDPMessage {
+    ArrayBuffer    data;
+    DOMString      remoteAddress;
+    unsigned short remotePort;
+};

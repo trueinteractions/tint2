@@ -1,11 +1,12 @@
 module.exports = (function() {
-  var utilities = require('../Utilities/Utilities_mac.js');
+  var utilities = require('Utilities');
   function Text() 
   {
+    var $ = process.bridge;
     var events = {};
 
     function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(args); });
+      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
     }
 
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
@@ -14,11 +15,11 @@ module.exports = (function() {
     // 500 is just a guess, 22 is the standard size xib/nib files seem to output. 
   	var $text = $.NSTextField('alloc')('initWithFrame', $.NSMakeRect(0,0,200,20) );
     var NSTextFieldDelegate = $.NSObject.extend('NSTextFieldDelegate'+Math.round(Math.random()*10000));
-    NSTextFieldDelegate.addInstanceMethod('init:', '@@:', function(self) { return self; });
+    NSTextFieldDelegate.addMethod('init:', '@@:', function(self) { return self; });
     //NSTextFieldDelegate.addMethod('mouseDown:','v@:@', function(self, _cmd, control) { console.log('mouse down.'); });
     //NSTextFieldDelegate.addInstanceMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { fireEvent('input'); });
     //NSTextFieldDelegate.addInstanceMethod('controlTextDidBeginEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputstart')});
-    NSTextFieldDelegate.addInstanceMethod('controlTextDidEndEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputend')});
+    NSTextFieldDelegate.addMethod('controlTextDidEndEditing:','v@:@', function(self,_cmd,frame) { fireEvent('inputend')});
     NSTextFieldDelegate.register();
     var NSTextFieldDelegateInstance = NSTextFieldDelegate('alloc')('init');
     $text('setDelegate',NSTextFieldDelegateInstance);

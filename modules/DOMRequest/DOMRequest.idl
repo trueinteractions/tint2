@@ -1,9 +1,0 @@
-interface DOMRequest : EventTarget {
-    readonly    attribute DOMString    readyState;
-    readonly    attribute any          result;
-    readonly    attribute DOMError?    error;
-    [TreatNonCallableAsNull]
-                attribute EventHandler onsuccess;
-    [TreatNonCallableAsNull]
-                attribute EventHandler onerror;
-};

@@ -1,5 +1,6 @@
 module.exports = (function() {
 	function Menu(title) {
+		var $ = process.bridge;
 		if(typeof(title) == 'undefined') title = "";
 
 		var $menu = $.NSMenu('alloc')('initWithTitle',$(title));

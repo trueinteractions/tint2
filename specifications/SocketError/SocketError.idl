@@ -1,0 +1,3 @@
+interface SocketError : DOMError {
+    readonly    attribute SocketErrorType type;
+};

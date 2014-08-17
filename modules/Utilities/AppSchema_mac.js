@@ -1,4 +1,5 @@
 module.exports = (function() {
+    var $ = process.bridge;
     if($.URLAppSchema) return;
 
     var appSchema = $.NSURLProtocol.extend('URLAppSchema');
@@ -9,7 +10,15 @@ module.exports = (function() {
         //    return $.YES;
         //else
             //console.log('canInitWithRequest:');
-            return $.NO;
+            
+            //var url = theRequest('URL');
+            //var scheme = url('scheme');
+            //var path = url('path');
+            //console.log(url);
+
+
+        //console.log(process.cwd());
+        return $.NO;
     });
     appSchema.addClassMethod('canonicalRequestForRequest:', '@@:@', function(self, cmd, request) {
         //console.log('canonicalRequestForRequest:')
@@ -17,15 +26,15 @@ module.exports = (function() {
     });
 
     // instance
-    appSchema.addInstanceMethod('startLoading','v@:', function(self, cmd) {
+    appSchema.addMethod('startLoading','v@:', function(self, cmd) {
         //console.log('startLoading:');
     });
 
-    appSchema.addInstanceMethod('stopLoading','v@:', function(self, cmd) {
+    appSchema.addMethod('stopLoading','v@:', function(self, cmd) {
         //console.log('stopLoading:');
     });
     //console.log('loaded.');
     // globally registers URLAppSchema;
     appSchema.register();
-
+    $.NSURLProtocol('registerClass',$.URLAppSchema('class'));
 })();
