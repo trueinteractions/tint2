@@ -6,7 +6,7 @@
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
   var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
-  //require('AppSchema');
+  //require('AppSchema')(process.cwd());
 
   /*
   global.Window = require('Window');
@@ -41,6 +41,21 @@
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
     this.launch = function() { fireEvent('launch'); }.bind(this);
     this.uninstall = function() { console.warn('unimplemented'); }
+
+    Object.defineProperty(this, 'packaged', {
+      get:function() { return false; }
+    });
+
+    this.resource = function(path) {
+      if(path.indexOf('app://') == -1) path = 'app://' + path;
+      console.log('...reading: ',path);
+      var url = $.NSURL('URLWithString',$("http://www.xmission.com"));
+      console.log('here2');
+      //var data = $.NSString('stringWithContentsOfURL',url,'encoding',$.NSASCIIStringEncoding,'error',null);
+      var data = $.NSData('dataWithContentsOfURL',url);
+      console.log('here3');
+      return data;
+    }
 
     Object.defineProperty(this, 'name', {
       get:function() { return name; },

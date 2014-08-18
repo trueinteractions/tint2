@@ -4,6 +4,7 @@
  * @ignore
  */
 function setup() {
+	require('Application');
 	global.Window = require('Window');
 }
 
@@ -15,13 +16,9 @@ function baseline() {
  * @example
  */
 function run($utils) {
-	var w = new Window();
-	application.icon = 'assets/tintcompiler.png';
-	application.badge = '2';
-	setTimeout(function(){ 
-		w.close();
-		$utils.ok(); 
-	}, 1000);
+	var data = application.resource('appresources.js');
+	console.log(data);
+	$utils.ok();
 }
 
 /**
@@ -36,5 +33,5 @@ module.exports = {
 	run:run, 
 	shutdown:shutdown, 
 	shell:false,
-	name:"DockIcon",
+	name:"AppResources",
 };

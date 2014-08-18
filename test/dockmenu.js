@@ -17,7 +17,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-	var w = new Window();
+	var win = new Window();
 
 	var dockmenu = new Menu("DockMenu");
 	var someMenu = new Menu("SomeMenu");
@@ -44,7 +44,10 @@ function run($utils) {
 	dockmenu.appendChild(someSuperMenuItem);
 	dockmenu.appendChild(someOtherSuperMenuItem);
 	application.dockmenu = dockmenu;
-	setTimeout(function(){ $utils.ok(); }, 1000);
+	setTimeout(function(){ 
+		win.close();
+		$utils.ok();
+	}, 1000);
 }
 
 /**

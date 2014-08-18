@@ -15,41 +15,41 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
+ * @see {Dialog}
  * @example
  */
 function run($utils) {
-	var w = new Window();
-	w.x = 0;
-	w.y = 0;
-	w.bringToFront();
-	var d = new Dialog("open");
-	d.title = "Dialog Title";
-	d.message = "Message dialog";
-	d.prompt = "PROMPT";
-	d.allowMultiple = true;
-	d.directory = "~/Pictures";
-	d.allowFileTypes = ["jpg","png"];
-	d.filename = "somefile.png";
-	d.addEventListener('select', function() {
-		console.log('selected values: ',d.selection);
+	var win = new Window();
+	win.x = 0;
+	win.y = 0;
+	win.bringToFront();
+	var dialog = new Dialog("open");
+	dialog.title = "Dialog Title";
+	dialog.message = "Message dialog";
+	dialog.prompt = "PROMPT";
+	dialog.allowMultiple = true;
+	dialog.directory = "~/Pictures";
+	dialog.allowFileTypes = ["jpg","png"];
+	dialog.filename = "somefile.png";
+	dialog.addEventListener('select', function() {
+		console.log('selected values: ',dialog.selection);
 	});
-	d.addEventListener('cancel', function() {
-		/* @hidden */ w.close();
+	dialog.addEventListener('cancel', function() {
+		/* @hidden */ win.close();
 		/* @hidden */ $utils.ok();
 	});
-	d.open(w);
-	/* @hidden */ $utils.assert(d.title == "Dialog Title")
-	/* @hidden */ $utils.assert(d.message == "Message dialog")
-	/* @hidden */ $utils.assert(d.prompt == "PROMPT")
-	/* @hidden */ $utils.assert(d.allowMultiple == true)
-	/* @hidden */ $utils.assert(d.allowMultiple == true)
-	/* @hidden */ $utils.assert(d.directory == "file:///Users/tlinton/Pictures/",d.directory);
-	/* @hidden */ $utils.assert(d.filename == "somefile.png");
-	/* @hidden */ $utils.assert(d.type == "open");
+	dialog.open(win);
+	/* @hidden */ $utils.assert(dialog.title == "Dialog Title")
+	/* @hidden */ $utils.assert(dialog.message == "Message dialog")
+	/* @hidden */ $utils.assert(dialog.prompt == "PROMPT")
+	/* @hidden */ $utils.assert(dialog.allowMultiple == true)
+	/* @hidden */ $utils.assert(dialog.allowMultiple == true)
+	/* @hidden */ $utils.assert(dialog.directory == "file:///Users/tlinton/Pictures/",dialog.directory);
+	/* @hidden */ $utils.assert(dialog.filename == "somefile.png");
+	/* @hidden */ $utils.assert(dialog.type == "open");
 	/* @hidden */ setTimeout(function() {
-	/* @hidden */ 	// $utils.takeSnapshotOfCurrentWindow('assets/dialog_mac.png');
-	/* @hidden */ 	d.cancel();
+	/* @hidden */ 	//$utils.takeSnapshotOfCurrentWindow('assets/dialog_mac.png');
+	/* @hidden */ 	dialog.cancel();
 	/* @hidden */ },2000);
 }
 
@@ -68,5 +68,5 @@ module.exports = {
 	run:run, 
 	shutdown:shutdown, 
 	shell:false,
-	name:"Dialog",
+	name:"Dialog"
 };
