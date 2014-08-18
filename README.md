@@ -23,3 +23,15 @@ Tint contains a set of native components such as Window, Toolbar, Button, WebVie
 
 <h2>Status</h2>
 This is intended as a preview release for Tint 2, currently only supported on OSX.  Preview releases for Windows, iOS, and Android are in tests at the moment.
+
+<h2>License</h2>
+Tint is licensed under the MIT license.
+
+<h2>Building</h2>
+
+```bash
+./config.sh
+ninja -v -C build/out/Release/
+
+# or you can use the Xcode project files.
+```
