@@ -9,7 +9,7 @@ require('Application');
 var $ = process.bridge.objc;
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var args = require('minimist');
+var args = require('./minimist');
 var grayedOutBegin = '\033[90m';
 var brightRedBegin = '\033[31m'
 var brightBlueBegin = '\033[36m'
