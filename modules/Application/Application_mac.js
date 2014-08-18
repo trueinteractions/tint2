@@ -1,4 +1,5 @@
 (function() {
+  require('Bridge');
   var utilities = require('Utilities');
   process.bridge.objc.import('Foundation',0);
   process.bridge.objc.import('Cocoa',0);
