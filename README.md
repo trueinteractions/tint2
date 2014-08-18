@@ -35,3 +35,26 @@ ninja -v -C build/out/Release/
 
 # or you can use the Xcode project files.
 ```
+
+<h2>Current Built-In Modules</h2>
+
+* Application
+* Application Schema
+* Button
+* Dialog
+* Menu (and MenuItem)
+* Notification
+* TextInput
+* Toolbar
+* WebView
+* Window
+
+<h2>Documentation</h2>
+Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
+
+There's also https://github.com/trueinteractions/tint2/blob/master/test/manual/browser.js which shows how to build a basic browser in Tint.
+
+<h2>Node Compatibility</h2>
+Tint is compatible with node all the way to the command line level.  There are new objects (and thus reserved require modules) set however outside of that Tint is built entirely on top of node.  Compiled modules (cpp/cc/c) are supported for node's 0.10.x interface.
+
+
