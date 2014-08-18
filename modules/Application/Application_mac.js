@@ -6,7 +6,7 @@
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
   var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
-  //require('AppSchema')(process.cwd());
+  require('AppSchema')(process.cwd());
 
   /*
   global.Window = require('Window');
@@ -48,12 +48,8 @@
 
     this.resource = function(path) {
       if(path.indexOf('app://') == -1) path = 'app://' + path;
-      console.log('...reading: ',path);
       var url = $.NSURL('URLWithString',$("http://www.xmission.com"));
-      console.log('here2');
-      //var data = $.NSString('stringWithContentsOfURL',url,'encoding',$.NSASCIIStringEncoding,'error',null);
       var data = $.NSData('dataWithContentsOfURL',url);
-      console.log('here3');
       return data;
     }
 

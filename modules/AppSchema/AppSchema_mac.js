@@ -1,8 +1,6 @@
 module.exports = function(basepath) {
-    console.log('TRYING.. to regiser this.')
     var $ = process.bridge.objc;
     if($.URLAppSchema) return;
-    console.log('registering app schema.');
     var workingdir = process.cwd();
     if(workingdir[workingdir.length-1] != '/')
         workingdir += '/';
@@ -43,7 +41,6 @@ module.exports = function(basepath) {
             if(url[0] == '/') url = url.substring(1);
             var possible = workingdir + url;
             if(!file.existsSync(possible)) {
-                console.log('throwing error.');
                 self('client')('URLProtocol',self,'didFailWithError',null);
             } else {
                 var data = fs.readFileSync(possible);
@@ -62,5 +59,5 @@ module.exports = function(basepath) {
         }
     });
     appSchema.register();
-    $.NSURLProtocol('registerClass',appSchema('class'));
+    //$.NSURLProtocol('registerClass',appSchema('class'));
 }
