@@ -4,9 +4,8 @@
  * @ignore
  */
 function setup() {
-	process.bridge = require('../../../../../../nodobjc/');
-	process.bridge.import('Foundation');
-	process.bridge.import('AppKit');
+	process.bridge.objc.import('Foundation');
+	process.bridge.objc.import('AppKit');
 	global.Notification = require('Notification');
 }
 

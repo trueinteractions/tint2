@@ -1,10 +1,10 @@
 (function() {
   var utilities = require('Utilities');
-  process.bridge.import('Foundation',0);
-  process.bridge.import('Cocoa',0);
-  process.bridge.import('AppKit',0);
-  process.bridge.import('WebKit',0);
-  var pool = process.bridge.NSAutoreleasePool('alloc')('init');
+  process.bridge.objc.import('Foundation',0);
+  process.bridge.objc.import('Cocoa',0);
+  process.bridge.objc.import('AppKit',0);
+  process.bridge.objc.import('WebKit',0);
+  var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
   //require('AppSchema');
 
   /*
@@ -19,7 +19,7 @@
   */
 
   function Application() {
-    var $ = process.bridge;
+    var $ = process.bridge.objc;
     var events = {}, mainMenu = null, name = "", badgeText = "", dockmenu = null;
     var $app = $.NSApplication('sharedApplication'), icon = "";
     var delegateClass = $.AppDelegate.extend('AppDelegate2');

@@ -1,6 +1,6 @@
 module.exports = (function() { 
   var baseUtilities = require('Utilities_base');
-  var $ = process.bridge;
+  var $ = process.bridge.objc;
 
   function attachSizeProperties($nativeObj, target, fireEvent, options) {
       var _width = 20, _height = 20, _minWidth = 20, _maxWidth = 20, _minHeight = 20, _maxHeight = 20;

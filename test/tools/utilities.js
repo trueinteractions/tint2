@@ -1,12 +1,12 @@
-process.bridge = require('../../../nodobjc');
-process.bridge.import('Foundation');
-process.bridge.import('Quartz');
-process.bridge.import('Cocoa');
-process.bridge.import('AppKit');
-process.bridge.import('CoreGraphics');
+require('Bridge')
+process.bridge.objc.import('Foundation');
+process.bridge.objc.import('Quartz');
+process.bridge.objc.import('Cocoa');
+process.bridge.objc.import('AppKit');
+process.bridge.objc.import('CoreGraphics');
 require('Application');
 
-var $ = process.bridge;
+var $ = process.bridge.objc;
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var args = require('minimist');
@@ -164,7 +164,9 @@ var ex = {};
 	}
 
 	function notok(code) {
-		if(currentTest.shell) shutdownShell(currentTest.name, function() { });
+		if(currentTest.shell) {
+			shutdownShell(currentTest.name, function() { process.exit(1); });
+		}
 	}
 
 	function nextTest() {

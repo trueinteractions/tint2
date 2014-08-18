@@ -1,5 +1,5 @@
 module.exports = (function() {
-    var $ = process.bridge;
+    var $ = process.bridge.objc;
     if($.URLAppSchema) return;
 
     var appSchema = $.NSURLProtocol.extend('URLAppSchema');

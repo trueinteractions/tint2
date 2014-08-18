@@ -1,9 +1,9 @@
 module.exports = (function() {
-  var center = process.bridge.NSUserNotificationCenter('defaultUserNotificationCenter');
+  var center = process.bridge.objc.NSUserNotificationCenter('defaultUserNotificationCenter');
 
   function Notification()
   {
-    var $ = process.bridge;
+    var $ = process.bridge.objc;
     var events = {};
     var titlestring = "", textstring = "", subtitlestring = "", soundEnabled = false;
     var actionbuttontitle = "", otherbuttontitle = "";
@@ -14,11 +14,11 @@ module.exports = (function() {
 
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
-
-    var NSUserNotificationCenterDelegate = process.bridge.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
+    
+    var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
     NSUserNotificationCenterDelegate.addMethod('init:', '@@:', function(self) { return self; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { 
-      return process.bridge.YES;
+      return $.YES;
     });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didActivateNotification:','v@:@@', function(self,_cmd,center,notify) {
       if(notify('activationType') == $.NSUserNotificationActivationTypeContentsClicked) fireEvent('click',['contents']);
@@ -67,7 +67,6 @@ module.exports = (function() {
     this.dispatch = function() {
 
       $notify = $.NSUserNotification('alloc')('init');
-      
       // Get the default notification center
       if(center == null) {
         console.warn('Attempted to deliver notification, but only packaged apps may use notifcations.');

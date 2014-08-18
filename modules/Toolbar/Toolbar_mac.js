@@ -1,6 +1,6 @@
 module.exports = (function() {
 	function Toolbar() {
-		var $ = process.bridge;
+		var $ = process.bridge.objc;
 		var $toolbar = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
 		var children = [];
 		var toolbarCache = [];

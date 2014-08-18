@@ -1,5 +1,5 @@
 module.exports = (function() {
-	var $ = process.bridge;
+	var $ = process.bridge.objc;
 	// TinyColor v1.0.0
 	// https://github.com/bgrins/TinyColor
 	// Brian Grinstead, MIT License

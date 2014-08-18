@@ -1,7 +1,7 @@
 module.exports = (function() {
   function MenuItem(titlestring,keystring,keymodifiers) 
   {
-    var $ = process.bridge;
+    var $ = process.bridge.objc;
     if(typeof(keystring)=='undefined') keystring = "";
     if(typeof(keymodifiers)=='undefined') keymodifiers = "";
 

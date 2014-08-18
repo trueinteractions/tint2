@@ -1,6 +1,6 @@
 module.exports = (function() {
 	function MenuItemSeperator() {
-		var $ = process.bridge;
+		var $ = process.bridge.objc;
     	var $menu = $.NSMenuItem('seperatorItem');;
     	Object.defineProperty(this, 'internal', {
       		get:function() { $menu }

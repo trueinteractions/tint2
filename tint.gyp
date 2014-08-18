@@ -17,8 +17,33 @@
     'node_use_systemtap%': 'false',
     'node_shared_openssl%': 'false',
     'library_files': [
+      'modules/Bridge/ref.js',
+      'modules/Bridge/struct.js',
+      'modules/Bridge/_foreign_function.js',
+      'modules/Bridge/bindings.js',
+      'modules/Bridge/callback.js',
+      'modules/Bridge/cif.js',
+      'modules/Bridge/cif_var.js',
+      'modules/Bridge/dynamic_library.js',
+      'modules/Bridge/errno.js',
+      'modules/Bridge/ffi.js',
+      'modules/Bridge/foreign_function.js',
+      'modules/Bridge/foreign_function_var.js',
+      'modules/Bridge/function.js',
+      'modules/Bridge/library.js',
+      'modules/Bridge/type.js',
+      'modules/Bridge/class.js',
+      'modules/Bridge/core.js',
+      'modules/Bridge/exception.js',
+      'modules/Bridge/id.js',
+      'modules/Bridge/import.js',
+      'modules/Bridge/index.js',
+      'modules/Bridge/ivar.js',
+      'modules/Bridge/method.js',
+      'modules/Bridge/types.js',
       'modules/Application/Application_mac.js',
 			'modules/Button/Button_mac.js',
+      'modules/Bridge/Bridge_mac.js',
 			'modules/Menu/Menu_mac.js',
 			'modules/Menu/MenuItem_mac.js',
       'modules/Notification/Notification_mac.js',
@@ -82,12 +107,14 @@
       'dependencies': [
         'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'node_js2c#host',
+        'ffi_bindings',
       ],
 
       'include_dirs': [
         'libraries/node/src',
         'libraries/node/tools/msvs/genfiles',
         'libraries/node/deps/uv/src/ares',
+        'libraries/node-ffi/src',
         '<(SHARED_INTERMEDIATE_DIR)' # for node_natives.h
       ],
 
@@ -427,6 +454,53 @@
     #    },
     #  ],
     #}, # end node_js2c
+    {
+      'target_name': 'ffi_bindings',
+      'type': 'static_library',
+      'sources': [
+          'modules/Bridge/ffi.h',
+          'modules/Bridge/ffi.cc',
+          'modules/Bridge/callback_info.cc',
+          'modules/Bridge/threaded_callback_invokation.cc'
+      ],
+      'include_dirs': [
+        'libraries/node/deps/uv/include',
+        'libraries/node/src',
+        'libraries/node/deps/v8/include',
+      ],
+      'dependencies': [
+        'libraries/libffi/libffi.gyp:ffi',
+        'ref_binding',
+      ],
+      'conditions': [
+        ['OS=="win"', {
+          'dependencies': [
+            'libraries/dlfcn-win32/dlfcn.gyp:dlfcn',
+            'libraries/pthreads-win32/pthread.gyp:pthread'
+          ]
+        }],
+        ['OS=="mac"', {
+          'xcode_settings': {
+            'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+            'MACOSX_DEPLOYMENT_TARGET': '10.7',
+            'OTHER_CFLAGS': [
+                '-ObjC++'
+            ]
+          },
+        }]
+      ]
+    },
+    {
+      'target_name': 'ref_binding',
+      'type': 'static_library',
+      'sources': [ 'modules/Bridge/ref.cc' ],
+      'include_dirs': [ 
+        'modules/Bridge/',
+        'libraries/node/deps/uv/include',
+        'libraries/node/src',
+        'libraries/node/deps/v8/include',
+      ],
+    },
     {
       'target_name': 'node_dtrace_header',
       'type': 'none',

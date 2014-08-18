@@ -2,7 +2,7 @@ module.exports = (function() {
   var utilities = require('Utilities');
   function Text() 
   {
-    var $ = process.bridge;
+    var $ = process.bridge.objc;
     var events = {};
 
     function fireEvent(event, args) {

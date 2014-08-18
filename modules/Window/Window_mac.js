@@ -1,6 +1,6 @@
 module.exports = (function() {
   var utilities = require('Utilities');
-  var $ = process.bridge;
+  var $ = process.bridge.objc;
 
   function Window() {
     var $defaultStyleMask = $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSMiniaturizableWindowMask | $.NSResizableWindowMask | $.NSTexturedBackgroundWindowMask;

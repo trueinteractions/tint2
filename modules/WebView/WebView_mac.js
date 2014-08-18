@@ -2,7 +2,7 @@ module.exports = (function() {
   var utilities = require('Utilities');
 
   function WebView() {
-    var $ = process.bridge;
+    var $ = process.bridge.objc;
     // TODO: Perhaps NSMakeRect auto casts with NSValue for convenience? possible memory leak though..
     // TODO: WebView seems to crash with Adobe Flash at times.
     var $webview = $.WebView('alloc')

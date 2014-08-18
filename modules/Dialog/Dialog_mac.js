@@ -1,7 +1,7 @@
 module.exports = (function() {
 
 	function Dialog(type) {
-		var $ = process.bridge;
+		var $ = process.bridge.objc;
 		var $dialog = (type == "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
 		var allowedFileTypes = null, events = {};
 
