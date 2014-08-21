@@ -41,10 +41,11 @@ ninja -v -C build/out/Release/
 * Application
 * Application Schema
 * Button
-* Dialog
+* FileDialog (Save/Open)
 * Menu (and MenuItem)
 * Notification
 * TextInput
+* SelectInput (Combo Boxes)
 * Toolbar
 * WebView
 * Window
