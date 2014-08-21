@@ -153,7 +153,6 @@ var ex = {};
 					}, notok);
 				}, notok);
 			}, notok);
-
 		}, notok);
 	}
 
@@ -211,7 +210,7 @@ var ex = {};
 				notok();
 				console.log(e.message);
 				console.log(e.stack);
-				process.exit(code);
+				process.exit(2);
 			}
 		}
 	}

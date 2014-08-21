@@ -3,12 +3,13 @@ module.exports = (function() {
   var Container = require('Container');
 
   function WebView() {
-    Container.call(this, $.WebView, $WebView, {isWebView:true});
+    Container.call(this, $.WebView, $.WebView, {isWebView:true});
     this.native = this.nativeView = this.nativeViewClass('alloc')
                             ('initWithFrame',$.NSMakeRect(0,0,500,480) 
                             ,'frameName',$('main')
                             ,'groupName',$('main'));
     this.nativeView('setShouldCloseWithWindow',$.YES);
+    this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.nativeView('setShouldUpdateWhileOffscreen',$.YES);
 
     this.back = function() { this.nativeView('goBack',this.nativeView); }
@@ -20,6 +21,10 @@ module.exports = (function() {
             msg += "window.dispatchEvent(msg);\n";
         return this.nativeView('stringByEvaluatingJavaScriptFromString',$(msg))('UTF8String');
     }
+
+    Object.defineProperty(this, 'progress', {
+        get:function() { return this.nativeView('estimatedProgress')*100; }
+    });
 
     // Setting the URL is asyncronous, the loading and rendering occurs on a seperate thread,
     // many attributes will not be available until after the URL has finished loading.
@@ -42,6 +47,11 @@ module.exports = (function() {
     Object.defineProperty(this, 'transparent', {
         get:function() { return this.nativeView('drawsBackground') ? false : true; },
         set:function(e) { this.nativeView('setDrawsBackground', e ? false : true ); }
+    });
+
+    Object.defineProperty(this, 'textScale', {
+        get:function() { return this.nativeView('textSizeMultiplier') * 100; },
+        set:function(e) { this.nativeView('setTextSizeMultiplier', (e / 100)); }
     });
 
     // Note that a title may not be immediately available until the page has
@@ -112,7 +122,7 @@ module.exports = (function() {
             console.log(e.message);
             console.log(e.stack);
             process.exit(1);
-        };
+        }
     }.bind(this));
     WebFrameLoadDelegate.addMethod('webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { 
         try {
@@ -121,7 +131,7 @@ module.exports = (function() {
             console.log(e.message);
             console.log(e.stack);
             process.exit(1);
-        };
+        }
     }.bind(this));
     WebFrameLoadDelegate.addMethod('webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) {
         try {
@@ -130,15 +140,16 @@ module.exports = (function() {
             console.log(e.message);
             console.log(e.stack);
             process.exit(1);
-        };
+        }
     }.bind(this));
     WebFrameLoadDelegate.addMethod('webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) {
-        this.fireEvent('close');
+        try {
+            this.fireEvent('close');
         } catch(e) { 
             console.log(e.message);
             console.log(e.stack);
             process.exit(1);
-        };
+        }
     }.bind(this));
     WebFrameLoadDelegate.addMethod('webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) {
         try {
@@ -147,7 +158,7 @@ module.exports = (function() {
             console.log(e.message);
             console.log(e.stack);
             process.exit(1);
-        };
+        }
     }.bind(this));
     WebFrameLoadDelegate.addMethod('webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', function(self, _cmd, sender,url,seconds,date,frame) {
         try {
@@ -156,7 +167,7 @@ module.exports = (function() {
             console.log(e.message);
             console.log(e.stack);
             process.exit(1);
-        };
+        }
     }.bind(this));
     WebFrameLoadDelegate.register();
     var webFrameLoadDelegateInstance = WebFrameLoadDelegate('alloc')('init');

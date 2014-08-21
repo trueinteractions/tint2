@@ -1,0 +1,15 @@
+<html>
+<head>
+	<title>Test1</title>
+	<script>
+		var zz = 1;
+		window.addEventListener('message', function(e) {
+			document.body.innerHTML += '<p>received message: '+e.data+' ['+(zz++)+']</p>';
+			document.title = 'Test'+zz;
+		});
+	</script>
+</head>
+<body>
+	Testing...
+</body>
+</html>

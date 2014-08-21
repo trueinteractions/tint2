@@ -1,8 +1,8 @@
-#!/bin/sh
-if [ ! $1 ]; then
-	export SCRIPTS=*.js
-else
-	export SCRIPTS=$1
-fi
+#!/usr/bin/env bash
 
-../build/Release/tint tools/utilities.js $SCRIPTS
+echo
+for file in $@; do
+  ../build/Release/tint tools/utilities.js $file
+  test $? -eq 0 || exit $?
+done
+echo
