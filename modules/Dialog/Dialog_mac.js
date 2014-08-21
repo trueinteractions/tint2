@@ -5,40 +5,47 @@ module.exports = (function() {
     var $dialog = (type == "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
     var allowedFileTypes = null, events = {};
 
-      function fireEvent(event, args) {
-        if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-      }
+    function fireEvent(event, args) {
+      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+    }
 
-      this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-      this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
+    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
 
     Object.defineProperty(this, "title", {
       get:function() { return $dialog('title'); },
       set:function(e) { $dialog('setTitle', $(e)); }
     });
+
     Object.defineProperty(this, "message", {
       get:function() { return $dialog('message'); },
       set:function(e) { $dialog('setMessage', $(e)); }
     });
+
     Object.defineProperty(this, "prompt", {
       get:function() { return $dialog('prompt'); },
       set:function(e) { $dialog('setPrompt', $(e)); }
     });
+
     Object.defineProperty(this, "directory", {
       get:function() { return $dialog('directoryURL')('absoluteString'); },
       set:function(e) { $dialog('setDirectoryURL', $.NSURL('URLWithString',$(e))); }
     });
+
     Object.defineProperty(this, 'filename', {
       get:function() { return $dialog('nameFieldStringValue'); },
       set:function(val) { $dialog('setNameFieldStringValue', $(val)); }
     });
+
     Object.defineProperty(this, 'type', {
       get:function() { return type; }
     });
+
     Object.defineProperty(this, 'allowAnyFileType', {
       get:function() { return $dialog('allowsOtherFileTypes') ? true : false; },
       set:function(val) { $dialog('setAllowedOtherFileTypes', val ? $.YES : $.NO); }
     });
+
     Object.defineProperty(this, "allowFileTypes", {
       get:function() { return allowedFileTypes; },
       set:function(items) { 
@@ -49,6 +56,7 @@ module.exports = (function() {
         $dialog('setAllowedFileTypes',arr);
       }
     });
+
     Object.defineProperty(this, "allowMultiple", {
       get:function() {
         if(type == "save") return false;
@@ -60,6 +68,7 @@ module.exports = (function() {
         $dialog('setAllowsMultipleSelection',e); 
       }
     });
+
     Object.defineProperty(this, "allowDirectories", {
       get:function() {
         if(type == "save") return false;
@@ -70,6 +79,7 @@ module.exports = (function() {
         $dialog('setCanChooseDirectories', e ? true : false);
       }
     });
+
     Object.defineProperty(this, "selection", {
       get:function() {
         if(type == "open") {
@@ -83,7 +93,9 @@ module.exports = (function() {
           return $dialog('URL')('absoluteString');
       }
     });
+
     this.setChild = function(e) { $dialog('setAccessoryView',e); }
+
     this.open = function(z) {
       var w = z ? z : $.NSApplication('sharedApplication')('mainWindow');
       if(w) {
@@ -99,6 +111,7 @@ module.exports = (function() {
         else fireEvent('cancel');
       }
     }
+
     this.cancel = function() {
       $dialog('cancel',$dialog);
     }

@@ -142,7 +142,7 @@ var ex = {};
       case "CLEAR": return 71;
 
       case "/": return 75;
-      case "ENTER": return 76;  // numberpad on full kbd
+      case "ENTER-NUM": return 76;  // numberpad on full kbd
 
       case "=": return 78;
 

@@ -57,6 +57,7 @@
 			'modules/Dialog/Dialog_mac.js',
       'modules/Control_mac.js',
       'modules/Container_mac.js',
+      'modules/SelectInput/SelectInput_mac.js',
       'libraries/node/src/node.js',
       'libraries/node/lib/_debugger.js',
       'libraries/node/lib/_linklist.js',
