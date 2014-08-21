@@ -1,12 +1,9 @@
 module.exports = (function() {
-	var $ = process.bridge.objc;
-
+  var $ = process.bridge.objc;
 	function Control(NativeObjectClass, NativeViewClass, options) {
     var events = {}, native, nativeView;
-		//width, height
-		//maxwidth, maxheight
-		//minwidth, minheight
-		//left, top, right, bottom
+
+    //width, height, maxwidth, maxheight, minwidth, minheight, left, top, right, bottom
 		this.fireEvent = function(event,args) {
 			var returnvalue = undefined;
       if(events[event]) {
