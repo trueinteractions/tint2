@@ -1,104 +1,137 @@
 module.exports = (function() {
+  var Container = require('Container');
   var utilities = require('Utilities');
   var $ = process.bridge.objc;
 
   function Window() {
-    var $defaultStyleMask = $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSMiniaturizableWindowMask | $.NSResizableWindowMask | $.NSTexturedBackgroundWindowMask;
-    var events = {}, children = [], fullscreen = false, background = "auto";
-    var $menu = null, 
-        $toolbar = null,
-        $window = $.NSWindow('alloc')(
-          'initWithContentRect', $.NSMakeRect(0,0,500,500), 
-          'styleMask', $defaultStyleMask, 
-          'backing', $.NSBackingStoreBuffered,
-          'defer', $.NO);
-    
-    $window('setExcludedFromWindowsMenu', $.NO);
-    $window('contentView')('setAutoresizesSubviews',$.YES);
-    $window('contentView')('setAutoresizingMask',$.NSViewWidthSizable | $.NSViewHeightSizable | $.NSViewMinXMargin | $.NSViewMaxXMargin | $.NSViewMinYMargin | $.NSViewMaxYMargin);
-    $window('setFrame',$.NSMakeRect(0,0,500,500),'display',$.YES,'animate',$.YES);
-    $window('cascadeTopLeftFromPoint', $.NSMakePoint(20,20));
-    $window('makeKeyAndOrderFront', $window);
-    $window('center');
+    var defaultStyleMask = $.NSTitledWindowMask | $.NSClosableWindowMask | 
+                            $.NSMiniaturizableWindowMask | $.NSResizableWindowMask | 
+                            $.NSTexturedBackgroundWindowMask;
+    var fullscreen = false, 
+        background = "auto", 
+        $menu = null, 
+        $toolbar = null;
 
-    function fireEvent(event, args) {
-      var returnvalue = undefined;
-      if(events[event]) {
-        var tmp = (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-        if(typeof(tmp) != 'undefined') returnvalue = tmp;
-      }
-      return returnvalue;
-    }
+    Container.call(this, $.NSWindow, $.NSView, {isWindow:true});
+    this.native = this.nativeClass('alloc')('initWithContentRect', $.NSMakeRect(0,0,500,500), 'styleMask', defaultStyleMask, 'backing', $.NSBackingStoreBuffered, 'defer', $.NO);
+    this.nativeView = this.nativeViewClass('alloc')('initWithFrame', $.NSMakeRect(0,0,500,500));
+    this.native('setContentView',this.nativeView);
+    this.native('setExcludedFromWindowsMenu', $.NO);
+    this.native('contentView')('setAutoresizingMask', $.NSViewWidthSizable | $.NSViewHeightSizable | 
+                                                      $.NSViewMinXMargin | $.NSViewMaxXMargin | 
+                                                      $.NSViewMinYMargin | $.NSViewMaxYMargin );
+    this.native('setFrame', $.NSMakeRect(0,0,500,500), 'display', $.YES, 'animate', $.YES);
+    this.native('contentView')('setBackgroundColor', $.NSColor('redColor'));
+    this.native('cascadeTopLeftFromPoint', $.NSMakePoint(20,20));
+    this.native('makeKeyAndOrderFront', this.native);
+    this.native('setReleasedWhenClosed', $.YES);
+    this.native('center');
 
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+    var WindowDelegate = $.NSObject.extend('WindowDelegate'+Math.round(Math.random()*10000));
+    WindowDelegate.addMethod('init', '@@:', function(self) { return self; }.bind(this));
+    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) {
+      try {
+        this.fireEvent('close'); 
+        return $.YES;
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('enter-fullscreen');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('leave-fullscreen');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      };  
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('focus');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('blur');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('minimize');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('restore');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('move');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        this.fireEvent('resize');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { 
+      try {
+        this.fireEvent('did-close');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    }.bind(this));
+    WindowDelegate.register();
+    var windowDelegateInstance = WindowDelegate('alloc')('init');
+    this.native('setDelegate', windowDelegateInstance);
 
-    Object.defineProperty(this, 'title', {
-      get:function() { return title; },
-      set:function(e) { 
-        title = e;
-        if(title == null || typeof(title) == 'undefined') title = "";
-        else $window('setTitle', $(title));
-      }
-    });
-    
-    Object.defineProperty(this, 'titleVisible', {
-      get:function() { return $window('titleVisibility') == $.NSWindowTitleHidden ? false : true; },
-      set:function(e) { $window('setTitleVisibility', e ? $.NSWindowTitleVisible : $.NSWindowTitleHidden ); }
-    });
+    this.addEventListener('remove', function(control) { this.native('contentsView')('willRemoveSubview',control.nativeView); });
 
+    /** Properties **/
     Object.defineProperty(this, 'frame', {
-      get:function() { return $window('styleMask') | $.NSTitledWindowMask; },
+      get:function() { return this.native('styleMask') | $.NSTitledWindowMask; },
       set:function(e) { 
-        if(e) $window('setStyleMask', $defaultStyleMask);
-        else $window('setStyleMask', $.NSBorderlessWindowMask); 
-      }
-    });
-
-    utilities.attachSizeProperties($window, this, fireEvent, {
-      type:'window',
-      hasmaxmin:true,
-      nolayout:true,
-      width:500,
-      height:500,
-      maxWidth:2000,
-      maxHeight:2000,
-      minWidth:100,
-      minHeight:100
-    });
-
-    Object.defineProperty(this, 'x', {
-      get:function() { return $window('frame').origin.x; },
-      set:function(e) { 
-        if(e == 'center') 
-          $window('center');
-        else {
-          var rect = $window('frame');
-          rect.origin.x = e;
-          $window('setFrame', rect, 'display', $.YES, 'animate', $.NO);
-        }
-      }
-    });
-
-    Object.defineProperty(this, 'y', {
-      get:function() { return $window('frame').origin.y; },
-      set:function(e) { 
-        if(e == 'center') 
-          $window('center');
-        else {
-          var height = $.NSScreen('mainScreen')('frame').size.height;
-          var rect = $window('frame');
-          rect.origin.y = height - e;
-          $window('setFrame', rect, 'display', $.YES, 'animate', $.NO);
-        }
-      }
-    });
-
-    Object.defineProperty(this, 'visible', {
-      get:function() { return $window('isVisible') ? true : false; },
-      set:function(e) {
-        if(e) $window('makeKeyAndOrderFront',$window);
-        else $window('orderOut',$window);
+        if(e) this.native('setStyleMask', $defaultStyleMask);
+        else this.native('setStyleMask', $.NSBorderlessWindowMask); 
       }
     });
 
@@ -106,7 +139,7 @@ module.exports = (function() {
       get:function() { return $menu; },
       set:function(e) {
         $menu = e;
-        global.application.internal('setMainMenu', $menu.internal);
+        global.application.native('setMainMenu', $menu.native);
       }
     });
 
@@ -118,151 +151,174 @@ module.exports = (function() {
           return;
         } 
         $toolbar = e;
-        $window('setToolbar', $toolbar.internal);
+        this.native('setToolbar', $toolbar.native);
       }
     });
 
     Object.defineProperty(this, 'state', {
       get:function() { 
         if(fullscreen) return "fullscreen";
-        else if($window('isZoomed')) return "maximized";
-        else if($window('isMiniaturized')) return "minimized";
+        else if(this.native('isZoomed')) return "maximized";
+        else if(this.native('isMiniaturized')) return "minimized";
         else return "normal";
-        return $window('frame').origin.y; 
       },
       set:function(e) { 
         if(e == 'maximized' || e == 'normal') {
           if(fullscreen) {
-            $window('toggleFullscreen',$window);
+            this.native('toggleFullscreen',this.native);
             fullscreen = false;
           }
-          if($window('isMiniaturized')) $window('deminiaturize',$window);
-          if(e == 'maximized') $window('performZoom',$window);
+          if(this.native('isMiniaturized')) this.native('deminiaturize',this.native);
+          if(e == 'maximized') this.native('performZoom',this.native);
         } else if (e == 'minimized') {
           if(fullscreen) {
-            $window('toggleFullscreen',$window);
+            this.native('toggleFullscreen',this.native);
             fullscreen = false;
           }
-          $window('performMiniaturize',$window);
+          this.native('performMiniaturize',this.native);
         } else if (e == 'fullscreen') {
           if(!fullscreen) {
-            $window('toggleFullscreen',$window);
+            this.native('toggleFullscreen',this.native);
             fullscreen = true;
           }
         }
       }
     });
 
-    Object.defineProperty(this, 'maximizeButton', {
-      get:function() { return $window('standardWindowButton',$.NSWindowZoomButton)('isHidden'); },
-      set:function(e) { $window('standardWindowButton',$.NSWindowZoomButton)('setHidden',!e); }
+    Object.defineProperty(this, 'title', {
+      get:function() { return this.native('title'); },
+      set:function(e) { 
+        if(e == null || typeof(e) == 'undefined') e = "";
+        else this.native('setTitle', $(e));
+      }
     });
 
-    Object.defineProperty(this, 'minimizeButton', {
-      get:function() { return $window('standardWindowButton',$.NSWindowMiniaturizeButton)('isHidden'); },
-      set:function(e) { $window('standardWindowButton',$.NSWindowMiniaturizeButton)('setHidden',!e); }
-    });
-
-    Object.defineProperty(this, 'closeButton', {
-      get:function() { return $window('standardWindowButton',$.NSWindowCloseButton)('isHidden'); },
-      set:function(e) { $window('standardWindowButton',$.NSWindowCloseButton)('setHidden',!e); }
-    });
-
-    Object.defineProperty(this, 'fullscreenButton', {
-      get:function() { return $window('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); },
-      set:function(e) { $window('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); }
-    });
-
-    Object.defineProperty(this, 'internal', {
-      get:function() { return $window; }
-    });
-
-    Object.defineProperty(this, 'resizable', {
-      get:function() { return $window('styleMask') | $.NSResizableWindowMask; },
+    Object.defineProperty(this, 'y', {
+      get:function() { return this.native('frame').origin.y; },
       set:function(e) {
-        if (e) {
-          $window('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
-          $window('setStyleMask',$window('styleMask') | $.NSResizableWindowMask);
-        } else {
-          $window('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
-          $window('setStyleMask',$window('styleMask') ^ $.NSResizableWindowMask);
+        if(e == 'center') this.native('center');
+        else {
+          var height = $.NSScreen('mainScreen')('frame').size.height;
+          var rect = this.native('frame');
+          rect.origin.y = height - e;
+          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
         }
       }
     });
 
-    this.close = function() { $window('close'); }
+    Object.defineProperty(this, 'x', {
+      get:function() { return this.native('frame').origin.x; },
+      set:function(e) { 
+        if(e == 'center') this.native('center');
+        else {
+          var rect = this.native('frame');
+          rect.origin.x = e;
+          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+        }
+      }
+    });
 
-    this.appendChild = function(control) {
-      children.push(control);
-      $window('contentView')('addSubview',control.internal);
-    }
+    Object.defineProperty(this, 'width', {
+      get:function() { return this.native('frame').size.width; },
+      set:function(e) {
+          var rect = this.native('frame');
+          rect.size.width = e;
+          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+      }
+    });
 
-    this.removeChild = function(control) {
-      if(children.indexOf(control) != -1) children.splice(children.indexOf(control),1);
-      $window('contentsView')('willRemoveSubview',control.internal);
-      control.internal('removeFromSuperview');
-    }
+    Object.defineProperty(this, 'height', {
+      get:function() { return this.native('frame').size.height; },
+      set:function(e) {
+          var rect = this.native('frame');
+          rect.size.height = e;
+          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+      }
+    });
 
-    this.bringToFront = function() {
-      $window('makeKeyAndOrderFront',$window);
-    }
+    Object.defineProperty(this, 'titleVisible', {
+      get:function() { return this.native('titleVisibility') == $.NSWindowTitleHidden ? false : true; },
+      set:function(e) { this.native('setTitleVisibility', e ? $.NSWindowTitleVisible : $.NSWindowTitleHidden ); }
+    });
+
+    Object.defineProperty(this, 'visible', {
+      get:function() { return this.native('isVisible') ? true : false; },
+      set:function(e) {
+        if(e) this.native('makeKeyAndOrderFront',this.native);
+        else this.native('orderOut',this.native);
+      }
+    });
+
+    Object.defineProperty(this, 'maximizeButton', {
+      get:function() { return this.native('standardWindowButton',$.NSWindowZoomButton)('isHidden'); },
+      set:function(e) { this.native('standardWindowButton',$.NSWindowZoomButton)('setHidden',!e); }
+    });
+
+    Object.defineProperty(this, 'minimizeButton', {
+      get:function() { return this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('isHidden'); },
+      set:function(e) { this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('setHidden',!e); }
+    });
+
+    Object.defineProperty(this, 'closeButton', {
+      get:function() { return this.native('standardWindowButton',$.NSWindowCloseButton)('isHidden'); },
+      set:function(e) { this.native('standardWindowButton',$.NSWindowCloseButton)('setHidden',!e); }
+    });
+
+    Object.defineProperty(this, 'fullscreenButton', {
+      get:function() { return this.native('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); },
+      set:function(e) { this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); }
+    });
+
+    Object.defineProperty(this, 'resizable', {
+      get:function() { return this.native('styleMask') | $.NSResizableWindowMask; },
+      set:function(e) {
+        if (e) {
+          this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
+          this.native('setStyleMask',this.native('styleMask') | $.NSResizableWindowMask);
+        } else {
+          this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
+          this.native('setStyleMask',this.native('styleMask') ^ $.NSResizableWindowMask);
+        }
+      }
+    });
 
     Object.defineProperty(this, 'backgroundColor', {
       get:function() { return background; },
       set:function(e) {
         if(e == 'auto') {
-          $window('setOpaque', $.YES);
-          $window('setBackgroundColor', $.NSColor('controlBackgroundColor'));
+          this.native('setOpaque', $.YES);
+          this.native('setBackgroundColor', $.NSColor('controlBackgroundColor'));
         } else {
           var rgba = utilities.parseColor(e);
           if(rgba.a) {
-             $window('setOpaque', $.YES);
-             $window('setHasShadow', $.YES);
+             this.native('setOpaque', $.YES);
+             this.native('setHasShadow', $.YES);
           } else {
-             $window('setOpaque', $.NO);
-             $window('setHasShadow', $.NO);
+             this.native('setOpaque', $.NO);
+             this.native('setHasShadow', $.NO);
           }
-          $window('setBackgroundColor', $.NSColor('colorWithCalibratedRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a));
+          this.native('setBackgroundColor', 
+            $.NSColor('colorWithCalibratedRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a));
         }
         background = e;
       }
     });
 
-    Object.defineProperty(this, 'alpha', {
-      get:function() { return $window('alphaValue'); },
-      set:function(e) { $window('setAlphaValue', e); }
-    });
-
     Object.defineProperty(this, "alwaysOnTop", {
-      get:function() { return $window('level') == $.NSFloatingWindowLevel ? true : false; },
+      get:function() { return this.native('level') == $.NSFloatingWindowLevel ? true : false; },
       set:function(e) { 
-        if(e) $window('setLevel', $.NSFloatingWindowLevel); 
-        else $window('setLevel', $.NSNormalWindowLevel); 
+        if(e) this.native('setLevel', $.NSFloatingWindowLevel); 
+        else this.native('setLevel', $.NSNormalWindowLevel); 
       }
     });
-
-    var WindowDelegate = $.NSObject.extend('WindowDelegate'+Math.round(Math.random()*10000));
-    WindowDelegate.addMethod('init', '@@:', function(self) { return self; });
-    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) { fireEvent('close'); return $.YES; });
-    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('enter-fullscreen'); });
-    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { fireEvent('leave-fullscreen'); });
-    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('focus'); });
-    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { fireEvent('blur'); });
-    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('minimize'); });
-    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { fireEvent('restore'); });
-    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { fireEvent('move'); });
-    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { fireEvent('resize'); });
-    WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { delete this; }.bind(this));
-    //WindowDelegate.addMethod('windowShouldZoom:toFrame:', ['B',['@',$.selector,'@',$.NSRect]], function(self, cmd, window, newFrame) {
-    //  var value = fireEvent('state');
-    //  if(typeof(value) == 'undefined') value = true;
-    //  return value ? $.YES : $.NO;
-    //  return false;
-    //});
-
-    var windowDelegateInstance = WindowDelegate('alloc')('init');
-    $window('setDelegate', windowDelegateInstance);
   }
+  
+  Window.prototype = Object.create(Container.prototype);
+  Window.prototype.constructor = Window;
+
+  /** Functions **/
+  Window.prototype.close = function() { this.native('close'); }
+  Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
 
   return Window;
 })();

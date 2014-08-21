@@ -70,6 +70,16 @@ var ex = {};
 		$.CGEventCreateKeyboardEvent(null,0x38,false); // shift
 		$.CGEventCreateKeyboardEvent(null,0x15,false); // 4
 	}*/
+	ex.clickAtControl = function clickAtControl(control) {
+		var bounds = control.boundsOnScreen;
+		bounds.x = bounds.x + bounds.width/2;
+		bounds.y = bounds.y + bounds.height/2;
+		var point = $.CGPointMake(bounds.x, bounds.y);
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
+
+	}
 	ex.clickAt = function clickAt(x,y) {
 		var point = $.CGPointMake(x, y);
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
@@ -163,6 +173,7 @@ var ex = {};
 		nextTest();
 	}
 
+
 	function notok(code) {
 		if(currentTest.shell) {
 			shutdownShell(currentTest.name, function() { process.exit(1); });
@@ -198,7 +209,8 @@ var ex = {};
 				}
 			} catch(e) {
 				notok();
-				throw e;
+				console.log(e.message);
+				console.log(e.stack);
 				process.exit(code);
 			}
 		}

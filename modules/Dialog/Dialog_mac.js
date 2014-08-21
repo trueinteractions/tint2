@@ -1,7 +1,7 @@
 module.exports = (function() {
+	var $ = process.bridge.objc;
 
 	function Dialog(type) {
-		var $ = process.bridge.objc;
 		var $dialog = (type == "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
 		var allowedFileTypes = null, events = {};
 
@@ -87,7 +87,7 @@ module.exports = (function() {
 		this.open = function(z) {
 			var w = z ? z : $.NSApplication('sharedApplication')('mainWindow');
 			if(w) {
-				w = w.internal ? w.internal : w;
+				w = w.native ? w.native : w;
 				var comp = $(function(self,e) {
 					if(e == $.NSFileHandlingPanelOKButton) fireEvent('select');
 					else fireEvent('cancel');

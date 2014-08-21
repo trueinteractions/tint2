@@ -8,13 +8,13 @@ module.exports = (function() {
 
 		this.appendChild = function(menuitem) {
 			children.push(menuitem);
-			$menu('addItem',menuitem.internal);
+			$menu('addItem',menuitem.native);
 		}
 		this.removeChild = function(menuitem) {
 			if(children.indexOf(menuitem) != -1) children.splice(children.indexOf(menuitem),1);
-	   		$menu('removeItem',menuitem.internal);
+	   		$menu('removeItem',menuitem.native);
 		}
-		Object.defineProperty(this, 'internal', {
+		Object.defineProperty(this, 'native', {
 	      get:function() { return $menu; }
 	    });
 	} 

@@ -16,7 +16,15 @@ module.exports = (function() {
 
     var NSMenuItemDelegate = $.NSObject.extend('NSMenuItemDelegate'+Math.round(Math.random()*10000));
     NSMenuItemDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    NSMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { fireEvent('click'); });
+    NSMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { 
+      try { 
+        fireEvent('click'); 
+      } catch(e) {
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }
+    });
     NSMenuItemDelegate.register();
     var NSMenuItemDelegateInstance = NSMenuItemDelegate('alloc')('init');
 
@@ -30,7 +38,7 @@ module.exports = (function() {
       get:function() { return submenu; },
       set:function(e) { 
         submenu = e;
-        $menu('setSubmenu',e.internal);
+        $menu('setSubmenu',e.native);
       }
     });
 
@@ -86,7 +94,7 @@ module.exports = (function() {
       set:function(e) { return $menu('setToolTip',$(e)); }
     });
 
-    Object.defineProperty(this, 'internal', {
+    Object.defineProperty(this, 'native', {
       get:function() { return $menu; }
     });
 

@@ -8,6 +8,7 @@
   var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
   require('AppSchema')(process.cwd());
 
+  var $ = process.bridge.objc;
   /*
   global.Window = require('Window');
   global.WebView = require('WebView');
@@ -20,12 +21,11 @@
   */
 
   function Application() {
-    var $ = process.bridge.objc;
     var events = {}, mainMenu = null, name = "", badgeText = "", dockmenu = null;
     var $app = $.NSApplication('sharedApplication'), icon = "";
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
     delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
-      return dockmenu.internal;
+      return dockmenu.native;
     });
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
@@ -92,7 +92,7 @@
       }
     });
 
-    Object.defineProperty(this, 'internal', { get:function() { return $app; } });
+    Object.defineProperty(this, 'native', { get:function() { return $app; } });
 
     this.attention = function(critical) {
       $app('requestUserAttention', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) );
