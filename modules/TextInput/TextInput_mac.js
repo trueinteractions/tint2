@@ -1,14 +1,16 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var Container = require('Container');
+
   function TextInput() 
   {
-    Control.call(this, $.NSTextField, $NSTextField, {});
+    Container.call(this, $.NSTextField, $.NSTextField, {});
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
+    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
 
     var NSTextFieldDelegate = $.NSObject.extend('NSTextFieldDelegate'+Math.round(Math.random()*10000));
     NSTextFieldDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    NSTextFieldDelegate.addInstanceMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { 
+    NSTextFieldDelegate.addMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { 
       try {
         this.fireEvent('input');
       } catch(e) { 
@@ -17,7 +19,7 @@ module.exports = (function() {
         process.exit(1);
       }
     }.bind(this));
-    NSTextFieldDelegate.addInstanceMethod('controlTextDidBeginEditing:','v@:@', function(self,_cmd,frame) { 
+    NSTextFieldDelegate.addMethod('controlTextDidBeginEditing:','v@:@', function(self,_cmd,frame) { 
       try {
         this.fireEvent('inputstart');
       } catch(e) { 
@@ -87,6 +89,7 @@ module.exports = (function() {
       set:function(e) { this.nativeView('cell')('setScrollable', e ? true : false ); }
     });
   }
+
   TextInput.prototype = Object.create(Container.prototype);
   TextInput.prototype.constructor = TextInput;
   return TextInput;

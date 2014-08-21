@@ -70,6 +70,135 @@ var ex = {};
 		$.CGEventCreateKeyboardEvent(null,0x38,false); // shift
 		$.CGEventCreateKeyboardEvent(null,0x15,false); // 4
 	}*/
+
+
+  ex.keyCodeFromChar = function keyCodeFromChar(keyString)
+  {
+    switch(keyString) {
+      case "a": return 0;
+      case "s": return 1;
+      case "d": return 2;
+      case "f": return 3;
+      case "h": return 4;
+      case "g": return 5;
+      case "z": return 6;
+      case "x": return 7;
+      case "c": return 8;
+      case "v": return 9;
+      // what is 10?
+      case "b": return 11;
+      case "q": return 12;
+      case "w": return 13;
+      case "e": return 14;
+      case "r": return 15;
+      case "y": return 16;
+      case "t": return 17;
+      case "1": return 18;
+      case "2": return 19;
+      case "3": return 20;
+      case "4": return 21;
+      case "6": return 22;
+      case "5": return 23;
+      case "=": return 24;
+      case "9": return 25;
+      case "7": return 26;
+      case "-": return 27;
+      case "8": return 28;
+      case "0": return 29;
+      case "]": return 30;
+      case "o": return 31;
+      case "u": return 32;
+      case "[": return 33;
+      case "i": return 34;
+      case "p": return 35;
+      case "RETURN": return 36;
+      case "l": return 37;
+      case "j": return 38;
+      case "'": return 39;
+      case "k": return 40;
+      case ";": return 41;
+      case "\\": return 42;
+      case ",": return 43;
+      case "/": return 44;
+      case "n": return 45;
+      case "m": return 46;
+      case ".": return 47;
+      case "TAB": return 48;
+      case "SPACE": return 49;
+      case "`": return 50;
+      case "DELETE": return 51;
+      case "ENTER": return 52;
+      case "ESCAPE": return 53;
+
+      // some more missing codes abound, reserved I presume, but it would
+      // have been helpful for Apple to have a document with them all listed
+
+      case ".": return 65;
+
+      case "*": return 67;
+
+      case "+": return 69;
+
+      case "CLEAR": return 71;
+
+      case "/": return 75;
+      case "ENTER": return 76;  // numberpad on full kbd
+
+      case "=": return 78;
+
+      case "=": return 81;
+      case "0": return 82;
+      case "1": return 83;
+      case "2": return 84;
+      case "3": return 85;
+      case "4": return 86;
+      case "5": return 87;
+      case "6": return 88;
+      case "7": return 89;
+
+      case "8": return 91;
+      case "9": return 92;
+
+      case "F5": return 96;
+      case "F6": return 97;
+      case "F7": return 98;
+      case "F3": return 99;
+      case "F8": return 100;
+      case "F9": return 101;
+
+      case "F11": return 103;
+
+      case "F13": return 105;
+
+      case "F14": return 107;
+
+      case "F10": return 109;
+
+      case "F12": return 111;
+
+      case "F15": return 113;
+      case "HELP": return 114;
+      case "HOME": return 115;
+      case "PGUP": return 116;
+      case "DELETE": return 117;
+      case "F4": return 118;
+      case "END": return 119;
+      case "F2": return 120;
+      case "PGDN": return 121;
+      case "F1": return 122;
+      case "LEFT": return 123;
+      case "RIGHT": return 124;
+      case "DOWN": return 125;
+      case "UP": return 126;
+      default:
+        return 0;
+    }
+  }
+
+  ex.keyAtControl = function keyAtControl(input) {
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), true));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), false));
+  }
 	ex.clickAtControl = function clickAtControl(control) {
 		var bounds = control.boundsOnScreen;
 		bounds.x = bounds.x + bounds.width/2;
