@@ -49,82 +49,76 @@ module.exports = (function() {
       	//	$NSToolbarDelegateInstance;
     	//});
 
-    	$toolbar('setDelegate',$NSToolbarDelegateInstance);
-		Object.defineProperty(this, 'state', {
-		  get:function() { 
-		  	if($toolbar('displayMode') == $.NSToolbarDisplayModeIconAndLabel) 
-		  		return "iconandlabel";
-		  	else if ($toolbar('displayMode') == $.NSToolbarDisplayModeIconOnly)
-		  		return "icon";
-		  	else if ($toolbar('displayMode') == $.NSToolbarDisplayModeLabelOnly)
-		  		return "label";
-		  	else
-		  		return "default";
-		  },
-		  set:function(e) {
-		  	switch(e) {
-		  		case 'iconandlabel':
-		  			$toolbar('setDisplayMode',$.NSToolbarDisplayModeIconAndLabel);
-		  			break;
-		  		case 'icon':
-		  			$toolbar('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
-		  			break;
-		  		case 'label':
-		  			$toolbar('setDisplayMode',$.NSToolbarDisplayModeLabelOnly);
-		  			break;
-		  		default:
-		  			$toolbar('setDisplayMode',$.NSToolbarDisplayModeDefault);
-		  			break;
-		  	}
-		  }
-		});
+    $toolbar('setDelegate',$NSToolbarDelegateInstance);
+    Object.defineProperty(this, 'state', {
+      get:function() { 
+        if($toolbar('displayMode') == $.NSToolbarDisplayModeIconAndLabel) 
+          return "iconandlabel";
+        else if ($toolbar('displayMode') == $.NSToolbarDisplayModeIconOnly)
+          return "icon";
+        else if ($toolbar('displayMode') == $.NSToolbarDisplayModeLabelOnly)
+          return "label";
+        else
+          return "default";
+      },
+      set:function(e) {
+        switch(e) {
+          case 'iconandlabel':
+            $toolbar('setDisplayMode',$.NSToolbarDisplayModeIconAndLabel);
+            break;
+          case 'icon':
+            $toolbar('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
+            break;
+          case 'label':
+            $toolbar('setDisplayMode',$.NSToolbarDisplayModeLabelOnly);
+            break;
+          default:
+            $toolbar('setDisplayMode',$.NSToolbarDisplayModeDefault);
+            break;
+        }
+      }
+    });
 
-		Object.defineProperty(this, 'size', {
-		  get:function() { 
-		  	if($toolbar('sizeMode') == $.NSToolbarSizeModeRegular) 
-		  		return "regular";
-		  	else if ($toolbar('sizeMode') == $.NSToolbarSizeModeSmall)
-		  		return "small";
-		  	else 
-		  		return "default";
-		  },
-		  set:function(e) {
-		  	switch(e) {
-		  		case 'regular':
-		  			$toolbar('setSizeMode',$.NSToolbarSizeModeRegular);
-		  			break;
-		  		case 'small':
-		  			$toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
-		  			break;
-		  		default:
-		  			$toolbar('setSizeMode',$.NSToolbarDisplayModeLabelOnly);
-		  			break;
-		  	}
-		  }
-		});
+    Object.defineProperty(this, 'size', {
+      get:function() { 
+        if($toolbar('sizeMode') == $.NSToolbarSizeModeRegular) 
+          return "regular";
+        else if ($toolbar('sizeMode') == $.NSToolbarSizeModeSmall)
+          return "small";
+        else 
+          return "default";
+      },
+      set:function(e) {
+        switch(e) {
+          case 'regular':
+            $toolbar('setSizeMode',$.NSToolbarSizeModeRegular);
+            break;
+          case 'small':
+            $toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
+            break;
+          default:
+            $toolbar('setSizeMode',$.NSToolbarDisplayModeLabelOnly);
+            break;
+        }
+      }
+    });
 
-		this.appendChild = function(child) {
-			var identifier;
-			if(child == "space")
-				child = {internal:$("NSToolbarFlexibleSpaceItem"), identifier:$("NSToolbarFlexibleSpaceItem")};
-			else
-				child.identifier = $((children.length+1).toString());
-			children.push(child);
-			$toolbar('insertItemWithItemIdentifier',child.identifier,'atIndex',children.length-1);	
-		}
+    this.appendChild = function(child) {
+      var identifier;
+      if(child == "space") child = {native:$("NSToolbarFlexibleSpaceItem"), identifier:$("NSToolbarFlexibleSpaceItem")};
+      else child.identifier = $((children.length+1).toString());
+      children.push(child);
+      $toolbar('insertItemWithItemIdentifier',child.identifier,'atIndex',children.length-1);	
+    }
 
-		this.removeChild = function(child) {
-			var index = children.indexOf(child);
-			if(index != -1) {
-				children.splice(index,1);
-		   		$toolbar('removeItemAtIndex',index);
-			}
-		}
-
-		Object.defineProperty(this, 'internal', {
-	      get:function() { return $toolbar; }
-	    });
-
-	} 
-	return Toolbar;
+    this.removeChild = function(child) {
+      var index = children.indexOf(child);
+      if(index != -1) {
+        children.splice(index,1);
+        $toolbar('removeItemAtIndex',index);
+      }
+    }
+    Object.defineProperty(this, 'native', { get:function() { return $toolbar; }});
+  } 
+  return Toolbar;
 })();

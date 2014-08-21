@@ -48,18 +48,18 @@ function run($utils) {
 	webview.addEventListener('load', function() {
 		mainWindow.title = webview.title;
 		webview.postMessage('hello');
-		webview.postMessage('hello2');
-		webview.postMessage('hello3');
+		/* @hidden */ webview.postMessage('hello2');
+		/* @hidden */ webview.postMessage('hello3');
 	});
-	var count = 1;
+	/* @hidden */ var count = 1;
 	webview.addEventListener('title', function() {
-		$utils.assert(webview.title == 'Test'+count);
+		/* @hidden */ $utils.assert(webview.title == 'Test'+count);
 		mainWindow.title = webview.title;
-		if(count == 4) {
-			mainWindow.close();
-			$utils.ok();
-		}
-		count++;
+		/* @hidden */ if(count == 4) {
+		/* @hidden */ 	mainWindow.close();
+		/* @hidden */ 	$utils.ok();
+		/* @hidden */ }
+		/* @hidden */ count++;
 	});
 	webview.location = 'file://'+process.cwd()+'/assets/webview-test.html';
 
