@@ -1,11 +1,11 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
-	function Control(NativeObjectClass, NativeViewClass, options) {
+  function Control(NativeObjectClass, NativeViewClass, options) {
     var events = {}, native, nativeView;
 
     //width, height, maxwidth, maxheight, minwidth, minheight, left, top, right, bottom
-		this.fireEvent = function(event,args) {
-			var returnvalue = undefined;
+    this.fireEvent = function(event,args) {
+      var returnvalue = undefined;
       if(events[event]) {
         (events[event]).forEach(function(item,index,arr) { 
           var tmp = item(args);
