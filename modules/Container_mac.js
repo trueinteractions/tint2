@@ -4,18 +4,16 @@ module.exports = (function() {
 
   function Container(NativeObjectClass, NativeViewClass, options) {
     Control.call(this, NativeObjectClass, NativeViewClass, options);
+    var layout = [], children = [];
 
-    var layout = [];
-    var children = [];
-
-    Object.defineProperty(this, 'layout',{ get:function() { return layout; } });
+    Object.defineProperty(this, 'layout',{ get:function() { return layout; }});
 
     Object.defineProperty(this, 'alpha', {
       get:function() { return this.native('alphaValue'); },
       set:function(e) { this.native('setAlphaValue', e); }
     });
 
-    Object.defineProperty(this, 'children', { get:function() { return children; } });
+    Object.defineProperty(this, 'children', { get:function() { return children; }});
 
     this.appendChild = function(control) {
       children.push(control);
@@ -24,7 +22,8 @@ module.exports = (function() {
 
     this.removeChild = function(control) {
       this.fireEvent('remove', element);
-      if(children.indexOf(control) != -1) children.splice(children.indexOf(control),1);
+      if(children.indexOf(control) != -1) 
+        children.splice(children.indexOf(control),1);
       control.nativeView('removeFromSuperview');
     }
 
@@ -84,7 +83,7 @@ module.exports = (function() {
                             layoutObject.secondAttribute == 'center' ? $.NSLayoutAttributeCenterX :
                             layoutObject.secondAttribute == 'middle' ? $.NSLayoutAttributeCenterY :
                             layoutObject.secondAttribute == 'baseline' ? $.NSLayoutAttributeBaseline :
-                            $.NSLayoutAttributeNotAnAttribute
+                                                                         $.NSLayoutAttributeNotAnAttribute
 
       var relation =  layoutObject.relationship == '<' ? $.NSLayoutRelationLessThanOrEqual :
                       layoutObject.relationship == '>' ? $.NSLayoutRelationGreaterThanOrEqual :
