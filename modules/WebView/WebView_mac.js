@@ -8,8 +8,6 @@ module.exports = (function() {
                             ('initWithFrame',$.NSMakeRect(0,0,500,480) 
                             ,'frameName',$('main')
                             ,'groupName',$('main'));
-    this.nativeView('setAutoresizesSubviews',$.YES);
-    this.nativeView('setAutoresizingMask',$.NSViewWidthSizable | $.NSViewHeightSizable);
     this.nativeView('setShouldCloseWithWindow',$.YES);
     this.nativeView('setShouldUpdateWhileOffscreen',$.YES);
 
