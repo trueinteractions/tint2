@@ -36,51 +36,51 @@ module.exports = (function() {
         process.exit(1);
       }
     }.bind(this));
-		//TODO: Does not work.
-		nativeViewExt.addMethod('mouseUp:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
-			self.super('mouseUp',events);
-			try { 
-				this.fireEvent('mouseUp');
-			} catch(e) { 
-				console.log(e.message);
-				console.log(e.stack);
-				process.exit(1);
-			}
-		}.bind(this));
-		//TODO: Does not work.
-		nativeViewExt.addMethod('mouseEntered:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
-			self.super('mouseEntered',events);
-			try {
-				this.fireEvent('mouseEntered');
-			} catch(e) { 
-				console.log(e.message);
-				console.log(e.stack);
-				process.exit(1);
-			}
-		}.bind(this));
-		//TODO: Does not work.
-		nativeViewExt.addMethod('mouseExited:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
-			self.super('mouseExited',events);
-			try { 
-				this.fireEvent('mouseExited');
-			} catch(e) { 
-				console.log(e.message);
-				console.log(e.stack);
-				process.exit(1);
-			}
-		}.bind(this));
-		//TODO: Does not work.
-		nativeViewExt.addMethod('mouseMoved:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
-			self.super('mouseMoved',events);
-			try {
-				this.fireEvent('mouseMoved');
-			} catch(e) { 
-				console.log(e.message);
-				console.log(e.stack);
-				process.exit(1);
-			}
-		}.bind(this));
-		nativeViewExt.register();
+    //TODO: Does not work.
+    nativeViewExt.addMethod('mouseUp:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
+    	self.super('mouseUp',events);
+    	try { 
+    		this.fireEvent('mouseUp');
+    	} catch(e) { 
+    		console.log(e.message);
+    		console.log(e.stack);
+    		process.exit(1);
+    	}
+    }.bind(this));
+    //TODO: Does not work.
+    nativeViewExt.addMethod('mouseEntered:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
+    	self.super('mouseEntered',events);
+    	try {
+    		this.fireEvent('mouseEntered');
+    	} catch(e) { 
+    		console.log(e.message);
+    		console.log(e.stack);
+    		process.exit(1);
+    	}
+    }.bind(this));
+    //TODO: Does not work.
+    nativeViewExt.addMethod('mouseExited:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
+    	self.super('mouseExited',events);
+    	try { 
+    		this.fireEvent('mouseExited');
+    	} catch(e) { 
+    		console.log(e.message);
+    		console.log(e.stack);
+    		process.exit(1);
+    	}
+    }.bind(this));
+    //TODO: Does not work.
+    nativeViewExt.addMethod('mouseMoved:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
+    	self.super('mouseMoved',events);
+    	try {
+    		this.fireEvent('mouseMoved');
+    	} catch(e) { 
+    		console.log(e.message);
+    		console.log(e.stack);
+    		process.exit(1);
+    	}
+    }.bind(this));
+    nativeViewExt.register();
 
 		Object.defineProperty(this,'boundsOnScreen', {
 			get:function() {
