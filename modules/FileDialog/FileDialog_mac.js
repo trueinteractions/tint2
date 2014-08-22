@@ -1,7 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
 
-  function Dialog(type) {
+  function FileDialog(type) {
     var $dialog = (type == "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
     var allowedFileTypes = null, events = {};
 
@@ -116,5 +116,5 @@ module.exports = (function() {
       $dialog('cancel',$dialog);
     }
   }
-  return Dialog;
+  return FileDialog;
 })();

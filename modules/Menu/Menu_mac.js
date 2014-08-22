@@ -23,10 +23,10 @@ module.exports = (function() {
     var MenuItemSeperator = require('MenuItemSeperator');
 
     var appleMenu = new Menu();
-    appleMenu.appendChild(new MenuItem('About '+name, null);
+    appleMenu.appendChild(new MenuItem('About '+name, null));
     appleMenu.appendChild(new MenuItemSeperator());
     appleMenu.appendChild(new MenuItem('Hide '+name, 'h'));
-    appleMenu.appendChild(new MenuItem('Hide Others', null);
+    appleMenu.appendChild(new MenuItem('Hide Others', null));
     appleMenu.appendChild(new MenuItem('Show All', null));
     appleMenu.appendChild(new MenuItemSeperator());
     appleMenu.appendChild(new MenuItem('Quit '+name, null));

@@ -4,9 +4,9 @@
  * @ignore
  */
 function setup() {
-	global.Window = require('Window');
-	global.Menu = require('Menu');
-	global.MenuItem = require('MenuItem');
+  global.Window = require('Window');
+  global.Menu = require('Menu');
+  global.MenuItem = require('MenuItem');
 }
 
 function baseline() {
@@ -17,37 +17,37 @@ function baseline() {
  * @example
  */
 function run($utils) {
-	var win = new Window();
+  var win = new Window();
 
-	var dockmenu = new Menu("DockMenu");
-	var someMenu = new Menu("SomeMenu");
-	
-	var someSuperMenuItem = new MenuItem('Some Item 1');
-	someSuperMenuItem.submenu = someMenu;
+  var dockmenu = new Menu("DockMenu");
+  var someMenu = new Menu("SomeMenu");
+  
+  var someSuperMenuItem = new MenuItem('Some Item 1');
+  someSuperMenuItem.submenu = someMenu;
 
-	var someMenuItem = new MenuItem("Test Menu","z");
-	someMenuItem.addEventListener('click', function() { });
-	someMenu.appendChild(someMenuItem);
+  var someMenuItem = new MenuItem("Test Menu","z");
+  someMenuItem.addEventListener('click', function() { });
+  someMenu.appendChild(someMenuItem);
 
 
-	var someOtherSuperMenuItem = new MenuItem('This Item');
+  var someOtherSuperMenuItem = new MenuItem('This Item');
 
-	var someMenuItem3 = new MenuItem("New","n","shift");
-	someMenuItem3.enabled = true;
-	someMenuItem3.addEventListener('click', function() { });
+  var someMenuItem3 = new MenuItem("New","n","shift");
+  someMenuItem3.enabled = true;
+  someMenuItem3.addEventListener('click', function() { });
 
-	var someMenu2 = new Menu("SomeMenu2");
-	someMenu2.appendChild(someMenuItem3);
+  var someMenu2 = new Menu("SomeMenu2");
+  someMenu2.appendChild(someMenuItem3);
 
-	someOtherSuperMenuItem.submenu = someMenu2;
+  someOtherSuperMenuItem.submenu = someMenu2;
 
-	dockmenu.appendChild(someSuperMenuItem);
-	dockmenu.appendChild(someOtherSuperMenuItem);
-	application.dockmenu = dockmenu;
-	setTimeout(function(){ 
-		win.close();
-		$utils.ok();
-	}, 1000);
+  dockmenu.appendChild(someSuperMenuItem);
+  dockmenu.appendChild(someOtherSuperMenuItem);
+  application.dockmenu = dockmenu;
+  setTimeout(function(){ 
+    win.close();
+    $utils.ok();
+  }, 1000);
 }
 
 /**
@@ -58,9 +58,9 @@ function shutdown() {
 }
 
 module.exports = {
-	setup:setup, 
-	run:run, 
-	shutdown:shutdown, 
-	shell:false,
-	name:"DockMenu",
+  setup:setup, 
+  run:run, 
+  shutdown:shutdown, 
+  shell:false,
+  name:"DockMenu",
 };
