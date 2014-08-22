@@ -61,7 +61,7 @@ function run($utils) {
     /* @hidden */ }
     /* @hidden */ count++;
   });
-  webview.location = 'file://'+process.cwd()+'/assets/webview-test.html';
+  webview.location = 'app://assets/webview-test.html';
 
 }
 

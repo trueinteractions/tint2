@@ -3,7 +3,12 @@
 @implementation AppSchema
 
 - (void)startLoading {
-	NSString *url = [[[self request] URL] path];
+	NSString *url = [[[self request] URL] description];
+
+	if([url rangeOfString:@"app:///"].location != NSNotFound)
+		url = [url stringByReplacingOccurrencesOfString:@"app:///" withString:@"/"];
+	else if([url rangeOfString:@"app://"].location != NSNotFound)
+		url = [url stringByReplacingOccurrencesOfString:@"app://" withString:@"/"];
 
 	// TODO: If packaged app...
 
@@ -13,7 +18,6 @@
 	currentpath = [filemgr currentDirectoryPath];
 
 	NSString *possible = [currentpath stringByAppendingString:url];
-
 	if ([filemgr fileExistsAtPath:possible] == YES) {
 		NSData *data = [filemgr contentsAtPath:possible];
 		NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[[self request] URL] MIMEType:@"" expectedContentLength:[data length] textEncodingName:nil];

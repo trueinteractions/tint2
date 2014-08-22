@@ -50,7 +50,10 @@
       if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
       var url = $.NSURL('URLWithString',$(path));
       var data = $.NSData('dataWithContentsOfURL',url);
-      return process.bridge.reinterpret(data('bytes'),data('length'),0);
+      if(data)
+        return process.bridge.reinterpret(data('bytes'),data('length'),0);
+      else 
+        return null;
     }
 
     Object.defineProperty(this, 'name', {
