@@ -5,6 +5,7 @@
 #include <node_string.h>
 #include "v8_typed_array.h"
 #include <stdlib.h>
+#include "../AppSchema/AppSchema_mac.h"
 
 namespace node {
 	extern v8::Persistent<v8::String> process_symbol;
@@ -182,6 +183,8 @@ v8::Handle<v8::Value> InitBridge(const v8::Arguments& args) {
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 	self.locked = true;
 
+	// Register the app:// protocol.
+	[NSURLProtocol registerClass:[AppSchema class]];
 
 	//
 	// IMPORTANT: DO NOT SET THIS RESOLUTION TIME LOWER THAN 0.0156 (preferably 0.016 ~ 60fps),

@@ -1,6 +1,5 @@
 module.exports = function(basepath) {
     var $ = process.bridge.objc;
-    if($.URLAppSchema) return;
     var workingdir = process.cwd();
     if(workingdir[workingdir.length-1] != '/')
         workingdir += '/';
@@ -19,7 +18,7 @@ module.exports = function(basepath) {
         }
     }
     global.require.__proto__ = global.requireNode;
-
+/*
     var appSchema = $.NSURLProtocol.extend('URLAppSchema');
     appSchema.addClassMethod('canInitWithRequest:', 'c@:@', function(self, cmd, theRequest) {
         console.log('received request');
@@ -59,5 +58,5 @@ module.exports = function(basepath) {
         }
     });
     appSchema.register();
-    //$.NSURLProtocol('registerClass',appSchema('class'));
+    $.NSURLProtocol('registerClass',appSchema('class'));*/
 }

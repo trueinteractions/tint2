@@ -1,0 +1,43 @@
+#include "AppSchema_mac.h"
+
+@implementation AppSchema
+
+- (void)startLoading {
+	NSString *url = [[[self request] URL] path];
+
+	// TODO: If packaged app...
+
+	NSFileManager *filemgr;
+	NSString *currentpath;
+	filemgr = [NSFileManager defaultManager];
+	currentpath = [filemgr currentDirectoryPath];
+
+	NSString *possible = [currentpath stringByAppendingString:url];
+
+	if ([filemgr fileExistsAtPath:possible] == YES) {
+		NSData *data = [filemgr contentsAtPath:possible];
+		NSURLResponse *response = [[NSURLResponse alloc] initWithURL:[[self request] URL] MIMEType:@"" expectedContentLength:[data length] textEncodingName:nil];
+		[[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageAllowed];
+		[[self client] URLProtocol:self didLoadData:data];
+		[[self client] URLProtocolDidFinishLoading:self];
+	} else {
+		[[self client] URLProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain code:-1 userInfo:nil]];
+	}
+}
+
+- (void)stopLoading {
+
+}
+
++ (BOOL)canInitWithRequest:(NSURLRequest *)request {
+	if ([[[request URL] scheme] caseInsensitiveCompare:@"app"] == NSOrderedSame)
+		return YES;
+	else
+		return NO;
+}
+
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
+	return request;
+}
+
+@end

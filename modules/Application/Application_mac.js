@@ -47,10 +47,10 @@
     });
 
     this.resource = function(path) {
-      if(path.indexOf('app://') == -1) path = 'app://' + path;
-      var url = $.NSURL('URLWithString',$("http://www.xmission.com"));
+      if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
+      var url = $.NSURL('URLWithString',$(path));
       var data = $.NSData('dataWithContentsOfURL',url);
-      return data;
+      return process.bridge.reinterpret(data('bytes'),data('length'),0);
     }
 
     Object.defineProperty(this, 'name', {

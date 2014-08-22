@@ -137,5 +137,5 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  name:"TextInput",
+  name:"SelectInput",
 };

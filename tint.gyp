@@ -122,6 +122,8 @@
       ],
 
       'sources': [
+				'modules/AppSchema/AppSchema_mac.h',
+				'modules/AppSchema/AppSchema_mac.mm',
         'modules/Runtime/Main_mac.mm',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',

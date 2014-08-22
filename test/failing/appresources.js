@@ -16,8 +16,8 @@ function baseline() {
  * @example
  */
 function run($utils) {
-	var data = application.resource('appresources.js');
-	console.log(data);
+	var data = application.resource('failing/appresources.js');
+	console.log('data: ',data, ' length: ', data.length);
 	$utils.ok();
 }
 
