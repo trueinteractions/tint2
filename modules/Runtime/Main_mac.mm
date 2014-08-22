@@ -206,10 +206,9 @@ v8::Handle<v8::Value> InitBridge(const v8::Arguments& args) {
 	//[self.timer setTolerance:0.0016];
 	// Create all the objects, load modules, do everything.
 	// so your next reading stop should be node::Load()!
-	//self.process_l->Set(v8::String::New("bridge"), v8::Object::New());
 	NODE_SET_METHOD(process_l, "initbridge", InitBridge);
 	node::Load(process_l);
-	
+
 	self.locked = false;
 }
 
