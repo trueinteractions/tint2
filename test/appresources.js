@@ -1,4 +1,4 @@
-
+var fs = require('fs');
 /**
  * @unit-test-setup
  * @ignore
@@ -16,9 +16,9 @@ function baseline() {
  * @example
  */
 function run($utils) {
-	var data = application.resource('failing/appresources.js');
-	console.log('data: ',data, ' length: ', data.length);
-	$utils.ok();
+	var data = application.resource('appresources.js');
+  /* @hidden */ $utils.assert(fs.statSync('appresources.js').size == data.length); 
+	/* @hidden */ $utils.ok();
 }
 
 /**
