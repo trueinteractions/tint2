@@ -9,16 +9,6 @@
   require('AppSchema')(process.cwd());
 
   var $ = process.bridge.objc;
-  /*
-  global.Window = require('Window');
-  global.WebView = require('WebView');
-  global.Menu = require('Menu');
-  global.MenuItem = require('MenuItem');
-  global.Toolbar = require('Toolbar');
-  global.Text = require('TextInput');
-  global.Button = require('Button');
-  global.Notification = require('Notification');
-  */
 
   function Application() {
     var events = {}, mainMenu = null, name = "", badgeText = "", dockmenu = null;
@@ -112,22 +102,6 @@
     $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
     $app('activateIgnoringOtherApps', true);
   }
-
-  /*Application.osxBuildDefaultMainMenu = function() {
-    $MenuClass = require('./modules/Menu/Menu_mac.js');
-    $MenuItemClass = require('./modules/Menu/MenuItem_mac.js');
-    $MenuItemSeperatorClass = require('./modules/Menu/MenuItemSeperator_mac.js');
-
-    var appleMenu = new $MenuClass("");
-    appleMenu.appendChild(new $MenuItemClass('About '+name, null);
-    appleMenu.appendChild(new $MenuItemSeperatorClass());
-    appleMenu.appendChild(new $MenuItemClass('Hide '+name, 'h'));
-    appleMenu.appendChild(new $MenuItemClass('Hide Others', null);
-    appleMenu.appendChild(new $MenuItemClass('Show All', null));
-    appleMenu.appendChild(new $MenuItemSeperatorClass());
-    appleMenu.appendChild(new $MenuItemClass('Quit '+name, null));
-  }*/
-
 
   global.application = new Application();
 })();
