@@ -48,6 +48,7 @@ ninja -v -C build/out/Release/
 * Application
 * Application Schema (app:// protocol for packaged apps)
 * Button
+* Dialogs (Alerts, sheets, etc)
 * FileDialog (Save/Open)
 * Menu (and MenuItem)
 * Notification
