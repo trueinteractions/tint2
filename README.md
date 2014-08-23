@@ -52,12 +52,13 @@ ninja -v -C build/out/Release/
 * FileDialog (Save/Open)
 * Menu (and MenuItem)
 * Notification
-* TextInput
+* ProgressBar
 * SelectInput (Combo Boxes)
 * SearchInput (look ahead while typing)
+* Status Bars (System Tray's)
+* TextInput
 * Toolbar
 * WebView (WebKit)
-* Status Bars (System Tray's)
 * Window
 
 <h2>Documentation</h2>
