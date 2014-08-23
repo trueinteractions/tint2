@@ -1,4 +1,3 @@
-
 /**
  * @unit-test-setup
  * @ignore
@@ -11,22 +10,33 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
+ * @see {Window}
  * @example
  */
 function run($utils) {
   var w = new Window();
-  application.icon = 'assets/tintcompiler.png';
-  application.badge = '2';
-  var handler;
+  w.preferences.animateOnSizeChange = true;
+  w.preferences.animateOnPositionChange = true;
+  setTimeout(function(){ 
+    w.width = 800;
+    w.height = 800;
+  }, 1000);
   setTimeout(function(){
-    handler = application.attention(true);
+    w.width = 100;
+    w.height = 100;
   }, 2000);
   setTimeout(function(){
-    handler.cancel();
+    w.x = 100;
+    w.y = 100;
+  }, 3000);
+  setTimeout(function(){
+    w.x = 900;
+    w.y = 900;
+  }, 4000);
+  setTimeout(function(){ 
     w.close();
     $utils.ok(); 
-  }, 4000);
+  }, 5000);
 }
 
 /**
@@ -41,5 +51,5 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  name:"DockIcon",
+  name:"WindowSizeAndPosition",
 };

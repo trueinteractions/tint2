@@ -25,8 +25,6 @@
         (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
     }
 
-    this.preferences = {animateWhenPossible:false};
-
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
     this.launch = function() { fireEvent('launch'); }.bind(this);

@@ -1,4 +1,3 @@
-
 /**
  * @unit-test-setup
  * @ignore
@@ -11,19 +10,27 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
+ * @see {Window}
  * @example
  */
 function run($utils) {
   var w = new Window();
-  application.icon = 'assets/tintcompiler.png';
-  application.badge = '2';
-  var handler;
-  setTimeout(function(){
-    handler = application.attention(true);
+  w.maximizeButton = true;
+  w.minimizeButton = false;
+  w.closeButton = false;
+  w.resizable = false;
+  w.titleVisible = false;
+
+  setTimeout(function(){ 
+    w.minimizeButton = true;
+  }, 1000);
+  setTimeout(function(){ 
+    w.closeButton = true;
   }, 2000);
-  setTimeout(function(){
-    handler.cancel();
+  setTimeout(function(){ 
+    w.resizable = true;
+  }, 3000);
+  setTimeout(function(){ 
     w.close();
     $utils.ok(); 
   }, 4000);
@@ -41,5 +48,5 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  name:"DockIcon",
+  name:"WindowButtons",
 };

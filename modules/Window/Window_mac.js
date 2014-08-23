@@ -27,6 +27,11 @@ module.exports = (function() {
     this.native('setReleasedWhenClosed', $.YES);
     this.native('center');
 
+    this.preferences = {
+      animateOnSizeChange:false,
+      animateOnPositionChange:false
+    }
+
     var WindowDelegate = $.NSObject.extend('WindowDelegate'+Math.round(Math.random()*10000));
     WindowDelegate.addMethod('init', '@@:', function(self) { return self; }.bind(this));
     WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) {
@@ -213,7 +218,9 @@ module.exports = (function() {
           var height = $.NSScreen('mainScreen')('frame').size.height;
           var rect = this.native('frame');
           rect.origin.y = height - e;
-          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+          this.native('setFrame', rect, 
+                      'display', $.YES, 
+                      'animate', this.preferences.animateOnPositionChange ? $.YES : $.NO);
         }
       }
     });
@@ -225,7 +232,9 @@ module.exports = (function() {
         else {
           var rect = this.native('frame');
           rect.origin.x = e;
-          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+          this.native('setFrame', rect, 
+                      'display', $.YES, 
+                      'animate', this.preferences.animateOnPositionChange ? $.YES : $.NO);
         }
       }
     });
@@ -235,7 +244,9 @@ module.exports = (function() {
       set:function(e) {
           var rect = this.native('frame');
           rect.size.width = e;
-          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+          this.native('setFrame', rect, 
+                      'display', $.YES, 
+                      'animate', this.preferences.animateOnSizeChange ? $.YES : $.NO);
       }
     });
 
@@ -244,7 +255,9 @@ module.exports = (function() {
       set:function(e) {
           var rect = this.native('frame');
           rect.size.height = e;
-          this.native('setFrame', rect, 'display', $.YES, 'animate', $.NO);
+          this.native('setFrame', rect, 
+                      'display', $.YES, 
+                      'animate', this.preferences.animateOnSizeChange ? $.YES : $.NO);
       }
     });
 
@@ -311,6 +324,7 @@ module.exports = (function() {
           }
           this.native('setBackgroundColor', 
             $.NSColor('colorWithCalibratedRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a));
+          this.native('setAlphaValue', rgba.a);
         }
         background = e;
       }
