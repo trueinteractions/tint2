@@ -54,6 +54,7 @@ ninja -v -C build/out/Release/
 * Notification
 * TextInput
 * SelectInput (Combo Boxes)
+* SearchInput (look ahead while typing)
 * Toolbar
 * WebView (WebKit)
 * Status Bars (System Tray's)
