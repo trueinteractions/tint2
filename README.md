@@ -46,7 +46,7 @@ ninja -v -C build/out/Release/
 <h2>Current Built-In Modules</h2>
 
 * Application
-* Application Schema
+* Application Schema (app:// protocol for packaged apps)
 * Button
 * FileDialog (Save/Open)
 * Menu (and MenuItem)
