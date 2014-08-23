@@ -155,6 +155,18 @@ module.exports = (function() {
       }
     });
 
+    Object.defineProperty(this, 'canBeFullscreen', {
+      get:function() { 
+        return this.native('collectionBehavior') && $.NSWindowCollectionBehaviorFullScreenPrimary ? true : false; 
+      },
+      set:function(e) { 
+        if(e) 
+          this.native('setCollectionBehavior', this.native('collectionBehavior') | $.NSWindowCollectionBehaviorFullScreenPrimary);
+        else
+          this.native('setCollectionBehavior', this.native('collectionBehavior') ^ $.NSWindowCollectionBehaviorFullScreenPrimary);
+      }
+    });
+
     Object.defineProperty(this, 'state', {
       get:function() { 
         if(fullscreen) return "fullscreen";
@@ -165,7 +177,7 @@ module.exports = (function() {
       set:function(e) { 
         if(e == 'maximized' || e == 'normal') {
           if(fullscreen) {
-            this.native('toggleFullscreen',this.native);
+            this.native('toggleFullScreen',this.native);
             fullscreen = false;
           }
           if(this.native('isMiniaturized')) this.native('deminiaturize',this.native);
@@ -178,7 +190,7 @@ module.exports = (function() {
           this.native('performMiniaturize',this.native);
         } else if (e == 'fullscreen') {
           if(!fullscreen) {
-            this.native('toggleFullscreen',this.native);
+            this.native('toggleFullScreen',this.native);
             fullscreen = true;
           }
         }
