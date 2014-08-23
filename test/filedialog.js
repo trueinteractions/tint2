@@ -68,5 +68,5 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  name:"Dialog"
+  name:"FileDialog"
 };
