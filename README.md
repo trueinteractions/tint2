@@ -55,6 +55,7 @@ ninja -v -C build/out/Release/
 * SelectInput (Combo Boxes)
 * Toolbar
 * WebView (WebKit)
+* Status Bars (System Tray's)
 * Window
 
 <h2>Documentation</h2>
