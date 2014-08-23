@@ -2,7 +2,7 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
 
-  function Dialog(type) {
+  function Dialog() {
     var $dialog = $.NSAlert('alloc')('init');
     var img = null, buttonsSet = false, mainButton = null, auxButton = null; events = {};
 

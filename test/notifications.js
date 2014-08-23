@@ -54,9 +54,7 @@ function run() {
       // The text for the button at @img{assets/notifications_aux_button.png}
       notify.auxillaryButtonLabel = "Aux";
       notify.addEventListener('fired', function() {
-        /* @hidden */ setTimeout(function() {
-        /* @hidden */   $utils.clickAt(1500,80);
-        /* @hidden */ },1000);
+        /* @hidden */ setTimeout(function() { $utils.clickAt(1500,80); },1000);
       });
       notify.addEventListener('click', function(args) {
         /* @hidden */ $utils.assert(args == 'contents');
