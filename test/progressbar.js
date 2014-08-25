@@ -22,7 +22,7 @@ function run($utils) {
   var interval;
   progress.size = "large";
   progress.indeterminate = false;
-  //progress.border = true;
+  progress.border = true;
 
   setTimeout(function() {
     interval = setInterval(function() { 

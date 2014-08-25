@@ -1,11 +1,12 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
 
-  function addMethodOverride(view, bindPoint, selector, event) {
+  function addMethodOverride(view, bindPoint, selector, event, blocks, eventAfter) {
     view.addMethod(selector,[$.void,['@',$.selector,'@']], function(self, cmd, events) {
-      self.super(selector.replace(':',''),events);
       try {
         bindPoint.fireEvent(event);
+        self.super(selector.replace(':',''),events);
+        if(blocks && eventAfter) bindPoint.fireEvent(eventAfter);
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -15,7 +16,7 @@ module.exports = (function() {
   }
 
   function Control(NativeObjectClass, NativeViewClass, options) {
-    var events = {}, native, nativeView;
+    var events = {}, native, nativeView, needsMouseTracking = 0, trackingArea = null;
 
     //width, height, maxwidth, maxheight, minwidth, minheight, left, top, right, bottom
     this.fireEvent = function(event,args) {
@@ -29,28 +30,57 @@ module.exports = (function() {
       return returnvalue;
     }
 
+
+    function addTrackingArea() {
+      var bounds = this.nativeView('bounds');
+      var options = $.NSTrackingMouseEnteredAndExited | $.NSTrackingMouseMoved | $.NSTrackingActiveInActiveApp | $.NSTrackingInVisibleRect;
+      trackingArea = $.NSTrackingArea('alloc')(
+        'initWithRect', bounds, 
+        'options', options,
+        'owner', this.nativeView,
+        'userInfo', null);
+      this.nativeView('addTrackingArea',trackingArea);
+    }
+
     this.addEventListener = function(event, func) {
+      event = event.toLowerCase();
+      if(event == "mouseenter" || event == "mouseexit" || event == "mousemove") {
+        needsMouseTracking++;
+        if(needsMouseTracking == 1 && this.nativeView('window'))
+          addTrackingArea.apply(this,null);
+        else if (needsMouseTracking == 1)
+          this.addEventListener('parent-attached', addTrackingArea.bind(this));
+      }
       if(!events[event]) 
         events[event] = []; 
       events[event].push(func);
-    }
+    }.bind(this);
 
     this.removeEventListener = function(event, func) {
+      event = event.toLowerCase();
+      if(event == "mouseenter" ||   event == "mouseexit" || event == "mousemove") {
+        needsMouseTracking--;
+        if(needsMouseTracking == 0) {
+          this.nativeView('removeTrackingArea',trackingArea);
+          trackingArea('release');
+          trackingArea = null;
+        }
+      }
       if(events[event] && events[event].indexOf(func) != -1) 
         events[event].splice(events[event].indexOf(func), 1);
-    }
+    }.bind(this);
 
     var nativeViewExt = NativeViewClass.extend('NSView'+Math.round(Math.random()*10000));
-    nativeViewExt.addMethod('acceptsFirstResponder','B@:', function(self, cmd) { return $.YES; });
-    addMethodOverride(nativeViewExt, this, 'mouseDown:', 'mouseDown');
-    addMethodOverride(nativeViewExt, this, 'mouseUp:', 'mouseUp'); //TODO:fail
-    addMethodOverride(nativeViewExt, this, 'rightMouseDown:', 'rightMouseDown'); //TODO:fail
-    addMethodOverride(nativeViewExt, this, 'rightMouseUp:', 'rightMouseUp'); //TODO:fail
-    addMethodOverride(nativeViewExt, this, 'keyUp:', 'keyUp');
-    addMethodOverride(nativeViewExt, this, 'keyDown:', 'keyDown'); //TODO:fail
-    addMethodOverride(nativeViewExt, this, 'mouseEntered:', 'mouseEntered'); //TODO:fail
-    addMethodOverride(nativeViewExt, this, 'mouseExited:', 'mouseExited'); //TODO:fail
-    addMethodOverride(nativeViewExt, this, 'mouseMoved:', 'mouseMoved');
+    //nativeViewExt.addMethod('acceptsFirstResponder','B@:',function(self,cmd) { return $.YES; });
+    addMethodOverride(nativeViewExt, this, 'mouseDown:', 'mousedown', options.mouseDownBlocks ? true : false, 'mouseup');
+    if(!options.mouseDownBlocks) addMethodOverride(nativeViewExt, this, 'mouseUp:', 'mouseup');
+    addMethodOverride(nativeViewExt, this, 'rightMouseDown:', 'rightmousedown');
+    addMethodOverride(nativeViewExt, this, 'rightMouseUp:', 'rightmouseup');
+    addMethodOverride(nativeViewExt, this, 'keyDown:', 'keydown');
+    addMethodOverride(nativeViewExt, this, 'keyUp:', 'keyup');
+    addMethodOverride(nativeViewExt, this, 'mouseEntered:', 'mouseenter');
+    addMethodOverride(nativeViewExt, this, 'mouseExited:', 'mouseexit');
+    addMethodOverride(nativeViewExt, this, 'mouseMoved:', 'mousemove');
     nativeViewExt.register();
 
     Object.defineProperty(this,'boundsOnScreen', {
@@ -115,7 +145,7 @@ module.exports = (function() {
 /*nativeViewExt.addMethod('mouseDown:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('mouseDown',events);
       try { 
-        this.fireEvent('mouseDown');
+        this.fireEvent('mousedown');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -136,7 +166,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('rightMouseDown:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('rightMouseDown',events);
       try { 
-        this.fireEvent('rightMouseDown');
+        this.fireEvent('rightmousedown');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -147,7 +177,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('mouseUp:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('mouseUp',events);
       try { 
-        this.fireEvent('mouseUp');
+        this.fireEvent('mouseup');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -158,7 +188,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('keyUp:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('keyUp',events);
       try { 
-        this.fireEvent('keyUp');
+        this.fireEvent('keyup');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -169,7 +199,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('keyDown:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('keyDown',events);
       try { 
-        this.fireEvent('keyDown');
+        this.fireEvent('keydown');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -180,7 +210,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('mouseEntered:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('mouseEntered',events);
       try {
-        this.fireEvent('mouseEntered');
+        this.fireEvent('mouseenter');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -191,7 +221,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('mouseExited:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('mouseExited',events);
       try { 
-        this.fireEvent('mouseExited');
+        this.fireEvent('mouseexit');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
@@ -202,7 +232,7 @@ module.exports = (function() {
     nativeViewExt.addMethod('mouseMoved:',[$.void,['@',$.selector,'@']], function(self, cmd, events) {
       self.super('mouseMoved',events);
       try {
-        this.fireEvent('mouseMoved');
+        this.fireEvent('mousemove');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);

@@ -90,12 +90,12 @@ function run($utils) {
   input.addEventListener('inputend', function(e) { 
     /* @hidden */ if(go) $utils.ok();
   });
-  input.addEventListener('mouseDown', function(e) { 
+  input.addEventListener('mouseup', function(e) { 
     /* @hidden */ if(go) $utils.keyAtControl('a'); 
   });
-  input.addEventListener('mouseMoved', function(e) { 
+  input.addEventListener('mousemove', function(e) { 
   });
-  input.addEventListener('keyUp', function(e) {
+  input.addEventListener('keyup', function(e) {
     /* @hidden */ if(go) $utils.assert(inputStart);
     /* @hidden */ if(go) $utils.assert(inputEv);
     /* @hidden */ if(go) $utils.assert(input.value == 'Twoa');
@@ -110,12 +110,12 @@ function run($utils) {
     /* @hidden */   setTimeout(function() { go = true; $utils.clickAtControl(input); }, 1000);
     /* @hidden */ }
   });
-  /* @hidden */ input.addEventListener('keyDown', function(e) { }); // doesn't work
-  /* @hidden */ input.addEventListener('mouseUp', function(e) { }); // doesn't work
-  /* @hidden */ input.addEventListener('rightMouseDown', function(e) { }); // doesn't work
-  /* @hidden */ input.addEventListener('rightMouseUp', function(e) { }); // doesn't work
-  /* @hidden */ input.addEventListener('mouseEntered', function(e) { }); // doesn't work
-  /* @hidden */ input.addEventListener('mouseExited', function(e) { }); // doesn't work
+  /* @hidden */ input.addEventListener('keydown', function(e) { }); // doesn't work
+  /* @hidden */ input.addEventListener('mouseup', function(e) { }); // doesn't work
+  /* @hidden */ input.addEventListener('rightmousedown', function(e) { }); // doesn't work
+  /* @hidden */ input.addEventListener('rightmouseup', function(e) { }); // doesn't work
+  /* @hidden */ input.addEventListener('mouseenter', function(e) { }); // doesn't work
+  /* @hidden */ input.addEventListener('mouseexit', function(e) { }); // doesn't work
 
   /* @hidden */ $utils.assert(input.length == 3);
   /* @hidden */ setTimeout(function() { $utils.clickAtControl(input); }, 500);

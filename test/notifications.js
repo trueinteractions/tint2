@@ -50,14 +50,13 @@ function run() {
       // Request a 'bong' when it runs.
       notify.sound = true;
       // The text for the button at @img{assets/notifications_main_button.png}
-      notify.mainButtonLabel = "Main";
+      notify.buttonLabel = "Main";
       // The text for the button at @img{assets/notifications_aux_button.png}
-      notify.auxillaryButtonLabel = "Aux";
       notify.addEventListener('fired', function() {
-        /* @hidden */ setTimeout(function() { $utils.clickAt(1500,80); },1000);
+        /* @hidden */ setTimeout(function() { $utils.clickAt(1600,80); },1000);
       });
       notify.addEventListener('click', function(args) {
-        /* @hidden */ $utils.assert(args == 'contents');
+        /* @hidden */ $utils.assert(args == "button");
         /* @hidden */ process.exit(0);
       });
 
@@ -68,8 +67,7 @@ function run() {
       /* @hidden */ $utils.assert(notify.subtitle === 'Sub-Title');
       /* @hidden */ $utils.assert(notify.text === "Main text for the notify");
       /* @hidden */ $utils.assert(notify.sound === true);
-      /* @hidden */ $utils.assert(notify.mainButtonLabel === "Main");
-      /* @hidden */ $utils.assert(notify.auxillaryButtonLabel === "Aux");
+      /* @hidden */ $utils.assert(notify.buttonLabel === "Main");
     }
   });
 }

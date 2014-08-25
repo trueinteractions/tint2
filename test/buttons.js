@@ -20,8 +20,10 @@ function run($utils) {
   var win = new Window();
   var buttonNormal = new Button();
   buttonNormal.title = "Hello";
-  buttonNormal.addEventListener('mouseDown', function() {
+  buttonNormal.addEventListener('mousedown', function() {
     /* @hidden */ count++;
+  });
+  buttonNormal.addEventListener('mouseup', function() {
     /* @hidden */ $utils.clickAtControl(buttonToggle);
   });
   win.appendChild(buttonNormal);
@@ -37,7 +39,12 @@ function run($utils) {
   buttonToggle.title = "Off";
   buttonToggle.type = "toggle";
   buttonToggle.state = false;
-  buttonToggle.addEventListener('mouseDown', function() {
+  buttonToggle.addEventListener('mousedown', function() {
+    $utils.assert(buttonToggle.state == false);
+  });
+
+  buttonToggle.addEventListener('mouseup', function() {
+    $utils.assert(buttonToggle.state == true);
     buttonToggle.title = buttonToggle.state == false ? "Off" : "On";
     /* @hidden */ count++;
     /* @hidden */ $utils.clickAtControl(buttonRadio);
@@ -54,11 +61,13 @@ function run($utils) {
   buttonRadio.title = "Radio Box 1";
   buttonRadio.type = "radio";
   buttonRadio.state = false;
-  buttonRadio.addEventListener('mouseDown', function() {
+  buttonRadio.addEventListener('mousedown', function() {
     /* @hidden */ count++;
-    /* @hidden */ $utils.clickAtControl(buttonRadio1);
+  });
+  buttonRadio.addEventListener('mouseup', function() {
     buttonRadio1.state = false;
     buttonRadio.state = true;
+    /* @hidden */ $utils.clickAtControl(buttonRadio1);
   });
   win.appendChild(buttonRadio);
   win.addLayoutConstraint({
@@ -73,7 +82,7 @@ function run($utils) {
     type:'radio',
     state:true
   });
-  buttonRadio1.addEventListener('mouseDown', function() {
+  buttonRadio1.addEventListener('mousedown', function() {
     /* @hidden */ count++;
     /* @hidden */ //$utils.takeSnapshotOfCurrentWindow('assets/buttons_mac.png');
     /* @hidden */ $utils.assert(buttonRadio.title == "Radio Box 1");
@@ -81,7 +90,7 @@ function run($utils) {
     /* @hidden */ $utils.assert(buttonRadio.state == true);
     /* @hidden */ $utils.assert(buttonRadio1.title == "Radio Box 2 (Selected)");
     /* @hidden */ $utils.assert(buttonRadio1.type == "radio");
-    /* @hidden */ $utils.assert(buttonRadio1.state == true);
+    /* @hidden */ $utils.assert(buttonRadio1.state == false);
     /* @hidden */ $utils.assert(buttonToggle.title == "On");
     /* @hidden */ $utils.assert(buttonToggle.type == "toggle");
     /* @hidden */ $utils.assert(buttonToggle.state == true);

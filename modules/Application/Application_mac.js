@@ -11,15 +11,17 @@
   var $ = process.bridge.objc;
 
   function Application() {
-    var events = {}, mainMenu = null, name = "", badgeText = "", dockmenu = null;
-    var $app = $.NSApplication('sharedApplication'), icon = "";
+    var events = {}, mainMenu = null, 
+        name = "", badgeText = "", 
+        dockmenu = null, icon = "";
+
+    var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
-    delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
-      return dockmenu.native;
-    });
+    delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) { return dockmenu.native; });
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
     $app('setDelegate',delegate);
+    
     function fireEvent(event, args) {
       if(events[event])
         (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });

@@ -18,6 +18,8 @@ module.exports = (function() {
     this.appendChild = function(control) {
       children.push(control);
       this.nativeView('addSubview',control.nativeView);
+      control.fireEvent('parent-attached', this);
+      this.fireEvent('child-attached', control);
     }
 
     this.removeChild = function(control) {
@@ -25,6 +27,8 @@ module.exports = (function() {
       if(children.indexOf(control) != -1) 
         children.splice(children.indexOf(control),1);
       control.nativeView('removeFromSuperview');
+      control.fireEvent('parent-dettached', this);
+      this.fireEvent('child-dettached', control);
     }
 
     // { relation: , priority: , firstItem: , secondItem: , 

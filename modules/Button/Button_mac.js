@@ -5,7 +5,7 @@ module.exports = (function() {
 
   function Button(options) {
     var img = null, buttonType = "normal";
-    Container.call(this, $.NSButton, $.NSButton, {});
+    Container.call(this, $.NSButton, $.NSButton, {mouseDownBlocks:true,keyDownBlocks:true});
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setButtonType',$.NSMomentaryLightButton);
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);

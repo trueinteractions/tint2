@@ -69,6 +69,8 @@
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
+  <key>NSUserNotificationAlertStyle</key>
+  <string>alert</string>
 	<key>SCMRevision</key>
 	<string>270019</string>
 </dict>

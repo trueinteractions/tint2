@@ -4,9 +4,8 @@ module.exports = (function() {
   function Notification()
   {
     var $ = process.bridge.objc;
-    var events = {};
-    var titlestring = "", textstring = "", subtitlestring = "", soundEnabled = false;
-    var actionbuttontitle = "", otherbuttontitle = "";
+    var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
+        soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "";
 
     function fireEvent(event, args) {
       if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
@@ -17,16 +16,13 @@ module.exports = (function() {
     
     var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
     NSUserNotificationCenterDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { 
-      return $.YES;
-    });
+    NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { return $.YES; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didActivateNotification:','v@:@@', function(self,_cmd,center,notify) {
       if(notify('activationType') == $.NSUserNotificationActivationTypeContentsClicked) fireEvent('click',['contents']);
       else if(notify('activationType') == $.NSUserNotificationActivationTypeActionButtonClicked) fireEvent('click',['button']);
+      else fireEvent('click', ['unknown']);
     });
-    NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didDeliverNotification:','v@:@@', function(self,_cmd,center,notify) {
-      fireEvent('fired');
-    });
+    NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didDeliverNotification:','v@:@@', function(self,_cmd,center,notify) { fireEvent('fired'); });
     NSUserNotificationCenterDelegate.register();
 
     if(center != null) {
@@ -54,15 +50,15 @@ module.exports = (function() {
       set:function(e) { soundEnabled = e ? true : false; }
     });
 
-    Object.defineProperty(this, 'mainButtonLabel', {
+    Object.defineProperty(this, 'buttonLabel', {
       get:function() { return actionbuttontitle; },
       set:function(e) { actionbuttontitle = e; }
     });
 
-    Object.defineProperty(this, 'auxillaryButtonLabel', {
+    /*Object.defineProperty(this, 'auxillaryButtonLabel', {
       get:function() { return otherbuttontitle; },
       set:function(e) { otherbuttontitle = e; }
-    });
+    });*/
 
     this.dispatch = function() {
 
@@ -94,8 +90,11 @@ module.exports = (function() {
       else if(actionbuttontitle && actionbuttontitle != "")
       {
         $notify('setActionButtonTitle',$(actionbuttontitle));
-        if(otherbuttontitle && otherbuttontitle != "") $notify('setOtherButtonTitle',$(otherbuttontitle));
-        //$notify('setHasActionButton',$.YES);
+        if(otherbuttontitle && otherbuttontitle != "")
+          $notify('setOtherButtonTitle',$(otherbuttontitle));
+        $notify('setHasActionButton',$.YES);
+        var num = $.NSNumber('numberWithDouble',1);
+        $notify('setValue', num, 'forKey', $('_showsButtons'));
       }
 
       center('deliverNotification', $notify);

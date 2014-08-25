@@ -4,7 +4,7 @@ module.exports = (function() {
 
   function SelectInput() 
   {
-    Container.call(this, $.NSComboBox, $.NSComboBox, {});
+    Container.call(this, $.NSComboBox, $.NSComboBox,  {mouseDownBlocks:true,keyDownBlocks:true});
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
 
@@ -12,6 +12,8 @@ module.exports = (function() {
     NSComboBoxDelegate.addMethod('init:', '@@:', function(self) { return self; });
     NSComboBoxDelegate.addMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { 
       try {
+        this.fireEvent('keydown'); // NSTextField's do not allow overriding the keyDown component, however
+                                   // the input event is fired directly after the event has been processed.
         this.fireEvent('input');
       } catch(e) { 
         console.log(e.message);
@@ -22,7 +24,7 @@ module.exports = (function() {
     NSComboBoxDelegate.addMethod('comboBoxSelectionDidChange:','v@:@', function(self,_cmd,frame) {
      try {
         this.fireEvent('change');
-      } catch(e) { 
+      } catch(e) {
         console.log(e.message);
         console.log(e.stack);
         process.exit(1);

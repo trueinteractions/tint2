@@ -4,7 +4,7 @@ module.exports = (function() {
 
   function TextInput() 
   {
-    Container.call(this, $.NSTextField, $.NSTextField, {});
+    Container.call(this, $.NSTextField, $.NSTextField, {mouseDownBlocks:true,keyDownBlocks:true});
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
 
@@ -12,6 +12,8 @@ module.exports = (function() {
     NSTextFieldDelegate.addMethod('init:', '@@:', function(self) { return self; });
     NSTextFieldDelegate.addMethod('controlTextDidChange:','v@:@', function(self,_cmd,frame) { 
       try {
+        this.fireEvent('keydown'); // NSTextField's do not allow overriding the keyDown component, however
+                                   // the input event is fired directly after the event has been processed.
         this.fireEvent('input');
       } catch(e) { 
         console.log(e.message);
