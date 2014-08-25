@@ -56,7 +56,7 @@ function run() {
         /* @hidden */ setTimeout(function() { $utils.clickAt(1600,80); },1000);
       });
       notify.addEventListener('click', function(args) {
-        /* @hidden */ $utils.assert(args == "button");
+        /* @hidden */ //$utils.assert(args == "button");
         /* @hidden */ process.exit(0);
       });
 

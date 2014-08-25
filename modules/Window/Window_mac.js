@@ -261,8 +261,19 @@ module.exports = (function() {
     });
 
     Object.defineProperty(this, 'titleVisible', {
-      get:function() { return this.native('titleVisibility') == $.NSWindowTitleHidden ? false : true; },
-      set:function(e) { this.native('setTitleVisibility', e ? $.NSWindowTitleVisible : $.NSWindowTitleHidden ); }
+      get:function() { 
+        var os = require('os');
+        var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
+        if(version < 14)
+          return true;
+        return this.native('titleVisibility') == $.NSWindowTitleHidden ? false : true; 
+      },
+      set:function(e) { 
+        var os = require('os');
+        var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
+        if(version < 14) return;
+        this.native('setTitleVisibility', e ? $.NSWindowTitleVisible : $.NSWindowTitleHidden ); 
+      }
     });
 
     Object.defineProperty(this, 'visible', {
