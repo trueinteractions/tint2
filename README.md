@@ -36,10 +36,14 @@ Tint is licensed under the MIT license.
 
 <h2>Building</h2>
 
-```bash
-./config.sh
-ninja -v -C build/out/Release/
+You'll need OSX 10.7 or higher and Xcode in addition to the Xcode bin utils package.
 
+```bash
+mkdir tint
+git clone https://github.com/trueinteractions/tint2.git .
+./config.sh
+./build.sh
+./runtests.sh
 # or you can use the Xcode project files.
 ```
 
