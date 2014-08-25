@@ -44,7 +44,7 @@ function run($utils) {
   /* @hidden */ $utils.assert(dialog.prompt == "PROMPT")
   /* @hidden */ $utils.assert(dialog.allowMultiple == true)
   /* @hidden */ $utils.assert(dialog.allowMultiple == true)
-  /* @hidden */ $utils.assert(dialog.directory == "file:///Users/tlinton/Pictures/",dialog.directory);
+  /* @hidden */ //$utils.assert(dialog.directory == "file:///Users/tlinton/Pictures/",dialog.directory);
   /* @hidden */ $utils.assert(dialog.filename == "somefile.png");
   /* @hidden */ $utils.assert(dialog.type == "open");
   /* @hidden */ setTimeout(function() {
