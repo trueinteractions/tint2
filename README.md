@@ -80,6 +80,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Toolbar
 * WebView (WebKit)
 * Window
+* process.bridge (Objective-C objects and execution bridge in OSX, C# objects and execution bridge in Windows)
 
 <h2>Documentation</h2>
 Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
