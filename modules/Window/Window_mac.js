@@ -133,7 +133,16 @@ module.exports = (function() {
     /** Properties **/
     Object.defineProperty(this, 'frame', {
       get:function() { 
-        return this.minimizeButton && this.maximizeButton && this.closeButton && this.resizable;
+        var os = require('os');
+        var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
+        if(version > 13) {
+          return this.minimizeButton ||
+                 this.maximizeButton ||
+                 this.closeButton ||
+                 this.resizable ||
+                 (this.native('styleMask') & $.NSTiledWindowMask);
+        } else
+          return this.minimizeButton && this.maximizeButton && this.closeButton && this.resizable;
         //return this.native('styleMask') & $.NSTitledWindowMask; 
       },
       set:function(e) {
@@ -141,16 +150,14 @@ module.exports = (function() {
         this.maximizeButton = e;
         this.closeButton = e;
         this.resizable = e;
-        //this.decorations = e;
-        //if(e) this.native('setStyleMask', defaultStyleMask);
-        //else this.native('setStyleMask', $.NSTexturedBackgroundWindowMask); 
+        var os = require('os');
+        var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
+        if(version > 13) {
+          if(e) this.native('setStyleMask', defaultStyleMask);
+          else this.native('setStyleMask', 0);
+        }
       }
     });
-
-    /*Object.defineProperty(this, 'decorations', {
-      get:function() { return this.native('hasShadow') ? true : false; },
-      set:function(e) { this.native('setHasShadow', e ? $.YES : $.NO); }
-    });*/
 
     Object.defineProperty(this, 'menu', {
       get:function() { return $menu; },

@@ -49,7 +49,9 @@ function run($utils) {
   mainWindow.minimizeButton = false;
   mainWindow.closeButton = false;
   mainWindow.resizable = false;
-  $utils.assert(mainWindow.frame == false);
+  mainWindow.titleVisible = false;
+  /* @hidden */ $utils.assert(mainWindow.frame == true);
+  mainWindow.frame = false;
   webview.transparent = true;
   mainWindow.backgroundColor = "rgba(0,255,0,0);"; // ensure we have a transparent "draw" color
   mainWindow.alpha = 1; // but also ensure child components can render.
