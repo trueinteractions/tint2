@@ -314,6 +314,10 @@ var ex = {};
 		nextTest();
 	}
 
+  ex.fail = function fail() {
+    throw new Error('explicit fail.');
+    process.exit(1);
+  }
 
 	function notok(code) {
 		if(currentTest.shell) {
