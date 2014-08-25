@@ -21,7 +21,6 @@ module.exports = (function() {
                                                       $.NSViewMinXMargin | $.NSViewMaxXMargin | 
                                                       $.NSViewMinYMargin | $.NSViewMaxYMargin );
     this.native('setFrame', $.NSMakeRect(0,0,500,500), 'display', $.YES, 'animate', $.YES);
-    this.native('contentView')('setBackgroundColor', $.NSColor('redColor'));
     this.native('cascadeTopLeftFromPoint', $.NSMakePoint(20,20));
     this.native('makeKeyAndOrderFront', this.native);
     this.native('setReleasedWhenClosed', $.YES);
