@@ -8,14 +8,15 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
 fi
 
 if [ ! -f "./libraries/node/config.gypi" ]; then
-  git submodule foreach git pull
-	cd libraries/node/
-	./configure
-	cd ../..
+  git submodule init
+  git submodule update
+  cd libraries/node/
+  ./configure
+  cd ../..
 fi
 
 if [ ! -d "./build" ]; then
-	mkdir build
+  mkdir build
 fi
 
 # -Dtarget_arch=x64 
