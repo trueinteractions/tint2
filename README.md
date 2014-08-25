@@ -1,8 +1,6 @@
 <h1>Tint</h1>
 
-Compile native applications with Javascript, CSS and HTML5.
-
-* OSX Preview: https://www.trueinteractions.com/preview/Tint2_OSX.zip
+Compile native applications with Javascript, CSS, HTML5 and node.
 
 <h2>What is Tint?</h2>
 
@@ -40,12 +38,14 @@ You'll need OSX 10.7 or higher and Xcode in addition to the Xcode bin utils pack
 
 ```bash
 mkdir tint
+cd tint
 git clone https://github.com/trueinteractions/tint2.git .
 ./config.sh
 ./build.sh
 ./runtests.sh
-# or you can use the Xcode project files.
 ```
+
+After building you'll find the binary in 'build/Release/tint'. You can also use the Xcode project files contained in the 'build' directory. Optionally you can use ninja build files that are generated in 'build/out/Release' and 'build/out/Debug'.
 
 <h2>Current Built-In Modules</h2>
 
@@ -69,9 +69,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 <h2>Documentation</h2>
 Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
 
-There's also https://github.com/trueinteractions/tint2/blob/master/test/manual/browser.js which shows how to build a basic browser in Tint.
-
 <h2>Node Compatibility</h2>
-Tint is compatible with node all the way to the command line level.  There are new objects (and thus reserved require modules) set however outside of that Tint is built entirely on top of node.  Compiled modules (cpp/cc/c) are supported for node's 0.10.x interface.
+Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.  Note if you use the command line interface it currently has lag/pauses due to running in a OSX event loop.
 
 
