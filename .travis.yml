@@ -9,6 +9,7 @@ before_install:
 
 install:
   - ./config.sh
+  - ./build.sh
 
 script:
   - ./runtests.sh
