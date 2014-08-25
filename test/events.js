@@ -21,62 +21,83 @@ function run($utils) {
   /* @hidden */ count = 0;
   var mainWindow = new Window();
   var buttonNormal = new Button();
-  var input = new SelectInput();
+  var input = new TextInput();
+
+  var mouseDown = false, mouseUp = false, rightMouseDown = false, mouseEnter = false, mouseExit = false, mouseMove = false;
+  var mouseDown2 = false, mouseUp2 = false, rightMouseDown2 = false, mouseEnter2 = false, mouseExit2 = false, mouseMove2 = false;
+  var inputEv = false, keyUp = false, keyDown = false;
+
   buttonNormal.title = "Hello";
   buttonNormal.addEventListener('mousedown', function() {
-    console.log('mousedown');
+    mouseDown = true;
   });
   buttonNormal.addEventListener('mouseup', function() {
-    console.log('mouseup');
+    mouseUp = true;
   });
   buttonNormal.addEventListener('rightmousedown', function() {
-    console.log('rightmousedown');
+    rightMouseDown = true;
   });
   buttonNormal.addEventListener('rightmouseup', function() {
-    console.log('rightmouseup');
+    rightMouseUp = true;
   });
   buttonNormal.addEventListener('mouseenter', function() {
-    console.log('mouseenter');
+    mouseEnter = true;
   });
   buttonNormal.addEventListener('mouseexit', function() {
-    console.log('mouseexit');
+    mouseExit = true;
   });
-  //buttonNormal.addEventListener('mousemove', function() {
-  //  console.log('mousemove' + (count++));
-  //});
+  buttonNormal.addEventListener('mousemove', function() {
+    mouseMove = true;
+  });
 
 
   input.addEventListener('mousedown', function() {
-    console.log('input mousedown');
+    mouseDown2 = true;
   });
   input.addEventListener('mouseup', function() {
-    console.log('input mouseup');
+    mouseUp2 = true;
   });
   input.addEventListener('rightmousedown', function() {
-    console.log('input rightmousedown');
+    //rightMouseDown2 = true;
   });
   input.addEventListener('rightmouseup', function() {
-    console.log('input rightmouseup');
+    //rightMouseUp2 = true;
   });
   input.addEventListener('mouseenter', function() {
-    console.log('input mouseenter');
+    mouseEnter2 = true;
   });
   input.addEventListener('mouseexit', function() {
-    console.log('input mouseexit');
+    mouseExit2 = true;
   });
-  //input.addEventListener('mousemove', function() {
-  //  console.log('input mousemove' + (count++));
-  //});
+  input.addEventListener('mousemove', function() {
+    mouseMove2 = true;
+  });
   input.addEventListener('input', function() {
-    console.log('input');
-  });
-  input.addEventListener('keyup', function() {
-    console.log('keyup');
+    inputEv = true;
   });
   input.addEventListener('keydown', function() {
-    console.log('keydown');
+    keyDown = true;
   });
+  input.addEventListener('keyup', function() {
+    keyUp = true;
+    /* @hidden */ $utils.assert(mouseDown == true);
+    /* @hidden */ $utils.assert(mouseUp == true);
+    /* @hidden */ //$utils.assert(rightMouseDown == true);
+    /* @hidden */ $utils.assert(mouseEnter == true);
+    /* @hidden */ $utils.assert(mouseExit == true);
+    /* @hidden */ $utils.assert(mouseMove == true);
+    /* @hidden */ $utils.assert(mouseDown2 == true);
+    /* @hidden */ $utils.assert(mouseUp2 == true);
+    /* @hidden */ //$utils.assert(rightMouseDown2 == true); //TODO: find out why utils cannot mimick a right mouse down properly.
+    /* @hidden */ $utils.assert(mouseEnter2  == true);
+    /* @hidden */ $utils.assert(mouseExit2 == true);
+    /* @hidden */ $utils.assert(mouseMove2 == true);
+    /* @hidden */ $utils.assert(inputEv == true);
+    /* @hidden */ $utils.assert(keyUp == true);
+    /* @hidden */ $utils.assert(keyDown == true);
+    /* @hidden */ $utils.ok();
 
+  });
   mainWindow.appendChild(buttonNormal);
   mainWindow.appendChild(input);
 
@@ -111,7 +132,14 @@ function run($utils) {
     secondItem:input, secondAttribute:'bottom',
     multiplier:0.0, constant:60.0
   });
-  $utils.ok();
+  
+
+  setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 1000);
+  setTimeout(function() { $utils.clickAtControl(input); }, 2000);
+  setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 3000);
+  setTimeout(function() { $utils.clickAtControl(input); }, 4000);
+  setTimeout(function() { $utils.keyAtControl('a'); }, 5000);
+
 }
 
 /**

@@ -37,39 +37,6 @@ var ex = {};
 	ex.enableCrashReporter = function enableCrashReporter() {
 		exec('defaults write com.apple.CrashReporter DialogType crashreport');
 	}
-	/*
-	   kCGEventNull                = NX_NULLEVENT,
-	   kCGEventLeftMouseDown       = NX_LMOUSEDOWN,
-	   kCGEventLeftMouseUp         = NX_LMOUSEUP,
-	   kCGEventRightMouseDown      = NX_RMOUSEDOWN,
-	   kCGEventRightMouseUp        = NX_RMOUSEUP,
-	   kCGEventMouseMoved          = NX_MOUSEMOVED,
-	   kCGEventLeftMouseDragged    = NX_LMOUSEDRAGGED,
-	   kCGEventRightMouseDragged   = NX_RMOUSEDRAGGED,
-	   kCGEventKeyDown             = NX_KEYDOWN,
-	   kCGEventKeyUp               = NX_KEYUP,
-	   kCGEventFlagsChanged        = NX_FLAGSCHANGED,
-	   kCGEventScrollWheel         = NX_SCROLLWHEELMOVED,
-	   kCGEventTabletPointer       = NX_TABLETPOINTER,
-	   kCGEventTabletProximity     = NX_TABLETPROXIMITY,
-	   kCGEventOtherMouseDown      = NX_OMOUSEDOWN,
-	   kCGEventOtherMouseUp        = NX_OMOUSEUP,
-	   kCGEventOtherMouseDragged   = NX_OMOUSEDRAGGED,
-	   kCGEventTapDisabledByTimeout = 0xFFFFFFFE,
-	   kCGEventTapDisabledByUserInput = 0xFFFFFFFF
-	*/
-	/*ex.screenShotAt = function screenShotAt(x,y) {
-		console.log('trying.... ugh. taking a screen shot at x, y ', x, y);
-		var point = $.CGPointMake(x, y);
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-		$.CGEventCreateKeyboardEvent(null,0x37,true); // cmd
-		$.CGEventCreateKeyboardEvent(null,0x38,true); // shift
-		$.CGEventCreateKeyboardEvent(null,0x15,true); // 4
-
-		$.CGEventCreateKeyboardEvent(null,0x37,false); // cmd
-		$.CGEventCreateKeyboardEvent(null,0x38,false); // shift
-		$.CGEventCreateKeyboardEvent(null,0x15,false); // 4
-	}*/
 
 
   ex.keyCodeFromChar = function keyCodeFromChar(keyString)
@@ -194,10 +161,52 @@ var ex = {};
         return 0;
     }
   }
+  /*
+     kCGEventNull                = NX_NULLEVENT,
+     kCGEventLeftMouseDown       = NX_LMOUSEDOWN,
+     kCGEventLeftMouseUp         = NX_LMOUSEUP,
+     kCGEventRightMouseDown      = NX_RMOUSEDOWN,
+     kCGEventRightMouseUp        = NX_RMOUSEUP,
+     kCGEventMouseMoved          = NX_MOUSEMOVED,
+     kCGEventLeftMouseDragged    = NX_LMOUSEDRAGGED,
+     kCGEventRightMouseDragged   = NX_RMOUSEDRAGGED,
+     kCGEventKeyDown             = NX_KEYDOWN,
+     kCGEventKeyUp               = NX_KEYUP,
+     kCGEventFlagsChanged        = NX_FLAGSCHANGED,
+     kCGEventScrollWheel         = NX_SCROLLWHEELMOVED,
+     kCGEventTabletPointer       = NX_TABLETPOINTER,
+     kCGEventTabletProximity     = NX_TABLETPROXIMITY,
+     kCGEventOtherMouseDown      = NX_OMOUSEDOWN,
+     kCGEventOtherMouseUp        = NX_OMOUSEUP,
+     kCGEventOtherMouseDragged   = NX_OMOUSEDRAGGED,
+     kCGEventTapDisabledByTimeout = 0xFFFFFFFE,
+     kCGEventTapDisabledByUserInput = 0xFFFFFFFF
+  */
+  /*ex.screenShotAt = function screenShotAt(x,y) {
+    console.log('trying.... ugh. taking a screen shot at x, y ', x, y);
+    var point = $.CGPointMake(x, y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventCreateKeyboardEvent(null,0x37,true); // cmd
+    $.CGEventCreateKeyboardEvent(null,0x38,true); // shift
+    $.CGEventCreateKeyboardEvent(null,0x15,true); // 4
+
+    $.CGEventCreateKeyboardEvent(null,0x37,false); // cmd
+    $.CGEventCreateKeyboardEvent(null,0x38,false); // shift
+    $.CGEventCreateKeyboardEvent(null,0x15,false); // 4
+  }*/
 
   ex.keyAtControl = function keyAtControl(input) {
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), true));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), false));
+  }
+  ex.rightClickAtControl = function rightClickAtControl(control) {
+    var bounds = control.boundsOnScreen;
+    bounds.x = bounds.x + bounds.width/2;
+    bounds.y = bounds.y + bounds.height/2;
+    var point = $.CGPointMake(bounds.x, bounds.y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
   }
 	ex.clickAtControl = function clickAtControl(control) {
 		var bounds = control.boundsOnScreen;
@@ -207,15 +216,19 @@ var ex = {};
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
-
 	}
 	ex.clickAt = function clickAt(x,y) {
 		var point = $.CGPointMake(x, y);
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
 		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
-
 	}
+  ex.rightClickAt = function rightClickAt(x,y) {
+    var point = $.CGPointMake(x, y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
+  }
 	ex.writeImage = function writeImage(image, path) {
 	 	var url = $.NSURL('fileURLWithPath',$(path));
 	 	var pathcf = $.CFStringCreateWithCString($.kCFAllocatorDefault,"public.png",$.kCFStringEncodingASCII);
