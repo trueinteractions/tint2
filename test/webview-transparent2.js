@@ -48,7 +48,6 @@ function run($utils) {
   mainWindow.maximizeButton = false;
   mainWindow.minimizeButton = false;
   mainWindow.closeButton = false;
-  mainWindow.resizable = false;
   mainWindow.titleVisible = false;
   /* @hidden */ $utils.assert(mainWindow.frame == true);
   mainWindow.frame = false;

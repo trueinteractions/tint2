@@ -142,7 +142,7 @@ module.exports = (function() {
                  this.resizable ||
                  (this.native('styleMask') & $.NSTiledWindowMask);
         } else
-          return this.minimizeButton && this.maximizeButton && this.closeButton && this.resizable;
+          return this.minimizeButton || this.maximizeButton || this.closeButton || this.resizable;
         //return this.native('styleMask') & $.NSTitledWindowMask; 
       },
       set:function(e) {
