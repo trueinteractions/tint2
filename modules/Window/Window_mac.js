@@ -132,12 +132,25 @@ module.exports = (function() {
 
     /** Properties **/
     Object.defineProperty(this, 'frame', {
-      get:function() { return this.native('styleMask') | $.NSTitledWindowMask; },
-      set:function(e) { 
-        if(e) this.native('setStyleMask', $defaultStyleMask);
-        else this.native('setStyleMask', $.NSBorderlessWindowMask); 
+      get:function() { 
+        return this.minimizeButton && this.maximizeButton && this.closeButton && this.resizable;
+        //return this.native('styleMask') & $.NSTitledWindowMask; 
+      },
+      set:function(e) {
+        this.minimizeButton = e;
+        this.maximizeButton = e;
+        this.closeButton = e;
+        this.resizable = e;
+        //this.decorations = e;
+        //if(e) this.native('setStyleMask', defaultStyleMask);
+        //else this.native('setStyleMask', $.NSTexturedBackgroundWindowMask); 
       }
     });
+
+    /*Object.defineProperty(this, 'decorations', {
+      get:function() { return this.native('hasShadow') ? true : false; },
+      set:function(e) { this.native('setHasShadow', e ? $.YES : $.NO); }
+    });*/
 
     Object.defineProperty(this, 'menu', {
       get:function() { return $menu; },
@@ -305,7 +318,7 @@ module.exports = (function() {
     });
 
     Object.defineProperty(this, 'resizable', {
-      get:function() { return this.native('styleMask') | $.NSResizableWindowMask; },
+      get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },
       set:function(e) {
         if (e) {
           this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);

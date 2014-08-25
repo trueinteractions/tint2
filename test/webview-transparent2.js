@@ -44,9 +44,14 @@ function run($utils) {
   });
   webview.location = "app://assets/webview-transparency.html";
   //mainWindow.title = "You should be able to see this.";
-  mainWindow.frame = false;
+  //mainWindow.frame = false;
+  mainWindow.maximizeButton = false;
+  mainWindow.minimizeButton = false;
+  mainWindow.closeButton = false;
+  mainWindow.resizable = false;
+  $utils.assert(mainWindow.frame == false);
   webview.transparent = true;
-  mainWindow.backgroundColor = "rgba(0,0,0,0);"; // ensure we have a transparent "draw" color
+  mainWindow.backgroundColor = "rgba(0,255,0,0);"; // ensure we have a transparent "draw" color
   mainWindow.alpha = 1; // but also ensure child components can render.
 
 
