@@ -8,6 +8,7 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
 fi
 
 if [ ! -f "./libraries/node/config.gypi" ]; then
+  git submodule foreach git pull
 	cd libraries/node/
 	./configure
 	cd ../..
