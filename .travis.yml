@@ -1,0 +1,14 @@
+# Mac OS X (https://github.com/travis-ci-tester/toolchain-table)
+
+language:
+  - objective-c
+
+env:
+
+before_install:
+
+install:
+  - ./config.sh
+
+script:
+  - ./runtests.sh
