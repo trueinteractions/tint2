@@ -48,6 +48,7 @@
 			'modules/Container_mac.js',
 			'modules/Control_mac.js',
 			'modules/Dialog/Dialog_mac.js',
+      'modules/DropDown/DropDown_mac.js',
 			'modules/FileDialog/FileDialog_mac.js',
 			'modules/Menu/Menu_mac.js',
 			'modules/Menu/MenuItem_mac.js',

@@ -8,9 +8,13 @@ module.exports = (function() {
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setUsesThreadedAnimation',$.YES);
+    this.native('startAnimation',this.native);
     this.native('setMinValue', 0);
     this.native('setMaxValue', 1);
     this.native('setDoubleValue', 0);
+    this.native('setStyle', $.NSProgressIndicatorBarStyle);
+    this.native('setIndeterminate', false);
+
 
     Object.defineProperty(this, 'border', {
       get:function() { return this.native('bezeled') ? true : false; },
@@ -26,7 +30,7 @@ module.exports = (function() {
       get:function() { return this.native('isIndeterminate') ? true : false; },
       set:function(e) { 
         this.native('setIndeterminate', e ? true : false);
-        this.native( e ? 'startAnimation' : 'stopAnimation', this.native);
+        //this.native( e ? 'startAnimation' : 'stopAnimation', this.native);
         this.native('setStyle', e ? $.NSProgressIndicatorSpinningStyle : $.NSProgressIndicatorBarStyle);
       }
     });
@@ -52,8 +56,8 @@ module.exports = (function() {
         else if (s == $.NSProgressIndicatorSpinningStyle) return "spinning";
       },
       set:function(e) { 
-        if (e == "bar") this.native('setStyle', $.NSProgressIndicatorBarStyle);
-        else if (e == "spinning") this.native('setStyle', $.NSProgressIndicatorSpinningStyle);
+        if (e == "bar") this.native('setStyle', $.NSProgressIndicatorBarStyle | $.NSProgressIndicatorPreferredLargeThickness);
+        else if (e == "spinning") this.native('setStyle', $.NSProgressIndicatorSpinningStyle | $.NSProgressIndicatorPreferredLargeThickness);
       }
     });
   }

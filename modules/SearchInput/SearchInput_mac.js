@@ -78,7 +78,13 @@ module.exports = (function() {
 
     Object.defineProperty(this, 'readonly', {
       get:function() { return !this.nativeView('isEditable'); },
-      set:function(e) { this.nativeView('setEditable',!e); }
+      set:function(e) {
+        var val = e ? $.NO : $.YES;
+        this.nativeView('setEditable',val);
+        this.nativeView('setBezeled',val);
+        this.nativeView('setDrawsBackground',val);
+        this.nativeView('setSelectable',val);
+      }
     });
 
     Object.defineProperty(this, 'linewrap', {

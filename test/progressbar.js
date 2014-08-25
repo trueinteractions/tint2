@@ -20,9 +20,10 @@ function run($utils) {
   var win = new Window();
   var progress = new ProgressBar();
   var interval;
-  progress.size = "large";
-  progress.indeterminate = false;
-  progress.border = true;
+  //progress.size = "large";
+  //progress.indeterminate = false;
+  //progress.border = true;
+  //process.style = "bar";
 
   setTimeout(function() {
     interval = setInterval(function() { 
