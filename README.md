@@ -47,6 +47,21 @@ git clone https://github.com/trueinteractions/tint2.git .
 
 After building you'll find the binary in 'build/Release/tint'. You can also use the Xcode project files contained in the 'build' directory. Optionally you can use ninja build files that are generated in 'build/out/Release' and 'build/out/Debug'.
 
+<h2>Running</h2>
+You can run applications using:
+
+```bash
+> tint some.js
+```
+
+Or you can run it in interactive mode (note you may experience pauses due to the OS event loop).
+
+```bash
+> tint
+```
+
+In addition applications can be packaged as normal apps using a shell package system (more instructions coming on this).
+
 <h2>Current Built-In Modules</h2>
 
 * Application
@@ -70,6 +85,6 @@ After building you'll find the binary in 'build/Release/tint'. You can also use 
 Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
 
 <h2>Node Compatibility</h2>
-Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.  Note if you use the command line interface it currently has lag/pauses due to running in a OSX event loop.
+Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.  Note if you use the command line interface it currently has lag/pauses due to running in an application event loop.
 
 
