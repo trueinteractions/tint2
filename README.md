@@ -4,7 +4,7 @@ Compile native applications with Javascript, CSS, HTML5 and node.
 
 <h2>What is Tint?</h2>
 
-Tint is a slightly modified version of NodeJS, it allows you to go beyond the shell command of node and turn javascript based node applications into fully functional desktop applications. It's also backwards compatible with node 0.10.
+Tint is a slightly modified version of NodeJS, it allows you to go beyond the shell command of node and turns javascript based node applications into fully functional desktop applications. It's also backwards compatible with node 0.10.
 
 You can perform various things you'd never be able to do normally with node. For example:
 
