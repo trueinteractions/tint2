@@ -6,6 +6,9 @@
 #include "v8_typed_array.h"
 #include <stdlib.h>
 #include "../AppSchema/AppSchema_mac.h"
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
 
 namespace node {
 	extern v8::Persistent<v8::String> process_symbol;
@@ -14,10 +17,9 @@ namespace node {
 	extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, v8::Handle<v8::Value> filename);
 }
 
-extern "C" {
-	static void ReportException(v8::TryCatch &try_catch, bool show_line);
-}
-
+static int embed_closed;
+static uv_sem_t embed_sem;
+static uv_thread_t embed_thread;
 static int init_argc;
 static char **init_argv;
 v8::Persistent<v8::Object> bridge;
@@ -31,199 +33,76 @@ namespace FFI {
 	extern void Init(v8::Handle<v8::Object> target);
 }
 
-/*
-static void AtExit() {
-	uv_tty_reset_mode();
-}
-
-void LoadTint(v8::Handle<v8::Object> process_l) {
-	node::process_symbol = NODE_PSYMBOL("process");
-	node::domain_symbol = NODE_PSYMBOL("domain");
-
-	// Compile, execute the src/node.js file. (Which was included as static C
-	// string in node_natives.h. 'natve_node' is the string containing that
-	// source code.)
-
-	// The node.js file returns a function 'f'
-	::atexit(AtExit);
-
-	v8::TryCatch try_catch;
-
-	v8::Local<v8::Value> f_value = node::ExecuteString(node::MainSource(),
-																			 IMMUTABLE_STRING("node.js"));
-	if (try_catch.HasCaught())  {
-		//ReportException(try_catch, true);
-		exit(10);
-	}
-	assert(f_value->IsFunction());
-	v8::Local<v8::Function> f = v8::Local<v8::Function>::Cast(f_value);
-
-	// Now we call 'f' with the 'process' variable that we've built up with
-	// all our bindings. Inside node.js we'll take care of assigning things to
-	// their places.
-
-	// We start the process this way in order to be more modular. Developers
-	// who do not like how 'src/node.js' setups the module system but do like
-	// Node's I/O bindings may want to replace 'f' with their own function.
-
-	// Add a reference to the global object
-	v8::Local<v8::Object> global = v8::Context::GetCurrent()->Global();
-	v8::Local<v8::Value> args[1] = { v8::Local<v8::Value>::New(process_l) };
-
-#if defined HAVE_DTRACE || defined HAVE_ETW || defined HAVE_SYSTEMTAP
-	node::InitDTrace(global);
-#endif
-
-#if defined HAVE_PERFCTR
-	node::InitPerfCounters(global);
-#endif
-
-	v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
-	bridge_template->SetClassName(v8::String::NewSymbol("bridge"));
-	bridge = v8::Persistent<v8::Object>::New(bridge_template->GetFunction()->NewInstance());
-
-	v8::Local<v8::FunctionTemplate> ref_template = v8::FunctionTemplate::New();
-	ref_template->SetClassName(v8::String::NewSymbol("ref"));
-	ref = v8::Persistent<v8::Object>::New(ref_template->GetFunction()->NewInstance());
-
-	process_l->Set(v8::String::NewSymbol("bridge"), bridge);
-	bridge->Set(v8::String::NewSymbol("ref"), ref);
-
-	REF::InitConstants(ref);
-
-	f->Call(global, 1, args);
-
-	REF::InitBindings(ref);
-	FFI::InitializeBindings(bridge);
-	FFI::InitializeStaticFunctions(bridge);
-	CallbackInfo::Initialize(bridge);
-
-	if (try_catch.HasCaught())  {
-		node::FatalException(try_catch);
-	}
-}*/
-/*
-
-static Handle<Value> Binding(const Arguments& args) {
-	HandleScope scope;
-
-	Local<String> module = args[0]->ToString();
-	String::Utf8Value module_v(module);
-	node_module_struct* modp;
-
-	if (binding_cache.IsEmpty()) {
-		binding_cache = Persistent<Object>::New(Object::New());
-	}
-
-	Local<Object> exports;
-
-	if (binding_cache->Has(module)) {
-		exports = binding_cache->Get(module)->ToObject();
-		return scope.Close(exports);
-	}
-
-	// Append a string to process.moduleLoadList
-	char buf[1024];
-	snprintf(buf, 1024, "Binding %s", *module_v);
-	uint32_t l = module_load_list->Length();
-	module_load_list->Set(l, String::New(buf));
-
-	if ((modp = get_builtin_module(*module_v)) != NULL) {
-		exports = Object::New();
-		// Internal bindings don't have a "module" object,
-		// only exports.
-		modp->register_func(exports, Undefined());
-		binding_cache->Set(module, exports);
-
-	} else if (!strcmp(*module_v, "constants")) {
-		exports = Object::New();
-		DefineConstants(exports);
-		binding_cache->Set(module, exports);
-
-	} else if (!strcmp(*module_v, "natives")) {
-		exports = Object::New();
-		DefineJavaScript(exports);
-		binding_cache->Set(module, exports);
-
-	} else {
-
-		return ThrowException(Exception::Error(String::New("No such module")));
-	}
-
-	return scope.Close(exports);
-}
-
-*/
-
 v8::Handle<v8::Object> process_l;
 
 v8::Handle<v8::Value> InitBridge(const v8::Arguments& args) {
 	v8::HandleScope scope;
-
 	v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
 	bridge_template->SetClassName(v8::String::NewSymbol("bridge"));
 	bridge = v8::Persistent<v8::Object>::New(bridge_template->GetFunction()->NewInstance());
 	process_l->Set(v8::String::NewSymbol("bridge"), bridge);
-
 	FFI::Init(bridge);
 	REF::Init(bridge);
-
 	return v8::Object::New();
 }
 
 
+static void uv_event(void *info) {
+	int r;
+	struct kevent errors[1];
+
+	while (!embed_closed) {
+		uv_loop_t* loop = uv_default_loop();
+
+		int timeout = uv_backend_timeout(loop);
+		int fd = uv_backend_fd(loop);
+
+		do {
+			struct timespec ts;
+			ts.tv_sec = timeout / 1000;
+			ts.tv_nsec = (timeout % 1000) * 1000000;
+			r = kevent(fd, NULL, 0, errors, 1, timeout < 0 ? NULL : &ts);
+		} while (r == -1 && errno == EINTR);
+
+		// Do not block, but place a function on the main queue, run the
+		// node block then re-post the semaphore to unlock this loop.
+		dispatch_async(dispatch_get_main_queue(), ^{
+			uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+			uv_sem_post(&embed_sem);
+		});
+
+		// Wait for the main loop to deal with events.
+		uv_sem_wait(&embed_sem);
+	}
+}
+
+
 @interface AppDelegate : NSObject <NSApplicationDelegate>
-@property() bool locked;
-@property() v8::Handle<v8::Object> process_l;
-@property() NSTimer* timer;
 @end
 
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-	self.locked = true;
 
 	// Register the app:// protocol.
 	[NSURLProtocol registerClass:[AppSchema class]];
 
-	//
-	// IMPORTANT: DO NOT SET THIS RESOLUTION TIME LOWER THAN 0.0156 (preferably 0.016 ~ 60fps),
-	//
-	// See NSTimer class for more information. The tolerance can be adjusted but is safe at checking
-	// the event loop every 0.016 + 0.100 seconds.  Node requires a high-resolution timer for server event loops, however it
-	// indirectly reduces battery life of laptops considerably while running.  We are forcing the UV/CF event
-	// loop into the recommended Apple "maximum" timer and can back off when in energy savings mode to
-	// act like other normal NSApplication's. Setting this lower than 0.0156 or setting the tolerance lower
-	// than 0.1 will cause significant (est. 3~5%) performance drop and lesser battery life.
-	// If you need a higher timer res, use NSOpenGL views and a seperate shared memory process to render
-	// to the rect specified by the app, then immediately shutdown. Note: any native webviews use their own
-	// timers, any webkit related javascript/webgl is not subject to this rule.
-	self.timer = [NSTimer scheduledTimerWithTimeInterval:0.0156
-																										target:self
-																									selector:@selector(helperTimer)
-																									userInfo:nil
-																									 repeats:true];
-	//[self.timer setTolerance:0.0016];
-	// Create all the objects, load modules, do everything.
-	// so your next reading stop should be node::Load()!
+	// Resgiter the initial bridge objective-c protocols
 	NODE_SET_METHOD(process_l, "initbridge", InitBridge);
+
+	// Load node and begin processing.
 	node::Load(process_l);
 
-	self.locked = false;
+	// Start worker that will interrupt main loop when having uv events.
+	// keep the UV loop in-sync with CFRunLoop.
+	embed_closed = 0;
+	uv_sem_init(&embed_sem, 0);
+	uv_thread_create(&embed_thread, uv_event, NULL);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-	self.locked = true;
-	[self.timer invalidate];
-	node::EmitExit(_process_l);
-}
-
-- (void) helperTimer {
-	if(self.locked) return;
-	self.locked = true;
-	uv_run(uv_default_loop(), UV_RUN_NOWAIT);
-
-	self.locked = false;
+	node::EmitExit(process_l);
+	embed_closed = 1;
 }
 @end
 

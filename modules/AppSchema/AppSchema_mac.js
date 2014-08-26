@@ -14,7 +14,7 @@ module.exports = function(basepath) {
             if(n[0] == '/') n = n.substring(1);
             var possible = workingdir + n;
             if(fs.existsSync(possible)) requireNode(possible);
-            else requireNode.apply(null,arguments);
+            else return global.requireNode.apply(null,arguments);
         }
     }
     global.require.__proto__ = global.requireNode;
