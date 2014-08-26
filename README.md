@@ -72,6 +72,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * FileDialog (Save/Open)
 * Menu (and MenuItem)
 * Notification
+* PopOver
 * ProgressBar
 * SelectInput (Combo Boxes)
 * SearchInput (look ahead while typing)
