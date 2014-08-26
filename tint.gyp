@@ -54,6 +54,7 @@
 			'modules/Menu/MenuItem_mac.js',
       'modules/Notification/Notification_mac.js',
       'modules/ProgressBar/ProgressBar_mac.js',
+      'modules/PopOver/PopOver_mac.js',
 			'modules/SearchInput/SearchInput_mac.js',
 			'modules/SelectInput/SelectInput_mac.js',
 			'modules/StatusBar/StatusBar_mac.js',

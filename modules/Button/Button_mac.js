@@ -59,6 +59,9 @@ module.exports = (function() {
       }
     });
 
+    // Create proxy for click event.
+    this.addEventListener('mouseup', function() { this.fireEvent('click'); }.bind(this));
+
     if(options) {
       Object.keys(options).forEach(function(key) { this[key] = options[key]; }.bind(this));
     }
