@@ -54,7 +54,7 @@ You can run applications using:
 > tint some.js
 ```
 
-Or you can run it in interactive mode (note you may experience pauses due to the OS event loop).
+Or you can run it in interactive mode.
 
 ```bash
 > tint
@@ -87,6 +87,6 @@ In addition applications can be packaged as normal apps using a shell package sy
 Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
 
 <h2>Node Compatibility</h2>
-Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.  Note if you use the command line interface it currently has lag/pauses due to running in an application event loop.
+Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.
 
 
