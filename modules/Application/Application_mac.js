@@ -38,7 +38,7 @@
 
     this.resource = function(path) {
       if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
-      var url = $.NSURL('URLWithString',$(path));
+      var url = $.NSURL('URLWithString',$(path.toString()));
       var data = $.NSData('dataWithContentsOfURL',url);
       if(data)
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
@@ -70,9 +70,9 @@
         icon = e;
         if(e.indexOf(':') > -1) {
           //TODO: RELEASE NSImage???
-          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e))));
+          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e.toString()))));
         } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
-          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
+          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfFile',$(e.toString())));
         } else {
           var imageRef = utilities.getImageFromString(e);
           if(imageRef==null) {
@@ -80,7 +80,7 @@
             img = null;
             return;
           }
-          $app('setApplicationIconImage', $.NSImage('imageNamed',$(imageRef)));
+          $app('setApplicationIconImage', $.NSImage('imageNamed',$(imageRef.toString())));
         }
       }
     });
