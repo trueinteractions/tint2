@@ -55,7 +55,7 @@
       get:function() { return badgeText; },
       set:function(e) { 
         badgeText = e;
-        $app('dockTile')('setBadgeLabel',$(badgeText));
+        $app('dockTile')('setBadgeLabel',$(badgeText.toString()));
       }
     });
 
