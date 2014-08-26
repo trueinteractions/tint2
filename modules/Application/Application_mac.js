@@ -70,7 +70,7 @@
         icon = e;
         if(e.indexOf(':') > -1) {
           //TODO: RELEASE NSImage???
-          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e))));
+          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e))));
         } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
           $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
         } else {
