@@ -23,15 +23,15 @@ function run($utils) {
 
   setTimeout(function() { 
     $utils.assert(mainWindow.width >= 1600); 
-  }, 1000);
+  }, 3000);
   setTimeout(function() { 
     mainWindow.state = "normal"; 
-  }, 2000);
+  }, 5000);
 
   setTimeout(function() { 
     $utils.assert(mainWindow.width <= 600);
     $utils.ok();
-  }, 3000);
+  }, 8000);
 
 }
 

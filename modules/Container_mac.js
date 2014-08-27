@@ -26,6 +26,7 @@ module.exports = (function() {
       this.fireEvent('remove', element);
       if(children.indexOf(control) != -1) 
         children.splice(children.indexOf(control),1);
+
       control.nativeView('removeFromSuperview');
       control.fireEvent('parent-dettached', this);
       this.fireEvent('child-dettached', control);

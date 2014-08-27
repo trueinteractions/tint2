@@ -16,9 +16,113 @@ module.exports = (function() {
   }
 
   function Control(NativeObjectClass, NativeViewClass, options) {
-    var events = {}, native, nativeView, needsMouseTracking = 0, trackingArea = null;
+    var events = {}, native, nativeView, needsMouseTracking = 0, 
+        trackingArea = null, intrinsicSize = null, layoutContraints = [],
+        topControl = null, bottomControl = null, leftControl = null, rightControl = null, 
+        top = null, left = null, right = null, bottom = null,
+        width = null, height = null;
+        //topMultiplier = null, bottomMultiplier = null, 
+        //rightMultiplier = null, leftMultiplier = null, 
+        //topConstant = 0, bottomConstant = 0,
+        //leftConstant = 0, rightConstant = 0;
 
-    //width, height, maxwidth, maxheight, minwidth, minheight, left, top, right, bottom
+/*
+    function performLayout() {
+      intrinsicSize = this.nativeView('intrinsicSize');
+      width = width || intrinsicSize.width || null;
+      height = height || intrinsicSize.height || null;
+
+      if(top && bottom && height) height = null;
+      if(right && left && width) width = null;
+
+      if(top && bottom) {
+        height = null;
+        parent.addLayoutConstraint(parseUnit(top, marginTop, this, topControl, '=', 'top');
+        parent.addLayoutConstraint(parseUnit(bottom, marginBottom, this, bottomControl, '=', 'bottom'));
+      } else if (top && height) {
+        parent.addLayoutConstraint(parseUnit(top, marginTop, this, topControl, '=', 'top');
+        parent.addLayoutConstraint(parseUnit(height, marginBottom, this, null, '=', 'height'));
+      } else if (top && !height) {
+        parent.addLayoutConstraint(parseUnit(top, marginTop, this, topControl, '=', 'top');
+      } else if (bottom && height) {
+
+      } else if (bottom && !height) {
+      
+      } else {
+
+      }
+
+      if(left && right) { 
+        width = null;
+      } else if (left && width) {
+
+      } else if (left && !width) {
+
+      } else if (right && width) {
+
+      } else if (right && !width) {
+
+      } else {
+
+      }
+
+    }
+
+    this.addEventListener('parent-attached', function(parent) {
+      topControl = parent, bottomControl = parent, leftControl = parent, rightControl = parent;
+    }.bind(this));
+
+    this.addEventListener('parent-dettached', function(parent) {
+      topControl = null, bottomControl = null, leftControl = null, rightControl = null;
+      top = left = bottom = right = width = height = null;
+    }.bind(this));
+
+      //top = null, left = null, right = null, bottom = null;
+      //width = intrinsicSize.width || null;
+      //height = intrinsicSize.height || null;
+
+    // top, bottom, !height
+    // left, right, !width
+    // top, !topsibling
+    // bottom, !bottomsibling
+    // left, !leftsibling
+    // right, !rightsibling
+
+    // note left and right are automatically swapped when locale setting specify r-to-l
+
+
+
+ 
+    // top, left, bottom, right
+    // width, height
+    // maxwidth, maxheight, minwidth, minheight
+    // ?? mintop, maxtop, minleft, maxleft, minbottom, maxbottom, minright, maxright
+
+    // Outstanding issues:
+    //    // HORIZONTAL
+    //    If left && right && width && (calculated(right) - calculated(left)) != calculated(width) { do we error? }
+    //    If ((!left && !right) && parent[horizontal-layout]=right-to-left) {
+    //      does left append to parents[left]=0 || previousSibling[right]=1.0? || whicheverSiblingIsMostLeft[right]=1.0? 
+    //    }
+    //    If ((!left || !right) && !width && parent[horizontal-layout]==right-to-left && intrinsicSize.width == -1) { do we just go width = 100%? }
+    //
+    //    // VERTICAL
+    //    If top && bottom && height && (calculated(bottom) - calculated(top)) != calculated(height) { do we error? }
+    //    If ((!top && !bottom) && parent[vertical-layout]=top-to-bottom { 
+    //      does this.top = parents[top]=0 || previousSiblings[right]=1.0? || whicheverSiblingIsMostBottom[right]=1.0? 
+    //    }
+    //    If ((!top || !bottom) && !height && parent[vertical-layout]=top-to-bottom && intrinsicSize.height == -1) { 
+    //      do we just go with height = 100%? 
+    //     }
+
+    // left
+    // top
+    // right
+    // bottom
+
+*/
+
+
     this.fireEvent = function(event,args) {
       var returnvalue = undefined;
       if(events[event]) {

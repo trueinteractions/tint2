@@ -43,7 +43,7 @@
       if(data)
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
       else {
-        console.warn('Cannot find icon at: ', path);
+        console.warn('Cannot find resource at: ', path);
         return null;
       }
     }
