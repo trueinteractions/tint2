@@ -1,3 +1,11 @@
+/*
+ * 
+ * NOTE: THIS FILE IS USED FOR HISTORICAL PURPOSES AND NOTES,
+ * IT IS NOT INTENDED TO BE A UNIT TEST AND USES OUTDATED API'S!!!
+ *
+ *
+ */
+
 require('Application');
 global.Window = require('Window');
 global.WebView = require('WebView');
