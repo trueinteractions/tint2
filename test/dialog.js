@@ -38,10 +38,10 @@ function run($utils) {
     /* @hidden */ dialog.open(win); // perhaps only allow a dialog to open once?
     /* @hidden */ confirm = 'aux';
     /* @hidden */ setTimeout(function() {
-    /* @hidden */   $utils.clickAt(250,124); // hopefully this is consistant, should hit supression
+    /* @hidden */   $utils.clickAt(250,124); // TODO: Fix this hard coded value, hopefully this is consistant, should hit supression
     /* @hidden */ },500);
     /* @hidden */ setTimeout(function() {
-    /* @hidden */   $utils.clickAt(300,154); // hopefully this is consistant, should hit aux 
+    /* @hidden */   $utils.clickAt(300,154); // TODO: Fix this hard coded value, hopefully this is consistant, should hit aux 
     /* @hidden */ },1000);
   });
   dialog.open(win);

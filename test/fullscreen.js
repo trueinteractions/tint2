@@ -5,6 +5,7 @@ var fs = require('fs');
  */
 function setup() {
   global.Window = require('Window');
+  global.Screens = require('Screens');
 }
 
 function baseline() {
@@ -16,22 +17,24 @@ function baseline() {
  */
 function run($utils) {
   var mainWindow = new Window();
+  /* @hidden */ mainWindow.width = 500;
+  /* @hidden */ var mainScreen = Screens.active;
   // Set the maximize button on OSX +10.9 to go fullscreen.
   mainWindow.canBeFullscreen = true;
   // Make the window fullscreen.
   mainWindow.state = "fullscreen";
 
-  setTimeout(function() { 
-    $utils.assert(mainWindow.width >= 1600); 
-  }, 3000);
-  setTimeout(function() { 
-    mainWindow.state = "normal"; 
-  }, 5000);
-
-  setTimeout(function() { 
-    $utils.assert(mainWindow.width <= 600);
-    $utils.ok();
-  }, 8000);
+  /* @hidden */ setTimeout(function() { 
+  /* @hidden */   $utils.assert(mainWindow.width == mainScreen.bounds.width); 
+  /* @hidden */ }, 1000);
+  /* @hidden */ setTimeout(function() { 
+  /* @hidden */   mainWindow.state = "normal"; 
+  /* @hidden */ }, 2000);
+  /* @hidden */ 
+  /* @hidden */ setTimeout(function() { 
+  /* @hidden */   $utils.assert(mainWindow.width == 500);
+  /* @hidden */   $utils.ok();
+  /* @hidden */ }, 3000);
 
 }
 
