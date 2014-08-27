@@ -70,7 +70,7 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:label, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
-    multiplier:0.0, constant:10.0
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -88,13 +88,13 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:popOpen, firstAttribute:'bottom',
     secondItem:mainWindow, secondAttribute:'top',
-    multiplier:0.0, constant:85.0
+    multiplier:1.0, constant:85.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:popOpen, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
-    multiplier:0.0, constant:10.0
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -144,7 +144,7 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:popClose, firstAttribute:'left',
     secondItem:popOver, secondAttribute:'left',
-    multiplier:0.0, constant:10.0
+    multiplier:1.0, constant:10.0
   });
   popOver.addLayoutConstraint({
     priority:'required', relationship:'=',

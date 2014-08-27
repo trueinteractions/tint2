@@ -43,7 +43,7 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
-    multiplier:0.0, constant:10.0
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -67,7 +67,7 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:input2, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
-    multiplier:0.0, constant:10.0
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',

@@ -31,7 +31,7 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:webview, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
-    multiplier:0.0, constant:0.0
+    multiplier:1.0, constant:0.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -56,8 +56,8 @@ function run($utils) {
     /* @hidden */ $utils.assert(webview.title == 'Test'+count);
     mainWindow.title = webview.title;
     /* @hidden */ if(count == 4) {
-    /* @hidden */   mainWindow.close();
-    /* @hidden */   $utils.ok();
+    /* @hidden */   setTimeout(function() { mainWindow.close();
+    /* @hidden */   $utils.ok(); }, 1000);
     /* @hidden */ }
     /* @hidden */ count++;
   });
