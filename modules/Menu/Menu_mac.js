@@ -29,7 +29,7 @@ module.exports = (function() {
     appleMenu.appendChild(new MenuItem('Hide Others', null));
     appleMenu.appendChild(new MenuItem('Show All', null));
     appleMenu.appendChild(new MenuItemSeperator());
-    appleMenu.appendChild(new MenuItem('Quit '+name, null));
+    appleMenu.appendChild(new MenuItem('Quit '+name, 'q'));
 
     return appleMenu;
   }

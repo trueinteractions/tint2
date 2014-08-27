@@ -117,7 +117,7 @@ module.exports = (function() {
     }.bind(this));
     WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { 
       try {
-        this.fireEvent('did-close');
+        this.fireEvent('closed');
       } catch(e) { 
         console.log(e.message);
         console.log(e.stack);
