@@ -109,9 +109,9 @@ module.exports = (function() {
 
     this.removeLayoutConstraint = function(index) {
       var objcNative = layout[index].splice(index, 1)[0];
-      nativeView('removeConstraint',objNative);
-      nativeView('updateConstraintsForSubtreeIfNeeded');
-      nativeView('layoutSubtreeIfNeeded');
+      this.nativeView('removeConstraint',objNative);
+      this.nativeView('updateConstraintsForSubtreeIfNeeded');
+      this.nativeView('layoutSubtreeIfNeeded');
     }
   }
 
