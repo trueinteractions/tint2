@@ -17,7 +17,16 @@
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
-    delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) { return dockmenu.native; });
+    delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
+      try {
+        if(dockmenu == null) return null;
+        else return dockmenu.native;
+      } catch(e) {
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }
+    });
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
     $app('setDelegate',delegate);
