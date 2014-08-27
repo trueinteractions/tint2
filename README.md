@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2)
+
 <h1>Tint</h1>
 
 Compile native applications with Javascript, CSS, HTML5 and node.
