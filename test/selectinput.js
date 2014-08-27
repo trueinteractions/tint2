@@ -30,14 +30,14 @@ function run($utils) {
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:0.0, constant:10.0
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'bottom',
     secondItem:mainWindow, secondAttribute:'top',
-    multiplier:0.0, constant:30.0
+    multiplier:1.0, constant:30.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -54,14 +54,14 @@ function run($utils) {
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input2, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:0.0, constant:60.0
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:60.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input2, firstAttribute:'bottom',
     secondItem:mainWindow, secondAttribute:'top',
-    multiplier:0.0, constant:80.0
+    multiplier:1.0, constant:80.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',

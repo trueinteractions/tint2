@@ -59,8 +59,8 @@ function run($utils) {
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:webView, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:0.0, constant:0.0
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:0.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',

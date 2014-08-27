@@ -57,14 +57,14 @@ function run($utils) {
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:label, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:0.0, constant:10.0
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:label, firstAttribute:'bottom',
     secondItem:mainWindow, secondAttribute:'top',
-    multiplier:0.0, constant:35.0
+    multiplier:1.0, constant:25.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -81,8 +81,8 @@ function run($utils) {
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:popOpen, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:0.0, constant:55.0
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:55.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -107,14 +107,14 @@ function run($utils) {
   popOver.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'top',
-    secondItem:popOver, secondAttribute:'bottom',
-    multiplier:0.0, constant:10.0
+    secondItem:popOver, secondAttribute:'top',
+    multiplier:1.0, constant:10.0
   });
   popOver.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'bottom',
     secondItem:popOver, secondAttribute:'top',
-    multiplier:0.0, constant:35.0
+    multiplier:1.0, constant:35.0
   });
   popOver.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -131,8 +131,8 @@ function run($utils) {
   popOver.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:popClose, firstAttribute:'top',
-    secondItem:input, secondAttribute:'bottom',
-    multiplier:0.0, constant:25.0
+    secondItem:input, secondAttribute:'top',
+    multiplier:1.0, constant:25.0
   });
   popOver.addLayoutConstraint({
     priority:'required', relationship:'=',

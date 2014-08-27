@@ -50,14 +50,14 @@ function run($utils) {
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:0.0, constant:10.0
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:10.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'bottom',
     secondItem:mainWindow, secondAttribute:'top',
-    multiplier:0.0, constant:35.0
+    multiplier:1.0, constant:35.0
   });
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',

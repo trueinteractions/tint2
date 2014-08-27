@@ -31,8 +31,8 @@ function run($utils) {
   win.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:buttonNormal, firstAttribute:'top',
-    secondItem:win, secondAttribute:'bottom',
-    multiplier:0.0, constant:0.0
+    secondItem:win, secondAttribute:'top',
+    multiplier:1.0, constant:0.0
   });
 
   var buttonToggle = new Button();

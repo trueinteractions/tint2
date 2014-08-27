@@ -40,8 +40,8 @@ function run($utils) {
   win.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:progress, firstAttribute:'top',
-    secondItem:win, secondAttribute:'bottom',
-    multiplier:0.0, constant:0.0
+    secondItem:win, secondAttribute:'top',
+    multiplier:1.0, constant:0.0
   });
   win.addLayoutConstraint({
     priority:'required', relationship:'=',
