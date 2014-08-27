@@ -2,6 +2,16 @@ module.exports = (function() {
   var baseUtilities = require('Utilities_base');
   var $ = process.bridge.objc;
 
+  function nsDictionaryToObject(nsdictionary) {
+    var allKeys = nsdictionary('allKeys');
+    var count = allKeys('count');
+    var values = []
+    for(var i=0; i < count; i++) {
+      values[allKeys('objectAtIndex',i)('description')('UTF8String')] = nsdictionary('objectForKey',allKeys('objectAtIndex',i))('description')('UTF8String');
+    }
+    return values;
+  }
+
   function attachSizeProperties($nativeObj, target, fireEvent, options) {
       var _width = 20, _height = 20, _minWidth = 20, _maxWidth = 20, _minHeight = 20, _maxHeight = 20;
       if(!options) options = {};
@@ -336,7 +346,8 @@ module.exports = (function() {
   return {
     attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
-    parseColor:baseUtilities.parseColor
+    parseColor:baseUtilities.parseColor,
+    nsDictionaryToObject:nsDictionaryToObject
   }
 })();
 

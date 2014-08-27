@@ -74,6 +74,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Notification
 * PopOver
 * ProgressBar
+* Screen Devices
 * SelectInput (Combo Boxes)
 * SearchInput (look ahead while typing)
 * Status Bars (System Tray's)
