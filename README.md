@@ -89,6 +89,85 @@ Currently documentation is fairly sparse, look at the individual modules for inf
 
 <h2>Node Compatibility</h2>
 Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.
+<h2>Creating a Browser in Tint</h2>
+
+```javascript
+  // Include the widgets we'll need.
+  require('Application');
+  global.Window = require('Window');
+  global.WebView = require('WebView');
+  global.Toolbar = require('Toolbar');
+  global.Button = require('Button');
+  global.TextInput = require('TextInput');
+
+  // Create the widgets.
+  var mainWindow = new Window();
+  var urlLocation = new TextInput();
+  var webView = new WebView();
+  var toolbar = new Toolbar();
+  var backButton = new Button();
+  var forwardButton = new Button();
+
+  // Images can be a URL or a string representing a built in OS icon.
+  backButton.image = 'back';
+  forwardButton.image = 'forward';
+
+  // Attach our webview to the window, everything else goes into the toolbar.
+  mainWindow.appendChild(webView);
+  toolbar.appendChild(backButton);
+  toolbar.appendChild(forwardButton);
+  toolbar.appendChild('space');
+  toolbar.appendChild(urlLocation);
+  toolbar.appendChild('space');
+  mainWindow.toolbar = toolbar;
+
+  // Set some styling.
+  mainWindow.titleVisible = false;
+  mainWindow.preferences.animateOnSizeChange = true;
+  mainWindow.preferences.animateOnPositionChange = true;
+
+  urlLocation.alignment = 'center';
+  urlLocation.linewrap = false;
+  urlLocation.scrollable = true;
+
+  // Attach some listeners to go back/forward and change the URL.
+  backButton.addEventListener('click',function() { webView.back(); });
+  forwardButton.addEventListener('click',function() { webView.forward(); });
+
+  urlLocation.addEventListener('inputend', function() {
+    var url = urlLocation.value;
+    if(url.indexOf(':') == -1) url = "http://"+url;
+    webView.location = url;
+  });
+
+  webView.addEventListener('load', function() { urlLocation.value = webView.location; });
+
+  // Tell the webview to take up as much space in the parent as possible.
+  mainWindow.addLayoutConstraint({
+    priority:'required', relationship:'=',
+    firstItem:webView, firstAttribute:'top',
+    secondItem:mainWindow, secondAttribute:'top',
+    multiplier:1.0, constant:0.0
+  });
+  mainWindow.addLayoutConstraint({
+    priority:'required', relationship:'=',
+    firstItem:webView, firstAttribute:'bottom',
+    secondItem:mainWindow, secondAttribute:'bottom',
+    multiplier:1.0, constant:0
+  });
+  mainWindow.addLayoutConstraint({
+    priority:'required', relationship:'=',
+    firstItem:webView, firstAttribute:'left',
+    secondItem:mainWindow, secondAttribute:'left',
+    multiplier:0.0, constant:0.0
+  });
+  mainWindow.addLayoutConstraint({
+    priority:'required', relationship:'=',
+    firstItem:webView, firstAttribute:'right',
+    secondItem:mainWindow, secondAttribute:'right',
+    multiplier:1.0, constant:0
+  });
+```
 
 <h2>FAQ</h2>
 * **Why not as a node module, why a whole other executable?** node does not have bindings for application event loops, in addition resources (when an application is packaged) must be available prior to node spinning up, this required modifiying the front start up layer of node to perform these actions, outside of that the code base for node is pretty much the same.
