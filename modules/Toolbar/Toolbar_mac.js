@@ -1,4 +1,6 @@
 module.exports = (function() {
+  var Control = require('Control');
+
   function Toolbar() {
     var $ = process.bridge.objc;
     var $toolbar = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
@@ -12,45 +14,62 @@ module.exports = (function() {
 
     var $NSToolbarDelegateClass = $.NSObject.extend('ToolbarDelegate'+Math.round(Math.random()*10000));
     $NSToolbarDelegateClass.addMethod('init:','@@:', function(self) { return self; });
-    $NSToolbarDelegateClass.addMethod('toolbarAllowedItemIdentifiers:','@@:', function(toolbar) { 
-      var $NSArrayChildren = $.NSMutableArray('alloc')('init');
-      //TODO: RELEASE NSArrayChildren ?
-      children.forEach(function(item,index,arr) {
-        $NSArrayChildren('addObject',item.identifier);
-      });
-      return $NSArrayChildren;
+    $NSToolbarDelegateClass.addMethod('toolbarAllowedItemIdentifiers:','@@:', function(toolbar) {
+      try {
+        var $NSArrayChildren = $.NSMutableArray('alloc')('init');
+        //TODO: RELEASE NSArrayChildren ?
+        children.forEach(function(item,index,arr) {
+          $NSArrayChildren('addObject',item.identifier);
+        });
+        return $NSArrayChildren;
+      } catch(e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
     });
-    $NSToolbarDelegateClass.addMethod('toolbarDefaultItemIdentifiers:','@@:', function(toolbar) { 
-      var $NSArrayChildren = $.NSMutableArray('alloc')('init');
-      //TODO: RELEASE NSArrayChildren ?
-      children.forEach(function(item,index,arr) {
-        $NSArrayChildren('addObject',item.identifier);
-      });
-      return $NSArrayChildren;
+    $NSToolbarDelegateClass.addMethod('toolbarDefaultItemIdentifiers:','@@:', function(toolbar) {
+      try { 
+        var $NSArrayChildren = $.NSMutableArray('alloc')('init');
+        //TODO: RELEASE NSArrayChildren ?
+        children.forEach(function(item,index,arr) {
+          $NSArrayChildren('addObject',item.identifier);
+        });
+        return $NSArrayChildren;
+      } catch(e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
     });
     $NSToolbarDelegateClass.addMethod('toolbar:itemForItemIdentifier:willBeInsertedIntoToolbar:','@@:@@B', function(self, cmd, toolbar, identifier, willBeInserted) {
-      if(!toolbarCache[parseInt(identifier)]) {
-        var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',identifier);
-        var child = children[parseInt(identifier)-1];
-        toolbarItem('setMaxSize',$.NSMakeSize(child.widthMaximum,child.heightMaximum));
-        toolbarItem('setMinSize',$.NSMakeSize(child.widthMinimum,child.heightMinimum));
-        toolbarItem('setView',child.internal);
-        toolbarCache[parseInt(identifier)] = toolbarItem;
+      try {
+        if(!toolbarCache[parseInt(identifier)]) {
+          var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',identifier);
+          var child = children[parseInt(identifier)-1];
+
+          var intrinsicSize = child.native('intrinsicContentSize');
+          if(intrinsicSize.width == -1 && intrinsicSize.height > 0)
+            toolbarItem('setMaxSize', $.NSMakeSize(10000,intrinsicSize.height));
+          if(intrinsicSize.height == -1 && intrinsicSize.width > 0)
+            toolbarItem('setMaxSize', $.NSMakeSize(intrinsicSize.height,10000));
+
+          toolbarItem('setMinSize', intrinsicSize);
+          toolbarItem('setView',child.native);
+          toolbarCache[parseInt(identifier)] = toolbarItem;
+        }
+        return toolbarCache[parseInt(identifier)];
+      } catch(e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
       }
-      return toolbarCache[parseInt(identifier)];
     });
 
     $NSToolbarDelegateClass.register();
     var $NSToolbarDelegateInstance = $NSToolbarDelegateClass('alloc')('init');
-
-    // causes:
-    //(node) warning: possible EventEmitter memory leak detected. 11 listeners added. Use emitter.setMaxListeners() to increase limit.
-      //process.on('exit', function() {
-        //  $NSToolbarDelegateClass;
-        //  $NSToolbarDelegateInstance;
-      //});
-
     $toolbar('setDelegate',$NSToolbarDelegateInstance);
+
     Object.defineProperty(this, 'state', {
       get:function() { 
         if($toolbar('displayMode') == $.NSToolbarDisplayModeIconAndLabel) 
@@ -107,6 +126,8 @@ module.exports = (function() {
     this.appendChild = function(child) {
       var identifier;
       if(child == "space") child = {native:$("NSToolbarFlexibleSpaceItem"), identifier:$("NSToolbarFlexibleSpaceItem")};
+      else if (!(child instanceof Control)) 
+        throw new Error('The passed in object to append as a child wasnt a control. ['+child+']');
       else child.identifier = $((children.length+1).toString());
       children.push(child);
       $toolbar('insertItemWithItemIdentifier',child.identifier,'atIndex',children.length-1);  

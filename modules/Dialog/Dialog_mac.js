@@ -98,7 +98,7 @@ module.exports = (function() {
       }
     });
 
-    this.setChild = function(e) { $dialog('setAccessoryView',e); }
+    this.setChild = function(e) { $dialog('setAccessoryView',e.nativeView); }
 
     this.open = function(z) {
       if(!buttonsSet) {

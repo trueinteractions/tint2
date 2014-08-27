@@ -42,13 +42,20 @@
       var data = $.NSData('dataWithContentsOfURL',url);
       if(data)
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
-      else 
+      else {
+        console.warn('Cannot find icon at: ', path);
         return null;
+      }
     }
 
     Object.defineProperty(this, 'name', {
-      get:function() { return name; },
-      set:function(e) {  name = e; }
+      get:function() { 
+        if(!name || name == "") return process.cwd();
+        return name; 
+      },
+      set:function(e) { 
+        name = e; 
+      }
     });
 
     Object.defineProperty(this, 'badge', {
