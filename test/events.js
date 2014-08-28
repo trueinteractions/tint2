@@ -130,7 +130,7 @@ function run($utils) {
     priority:'required', relationship:'=',
     firstItem:buttonNormal, firstAttribute:'top',
     secondItem:input, secondAttribute:'bottom',
-    multiplier:0.0, constant:60.0
+    multiplier:1.0, constant:60.0
   });
   
 
