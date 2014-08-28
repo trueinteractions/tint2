@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+echo -n 'Tint unit tests for: '
+uname -a 
 if [ ! -f "../build/Release/tint" ]; then
   if [ ! -f "../build/out/Release/tint" ]; then
     echo "Cannot find the binary for tint, exiting."
