@@ -33,7 +33,7 @@ This is intended as a preview release for Tint 2, currently only supported on OS
 
 <h2>Building</h2>
 
-You'll need OSX 10.7 or higher and Xcode in addition to the Xcode bin utils package.
+This preview release is limited to OSX only. You'll need OSX 10.7 or higher and Xcode in addition to the Xcode bin utils package.
 
 ```bash
 mkdir tint
