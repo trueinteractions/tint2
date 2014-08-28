@@ -118,8 +118,7 @@ function run($utils) {
     multiplier:1, constant:10
   });
 
-  /* @hidden */ setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 500);
-  /* @hidden */ setTimeout(function() { $utils.fail(); }, 10000);
+  /* @hidden */ setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 1000);
 }
 
 /**
