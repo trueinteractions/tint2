@@ -76,6 +76,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Screen Devices
 * SelectInput (Combo Boxes)
 * SearchInput (look ahead while typing)
+* Slider (range value)
 * Status Bars (System Tray's)
 * TextInput
 * Toolbar
