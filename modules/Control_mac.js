@@ -1,4 +1,6 @@
 module.exports = (function() {
+  console.assert(typeof application !== "undefined", 'You must use require(\'Application\') prior to using any GUI components.');
+  console.assert(process.bridge.objc, 'Failure to establish objective-c bridge.');
   var $ = process.bridge.objc;
 
   function addMethodOverride(view, bindPoint, selector, event, blocks, eventAfter) {

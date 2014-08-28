@@ -31,9 +31,6 @@ You can even create custom components and views that are cross-platform compatib
 <h2>Status</h2>
 This is intended as a preview release for Tint 2, currently only supported on OSX.  Preview releases for Windows, iOS, and Android are in tests at the moment.
 
-<h2>License</h2>
-Tint is licensed under the MIT license.
-
 <h2>Building</h2>
 
 You'll need OSX 10.7 or higher and Xcode in addition to the Xcode bin utils package.
@@ -178,3 +175,11 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 * **Are there any major differences in desktop programming?** Yes, layout can be tricky and is currently done using layout constraints in C#/Obj-C. Work is continuing on this front. You don't use CSS/HTML for layout, just javascript. The application lifetime is also very different, most websites actually have memory leaks, but users a very rarely there long enough to have it affect system performance considerably, this is not the case with desktop applications.  In addition sandboxed environments can introduce complexities for those not familiar with desktop security practices.
 * **When will this be stable?** In short, October 2014. However prior to that we're encouraging people to download and use it for fun or to contribute, this is why there is no downloadable binary. The stable releases in October will support OSX and Windows.
 * **Where can I find a binary download?** Since this isn't stable we're discouraging users who aren't familiar with development processes from using it, e.g., the only way to run it is to follow the build instructions above. Once stable in October we'll post binaries for OSX and Windows.
+
+
+<h2>License</h2>
+Tint is licensed under the MIT license.
+
+Commercial support available at http://www.trueinteractions.com/
+Copyright (c) 2014 True Interactions
+

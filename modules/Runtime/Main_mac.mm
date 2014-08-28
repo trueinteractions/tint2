@@ -47,7 +47,14 @@ v8::Handle<v8::Value> InitBridge(const v8::Arguments& args) {
 }
 
 
+static void uv_noop(uv_async_t* handle, int status) {}
+
 static void uv_event(void *info) {
+	[[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
+
+	uv_async_t dummy_uv_handle_;
+	uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
+
 	int r;
 	struct kevent errors[1];
 
@@ -83,6 +90,7 @@ static void uv_event(void *info) {
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+	[[NSThread currentThread] setName:@"Tint EventLoop"];
 
 	// Register the app:// protocol.
 	[NSURLProtocol registerClass:[AppSchema class]];
