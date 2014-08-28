@@ -129,7 +129,7 @@ module.exports = (function() {
       var returnvalue = undefined;
       if(events[event]) {
         (events[event]).forEach(function(item,index,arr) { 
-          var tmp = item(args);
+          var tmp = item.apply(null, args);
           if(tmp) returnvalue = tmp;
         });
       }

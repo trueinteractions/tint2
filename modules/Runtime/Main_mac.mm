@@ -62,6 +62,7 @@ static void uv_event(void *info) {
 		uv_loop_t* loop = uv_default_loop();
 
 		int timeout = uv_backend_timeout(loop);
+		if(timeout == -1) timeout = 15.6;
 		int fd = uv_backend_fd(loop);
 
 		do {

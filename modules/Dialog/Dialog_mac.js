@@ -2,31 +2,21 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
 
-  function Dialog() {
-    var $dialog = $.NSAlert('alloc')('init');
-    var img = null, buttonsSet = false, mainButton = null, auxButton = null; events = {};
+  var Control = require('Control');
 
-    //TODO: Inherit event listeners..?
-    function fireEvent(event, args) {
-      if(events[event]) 
-        (events[event]).forEach(function(item,index,arr) { 
-          if(Array.isArray(args))
-            item.apply(null,args);
-          else
-            item.apply(null,[args]);
-        });
-    }
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+  function Dialog() {
+    Control.call(this, $.NSAlert, $.NSView, {});
+    var img = null, buttonsSet = false, mainButton = null, auxButton = null; events = {};
+    this.nativeView = this.native = $.NSAlert('alloc')('init');
 
     Object.defineProperty(this, "title", {
-      get:function() { return $dialog('messageText'); },
-      set:function(e) { $dialog('setMessageText', $(e)); }
+      get:function() { return this.native('messageText'); },
+      set:function(e) { this.native('setMessageText', $(e)); }
     });
 
     Object.defineProperty(this, "message", {
-      get:function() { return $dialog('informativeText'); },
-      set:function(e) { $dialog('setInformativeText', $(e)); }
+      get:function() { return this.native('informativeText'); },
+      set:function(e) { this.native('setInformativeText', $(e)); }
     });
 
     Object.defineProperty(this, "mainbutton", {
@@ -41,33 +31,25 @@ module.exports = (function() {
 
     Object.defineProperty(this, "suppression", {
       get:function() {
-        if(!$dialog('showsSuppressionButton')) return null;
-        return $dialog('suppressionButton')('title');
+        if(!this.native('showsSuppressionButton')) return null;
+        return this.native('suppressionButton')('title');
       },
       set:function(e) {
-        $dialog('setShowsSuppressionButton', e == null ? $.NO : $.YES);
-        if(e !== null) $dialog('suppressionButton')('setTitle', $(e)); 
+        this.native('setShowsSuppressionButton', e == null ? $.NO : $.YES);
+        if(e !== null) this.native('suppressionButton')('setTitle', $(e)); 
       }
     });
 
     Object.defineProperty(this, "suppressionChecked", {
       get:function() {
-        if(!$dialog('showsSuppressionButton')) return false;
-        return $dialog('suppressionButton')('state') === $.NSOnState ? true : false;
+        if(!this.native('showsSuppressionButton')) return false;
+        return this.native('suppressionButton')('state') === $.NSOnState ? true : false;
       },
       set:function(e) {
-        if(!$dialog('showsSuppressionButton')) return false;
-        $dialog('suppressionButton')('setState', e === true ? $.NSOnState : $.NSOffState); 
+        if(!this.native('showsSuppressionButton')) return false;
+        this.native('suppressionButton')('setState', e === true ? $.NSOnState : $.NSOffState); 
       }
     });
-
-    Object.defineProperty(this, 'native', {
-      get:function() { return $dialog; }
-    });
-
-    Object.defineProperty(this, 'nativeView', {
-      get:function() { return $dialog; }
-    })
 
     Object.defineProperty(this, 'icon', {
       get:function() { return img; },
@@ -87,26 +69,26 @@ module.exports = (function() {
 
     Object.defineProperty(this, "type", {
       get:function() { 
-        if($dialog('alertStyle') == $.NSWarningAlertStyle) return "warning";
-        else if ($dialog('alertStyle') == $.NSInformationalAlertStyle) return "information";
-        else if ($dialog('alertStyle') == $.NSCriticalAlertStyle) return "critical";
+        if(this.native('alertStyle') == $.NSWarningAlertStyle) return "warning";
+        else if (this.native('alertStyle') == $.NSInformationalAlertStyle) return "information";
+        else if (this.native('alertStyle') == $.NSCriticalAlertStyle) return "critical";
       },
       set:function(e) {
-        if(e == "warning") $dialog('setAlertStyle', $.NSWarningAlertStyle);
-        else if (e == "critical") $dialog('setAlertStyle', $.NSCriticalAlertStyle);
-        else $dialog('setAlertStyle', $.NSInformationalAlertStyle); 
+        if(e == "warning") this.native('setAlertStyle', $.NSWarningAlertStyle);
+        else if (e == "critical") this.native('setAlertStyle', $.NSCriticalAlertStyle);
+        else this.native('setAlertStyle', $.NSInformationalAlertStyle); 
       }
     });
 
-    this.setChild = function(e) { $dialog('setAccessoryView',e.nativeView); }
+    this.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
 
     this.open = function(z) {
       if(!buttonsSet) {
         if(mainButton == null && auxButton !== null)
           throw new Error("The main button was not defined, however the auxillary button was.  A main button must be set for auxilliary buttons to exist.");
 
-        if(mainButton !== null) $dialog('addButtonWithTitle', $(mainButton));
-        if(auxButton !== null) $dialog('addButtonWithTitle', $(auxButton));
+        if(mainButton !== null) this.native('addButtonWithTitle', $(mainButton));
+        if(auxButton !== null) this.native('addButtonWithTitle', $(auxButton));
         buttonsSet = true;
       }
 
@@ -115,21 +97,25 @@ module.exports = (function() {
         w = w.native ? w.native : w;
         var comp = $(function(self,e) {
           try {
-            if(e == $.NSAlertFirstButtonReturn) fireEvent('click','main');
-            else fireEvent('click','aux');
+            if(e == $.NSAlertFirstButtonReturn) this.fireEvent('click',['main']);
+            else this.fireEvent('click',['aux']);
           } catch(e) {
             console.error(e.message);
             console.error(e.stack);
             process.exit(1);
           }
-        },[$.void,['?',$.long]]);
-        $dialog('beginSheetModalForWindow',w,'completionHandler',comp);
+        }.bind(this),[$.void,['?',$.long]]);
+        this.native('beginSheetModalForWindow',w,'completionHandler',comp);
       } else {
-        var e = $dialog('runModal');
-        if(e == $.NSAlertFirstButtonReturn) fireEvent('click','main');
-        else fireEvent('click','aux');
+        var e = this.native('runModal');
+        if(e == $.NSAlertFirstButtonReturn) this.fireEvent('click',['main']);
+        else this.fireEvent('click',['aux']);
       }
-    }
+    }.bind(this);
   }
+  Dialog.prototype = Object.create(Control.prototype);
+  Dialog.prototype.constructor = Dialog;
+
+
   return Dialog;
 })();
