@@ -35,33 +35,6 @@ module.exports = (function() {
       this.fireEvent('child-dettached', [control]);
     }
 
-    // { relation: , priority: , firstItem: , secondItem: , 
-    //    firstAttribute: secondAttribute: multiplier: constant: }
-    // relationship <, =, >
-    // attribute: left,right,top,bottom,leading,trailing,width,height,center,middle,baseline
-    // priority: required, high, medium low
-    /*
-      NSLayoutAttributeLeft = 1,
-      NSLayoutAttributeRight,
-      NSLayoutAttributeTop,
-      NSLayoutAttributeBottom,
-      NSLayoutAttributeLeading,
-      NSLayoutAttributeTrailing,
-      NSLayoutAttributeWidth,
-      NSLayoutAttributeHeight,
-      NSLayoutAttributeCenterX,
-      NSLayoutAttributeCenterY,
-      NSLayoutAttributeBaseline,
-      */
-    /*
-       NSLayoutPriorityRequired = 1000,
-       NSLayoutPriorityDefaultHigh = 750,
-       NSLayoutPriorityDragThatCanResizeWindow = 510,
-       NSLayoutPriorityWindowSizeStayPut = 500,
-       NSLayoutPriorityDragThatCannotResizeWindow = 490,
-       NSLayoutPriorityDefaultLow = 250,
-       NSLayoutPriorityFittingSizeCompression = 50,
-       */
     this.addLayoutConstraint = function(layoutObject) {
       var priority =  layoutObject.priority == 'required' ? 1000 :
                       layoutObject.priority == 'high' ? 750 : 
