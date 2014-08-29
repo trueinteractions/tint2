@@ -16,10 +16,14 @@ module.exports = (function() {
     Object.defineProperty(this, 'children', { get:function() { return children; }});
 
     this.appendChild = function(control) {
-      children.push(control);
-      this.nativeView('addSubview',control.nativeView);
-      control.fireEvent('parent-attached', this);
-      this.fireEvent('child-attached', control);
+      if(Array.isArray(control)) {
+        for(var i=0; i < control.length; i++) this.appendChild(control[i]);
+      } else {
+        children.push(control);
+        this.nativeView('addSubview',control.nativeView);
+        control.fireEvent('parent-attached', this);
+        this.fireEvent('child-attached', control);
+      }
     }
 
     this.removeChild = function(control) {

@@ -114,13 +114,11 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
   backButton.image = 'back';
   forwardButton.image = 'forward';
 
-  // Attach our webview to the window, everything else goes into the toolbar.
+  // Attach our webview to the window
   mainWindow.appendChild(webView);
-  toolbar.appendChild(backButton);
-  toolbar.appendChild(forwardButton);
-  toolbar.appendChild('space');
-  toolbar.appendChild(urlLocation);
-  toolbar.appendChild('space');
+
+  // everything else goes into the toolbar.
+  toolbar.appendChild([backButton, forwardButton, 'space', urlLocation, 'space']);
   mainWindow.toolbar = toolbar;
 
   // Set some styling.
@@ -169,6 +167,9 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
     secondItem:mainWindow, secondAttribute:'right',
     multiplier:1.0, constant:0
   });
+
+  // Set the URL to somewhere.
+  webView.location = 'https://www.google.com/';
 ```
 
 <h2>FAQ</h2>

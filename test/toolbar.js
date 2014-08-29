@@ -30,11 +30,7 @@ function run($utils) {
   forwardButton.image = 'forward';
 
   mainWindow.appendChild(webView);
-  toolbar.appendChild(backButton);
-  toolbar.appendChild(forwardButton);
-  toolbar.appendChild('space');
-  toolbar.appendChild(urlLocation);
-  toolbar.appendChild('space');
+  toolbar.appendChild([backButton, forwardButton, 'space', urlLocation, 'space']);
   mainWindow.toolbar = toolbar;
 
   mainWindow.titleVisible = false;
