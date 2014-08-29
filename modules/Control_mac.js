@@ -16,7 +16,44 @@ module.exports = (function() {
       }
     }.bind(bindPoint));
   }
+/*
 
++ alternateSelectedControlColor
++ alternateSelectedControlTextColor
++ colorForControlTint:
++ controlBackgroundColor
++ controlColor
++ controlAlternatingRowBackgroundColors
++ controlHighlightColor
++ controlLightHighlightColor
++ controlShadowColor
++ controlDarkShadowColor
++ controlTextColor
++ currentControlTint
++ disabledControlTextColor
++ gridColor
++ headerColor
++ headerTextColor
++ highlightColor
++ keyboardFocusIndicatorColor
++ knobColor
++ scrollBarColor
++ secondarySelectedControlColor
++ selectedControlColor
++ selectedControlTextColor
++ selectedMenuItemColor
++ selectedMenuItemTextColor
++ selectedTextBackgroundColor
++ selectedTextColor
++ selectedKnobColor
++ shadowColor
++ textBackgroundColor
++ textColor
++ windowBackgroundColor
++ windowFrameColor
++ windowFrameTextColor
++ underPageBackgroundColor
+*/
   function Control(NativeObjectClass, NativeViewClass, options) {
     var events = {}, native, nativeView, needsMouseTracking = 0, 
         trackingArea = null, intrinsicSize = null, layoutContraints = [],

@@ -48,29 +48,29 @@ function run($utils) {
     /* @hidden */ }
   });
 
-  setTimeout(function() {
-    $utils.clickAt(58,109);
-    setTimeout(function() {
-      $utils.clickAt(220,109);
-      setTimeout(function() {
-        $utils.keyAtControl('a');
-        $utils.keyAtControl('r');
-        $utils.keyAtControl('i');
-        $utils.keyAtControl('a');
-        $utils.keyAtControl('l');
-        setTimeout(function() {
-          $utils.clickAt(320,109);
-          setTimeout(function() {
-            $utils.clickAt(450,109);
-            $utils.keyAtControl('1');
-            $utils.keyAtControl('5');
-            trackChange = true;
-            $utils.keyAtControl('RETURN');
-          },500);
-        },500);
-      },500);
-    },500);
-  },500);
+  /* @hidden */ setTimeout(function() {
+  /* @hidden */   $utils.clickAt(58,109);
+  /* @hidden */   setTimeout(function() {
+  /* @hidden */     $utils.clickAt(220,109);
+  /* @hidden */     setTimeout(function() {
+  /* @hidden */       $utils.keyAtControl('a');
+  /* @hidden */       $utils.keyAtControl('r');
+  /* @hidden */       $utils.keyAtControl('i');
+  /* @hidden */       $utils.keyAtControl('a');
+  /* @hidden */       $utils.keyAtControl('l');
+  /* @hidden */       setTimeout(function() {
+  /* @hidden */         $utils.clickAt(320,109);
+  /* @hidden */         setTimeout(function() {
+  /* @hidden */           $utils.clickAt(450,109);
+  /* @hidden */           $utils.keyAtControl('1');
+  /* @hidden */           $utils.keyAtControl('5');
+  /* @hidden */           trackChange = true;
+  /* @hidden */           $utils.keyAtControl('RETURN');
+  /* @hidden */         },500);
+  /* @hidden */       },500);
+  /* @hidden */     },500);
+  /* @hidden */   },500);
+  /* @hidden */ },500);
 }
 
 /**
