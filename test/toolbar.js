@@ -3,12 +3,7 @@
  * @ignore
  */
 function setup() {
-  require('Application');
-  global.Window = require('Window');
-  global.WebView = require('WebView');
-  global.Toolbar = require('Toolbar');
-  global.Button = require('Button');
-  global.TextInput = require('TextInput');
+  require('Common');
 }
 
 function baseline() {

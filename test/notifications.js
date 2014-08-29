@@ -4,10 +4,7 @@
  * @ignore
  */
 function setup() {
-  process.bridge.objc.import('Foundation');
-  process.bridge.objc.import('AppKit');
-  global.Notification = require('Notification');
-  global.Screens = require('Screens');
+  require('Common');
 }
 
 function baseline() {

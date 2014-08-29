@@ -4,8 +4,7 @@ var fs = require('fs');
  * @ignore
  */
 function setup() {
-  require('Application');
-  global.Window = require('Window');
+  require('Common');
 }
 
 function baseline() {

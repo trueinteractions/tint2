@@ -42,6 +42,7 @@
       'modules/Bridge/method.js',
       'modules/Bridge/types.js',
       'modules/Application/Application_mac.js',
+      'modules/Application/Common_mac.js',
       'modules/AppSchema/AppSchema_mac.js',
 			'modules/Button/Button_mac.js',
       'modules/Bridge/Bridge_mac.js',

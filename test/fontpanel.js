@@ -4,9 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.Font = require('Font');
-  global.FontPanel = require('FontPanel');
+  require('Common');
 }
 
 function baseline() {

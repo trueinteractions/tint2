@@ -4,8 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.Button = require('Button');
+  require('Common');
 }
 
 function baseline() {

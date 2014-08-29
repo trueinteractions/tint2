@@ -4,8 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.Slider = require('Slider');
+  require('Common');
 }
 
 function baseline() {

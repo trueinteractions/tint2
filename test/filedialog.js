@@ -6,8 +6,7 @@ var fd = fs.openSync(logfile, 'w');
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.FileDialog = require('FileDialog');
+  require('Common');
   fs.closeSync(2);
 }
 

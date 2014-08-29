@@ -4,8 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.ProgressBar = require('ProgressBar');
+  require('Common');
 }
 
 function baseline() {

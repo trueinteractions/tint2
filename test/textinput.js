@@ -4,8 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.TextInput = require('TextInput');
+  require('Common');
 }
 
 function baseline() {

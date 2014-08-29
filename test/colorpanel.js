@@ -4,9 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.ColorPanel = require('ColorPanel');
-  global.Color = require('Color');
+  require('Common');
 }
 
 function baseline() {

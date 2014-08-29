@@ -4,8 +4,7 @@ var fs = require('fs');
  * @ignore
  */
 function setup() {
-  require('Application');
-  global.Screens = require('Screens');
+  require('Common');
 }
 
 function baseline() {

@@ -4,10 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.TextInput = require('TextInput');
-  global.Button = require('Button');
-  global.PopOver = require('PopOver');
+  require('Common');
 }
 
 function baseline() {

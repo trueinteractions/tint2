@@ -3,8 +3,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.Screens = require('Screens');
+  require('Common');
 }
 
 function baseline() {

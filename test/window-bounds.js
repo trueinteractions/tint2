@@ -3,7 +3,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
+  require('Common');
 }
 
 function baseline() {

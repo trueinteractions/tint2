@@ -4,8 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.WebView = require('WebView');
+  require('Common');
 }
 
 function baseline() {

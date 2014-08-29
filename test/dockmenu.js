@@ -4,9 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Window = require('Window');
-  global.Menu = require('Menu');
-  global.MenuItem = require('MenuItem');
+  require('Common');
 }
 
 function baseline() {

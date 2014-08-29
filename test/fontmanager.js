@@ -4,7 +4,7 @@
  * @ignore
  */
 function setup() {
-  global.Font = require('Font');
+  require('Common');
 }
 
 function baseline() {
