@@ -97,6 +97,7 @@ module.exports = (function() {
         constraintCenter = null, constraintMiddle = null;
 
     function parseValue(e) {
+      if(typeof e == 'number') return e;
       if(e.indexOf('%') > -1) {
         e = e.replace('%','').trim();
         e = parseInt(e);
@@ -116,12 +117,18 @@ module.exports = (function() {
           throw new Error('A width cannot be set on an item that has a left and right set.');
         var percent = false;
         var tmp = userWidth = e;
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.width = userWidth;
+          }.bind(this));
+          return;
+        }
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(e == null) return;
         if(e.indexOf('%') > -1) percent = true;
         if(percent && tmp < 0) throw new Error('Value cannot be negative.');
-        if(constraintWidth !== null && parent) parent.removeLayoutConstraint(constraintWidth);
+        if(constraintWidth !== null) parent.removeLayoutConstraint(constraintWidth);
         if(percent) {
           constraintWidth = parent.addLayoutConstraint({ 
             priority:'required',
@@ -149,6 +156,12 @@ module.exports = (function() {
           throw new Error('A height cannot be set on an item that has a top and bottom set.');
         var percent = false;
         var tmp = userHeight = e;
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.height = userHeight;
+          }.bind(this));
+          return;
+        }
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(e == null) return;
@@ -182,12 +195,18 @@ module.exports = (function() {
           throw new Error('A top cannot be set when the bottom and height have been set already.');
         var percent = false;
         var tmp = userTop = e;
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.top = userTop;
+          }.bind(this));
+          return;
+        }
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(tmp < 0) throw new Error('Value cannot be negative.');
         if(constraintTop !== null && parent) parent.removeLayoutConstraint(constraintTop);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent) {
           constraintTop = parent.addLayoutConstraint({ 
             priority:'required',
@@ -216,13 +235,19 @@ module.exports = (function() {
           throw new Error('A bottom cannot be set when the top and height have been set already.');
         var percent = false;
         var tmp = userBottom = e;
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.bottom = userBottom;
+          }.bind(this));
+          return;
+        }
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(tmp < 0) throw new Error('Value cannot be negative.');
         if(constraintBottom !== null && parent)
           parent.removeLayoutConstraint(constraintBottom);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent) {
           constraintBottom = parent.addLayoutConstraint({ 
             priority:'required',
@@ -251,11 +276,17 @@ module.exports = (function() {
           throw new Error('A right cannot be set when the left and width have been set already.');
         var percent = false;
         var tmp = userRight = e;
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.right = userRight;
+          }.bind(this));
+          return;
+        }
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(constraintRight !== null && parent) parent.removeLayoutConstraint(constraintRight);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent) {
           constraintRight = parent.addLayoutConstraint({ 
             priority:'required',
@@ -284,11 +315,17 @@ module.exports = (function() {
           throw new Error('A left cannot be set when the right and width have been set already.');
         var percent = false;
         var tmp = userLeft = e;
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.left = userLeft;
+          }.bind(this));
+          return;
+        }
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(constraintLeft !== null && parent) parent.removeLayoutConstraint(constraintLeft);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent) {
           constraintLeft = parent.addLayoutConstraint({ 
             priority:'required',
@@ -317,9 +354,15 @@ module.exports = (function() {
         var tmp = userCenter = e;
         if(e == null) tmp = e;
         else tmp = parseValue(e);
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.center = userCenter;
+          }.bind(this));
+          return;
+        }
         if(constraintCenter !== null && parent) parent.removeLayoutConstraint(constraintCenter);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent) {
           constraintCenter = parent.addLayoutConstraint({ 
             priority:'required',
@@ -348,9 +391,15 @@ module.exports = (function() {
         var tmp = userMiddle = e;
         if(e == null) tmp = e;
         else tmp = parseValue(e);
+        if(!parent) {
+          this.addEventListener('parent-attached', function() {
+            this.middle = userMiddle;
+          }.bind(this));
+          return;
+        }
         if(constraintMiddle !== null && parent) parent.removeLayoutConstraint(constraintMiddle);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent) {
           constraintMiddle = parent.addLayoutConstraint({ 
             priority:'required',
