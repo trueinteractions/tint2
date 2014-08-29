@@ -56,7 +56,11 @@ module.exports = (function() {
 */
   function Control(NativeObjectClass, NativeViewClass, options) {
     var events = {}, native, nativeView, needsMouseTracking = 0, 
-        trackingArea = null, intrinsicSize = null, layoutContraints = [],
+        trackingArea = null, intrinsicSize = null, layoutContraints = [];
+
+
+/*
+
         topControl = null, bottomControl = null, leftControl = null, rightControl = null, 
         top = null, left = null, right = null, bottom = null,
         width = null, height = null;
@@ -65,7 +69,6 @@ module.exports = (function() {
         //topConstant = 0, bottomConstant = 0,
         //leftConstant = 0, rightConstant = 0;
 
-/*
     function performLayout() {
       intrinsicSize = this.nativeView('intrinsicSize');
       width = width || intrinsicSize.width || null;

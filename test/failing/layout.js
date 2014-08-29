@@ -17,15 +17,25 @@ function baseline() {
  */
 function run($utils) {
   /* @hidden */ count = 0;
+
+  // TODO: Fix height %
   var win = new Window();
   var buttonNormal = new Button();
-  console.log(win.nativeView('intrinsicContentSize'));
   buttonNormal.title = "Hello";
   win.appendChild(buttonNormal);
+  buttonNormal.middle = '100%';
+  buttonNormal.center = '100%';
+  buttonNormal.width = '200px';
+
+  /*
+
+  buttonNormal.top = '0';
+  buttonNormal.left = '10%';
+  buttonNormal.right = '-10%'; crashes
+*/
 
   // if no intrinsic size, autofits based on child constraints, defaults to frame? if no child constraints?
   // if its -1 it grows to either its frame or strinks/autofits to its
-  console.log(win.nativeView('intrinsicContentSize'));
   /*win.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:buttonNormal, firstAttribute:'top',
@@ -49,26 +59,26 @@ function run($utils) {
   });*/
 
 
-  /* top bindings */
+  /* top bindings 
   win.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:buttonNormal, firstAttribute:'top',
     secondItem:win, secondAttribute:'bottom',
     multiplier:0.0001, constant:0
-  });
+  });*/
   /* bottom bindings
   win.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:buttonNormal, firstAttribute:'bottom',
     secondItem:win, secondAttribute:'bottom',
     multiplier:1, constant:0
-  });*/
+  });
   win.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:buttonNormal, firstAttribute:'height',
     secondItem:win, secondAttribute:'height',
     multiplier:1, constant:0
-  })
+  })*/
 
 }
 
