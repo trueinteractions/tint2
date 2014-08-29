@@ -5,8 +5,15 @@
   process.bridge.objc.import('Cocoa',0);
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
+  
+  // Help reign in garbage collection
   var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
+  
+  // Include the app schema. app:// registers on NSURL and for node require().
   require('AppSchema')(process.cwd());
+
+  // Register our font factory.
+  require('FontInternals');
 
   var $ = process.bridge.objc;
 
@@ -52,7 +59,7 @@
       if(data)
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
       else {
-        console.warn('Cannot find resource at: ', path);
+        if(application.warn) console.warn('Cannot find resource at: ', path);
         return null;
       }
     }
@@ -92,7 +99,7 @@
         } else {
           var imageRef = utilities.getImageFromString(e);
           if(imageRef==null) {
-            console.warn('Image referenced as: '+imageRef+'('+e+') could not be found.');
+            if(application.warn) console.warn('Image referenced as: '+imageRef+'('+e+') could not be found.');
             img = null;
             return;
           }

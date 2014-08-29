@@ -6,7 +6,7 @@ Compile native applications with Javascript, CSS, HTML5 and node.
 
 <h2>What is Tint?</h2>
 
-Tint is a slightly modified version of NodeJS, it allows you to go beyond the shell command of node and turns javascript based node applications into fully functional desktop applications. It's also backwards compatible with node 0.10.
+Tint is a slightly modified version of node. It allows you to go beyond the shell command of node and turns javascript based node applications into fully functional desktop applications. It's also backwards compatible with node 0.10.
 
 You can perform various things you'd never be able to do normally with node. For example:
 
@@ -29,7 +29,7 @@ If you're just interested in creating cross-platform apps with javascript? You'r
 You can even create custom components and views that are cross-platform compatible in javascript.
 
 <h2>Status</h2>
-This is intended as a preview release for Tint 2, currently only supported on OSX.  Preview releases for Windows, iOS, and Android are in tests at the moment.
+This is intended as a preview release for Tint 2, currently only supported on OSX.  Preview releases for Windows, Linux (QT), iOS, and Android are in tests at the moment.
 
 <h2>Building</h2>
 
@@ -69,6 +69,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Dialogs (Alerts, sheets, etc)
 * DropDown
 * FileDialog (Save/Open)
+* Fonts, Font Managers and FontPanel
 * Menu (and MenuItem)
 * Notification
 * PopOver
@@ -170,10 +171,10 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 ```
 
 <h2>FAQ</h2>
-* **Why not as a node module, why a whole other executable?** node does not have bindings for application event loops, in addition resources (when an application is packaged) must be available prior to node spinning up, this required modifiying the front start up layer of node to perform these actions, outside of that the code base for node is pretty much the same.
+* **Why not as a node module, why a whole other executable?** node does not have bindings for application event loops, in addition resources (when an application is packaged) must be available prior to node spinning up, this required modifiying the front start up layer of node to perform these actions, outside of that the code base for node is the same.
 * **What platforms does this aim to support?** For the moment OSX and Windows are nearing completion, OSX is in preview release and the Windows preview is coming in October. Shortly after we'll have a QT Linux version. iOS and Android have several other issues/challenges that make it difficult to integrate, but our hope and target is to support all platforms.
 * **How do you manage inconsistencies in interfaces?** Very carefully, unit tests for the GUI are essential to ensuring the same behavior for the same application across different operating systems and their OS versions.  If a complementary (or similar in functionality) native widget exists in one OS and not another, its not included as the SDK (but that's not stopping you from creating it or using non-cross-compatible components). The Tint SDK aims at providing 100% reliable behavior across any OS.
-* **Are there any major differences in desktop programming?** Yes, layout can be tricky and is currently done using layout constraints in C#/Obj-C. Work is continuing on this front. You don't use CSS/HTML for layout, just javascript. The application lifetime is also very different, most websites actually have memory leaks, but users a very rarely there long enough to have it affect system performance considerably, this is not the case with desktop applications.  In addition sandboxed environments can introduce complexities for those not familiar with desktop security practices.
+* **Are there any major differences in desktop programming?** Yes, layout can be tricky and is currently done using layout constraints in C#/Obj-C. Work is continuing on this front. You don't use CSS/HTML for layout, just javascript. The application lifetime is also very different, most websites actually have memory leaks, but users are very rarely there long enough to have it affect system performance considerably, this is not the case with desktop applications.  In addition sandboxed environments can introduce complexities for those not familiar with desktop security practices.
 * **When will this be stable?** In short, October 2014. However prior to that we're encouraging people to download and use it for fun or to contribute, this is why there is no downloadable binary. The stable releases in October will support OSX and Windows.
 * **Where can I find a binary download?** Since this isn't stable we're discouraging users who aren't familiar with development processes from using it, e.g., the only way to run it is to follow the build instructions above. Once stable in October we'll post binaries for OSX and Windows.
 
@@ -182,5 +183,6 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 Tint is licensed under the MIT license.
 
 Commercial support available at http://www.trueinteractions.com/
+
 Copyright (c) 2014 True Interactions
 

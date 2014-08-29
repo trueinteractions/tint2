@@ -2,6 +2,15 @@ module.exports = (function() {
   var baseUtilities = require('Utilities_base');
   var $ = process.bridge.objc;
 
+  function nsArrayToArray(nsArray) {
+    var count = nsArray('count');
+    var values = [];
+    for(var i=0; i < count; i++) {
+      values.push(nsArray('objectAtIndex',i));
+    }
+    return values;
+  }
+
   function nsDictionaryToObject(nsdictionary) {
     var allKeys = nsdictionary('allKeys');
     var count = allKeys('count');
@@ -347,7 +356,8 @@ module.exports = (function() {
     attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
     parseColor:baseUtilities.parseColor,
-    nsDictionaryToObject:nsDictionaryToObject
+    nsDictionaryToObject:nsDictionaryToObject,
+    nsArrayToArray:nsArrayToArray
   }
 })();
 
