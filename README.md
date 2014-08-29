@@ -65,7 +65,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 
 * Application
 * Application Schema (app:// protocol for packaged apps)
-* Button
+* Button (Normal, Toggle, Radio, Checkbox)
 * Dialogs (Alerts, sheets, etc)
 * DropDown
 * FileDialog (Save/Open)

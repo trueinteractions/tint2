@@ -128,17 +128,18 @@ module.exports = (function() {
       set:function(e) { isMultiple = e ? true : false; }
     });
 
-    //TODO: Standardize Font object
-    //- (void)setSelectedFont:(NSFont *)aFont isMultiple:(BOOL)flag
     Object.defineProperty(this, 'selected', {
       get:function() {
         var font = fontManager('convertFont',this.native('font'));
         if(font == null) return null;
         return new Font(font);
       },
-      set:function(fontObj) { this.native('setFont', fontObj.native); }
+      set:function(fontObj) { 
+        this.native('setFont', fontObj.native);
+        this.native('setPanelFont', fontObj.native, 'isMultiple', isMultiple ? $.YES : $.NO);
+        this.fireEvent('fontchange');
+      }
     });
-
 
     Object.defineProperty(this, 'floating', {
       get:function() { return this.nativeView('isFloatingPanel'); },
