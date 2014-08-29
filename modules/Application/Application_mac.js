@@ -110,6 +110,14 @@
 
     Object.defineProperty(this, 'native', { get:function() { return $app; } });
 
+    this.hideAllOtherApplications = function() { $app('hideOtherApplications', $app); }
+    this.unhideAllOtherApplications = function() { $app('unhideAllApplications', $app); }
+
+    Object.defineProperty(this, 'visible', {
+      get:function() { return $app('isHidden') == $.NO ? true : false; },
+      set:function(e) { if(e) $app('unhide',$app); else $app('hide', $app); }
+    })
+
     this.attention = function(critical) {
       $app('requestUserAttention', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) );
       return {cancel:function() { $app('cancelUserAttentionRequest', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) ); }.bind(this)};
