@@ -130,7 +130,7 @@ module.exports = (function() {
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent && tmp < 0) throw new Error('Value cannot be negative.');
         if(constraintWidth !== null) parent.removeLayoutConstraint(constraintWidth);
         if(percent) {
@@ -169,7 +169,7 @@ module.exports = (function() {
         if(e == null) tmp = e;
         else tmp = parseValue(e);
         if(e == null) return;
-        if(e.indexOf('%') > -1) percent = true;
+        if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
         if(percent && tmp < 0) throw new Error('Value cannot be negative.');
         if(constraintHeight !== null && parent) parent.removeLayoutConstraint(constraintHeight);
         if(percent) {
@@ -264,7 +264,7 @@ module.exports = (function() {
           constraintBottom = parent.addLayoutConstraint({ 
             priority:'required',
             firstItem:this, firstAttribute:'bottom',
-            multiplier:1.0, constant:tmp, 
+            multiplier:1.0, constant:(-1)*tmp, 
             relationship:'=',
             secondItem:parent, secondAttribute:'bottom'
           });
@@ -303,7 +303,7 @@ module.exports = (function() {
           constraintRight = parent.addLayoutConstraint({ 
             priority:'required',
             firstItem:this, firstAttribute:'right',
-            multiplier:1.0, constant:tmp, 
+            multiplier:1.0, constant:(-1)*tmp, 
             relationship:'=',
             secondItem:parent, secondAttribute:'right'
           });

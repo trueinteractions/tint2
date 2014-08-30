@@ -4,7 +4,7 @@ module.exports = (function() {
   var $ = process.bridge.objc;
 
   function Button(options) {
-    var img = null, buttonType = "normal";
+    var img = null, buttonType = "normal", buttonStyle = "normal";;
     Container.call(this, $.NSButton, $.NSButton, {mouseDownBlocks:true,keyDownBlocks:true});
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setButtonType',$.NSMomentaryLightButton);
@@ -30,6 +30,21 @@ module.exports = (function() {
         else if (type == "toggle") this.native('setButtonType',$.NSPushOnPushOffButton);
         else if (type == "checkbox") this.native('setButtonType', $.NSSwitchButton);
         else if (type == "radio") this.native('setButtonType', $.NSRadioButton);
+      }
+    });
+
+    Object.defineProperty(this, 'style', {
+      get:function() { return buttonStyle; },
+      set:function(type) {
+        buttonStyle = type;
+        if(type == "normal") this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
+        else if (type == "rounded") this.native('setBezelStyle',$.NSRoundedBezelStyle);
+        else if (type == "square") this.native('setBezelStyle',$.NSThickSquareBezelStyle);
+        else if (type == "disclosure") this.native('setBezelStyle', $.NSDisclosureBezelStyle);
+        else if (type == "shadowless") this.native('setBezelStyle', $.NSShadowlessSquareBezelStyle);
+        else if (type == "circular") this.native('setBezelStyle', $.NSCircularBezelStyle);
+        else if (type == "recessed") this.native('setBezelStyle', $.NSRecessedBezelStyle);
+        else if (type == "help") this.native('setBezelStyle', $.NSHelpButtonBezelStyle);
       }
     });
 
