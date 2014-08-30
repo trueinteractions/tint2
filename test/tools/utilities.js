@@ -326,8 +326,8 @@ var ex = {};
 	}
 
 	function nextTest() {
-    application.hideAllOtherApplications();
-    application.visible = true;
+    //application.hideAllOtherApplications();
+    //application.visible = true;
 		if(inputs.length > 0)
 			test(inputs.pop());
 		else if (inputs.length == 0)

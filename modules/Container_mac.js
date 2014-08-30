@@ -24,8 +24,8 @@ module.exports = (function() {
       } else {
         children.push(control);
         this.nativeView('addSubview',control.nativeView);
-        control.fireEvent('parent-attached', this);
-        this.fireEvent('child-attached', control);
+        control.fireEvent('parent-attached', [this]);
+        this.fireEvent('child-attached', [control]);
       }
     }
 
@@ -401,6 +401,7 @@ module.exports = (function() {
           }.bind(this));
           return;
         }
+
         if(constraintMiddle !== null && parent) parent.removeLayoutConstraint(constraintMiddle);
         if(e == null) return;
         if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;

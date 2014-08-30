@@ -19,9 +19,12 @@ function run($utils) {
   var win = new Window();
 
   var webView = new WebView();
-  webView.left = webView.right = webView.top = webView.bottom = 0;
   win.appendChild(webView);
   webView.location = "https://www.google.com";
+  webView.left = webView.right = webView.top = webView.bottom = 0;
+  win.width = 700;
+
+  $utils.assert(win.boundsOnScreen.width === webView.boundsOnScreen.width);
 
   var buttonNormal = new Button();
   buttonNormal.title = "Hello";
