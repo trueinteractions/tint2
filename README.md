@@ -138,30 +138,7 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
   webView.addEventListener('load', function() { urlLocation.value = webView.location; });
 
   // Tell the webview to take up as much space in the parent as possible.
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:1.0, constant:0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:0.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:0
-  });
+  webView.left = webView.right = webView.top = webView.bottom = 0;
 
   // Set the URL to somewhere.
   webView.location = 'https://www.google.com/';
