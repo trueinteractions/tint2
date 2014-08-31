@@ -97,5 +97,6 @@ module.exports = (function() {
     get:function() { return this.nativeView('cell')('isScrollable'); },
     set:function(e) { this.nativeView('cell')('setScrollable', e ? true : false ); }
   });
+
   return TextInput;
 })();
