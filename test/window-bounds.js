@@ -22,18 +22,18 @@ function run($utils) {
     w.height = 800;
   /* @hidden */ }, 100);
   /* @hidden */ setTimeout(function(){
-  /* @hidden */   $utils.assert(w.width == 800);
-  /* @hidden */   $utils.assert(w.height == 800);
+  /* @hidden */   $utils.assert(w.width == 800, 'w.width should be 800, was: '+w.width);
+  /* @hidden */   $utils.assert(w.height == 800, 'w.height should be 800, was: '+w.height);
   /* @hidden */   $utils.assert(w.bounds.width == 800, 'w.bounds.width should be 800, was: '+w.bounds.width);
   /* @hidden */   $utils.assert(w.bounds.height == 778, 'w.bounds.height should be 800, was: '+w.bounds.height);
   /* @hidden */   w.width = 100;
   /* @hidden */   w.height = 100;
   /* @hidden */ }, 2000);
   /* @hidden */ setTimeout(function(){
-  /* @hidden */   $utils.assert(w.width == 100);
-  /* @hidden */   $utils.assert(w.height == 100);
-  /* @hidden */   $utils.assert(w.bounds.width == 100);
-  /* @hidden */   $utils.assert(w.bounds.height == 78);
+  /* @hidden */   $utils.assert(w.width == 100, 'w.width should have been 100, was: '+w.width);
+  /* @hidden */   $utils.assert(w.height == 100, 'w.height should have been 100, was: '+w.height);
+  /* @hidden */   $utils.assert(w.bounds.width == 100, 'w.bounds.width should have been 100, was: '+w.bounds.width);
+  /* @hidden */   $utils.assert(w.bounds.height == 78, 'w.bounds.height should have been 100, was: '+w.bounds.height);
     w.x = 100;
     w.y = 150;
   /* @hidden */ }, 3500);

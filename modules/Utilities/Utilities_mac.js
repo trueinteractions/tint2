@@ -394,6 +394,19 @@ module.exports = (function() {
     return img;
   }
 
+  function errorwrap(func) {
+    var wrap = function() {
+      try {
+        return func.apply(null,arguments);
+      } catch(e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
+    }
+    return wrap;
+  }
+
   return {
     attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
@@ -403,7 +416,8 @@ module.exports = (function() {
     parseUnits:parseUnits,
     makePropertyBoolType:makePropertyBoolType,
     makePropertyStringType:makePropertyStringType,
-    makeNSImage:makeNSImage
+    makeNSImage:makeNSImage,
+    errorwrap:errorwrap
   }
 })();
 

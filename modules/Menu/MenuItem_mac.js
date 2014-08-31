@@ -1,7 +1,24 @@
 module.exports = (function() {
+  var $ = process.bridge.objc;
+  var utilities = require('Utilities');
+
+  if(!$.TintMenuItemDelegate) {
+    var TintMenuItemDelegate = $.NSObject.extend('TintMenuItemDelegate');
+    TintMenuItemDelegate.addMethod('initWithJavascriptObject:', ['@',[TintMenuItemDelegate,$.selector,'@']], 
+      utilities.errorwrap(function(self, cmd, id) {
+        self.callback = application.private.delegateMap[id.toString()];
+        application.private.delegateMap[id.toString()] = null;
+        return self;
+    }));
+    TintMenuItemDelegate.addMethod('click:','v@:@', 
+      utilities.errorwrap(function(self,_cmd,frame) { 
+        self.callback.fireEvent('click');
+    }));
+    TintMenuItemDelegate.register();
+  }
+
   function MenuItem(titlestring,keystring,keymodifiers) 
   {
-    var $ = process.bridge.objc;
     if(typeof(keystring)=='undefined') keystring = "";
     if(typeof(keymodifiers)=='undefined') keymodifiers = "";
 
@@ -14,22 +31,11 @@ module.exports = (function() {
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
 
-    var NSMenuItemDelegate = $.NSObject.extend('NSMenuItemDelegate'+Math.round(Math.random()*10000));
-    NSMenuItemDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    NSMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { 
-      try { 
-        fireEvent('click'); 
-      } catch(e) {
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }
-    });
-    NSMenuItemDelegate.register();
-    var NSMenuItemDelegateInstance = NSMenuItemDelegate('alloc')('init');
-
+    var id = (Math.random()*100000).toString();
+    application.private.delegateMap[id] = this;
+    var menuDelegate = TintMenuItemDelegate('alloc')('initWithJavascriptObject', $(id));
   	var $menu = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
-    $menu('setTarget',NSMenuItemDelegateInstance);
+    $menu('setTarget',menuDelegate);
     $menu('setAction','click:');
 
   	var submenu=null, modifiers = "";

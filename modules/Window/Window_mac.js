@@ -5,108 +5,53 @@ module.exports = (function() {
 
   if(!$.WindowDelegate) {
     var WindowDelegate = $.NSObject.extend('WindowDelegate');
-    WindowDelegate.addMethod('initWithJavascriptObject:', ['@',[WindowDelegate,$.selector,'@']], function(self, cmd, id) {
-      try {
+    WindowDelegate.addMethod('initWithJavascriptObject:', ['@',[WindowDelegate, $.selector,'@']], 
+      utilities.errorwrap(function(self, cmd, id) {
         self.callback = application.private.delegateMap[id.toString()];
         application.private.delegateMap[id.toString()] = null;
-        return self; 
-      } catch (e) {
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }
-    });
-    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) {
-      try {
+        return self;
+    }));
+    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, window) {
         self.callback.fireEvent('close'); 
         return $.YES;
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('enter-fullscreen');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('leave-fullscreen');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      };  
-    });
-    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('focus');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('blur');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('minimize');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('restore');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('move');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', 
+      utilities.errorwrap(function(self, cmd, notification) { 
         self.callback.fireEvent('resize');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
-    WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { 
-      try {
+    }));
+    WindowDelegate.addMethod('windowDidClose:', 'v@:@@', 
+      utilities.errorwrap(function(self,cmd,notification) { 
         self.callback.fireEvent('closed');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }; 
-    });
+    }));
     WindowDelegate.register();
     $.WindowDelegate.IDMap = {};
   }
