@@ -20,13 +20,12 @@ module.exports = (function() {
 
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
     if(!NativeObjectClass || NativeObjectClass.type != '#') {
-      Panel.call(this, $.NSColorPanel, $.NSView, {isWindow:true});
+      Panel.call(this, $.NSColorPanel, $.NSView, {isPanel:true});
       this.native = this.native = $.NSColorPanel('sharedColorPanel');
       this.nativeView = this.native('contentView');
       this.native('setExcludedFromWindowsMenu', $.NO);
       this.native('makeKeyAndOrderFront', this.native);
       this.native('setReleasedWhenClosed', $.YES);
-      this.native('setFloatingPanel', $.YES);
       this.native('cascadeTopLeftFromPoint', $.NSMakePoint(20,20));
 
       var id = Math.random().toString();
