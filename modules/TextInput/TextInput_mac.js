@@ -53,6 +53,12 @@ module.exports = (function() {
       set:function(e) { this.nativeView('setEnabled',e); }
     });
 
+
+    Object.defineProperty(this, 'textcolor', {
+      get:function() { return new Color(this.nativeView('textColor')); },
+      set:function(e) { this.nativeView('setTextColor',e.native); }
+    });
+
     Object.defineProperty(this, 'alignment', {
       get:function() {
         if (this.nativeView('alignment') == 0) return "left";

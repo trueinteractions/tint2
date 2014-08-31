@@ -17,26 +17,38 @@ function run($utils) {
   var w = new Window();
   w.preferences.animateOnSizeChange = true;
   w.preferences.animateOnPositionChange = true;
-  setTimeout(function(){ 
+  /* @hidden */ setTimeout(function(){ 
     w.width = 800;
     w.height = 800;
-  }, 1000);
-  setTimeout(function(){
-    w.width = 100;
-    w.height = 100;
-  }, 2000);
-  setTimeout(function(){
+  /* @hidden */ }, 100);
+  /* @hidden */ setTimeout(function(){
+  /* @hidden */   $utils.assert(w.width == 800);
+  /* @hidden */   $utils.assert(w.height == 800);
+  /* @hidden */   $utils.assert(w.bounds.width == 800, 'w.bounds.width should be 800, was: '+w.bounds.width);
+  /* @hidden */   $utils.assert(w.bounds.height == 778, 'w.bounds.height should be 800, was: '+w.bounds.height);
+  /* @hidden */   w.width = 100;
+  /* @hidden */   w.height = 100;
+  /* @hidden */ }, 2000);
+  /* @hidden */ setTimeout(function(){
+  /* @hidden */   $utils.assert(w.width == 100);
+  /* @hidden */   $utils.assert(w.height == 100);
+  /* @hidden */   $utils.assert(w.bounds.width == 100);
+  /* @hidden */   $utils.assert(w.bounds.height == 78);
     w.x = 100;
-    w.y = 100;
-  }, 3000);
-  setTimeout(function(){
-    w.x = 900;
-    w.y = 900;
-  }, 4000);
-  setTimeout(function(){ 
-    w.close();
-    $utils.ok(); 
-  }, 5000);
+    w.y = 150;
+  /* @hidden */ }, 3500);
+  /* @hidden */ setTimeout(function(){
+    /* @hidden */ $utils.assert(w.x == 100, 'w.x should be 100, was: '+w.x);
+    /* @hidden */ $utils.assert(w.y == 150, 'w.y should be 150, was: '+w.y);
+    /* @hidden */   w.x = 900;
+    /* @hidden */   w.y = 500;
+  /* @hidden */ }, 4500);
+  /* @hidden */ setTimeout(function(){ 
+    /* @hidden */ $utils.assert(w.x == 900, 'w.x should be 900, was: '+w.x);
+    /* @hidden */ $utils.assert(w.y == 500, 'w.y should be 500, was: '+w.y);
+    /* @hidden */ w.close();
+    /* @hidden */ $utils.ok(); 
+  /* @hidden */ }, 5500);
 }
 
 /**

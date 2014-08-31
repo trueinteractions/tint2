@@ -73,6 +73,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Fonts, Font Managers and FontPanel
 * Menu (and MenuItem)
 * Notification
+* Panels (Inspector and Utility)
 * PopOver
 * ProgressBar
 * Screen Devices

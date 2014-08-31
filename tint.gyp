@@ -59,6 +59,7 @@
 			'modules/Menu/Menu_mac.js',
 			'modules/Menu/MenuItem_mac.js',
       'modules/Notification/Notification_mac.js',
+      'modules/Panel/Panel_mac.js',
       'modules/ProgressBar/ProgressBar_mac.js',
       'modules/PopOver/PopOver_mac.js',
       'modules/Screens/Screens_mac.js',

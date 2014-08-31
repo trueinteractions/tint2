@@ -24,7 +24,8 @@ function run($utils) {
   webView.left = webView.right = webView.top = webView.bottom = 0;
   win.width = 700;
 
-  $utils.assert(win.boundsOnScreen.width === webView.boundsOnScreen.width);
+  $utils.assert(win.boundsOnScreen.width === webView.boundsOnScreen.width, // @hidden
+    'window width: '+win.boundsOnScreen.width+' webview width: '+webView.boundsOnScreen.width);  // @hidden
 
   var buttonNormal = new Button();
   buttonNormal.title = "Hello";

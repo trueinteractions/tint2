@@ -17,6 +17,7 @@ global.FontPanel = require('FontPanel');
 global.Menu = require('Menu');
 global.MenuItem = require('MenuItem');
 global.Notification = require('Notification');
+global.Panel = require('Panel');
 global.PopOver = require('PopOver');
 global.ProgressBar = require('ProgressBar');
 global.Screens = require('Screens');

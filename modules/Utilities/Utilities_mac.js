@@ -352,12 +352,26 @@ module.exports = (function() {
     return imageRef;
   }
 
+  function parseUnits(e) {
+    if(typeof e == 'number') return e;
+    if(e.indexOf('%') > -1) {
+      e = e.replace('%','').trim();
+      e = parseInt(e);
+      e = e/100;
+    } else {
+      e = e.replace('px','').trim();
+      e = parseInt(e);
+    }
+    return e;
+  }
+
   return {
     attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
     parseColor:baseUtilities.parseColor,
     nsDictionaryToObject:nsDictionaryToObject,
-    nsArrayToArray:nsArrayToArray
+    nsArrayToArray:nsArrayToArray,
+    parseUnits:parseUnits
   }
 })();
 

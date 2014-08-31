@@ -58,6 +58,7 @@ TODO: Add colors:
     var events = {}, native, nativeView, needsMouseTracking = 0, 
         trackingArea = null, intrinsicSize = null, layoutContraints = [];
 
+    this.private = {};
     this.fireEvent = function(event,args) {
       var returnvalue = undefined;
       if(events[event]) {
@@ -68,7 +69,6 @@ TODO: Add colors:
       }
       return returnvalue;
     }
-
 
     function addTrackingArea() {
       var bounds = this.nativeView('bounds');
@@ -153,7 +153,7 @@ TODO: Add colors:
     Object.defineProperty(this,'bounds',{
       get:function() {
         var bounds = this.nativeView('bounds');
-        return {x:bounds.origin.x, y:bounds.origin.y, width:bounds.size.width, height:bounds.size.height};
+        return {x:bounds.origin.x, y:(bounds.origin.y - bounds.size.height), width:bounds.size.width, height:bounds.size.height};
       }
     });
 
@@ -175,8 +175,6 @@ TODO: Add colors:
       get:function() { return !this.nativeView('isHidden'); },
       set:function(e) { return this.nativeView('setHidden',!e); }
     });
-
-
  }
  return Control;
 })();
