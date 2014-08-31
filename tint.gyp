@@ -67,6 +67,7 @@
       'modules/SelectInput/SelectInput_mac.js',
       'modules/Slider/Slider_mac.js',
       'modules/StatusBar/StatusBar_mac.js',
+      'modules/Split/Split_mac.js',
       'modules/Text/Text_mac.js',
       'modules/TextInput/TextInput_mac.js',
       'modules/Toolbar/Toolbar_mac.js',

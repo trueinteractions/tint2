@@ -1,8 +1,8 @@
 module.exports = (function() {
   var Control = require('Control');
-  var Utilities = require('Utilities');
+  var utilities = require('Utilities');
   var $ = process.bridge.objc;
-  var parseValue = Utilities.parseUnits;
+  var parseValue = utilities.parseUnits;
 
   function Container(NativeObjectClass, NativeViewClass, options) {
     Control.call(this, NativeObjectClass, NativeViewClass, options);
@@ -119,324 +119,62 @@ module.exports = (function() {
     this.nativeView('layoutSubtreeIfNeeded');
   }
 
-  Object.defineProperty(Container.prototype, 'width', {
-    configurable:true,
-    get:function() { return this.private.user.width; },
-    set:function(e) {
-      if(this.private.user.left !== null && this.private.user.right !== null) 
-        throw new Error('A width cannot be set on an item that has a left and right set.');
-      var percent = false;
-      var tmp = this.private.user.width = e;
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.width = this.private.user.width;
-        }.bind(this));
-        return;
-      }
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent && tmp < 0) throw new Error('Value cannot be negative.');
-      if(this.private.constraints.width !== null) 
-        this.private.parent.removeLayoutConstraint(this.private.constraints.width);
-      if(percent) {
-        this.private.constraints.width = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'width',
-          multiplier:tmp, constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'width'
-        });
-      } else {
-        this.private.constraints.width = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'width',
-          multiplier:1.0, constant:tmp, 
-          relationship:'='
-        });
-      }
-    }
-  });
+  function createLayoutProperty(name, percentName, percentFunc, scalarName, scalarFunc, notAllowed) {
+    Object.defineProperty(Container.prototype, name, {
+      get: function() { return this.private.user[name]; },
+      set: function(value) {
 
-  Object.defineProperty(Container.prototype, 'height', {
-    configurable:true,
-    get:function() { return this.private.user.height; },
-    set:function(e) {
-      if(this.private.user.bottom !== null && this.private.user.top !== null) 
-        throw new Error('A height cannot be set on an item that has a top and bottom set.');
-      var percent = false;
-      var tmp = this.private.user.height = e;
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.height = this.private.user.height;
-        }.bind(this));
-        return;
-      }
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent && tmp < 0) throw new Error('Value cannot be negative.');
-      if(this.private.constraints.height !== null && this.private.parent) 
-        this.private.parent.removeLayoutConstraint(this.private.constraints.height);
-      if(percent) {
-        this.private.constraints.height = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'height',
-          multiplier:tmp, constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'height'
-        });
-      } else {
-        this.private.constraints.height = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'height',
-          multiplier:1.0, constant:tmp, 
-          relationship:'='
-        });
-      }
-    }
-  });
+        if(notAllowed && 
+            notAllowed[0] && this.private.user[notAllowed[0]] !== null && 
+            notAllowed[1] && this.private.user[notAllowed[1]] !== null)
+          throw new Error('A '+name+' cannot be set when the '+notAllowed[0]+' and '+notAllowed[1]+' have been set already.');
 
-  Object.defineProperty(Container.prototype, 'top', {
-    configurable:true,
-    get:function() { return this.private.user.top; },
-    set:function(e) {
-      if(this.private.user.bottom !== null && this.private.user.height !== null) 
-        throw new Error('A top cannot be set when the bottom and height have been set already.');
-      var percent = false;
-      var tmp = this.private.user.top = e;
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.top = this.private.user.top;
-        }.bind(this));
-        return;
-      }
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(tmp < 0) throw new Error('Value cannot be negative.');
-      if(this.private.constraints.top !== null && this.private.parent) 
-        this.private.parent.removeLayoutConstraint(this.private.user.constraints.top);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent) {
-        this.private.constraints.top = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'top',
-          multiplier:tmp, constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'bottom'
-        });
-      } else {
-        this.private.constraints.top = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'top',
-          multiplier:1.0, constant:tmp, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'top'
-        });
-      }
-    }
-  });
+        this.private.user[name] = value;
 
-  Object.defineProperty(Container.prototype, 'bottom', {
-    configurable:true,
-    get:function() { return this.private.user.bottom; },
-    set:function(e) {
-      if(this.private.user.top !== null && this.private.user.height !== null) 
-        throw new Error('A bottom cannot be set when the top and height have been set already.');
-      var percent = false;
-      var tmp = this.private.user.bottom = e;
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.bottom = this.private.user.bottom;
-        }.bind(this));
-        return;
-      }
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(tmp < 0) throw new Error('Value cannot be negative.');
-      if(this.private.constraints.bottom !== null && this.private.parent)
-        this.private.parent.removeLayoutConstraint(this.private.constraints.bottom);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent) {
-        this.private.constraints.bottom = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'bottom',
-          multiplier:(1-tmp), constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'bottom'
-        });
-      } else {
-        this.private.constraints.bottom = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'bottom',
-          multiplier:1.0, constant:(-1)*tmp, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'bottom'
-        });
-      }
-    }
-  });
+        if(!this.private.parent) {
+          this.addEventListener('parent-attached', function() { 
+            this[name] = this.private.user[name]; 
+          }.bind(this));
+          return;
+        }
 
-  Object.defineProperty(Container.prototype, 'right', {
-    configurable:true,
-    get:function() { return this.private.user.right; },
-    set:function(e) {
-      if(this.private.user.left !== null && this.private.user.width !== null) 
-        throw new Error('A right cannot be set when the left and width have been set already.');
-      var percent = false;
-      var tmp = this.private.user.right = e;
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.right = this.private.user.right;
-        }.bind(this));
-        return;
-      }
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(this.private.constraints.right !== null && this.private.parent) 
-        this.private.parent.removeLayoutConstraint(this.private.constraints.right);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent) {
-        this.private.constraints.right = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'right',
-          multiplier:(1-tmp), constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'right'
-        });
-      } else {
-        this.private.constraints.right = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'right',
-          multiplier:1.0, constant:(-1)*tmp, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'right'
-        });
-      }
-    }
-  });
+        var parsedValue = utilities.parseUnits(value);
+        var layoutObject = {priority:'required', firstItem:this, firstAttribute:name, relationship:'=', secondItem:this.private.parent};
 
-  Object.defineProperty(Container.prototype, 'left', {
-    configurable:true,
-    get:function() { return this.private.user.left; },
-    set:function(e) {
-      if(this.private.user.right !== null && this.private.user.width !== null) 
-        throw new Error('A left cannot be set when the right and width have been set already.');
-      var percent = false;
-      var tmp = this.private.user.left = e;
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.left = this.private.user.left;
-        }.bind(this));
-        return;
-      }
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(this.private.constraints.left !== null && this.private.parent) 
-        this.private.parent.removeLayoutConstraint(constraintLeft);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent) {
-        this.private.constraints.left = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'left',
-          multiplier:tmp, constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'right'
-        });
-      } else {
-        this.private.constraints.left = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'left',
-          multiplier:1.0, constant:tmp, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'left'
-        });
-      }
-    }
-  });
+        if(this.private.constraints[name] !== null) 
+          this.private.parent.removeLayoutConstraint(this.private.constraints[name]);
 
-  Object.defineProperty(Container.prototype, 'center', {
-    configurable:true,
-    get:function() { return this.private.user.center; },
-    set:function(e) {
-      var percent = false;
-      var tmp = this.private.user.center = e;
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.center = this.private.user.center;
-        }.bind(this));
-        return;
-      }
-      if(this.private.constraints.center !== null && this.private.parent) 
-        this.private.parent.removeLayoutConstraint(this.private.constraints.center);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent) {
-        this.private.constraints.center = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'center',
-          multiplier:tmp, constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'center'
-        });
-      } else {
-        this.private.constraints.center = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'center',
-          multiplier:1.0, constant:tmp, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'center'
-        });
-      }
-    }
-  });
+        if(typeof value != 'number' && value.indexOf('%') > -1) {
+          layoutObject.multiplier = percentFunc(parsedValue);
+          layoutObject.constant = 0.0;
+          layoutObject.secondAttribute = percentName;
+        } else {
+          layoutObject.multiplier = 1.0;
+          layoutObject.constant = scalarFunc(parsedValue);
+          layoutObject.secondAttribute = scalarName;
+        }
 
-  Object.defineProperty(Container.prototype, 'middle', {
-    configurable:true,
-    get:function() { return this.private.user.middle; },
-    set:function(e) {
-      var percent = false;
-      var tmp = this.private.user.middle = e;
-      if(e == null) tmp = e;
-      else tmp = parseValue(e);
-      if(!this.private.parent) {
-        this.addEventListener('parent-attached', function() {
-          this.middle = this.private.user.middle;
-        }.bind(this));
-        return;
+        if(!layoutObject.secondAttribute) layoutObject.secondItem = null;
+        this.private.constraints[name] = this.private.parent.addLayoutConstraint(layoutObject);
       }
+    });
+  }
 
-      if(this.private.constraints.middle !== null && this.private.parent) 
-        this.private.parent.removeLayoutConstraint(this.private.constraints.middle);
-      if(e == null) return;
-      if(typeof e != 'number' && e.indexOf('%') > -1) percent = true;
-      if(percent) {
-        this.private.constraints.middle = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'middle',
-          multiplier:tmp, constant:0.0, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'middle'
-        });
-      } else {
-        this.private.constraints.middle = this.private.parent.addLayoutConstraint({ 
-          priority:'required',
-          firstItem:this, firstAttribute:'middle',
-          multiplier:1.0, constant:tmp, 
-          relationship:'=',
-          secondItem:this.private.parent, secondAttribute:'middle'
-        });
-      }
-    }
-  });
+  function identity(v) { return v; }
+  function inverse(v) { return (1-v); }
+  function negate(v) { return -1*v; }
+
+  createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
+  createLayoutProperty('bottom', 'bottom', inverse, 'bottom', negate, ['top','height']);
+
+  createLayoutProperty('left', 'right', identity, 'left', identity, ['right','width']);
+  createLayoutProperty('right', 'right', inverse, 'right', negate, ['left','width']);
+
+  createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
+  createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
+
+  createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);
+  createLayoutProperty('center', 'center', identity, 'center', identity, null);
 
   return Container;
 })();
