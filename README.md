@@ -50,13 +50,13 @@ After building you'll find the binary in 'build/tools/Release/tint'. You can als
 You can run applications using:
 
 ```bash
-> tint some.js
+$ tint some.js
 ```
 
 Or you can run it in interactive mode.
 
 ```bash
-> tint
+$ tint
 ```
 
 In addition applications can be packaged as normal apps using a shell package system (more instructions coming on this).
