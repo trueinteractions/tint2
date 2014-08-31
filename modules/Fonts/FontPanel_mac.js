@@ -11,7 +11,7 @@ module.exports = (function() {
     this.native = fontManager('fontPanel', $.YES);
     fontManager('setDelegate',this.native);
     fontManager('setTarget', this.native);
-    $.TintFontPanel.panel.fireEvent = this.fireEvent;
+    $.TintFontPanel.panel.fireEvent = this.fireEvent.bind(this);
     this.native('makeKeyAndOrderFront',this.native);
 
     this.preferences = {

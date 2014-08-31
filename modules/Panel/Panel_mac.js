@@ -24,7 +24,7 @@ module.exports = (function() {
       this.private.styleMask = $.NSHUDWindowMask | $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSResizableWindowMask;
 
       var id = Math.random().toString();
-      $.WindowDelegate.IDMap[id] = this;
+      application.private.delegateMap[id] = this;
       var windowDelegateInstance = $.WindowDelegate('alloc')('initWithJavascriptObject', $(id));
       this.native('setDelegate', windowDelegateInstance);
     } else

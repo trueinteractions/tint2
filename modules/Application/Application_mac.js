@@ -48,6 +48,9 @@
     this.launch = function() { fireEvent('launch'); }.bind(this);
     this.uninstall = function() { console.warn('unimplemented'); }
 
+    this.private = {};
+    this.private.delegateMap = {};
+
     Object.defineProperty(this, 'packaged', {
       get:function() { return false; }
     });

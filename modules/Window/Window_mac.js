@@ -3,111 +3,113 @@ module.exports = (function() {
   var utilities = require('Utilities');
   var $ = process.bridge.objc;
 
-  var WindowDelegate = $.NSObject.extend('WindowDelegate');
-  WindowDelegate.addMethod('initWithJavascriptObject:', ['@',[WindowDelegate,$.selector,'@']], function(self, cmd, id) {
-    try {
-      self.callback = $.WindowDelegate.IDMap[id.toString()];
-      $.WindowDelegate.IDMap[id.toString()] = null;
-      return self; 
-    } catch (e) {
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }
-  });
-  WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) {
-    try {
-      self.callback.fireEvent('close'); 
-      return $.YES;
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('enter-fullscreen');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('leave-fullscreen');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    };  
-  });
-  WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('focus');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('blur');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('minimize');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('restore');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('move');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { 
-    try {
-      self.callback.fireEvent('resize');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { 
-    try {
-      self.callback.fireEvent('closed');
-    } catch(e) { 
-      console.log(e.message);
-      console.log(e.stack);
-      process.exit(1);
-    }; 
-  });
-  WindowDelegate.register();
-  $.WindowDelegate.IDMap = {};
+  if(!$.WindowDelegate) {
+    var WindowDelegate = $.NSObject.extend('WindowDelegate');
+    WindowDelegate.addMethod('initWithJavascriptObject:', ['@',[WindowDelegate,$.selector,'@']], function(self, cmd, id) {
+      try {
+        self.callback = application.private.delegateMap[id.toString()];
+        application.private.delegateMap[id.toString()] = null;
+        return self; 
+      } catch (e) {
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }
+    });
+    WindowDelegate.addMethod('windowWillClose:', 'v@:@@', function(self, cmd, window) {
+      try {
+        self.callback.fireEvent('close'); 
+        return $.YES;
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('enter-fullscreen');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('leave-fullscreen');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      };  
+    });
+    WindowDelegate.addMethod('windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('focus');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('blur');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('minimize');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('restore');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowDidMove:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('move');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowDidResize:', 'v@:@@', function(self, cmd, notification) { 
+      try {
+        self.callback.fireEvent('resize');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.addMethod('windowDidClose:', 'v@:@@', function(self,cmd,notification) { 
+      try {
+        self.callback.fireEvent('closed');
+      } catch(e) { 
+        console.log(e.message);
+        console.log(e.stack);
+        process.exit(1);
+      }; 
+    });
+    WindowDelegate.register();
+    $.WindowDelegate.IDMap = {};
+  }
 
   function Window(NativeObjectClass, NativeViewClass, options) {
     if(!NativeObjectClass || NativeObjectClass.type != '#') {
@@ -132,7 +134,7 @@ module.exports = (function() {
       this.native('center');
       
       var id = (Math.random()*100000).toString();
-      $.WindowDelegate.IDMap[id] = this;
+      application.private.delegateMap[id] = this;
       var windowDelegateInstance = $.WindowDelegate('alloc')('initWithJavascriptObject', $(id));
       this.native('setDelegate', windowDelegateInstance);
     } else
