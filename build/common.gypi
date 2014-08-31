@@ -205,9 +205,9 @@
         'defines': ['_DARWIN_USE_64_BIT_INODE=1'],
         'xcode_settings': {
 					'SDKROOT': '<!(xcrun --show-sdk-path)',
-					'PROJECT_DIR': '<@(DEPTH)/build',
-					'SYMROOT': '<@(DEPTH)/build',
-					'OBJROOT': '<@(DEPTH)/build',
+					'PROJECT_DIR': '<@(DEPTH)/build/xcode/',
+					'SYMROOT': '<@(DEPTH)/build/xcode/',
+					'OBJROOT': '<@(DEPTH)/build/xcode/',
           'ALWAYS_SEARCH_USER_PATHS': 'NO',
           'GCC_CW_ASM_SYNTAX': 'NO',                # No -fasm-blocks
           'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic

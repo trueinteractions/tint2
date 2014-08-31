@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 echo -n 'Tint unit tests for: '
 uname -a 
-if [ ! -f "../build/Release/tint" ]; then
-  if [ ! -f "../build/out/Release/tint" ]; then
+if [ ! -f "../build/xcode/Release/tint" ]; then
+  if [ ! -f "../build/ninja/out/Release/tint" ]; then
     echo "Cannot find the binary for tint, exiting."
     exit 0
   else
-    TINTEXEC="../build/out/Release/tint"
+    TINTEXEC="../build/ninja/out/Release/tint"
   fi
 else
-  TINTEXEC="../build/Release/tint"
+  TINTEXEC="../build/xcode/Release/tint"
 fi
 
 echo

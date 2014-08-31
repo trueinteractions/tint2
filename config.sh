@@ -15,11 +15,7 @@ if [ ! -f "./libraries/node/config.gypi" ]; then
   cd ../..
 fi
 
-if [ ! -d "./build" ]; then
-  mkdir build
-fi
-
 # -Dtarget_arch=x64 
-
-./tools/gyp/gyp ./tools/tint.gyp -f $GYP_GENERATORS -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./tools/config.gypi -I./tools/common.gypi
-./tools/gyp/gyp ./tools/tint.gyp -f ninja -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./tools/config.gypi -I./tools/common.gypi
+# -D gyp_output_dir=./build/xcode/
+./tools/gyp/gyp tint.gyp -f xcode -D target_arch=x64  --generator-output=./build/xcode/ --depth=. -I./build/config.gypi -I./build/common.gypi
+./tools/gyp/gyp tint.gyp -f ninja -D target_arch=x64 --generator-output=./build/ninja/ --depth=$PWD -I./build/config.gypi -I./build/common.gypi

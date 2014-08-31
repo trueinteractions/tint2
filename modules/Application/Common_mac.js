@@ -25,6 +25,7 @@ global.SearchInput = require('SearchInput');
 global.SelectInput = require('SelectInput');
 global.Slider = require('Slider');
 global.StatusBar = require('StatusBar');
+global.Text = require('Text');
 global.TextInput = require('TextInput');
 global.Toolbar = require('Toolbar');
 global.WebView = require('WebView');
