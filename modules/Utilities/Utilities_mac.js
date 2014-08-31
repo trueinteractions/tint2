@@ -365,13 +365,29 @@ module.exports = (function() {
     return e;
   }
 
+  function makePropertyBoolType(name,getselector,setselector) {
+    Object.defineProperty(this, name, {
+      get:function() { return this.native(getselector); },
+      set:function(value) { this.native(setselector, value ? true : false); }
+    });
+  }
+
+  function makePropertyStringType(name,getselector,setselector) {
+    Object.defineProperty(this, name, {
+      get:function() { return this.native(getselector); },
+      set:function(value) { this.native(setselector, $(value ? value : "")); }
+    });
+  }
+
   return {
     attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
     parseColor:baseUtilities.parseColor,
     nsDictionaryToObject:nsDictionaryToObject,
     nsArrayToArray:nsArrayToArray,
-    parseUnits:parseUnits
+    parseUnits:parseUnits,
+    makePropertyBoolType:makePropertyBoolType,
+    makePropertyStringType:makePropertyStringType
   }
 })();
 

@@ -7,25 +7,11 @@ module.exports = (function() {
   function Container(NativeObjectClass, NativeViewClass, options) {
     Control.call(this, NativeObjectClass, NativeViewClass, options);
 
-    this.addEventListener('parent-attached', function(p) {
-      //TODO: Attach constraints? (rather than in the width set?)
-      this.private.parent = p;
-    }.bind(this));
-    this.addEventListener('parent-dettached', function(p) { 
-      //TODO: Dettach constraints
-      this.private.parent = null; 
-    }.bind(this));
+    this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
+    this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
 
-    this.private.user = {
-      width:null, height:null,
-      left:null, right:null, top:null, bottom:null,
-      center:null, middle:null
-    };
-    this.private.constraints = {
-      width:null, height:null,
-      left:null, right:null, top:null, bottom:null,
-      center:null, middle:null
-    };
+    this.private.user = { width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null };
+    this.private.constraints = { width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null };
     this.private.parent = null;
     this.private.children = [];
     this.private.layoutObjcConstraints = [];
@@ -34,10 +20,7 @@ module.exports = (function() {
   Container.prototype = Object.create(Control.prototype);
   Container.prototype.constructor = Container;
 
-  Object.defineProperty(Container.prototype, 'alpha', {
-    get:function() { return this.native('alphaValue'); },
-    set:function(e) { this.native('setAlphaValue', e); }
-  });
+  (utilities.makePropertyBoolType.bind(Container.prototype))('alpha','alphaValue','setAlphaValue');
 
   Object.defineProperty(Container.prototype, 'children', { 
     get:function() { return this.private.children; }
@@ -123,26 +106,26 @@ module.exports = (function() {
     Object.defineProperty(Container.prototype, name, {
       get: function() { return this.private.user[name]; },
       set: function(value) {
+        var p = this.private;
 
-        if(notAllowed && 
-            notAllowed[0] && this.private.user[notAllowed[0]] !== null && 
-            notAllowed[1] && this.private.user[notAllowed[1]] !== null)
+        if(notAllowed && notAllowed[0] && p.user[notAllowed[0]] !== null && notAllowed[1] && p.user[notAllowed[1]] !== null)
           throw new Error('A '+name+' cannot be set when the '+notAllowed[0]+' and '+notAllowed[1]+' have been set already.');
 
-        this.private.user[name] = value;
+        p.user[name] = value;
+        var attached = function() {
+          this.removeEventListener('parent-attached',attached);
+          this[name] = p.user[name];
+        }.bind(this);
 
-        if(!this.private.parent) {
-          this.addEventListener('parent-attached', function() { 
-            this[name] = this.private.user[name]; 
-          }.bind(this));
-          return;
-        }
+        this.addEventListener('parent-attached', attached);
+        if(!p.parent) return;
+        this.addEventListener('parent-dettached', function() { p.parent.removeLayoutConstraint(p.constraints[name]); }.bind(this));
 
         var parsedValue = utilities.parseUnits(value);
-        var layoutObject = {priority:'required', firstItem:this, firstAttribute:name, relationship:'=', secondItem:this.private.parent};
+        var layoutObject = {priority:'required', firstItem:this, firstAttribute:name, relationship:'=', secondItem:p.parent};
 
-        if(this.private.constraints[name] !== null) 
-          this.private.parent.removeLayoutConstraint(this.private.constraints[name]);
+        if(p.constraints[name] !== null)
+          p.parent.removeLayoutConstraint(p.constraints[name]);
 
         if(typeof value != 'number' && value.indexOf('%') > -1) {
           layoutObject.multiplier = percentFunc(parsedValue);
@@ -155,7 +138,7 @@ module.exports = (function() {
         }
 
         if(!layoutObject.secondAttribute) layoutObject.secondItem = null;
-        this.private.constraints[name] = this.private.parent.addLayoutConstraint(layoutObject);
+        p.constraints[name] = p.parent.addLayoutConstraint(layoutObject);
       }
     });
   }

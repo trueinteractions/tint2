@@ -131,7 +131,7 @@ module.exports = (function() {
       this.native('setReleasedWhenClosed', $.YES);
       this.native('center');
       
-      var id = Math.random().toString();
+      var id = (Math.random()*100000).toString();
       $.WindowDelegate.IDMap[id] = this;
       var windowDelegateInstance = $.WindowDelegate('alloc')('initWithJavascriptObject', $(id));
       this.native('setDelegate', windowDelegateInstance);
@@ -152,7 +152,6 @@ module.exports = (function() {
   Window.prototype = Object.create(Container.prototype);
   Window.prototype.constructor = Window;
 
-  /** Properties **/
   Window.prototype.preferences = {
     animateOnSizeChange:false,
     animateOnPositionChange:false
@@ -162,15 +161,14 @@ module.exports = (function() {
     get:function() { 
       var os = require('os');
       var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
-      if(version > 13) {
+      if(version > 13)
         return this.minimizeButton ||
                this.maximizeButton ||
                this.closeButton ||
                this.resizable ||
                (this.native('styleMask') & $.NSTiledWindowMask);
-      } else
+      else
         return this.minimizeButton || this.maximizeButton || this.closeButton || this.resizable;
-      //return this.native('styleMask') & $.NSTitledWindowMask; 
     },
     set:function(e) {
       this.minimizeButton = e;
@@ -251,13 +249,7 @@ module.exports = (function() {
     }
   });
 
-  Object.defineProperty(Window.prototype, 'title', {
-    get:function() { return this.native('title'); },
-    set:function(e) { 
-      if(e == null || typeof(e) == 'undefined') e = "";
-      else this.native('setTitle', $(e));
-    }
-  });
+  (utilities.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
 
   Object.defineProperty(Window.prototype, 'y', {
     get:function() { 
