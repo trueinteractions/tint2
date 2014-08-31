@@ -198,7 +198,7 @@
         # javascript files to make for an even more pleasant IDE experience
         '<@(library_files)',
         # node.gyp is added to the project by default.
-        'common.gypi',
+        'tools/common.gypi',
       ],
 
       'defines': [
@@ -413,7 +413,7 @@
           'action_name': 'node_js2c',
           'inputs': [
             '<@(library_files)',
-            './config.gypi',
+            './tools/config.gypi',
           ],
           'outputs': [
             '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',

@@ -21,5 +21,5 @@ fi
 
 # -Dtarget_arch=x64 
 
-./tools/gyp/gyp tint.gyp -f $GYP_GENERATORS -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./config.gypi -I./common.gypi
-./tools/gyp/gyp tint.gyp -f ninja -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./config.gypi -I./common.gypi
+./tools/gyp/gyp tint.gyp -f $GYP_GENERATORS -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./tools/config.gypi -I./tools/common.gypi
+./tools/gyp/gyp tint.gyp -f ninja -D target_arch=x64 -D gyp_output_dir=build --generator-output=build --depth=$PWD -I./tools/config.gypi -I./tools/common.gypi

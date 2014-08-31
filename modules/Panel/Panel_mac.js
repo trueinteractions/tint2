@@ -30,6 +30,7 @@ module.exports = (function() {
     } else
       Window.call(this, NativeObjectClass, NativeViewClass, options);
   }
+
   Panel.prototype = Object.create(Window.prototype);
   Panel.prototype.constructor = Panel;
 
