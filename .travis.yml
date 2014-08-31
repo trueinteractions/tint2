@@ -10,4 +10,4 @@ install:
   - ./build.sh
 
 script:
-  - ./runtests.sh
+  - ./test.sh
