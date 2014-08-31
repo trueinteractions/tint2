@@ -92,22 +92,10 @@
 
     Object.defineProperty(this, 'icon', {
       get:function() { return icon; },
-      set:function(e) { 
+      set:function(e) {
         icon = e;
-        if(e.indexOf(':') > -1) {
-          //TODO: RELEASE NSImage???
-          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e.toString()))));
-        } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
-          $app('setApplicationIconImage',$.NSImage('alloc')('initWithContentsOfFile',$(e.toString())));
-        } else {
-          var imageRef = utilities.getImageFromString(e);
-          if(imageRef==null) {
-            if(application.warn) console.warn('Image referenced as: '+imageRef+'('+e+') could not be found.');
-            img = null;
-            return;
-          }
-          $app('setApplicationIconImage', $.NSImage('imageNamed',$(imageRef.toString())));
-        }
+        e = utilities.makeNSImage(e);
+        if(e) $app('setApplicationIconImage', e);
       }
     });
 

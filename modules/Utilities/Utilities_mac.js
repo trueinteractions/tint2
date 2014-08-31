@@ -379,6 +379,21 @@ module.exports = (function() {
     });
   }
 
+  function makeNSImage(e) {
+    var img = null;
+    if(!e || typeof(e) !== 'string') return null;
+    else if(e.indexOf(':') > -1)
+      img = $.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e)));
+    else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
+      img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
+    else {
+      var imageRef = getImageFromString(e);
+      if(imageRef==null) img = null;
+      else img = $.NSImage('imageNamed',$(imageRef));
+    }
+    return img;
+  }
+
   return {
     attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
@@ -387,7 +402,8 @@ module.exports = (function() {
     nsArrayToArray:nsArrayToArray,
     parseUnits:parseUnits,
     makePropertyBoolType:makePropertyBoolType,
-    makePropertyStringType:makePropertyStringType
+    makePropertyStringType:makePropertyStringType,
+    makeNSImage:makeNSImage
   }
 })();
 

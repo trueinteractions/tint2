@@ -60,17 +60,10 @@ module.exports = (function() {
 
     Object.defineProperty(this, 'image', {
       get:function() { return img; },
-      set:function(e) { 
-        img = e; // TODO: Release NSImage.
-        if(e.indexOf(':') > -1)
-          this.native('setImage',$.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e))));
-        else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
-          this.native('setImage',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
-        else {
-          var imageRef = utilities.getImageFromString(e);
-          if(imageRef==null) img = null;
-          else this.native('setImage', $.NSImage('imageNamed',$(imageRef)));
-        }
+      set:function(e) {
+        img = e;
+        e = utilities.makeNSImage(e);
+        if(e) this.native('setImage', e);
       }
     });
 

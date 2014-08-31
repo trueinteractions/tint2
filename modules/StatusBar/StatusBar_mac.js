@@ -3,7 +3,7 @@ module.exports = (function() {
   var utilities = require('Utilities');
 
   function StatusBar() {
-    var $statusbar = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1), img = null, events = {};
+    var $statusbar = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1), img = null, altimg = null, events = {};
     // This is collected immediately if its not retained explicitly.
     $statusbar('retain');
 
@@ -67,34 +67,20 @@ module.exports = (function() {
     });
 
     Object.defineProperty(this, 'imageClicked', {
-      get:function() { return img; },
+      get:function() { return altimg; },
       set:function(e) { 
-        img = e; // TODO: Release NSImage.
-        if(e.indexOf(':') > -1)
-          this.native('setAlternateImage',$.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e))));
-        else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
-          this.native('setImage',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
-        else {
-          var imageRef = utilities.getImageFromString(e);
-          if(imageRef==null) img = null;
-          else this.native('setAlternateImage', $.NSImage('imageNamed',$(imageRef)));
-        }
+        altimg = e; 
+        e = utilities.makeNSImage(e);
+        if(e) this.native('setAlternativeImage', e);
       }
     });
 
     Object.defineProperty(this, 'image', {
       get:function() { return img; },
       set:function(e) { 
-        img = e; // TODO: Release NSImage.
-        if(e.indexOf(':') > -1)
-          this.native('setImage',$.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e))));
-        else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
-          this.native('setImage',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
-        else {
-          var imageRef = utilities.getImageFromString(e);
-          if(imageRef==null) img = null;
-          else this.native('setImage', $.NSImage('imageNamed',$(imageRef)));
-        }
+        img = e;
+        e = utilities.makeNSImage(e);
+        if(e) this.native('setImage', e);
       }
     });
 

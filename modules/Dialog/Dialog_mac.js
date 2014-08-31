@@ -54,16 +54,9 @@ module.exports = (function() {
     Object.defineProperty(this, 'icon', {
       get:function() { return img; },
       set:function(e) { 
-        img = e; // TODO: Release NSImage.
-        if(e.indexOf(':') > -1)
-          this.native('setIcon',$.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e))));
-        else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
-          this.native('setIcon',$.NSImage('alloc')('initWithContentsOfFile',$(e)));
-        else {
-          var imageRef = utilities.getImageFromString(e);
-          if(imageRef==null) img = null;
-          else this.native('setIcon', $.NSImage('imageNamed',$(imageRef)));
-        }
+        img = e;
+        e = utilities.makeNSImage(e);
+        if(e) this.native('setIcon', e);
       }
     });
 
