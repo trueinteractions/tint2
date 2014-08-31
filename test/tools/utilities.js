@@ -19,6 +19,7 @@ var failureMark = '✕';
 var currentTest = null;
 var createBaseline = false;
 var ex = {};
+var tintexec;
 
 //try {
 	ex.assert = function assert(condition,value) {
@@ -289,7 +290,7 @@ var ex = {};
 	function setupShell(name, cmd) {
 		execAndPump("mkdir "+name+"-test", function() {
 			execAndPump("cp -a -p tools/Shell.app "+name+"-test", function() {
-				execAndPump("cp -a -p ../build/Release/tint "+name+"-test/Shell.app/Contents/MacOS/Runtime", function() {
+				execAndPump("cp -a -p "+tintexec+" "+name+"-test/Shell.app/Contents/MacOS/Runtime", function() {
 					execAndPump("cp "+name+".js ./"+name+"-test/Shell.app/Contents/Resources/test.js", function() {
 						execAndPump("cat tools/shell-stub.js >> ./"+name+"-test/Shell.app/Contents/Resources/test.js", cmd, notok)
 					}, notok);
@@ -364,7 +365,8 @@ var ex = {};
 	}
 
 	if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
-		var argv = args(process.argv.slice(2));
+    tintexec = process.argv[2];
+		var argv = args(process.argv.slice(3));
 		if(argv.baseline == "true") createBaseline = true;
 		var inputs = argv['_'];
 		nextTest();

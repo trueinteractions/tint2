@@ -14,7 +14,7 @@ fi
 
 echo
 for file in $@; do
-  $TINTEXEC tools/utilities.js $file
+  $TINTEXEC tools/utilities.js $TINTEXEC $file
   test $? -eq 0 || exit $?
 done
 echo
