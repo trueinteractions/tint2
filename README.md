@@ -95,7 +95,8 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 <h2>Creating a Browser in Tint</h2>
 
 ```javascript
-  // Include the widgets we'll need. Note you can individually include Application, TextInput, WebView etc.
+  // Include the widgets we'll need. Note you can 
+  // individually include Application, TextInput, WebView etc.
   require('Common');
 
   // Create the widgets.
