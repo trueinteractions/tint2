@@ -206,7 +206,10 @@ module.exports = (function() {
     var basetype = type.type ? type.type : type;
     if (basetype == '@?') return createBlock(val, basetype);
     else if (basetype == '^?') return createWrapperPointer(val, type);
-    else if (basetype == '@' || basetype == '#') return val ? val.pointer : null;
+    else if (basetype == '@' || basetype == '#') {
+      if(Buffer.isBuffer(val)) return val;
+      return val ? val.pointer : null;
+    }
     else if (basetype == ':') return selCache[val] || (selCache[val] = objc.sel_registerName(val));
     else if (val === true) return 1;
     else if (val === false) return 0;

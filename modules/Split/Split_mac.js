@@ -19,6 +19,10 @@ module.exports = (function() {
       backupRemove.apply(this,arguments);
       this.nativeView('adjustSubviews'); 
     }.bind(this);
+
+    this.setDividerAt = function(position, index) {
+      this.nativeView('setPosition', position, 'ofDividerAtIndex', index);
+    }
   }
 
   Split.prototype = Object.create(Container.prototype);

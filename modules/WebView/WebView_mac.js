@@ -6,6 +6,7 @@ module.exports = (function() {
   function WebView(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
+    options.nonStandardEvents = true;
     options.delegates = options.delegates.concat([
       ['webView:didCancelClientRedirectForFrame:','v@:@@', function(self,_cmd,frame) { this.fireEvent('cancel'); }.bind(this)],
       ['webView:didClearWindowObject:forFrame:','v@:@@@', function(self,_cmd,win,frame) { this.fireEvent('unload'); }.bind(this)],

@@ -65,27 +65,30 @@ module.exports = (function() {
   function Control(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
-    options.delegates = options.delegates.concat([
-      ['mouseDown:','v@:@', function(self, cmd, events) {
-          this.fireEvent('mousedown');
-          self.super('mouseDown',events);
-          if(options.mouseDownBlocks) this.fireEvent('mouseup');
-      }.bind(this)],
-      ['mouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('mouseup'); self.super('mouseUp',events); }.bind(this)],
-      ['rightMouseDown:','v@:@', function(self, cmd, events) { this.fireEvent('rightmousedown'); self.super('rightMouseDown',events); }.bind(this)],
-      ['rightMouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('rightmouseup'); self.super('rightMouseUp',events); }.bind(this)],
-      ['keyDown:','v@:@', function(self, cmd, events) { this.fireEvent('keydown'); self.super('keyDown',events); }.bind(this)],
-      ['keyUp:','v@:@', function(self, cmd, events) { this.fireEvent('keyup'); self.super('keyUp',events); }.bind(this)],
-      ['mouseEntered:','v@:@', function(self, cmd, events) { this.fireEvent('mouseenter'); self.super('mouseEntered',events); }.bind(this)],
-      ['mouseExited:','v@:@', function(self, cmd, events) { this.fireEvent('mouseexit'); self.super('mouseExited',events); }.bind(this)],
-      ['mouseMoved:','v@:@', function(self, cmd, events) { this.fireEvent('mousemove'); self.super('mouseMoved',events); }.bind(this)]
-    ]);
+    if(!options.nonStandardEvents) {
+      options.delegates = options.delegates.concat([
+        ['mouseDown:','v@:@', function(self, cmd, events) {
+            this.fireEvent('mousedown');
+            self.super('mouseDown',events);
+            if(options.mouseDownBlocks) this.fireEvent('mouseup');
+        }.bind(this)],
+        ['mouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('mouseup'); self.super('mouseUp',events); }.bind(this)],
+        ['rightMouseDown:','v@:@', function(self, cmd, events) { this.fireEvent('rightmousedown'); self.super('rightMouseDown',events); }.bind(this)],
+        ['rightMouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('rightmouseup'); self.super('rightMouseUp',events); }.bind(this)],
+        ['keyDown:','v@:@', function(self, cmd, events) { this.fireEvent('keydown'); self.super('keyDown',events); }.bind(this)],
+        ['keyUp:','v@:@', function(self, cmd, events) { this.fireEvent('keyup'); self.super('keyUp',events); }.bind(this)],
+        ['mouseEntered:','v@:@', function(self, cmd, events) { this.fireEvent('mouseenter'); self.super('mouseEntered',events); }.bind(this)],
+        ['mouseExited:','v@:@', function(self, cmd, events) { this.fireEvent('mouseexit'); self.super('mouseExited',events); }.bind(this)],
+        ['mouseMoved:','v@:@', function(self, cmd, events) { this.fireEvent('mousemove'); self.super('mouseMoved',events); }.bind(this)]
+      ]);
+    }
 
     this.private = {
       events:{}, layoutObjcConstraints:[], parent:null, trackingArea:null, needsMouseTracking:0,
       user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
       constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null }
     };
+
     this.nativeClass = NativeObjectClass;
     this.native = this.nativeView = null;
 

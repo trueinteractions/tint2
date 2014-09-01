@@ -44,7 +44,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./test.sh
 ```
 
-After building you'll find the binary in 'build/tools/Release/tint'. You can also use the Xcode project files contained in the 'build' directory. Optionally you can use ninja build files that are generated in 'build/out/Release' and 'build/out/Debug'.
+After building you'll find the binary in 'build/xcode/Release/tint'. You can also use the Xcode project files contained in the 'build' directory. Optionally you can use ninja build files that are generated in 'build/ninja/out/Release' and 'build/ninja/out/Debug'.
 
 <h2>Running</h2>
 You can run applications using:
