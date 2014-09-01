@@ -15,21 +15,35 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  var count = 0;
   var win = new Window();
   var split = new Split();
   var webview1 = new WebView();
   var webview2 = new WebView();
-
+  var webview3 = new WebView();
   win.appendChild(split);
   split.appendChild(webview1);
   split.appendChild(webview2);
+  split.appendChild(webview3);
   split.left = split.right = split.top = split.bottom = 0;
-  //webview2.left = webview2.top = 0;
-  //webview1.left = webview1.right = webview1.top = webview1.bottom = 0;
-  split.setDividerAt(250,0);
+  /* @hidden */ split.addEventListener('resized', function() {
+  /* @hidden */   count++;
+  /* @hidden */ });
   webview1.location = 'https://www.google.com';
   webview2.location = 'https://www.bing.com';
-  $utils.ok();
+  webview3.location = 'https://www.yahoo.com';
+  split.style = "thin";
+  /* @hidden */ $utils.assert(split.orientation == "vertical");
+  // The first value is a percentage indicating where the divider should be
+  // placed, the second is the index of the divider which is n-1 the children.
+  // or two in this case.
+  split.setPosition(0.333,0);
+  split.setPosition(0.666,1);
+  /* @hidden */ setTimeout(function() { 
+  /* @hidden */   $utils.assert(split.style == "thin");
+  /* @hidden */   $utils.assert(count > 3);
+  /* @hidden */   $utils.ok();
+  /* @hidden */ },1000);
 }
 
 /**

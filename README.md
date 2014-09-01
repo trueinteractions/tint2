@@ -80,6 +80,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * SelectInput (Combo Boxes)
 * SearchInput (look ahead while typing)
 * Slider (range value)
+* Split (Divider, Panes)
 * Status Bars (System Tray's)
 * TextInput
 * Toolbar
