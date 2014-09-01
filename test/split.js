@@ -29,7 +29,7 @@ function run($utils) {
   split.setDividerAt(250,0);
   webview1.location = 'https://www.google.com';
   webview2.location = 'https://www.bing.com';
-  //$utils.ok();
+  $utils.ok();
 }
 
 /**

@@ -1,92 +1,135 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
+  var Container = require('Container');
+  var Menu = require('Menu');
+
+  if(!$.TintStatusBarDelegate) {
+    if(!process.bridge.objc.delegates) process.bridge.objc.delegates = {};
+    var TintStatusBarDelegate = $.NSObject.extend('TintStatusBarDelegate');
+    TintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[TintStatusBarDelegate,$.selector,'@']], 
+      utilities.errorwrap(function(self, cmd, id) {
+        self.callback = process.bridge.objc.delegates[id.toString()];
+        process.bridge.objc.delegates[id.toString()] = null;
+        return self;
+    }));
+    TintStatusBarDelegate.addMethod('click:','v@:@', 
+      utilities.errorwrap(function(self,_cmd,frame) { 
+        self.callback.fireEvent('click');
+    }));
+    TintStatusBarDelegate.register();
+  }
 
   function StatusBar() {
-    var $statusbar = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1), img = null, altimg = null, events = {};
-    // This is collected immediately if its not retained explicitly.
-    $statusbar('retain');
+    this.private = {events:{},submenu:null,imgOn:null,img:null,custom:null,custommenu:null};
 
-    //TODO: Inherit event listeners..?
-    function fireEvent(event, args) {
-      if(events[event]) 
-        (events[event]).forEach(function(item,index,arr) { 
-          if(Array.isArray(args))
-            item.apply(null,args);
-          else
-            item.apply(null,[args]);
-        });
-    }
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
-
-    var StatusBarDelegate = $.NSObject.extend('StatusBar'+Math.round(Math.random()*10000));
-    StatusBarDelegate.addMethod('init:', '@@:', function(self) { return self; });
-    StatusBarDelegate.addMethod('click:','v@:@', function(self,_cmd,sender) { 
-      try {
-        fireEvent('click');
-      } catch(e) { 
-        console.log(e.message);
-        console.log(e.stack);
-        process.exit(1);
-      }
-    }.bind(this));
-    StatusBarDelegate.register();
-    var StatusBarDelegateInstance = StatusBarDelegate('alloc')('init');
-
-    $statusbar('setTarget',StatusBarDelegateInstance);
-    $statusbar('setAction','click:');
-
-    Object.defineProperty(this, 'title', {
-      get:function() { return $statusbar('title'); },
-      set:function(e) { $statusbar('setTitle', $(e)); }
-    });
-
-    this.setChild = function(e) { $statusbar('setView',e.native); }
-
-    Object.defineProperty(this, 'menu', {
-      set:function(e) { $statusbar('setMenu', e.native); }
-    });
-
-    Object.defineProperty(this, 'enabled', {
-      get:function() { return $statusbar('isEnabled') ? true : false; },
-      set:function(e) { $statusbar('setEnabled', e ? true : false); }
-    });
-
-    Object.defineProperty(this, 'tooltip', {
-      get:function() { return $statusbar('toolTip'); },
-      set:function(e) { $statusbar('setToolTip', $(e)); }
-    });
-
-    Object.defineProperty(this, 'native', {
-      get:function() { return $statusbar; }
-    });
-
-    Object.defineProperty(this, 'nativeView', {
-      get:function() { return $statusbar; }
-    });
-
-    Object.defineProperty(this, 'imageClicked', {
-      get:function() { return altimg; },
-      set:function(e) { 
-        altimg = e; 
-        e = utilities.makeNSImage(e);
-        if(e) this.native('setAlternativeImage', e);
-      }
-    });
-
-    Object.defineProperty(this, 'image', {
-      get:function() { return img; },
-      set:function(e) { 
-        img = e;
-        e = utilities.makeNSImage(e);
-        if(e) this.native('setImage', e);
-      }
-    });
-
-    this.close = function() { 
-      $statusbar('release');
-    }
+    var id = (Math.random()*100000).toString();
+    process.bridge.objc.delegates[id] = this;
+    var delegate = TintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
+    this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
+    this.native('retain'); // required else we'll find it GC'd 
+    this.native('setTarget',delegate);
+    this.native('setAction','click:');
   }
+
+  StatusBar.prototype.fireEvent = function(event, args) {
+    if(this.private.events[event]) 
+      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+  }
+
+  StatusBar.prototype.addEventListener = function(event, func) { 
+    if(!this.private.events[event]) 
+      this.private.events[event] = []; 
+    this.private.events[event].push(func); 
+  }
+
+  StatusBar.prototype.removeEventListener = function(event, func) { 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+      this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
+  }
+
+  StatusBar.prototype.close = function() { 
+    this.native('release');
+  }
+
+  Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
+    get:function() { return this.private.imgOn; },
+    set:function(e) { 
+      this.private.imgOn = e; 
+      e = utilities.makeNSImage(e);
+      if(e) this.native('setOnStateImage', e);
+    }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'imageOff', {
+    get:function() { return this.private.imgOff; },
+    set:function(e) { 
+      this.private.imgOff = e; 
+      e = utilities.makeNSImage(e);
+      if(e) this.native('setOffStateImage', e);
+    }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'image', {
+    get:function() { return this.private.img; },
+    set:function(e) { 
+      this.private.img = e;
+      e = utilities.makeNSImage(e);
+      if(e) this.native('setImage', e);
+    }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'menu', {
+    get:function() { return this.private.submenu; },
+    set:function(e) { 
+      if(e instanceof Menu) {
+        this.private.submenu = e;
+        this.native('setMenu',e.native);
+      } else throw new Error("The passed in object was not a valid menu object.");
+    }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'highlight', {
+    get:function() { return this.native('highlightMode') == $.YES ? true : false; },
+    set:function(e) { this.native('setHighlightMode', e ? $YES : NO); }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'title', {
+    get:function() { return this.native('title')('UTF8String'); },
+    set:function(e) { return this.native('setTitle',$(e)); }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'enabled', {
+    get:function() { return this.native('isEnabled'); },
+    set:function(e) { return this.native('setEnabled',e); }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'tooltip', {
+    get:function() { return this.native('toolTip')('UTF8String'); },
+    set:function(e) { return this.native('setToolTip',$(e)); }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'custom', {
+    get:function() { return this.private.custom; },
+    set:function(e) {
+      if(e instanceof Container) {
+        this.private.custom = e;
+        this.nativeView = e.nativeView;
+        return this.native('setView',e.nativeView);
+      }
+      else throw new Error("The passed in object was not a valid container or control.");
+    }
+  });
+
+  Object.defineProperty(StatusBar.prototype, 'custommenu', {
+    get:function() { return this.private.custommenu; },
+    set:function(e) {
+      if(e instanceof Menu) {
+        this.private.custommenu = e;
+        return this.native('popUpStatusItemMenu',e.native);
+      } else throw new Error("The passed in object was not a valid menu object.");
+    }
+  });
   return StatusBar;
+
 })();

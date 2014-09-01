@@ -21,26 +21,25 @@ function run($utils) {
   var someSuperMenuItem = new MenuItem('Some Item 1');
   someSuperMenuItem.submenu = someMenu;
   var someMenuItem = new MenuItem("Test Menu","z");
-  someMenuItem.addEventListener('click', function() { });
+  someMenuItem.addEventListener('click', function() { console.log('Test Menu was clicked.')});
   someMenu.appendChild(someMenuItem);
   var someOtherSuperMenuItem = new MenuItem('This Item');
   var someMenuItem3 = new MenuItem("New","n","shift");
   someMenuItem3.enabled = true;
-  someMenuItem3.addEventListener('click', function() { });
+  someMenuItem3.addEventListener('click', function() { console.log('New was clicked.'); });
   var someMenu2 = new Menu("SomeMenu2");
   someMenu2.appendChild(someMenuItem3);
   someOtherSuperMenuItem.submenu = someMenu2;
-
   statusmenu.appendChild(someSuperMenuItem);
   statusmenu.appendChild(someOtherSuperMenuItem);
 
   var statusbar = new StatusBar();
-  //statusbar.menu = statusmenu;
+  statusbar.menu = statusmenu;
   statusbar.image = 'reload';
-  statusbar.title = 'hello';
+  statusbar.title = 'hi ';
   statusbar.addEventListener('click', function() {
-    console.log('clicked');
-  })
+  });
+
 
   setTimeout(function(){
     statusbar.close();

@@ -1,13 +1,15 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
+  var Container = require('Container');
 
   if(!$.TintMenuItemDelegate) {
+    if(!process.bridge.objc.delegates) process.bridge.objc.delegates = {};
     var TintMenuItemDelegate = $.NSObject.extend('TintMenuItemDelegate');
     TintMenuItemDelegate.addMethod('initWithJavascriptObject:', ['@',[TintMenuItemDelegate,$.selector,'@']], 
       utilities.errorwrap(function(self, cmd, id) {
-        self.callback = application.private.delegateMap[id.toString()];
-        application.private.delegateMap[id.toString()] = null;
+        self.callback = process.bridge.objc.delegates[id.toString()];
+        process.bridge.objc.delegates[id.toString()] = null;
         return self;
     }));
     TintMenuItemDelegate.addMethod('click:','v@:@', 
@@ -17,96 +19,138 @@ module.exports = (function() {
     TintMenuItemDelegate.register();
   }
 
-  function MenuItem(titlestring,keystring,keymodifiers) 
-  {
+  function MenuItem(titlestring,keystring,keymodifiers) {
     if(typeof(keystring)=='undefined') keystring = "";
     if(typeof(keymodifiers)=='undefined') keymodifiers = "";
 
-    var events = {};
-
-    function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-    }
-
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+    this.private = {events:{},submenu:null,modifiers:"",imgOn:null,imgOff:null,img:null,custom:null};
 
     var id = (Math.random()*100000).toString();
-    application.private.delegateMap[id] = this;
+    process.bridge.objc.delegates[id] = this;
     var menuDelegate = TintMenuItemDelegate('alloc')('initWithJavascriptObject', $(id));
-  	var $menu = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
-    $menu('setTarget',menuDelegate);
-    $menu('setAction','click:');
-
-  	var submenu=null, modifiers = "";
-
-  	Object.defineProperty(this, 'submenu', {
-      get:function() { return submenu; },
-      set:function(e) { 
-        submenu = e;
-        $menu('setSubmenu',e.native);
-      }
-    });
-
-    Object.defineProperty(this, 'title', {
-      get:function() { return $menu('title')('UTF8String'); },
-      set:function(e) { return $menu('setTitle',$(e)); }
-    });
-
-    Object.defineProperty(this, 'enabled', {
-      get:function() { return $menu('isEnabled'); },
-      set:function(e) { return $menu('setEnabled',e); }
-    });
-
-    Object.defineProperty(this, 'hidden', {
-      get:function() { return $menu('isHidden'); },
-      set:function(e) { return $menu('setHidden',e); }
-    });
-
-    Object.defineProperty(this, 'key', {
-      get:function() { return $menu('keyEquivalent')('UTF8String'); },
-      set:function(e) { return $menu('setKeyEquivalent',$(e)); }
-    });
-
-    Object.defineProperty(this, 'modifiers', {
-      get:function() {
-        var modifiersFlags = $menu('keyEquivalentModifierMask');
-        var modifiersString = "";
-        if(modifierFlags & $.NSShiftKeyMask)
-          modifiersString += ",shift";
-        if(modifierFlags & $.NSAlternateKeyMask)
-          modifiersString += ",alt";
-        if(modifiersFlags & $.NSCommandKeyMask)
-          modifiersString += ",cmd";
-        if(modifiersFlags & $.NSControlKeyMask)
-          modifiersString += ",ctrl";
-        return modifiersString.length > 0 ? modifiersString.substring(1) : "";
-      },
-      set:function(e) { 
-        var modifiers = e.split(',');
-        var modifierFlags = 0;
-        modifiers.forEach(function(item,index,arr) {
-          if(item=='shift') modifierFlags = modifierFlags | $.NSShiftKeyMask;
-          if(item=='alt') modifierFlags = modifierFlags | $.NSAlternateKeyMask;
-          if(item=='cmd') modifierFlags = modifierFlags | $.NSCommandKeyMask;
-          if(item=='ctrl') modifierFlags = modifierFlags | $.NSControlKeyMask;
-        });
-        $menu('setKeyEquivalentModifierMask',modifierFlags);
-      }
-    });
-
-    Object.defineProperty(this, 'tooltip', {
-      get:function() { return $menu('toolTip')('UTF8String'); },
-      set:function(e) { return $menu('setToolTip',$(e)); }
-    });
-
-    Object.defineProperty(this, 'native', {
-      get:function() { return $menu; }
-    });
+  	this.native = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
+    this.native('setTarget',menuDelegate);
+    this.native('setAction','click:');
 
     if(titlestring) this.title = titlestring;
     if(keystring) this.key = keystring;
     if(keymodifiers) this.modifiers = keymodifiers;
   }
+
+  MenuItem.prototype.fireEvent = function(event, args) {
+    if(this.private.events[event]) 
+      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+  }
+
+  MenuItem.prototype.addEventListener = function(event, func) { 
+    if(!this.private.events[event]) 
+      this.private.events[event] = []; 
+    this.private.events[event].push(func); 
+  }
+
+  MenuItem.prototype.removeEventListener = function(event, func) { 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+      this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
+  }
+
+  Object.defineProperty(MenuItem.prototype, 'imageOn', {
+    get:function() { return this.private.imgOn; },
+    set:function(e) { 
+      this.private.imgOn = e; 
+      e = utilities.makeNSImage(e);
+      if(e) this.native('setOnStateImage', e);
+    }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'imageOff', {
+    get:function() { return this.private.imgOff; },
+    set:function(e) { 
+      this.private.imgOff = e; 
+      e = utilities.makeNSImage(e);
+      if(e) this.native('setOffStateImage', e);
+    }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'image', {
+    get:function() { return this.private.img; },
+    set:function(e) { 
+      this.private.img = e;
+      e = utilities.makeNSImage(e);
+      if(e) this.native('setImage', e);
+    }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'submenu', {
+    get:function() { return this.private.submenu; },
+    set:function(e) { 
+      this.private.submenu = e;
+      this.native('setSubmenu',e.native);
+    }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'title', {
+    get:function() { return this.native('title')('UTF8String'); },
+    set:function(e) { return this.native('setTitle',$(e)); }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'enabled', {
+    get:function() { return this.native('isEnabled'); },
+    set:function(e) { return this.native('setEnabled',e); }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'hidden', {
+    get:function() { return this.native('isHidden'); },
+    set:function(e) { return this.native('setHidden',e); }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'key', {
+    get:function() { return this.native('keyEquivalent')('UTF8String'); },
+    set:function(e) { return this.native('setKeyEquivalent',$(e)); }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'modifiers', {
+    get:function() {
+      var modifiersFlags = this.native('keyEquivalentModifierMask');
+      var modifiersString = "";
+      if(modifierFlags & $.NSShiftKeyMask)
+        modifiersString += ",shift";
+      if(modifierFlags & $.NSAlternateKeyMask)
+        modifiersString += ",alt";
+      if(modifiersFlags & $.NSCommandKeyMask)
+        modifiersString += ",cmd";
+      if(modifiersFlags & $.NSControlKeyMask)
+        modifiersString += ",ctrl";
+      return modifiersString.length > 0 ? modifiersString.substring(1) : "";
+    },
+    set:function(e) { 
+      var modifiers = e.split(',');
+      var modifierFlags = 0;
+      modifiers.forEach(function(item,index,arr) {
+        if(item=='shift') modifierFlags = modifierFlags | $.NSShiftKeyMask;
+        if(item=='alt') modifierFlags = modifierFlags | $.NSAlternateKeyMask;
+        if(item=='cmd') modifierFlags = modifierFlags | $.NSCommandKeyMask;
+        if(item=='ctrl') modifierFlags = modifierFlags | $.NSControlKeyMask;
+      });
+      this.native('setKeyEquivalentModifierMask',modifierFlags);
+    }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'tooltip', {
+    get:function() { return this.native('toolTip')('UTF8String'); },
+    set:function(e) { return this.native('setToolTip',$(e)); }
+  });
+
+  Object.defineProperty(MenuItem.prototype, 'custom', {
+    get:function() { return this.private.custom; },
+    set:function(e) {
+      if(e instanceof Container) {
+        this.private.custom = e;
+        this.nativeView = e.nativeView;
+        return this.native('setView',e.nativeView);
+      }
+      else throw new Error("The passed in object was not a valid container or control.");
+    }
+  });
   return MenuItem;
+
 })();

@@ -1,5 +1,4 @@
 module.exports = (function() {
-  var utilities = require('Utilities');
   var Window = require('Window');
   var $ = process.bridge.objc;
 
