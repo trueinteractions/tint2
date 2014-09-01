@@ -1,43 +1,32 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
-  var utilities = require('Utilities');
   var Container = require('Container');
 
-  if(!$.TintTextInputDelegate) {
-    var TintTextInputDelegate = $.NSObject.extend('TintTextInputDelegate');
-    TintTextInputDelegate.addMethod('initWithJavascriptObject:', ['@',[TintTextInputDelegate,$.selector,'@']], 
-      utilities.errorwrap(function(self, cmd, id) {
-        self.callback = application.private.delegateMap[id.toString()];
-        application.private.delegateMap[id.toString()] = null;
-        return self;
-    }));
-    TintTextInputDelegate.addMethod('controlTextDidChange:','v@:@',
-      utilities.errorwrap(function(self,_cmd,frame) { 
-        self.callback.fireEvent('keydown'); // NSTextField's do not allow overriding the keyDown component, however
-                                   // the input event is fired directly after the event has been processed.
-        self.callback.fireEvent('input');
-    }));
-    TintTextInputDelegate.addMethod('controlTextDidBeginEditing:','v@:@',
-      utilities.errorwrap(function(self,_cmd,frame) { 
-        self.callback.fireEvent('inputstart');
-    }));
-    TintTextInputDelegate.addMethod('controlTextDidEndEditing:','v@:@',
-      utilities.errorwrap(function(self,_cmd,frame) { 
-        self.callback.fireEvent('inputend');
-    }));
-    TintTextInputDelegate.register();
-  }
+  function TextInput(NativeObjectClass, NativeViewClass, options) {
+    options = options || {};
+    options.mouseDownBlocks = true;
+    options.keyDownBlocks = true;
+    options.delegates = options.delegates || [];
+    options.delegates = options.delegates.concat([
+      ['controlTextDidChange:','v@:@', function() {
+          // NSTextField's do not allow overriding the keyDown component, however
+          // the input event is fired directly after the event has been processed.
+          this.fireEvent('keydown'); 
+          this.fireEvent('input');
+        }.bind(this)
+      ],
+      ['controlTextDidBeginEditing:','v@:@', function() { this.fireEvent('inputstart'); }.bind(this)],
+      ['controlTextDidEndEditing:','v@:@', function() { this.fireEvent('inputend'); }.bind(this)]
+    ]);
 
-  function TextInput() 
-  {
-    Container.call(this, $.NSTextField, $.NSTextField, {mouseDownBlocks:true,keyDownBlocks:true});
+    if(NativeObjectClass && NativeObjectClass.type == '#')
+      Container.call(this, NativeObjectClass, NativeViewClass, options);
+    else
+      Container.call(this, $.NSTextField, $.NSTextField, options);
+
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
-
-    var id = (Math.random()*100000).toString();
-    application.private.delegateMap[id] = this;
-    var textInputDelegate = TintTextInputDelegate('alloc')('initWithJavascriptObject', $(id));
-    this.nativeView('setDelegate',textInputDelegate);
+    this.native('setDelegate', this.nativeView);
   }
 
   TextInput.prototype = Object.create(Container.prototype);

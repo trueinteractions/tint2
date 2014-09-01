@@ -4,31 +4,18 @@ module.exports = (function() {
   var $ = process.bridge.objc;
 
   function Panel(NativeObjectClass, NativeViewClass, options) {
-    if(!NativeObjectClass || NativeObjectClass.type != '#') {
-      Window.call(this, $.NSPanel, $.NSView, {isWindow:true});
-      this.native = this.nativeClass('alloc')('initWithContentRect', $.NSMakeRect(0,0,250,400), 
-                            'styleMask', $.NSHUDWindowMask | $.NSTitledWindowMask | $.NSUtilityWindowMask | $.NSClosableWindowMask | $.NSResizableWindowMask, 
-                            'backing', $.NSBackingStoreBuffered, 
-                            'defer', $.NO);
-      this.nativeView = this.nativeViewClass('alloc')('initWithFrame', $.NSMakeRect(0,0,250,400));
-      this.native('setContentView',this.nativeView);
-      this.native('setExcludedFromWindowsMenu', $.NO);
-      this.native('contentView')('setAutoresizingMask', $.NSViewWidthSizable | $.NSViewHeightSizable | 
-                                                        $.NSViewMinXMargin | $.NSViewMaxXMargin | 
-                                                        $.NSViewMinYMargin | $.NSViewMaxYMargin );
-      this.native('setFrame', $.NSMakeRect(0,0,250,400), 'display', $.YES, 'animate', $.YES);
-      this.native('makeKeyAndOrderFront', this.native);
-      this.native('setReleasedWhenClosed', $.YES);
-      this.native('setFloatingPanel', $.YES);
-      this.native('cascadeTopLeftFromPoint', $.NSMakePoint(20,20));
-      this.private.styleMask = $.NSHUDWindowMask | $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSResizableWindowMask;
+    options = options || {};
+    options.styleMask = options.styleMask || ($.NSHUDWindowMask | $.NSTitledWindowMask | $.NSUtilityWindowMask | 
+                                    $.NSClosableWindowMask | $.NSResizableWindowMask);
+    options.width = options.width || 200;
+    options.height = options.height || 250;
 
-      var id = Math.random().toString();
-      application.private.delegateMap[id] = this;
-      var windowDelegateInstance = $.WindowDelegate('alloc')('initWithJavascriptObject', $(id));
-      this.native('setDelegate', windowDelegateInstance);
-    } else
+    if(NativeObjectClass && NativeObjectClass.type == '#')
       Window.call(this, NativeObjectClass, NativeViewClass, options);
+    else
+      Window.call(this, $.NSPanel, $.NSView, options);
+
+    this.native('setFloatingPanel', $.YES);
   }
 
   Panel.prototype = Object.create(Window.prototype);

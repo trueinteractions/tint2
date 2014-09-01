@@ -1,39 +1,19 @@
 module.exports = (function() {
   var Panel = require('Panel');
-  var utilities = require('Utilities');
   var Color = require('Color');
   var $ = process.bridge.objc;
 
-  if(!$.ColorPanelDelegate) {
-    var ColorPanelDelegate = $.WindowDelegate.extend('ColorPanelDelegate');
-    ColorPanelDelegate.addMethod('changeColor:', 'v@:@', function(self,cmd,notification) {
-        try {
-          self.callback.fireEvent('colorchange');
-        } catch(e) { 
-          console.log(e.message);
-          console.log(e.stack);
-          process.exit(1);
-        };
-    }.bind(this));
-    ColorPanelDelegate.register();
-  }
-
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
-    if(!NativeObjectClass || NativeObjectClass.type != '#') {
-      Panel.call(this, $.NSColorPanel, $.NSView, {isPanel:true});
-      this.native = this.native = $.NSColorPanel('sharedColorPanel');
-      this.nativeView = this.native('contentView');
-      this.native('setExcludedFromWindowsMenu', $.NO);
-      this.native('makeKeyAndOrderFront', this.native);
-      this.native('setReleasedWhenClosed', $.YES);
-      this.native('cascadeTopLeftFromPoint', $.NSMakePoint(20,20));
+    options = options || {};
+    options.delegates = options.delegates || [];
+    options.delegates = options.delegates.concat([['changeColor:', 'v@:@', function(self, cmd, notif) { this.fireEvent('colorChange'); }.bind(this)]]);
 
-      var id = Math.random().toString();
-      application.private.delegateMap[id] = this;
-      var colorPanelDelegate = $.ColorPanelDelegate('alloc')('initWithJavascriptObject', $(id));
-      this.native('setDelegate', colorPanelDelegate);
-    } else
+    if(NativeObjectClass && NativeObjectClass.type == '#')
       Panel.call(this, NativeObjectClass, NativeViewClass, options);
+    else {
+      options.nativeObject = options.nativeObject || $.NSColorPanel('sharedColorPanel');
+      Panel.call(this, $.NSColorPanel, $.NSView, options);
+    }
   }
 
   ColorPanel.prototype = Object.create(Panel.prototype);

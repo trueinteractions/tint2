@@ -4,12 +4,16 @@ module.exports = (function() {
   var Font = require('Font');
   var $ = process.bridge.objc;
 
-  function FontPanel() {
-    Panel.call(this, $.TintFontPanel, $.NSView, {isPanel:true});
+  function FontPanel(NativeObjectClass, NativeViewClass, options) {
     var fontManager = $.NSFontManager('sharedFontManager');
-    this.native = fontManager('fontPanel', $.YES);
-    this.nativeView = this.native('contentView');
-    this.native('makeKeyAndOrderFront',this.native);
+    options = options || {};
+
+    if(NativeObjectClass && NativeObjectClass.type == '#')
+      Panel.call(this, NativeObjectClass, NativeViewClass, options);
+    else {
+      options.nativeObject = options.nativeObject || fontManager('fontPanel', $.YES);
+      Panel.call(this, $.TintFontPanel, $.NSView, options);
+    }
 
     fontManager('setDelegate',this.native);
     fontManager('setTarget', this.native);

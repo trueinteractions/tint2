@@ -3,66 +3,35 @@ module.exports = (function() {
   var utilities = require('Utilities');
   var Container = require('Container');
 
-  if(!$.TintWebViewDelegate) {
-    var TintWebViewDelegate = $.NSObject.extend('TintWebViewDelegate');
+  function WebView(NativeObjectClass, NativeViewClass, options) {
+    options = options || {};
+    options.delegates = options.delegates || [];
+    options.delegates = options.delegates.concat([
+      ['webView:didCancelClientRedirectForFrame:','v@:@@', function(self,_cmd,frame) { this.fireEvent('cancel'); }.bind(this)],
+      ['webView:didClearWindowObject:forFrame:','v@:@@@', function(self,_cmd,win,frame) { this.fireEvent('unload'); }.bind(this)],
+      ['webView:didFailLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { this.fireEvent('error'); }.bind(this)],
+      ['webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { this.fireEvent('error'); }.bind(this)],
+      ['webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function(self, _cmd, title, frame) { this.fireEvent('redirect'); }.bind(this)],
+      ['webView:didReceiveTitle:forFrame:', 'v@:@@@', function(self, _cmd, title, frame) { this.fireEvent('title'); }.bind(this)],
+      ['webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('loading'); }.bind(this)],
+      ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('load'); }.bind(this)],
+      ['webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('request'); }.bind(this)],
+      ['webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('close'); }.bind(this)],
+      ['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { this.fireEvent('locationchange'); }.bind(this)],
+      ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', 
+        function(self, _cmd, sender,url,seconds,date,frame) { this.fireEvent('redirect'); }.bind(this)],
+    ]);
 
-    TintWebViewDelegate.addMethod('initWithJavascriptObject:', ['@',[TintWebViewDelegate,$.selector,'@']], 
-      utilities.errorwrap(function(self, cmd, id) {
-        self.callback = application.private.delegateMap[id.toString()];
-        application.private.delegateMap[id.toString()] = null;
-        return self;
-    }));
-
-    TintWebViewDelegate.addMethod('webView:didCancelClientRedirectForFrame:','v@:@@', 
-      utilities.errorwrap(function(self,_cmd,frame) { self.callback.fireEvent('cancel'); }));
-
-    TintWebViewDelegate.addMethod('webView:didClearWindowObject:forFrame:','v@:@@@', 
-      utilities.errorwrap(function(self,_cmd,win,frame) { self.callback.fireEvent('unload'); }));
-
-    TintWebViewDelegate.addMethod('webView:didFailLoadWithError:forFrame:','v@:@@', 
-      utilities.errorwrap(function(self, _cmd, error, frame) { self.callback.fireEvent('error'); }));
-
-    TintWebViewDelegate.addMethod('webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', 
-      utilities.errorwrap(function(self, _cmd, error, frame) { self.callback.fireEvent('error'); }));
-
-    TintWebViewDelegate.addMethod('webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', 
-      utilities.errorwrap(function(self, _cmd, title, frame) { self.callback.fireEvent('redirect'); }));
-
-    TintWebViewDelegate.addMethod('webView:didReceiveTitle:forFrame:', 'v@:@@@', 
-      utilities.errorwrap(function(self, _cmd, title, frame) { self.callback.fireEvent('title'); }));
-
-    TintWebViewDelegate.addMethod('webView:didStartProvisionalLoadForFrame:', 'v@:@@', 
-      utilities.errorwrap(function(self, _cmd, frame) { self.callback.fireEvent('loading'); }));
-
-    TintWebViewDelegate.addMethod('webView:didFinishLoadForFrame:', 'v@:@@', 
-      utilities.errorwrap(function(self, _cmd, frame) { self.callback.fireEvent('load'); }));
-
-    TintWebViewDelegate.addMethod('webView:didCommitLoadForFrame:', 'v@:@@', 
-      utilities.errorwrap(function(self, _cmd, frame) { self.callback.fireEvent('request'); }));
-
-    TintWebViewDelegate.addMethod('webView:willCloseFrame:', 'v@:@@', 
-      utilities.errorwrap(function(self, _cmd, frame) { self.callback.fireEvent('close'); }));
-
-    TintWebViewDelegate.addMethod('webView:didChangeLocationWithinPageForFrame:', 'v@:@@', 
-      utilities.errorwrap(function(self, _cmd, notif) { self.callback.fireEvent('locationchange'); }));
-
-    TintWebViewDelegate.addMethod('webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', 
-      utilities.errorwrap(function(self, _cmd, sender,url,seconds,date,frame) { self.callback.fireEvent('redirect'); }));
-
-    TintWebViewDelegate.register();
-  }
-
-  function WebView() {
-    Container.call(this, $.WebView, $.WebView, {isWebView:true});
+    if(NativeObjectClass && NativeObjectClass.type == '#')
+      Container.call(this, NativeObjectClass, NativeViewClass, options);
+    else
+      Container.call(this, $.WebView, $.WebView, options);
+    
     this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
     this.nativeView('setShouldCloseWithWindow',$.YES);
     this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.nativeView('setShouldUpdateWhileOffscreen',$.YES);
-
-    var id = (Math.random()*100000).toString();
-    application.private.delegateMap[id] = this;
-    var webViewDelegate = $.TintWebViewDelegate('alloc')('initWithJavascriptObject', $(id));
-    this.nativeView('setFrameLoadDelegate', webViewDelegate);
+    this.nativeView('setFrameLoadDelegate', this.nativeView);
   }
 
   WebView.prototype = Object.create(Container.prototype);

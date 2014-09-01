@@ -101,7 +101,7 @@ function run($utils) {
     /* @hidden */ if(go) $utils.clickAtControl(input2);
   });
   input.addEventListener('change', function(e) {
-    /* @hidden */ if(input.selectedIndex == 0) $utils.assert(input.value == "One");
+    /* @hidden */ if(input.selectedIndex == 0) $utils.assert(input.value == "One", 'Expected "One" but got "' + input.value + '"');
     /* @hidden */ if(input.selectedIndex == 1) {
     /* @hidden */   ready = true;
     /* @hidden */   $utils.assert(input.value == "Two");

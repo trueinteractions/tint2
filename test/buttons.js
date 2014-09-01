@@ -76,11 +76,11 @@ function run($utils) {
     multiplier:1, constant:10
   });
 
-  var buttonRadio1 = new Button({
-    title:'Radio Box 2 (Selected)',
-    type:'radio',
-    state:true
-  });
+  var buttonRadio1 = new Button();
+  buttonRadio1.title = 'Radio Box 2 (Selected)';
+  buttonRadio1.type = 'radio';
+  buttonRadio1.state = 'true';
+
   buttonRadio1.addEventListener('mousedown', function() {
     /* @hidden */ count++;
     /* @hidden */ //$utils.takeSnapshotOfCurrentWindow('assets/buttons_mac.png');
