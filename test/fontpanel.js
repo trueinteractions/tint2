@@ -59,7 +59,7 @@ function run($utils) {
   /* @hidden */       setTimeout(function() {
   /* @hidden */         $utils.clickAt(320,109);
   /* @hidden */         setTimeout(function() {
-  /* @hidden */           $utils.clickAt(450,109);
+  /* @hidden */           $utils.clickAt(440,109);
   /* @hidden */           $utils.keyAtControl('1');
   /* @hidden */           $utils.keyAtControl('5');
   /* @hidden */           trackChange = true;
