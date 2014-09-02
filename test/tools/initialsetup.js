@@ -20,5 +20,9 @@ $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMo
 $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 52, true));
 $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 52, false));
 
+
+$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 36, true));
+$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 36, false));
+
 // Give a second before we begin.
 setTimeout(function() { process.exit(0); }, 1000);
