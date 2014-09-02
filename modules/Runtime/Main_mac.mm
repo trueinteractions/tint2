@@ -61,25 +61,15 @@ static void uv_event(void *info) {
 
 	int r;
 	struct kevent errors[1];
-
-	while (!embed_closed) {
-		uv_loop_t* loop = uv_default_loop();
-
-		int timeout = uv_backend_timeout(loop);
-
-    // -1 in UV language means "who knows" or we're aware of a pending event
-    // but its unknown when it will execute, recheck later.  There are situations
-    // where these are callbacks for draw events, so lets keep our check interval
-    // ABOVE energy performance requirements (>15.6) but still close to 60fps.
-    // In the situation timeout returns more than 100ms, reset to check in 100ms,
-    // the timeout we get back could have been from a setTimeout call, if the setTimout
-    // had a significantly large wait time (such as 20seconds) we'll do nothing during
-    // that time, however there may actually be other pending events (such as -1)
-    // to deal with.  We'll take a conservative approach and recheck in 100 ms.
-		if(timeout == -1) timeout = 1000.0/60.0;
-		else if (timeout > 100) timeout = 100;
-
+  uv_loop_t* loop = uv_default_loop();
+  int timeout = uv_backend_timeout(loop);
+	
+  while (!embed_closed) {
     int fd = uv_backend_fd(loop);
+
+    timeout = uv_backend_timeout(loop);
+    if(timeout < 0) timeout = 250;
+    if(timeout > 500) timeout = 500;
 
 		do {
 			struct timespec ts;
@@ -95,8 +85,13 @@ static void uv_event(void *info) {
 			uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 			uv_sem_post(&embed_sem);
 		});
+
 		// Wait for the main loop to deal with events.
 		uv_sem_wait(&embed_sem);
+
+    // The position of this timeout is critical for the loop, do not
+    // place it above the sem_wait or at the beginning of the loop.
+    timeout = uv_backend_timeout(loop);
 	}
 }
 
