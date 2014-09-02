@@ -19,9 +19,7 @@ function run($utils) {
   /* @hidden */ //var second = false;
   /* @hidden */ panel.x=0;
   /* @hidden */ panel.y=0;
-  /* @hidden */ panel.width=500;
-  /* @hidden */ panel.height=500;
-  /* @hidden */ $utils.clickAt(250,250);
+  /* @hidden */ $utils.clickAt(125,125);
   panel.addEventListener('colorchange', function() {
     var selected = panel.selected;
     /* @hidden */ $utils.assert(selected.red <= 1 && selected.red >= 0, 'selected.red='+selected.red+' < 0.96 && selected.red='+selected.red+' > 0.93');
