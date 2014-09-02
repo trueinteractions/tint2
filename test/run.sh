@@ -11,7 +11,7 @@ if [ ! -f "../build/xcode/Release/tint" ]; then
 else
   TINTEXEC="../build/xcode/Release/tint"
 fi
-
+$TINTEXEC tools/initialsetup.js
 echo
 for file in $@; do
   $TINTEXEC tools/utilities.js $TINTEXEC $file
