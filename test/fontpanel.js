@@ -22,7 +22,7 @@ function run($utils) {
   /* @hidden */ panel.x=0;
   /* @hidden */ panel.y=0;
   /* @hidden */ panel.width = 500;
-  /* @hidden */ panel.height = 500;
+  /* @hidden */ panel.height = 250;
   panel.addEventListener('fontchange', function() {
     /* @hidden */ if(trackChange){
     var selected = panel.selected;
