@@ -29,6 +29,7 @@ var tintexec;
 			console.log('assertion failed.');
 			console.error(msg.message);
 			console.error(msg.stack);
+      console.log(ex.takeSnapshotOfActiveScreen());
 			process.exit(1);
 		}
 	}
@@ -340,11 +341,11 @@ var tintexec;
 
   var timeoutToSnapshot = null;
 	function nextTest() {
-    if(timeoutToSnapshot) clearTimeout(timeoutToSnapshot);
-    timeoutToSnapshot = setTimeout(function() {
-      console.log(ex.takeSnapshotOfActiveScreen());
-      process.exit(1);
-    }, 10000);
+    //if(timeoutToSnapshot) clearTimeout(timeoutToSnapshot);
+    //timeoutToSnapshot = setTimeout(function() {
+    //  console.log(ex.takeSnapshotOfActiveScreen());
+    //  process.exit(1);
+    //}, 20000);
     //application.hideAllOtherApplications();
     //application.visible = true;
 		if(inputs.length > 0)

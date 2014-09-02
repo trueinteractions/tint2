@@ -35,7 +35,7 @@ function run($utils) {
     /* @hidden */ $utils.assert(openEvent);
     /* @hidden */ $utils.ok();
   });
-  popOver.addEventListener('open', function() { 
+  popOver.addEventListener('open', function() {
     /* @hidden */ openEvent = true;
   });
   popOver.appendChild(input);
@@ -149,7 +149,6 @@ function run($utils) {
     secondItem:popOver, secondAttribute:'right',
     multiplier:1.0, constant:-10.0
   });
-
   /* @hidden */ setTimeout(function() {
   /* @hidden */   $utils.clickAtControl(popOpen);
   /* @hidden */ }, 500);
