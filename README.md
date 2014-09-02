@@ -67,6 +67,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Application Schema (app:// protocol for packaged apps)
 * Button (Normal, Toggle, Radio, Checkbox)
 * Color, Color Picker (ColorLabel)
+* Container (Generic view)
 * Dialogs (Alerts, sheets, etc)
 * DropDown
 * FileDialog (Save/Open)
@@ -77,6 +78,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * PopOver
 * ProgressBar
 * Screen Devices
+* Scroll (Scroll views)
 * SelectInput (Combo Boxes)
 * SearchInput (look ahead while typing)
 * Slider (range value)

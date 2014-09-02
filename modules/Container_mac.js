@@ -5,7 +5,13 @@ module.exports = (function() {
   var parseValue = utilities.parseUnits;
 
   function Container(NativeObjectClass, NativeViewClass, options) {
-    Control.call(this, NativeObjectClass, NativeViewClass, options);
+    if(NativeObjectClass && NativeObjectClass.type == '#')
+      Control.call(this, NativeObjectClass, NativeViewClass, options);
+    else {
+      Control.call(this, $.NSView, $.NSView, options);
+      this.native = this.nativeView = this.nativeViewClass('alloc')('init');
+      this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    }
     this.private.children = [];
   }
 

@@ -1,6 +1,7 @@
 module.exports = (function() {
   $ = process.bridge.objc;
   function Color(type, c1, c2, c3, c4, c5) {
+    if(type instanceof Color) return type;
     if(type.type == '@') this.native = type;
     else if(type == "black") this.native = $.NSColor('blackColor');
     else if(type == "black") this.native = $.NSColor('blueColor');

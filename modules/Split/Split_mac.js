@@ -7,30 +7,12 @@ module.exports = (function() {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
-      ['splitView:canCollapseSubview:','B@:@@', function(self, selector, splitview, subview) {
-        //console.log('canCollapseSubview');
-        return $.NO; 
-      }.bind(this)],
-      ['splitView:constrainMaxCoordinate:ofSubviewAt:','d@:@dl', function(self, selector, splitview, proposedMax, index) {
-        //console.log('constrainMaxCoordinate');
-        return proposedMax; 
-      }.bind(this)],
-      ['splitView:constrainMinCoordinate:ofSubviewAt:','d@:@dl', function(self, selector, splitview, proposedMin, index) {
-        //console.log('constrainMaxCoordinate');
-        return proposedMin;
-      }.bind(this)],
-      ['splitView:constrainSplitPosition:ofSubviewAt:','d@:@dl', function(self, selector, splitview, proposedPosition, index) {
-        //console.log('constrainSplitPosition');
-        return proposedPosition;
-      }.bind(this)],
-      ['splitView:shouldAdjustSizeOfSubview:','B@:@@', function(self, selector, splitview, subview) {
-        //console.log('shouldAdjustSizeOfSubview');
-        return $.YES; 
-      }.bind(this)],
-      ['splitView:shouldHideDividerAtIndex:','B@:@l', function(self, selector, splitview, index) {
-        //console.log('shouldHideDividerAtIndex');
-        return $.YES;
-      }.bind(this)],
+      ['splitView:canCollapseSubview:','B@:@@', function(self, selector, splitview, subview) { return $.NO; }.bind(this)],
+      ['splitView:constrainMaxCoordinate:ofSubviewAt:','d@:@dl', function(self, selector, splitview, proposedMax, index) { return proposedMax; }.bind(this)],
+      ['splitView:constrainMinCoordinate:ofSubviewAt:','d@:@dl', function(self, selector, splitview, proposedMin, index) { return proposedMin; }.bind(this)],
+      ['splitView:constrainSplitPosition:ofSubviewAt:','d@:@dl', function(self, selector, splitview, proposedPosition, index) { return proposedPosition; }.bind(this)],
+      ['splitView:shouldAdjustSizeOfSubview:','B@:@@', function(self, selector, splitview, subview) { return $.YES; }.bind(this)],
+      ['splitView:shouldHideDividerAtIndex:','B@:@l', function(self, selector, splitview, index) { return $.YES; }.bind(this)],
       ['splitViewDidResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resized'); }.bind(this)],
       ['splitViewWillResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resize'); }.bind(this)]
     ]);

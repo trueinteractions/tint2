@@ -240,6 +240,18 @@ var tintexec;
 	        $.NSLog($("Failed to write image to %@"), $(path));
 	    }
 	}
+  ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
+    var cgimage = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
+    /*var nsimage = $.NSImage('alloc')('initWithCGImage',cgimage,'size',$.NSZeroSize);
+    var size = nsimage('size');
+    nsimage('lockFocus');*/
+    var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',cgimage);
+    //var bitmapRep = $.NSBitmapImageRep('alloc')('initWithFocusedViewRect',$.NSMakeRect(0, 0, size.width, size.height));
+    //nsimage('unlockFocus')
+    var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
+    var base64String = imageData('base64EncodedStringWithOptions',0);
+    return base64String;
+  }
 	ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
 		var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListExcludeDesktopElements, 1, $.kCGWindowImageDefault);
 		this.writeImage(image, path);
@@ -326,7 +338,13 @@ var tintexec;
 		}
 	}
 
+  var timeoutToSnapshot = null;
 	function nextTest() {
+    if(timeoutToSnapshot) clearTimeout(timeoutToSnapshot);
+    timeoutToSnapshot = setTimeout(function() {
+      console.log(ex.takeSnapshotOfActiveScreen());
+      process.exit(1);
+    }, 10000);
     //application.hideAllOtherApplications();
     //application.visible = true;
 		if(inputs.length > 0)
