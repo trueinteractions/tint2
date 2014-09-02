@@ -13,7 +13,7 @@ function baseline() {
 /**
  * @see {Fonts}
  * @see {FontPanel}
- * @example
+ * @example 
  */
 function run($utils) {
   var panel = new FontPanel();
