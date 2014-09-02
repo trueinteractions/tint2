@@ -52,6 +52,10 @@ static void uv_noop(uv_async_t* handle, int status) {}
 static void uv_event(void *info) {
 	[[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
 
+  // The dummy handle prevents UV from exiting and throwing incorrect
+  // timeout values, its necessary since uv can't see many of the app
+  // events to keep it assuming something else will come and return -1
+  // from uv_backend_timeout.
 	uv_async_t dummy_uv_handle_;
 	uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
 
@@ -62,8 +66,20 @@ static void uv_event(void *info) {
 		uv_loop_t* loop = uv_default_loop();
 
 		int timeout = uv_backend_timeout(loop);
-		if(timeout == -1) timeout = 15.6;
-		int fd = uv_backend_fd(loop);
+
+    // -1 in UV language means "who knows" or we're aware of a pending event
+    // but its unknown when it will execute, recheck later.  There are situations
+    // where these are callbacks for draw events, so lets keep our check interval
+    // ABOVE energy performance requirements (>15.6) but still close to 60fps.
+    // In the situation timeout returns more than 100ms, reset to check in 100ms,
+    // the timeout we get back could have been from a setTimeout call, if the setTimout
+    // had a significantly large wait time (such as 20seconds) we'll do nothing during
+    // that time, however there may actually be other pending events (such as -1)
+    // to deal with.  We'll take a conservative approach and recheck in 100 ms.
+		if(timeout == -1) timeout = 1000.0/60.0;
+		else if (timeout > 100) timeout = 100;
+
+    int fd = uv_backend_fd(loop);
 
 		do {
 			struct timespec ts;
@@ -72,13 +88,13 @@ static void uv_event(void *info) {
 			r = kevent(fd, NULL, 0, errors, 1, timeout < 0 ? NULL : &ts);
 		} while (r == -1 && errno == EINTR);
 
-		// Do not block, but place a function on the main queue, run the
-		// node block then re-post the semaphore to unlock this loop.
+		// Do not block this thread, place uv callbacks on the main thread, 
+    // then repost the semaphore to allow us to continue. Note, we've
+    // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
 		dispatch_async(dispatch_get_main_queue(), ^{
 			uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 			uv_sem_post(&embed_sem);
 		});
-
 		// Wait for the main loop to deal with events.
 		uv_sem_wait(&embed_sem);
 	}

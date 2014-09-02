@@ -83,5 +83,6 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
+  timeout:true,
   name:"FontPanel",
 };

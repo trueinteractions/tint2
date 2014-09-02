@@ -339,13 +339,7 @@ var tintexec;
 		}
 	}
 
-  var timeoutToSnapshot = null;
 	function nextTest() {
-    //if(timeoutToSnapshot) clearTimeout(timeoutToSnapshot);
-    //timeoutToSnapshot = setTimeout(function() {
-    //  console.log(ex.takeSnapshotOfActiveScreen());
-    //  process.exit(1);
-    //}, 20000);
     //application.hideAllOtherApplications();
     //application.visible = true;
 		if(inputs.length > 0)
@@ -373,6 +367,15 @@ var tintexec;
 					currentTest.setup();
 					currentTest.run(ex);
 					currentTest.shutdown();
+
+          if(currentTest.timeout) {
+            //if(timeoutToSnapshot) clearTimeout(timeoutToSnapshot);
+            //timeoutToSnapshot = 
+              setTimeout(function() {
+                console.log(ex.takeSnapshotOfActiveScreen());
+                process.exit(1);
+              }, 20000);
+          }
 				}
 			} catch(e) {
 				notok();
