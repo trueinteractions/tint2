@@ -4,6 +4,7 @@ process.bridge.objc.import('Quartz');
 process.bridge.objc.import('Cocoa');
 process.bridge.objc.import('AppKit');
 process.bridge.objc.import('CoreGraphics');
+var exec = require('child_process').exec;
 
 var $ = process.bridge.objc;
 
@@ -19,10 +20,11 @@ $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMo
 // Send an enter command to void out any modals.
 $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 52, true));
 $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 52, false));
-
-
 $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 36, true));
 $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, 36, false));
+
+// Finaly straw, kill off the iPhone Simulator (travis-ci builds.)
+exec("killall -9 \"iPhone Simulator\"", {}, function(error,stdout,stderr) {});
 
 // Give a second before we begin.
 setTimeout(function() { process.exit(0); }, 1000);
