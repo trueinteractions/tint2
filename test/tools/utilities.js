@@ -29,7 +29,7 @@ var tintexec;
 			console.log('assertion failed.');
 			console.error(msg.message);
 			console.error(msg.stack);
-      console.log(ex.takeSnapshotOfActiveScreen());
+      //console.log(ex.takeSnapshotOfActiveScreen());
 			process.exit(1);
 		}
 	}

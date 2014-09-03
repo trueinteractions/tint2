@@ -15,7 +15,6 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  //UNSTABLE
   var count = 0;
   var win = new Window();
   var split = new Split();
@@ -33,6 +32,12 @@ function run($utils) {
   webview1.location = 'https://www.google.com';
   webview2.location = 'https://www.bing.com';
   webview3.location = 'https://www.yahoo.com';
+  webview1.width='100%';
+  webview1.height='100%';
+  webview2.width='100%';
+  webview2.height='100%';
+  webview3.width='100%';
+  webview3.height='100%';
   split.style = "thin";
   /* @hidden */ $utils.assert(split.orientation == "vertical");
   // The first value is a percentage indicating where the divider should be
@@ -40,12 +45,11 @@ function run($utils) {
   // or two in this case.
   split.setPosition(0.333,0);
   split.setPosition(0.666,1);
-  /* @hidden */ //setTimeout(function() { 
-  /* @hidden */ //  $utils.assert(split.style == "thin");
-  /* @hidden */ //  $utils.assert(count > 3);
-  /* @hidden */   
-  /* @hidden */ //},1000);
-  //$utils.ok();
+  /* @hidden */ setTimeout(function() { 
+  /* @hidden */   $utils.assert(split.style == "thin");
+  /* @hidden */   $utils.assert(count >= 3, 'count should be greater than 3, it was: '+count);
+  /* @hidden */   $utils.ok();
+  /* @hidden */ },1000);
 }
 
 /**

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# echo -n 'Tint unit tests for: '
-# uname -a 
+if [ $CI ]; then
+ echo -n 'Tint unit tests for: '
+ uname -a 
+fi
 if [ ! -f "../build/xcode/Release/tint" ]; then
   if [ ! -f "../build/ninja/out/Release/tint" ]; then
     echo "Cannot find the binary for tint, exiting."
@@ -11,9 +13,12 @@ if [ ! -f "../build/xcode/Release/tint" ]; then
 else
   TINTEXEC="../build/xcode/Release/tint"
 fi
-$TINTEXEC tools/initialsetup.js
+if [ $CI ]; then
+  $TINTEXEC tools/initialsetup.js
+fi
 for file in $@; do
   $TINTEXEC tools/utilities.js $TINTEXEC $file
   test $? -eq 0 || exit $?
+  sleep 0.5
 done
 echo

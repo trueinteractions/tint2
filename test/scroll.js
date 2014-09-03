@@ -42,7 +42,7 @@ function run($utils) {
     button.left=0;
     button.top = i*35;
   }
-  $utils.ok();
+  //$utils.ok();
   //scrollview.setChild(genericview);
 }
 
