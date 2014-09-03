@@ -66,7 +66,7 @@ function run($utils) {
   /* @hidden */     $utils.scrollAtControl(scrollview, -10);
   /* @hidden */   setTimeout(function() {
   /* @hidden */     var bounds = win.boundsOnScreen;
-  /* @hidden */     $utils.clickAt(bounds.x + 20, bounds.y + bounds.height - 10);
+  /* @hidden */     $utils.clickAt(bounds.x + 20, bounds.y + bounds.height - 20);
   /* @hidden */   },1500);
   /* @hidden */ },2500);
 }
