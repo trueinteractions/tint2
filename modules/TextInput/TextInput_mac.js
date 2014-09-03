@@ -58,6 +58,11 @@ module.exports = (function() {
     }
   });
 
+  Object.defineProperty(TextInput.prototype, 'placeholder', {
+    get:function() { return this.nativeView('cell')('placeholderString'); },
+    set:function(e) { this.nativeView('cell')('setPlaceholderString', $(e.toString())); }
+  });
+
   Object.defineProperty(TextInput.prototype, 'alignment', {
     get:function() {
       if (this.nativeView('alignment') == 0) return "left";

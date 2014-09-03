@@ -11,6 +11,14 @@ module.exports = (function() {
     return values;
   }
 
+  function arrayToNSArray(arr) {
+    var nsarray = $.NSMutableArray('arrayWithCapacity',arr.length);
+    for(var i=0; i < arr.length; i++) {
+      nsarray('insertObject', $((arr[i].toString())), 'atIndex', i);
+    }
+    return nsarray;
+  }
+
   function nsDictionaryToObject(nsdictionary) {
     var allKeys = nsdictionary('allKeys');
     var count = allKeys('count');
@@ -417,7 +425,8 @@ module.exports = (function() {
     makePropertyBoolType:makePropertyBoolType,
     makePropertyStringType:makePropertyStringType,
     makeNSImage:makeNSImage,
-    errorwrap:errorwrap
+    errorwrap:errorwrap,
+    arrayToNSArray:arrayToNSArray
   }
 })();
 

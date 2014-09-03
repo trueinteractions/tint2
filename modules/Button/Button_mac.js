@@ -29,6 +29,11 @@ module.exports = (function() {
   Button.prototype = Object.create(Container.prototype);
   Button.prototype.constructor = Button;
 
+  Object.defineProperty(Button.prototype, 'border', {
+    get:function() { return this.native('isBordered') == $.YES ? true : false; },
+    set:function(e) { return this.native('setBordered', e === true ? $.YES : $.NO); }
+  });
+
   Object.defineProperty(Button.prototype, 'state', {
     get:function() { return this.native('state') === $.NSOnState ? true : false; },
     set:function(e) { return this.native('setState', e === true ? $.NSOnState : $.NSOffState); }
@@ -47,6 +52,7 @@ module.exports = (function() {
       else if (type == "toggle") this.native('setButtonType',$.NSPushOnPushOffButton);
       else if (type == "checkbox") this.native('setButtonType', $.NSSwitchButton);
       else if (type == "radio") this.native('setButtonType', $.NSRadioButton);
+      else if (type == "none") this.native('setButtonType', $.NSMomentaryPushInButton);
     }
   });
 
