@@ -39,17 +39,15 @@ module.exports = (function() {
         if(p.constraints[name] !== null)
           p.parent.removeLayoutConstraint(p.constraints[name]);
 
-        if(typeof value != 'number' && value.indexOf('%') > -1) {
-          var parsedValue = utilities.parseUnits(value);
-          layoutObject.multiplier = percentFunc(parsedValue);
-          layoutObject.constant = 0.0;
-          layoutObject.secondAttribute = percentName;
-        } else if (value instanceof Control) {
+        if (value instanceof Control) {
           layoutObject.secondItem = value;
           layoutObject.multiplier = 1.0;
-          layoutObject.constant = 10.0;
-          if(p.parent == value || name == "middle" || name == "center") 
+          layoutObject.constant = 0.0;
+          if((p.parent == value || this == value.private.parent) 
+                || name == "middle" || name == "center") 
+          {
             layoutObject.firstAttribute = layoutObject.secondAttribute = name;
+          }
           else if (name == "left") {
             layoutObject.firstAttribute = "left";
             layoutObject.secondAttribute = "right";
@@ -63,6 +61,11 @@ module.exports = (function() {
             layoutObject.firstAttribute = "bottom";
             layoutObject.secondAttribute = "top";
           }
+        } else if(typeof value != 'number' && value.indexOf('%') > -1) {
+          var parsedValue = utilities.parseUnits(value);
+          layoutObject.multiplier = percentFunc(parsedValue);
+          layoutObject.constant = 0.0;
+          layoutObject.secondAttribute = percentName;
         } else {
           var parsedValue = utilities.parseUnits(value);
           layoutObject.multiplier = 1.0;

@@ -20,8 +20,6 @@ function run($utils) {
   var win = new Window();
   var scrollview = new Scroll();
   var genericview = new Container();
-  var buttonTest = new Button();
-  buttonTest.title = "Foo";
   scrollview.setChild(genericview);
   scrollview.horizontal = true;
   scrollview.vertical = true;
@@ -30,20 +28,47 @@ function run($utils) {
   scrollview.left = scrollview.top = 0;
   scrollview.width = '100%';
   scrollview.height = '100%';
-  buttonTest.left = buttonTest.top = 0;
-  genericview.left = genericview.top = 0;
   genericview.width = '100%';
-  genericview.height = '4500px';
+  genericview.top = 0;
+  //genericview.height = '4000px';
+
+  var previousButton = genericview;
   for(var i=0; i < 100; i++) {
     var button = new Button();
-    button.title = "My Button "+i;
+    button.title = "My Button "+(i+1);
     genericview.appendChild(button);
-
     button.left=0;
-    button.top = i*35;
+    /* @hidden */ if (i == 0) {
+    /* @hidden */   button.addEventListener('click', function() {
+    /* @hidden */     $utils.ok();
+    /* @hidden */   });
+    /* @hidden */ }
+    // This causes the generic view to be the size of its
+    // contents, in addition it has each button trailing
+    // the next one above it.
+    if (i == 99) {
+      genericview.bottom = button;
+      button.addEventListener('click', function() {
+        genericview.scrollTo(0,0);
+        /* @hidden */ var bounds = win.boundsOnScreen;
+        /* @hidden */ $utils.clickAt(bounds.x+20, bounds.y + 15);
+      });
+    }
+ 
+    button.top = previousButton;
+    button.height = '22px';
+
+    previousButton = button;
   }
-  //$utils.ok();
-  //scrollview.setChild(genericview);
+
+  /* @hidden */ setTimeout(function() {
+  /* @hidden */   for(var i=0; i < 20; i++)
+  /* @hidden */     $utils.scrollAtControl(scrollview, -10);
+  /* @hidden */   setTimeout(function() {
+  /* @hidden */     var bounds = win.boundsOnScreen;
+  /* @hidden */     $utils.clickAt(bounds.x + 20, bounds.y + bounds.height - 10);
+  /* @hidden */   },1500);
+  /* @hidden */ },2500);
 }
 
 /**

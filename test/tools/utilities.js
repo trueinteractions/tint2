@@ -210,6 +210,20 @@ var tintexec;
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
   }
+  ex.scrollAt = function scrollAt(x, y, upOrDown) {
+    var point = $.CGPointMake(x, y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateScrollWheelEvent($.kCGScrollEventUnitPixel, 1, upOrDown));
+  }
+  ex.scrollAtControl = function scrollAtControl(control, upOrDown) {
+    var bounds = control.boundsOnScreen;
+    bounds.x = bounds.x + bounds.width/2;
+    bounds.y = bounds.y + bounds.height/2;
+    var point = $.CGPointMake(bounds.x, bounds.y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    var scrollEvent = $.CGEventCreateScrollWheelEvent(null, 1, 1, upOrDown);
+    $.CGEventPost($.kCGHIDEventTap, scrollEvent);
+  }
 	ex.clickAtControl = function clickAtControl(control) {
 		var bounds = control.boundsOnScreen;
 		bounds.x = bounds.x + bounds.width/2;

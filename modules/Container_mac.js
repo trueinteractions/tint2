@@ -41,5 +41,10 @@ module.exports = (function() {
     this.fireEvent('child-dettached', [control]);
   }
 
+  Container.prototype.scrollTo = function(x, y) {
+    var b = this.bounds;
+    this.nativeView('scrollPoint', $.NSMakePoint(x,b.height - y));
+  }
+
   return Container;
 })();
