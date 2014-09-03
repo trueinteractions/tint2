@@ -15,7 +15,6 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  //UNSTABLE, NOT FINISHED.
   $ = process.bridge.objc;
   var win = new Window();
   var scrollview = new Scroll();
