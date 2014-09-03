@@ -15,7 +15,6 @@ module.exports = (function() {
     this.private.searchButton = null;
     this.private.cancelButton = null;
 
-    console.log('app name: ', application.name)
     this.native('setRecentsAutosaveName',$(application.name));
   }
 
