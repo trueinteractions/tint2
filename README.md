@@ -161,6 +161,8 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 <h2>License</h2>
 Tint is licensed under the MIT license.
 
+For the latest updates/news http://www.twitter.com/trevorlinton
+
 Commercial support available at http://www.trueinteractions.com/
 
 Copyright (c) 2014 True Interactions
