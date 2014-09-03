@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2)
-
 <h1>Tint</h1>
 
 Compile native applications with Javascript, CSS, HTML5 and node.
@@ -29,6 +27,8 @@ If you're just interested in creating cross-platform apps with javascript? You'r
 You can even create custom components and views that are cross-platform compatible in javascript.
 
 <h2>Status</h2>
+OSX Unit Tests: [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2)
+
 This is intended as a preview release for Tint 2, currently only supported on OSX.  Preview releases for Windows, Linux (QT), iOS, and Android are in tests at the moment.
 
 <h2>Building</h2>
