@@ -34,17 +34,37 @@ module.exports = (function() {
           p.parent.removeLayoutConstraint(p.constraints[name]);
         }.bind(this));
 
-        var parsedValue = utilities.parseUnits(value);
         var layoutObject = {priority:'required', firstItem:this, firstAttribute:name, relationship:'=', secondItem:p.parent};
 
         if(p.constraints[name] !== null)
           p.parent.removeLayoutConstraint(p.constraints[name]);
 
         if(typeof value != 'number' && value.indexOf('%') > -1) {
+          var parsedValue = utilities.parseUnits(value);
           layoutObject.multiplier = percentFunc(parsedValue);
           layoutObject.constant = 0.0;
           layoutObject.secondAttribute = percentName;
+        } else if (value instanceof Control) {
+          layoutObject.secondItem = value;
+          layoutObject.multiplier = 1.0;
+          layoutObject.constant = 10.0;
+          if(p.parent == value || name == "middle" || name == "center") 
+            layoutObject.firstAttribute = layoutObject.secondAttribute = name;
+          else if (name == "left") {
+            layoutObject.firstAttribute = "left";
+            layoutObject.secondAttribute = "right";
+          } else if (name == "right") {
+            layoutObject.firstAttribute = "right";
+            layoutObject.secondAttribute = "left";
+          } else if (name == "top") {
+            layoutObject.firstAttribute = "top";
+            layoutObject.secondAttribute = "bottom";
+          } else if (name == "bottom") {
+            layoutObject.firstAttribute = "bottom";
+            layoutObject.secondAttribute = "top";
+          }
         } else {
+          var parsedValue = utilities.parseUnits(value);
           layoutObject.multiplier = 1.0;
           layoutObject.constant = scalarFunc(parsedValue);
           layoutObject.secondAttribute = scalarName;
