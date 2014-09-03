@@ -88,10 +88,6 @@ static void uv_event(void *info) {
 
         // Wait for the main loop to deal with events.
         uv_sem_wait(&embed_sem);
-
-        // The position of this timeout is critical for the loop, do not
-        // place it above the sem_wait or at the beginning of the loop.
-        timeout = uv_backend_timeout(loop);
     }
 }
 
