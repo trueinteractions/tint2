@@ -22,6 +22,13 @@ module.exports = (function() {
           throw new Error('A '+name+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
 
         p.user[name] = value;
+
+        if(p.constraints[name] !== null)
+          p.parent.removeLayoutConstraint(p.constraints[name]);
+
+        if(value == null) 
+          return;
+
         var attached = function() {
           this.removeEventListener('parent-attached',attached);
           this[name] = p.user[name];
@@ -35,9 +42,6 @@ module.exports = (function() {
         }.bind(this));
 
         var layoutObject = {priority:'required', firstItem:this, firstAttribute:name, relationship:'=', secondItem:p.parent};
-
-        if(p.constraints[name] !== null)
-          p.parent.removeLayoutConstraint(p.constraints[name]);
 
         if (value instanceof Control) {
           layoutObject.secondItem = value;
@@ -61,7 +65,7 @@ module.exports = (function() {
             layoutObject.firstAttribute = "bottom";
             layoutObject.secondAttribute = "top";
           }
-        } else if(typeof value != 'number' && value.indexOf('%') > -1) {
+        } else if(value instanceof String && value.indexOf('%') > -1) {
           var parsedValue = utilities.parseUnits(value);
           layoutObject.multiplier = percentFunc(parsedValue);
           layoutObject.constant = 0.0;

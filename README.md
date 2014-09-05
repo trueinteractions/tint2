@@ -90,6 +90,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Slider (range value)
 * Split (Divider, Panes)
 * Status Bars (System Tray's)
+* Tables (Table View)
 * TextInput
 * Toolbar
 * WebView (WebKit)
