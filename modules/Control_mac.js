@@ -23,16 +23,16 @@ module.exports = (function() {
 
         p.user[name] = value;
 
-        if(p.constraints[name] !== null)
-          p.parent.removeLayoutConstraint(p.constraints[name]);
-
-        if(value == null) 
-          return;
-
         var attached = function() {
           this.removeEventListener('parent-attached',attached);
           this[name] = p.user[name];
         }.bind(this);
+
+        if(p.constraints[name] !== null && p.constraints[name])
+          p.parent.removeLayoutConstraint(p.constraints[name]);
+
+        if(value == null)
+          return;
 
         this.addEventListener('parent-attached', attached);
         if(!p.parent) return;
@@ -65,7 +65,7 @@ module.exports = (function() {
             layoutObject.firstAttribute = "bottom";
             layoutObject.secondAttribute = "top";
           }
-        } else if(value instanceof String && value.indexOf('%') > -1) {
+        } else if(value && value.indexOf && value.indexOf('%') > -1) {
           var parsedValue = utilities.parseUnits(value);
           layoutObject.multiplier = percentFunc(parsedValue);
           layoutObject.constant = 0.0;
@@ -225,6 +225,7 @@ module.exports = (function() {
   }
 
   Control.prototype.removeLayoutConstraint = function(index) {
+    if(typeof(index) == 'undefined' || index == null || !this.private.layoutObjcConstraints[index]) return;
     var objcNative = this.private.layoutObjcConstraints[index].objc;
     this.private.layoutObjcConstraints.splice(index, 1);
     this.nativeView('removeConstraint',objcNative);

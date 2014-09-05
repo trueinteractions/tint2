@@ -2,6 +2,7 @@ module.exports = (function() {
   var Container = require('Container');
   var utilities = require('Utilities');
   var Delegate = require('Bridge');
+  var Color = require('Color');
   var $ = process.bridge.objc;
 
   function Window(NativeObjectClass, NativeViewClass, options) {
@@ -285,22 +286,21 @@ module.exports = (function() {
     get:function() { return this.private.background; },
     set:function(e) {
       if(e == 'auto') {
+        this.private.background = 'auto';
         this.native('setOpaque', $.YES);
         this.native('setBackgroundColor', $.NSColor('controlBackgroundColor'));
       } else {
-        var rgba = utilities.parseColor(e);
-        if(rgba.a) {
+        this.private.background = new Color(e);
+        if(this.private.background.alpha > 0) {
            this.native('setOpaque', $.YES);
            this.native('setHasShadow', $.YES);
         } else {
            this.native('setOpaque', $.NO);
            this.native('setHasShadow', $.NO);
         }
-        this.native('setBackgroundColor', 
-          $.NSColor('colorWithCalibratedRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a));
-        this.native('setAlphaValue', rgba.a);
+        this.native('setBackgroundColor', this.private.background.native);
+        this.native('setAlphaValue', this.private.background.alpha);
       }
-      this.private.background = e;
     }
   });
 

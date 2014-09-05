@@ -1,7 +1,9 @@
 module.exports = (function() {
   $ = process.bridge.objc;
+  var utilities = require('Utilities');
+
   function Color(type, c1, c2, c3, c4, c5) {
-    if(type instanceof Color) return type;
+    if(type instanceof Color) this = type;
     if(type.type == '@') this.native = type;
     else if(type == "black") this.native = $.NSColor('blackColor');
     else if(type == "black") this.native = $.NSColor('blueColor');
@@ -23,6 +25,10 @@ module.exports = (function() {
     else if(type == "hsb" || type == "hsba") this.native = $.NSColor('colorWithCalibratedHue', c1, 'saturation', c2, 'brightness', c3, 'alpha', c4 ? c4 : 1);
     else if(type == "rgb" || type == "rgba") this.native = $.NSColor('colorWithCalibratedRed', c1, 'green', c2, 'blue', c3, 'alpha', c4 ? c4 : 1);
     else if(type == "image") this.native = $.NSColor('colorWithPatternImage', c1);
+    else {
+      var rgba = utilities.parseColor(type);
+      this.native = $.NSColor('colorWithCalibratedRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a);
+    }
   }
   Object.defineProperty(Color.prototype, 'colorspace', { get:function() { 
     var name = this.native('colorSpaceName').toString();
@@ -45,7 +51,7 @@ module.exports = (function() {
   Object.defineProperty(Color.prototype, 'hue', { get:function() { return this.native('hueComponent'); }});
   Object.defineProperty(Color.prototype, 'saturation', { get:function() { return this.native('saturationComponent'); }});
   Object.defineProperty(Color.prototype, 'brightness', { get:function() { return this.native('brightnessComponent'); }});
-  Object.defineProperty(Color.prototype, 'image', {get:function() { return this.native('pattenrImage'); }});
+  Object.defineProperty(Color.prototype, 'image', {get:function() { return this.native('patternImage'); }});
 
   return Color;
 })();

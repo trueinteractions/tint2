@@ -73,7 +73,7 @@ module.exports = (function() {
       } else {
         this.private.background = new Color(e);
         this.native('setDrawsBackground', $.YES);
-        this.native('setBackgroundColor', new Color(e));
+        this.native('setBackgroundColor', this.private.background.native);
       }
     }
   });
