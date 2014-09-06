@@ -61,6 +61,8 @@ module.exports = (function() {
     this.native('setExcludedFromWindowsMenu', $.NO);
     this.native('center');
 
+    application.windows.push(this);
+
     this.addEventListener('remove', function(control) { this.native('contentsView')('willRemoveSubview',control.nativeView); });
   }
   
@@ -313,7 +315,13 @@ module.exports = (function() {
   });
 
   /** Functions **/
-  Window.prototype.close = function() { this.native('close'); }
+  Window.prototype.close = function() {
+    application.windows.forEach(function(item,ndx,arr) { 
+      if(item == this)
+        delete arr[ndx];
+    });
+    this.native('close');
+  }
   Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
 
   return Window;

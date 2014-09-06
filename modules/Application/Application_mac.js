@@ -20,7 +20,7 @@
   function Application() {
     var events = {}, mainMenu = null, 
         name = "", badgeText = "", 
-        dockmenu = null, icon = "";
+        dockmenu = null, icon = "", nswindows = [];
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
@@ -65,6 +65,10 @@
         return null;
       }
     }
+
+    Object.defineProperty(this, 'windows', {
+      get:function() { return nswindows; }
+    });
 
     Object.defineProperty(this, 'name', {
       get:function() { 

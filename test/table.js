@@ -15,14 +15,16 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  // TODO: Design unit tests.
+  var count = 0; // @{hidden}
   var mainWindow = new Window();
   var table = new Table();
   var scroll = new Scroll();
   var textInput = new TextInput();
 
   mainWindow.appendChild(scroll);
-  table.addEventListener('row-added', function(e) {  });
+  table.addEventListener('row-added', function(e) {
+    count++; // @{hidden}
+  });
   table.addEventListener('row-removed', function(e) { });
   table.addEventListener('select', function(e) { });
   textInput.value = "Test";
@@ -39,7 +41,11 @@ function run($utils) {
   table.addRow();
   table.addRow();
   table.setValueAt('First Column',0,textInput);
-  $utils.ok();
+
+  setTimeout(function() { // @{hidden}
+    $utils.assert(count == 3); // @{hidden}
+    $utils.ok(); // @{hidden}
+  },1500); // @{hidden}
 }
 
 /**

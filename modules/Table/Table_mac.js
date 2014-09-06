@@ -52,6 +52,7 @@ module.exports = (function() {
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setDelegate', this.nativeView);
     this.native('setDataSource', this.nativeView);    
+    this.native('setRowSizeStyle', $.NSTableViewRowSizeStyleMedium);
   }
 
   Table.prototype = Object.create(Container.prototype);
@@ -108,6 +109,23 @@ module.exports = (function() {
     this.nativeView('reloadDataForRowIndexes', $.NSIndexSet('indexSetWithIndex',row),
                     'columnIndexes',$.NSIndexSet('indexSetWithIndex', this.nativeView('columnWithIdentifier',$(columnId))));
   }
+
+  Object.defineProperty(Table.prototype, 'rowHeightStyle', {
+    get:function() { 
+      var rowSize = this.nativeView('rowSizeStyle');
+      if(rowSize == $.NSTableViewRowSizeStyleDefault) return "default";
+      else if(rowSize == $.NSTableViewRowSizeStyleSmall) return "small";
+      else if(rowSize == $.NSTableViewRowSizeStyleMedium) return "medium";
+      else if(rowSize == $.NSTableViewRowSizeStyleLarge) return "large";
+      else return "unknown";
+    },
+    set:function(e) { 
+      if(e == "default") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleDefault);
+      else if(e == "small") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleSmall);
+      else if(e == "medium") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
+      else if(e == "large") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
+    }
+  });
 
   Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
     get:function() { return this.nativeView('allowsColumnRecording') == $.YES ? true : false; },

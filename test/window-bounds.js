@@ -14,7 +14,10 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  $utils.assert(application.windows.length == 0);
   var w = new Window();
+  $utils.assert(application.windows.length == 1);
+  $utils.assert(application.windows[0] == w);
   w.preferences.animateOnSizeChange = true;
   w.preferences.animateOnPositionChange = true;
   /* @hidden */ setTimeout(function(){ 
