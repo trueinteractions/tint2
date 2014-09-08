@@ -314,7 +314,6 @@ module.exports = (function() {
     }
   });
 
-  /** Functions **/
   Window.prototype.close = function() {
     application.windows.forEach(function(item,ndx,arr) { 
       if(item == this)

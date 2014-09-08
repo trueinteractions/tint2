@@ -20,11 +20,11 @@ mainWindow.title = "I'm a native window built in node.";
 Tint contains a set of native components such as Window, Toolbar, Button, WebView, Text Inputs, Panels, Menus, etc. It also allows you to integrate with the OS on many levels and supports alerts and native notifications. 
 
 <h2>Why is Tint different?</h2>
-There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't try to mask javascript as a native API.  Tint uses language bridges to natively represent real C++, C# and Objective-C objects directly in javascript safely.  This allows developers to create applications that integrate into the OS, but also allows developers to enhance its capabilities beyond what the Tint SDK allows. Make your own widgets, create your own OS integration methods, if you know C++, C, C# or Objective-C you have no limitations. 
+There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
 
-If you're just interested in creating cross-platform apps with javascript? You're in luck, there's a wide variety of components and classes using just javascript to choose from.
+With Tint you have options, you can use the SDK to create native applications or use Tint's language bridge to directly interface with objective-c/C#/C++ or C directly in javascript. 
 
-You can even create custom components and views that are cross-platform compatible in javascript.
+If you don't want to learn (or deal with) native OS languages, you're in luck, there's a wide variety of cross-compatible widgets for javascript to choose from.
 
 <h2>Status</h2>
 
