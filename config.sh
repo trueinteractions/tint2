@@ -1,10 +1,16 @@
 #!/bin/sh
 
+if [ ! $PYTHON ]; then
+   PYTHON=`which python`;
+   echo "No python environment set, assuming $PYTHON"
+   $PYTHON -V
+fi
+
 if [ ! -f "./libraries/node/config.gypi" ]; then
   git submodule init
   git submodule update
   cd libraries/node/
-  ./configure
+  $PYTHON ./configure
   cd ../..
 fi
 
