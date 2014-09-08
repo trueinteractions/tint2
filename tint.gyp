@@ -49,6 +49,7 @@
       'modules/Bridge/Bridge_mac.js',
       'modules/Color/Color_mac.js',
       'modules/Color/ColorPanel_mac.js',
+      'modules/Color/ColorWell_mac.js',
       'modules/Container_mac.js',
       'modules/Control_mac.js',
       'modules/Dialog/Dialog_mac.js',

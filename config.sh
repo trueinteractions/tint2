@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ $CC ]; then
+  echo "Warning using a pre-set compiler $CC"
+fi
+
 if [ ! $PYTHON ]; then
    PYTHON=`which python`;
    echo "No python environment set, assuming $PYTHON"

@@ -10,6 +10,7 @@ global.Button = require('Button');
 global.ButtonGroup = require('ButtonGroup');
 global.Color = require('Color');
 global.ColorPanel = require('ColorPanel');
+global.ColorWell = require('ColorWell');
 global.Container = require('Container');
 global.Dialog = require('Dialog');
 global.DropDown = require('DropDown');
