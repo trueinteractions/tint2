@@ -8,7 +8,7 @@
   
   // Help reign in garbage collection
   var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
-  
+
   // Include the app schema. app:// registers on NSURL and for node require().
   require('AppSchema')(process.cwd());
 

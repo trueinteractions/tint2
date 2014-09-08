@@ -7,6 +7,7 @@
 require('Application');
 require('Bridge');
 global.Button = require('Button');
+global.ButtonGroup = require('ButtonGroup');
 global.Color = require('Color');
 global.ColorPanel = require('ColorPanel');
 global.Container = require('Container');

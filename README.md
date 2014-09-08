@@ -72,6 +72,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Application
 * Application Schema (app:// protocol for packaged apps)
 * Button (Normal, Toggle, Radio, Checkbox)
+* Button Groups (Segmented Buttons)
 * Color, Color Picker (ColorLabel)
 * Container (Generic view)
 * Dialogs (Alerts, sheets, etc)

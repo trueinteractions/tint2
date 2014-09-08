@@ -21,6 +21,7 @@ module.exports = (function() {
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
     this.native('cell')('setWraps',$.NO);
+    this.native('setTitle', $(""));
 
     // Create proxy for click event.
     this.addEventListener('mouseup', function() { this.fireEvent('click'); }.bind(this));
@@ -30,29 +31,33 @@ module.exports = (function() {
   Button.prototype.constructor = Button;
 
   Object.defineProperty(Button.prototype, 'border', {
-    get:function() { return this.native('isBordered') == $.YES ? true : false; },
-    set:function(e) { return this.native('setBordered', e === true ? $.YES : $.NO); }
+    get:function() { return this.nativeView('isBordered') == $.YES ? true : false; },
+    set:function(e) { return this.nativeView('setBordered', e === true ? $.YES : $.NO); }
   });
 
   Object.defineProperty(Button.prototype, 'state', {
-    get:function() { return this.native('state') === $.NSOnState ? true : false; },
-    set:function(e) { return this.native('setState', e === true ? $.NSOnState : $.NSOffState); }
+    get:function() { return this.nativeView('state') === $.NSOnState ? true : false; },
+    set:function(e) { return this.nativeView('setState', e === true ? $.NSOnState : $.NSOffState); }
   });
 
   Object.defineProperty(Button.prototype, 'title', {
-    get:function() { return this.native('title') },
-    set:function(e) { return this.native('setTitle', $(e)); }
+    get:function() { return this.nativeView('title').toString(); },
+    set:function(e) {
+      // Private event, do not rely on it.
+      this.fireEvent('property-change', ['title', e]);
+      return this.nativeView('setTitle', $(e)); 
+    }
   });
 
   Object.defineProperty(Button.prototype, 'type', {
     get:function() { return this.private.buttonType; },
     set:function(type) {
       this.private.buttonType = type;
-      if(type == "normal") this.native('setButtonType',$.NSMomentaryLightButton);
-      else if (type == "toggle") this.native('setButtonType',$.NSPushOnPushOffButton);
-      else if (type == "checkbox") this.native('setButtonType', $.NSSwitchButton);
-      else if (type == "radio") this.native('setButtonType', $.NSRadioButton);
-      else if (type == "none") this.native('setButtonType', $.NSMomentaryPushInButton);
+      if(type == "normal") this.nativeView('setButtonType',$.NSMomentaryLightButton);
+      else if (type == "toggle") this.nativeView('setButtonType',$.NSPushOnPushOffButton);
+      else if (type == "checkbox") this.nativeView('setButtonType', $.NSSwitchButton);
+      else if (type == "radio") this.nativeView('setButtonType', $.NSRadioButton);
+      else if (type == "none") this.nativeView('setButtonType', $.NSMomentaryPushInButton);
     }
   });
 
@@ -60,33 +65,39 @@ module.exports = (function() {
     get:function() { return this.private.buttonStyle; },
     set:function(type) {
       this.private.buttonStyle = type;
-      if(type == "normal") this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
-      else if (type == "rounded") this.native('setBezelStyle',$.NSRoundedBezelStyle);
-      else if (type == "square") this.native('setBezelStyle',$.NSThickSquareBezelStyle);
-      else if (type == "disclosure") this.native('setBezelStyle', $.NSDisclosureBezelStyle);
-      else if (type == "shadowless") this.native('setBezelStyle', $.NSShadowlessSquareBezelStyle);
-      else if (type == "circular") this.native('setBezelStyle', $.NSCircularBezelStyle);
-      else if (type == "recessed") this.native('setBezelStyle', $.NSRecessedBezelStyle);
-      else if (type == "help") this.native('setBezelStyle', $.NSHelpButtonBezelStyle);
+      if(type == "normal") this.nativeView('setBezelStyle',$.NSTexturedRoundedBezelStyle);
+      else if (type == "rounded") this.nativeView('setBezelStyle',$.NSRoundedBezelStyle);
+      else if (type == "square") this.nativeView('setBezelStyle',$.NSThickSquareBezelStyle);
+      else if (type == "disclosure") this.nativeView('setBezelStyle', $.NSDisclosureBezelStyle);
+      else if (type == "shadowless") this.nativeView('setBezelStyle', $.NSShadowlessSquareBezelStyle);
+      else if (type == "circular") this.nativeView('setBezelStyle', $.NSCircularBezelStyle);
+      else if (type == "recessed") this.nativeView('setBezelStyle', $.NSRecessedBezelStyle);
+      else if (type == "help") this.nativeView('setBezelStyle', $.NSHelpButtonBezelStyle);
     }
   });
 
   Object.defineProperty(Button.prototype, 'showBorderOnHover', {
-    get:function() { return this.native('showsBorderOnlyWhileMouseInside') ? true : false; },
-    set:function(e) { this.native('setShowsBorderOnlyWhileMouseInside', e ? true : false ); }
+    get:function() { return this.nativeView('showsBorderOnlyWhileMouseInside') ? true : false; },
+    set:function(e) { this.nativeView('setShowsBorderOnlyWhileMouseInside', e ? true : false ); }
   });
 
   Object.defineProperty(Button.prototype, 'enabled', {
-    get:function() { return this.native('isEnabled'); },
-    set:function(e) { return this.native('setEnabled',e); }
+    get:function() { return this.nativeView('isEnabled'); },
+    set:function(e) {
+      // Private event, do not rely on it.
+      this.fireEvent('property-change', ['enabled', e]);
+      return this.nativeView('setEnabled',e); 
+    }
   });
 
   Object.defineProperty(Button.prototype, 'image', {
     get:function() { return this.private.img; },
     set:function(e) {
+      // Private event, do not rely on it.
+      this.fireEvent('property-change', ['image', e]);
       this.private.img = e;
       e = utilities.makeNSImage(e);
-      if(e) this.native('setImage', e);
+      if(e) this.nativeView('setImage', e);
     }
   });
 
