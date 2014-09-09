@@ -84,6 +84,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * DropDown
 * FileDialog (Save/Open)
 * Fonts, Font Managers and FontPanel
+* Image Well (Image Views)
 * Menu (and MenuItem)
 * Notification
 * Panels (Inspector and Utility)

@@ -59,6 +59,7 @@
       'modules/Fonts/Font_mac.js',
       'modules/Fonts/FontInternals_mac.js',
       'modules/Fonts/FontPanel_mac.js',
+      'modules/Image/ImageWell_mac.js',
       'modules/Menu/Menu_mac.js',
       'modules/Menu/MenuItem_mac.js',
       'modules/Notification/Notification_mac.js',

@@ -37,7 +37,7 @@ module.exports = (function() {
       else if (position == $.NSBelowTop) return "below-top";
       else if (position == $.NSAboveBottom) return "above-bottom";
       else if (position == $.NSAtBottom) return "bottom";
-      else if (position == $.NSBelowBottom) return "below-bottom";
+      else return "below-bottom";
     },
     set:function(e) {
       if(e == "above-top") this.nativeView('setTitlePosition', $.NSAboveTop);
