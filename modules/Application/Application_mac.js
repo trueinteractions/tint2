@@ -20,10 +20,14 @@
   function Application() {
     var events = {}, mainMenu = null, 
         name = "", badgeText = "", 
-        dockmenu = null, icon = "", nswindows = [];
+        dockmenu = null, icon = "", nswindows = [],
+        terminateWhenLastWindowClosed = $.NO;
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
+    delegateClass.addMethod('applicationShouldTerminateAfterLastWindowClosed:','B@:@',function(self,cmd,sender) {
+      return terminateWhenLastWindowClosed;
+    });
     delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
       try {
         if(dockmenu == null) return null;
@@ -37,7 +41,6 @@
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
     $app('setDelegate',delegate);
-    
     function fireEvent(event, args) {
       if(events[event])
         (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
@@ -100,6 +103,11 @@
         e = utilities.makeNSImage(e);
         if(e) $app('setApplicationIconImage', e);
       }
+    });
+
+    Object.defineProperty(this, 'exitAfterWindowsClose', {
+      get:function() { return terminateWhenLastWindowClosed == $.YES ? true : false; },
+      set:function(e) { terminateWhenLastWindowClosed = e ? $.YES : $.NO; }
     });
 
     Object.defineProperty(this, 'native', { get:function() { return $app; } });

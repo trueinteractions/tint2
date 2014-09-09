@@ -27,7 +27,7 @@ function run($utils) {
   panel.x='0px';
   panel.y='0px';
   /* @hidden */ panel.addEventListener('close', function() {
-   /* @hidden */ $utils.clickAt(10,530);
+    /* @hidden */ $utils.clickAt(10,530);
   /* @hidden */ });
 
 

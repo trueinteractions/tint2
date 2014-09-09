@@ -27,8 +27,12 @@ module.exports = (function() {
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else
       Container.call(this, $.WebView, $.WebView, options);
-    
+
     this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
+    
+    this.private.preferences = $.WebPreferences('alloc')('initWithIdentifier', $(application.name));
+    this.nativeView('setPreferences',this.private.preferences);
+
     this.nativeView('setShouldCloseWithWindow',$.YES);
     this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.nativeView('setShouldUpdateWhileOffscreen',$.YES);
@@ -48,6 +52,33 @@ module.exports = (function() {
     msg += "window.dispatchEvent(msg);\n";
     return this.nativeView('stringByEvaluatingJavaScriptFromString',$(msg))('UTF8String');
   }
+
+/*
+TODO:
+  Object.defineProperty(WebView.prototype, 'allowAnimatedImages') //setAllowsAnimatedImages
+  Object.defineProperty(WebView.prototype, 'allowAnimatedImagesToLoop') //setAllowsAnimatedImageLooping
+  Object.defineProperty(WebView.prototype, 'defaultFontSize') //setDefaultFontSize
+  Object.defineProperty(WebView.prototype, 'defaultFixedFontSize') //setDefaultFixedFontSize
+  Object.defineProperty(WebView.prototype, 'defaultFontSizeMinimum') //setMinimumFontSize
+  Object.defineProperty(WebView.prototype, 'allowJava') //setJavaEnabled
+  Object.defineProperty(WebView.prototype, 'allowJavascript') //setJavaScriptEnabled
+  Object.defineProperty(WebView.prototype, 'allowImages') //setLoadsImagesAutomatically
+  Object.defineProperty(WebView.prototype, 'allowPlugins') //setPlugInsEnabled
+  Object.defineProperty(WebView.prototype, 'private') //setPrivateBrowsingEnabled
+  Object.defineProperty(WebView.prototype, 'userstylesheet') //setUserStyleSheetLocation && setUserStyleSheetEnabled
+  Object.defineProperty(WebView.prototype, 'cache') //setUsesPageCache
+  Object.defineProperty(WebView.prototype, 'media') //setMediaStyle
+
+  Object.defineProperty(WebView.prototype, 'icon') //mainFrameIcon. read only.
+
+  WebView.prototype.elementAt() // elementAtPoint:
+  WebView.prototype.find() // searchFor:direction:caseSensitive:wrap:
+  WebView.prototype.execute() // stringByEvaluatingJavaScriptFromString
+  WebView.prototype.exception() // WebScriptObject setException:
+
+  WebFrames!
+  https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/DisplayWebContent/Concepts/WebKitDesign.html#//apple_ref/doc/uid/20002024-114390
+*/
 
   Object.defineProperty(WebView.prototype, 'progress', {
     get:function() { return this.nativeView('estimatedProgress')*100; }

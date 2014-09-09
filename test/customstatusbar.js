@@ -23,14 +23,20 @@ function run($utils) {
   var webView = new WebView();
   var opened = false;
 
+  // PopOver's like windows must have a fixed width/height.
   popOver.width = 300;
   popOver.height = 200;
+  // Add the web view as a child of the pop over.
   popOver.appendChild(webView);
-
+  // When the pop over launches it'll show our github URL.
   webView.location = "https://www.github.com/trueinteractions/tint2";
+  // Take up as much space as possible in the popOver.
   webView.left=webView.right=webView.top=webView.bottom=0;
+  // Set the image in the image well to our logo.
   imagewell.image = "app://assets/tintcompiler.png";
+  // Override the status bar with custom behavior.
   statusbar.custom = imagewell;
+  // When the image well is clicked launch the pop over (or close it if open)
   imagewell.addEventListener('mousedown', function() {
     if(!opened) {
       popOver.open(imagewell,'bottom');
@@ -49,14 +55,14 @@ function run($utils) {
 
   // If we want to do some behavior on right mouse clicks.
   //imagewell.addEventListener('rightmousedown', function() {
-  //  console.log('we dont have anything to do on right mouse down...');
   //});
   
   // If we want to do some behavior on mouse up.
   //imagewell.addEventListener('mouseup', function() {
   //});
   
-
+  // If the user clicks into the pop over close it, this only applies
+  // to the frame of the pop over, not its children.
   popOver.addEventListener('mousedown', function() {
     popOver.close();
     opened = false;
