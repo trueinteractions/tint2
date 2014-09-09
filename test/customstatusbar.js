@@ -71,7 +71,7 @@ function run($utils) {
   /* @hidden */ setTimeout(function(){
   /* @hidden */   bounds = imagewell.boundsOnScreen;
   /* @hidden */   activeBounds = Screens.active.bounds;
-  /* @hidden */   xPos = activeBounds.width + bounds.x;
+  /* @hidden */   xPos = activeBounds.x + bounds.x;
   /* @hidden */   $utils.clickAt(xPos + bounds.width/2,11);
   /* @hidden */ }, 2000);
   /* @hidden */ //TODO: Fix click handler on imagewell.

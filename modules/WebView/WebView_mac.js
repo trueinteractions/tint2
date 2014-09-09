@@ -54,6 +54,14 @@ module.exports = (function() {
   }
 
 /*
+  -- if the selector is allowed to be used.
++ (BOOL)isSelectorExcludedFromWebScript:(SEL)selector {}
+  -- if a specific property is allowed in js?
++ (BOOL)isKeyExcludedFromWebScript:(const char *)property {}
+  -- converts the selector to the JS name.
++ (NSString *) webScriptNameForSelector:(SEL)sel {}
+
+
 TODO:
   Object.defineProperty(WebView.prototype, 'allowAnimatedImages') //setAllowsAnimatedImages
   Object.defineProperty(WebView.prototype, 'allowAnimatedImagesToLoop') //setAllowsAnimatedImageLooping
