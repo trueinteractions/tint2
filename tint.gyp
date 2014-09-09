@@ -44,6 +44,7 @@
       'modules/Application/Application_mac.js',
       'modules/Application/Common_mac.js',
       'modules/AppSchema/AppSchema_mac.js',
+      'modules/Box/Box_mac.js',
       'modules/Button/Button_mac.js',
       'modules/ButtonGroup/ButtonGroup_mac.js',
       'modules/Bridge/Bridge_mac.js',
