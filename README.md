@@ -1,6 +1,6 @@
 <h1>Tint</h1>
 
-Compile native applications with Javascript, CSS, HTML5 and node.
+Create native applications with Javascript, CSS, HTML5 and node.
 
 <h2>What is Tint?</h2>
 
