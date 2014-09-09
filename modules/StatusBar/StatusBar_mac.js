@@ -26,7 +26,7 @@ module.exports = (function() {
     var id = (Math.random()*100000).toString();
     process.bridge.objc.delegates[id] = this;
     var delegate = TintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
-    this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',$.NSVariableStatusItemLength);
+    this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
     this.native('retain'); // required else we'll find it GC'd 
     this.native('setTarget',delegate);
     this.native('setAction','click:');
