@@ -207,7 +207,7 @@ module.exports = (function() {
     var img = null;
     if(!e || typeof(e) !== 'string') return null;
     else if(e.indexOf(':') > -1)
-      img = $.NSImage('alloc')('initWithContentsOfURL',$NSURL('URLWithString',$(e)));
+      img = $.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e)));
     else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
       img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
     else {

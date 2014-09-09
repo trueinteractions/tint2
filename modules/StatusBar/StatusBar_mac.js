@@ -26,7 +26,7 @@ module.exports = (function() {
     var id = (Math.random()*100000).toString();
     process.bridge.objc.delegates[id] = this;
     var delegate = TintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
-    this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
+    this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',$.NSVariableStatusItemLength);
     this.native('retain'); // required else we'll find it GC'd 
     this.native('setTarget',delegate);
     this.native('setAction','click:');
@@ -79,6 +79,11 @@ module.exports = (function() {
     }
   });
 
+  Object.defineProperty(StatusBar.prototype, 'length', {
+    get:function() { return this.native('length'); },
+    set:function(e) { this.native('setLength', e); }
+  });
+
   Object.defineProperty(StatusBar.prototype, 'menu', {
     get:function() { return this.private.submenu; },
     set:function(e) { 
@@ -109,12 +114,15 @@ module.exports = (function() {
     set:function(e) { return this.native('setToolTip',$(e)); }
   });
 
+  // Note: setting a custom view overrides title, tooltip, enabled, highlight, menu
+  // and events such as mousedown, mouseup, etc.
   Object.defineProperty(StatusBar.prototype, 'custom', {
     get:function() { return this.private.custom; },
     set:function(e) {
       if(e instanceof Container) {
         this.private.custom = e;
         this.nativeView = e.nativeView;
+        if(this.length == -1) this.length = 22; // set a default.
         return this.native('setView',e.nativeView);
       }
       else throw new Error("The passed in object was not a valid container or control.");
