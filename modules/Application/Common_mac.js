@@ -13,6 +13,7 @@ global.Color = require('Color');
 global.ColorPanel = require('ColorPanel');
 global.ColorWell = require('ColorWell');
 global.Container = require('Container');
+global.DateWell = require('DateWell');
 global.Dialog = require('Dialog');
 global.DropDown = require('DropDown');
 global.FileDialog = require('FileDialog');
