@@ -2,6 +2,34 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
   var Container = require('Container');
+  
+  if(!$.TintWebKitResponseDelegate) {
+    if(!process.bridge.objc.delegates) process.bridge.objc.delegates = {};
+
+    // This class implements a set of javascript -> objective-c functions on the object window.TintMessages
+    // within each webview. This allows communication to-from webkit and our hosting JS instance. Only serializable
+    // strings can be passed back-forth. For now, only post message is used.
+    var TintWebKitResponseDelegate = $.NSObject.extend('TintWebKitResponseDelegate');
+    TintWebKitResponseDelegate.addMethod('initWithJavascriptObject:', ['@',[TintWebKitResponseDelegate,$.selector,'@']], 
+      utilities.errorwrap(function(self, cmd, id) {
+        self.callback = process.bridge.objc.delegates[id.toString()];
+        process.bridge.objc.delegates[id.toString()] = null;
+        return self;
+    }));
+    TintWebKitResponseDelegate.addClassMethod('webScriptNameForSelector:','@@::', 
+      utilities.errorwrap(function(self,_cmd,sel) { 
+        return $("postMessage");
+    }));
+    TintWebKitResponseDelegate.addClassMethod('isSelectorExcludedFromWebScript:','B@::', 
+      utilities.errorwrap(function(self,_cmd,sel) { 
+        if(sel == "postMessage") return $.NO;
+        else return $.YES
+    }));
+    TintWebKitResponseDelegate.addMethod('postMessage','v@:@',
+        utilities.errorwrap(function(self, cmd, message) { self.callback.fireEvent('message', [message.toString()]); }));
+    TintWebKitResponseDelegate.register();
+
+  }
 
   function WebView(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -15,7 +43,12 @@ module.exports = (function() {
       ['webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function(self, _cmd, title, frame) { this.fireEvent('redirect'); }.bind(this)],
       ['webView:didReceiveTitle:forFrame:', 'v@:@@@', function(self, _cmd, title, frame) { this.fireEvent('title'); }.bind(this)],
       ['webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('loading'); }.bind(this)],
-      ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('load'); }.bind(this)],
+      ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { 
+        // Create the comm delegate and assign it to window.TintMessages, then override window.postMessage.
+        this.nativeView('windowScriptObject')('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
+        this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessage = function(e) { window.TintMessages.postMessage(e); }"));
+        this.fireEvent('load');
+      }.bind(this)],
       ['webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('request'); }.bind(this)],
       ['webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('close'); }.bind(this)],
       ['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { this.fireEvent('locationchange'); }.bind(this)],
@@ -31,8 +64,13 @@ module.exports = (function() {
     this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
     
     this.private.preferences = $.WebPreferences('alloc')('initWithIdentifier', $(application.name));
-    this.nativeView('setPreferences',this.private.preferences);
 
+    var id = (Math.random()*100000).toString();
+    process.bridge.objc.delegates[id] = this;
+    this.private.commDelegate = TintWebKitResponseDelegate('alloc')('initWithJavascriptObject',$(id));
+    this.private.commDelegate.fireEvent = this.fireEvent;
+
+    this.nativeView('setPreferences',this.private.preferences);
     this.nativeView('setShouldCloseWithWindow',$.YES);
     this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.nativeView('setShouldUpdateWhileOffscreen',$.YES);
@@ -51,6 +89,10 @@ module.exports = (function() {
     msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'")+"');\n";
     msg += "window.dispatchEvent(msg);\n";
     return this.nativeView('stringByEvaluatingJavaScriptFromString',$(msg))('UTF8String');
+  }
+
+  WebView.prototype.execute = function(e) {
+    return this.nativeView('stringByEvaluatingJavaScriptFromString',$(e.toString())('UTF8String'));
   }
 
 /*

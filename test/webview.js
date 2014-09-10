@@ -11,11 +11,11 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
+ * @see {WebView}
  * @example
  */
 function run($utils) {
-  var $ = process.bridge.objc;
+  /* @hidden */ var $ = process.bridge.objc;
 
   var mainWindow = new Window();
   var webview = new WebView();
