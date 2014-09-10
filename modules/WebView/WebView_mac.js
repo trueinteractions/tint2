@@ -20,7 +20,7 @@ module.exports = (function() {
       ['webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('close'); }.bind(this)],
       ['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { this.fireEvent('locationchange'); }.bind(this)],
       ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', 
-        function(self, _cmd, sender,url,seconds,date,frame) { this.fireEvent('redirect'); }.bind(this)],
+        function(self, _cmd, sender,url,seconds,date,frame) { this.fireEvent('redirect'); }.bind(this)]
     ]);
 
     if(NativeObjectClass && NativeObjectClass.type == '#')

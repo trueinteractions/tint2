@@ -88,7 +88,8 @@ function shutdown() {
 
 module.exports = {
   setup:setup, 
-  run:run, 
+  run:run,
+  timeout:true,
   shutdown:shutdown, 
   shell:false,
   name:"CustomStatusBar",

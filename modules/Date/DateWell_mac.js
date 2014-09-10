@@ -14,6 +14,9 @@ module.exports = (function() {
 
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
+    this.nativeView('setBordered', $.NO);
+    this.nativeView('setDateValue', $.NSDate('date'));
   }
 
   DateWell.prototype = Object.create(Container.prototype);
@@ -53,8 +56,13 @@ module.exports = (function() {
     }
   });
 
+  Object.defineProperty(DateWell.prototype, 'range', {
+    get:function() { return this.nativeView('datePickerMode') == $.NSRangeDateMode ? true : false; },
+    set:function(e) { this.nativeView('setDatePickerMode', e ? $.NSRangeDateMode : $.NSSingleDateMode); }
+  });
+
   Object.defineProperty(DateWell.prototype, 'value', {
-    get:function() { new Date(this.nativeView('timeIntervalSince1970')*1000); },
+    get:function() { return new Date(this.nativeView('dateValue')('timeIntervalSince1970')*1000); },
     set:function(e) {
       var d = new Date(e);
       this.nativeView('setDateValue',$(d));

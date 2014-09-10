@@ -80,6 +80,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Button Groups (Segmented Buttons)
 * Color, Color Picker, ColorWell (ColorLabel)
 * Container (Generic view)
+* Date Well (Date View, Date Picker)
 * Dialogs (Alerts, sheets, etc)
 * DropDown
 * FileDialog (Save/Open)
