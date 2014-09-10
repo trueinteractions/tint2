@@ -57,16 +57,7 @@ module.exports = (function() {
     set:function(e) { 
       this.private.imgOn = e; 
       e = utilities.makeNSImage(e);
-      if(e) this.native('setOnStateImage', e);
-    }
-  });
-
-  Object.defineProperty(StatusBar.prototype, 'imageOff', {
-    get:function() { return this.private.imgOff; },
-    set:function(e) { 
-      this.private.imgOff = e; 
-      e = utilities.makeNSImage(e);
-      if(e) this.native('setOffStateImage', e);
+      if(e) this.native('setAlternateImage', e);
     }
   });
 
