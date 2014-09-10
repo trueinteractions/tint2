@@ -96,7 +96,7 @@ module.exports = (function() {
 
   Object.defineProperty(StatusBar.prototype, 'highlight', {
     get:function() { return this.native('highlightMode') == $.YES ? true : false; },
-    set:function(e) { this.native('setHighlightMode', e ? $YES : NO); }
+    set:function(e) { this.native('setHighlightMode', e ? $.YES : $.NO); }
   });
 
   Object.defineProperty(StatusBar.prototype, 'title', {
