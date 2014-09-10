@@ -35,7 +35,8 @@ function run($utils) {
 
   var statusbar = new StatusBar();
   statusbar.menu = statusmenu;
-  statusbar.image = 'reload';
+  statusbar.image = 'app://assets/tintcompiler_small.png';
+  statusbar.imageHighlighted = 'app://assets/tintapp_small.png';
   statusbar.title = 'hi ';
   statusbar.addEventListener('click', function() {
   });
