@@ -88,11 +88,11 @@ module.exports = (function() {
     var msg = "var msg=document.createEvent('MessageEvent');\n";
     msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'")+"');\n";
     msg += "window.dispatchEvent(msg);\n";
-    return this.nativeView('stringByEvaluatingJavaScriptFromString',$(msg))('UTF8String');
+    this.nativeView('stringByEvaluatingJavaScriptFromString',$(msg))('UTF8String');
   }
 
   WebView.prototype.execute = function(e) {
-    return this.nativeView('stringByEvaluatingJavaScriptFromString',$(e.toString())('UTF8String'));
+    return this.nativeView('stringByEvaluatingJavaScriptFromString',$(e.toString()))('UTF8String').toString();
   }
 
 /*
