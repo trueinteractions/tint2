@@ -42,6 +42,7 @@ module.exports = (function() {
       ['webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', function(self, _cmd, error, frame) { this.fireEvent('error'); }.bind(this)],
       ['webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function(self, _cmd, title, frame) { this.fireEvent('redirect'); }.bind(this)],
       ['webView:didReceiveTitle:forFrame:', 'v@:@@@', function(self, _cmd, title, frame) { this.fireEvent('title'); }.bind(this)],
+      ['webView:didReceiveIcon:forFrame:', 'v@:@@@', function(self, _cmd, icon, frame) { this.fireEvent('icon'); }.bind(this)],
       ['webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('loading'); }.bind(this)],
       ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { 
         // Create the comm delegate and assign it to window.TintMessages, then override window.postMessage.
@@ -121,6 +122,13 @@ TODO:
   https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/DisplayWebContent/Concepts/WebKitDesign.html#//apple_ref/doc/uid/20002024-114390
 */
 
+  Object.defineProperty(WebView.prototype, 'icon', {
+    get:function() {
+      var ico = this.nativeView('mainFrameIcon');
+      if(ico) return utilities.makeURIFromNSImage(ico);
+      return null;
+    }
+  })
 
   Object.defineProperty(WebView.prototype, 'allowAnimatedImages', {
     get:function() { return this.private.preferences('allowsAnimatedImages') == $.YES ? true : false; },

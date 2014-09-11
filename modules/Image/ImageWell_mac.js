@@ -1,6 +1,7 @@
 module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
+  var utilities = require('Utilities');
 
   function ImageWell(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -23,7 +24,8 @@ module.exports = (function() {
     get:function() { return this.private.currentImage; },
     set:function(e) {
       this.private.currentImage = e;
-      var img = $.NSImage('alloc')('initByReferencingURL',$.NSURL('URLWithString',$(e.toString())));
+      var img = utilities.makeNSImage(e);
+      if(!img) console.log('Error, image was invalud: ', e);
       this.nativeView('setImage',img);
       img('release');
     }

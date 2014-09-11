@@ -218,6 +218,14 @@ module.exports = (function() {
     return img;
   }
 
+  function makeURIFromNSImage(nsimage) {
+    var cgimage = nsimage('CGImageForProposedRect',null,'context',$.NSGraphicsContext('currentContext'),'hints',null);
+    var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',cgimage);
+    var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
+    var base64String = imageData('base64EncodedStringWithOptions',0);
+    return "data:image/png;base64," + base64String;
+  }
+
   function errorwrap(func) {
     var wrap = function() {
       try {
@@ -242,7 +250,8 @@ module.exports = (function() {
     makePropertyStringType:makePropertyStringType,
     makeNSImage:makeNSImage,
     errorwrap:errorwrap,
-    arrayToNSArray:arrayToNSArray
+    arrayToNSArray:arrayToNSArray,
+    makeURIFromNSImage:makeURIFromNSImage
   }
 })();
 
