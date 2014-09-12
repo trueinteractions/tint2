@@ -35,7 +35,6 @@ function run($utils) {
   $utils.assert(webview.allowJavascript == false);
   $utils.assert(webview.allowPlugins == false);
   $utils.ok();
-  )
 }
 
 /**
