@@ -47,8 +47,9 @@ module.exports = (function() {
       ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { 
         try {
           // Create the comm delegate and assign it to window.TintMessages, then override window.postMessage.
-          if(this.nativeView('windowScriptObject')) {
-            this.nativeView('windowScriptObject')('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
+          var frameWinObj = this.nativeView('windowScriptObject');
+          if(frameWinObj) {
+            frameWinObj('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
             this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessage = function(e) { window.TintMessages.postMessage(e); }"));
           }
           this.fireEvent('load');
