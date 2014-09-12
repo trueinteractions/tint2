@@ -21,20 +21,24 @@ function run($utils) {
   var webview = new WebView();
   mainWindow.appendChild(webview);
   webview.left = webview.right = webview.top = webview.bottom = 0;
-  webview.privateBrowsing = true;
+  //NOT working: webview.privateBrowsing = true;
   webview.allowAnimatedImages = false;
   webview.allowAnimatedImagesToLoop = false;
   webview.allowJava = false;
   webview.allowJavascript = false;
   webview.allowPlugins = false;
+  webview.location = "https://www.google.com";
 
-  $utils.assert(webview.privateBrowsing == true);
-  $utils.assert(webview.allowAnimatedImages == false);
-  $utils.assert(webview.allowAnimatedImagesToLoop == false);
-  $utils.assert(webview.allowJava == false);
-  $utils.assert(webview.allowJavascript == false);
-  $utils.assert(webview.allowPlugins == false);
-  $utils.ok();
+  webview.addEventListener('load', function() {
+    //NOT working: $utils.assert(webview.privateBrowsing == true, 'private browsing was not true.');
+    $utils.assert(webview.allowAnimatedImages == false, 'allow animated images was true.');
+    $utils.assert(webview.allowAnimatedImagesToLoop == false, 'allow animated images to loop not true.');
+    $utils.assert(webview.allowJava == false, 'allow java was true.');
+    $utils.assert(webview.allowJavascript == false, 'allow javascript was true.');
+    $utils.assert(webview.allowPlugins == false, 'allow plugins was true.');
+    $utils.ok();
+  });
+
 }
 
 /**

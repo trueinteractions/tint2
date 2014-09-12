@@ -45,10 +45,18 @@ module.exports = (function() {
       ['webView:didReceiveIcon:forFrame:', 'v@:@@@', function(self, _cmd, icon, frame) { this.fireEvent('icon'); }.bind(this)],
       ['webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('loading'); }.bind(this)],
       ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { 
-        // Create the comm delegate and assign it to window.TintMessages, then override window.postMessage.
-        this.nativeView('windowScriptObject')('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
-        this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessage = function(e) { window.TintMessages.postMessage(e); }"));
-        this.fireEvent('load');
+        try {
+          // Create the comm delegate and assign it to window.TintMessages, then override window.postMessage.
+          if(this.nativeView('windowScriptObject')) {
+            this.nativeView('windowScriptObject')('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
+            this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessage = function(e) { window.TintMessages.postMessage(e); }"));
+          }
+          this.fireEvent('load');
+        } catch(e) {
+          console.error(e.message);
+          console.error(e.stack);
+          process.exit(1);
+        }
       }.bind(this)],
       ['webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('request'); }.bind(this)],
       ['webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('close'); }.bind(this)],
@@ -157,7 +165,7 @@ TODO:
 
   Object.defineProperty(WebView.prototype, 'privateBrowsing', {
     get:function() { return this.private.preferences('privateBrowsingEnabled') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', e ? $.YES : $.NO); }
+    set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', (e ? $.YES : $.NO)); }
   });
 
   Object.defineProperty(WebView.prototype, 'progress', {
