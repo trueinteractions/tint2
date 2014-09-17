@@ -63,6 +63,7 @@
       'modules/Image/ImageWell_mac.js',
       'modules/Menu/Menu_mac.js',
       'modules/Menu/MenuItem_mac.js',
+      'modules/Menu/MenuItemSeparator_mac.js',
       'modules/Notification/Notification_mac.js',
       'modules/Panel/Panel_mac.js',
       'modules/ProgressBar/ProgressBar_mac.js',
