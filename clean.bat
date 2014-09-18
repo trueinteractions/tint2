@@ -17,6 +17,8 @@ del /S /Q .\node_dtrace_ustack.vcxproj
 del /S /Q .\node_etw.vcxproj
 del /S /Q .\node_js2c.vcxproj
 del /S /Q .\node_js2c.vcxproj.filters
+del /S /Q .\tint_js2c.vcxproj
+del /S /Q .\tint_js2c.vcxproj.filters
 del /S /Q .\node_perfctr.vcxproj
 del /S /Q .\node_systemtap_header.vcxproj
 del /S /Q .\ref_binding.vcxproj

@@ -336,7 +336,7 @@ NAN_METHOD(ReadInt64) {
     // return a String
     char strbuf[128];
     snprintf(strbuf, 128, "%" PRId64, val);
-    rtn = NanNew<v8::String>(strbuf);
+    rtn = NanNew<v8::String>((const char *)strbuf);
   } else {
     // return a Number
     rtn = NanNew<v8::Number>(static_cast<double>(val));
@@ -413,7 +413,7 @@ NAN_METHOD(ReadUInt64) {
     // return a String
     char strbuf[128];
     snprintf(strbuf, 128, "%" PRIu64, val);
-    rtn = NanNew<v8::String>(strbuf);
+    rtn = NanNew<v8::String>((const char *)strbuf);
   } else {
     // return a Number
     rtn = NanNew<v8::Number>(static_cast<double>(val));

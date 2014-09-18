@@ -40,6 +40,8 @@ libraries/libffi/test.xml
 ./libraries/libffi/libffi.xcodeproj/project.pbxproj
 *.sln
 *.lastbuildstate
+*.unsuccessfulbuild
+*.successfulbuild
 libraries/node_tmp/
 test.js
 Release/*

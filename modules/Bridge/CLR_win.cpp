@@ -16,6 +16,14 @@ using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
 
+/* Stubs for CLR, these are needed otherwise we'll get a linking 
+ * warning complaining that the exe will not run. */
+namespace v8 {
+  namespace internal {
+    class Object {};
+  }
+  struct HeapStatsUpdate {};
+}
 
 Persistent<Function> bufferConstructor;
 

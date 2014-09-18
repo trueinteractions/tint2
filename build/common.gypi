@@ -97,7 +97,7 @@
             'ExceptionHandling': 0,
             'AdditionalOptions': [
               '/MP', # compile across multiple CPUs
-              '/wd4506', '/wd4267', '/wd4244', '/wd4344', '/wd4800', '/wd4355', '/wd4005'
+              '/wd4506', '/wd4267', '/wd4244', '/wd4344', '/wd4800', '/wd4355', '/wd4005',
             ],
           },
           'VCLibrarianTool': {
@@ -110,6 +110,10 @@
             'OptimizeReferences': 2, # /OPT:REF
             'EnableCOMDATFolding': 2, # /OPT:ICF
             'LinkIncremental': 1, # disable incremental linking
+            'AdditionalOptions': [ 
+              '/ignore:4221', # ignores empty object warnings (openssl ecp_* files)
+              '/ignore:4355', # ignores using this in base member initializers (v8)
+            ],
           },
         },
       }
@@ -149,6 +153,13 @@
         'msvs_cygwin_shell': 0, # prevent actions from trying to use cygwin
         'defines': [
           'WIN32',
+          '_DLL', # neccessary in order to use /MD (msvcrt.lib/msvcr110.dll) 
+                  # instead of /MT (libcmt.lib), we need /MD to include CLR
+                  # (/CLR) compiled options, as /MT isn't compatible with CLR.
+                  # note we do not actually produce a DLL, we just need to
+                  # send out a note that we intend to dynamically link 
+                  # our internals (even as a EXE). To produce a real DLL
+                  # we'd need to include /LD.
           # we don't really want VC++ warning us about
           # how dangerous C functions are...
           '_CRT_SECURE_NO_DEPRECATE',

@@ -4,9 +4,12 @@
 #include <stdlib.h>
 #include <windows.h>
 #include "v8_typed_array.h"
-#include "uv-common.h"
 
+//TODO: Find a better way of doing this instead of "trusting"
+//that this private interface signature will remain the same.
 extern "C" DWORD uv_get_poll_timeout(uv_loop_t* loop);
+#define uv__has_active_reqs(loop)                                             \
+  (ngx_queue_empty(&(loop)->active_reqs) == 0)
 
 static int embed_closed;
 static uv_sem_t embed_sem;
@@ -22,9 +25,9 @@ namespace REF {
   extern void Init(v8::Handle<v8::Object> target);
 }
 
-extern class FFI {
+class FFI {
 public:
-static void FFI::Init(v8::Handle<v8::Object> target);
+  static void FFI::Init(v8::Handle<v8::Object> target);
 };
 
 extern "C" void CLR_Init(v8::Handle<v8::Object> target);

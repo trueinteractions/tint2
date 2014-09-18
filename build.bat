@@ -17,11 +17,10 @@ if "%arg1%" == "debug" (
 
 SETLOCAL
   call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+  call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+  :: 
+  "%MSBUILDDIR%msbuild.exe" /p:PlatformToolset=v100 /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo tint.sln 
 ENDLOCAL
-
-:: /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal
-"%MSBUILDDIR%msbuild.exe" /p:PlatformToolset=v100 /m /P:Configuration=%CONFIG% /target:tint /nologo tint.sln 
-
 
 goto:eof
 ::ERRORS
