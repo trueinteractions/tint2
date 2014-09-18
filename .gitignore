@@ -37,8 +37,7 @@ test/sandbox/
 libraries/libffi/closure-test.xml
 libraries/libffi/ffi.xml
 libraries/libffi/test.xml
-libraries/libffi/libffi.xcodeproj/project.pbxproj
-libraries/node
+./libraries/libffi/libffi.xcodeproj/project.pbxproj
 *.sln
 *.lastbuildstate
 libraries/node_tmp/
