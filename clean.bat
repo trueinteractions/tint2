@@ -38,3 +38,9 @@ del /S /Q ffi_bindings.vcxproj.filters
 del /S /Q libraries\node\node.sln
 del /S /Q libraries\node\node.vcxproj
 del /S /Q libraries\node\node.vcxproj.filters
+del /S /Q libraries\libffi\libffi.sln
+del /S /Q libraries\libffi\libffi.vcxproj
+del /S /Q libraries\libffi\libffi.vcxproj.filters
+del /S /Q libraries\node\deps\v8\tools\gyp\v8.sln
+del /S /Q libraries\node\deps\v8\tools\gyp\v8.vcxproj
+del /S /Q libraries\node\deps\v8\tools\gyp\v8.vcxproj.filters

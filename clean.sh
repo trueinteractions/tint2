@@ -17,3 +17,11 @@ rm -rf ./build/tint.build
 rm -rf ./build/cares.build
 rm -rf ./build/uv.build
 rm -rf ./build/zlib.build
+rm -rf ./libraries/libffi/libffi.xcodeproj
+rm -rf ./libraries/node/node.xcodeproj
+rm -rf ./libraries/node/deps/v8/tools/gyp/v8.xcodeproj
+rm -rf ./libraries/node/deps/cares/cares.xcodeproj
+rm -rf ./libraries/node/deps/http_parser/http_parser.xcodeproj
+rm -rf ./libraries/node/deps/openssl/openssl.xcodeproj
+rm -rf ./libraries/node/deps/uv/uv.xcodeproj
+rm -rf ./libraries/node/deps/zlib/zlib.xcodeproj
