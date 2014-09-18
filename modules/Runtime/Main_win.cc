@@ -90,7 +90,7 @@ void uv_event(void *info) {
 void node_load() {
   //TODO: Register the app:// protocol.
 
-  // Resgiter the initial bridge objective-c protocols
+  // Resgiter the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);
 
   // Load node and begin processing.
@@ -100,7 +100,6 @@ void node_load() {
   // keep the UV loop in-sync with windows message loop.
   embed_closed = 0;
 
-  uv_run(uv_default_loop(), UV_RUN_DEFAULT);
   // The dummy handle prevents UV from exiting and throwing incorrect
   // timeout values, its necessary since uv can't see many of the app
   // events to keep it assuming something else will come and return -1
@@ -162,13 +161,18 @@ void win_msg_loop() {
   BOOL bRet;
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
-    assert(bRet > 0);
-    if(msg.message == 0x8001) uv_run_nowait();
-    else {
+    if (msg.message == WM_QUIT)
+      break;
+    else if(msg.message == 0x8001)
+      uv_run_nowait();
+    else { //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
        TranslateMessage(&msg);
        DispatchMessage(&msg);
     }
   }
+  fprintf(stderr, "terminating: bRet: %i, last msg.message: %i\n",bRet,msg.message);
+  node_terminate();
+  exit(0);
 }
 
 int main(int argc, char *argv[]) {
@@ -193,7 +197,7 @@ int main(int argc, char *argv[]) {
     process_l = node::SetupProcessObject(init_argc, init_argv);
     v8_typed_array::AttachBindings(context->Global());
     node_load();
-
+    win_msg_loop();
 #ifndef NDEBUG
     context.Dispose();
 #endif
