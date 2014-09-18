@@ -19,7 +19,7 @@ SETLOCAL
   call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
 ENDLOCAL
 
-"%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /target:tint /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /nologo tint.sln 
+"%MSBUILDDIR%msbuild.exe" /p:PlatformToolset=v100 /m /P:Configuration=%CONFIG% /target:tint /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /nologo tint.sln 
 
 
 goto:eof
