@@ -1,0 +1,5 @@
+before_install:
+
+install:
+  - ./config.bat
+  - ./build.bat

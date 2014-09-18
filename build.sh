@@ -7,7 +7,7 @@ if [ "$(uname)" == "Darwin" ]; then
       ninja -v -C build/ninja/out/Release
     fi
   else
-    xcodebuild -configuration Release -project build/xcode/tint.xcodeproj build    
+    xcodebuild -configuration Release -project tint.xcodeproj build    
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(which make)" == "" ]; then
@@ -20,15 +20,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     make -f build/make/Makefile tint
   fi
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-  if [ "$(which msbuild)" == "" ]; then
-    if [ "$(which ninja)" == ""]; then
-      echo "You do not have Microsoft Visual Studio or ninja installed. One of these is required."
-    else
-      ninja -v -C build/ninja/out/Release
-    fi
-  else
-    msbuild build/msvs/tint.csproj    
-  fi
+  cmd build.bat
 else
   echo "Your platform is unfortunately not supported right now."
 fi

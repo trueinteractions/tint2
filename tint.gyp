@@ -16,22 +16,7 @@
     'node_use_openssl%': 'true',
     'node_use_systemtap%': 'false',
     'node_shared_openssl%': 'false',
-    'library_files': [
-      'modules/Bridge/ref.js',
-      'modules/Bridge/struct.js',
-      'modules/Bridge/_foreign_function.js',
-      'modules/Bridge/bindings.js',
-      'modules/Bridge/callback.js',
-      'modules/Bridge/cif.js',
-      'modules/Bridge/cif_var.js',
-      'modules/Bridge/dynamic_library.js',
-      'modules/Bridge/errno.js',
-      'modules/Bridge/ffi.js',
-      'modules/Bridge/foreign_function.js',
-      'modules/Bridge/foreign_function_var.js',
-      'modules/Bridge/function.js',
-      'modules/Bridge/library.js',
-      'modules/Bridge/type.js',
+    'mac_library_files': [
       'modules/Bridge/class.js',
       'modules/Bridge/core.js',
       'modules/Bridge/exception.js',
@@ -40,7 +25,6 @@
       'modules/Bridge/index.js',
       'modules/Bridge/ivar.js',
       'modules/Bridge/method.js',
-      'modules/Bridge/types.js',
       'modules/Application/Application_mac.js',
       'modules/Application/Common_mac.js',
       'modules/AppSchema/AppSchema_mac.js',
@@ -77,10 +61,14 @@
       'modules/Table/Table_mac.js',
       'modules/TextInput/TextInput_mac.js',
       'modules/Toolbar/Toolbar_mac.js',
-      'modules/Utilities/Utilities_base.js',
       'modules/Utilities/Utilities_mac.js',
       'modules/WebView/WebView_mac.js',
       'modules/Window/Window_mac.js',
+    ],
+    'win_library_files':[
+      'modules/Bridge/Bridge_win.js',
+    ],
+    'library_files': [
       'libraries/node/src/node.js',
       'libraries/node/lib/_debugger.js',
       'libraries/node/lib/_linklist.js',
@@ -122,6 +110,22 @@
       'libraries/node/lib/util.js',
       'libraries/node/lib/vm.js',
       'libraries/node/lib/zlib.js',
+      'modules/Bridge/ref.js',
+      'modules/Bridge/struct.js',
+      'modules/Bridge/_foreign_function.js',
+      'modules/Bridge/callback.js',
+      'modules/Bridge/cif.js',
+      'modules/Bridge/cif_var.js',
+      'modules/Bridge/dynamic_library.js',
+      'modules/Bridge/errno.js',
+      'modules/Bridge/ffi.js',
+      'modules/Bridge/foreign_function.js',
+      'modules/Bridge/foreign_function_var.js',
+      'modules/Bridge/function.js',
+      'modules/Bridge/library.js',
+      'modules/Bridge/type.js',
+      'modules/Bridge/types.js',
+      'modules/Utilities/Utilities_base.js',
     ],
   },
 
@@ -131,23 +135,20 @@
       'type': 'executable',
 
       'dependencies': [
-        'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
-        'node_js2c#host',
+        'tint_js2c#host',
         'ffi_bindings',
       ],
-
       'include_dirs': [
         'libraries/node/src',
         'libraries/node/tools/msvs/genfiles',
         'libraries/node/deps/uv/src/ares',
         'libraries/node-ffi/src',
-        '<(SHARED_INTERMEDIATE_DIR)' # for node_natives.h
+        'libraries/node/deps/v8/include/',
+        'libraries/node/deps/uv/include/',
+        'libraries/node/deps/uv/src/',
+        '<(SHARED_INTERMEDIATE_DIR)'
       ],
-
       'sources': [
-        'modules/AppSchema/AppSchema_mac.h',
-        'modules/AppSchema/AppSchema_mac.mm',
-        'modules/Runtime/Main_mac.mm',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
         'libraries/node/src/handle_wrap.cc',
@@ -208,14 +209,12 @@
         # node.gyp is added to the project by default.
         'build/common.gypi',
       ],
-
       'defines': [
         'NODE_WANT_INTERNALS=1',
         'ARCH="<(target_arch)"',
         'PLATFORM="<(OS)"',
         'NODE_TAG="<(node_tag)"',
       ],
-
       'conditions': [
         [ 'node_use_openssl=="true"', {
           'defines': [ 'HAVE_OPENSSL=1' ],
@@ -297,9 +296,9 @@
             'libraries/node/deps/v8/include/v8.h',
             'libraries/node/deps/v8/include/v8-debug.h',
           ],
-          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8' ],
+          'defines': [ 'COMPRESS_STARTUP_DATA_BZ2' ],
+          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host' ],
         }],
-
         [ 'node_shared_zlib=="false"', {
           'dependencies': [ 'libraries/node/deps/zlib/zlib.gyp:zlib' ],
         }],
@@ -315,10 +314,13 @@
         [ 'node_shared_libuv=="false"', {
           'dependencies': [ 'libraries/node/deps/uv/uv.gyp:libuv' ],
         }],
-
         [ 'OS=="win"', {
+          'dependencies': [
+            'tint_clr'
+          ],
           'sources': [
-            'libraries/node/src/res/node.rc',
+            'modules/Runtime/Main_win.cc',
+            'tools/tint.rc',
           ],
           'defines': [
             'FD_SETSIZE=1024',
@@ -331,6 +333,11 @@
           'defines': [ '__POSIX__' ],
         }],
         [ 'OS=="mac"', {
+          'sources':[
+            'modules/AppSchema/AppSchema_mac.h',
+            'modules/AppSchema/AppSchema_mac.mm',
+            'modules/Runtime/Main_mac.mm',
+          ],
           'libraries': [ '-framework Carbon' ],
           'defines!': [
             'PLATFORM="mac"',
@@ -365,7 +372,35 @@
         'VCLinkerTool': {
           'SubSystem': 1, # /subsystem:console
         },
-      },
+      }
+    }, #end target tint
+    {
+      'target_name': 'tint_clr',
+      'type': 'static_library',
+      'include_dirs': [
+        'libraries/node/src',
+        'libraries/node/tools/msvs/genfiles',
+        'libraries/node/deps/uv/include/',
+        'libraries/node/deps/uv/src/',
+        'libraries/node-ffi/src',
+        'libraries/node/deps/v8/include/',
+        '<(SHARED_INTERMEDIATE_DIR)'
+      ],
+      'sources':[
+      ],
+      'conditions': [
+        ['OS=="win"', {
+          'sources': [
+            'modules/Bridge/CLR_win.cpp',
+          ]
+        }]
+      ],
+      'msvs_settings': {
+        'VCCLCompilerTool': {
+          'ExceptionHandling': 0,
+          'AdditionalOptions': [ '/CLR', '/EHa' ],
+        },
+      }
     },
     # generate ETW header and resource files
     {
@@ -413,20 +448,26 @@
       ]
     },
     {
-      'target_name': 'node_js2c',
+      'target_name': 'tint_js2c',
       'type': 'none',
       'toolsets': ['host'],
       'actions': [
         {
-          'action_name': 'node_js2c',
+          'action_name': 'tint_js2c',
           'inputs': [
             '<@(library_files)',
-            './build/config.gypi',
+            'libraries/node/config.gypi'
           ],
           'outputs': [
             '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
           ],
           'conditions': [
+            ['OS=="mac"',{
+              'inputs': ['<@(mac_library_files)'],
+            }],
+            ['OS=="win"',{
+              'inputs': ['<@(win_library_files)'],
+            }],
             [ 'node_use_dtrace=="false"'
               ' and node_use_etw=="false"'
               ' and node_use_systemtap=="false"',
@@ -436,60 +477,22 @@
               ],
             [ 'node_use_perfctr=="false"', {
               'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
-            }]
+            }],
           ],
               'action': [
                 '<(python)',
-                'tools/js2c.py',
+                'tools/tint_js2c.py',
                 '<@(_outputs)',
                 '<@(_inputs)',
               ],
         },
       ],
-    }, # end node_js2c
-    #{
-    #  'target_name': 'node_js2c',
-    #  'type': 'none',
-    #  'toolsets': ['host'],
-    #  'actions': [
-    #    {
-    #      'action_name': 'node_js2c',
-    #      'inputs': [
-    #        '<@(library_files)',
-    #        './config.gypi',
-    #      ],
-    #      'outputs': [
-    #        '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
-    #      ],
-    #      'conditions': [
-    #        [ 'node_use_dtrace=="false"'
-    #          ' and node_use_etw=="false"'
-    #          ' and node_use_systemtap=="false"',
-    #        {
-    #            'inputs': ['libraries/node/src/macros.py']
-    #          }
-    #          ],
-    #        [ 'node_use_perfctr=="false"', {
-    #          'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
-    #        }]
-    #      ],
-    #          'action': [
-    #            '<(python)',
-    #            'libraries/node/tools/js2c.py',
-    #            '<@(_outputs)',
-    #            '<@(_inputs)',
-    #          ],
-    #    },
-    #  ],
-    #}, # end node_js2c
+    }, # end tint_js2c
     {
       'target_name': 'ffi_bindings',
       'type': 'static_library',
       'sources': [
-          'modules/Bridge/ffi.h',
           'modules/Bridge/ffi.cc',
-          'modules/Bridge/callback_info.cc',
-          'modules/Bridge/threaded_callback_invokation.cc'
       ],
       'include_dirs': [
         'libraries/node/deps/uv/include',

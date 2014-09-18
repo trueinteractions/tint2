@@ -1,4 +1,8 @@
 #!/bin/sh
+rm -rf ./build/*.mk
+rm -rf ./build/gyp-mac-tool
+rm -rf ./build/libraries
+rm -rf ./build/Makefile
 rm -rf ./build/ninja
 rm -rf ./build/xcode
 rm -rf ./build/DerivedSources/
