@@ -10,8 +10,7 @@
 //TODO: Find a better way of doing this instead of "trusting"
 //that this private interface signature will remain the same.
 extern "C" DWORD uv_get_poll_timeout(uv_loop_t* loop);
-#define uv__has_active_reqs(loop)                                             \
-  (ngx_queue_empty(&(loop)->active_reqs) == 0)
+#define uv__has_active_reqs(loop) (ngx_queue_empty(&(loop)->active_reqs) == 0)
 
 static int embed_closed;
 static uv_sem_t embed_sem;
@@ -26,10 +25,12 @@ DWORD mainThreadId = 0;
 namespace REF {
   extern void Init(v8::Handle<v8::Object> target);
 }
+
 class FFI {
-public:
-  static void FFI::Init(v8::Handle<v8::Object> target);
+  public:
+    static void FFI::Init(v8::Handle<v8::Object> target);
 };
+
 extern "C" void CLR_Init(v8::Handle<v8::Object> target);
 void uv_noop(uv_async_t* handle, int status) {}
 
@@ -44,8 +45,6 @@ v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
   CLR_Init(bridge);
   return v8::Object::New();
 }
-
-
 
 void uv_event(void *info) {
   uv_loop_t* loop = uv_default_loop();
@@ -74,7 +73,7 @@ void uv_event(void *info) {
         PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
     }
 
-    PostThreadMessage(mainThreadId, 0x8001 /* magic UV id */, 0, 0));
+    PostThreadMessage(mainThreadId, 0x8001 /* magic UV id */, 0, 0);
     uv_sem_wait(&embed_sem);
   }
 }

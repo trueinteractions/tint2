@@ -14,7 +14,8 @@ namespace node {
     extern v8::Persistent<v8::String> process_symbol;
     extern v8::Persistent<v8::String> domain_symbol;
     extern void InitDTrace(v8::Handle<v8::Object> target);
-    extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, v8::Handle<v8::Value> filename);
+    extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, 
+      v8::Handle<v8::Value> filename);
 }
 
 static int embed_closed;
