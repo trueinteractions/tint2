@@ -320,7 +320,7 @@
           ],
           'sources': [
             'modules/Runtime/Main_win.cc',
-            'tools/tint.rc',
+            #'tools/tint.rc',
           ],
           'defines': [
             'FD_SETSIZE=1024',
