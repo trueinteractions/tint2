@@ -15,6 +15,10 @@ if "%arg1%" == "debug" (
   set CONFIG="Release"
 )
 
+dir "C:\Program Files (x86)\Microsoft SDKs\Windows"
+
+dir /S "C:\Program Files (x86)\Microsoft SDKs\Windows"
+
 ::if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 ::  SETLOCAL
 ::    copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
