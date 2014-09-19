@@ -18,7 +18,7 @@ if "%arg1%" == "debug" (
 if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
   SETLOCAL
     call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-    "%MSBUILDDIR%msbuild.exe" /p:PlatformToolset=v110 /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo tint.sln 
+    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo tint.sln 
   ENDLOCAL
 ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
   SETLOCAL
