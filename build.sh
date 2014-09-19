@@ -7,7 +7,7 @@ if [ "$(uname)" == "Darwin" ]; then
       ninja -v -C build/ninja/out/Release
     fi
   else
-    xcodebuild -configuration Release -project tint.xcodeproj build    
+    xcodebuild -configuration Release -project build/xcode/tint.xcodeproj build    
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(which make)" == "" ]; then

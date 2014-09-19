@@ -3,25 +3,28 @@ import glob
 import os
 import shlex
 import sys
+from subprocess import call
 
 script_dir = os.path.dirname(__file__)
 node_root  = os.path.normpath(os.path.join(script_dir, os.pardir))
+gypexec = os.path.join(node_root, 'libraries', 'node', 'tools', 'gyp', 'gyp')
+# import gyp
 
-sys.path.insert(0, os.path.join(node_root, 'libraries', 'node', 'tools', 'gyp', 'pylib'))
-import gyp
-
-def run_gyp(args):
-  rc = gyp.main(args)
-  if rc != 0:
-    print 'Error running GYP'
-    sys.exit(rc)
-
+# def run_gyp(args):
+#  rc = gyp.main(args)
+#  if rc != 0:
+#    print 'Error running GYP'
+#    sys.exit(rc)
 if __name__ == '__main__':
-  args = sys.argv[1:]
+  args = ['python']
+  args.append(gypexec)
+  args.extend(list(sys.argv[1:]))
   # Directory within which we want all generated files (including Makefiles)
   # to be written.
   if 'ninja' in args:
     output_dir = os.path.join(os.path.abspath(node_root), 'build', 'ninja')
+  elif 'msvs' in args:
+    output_dir = os.path.join(os.path.abspath(node_root), 'build', 'msvs')
   elif 'xcode' in args:
     output_dir = os.path.join(os.path.abspath(node_root), 'build', 'xcode')
   elif 'make' in args:
@@ -32,14 +35,14 @@ if __name__ == '__main__':
   # GYP bug.
   # On msvs it will crash if it gets an absolute path.
   # On Mac/make it will crash if it doesn't get an absolute path.
-  if sys.platform == 'win32':
-    args.append(os.path.join(node_root, 'tint.gyp'))
-    common_fn  = os.path.join(node_root, 'build', 'common.gypi')
-    options_fn = os.path.join(node_root, 'libraries', 'node', 'config.gypi')
-  else:
-    args.append(os.path.join(os.path.abspath(node_root), 'tint.gyp'))
-    common_fn  = os.path.join(os.path.abspath(node_root), 'build','common.gypi')
-    options_fn = os.path.join(os.path.abspath(node_root), 'libraries', 'node', 'config.gypi')
+  #if sys.platform == 'win32':
+  args.append(os.path.join(node_root, 'tint.gyp'))
+  common_fn  = os.path.join(node_root, 'build', 'common.gypi')
+  options_fn = os.path.join(node_root, 'libraries', 'node', 'config.gypi')
+  #else:
+  #  args.append(os.path.join(os.path.abspath(node_root), 'tint.gyp'))
+  #  common_fn  = os.path.join(os.path.abspath(node_root), 'build','common.gypi')
+  #  options_fn = os.path.join(os.path.abspath(node_root), 'libraries', 'node', 'config.gypi')
 
   if os.path.exists(common_fn):
     args.extend(['-I', common_fn])
@@ -50,14 +53,15 @@ if __name__ == '__main__':
   args.append('--depth=' + node_root)
 
   # There's a bug with windows which doesn't allow this feature.
-  if sys.platform != 'win32':
-    # Tell gyp to write the Makefiles into output_dir
-    args.extend(['--generator-output', output_dir])
+  # if sys.platform != 'win32':
+  # Tell gyp to write the Makefiles into output_dir
+  args.extend(['--generator-output', output_dir])
 
-    # Tell make to write its output into the same dir
-    args.extend(['-Goutput_dir=' + output_dir])
+  # Tell make to write its output into the same dir
+  args.extend(['-Goutput_dir=' + output_dir])
 
   args.append('-Dcomponent=static_library')
   args.append('-Dlibrary=static_library')
-  gyp_args = list(args)
-  run_gyp(gyp_args)
+  # gyp_args = list(args)
+  call(args)
+  # run_gyp(gyp_args)

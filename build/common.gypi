@@ -110,10 +110,6 @@
             'OptimizeReferences': 2, # /OPT:REF
             'EnableCOMDATFolding': 2, # /OPT:ICF
             'LinkIncremental': 1, # disable incremental linking
-            'AdditionalOptions': [ 
-              '/ignore:4221', # ignores empty object warnings (openssl ecp_* files)
-              '/ignore:4355', # ignores using this in base member initializers (v8)
-            ],
           },
         },
       }

@@ -61,7 +61,7 @@ test.bat
 ```
 
 <h3>Post-Build</h3>
-After building you'll find the binary in 'build/xcode/Release/tint' or 'Release\tint.exe. You can also use the Xcode project files or MSVS 2010 files in the root. Optionally you can use ninja build files that are generated in 'build/ninja/out/Release' and 'build/ninja/out/Debug' on posix (OSX only at the moment).
+After building you'll find the binary in 'build/xcode/Release/tint' or 'build\msvs\Release\tint.exe. You can also use the Xcode project files or MSVS 2010 files in build\xcode and build\msvs. Optionally you can use ninja build files that are generated in 'build/ninja/out/Release' and 'build/ninja/out/Debug' on posix (OSX only at the moment).
 
 <h3>Troubleshooting Builds</h3>
 If you have issues compiling ensure you're using Python 2.7 or 2.6 (./config.sh (config.bat on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use 'echo $PYTHON' (echo %PYTHON% on Windows) and 'echo $CC' (echo %CC% on Windows) to check to see if any of these are set to alternate versions.
