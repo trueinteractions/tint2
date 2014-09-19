@@ -24,9 +24,9 @@ if "%arg1%" == "debug" (
 ::) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
   SETLOCAL
     copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
-    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat x64"
     :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-    "%MSBUILDDIR%msbuild.exe" /p:PlatformToolset=v100 /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
   ENDLOCAL
 ::) else (
 ::  goto MissingMSBuildToolsPath

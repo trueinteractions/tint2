@@ -53,6 +53,13 @@ static void uv_noop(uv_async_t* handle, int status) {}
 static void uv_event(void *info) {
     [[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
 
+    // The dummy handle prevents UV from exiting and throwing incorrect
+    // timeout values, its necessary since uv can't see many of the app
+    // events to keep it assuming something else will come and return -1
+    // from uv_backend_timeout.
+    uv_async_t dummy_uv_handle_;
+    uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
+
     int r;
     struct kevent errors[1];
     uv_loop_t* loop = uv_default_loop();
@@ -107,13 +114,6 @@ static void uv_event(void *info) {
     // keep the UV loop in-sync with CFRunLoop.
     embed_closed = 0;
 
-    // The dummy handle prevents UV from exiting and throwing incorrect
-    // timeout values, its necessary since uv can't see many of the app
-    // events to keep it assuming something else will come and return -1
-    // from uv_backend_timeout.
-    uv_async_t dummy_uv_handle_;
-    uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
-
     uv_sem_init(&embed_sem, 0);
     uv_thread_create(&embed_thread, uv_event, NULL);
 }
@@ -121,10 +121,10 @@ static void uv_event(void *info) {
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     node::EmitExit(process_l);
     embed_closed = 1;
-    uv_sem_post(&embed_sem);
+    /*uv_sem_post(&embed_sem);
     uv_run(uv_default_loop(), UV_RUN_ONCE);
     uv_thread_join(&embed_thread);
-    uv_sem_destroy(&embed_sem);
+    uv_sem_destroy(&embed_sem);*/
 }
 @end
 

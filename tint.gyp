@@ -136,6 +136,7 @@
       'type': 'executable',
 
       'dependencies': [
+        'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'tint_js2c#host',
         'ffi_bindings',
       ],
