@@ -1,8 +1,10 @@
+#pragma comment(lib, "gdi32.lib")
 #include <node.h>
 #include <node_javascript.h>
 #include <node_string.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <wingdi.h>
 #include "v8_typed_array.h"
 
 //TODO: Find a better way of doing this instead of "trusting"
@@ -14,39 +16,36 @@ extern "C" DWORD uv_get_poll_timeout(uv_loop_t* loop);
 static int embed_closed;
 static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
-
 static int init_argc;
 static char **init_argv;
 
 v8::Handle<v8::Object> process_l;
 v8::Persistent<v8::Object> bridge;
+DWORD mainThreadId = 0;
 
 namespace REF {
   extern void Init(v8::Handle<v8::Object> target);
 }
-
 class FFI {
 public:
   static void FFI::Init(v8::Handle<v8::Object> target);
 };
-
 extern "C" void CLR_Init(v8::Handle<v8::Object> target);
-
-DWORD mainThreadId = 0;
+void uv_noop(uv_async_t* handle, int status) {}
 
 v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
-    v8::HandleScope scope;
-    v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
-    bridge_template->SetClassName(v8::String::NewSymbol("bridge"));
-    bridge = v8::Persistent<v8::Object>::New(bridge_template->GetFunction()->NewInstance());
-    process_l->Set(v8::String::NewSymbol("bridge"), bridge);
-    FFI::Init(bridge);
-    REF::Init(bridge);
-    CLR_Init(bridge);
-    return v8::Object::New();
+  v8::HandleScope scope;
+  v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
+  bridge_template->SetClassName(v8::String::NewSymbol("bridge"));
+  bridge = v8::Persistent<v8::Object>::New(bridge_template->GetFunction()->NewInstance());
+  process_l->Set(v8::String::NewSymbol("bridge"), bridge);
+  FFI::Init(bridge);
+  REF::Init(bridge);
+  CLR_Init(bridge);
+  return v8::Object::New();
 }
 
-void uv_noop(uv_async_t* handle, int status) {}
+
 
 void uv_event(void *info) {
   uv_loop_t* loop = uv_default_loop();
@@ -67,33 +66,22 @@ void uv_event(void *info) {
       DWORD bytes, timeout;
       ULONG_PTR key;
       OVERLAPPED* overlapped;
-
       timeout = uv_get_poll_timeout(loop);
-      GetQueuedCompletionStatus(loop->iocp,
-                                &bytes,
-                                &key,
-                                &overlapped,
-                                timeout);
+      GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
       if (overlapped != NULL)
-        PostQueuedCompletionStatus(loop->iocp,
-                                   bytes,
-                                   key,
-                                   overlapped);
+        PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
     }
 
-    {
-      assert(PostThreadMessage(mainThreadId, 0x8001 /* magic UV id */, 0, 0));
-    }
+    PostThreadMessage(mainThreadId, 0x8001 /* magic UV id */, 0, 0));
     uv_sem_wait(&embed_sem);
   }
 }
 
 void node_load() {
   //TODO: Register the app:// protocol.
-
-  // Resgiter the initial bridge: C++/C/C# (CLR) dotnet
+  // Register the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);
 
   // Load node and begin processing.
@@ -109,7 +97,6 @@ void node_load() {
   // from uv_backend_timeout.
   uv_async_t dummy_uv_handle_;
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
-
   uv_sem_init(&embed_sem, 0);
   uv_thread_create(&embed_thread, uv_event, NULL);
 }
@@ -136,22 +123,20 @@ static char **copy_argv(int argc, char **argv) {
   int i;
 
   strlen_sum = 0;
-  for(i = 0; i < argc; i++) {
-      strlen_sum += strlen(argv[i]) + 1;
-  }
+  for(i = 0; i < argc; i++)
+    strlen_sum += strlen(argv[i]) + 1;
 
   argv_copy = (char **) malloc(sizeof(char *) * (argc + 1) + strlen_sum);
-  if (!argv_copy) {
-      return NULL;
-  }
+  if (!argv_copy)
+    return NULL;
 
   argv_data = (char *) argv_copy + sizeof(char *) * (argc + 1);
 
   for(i = 0; i < argc; i++) {
-      argv_copy[i] = argv_data;
-      len = strlen(argv[i]) + 1;
-      memcpy(argv_data, argv[i], len);
-      argv_data += len;
+    argv_copy[i] = argv_data;
+    len = strlen(argv[i]) + 1;
+    memcpy(argv_data, argv[i], len);
+    argv_data += len;
   }
 
   argv_copy[argc] = NULL;
@@ -173,7 +158,6 @@ void win_msg_loop() {
        DispatchMessage(&msg);
     }
   }
-  fprintf(stderr, "terminating: bRet: %i, last msg.message: %i\n",bRet,msg.message);
   node_terminate();
   exit(0);
 }
@@ -205,7 +189,6 @@ int main(int argc, char *argv[]) {
     context.Dispose();
 #endif
   }
-
 #ifndef NDEBUG
   // Clean up. Not strictly necessary.
   v8::V8::Dispose();
