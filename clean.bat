@@ -1,45 +1,45 @@
 @echo off
 
-rmdir /S /Q .\build\msvs\
-rmdir /S /Q .\build\Release\
-rmdir /S /Q .\build\Debug\
-rmdir /S /Q .\build\out\
-rmdir /S /Q .\build\ninja\
-rmdir /S /Q .\Debug
-rmdir /S /Q .\Release
-rmdir /S /Q .\libraries\dlfcn-win32\Debug
-rmdir /S /Q .\libraries\dlfcn-win32\Release
-del /S /Q .\libraries\dlfcn-win32\dlfcn.sln
-del /S /Q .\libraries\dlfcn-win32\dlfcn.vcxproj
-del /S /Q .\node_dtrace_header.vcxproj
-del /S /Q .\node_dtrace_provider.vcxproj
-del /S /Q .\node_dtrace_ustack.vcxproj
-del /S /Q .\node_etw.vcxproj
-del /S /Q .\node_js2c.vcxproj
-del /S /Q .\node_js2c.vcxproj.filters
-del /S /Q .\tint_js2c.vcxproj
-del /S /Q .\tint_js2c.vcxproj.filters
-del /S /Q .\node_perfctr.vcxproj
-del /S /Q .\node_systemtap_header.vcxproj
-del /S /Q .\ref_binding.vcxproj
-del /S /Q .\ref_binding.vcxproj.filters
-del /S /Q .\tint.sln
-del /S /Q .\tint.vcxproj
-del /S /Q .\tint.vcxproj.filters
-del /S /Q .\tint_js2c.vcxproj
-del /S /Q .\tint_js2c.vcxproj.filters
-del /S /Q .\tint_runtime.vcxproj
-del /S /Q .\tint_runtime.vcxproj.filters
-del /S /Q .\tint_clr.vcxproj
-del /S /Q .\tint_clr.vcxproj.filters
-del /S /Q .\ffi_bindings.vcxproj
-del /S /Q .\ffi_bindings.vcxproj.filters
-del /S /Q .\libraries\node\node.sln
-del /S /Q .\libraries\node\node.vcxproj
-del /S /Q .\libraries\node\node.vcxproj.filters
-del /S /Q .\libraries\libffi\libffi.sln
-del /S /Q .\libraries\libffi\libffi.vcxproj
-del /S /Q .\libraries\libffi\libffi.vcxproj.filters
-del /S /Q .\libraries\node\deps\v8\tools\gyp\v8.sln
-del /S /Q .\libraries\node\deps\v8\tools\gyp\v8.vcxproj
-del /S /Q .\libraries\node\deps\v8\tools\gyp\v8.vcxproj.filters
+rmdir /S /Q .\build\msvs\ >nul 2>&1
+rmdir /S /Q .\build\Release\ >nul 2>&1
+rmdir /S /Q .\build\Debug\ >nul 2>&1
+rmdir /S /Q .\build\out\ >nul 2>&1
+rmdir /S /Q .\build\ninja\ >nul 2>&1
+rmdir /S /Q .\Debug >nul 2>&1
+rmdir /S /Q .\Release >nul 2>&1
+rmdir /S /Q .\libraries\dlfcn-win32\Debug >nul 2>&1
+rmdir /S /Q .\libraries\dlfcn-win32\Release >nul 2>&1
+del /S /Q .\libraries\dlfcn-win32\dlfcn.sln >nul 2>&1
+del /S /Q .\libraries\dlfcn-win32\dlfcn.vcxproj >nul 2>&1
+del /S /Q .\node_dtrace_header.vcxproj >nul 2>&1
+del /S /Q .\node_dtrace_provider.vcxproj >nul 2>&1
+del /S /Q .\node_dtrace_ustack.vcxproj >nul 2>&1
+del /S /Q .\node_etw.vcxproj >nul 2>&1
+del /S /Q .\node_js2c.vcxproj >nul 2>&1
+del /S /Q .\node_js2c.vcxproj.filters >nul 2>&1
+del /S /Q .\tint_js2c.vcxproj >nul 2>&1
+del /S /Q .\tint_js2c.vcxproj.filters >nul 2>&1
+del /S /Q .\node_perfctr.vcxproj >nul 2>&1
+del /S /Q .\node_systemtap_header.vcxproj >nul 2>&1
+del /S /Q .\ref_binding.vcxproj >nul 2>&1
+del /S /Q .\ref_binding.vcxproj.filters >nul 2>&1
+del /S /Q .\tint.sln >nul 2>&1
+del /S /Q .\tint.vcxproj >nul 2>&1
+del /S /Q .\tint.vcxproj.filters >nul 2>&1
+del /S /Q .\tint_js2c.vcxproj >nul 2>&1
+del /S /Q .\tint_js2c.vcxproj.filters >nul 2>&1
+del /S /Q .\tint_runtime.vcxproj >nul 2>&1
+del /S /Q .\tint_runtime.vcxproj.filters >nul 2>&1
+del /S /Q .\tint_clr.vcxproj >nul 2>&1
+del /S /Q .\tint_clr.vcxproj.filters >nul 2>&1
+del /S /Q .\ffi_bindings.vcxproj >nul 2>&1
+del /S /Q .\ffi_bindings.vcxproj.filters >nul 2>&1
+del /S /Q .\libraries\node\node.sln >nul 2>&1
+del /S /Q .\libraries\node\node.vcxproj >nul 2>&1
+del /S /Q .\libraries\node\node.vcxproj.filters >nul 2>&1
+del /S /Q .\libraries\libffi\libffi.sln >nul 2>&1
+del /S /Q .\libraries\libffi\libffi.vcxproj >nul 2>&1
+del /S /Q .\libraries\libffi\libffi.vcxproj.filters >nul 2>&1
+del /S /Q .\libraries\node\deps\v8\tools\gyp\v8.sln >nul 2>&1
+del /S /Q .\libraries\node\deps\v8\tools\gyp\v8.vcxproj >nul 2>&1
+del /S /Q .\libraries\node\deps\v8\tools\gyp\v8.vcxproj.filters >nul 2>&1

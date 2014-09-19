@@ -7,16 +7,28 @@ if NOT exist .\libraries\node\node.gyp (
 )
 
 SETLOCAL
-  call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-  call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
-
+  if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
+  ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+    call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+  ) else (
+    goto MSBuildNotFound
+  )
   set msiplatform=x64
   set noetw_msi_arg=/p:NoETW=1
   set noperfctr_msi_arg=/p:NoPerfCtr=1
   set target_arch=x64
 
-  python tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag=
+  python tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
 ENDLOCAL
+
+goto:eof
+:MSBuildNotFound
+echo "Error: Cannot find environment variable VS110COMNTOOLS (Visual Studio 2012 and 2013) or VS100COMNTOOLS (Visual Studio 2010)"
+echo "Error: Download and install Visual Studio 2010 or greater and Windows SDK 7.0 or greater. Visit http://www.microsoft.com"
+
+:: Alternate ways of generating the project files (not recommended.)
 :: python tools\gyp_tint
 :: .\libraries\node\tools\gyp\gyp.bat tint.gyp -f msvs -D target_arch=x64 -Goutput_dir=./build/msvs --generator-output=./build/msvs/ --depth=. -I./libraries/node/config.gypi -I./build/common.gypi
 :: .\libraries\node\tools\gyp\gyp.bat tint.gyp -f ninja -D target_arch=x64 -Goutput_dir=./build/ninja --generator-output=./build/ninja/ --depth=. -I./libraries/node/config.gypi -I./build/common.gypi

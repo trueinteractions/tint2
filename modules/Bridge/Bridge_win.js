@@ -4,15 +4,19 @@ var dotnet = process.bridge;
 var classCache = {};
 
 function unwrap(a) {
-  if(a && a.pointer) return a.pointer;
-  else if(a && a.classPointer) return a.classPointer;
-  else return a;
+  if(a && a.pointer)            // Return instance
+    return a.pointer;
+  else if(a && a.classPointer)  // Return the class
+    return a.classPointer;
+  else 
+    return a;                   // "Other" type (enum, const)
 }
 
 function wrap(b) {
-  if(Buffer.isBuffer(b)) {
+  if(Buffer.isBuffer(b)) {      // Either an instance/class
     return createJSInstance(b);
-  } else return b;
+  } else 
+    return b;                   // "Other" type (enum, const)
 }
 
 function createEnum(typeNative) {
@@ -32,7 +36,7 @@ function createEnum(typeNative) {
 }
 
 function createEvent(target, typeNative, typeName, memberNative, memberName, static) {
-  // TODO...
+  // TODO Perhaps delegates can use addEventListener?..
   target[memberName] = function() { console.log('unimplemented: '+typeName+'::'+memberName); }
 }
 
@@ -50,7 +54,10 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
     var pointer = static ? this.classPointer : this.pointer;
     var func = static ? dotnet.execStaticMethod : dotnet.execMethod;
     var args = [pointer, memberName];
-    for(var i=0; i < arguments.length; i++) args.push(unwrap(arguments[i]));
+    
+    for(var i=0; i < arguments.length; i++)
+      args.push(unwrap(arguments[i]));
+    
     return wrap(func.apply(null,args));
   }
 }
@@ -67,30 +74,20 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   var info = { typeNative:typeNative, typeName:typeName, memberNative:memberNative, memberName:memberName, cls:target };
   var memberType = dotnet.execGetProperty(memberNative, 'MemberType');
   var strMemberType = dotnet.execMethod(memberType, 'ToString');
-  switch(strMemberType) {
-    case 'Event':
-      info.exec = createEvent;
-      break;
-    case 'Field':
-      info.exec = createField;
-      break;
-    case 'Method':
-      info.exec = createMethod;
-      break;
-    case 'Property':
-      info.exec = createProperty;
-      break;
-    default:
-      //console.warn('member failed to recognize: '+strMemberType+' on '+typeName+' with: '+memberName);
-      break; 
-  }
+  
+  if(strMemberType == 'Event') info.exec = createEvent;
+  else if (strMemberType == 'Field') info.exec = createField;
+  else if (strMemberType == 'Method') info.exec = createMethod;
+  else if (strMemberType == 'Property') info.exec = createProperty;
+
   if(info.exec)
-    info.exec(info.cls,info.typeNative,info.typeName,info.memberNative,info.memberName,static);
+    info.exec(info.cls, info.typeNative, info.typeName, info.memberNative, info.memberName, static);
 }
 
 function createJSInstance(pointer) {
   var typeNative = dotnet.getType(pointer);
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
+
   if(dotnet.execGetProperty(dotnet.getType(typeNative), "IsClass")) {
     var c = createClass(typeNative, typeName);
     var n = function() {
@@ -102,9 +99,8 @@ function createJSInstance(pointer) {
     n.pointer = n.prototype.pointer = pointer;
     n.classPointer = n.prototype.classPointer = typeNative;
     return new n;
-  } else {
+  } else
     console.warn('Unknown type passed back: ', typeName);
-  }
 }
 
 function createClass(typeNative, typeName) {
@@ -124,14 +120,18 @@ function createClass(typeNative, typeName) {
   cls.classPointer = cls.prototype.classPointer = typeNative;
   cls.className = cls.prototype.className = typeName;
 
+  // Find all STATIC members.
   typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
+  
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
     var memberName = dotnet.execGetProperty(memberNative, 'Name');
     createMember(cls, typeNative, typeName, memberNative, memberName, true);
   }
 
+  // Find all INSTANCE members.
   typeEnumerator = dotnet.execMethod(dotnet.getMemberTypes(typeNative),'GetEnumerator');
+  
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
     var memberName = dotnet.execGetProperty(memberNative, 'Name');
@@ -144,11 +144,20 @@ function createClass(typeNative, typeName) {
 function createFromType(nativeType, onto) {
   if(dotnet.execGetProperty(nativeType, "IsPublic")) {
     var name = dotnet.execGetProperty(nativeType,"Name");
+    var space = dotnet.execGetProperty(nativeType,"Namespace");
     var info = { onto:onto, type:nativeType, name:name }
+    
+    if(space) {
+      var spl = space.split('.');
+      for(var i=0; i < spl.length; i++) {
+        if(!info.onto[spl[i]]) info.onto[spl[i]] = {};
+        info.onto = info.onto[spl[i]];
+      }
+    }
 
     if(dotnet.execGetProperty(nativeType, "IsClass")) {
       //onto[name] = createClass(nativeType,name);
-      Object.defineProperty(onto, name, {
+      Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() {
           delete this.onto[this.name];
@@ -157,7 +166,7 @@ function createFromType(nativeType, onto) {
       });
     } else if(dotnet.execGetProperty(nativeType, "IsEnum")) {
       //onto[name] = createEnum(nativeType,name);
-      Object.defineProperty(onto, name, {
+      Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() { 
           delete this.onto[this.name];
@@ -166,18 +175,18 @@ function createFromType(nativeType, onto) {
       });
     } else if(dotnet.execGetProperty(nativeType, "IsValueType")) {
       //onto[name] = createClass(nativeType,name);
-      Object.defineProperty(onto, name, {
+      Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() {
           delete this.onto[this.name];
           return this.onto[this.name] = createClass(this.type,this.name);
         }.bind(info)
       });
-    } else if(dotnet.execGetProperty(nativeType, "IsInterface")) {
-    } else if(dotnet.execGetProperty(nativeType, "IsAbstract")) {
-    } else {
+    } //else if(dotnet.execGetProperty(nativeType, "IsInterface")) {
+    //} else if(dotnet.execGetProperty(nativeType, "IsAbstract")) {
+    //} else {
       //console.warn('The type: '+name+' was not imported or of a known layout.');
-    }
+    //}
   }
 }
 
@@ -186,6 +195,7 @@ function Import(assembly, onto) {
 
   var types = dotnet.loadAssembly(assembly);
   var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");
+
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var type = dotnet.execGetProperty(typeEnumerator,'Current');
     createFromType(type, onto);
@@ -193,5 +203,8 @@ function Import(assembly, onto) {
 }
 
 if(!process.bridge.dotnet) process.bridge.dotnet = {};
-process.bridge.dotnet.import = function(e) { Import(e, process.bridge.dotnet); };
-process.bridge.dotnet.Import = function(e) { Import(e, process.bridge.dotnet); };
+process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) { 
+  Import(e, process.bridge.dotnet); 
+};
+
+
