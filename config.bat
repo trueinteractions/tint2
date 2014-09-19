@@ -7,14 +7,14 @@ if NOT exist .\libraries\node\node.gyp (
 )
 
 SETLOCAL
-  if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-  ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+    :: if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+    :: call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
+    :: ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+    :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
     call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
-  ) else (
-    goto MSBuildNotFound
-  )
+    :: ) else (
+    :: goto MSBuildNotFound
+    :: )
   set msiplatform=x64
   set noetw_msi_arg=/p:NoETW=1
   set noperfctr_msi_arg=/p:NoPerfCtr=1

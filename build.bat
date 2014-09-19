@@ -15,22 +15,22 @@ if "%arg1%" == "debug" (
   set CONFIG="Release"
 )
 
-if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-  SETLOCAL
-    copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
-    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
-  ENDLOCAL
-) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+::if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+::  SETLOCAL
+::    copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
+::    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
+::    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+::  ENDLOCAL
+::) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
   SETLOCAL
     copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
     call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
-    call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+    :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
     "%MSBUILDDIR%msbuild.exe" /p:PlatformToolset=v100 /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
   ENDLOCAL
-) else (
-  goto MissingMSBuildToolsPath
-)
+::) else (
+::  goto MissingMSBuildToolsPath
+::)
 
 goto:eof
 ::ERRORS

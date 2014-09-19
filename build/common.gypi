@@ -141,7 +141,7 @@
           ['_type=="executable"', {
             #'SubSystem': 1, # console executable
           }],
-        ],
+        ]
       },
     },
     'conditions': [

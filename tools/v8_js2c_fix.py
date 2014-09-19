@@ -389,7 +389,6 @@ def main():
   natives = sys.argv[1]
   type = sys.argv[2].replace('../','').replace('..\\','').replace('libraries\\','').replace('node\\','').replace('deps\\','').replace('v8\\','').replace('tools\\','').replace('gyp\\','')
   compression = sys.argv[3].replace('../','').replace('..\\','').replace('libraries\\','').replace('node\\','').replace('deps\\','').replace('v8\\','').replace('tools\\','').replace('gyp\\','')
-  print('type is: '+type+' compression is: '+compression)
   source_files = sys.argv[4:]
   JS2C(source_files, [natives], { 'TYPE': type, 'COMPRESSION': compression })
 

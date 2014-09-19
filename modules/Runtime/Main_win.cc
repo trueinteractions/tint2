@@ -1,10 +1,10 @@
-#pragma comment(lib, "gdi32.lib")
+
 #include <node.h>
 #include <node_javascript.h>
 #include <node_string.h>
 #include <stdlib.h>
 #include <windows.h>
-#include <wingdi.h>
+
 #include "v8_typed_array.h"
 
 //TODO: Find a better way of doing this instead of "trusting"
