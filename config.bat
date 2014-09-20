@@ -1,21 +1,22 @@
 
 @ECHO OFF
 
-if exist "%PYTHON%" (
-  if exist "%PYTHON\python" (
-    set pythoncmd="%PYTHON%\python"
-  ) else (
-    set pythoncmd="%PYTHON%"
-  )
-) else (
-  set pythoncmd="C:\Python27\python.exe"
-)
+:: if exist "%PYTHON%" (
+::  if exist "%PYTHON\python" (
+::    set pythoncmd="%PYTHON%\python"
+::  ) else (
+::    set pythoncmd="%PYTHON%"
+::  )
+:: ) else (
+::  set pythoncmd="C:\Python27\python.exe"
+:: )
 
 if NOT exist .\libraries\node\node.gyp (
   git submodule init
   git submodule update
 )
 
+call build.bat release nobuild nosign x64
 ::SETLOCAL
   ::if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
   ::  call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
@@ -29,8 +30,8 @@ if NOT exist .\libraries\node\node.gyp (
   ::set noperfctr_msi_arg=/p:NoPerfCtr=1
   ::set target_arch=x64
 
-  call %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
- 
+  :: call %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
+
 ::ENDLOCAL
 
 goto:eof
