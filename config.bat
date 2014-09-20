@@ -20,7 +20,7 @@ SETLOCAL
     :: call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
     :: ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
     :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
     :: ) else (
     :: goto MSBuildNotFound
     :: )
