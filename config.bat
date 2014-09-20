@@ -17,7 +17,7 @@ if NOT exist .\libraries\node\node.gyp (
 )
 
 set arch=x64
-if /i "%1"=="x86" set arch=ia32&goto arg-ok
+if /i "%1"=="x86" set arch=ia32
 
 call build.bat release nobuild nosign %arch%
 ::SETLOCAL
