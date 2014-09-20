@@ -381,6 +381,13 @@
             '/LTCG', # msbuild said i should add it to save time..
           ]
         },
+      },
+      'all_dependent_settings': {
+        'msvs_settings': {
+          'VCLinkerTool': {
+            'RuntimeLibrary':2
+          }
+        }
       }
     }, #end target tint
     {
