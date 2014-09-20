@@ -13,7 +13,7 @@ if /i "%1"=="/?" goto help
 
 @rem Process arguments.
 set config=Release
-set msiplatform=z64
+set msiplatform=x64
 set target=Build
 set target_arch=x64
 set debug_arg=

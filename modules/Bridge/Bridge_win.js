@@ -207,7 +207,7 @@ process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) {
   Import(e, process.bridge.dotnet); 
 };
 
-
+// TODO: One of these causes a memory access violation in the CLR.
 // if(!process.bridge.ref) process.bridge.ref = require('ref');
 // if(!process.bridge.struct) process.bridge.struct = require('struct');
 // if(!process.bridge.ffi) process.bridge.ffi = require('ffi');
