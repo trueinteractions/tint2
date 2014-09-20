@@ -30,12 +30,27 @@ if "%arg1%" == "debug" (
 ::    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
 ::  ENDLOCAL
 ::) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+:: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
   SETLOCAL
-    copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
-    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
-    echo "Windows SDK: %WindowsSdkDir%"
-    :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-    "%MSBUILDDIR%msbuild.exe" /P:PlatformToolset=v100 /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+    if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+      echo "Visual Studio 2013"
+      copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
+      call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+      echo "Windows SDK: %WindowsSdkDir%"
+      "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+    ) else if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+      echo "Visual Studio 2012"
+      copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
+      call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+      echo "Windows SDK: %WindowsSdkDir%"
+      "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+    ) else if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+      echo "Visual Studio 2010"
+      copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
+      call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+      echo "Windows SDK: %WindowsSdkDir%"
+      "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+    )
   ENDLOCAL
 ::) else (
 ::  goto MissingMSBuildToolsPath

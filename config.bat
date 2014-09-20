@@ -1,13 +1,14 @@
 
 @ECHO OFF
 
-set pythoncmd = python
-if defined %PYTHON% if exist %PYTHON% (
-  if exist %PYTHON\python (
-    set pythoncmd = %PYTHON%\python
+if exist "%PYTHON%" (
+  if exist "%PYTHON\python" (
+    set pythoncmd="%PYTHON%\python"
   ) else (
-    set pythoncmd = %PYTHON%
+    set pythoncmd="%PYTHON%"
   )
+) else (
+  set pythoncmd="C:\Python27\python.exe"
 )
 
 if NOT exist .\libraries\node\node.gyp (
@@ -16,23 +17,22 @@ if NOT exist .\libraries\node\node.gyp (
 )
 
 SETLOCAL
-    :: if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    :: call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-    :: ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+  if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+    call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+  ) else if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+  ) else if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
     call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
-    :: ) else (
-    :: goto MSBuildNotFound
-    :: )
+  )
   set msiplatform=x64
   set noetw_msi_arg=/p:NoETW=1
   set noperfctr_msi_arg=/p:NoPerfCtr=1
   set target_arch=x64
 
-  %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
+  call %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
 ENDLOCAL
 
 goto:eof
 :MSBuildNotFound
-echo "Error: Cannot find environment variable VS110COMNTOOLS (Visual Studio 2012 and 2013) or VS100COMNTOOLS (Visual Studio 2010)"
+echo "Error: Cannot find environment variable VS120COMNTOOLS (Visual Studio 2013), VS110COMNTOOLS (Visual Studio 2012) or VS100COMNTOOLS (Visual Studio 2010)"
 echo "Error: Download and install Visual Studio 2010 or greater and Windows SDK 7.0 or greater. Visit http://www.microsoft.com"

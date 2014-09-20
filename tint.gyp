@@ -378,7 +378,7 @@
           'AdditionalOptions': [ 
             '/NODEFAULTLIB:LIBCMT', # remove libcmt, relink with "/MD" (msvcrt.lib/msvcr110.dll)
             '/DEFAULTLIB:MSVCRT',
-            '/PlatformToolset:Windows7.1SDK'
+            '/PlatformToolset:Windows7.1SDK',
             '/LTCG', # msbuild said i should add it to save time..
           ]
         },
