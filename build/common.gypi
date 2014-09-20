@@ -1,9 +1,8 @@
 {
   'variables': {
-    'werror': '',                     # Turn off -Werror in V8 build.
     'visibility%': 'normal',          # V8's visibility setting
-    'target_arch%': 'x64',           # set v8's target architecture
-    'host_arch%': 'x64',             # set v8's host architecture
+    'target_arch%': 'x64',            # set v8's target architecture
+    'host_arch%': 'x64',              # set v8's host architecture
     'want_separate_host_toolset%': 0, # V8 should not build target and host
     'library%': 'static_library',     # allow override to 'shared_library' for DLL/.so builds
     'component%': 'static_library',   # NB. these names match with what V8 expects
@@ -20,14 +19,7 @@
     'conditions': [
       ['OS != "win"', {
         'v8_postmortem_support': 'true'
-      }],
-      ['GENERATOR == "ninja"', {
-        'OBJ_DIR': '<(PRODUCT_DIR)/obj',
-        'V8_BASE': '<(PRODUCT_DIR)/libv8_base.a',
-      }, {
-        'OBJ_DIR': '<(PRODUCT_DIR)/obj.target',
-        'V8_BASE': '<(PRODUCT_DIR)/obj.target/deps/v8/tools/gyp/libv8_base.a',
-      }],
+      }]
     ],
   },
 
@@ -41,17 +33,14 @@
           ['target_arch=="x64"', {
             'msvs_configuration_platform': 'x64',
           }],
-					['OS!="mac"', {
-						'ldflags': [ '-framework Carbon'],
-					}],
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'RuntimeLibrary': 1, # static debug
+            #'RuntimeLibrary': 1, # static debug
             'Optimization': 0, # /Od, no optimization
             'MinimalRebuild': 'false',
             'OmitFramePointers': 'false',
-            'BasicRuntimeChecks': 3, # /RTC1
+            #'BasicRuntimeChecks': 3, # /RTC1
           },
           'VCLinkerTool': {
             'LinkIncremental': 2, # enable incremental linking
@@ -93,16 +82,10 @@
             # pull in V8's postmortem metadata
             'ldflags': [ '-Wl,-z,allextract' ]
           }],
-          ['OS!="mac" and OS!="win"', {
-            'cflags': [ '-fno-omit-frame-pointer' ],
-          }],
-					['OS!="mac"', {
-						'ldflags': [ '-framework Carbon'],
-					}],
         ],
-        'msvs_settings': {
+        'msvs_settings%': {
           'VCCLCompilerTool': {
-            'RuntimeLibrary': 0, # static release
+            #'RuntimeLibrary': 0, # static release 
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
@@ -111,9 +94,10 @@
             'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
             'RuntimeTypeInfo': 'false',
-            'ExceptionHandling': '0',
+            'ExceptionHandling': 0,
             'AdditionalOptions': [
               '/MP', # compile across multiple CPUs
+              '/wd4506', '/wd4267', '/wd4244', '/wd4344', '/wd4800', '/wd4355', '/wd4005',
             ],
           },
           'VCLibrarianTool': {
@@ -130,7 +114,7 @@
         },
       }
     },
-    'msvs_settings': {
+    'msvs_settings%': {
       'VCCLCompilerTool': {
         'StringPooling': 'true', # pool string literals
         'DebugInformationFormat': 3, # Generate a PDB
@@ -155,9 +139,9 @@
         'SuppressStartupBanner': 'true',
         'target_conditions': [
           ['_type=="executable"', {
-            'SubSystem': 1, # console executable
+            #'SubSystem': 1, # console executable
           }],
-        ],
+        ]
       },
     },
     'conditions': [
@@ -165,6 +149,13 @@
         'msvs_cygwin_shell': 0, # prevent actions from trying to use cygwin
         'defines': [
           'WIN32',
+          '_DLL', # neccessary in order to use /MD (msvcrt.lib/msvcr110.dll) 
+                  # instead of /MT (libcmt.lib), we need /MD to include CLR
+                  # (/CLR) compiled options, as /MT isn't compatible with CLR.
+                  # note we do not actually produce a DLL, we just need to
+                  # send out a note that we intend to dynamically link 
+                  # our internals (even as a EXE). To produce a real DLL
+                  # we'd need to include /LD.
           # we don't really want VC++ warning us about
           # how dangerous C functions are...
           '_CRT_SECURE_NO_DEPRECATE',
@@ -172,7 +163,7 @@
           # POSIX names
           '_CRT_NONSTDC_NO_DEPRECATE',
           'BUILDING_V8_SHARED=1',
-          'BUILDING_UV_SHARED=1',
+          'BUILDING_UV_SHARED=1'
         ],
       }],
       [ 'OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris"', {
@@ -204,10 +195,10 @@
       ['OS=="mac"', {
         'defines': ['_DARWIN_USE_64_BIT_INODE=1'],
         'xcode_settings': {
-					'SDKROOT': '<!(xcrun --show-sdk-path)',
-					'PROJECT_DIR': '<@(DEPTH)/build/xcode/',
-					'SYMROOT': '<@(DEPTH)/build/xcode/',
-					'OBJROOT': '<@(DEPTH)/build/xcode/',
+          'SDKROOT': '<!(xcrun --show-sdk-path)',   # added for Tint
+          'PROJECT_DIR': '<@(DEPTH)/build/xcode/',  # added for Tint
+          'SYMROOT': '<@(DEPTH)/build/xcode/',      # added for Tint
+          'OBJROOT': '<@(DEPTH)/build/xcode/',      # added for Tint
           'ALWAYS_SEARCH_USER_PATHS': 'NO',
           'GCC_CW_ASM_SYNTAX': 'NO',                # No -fasm-blocks
           'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic
@@ -215,31 +206,31 @@
           'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',        # -fno-exceptions
           'GCC_ENABLE_CPP_RTTI': 'NO',              # -fno-rtti
           'GCC_ENABLE_PASCAL_STRINGS': 'NO',        # No -mpascal-strings
-					'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',
-					'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',
+          'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',       # added for Tint
+          'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',   # added for Tint
           'GCC_THREADSAFE_STATICS': 'NO',           # -fno-threadsafe-statics
           'PREBINDING': 'NO',                       # No -Wl,-prebind
-          'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.7
+          'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.7, chng from 10.5
           'USE_HEADERMAP': 'NO',
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
-            '-g', 
-            '-stdlib=libc++',
+            '-g',                                   # added for Tint
+            '-stdlib=libc++',                       # added for Tint
           ],
           'OTHER_CPLUSPLUSFLAGS': [
-            '-g', 
-            '-stdlib=libc++'
+            '-g',                                   # added for Tint
+            '-stdlib=libc++'                        # added for Tint
           ],
-					'OTHER_LDFLAGS':[
-						'-framework Carbon', '-framework AppKit'
-					],
+          'OTHER_LDFLAGS':[
+            '-framework Carbon', '-framework AppKit'# added for Tint
+          ],
           'WARNING_CFLAGS': [
             '-Wall',
             '-Wendif-labels',
             '-W',
             '-Wno-unused-parameter',
-            '-fobjc-arc',
-            '-fobjc-runtime=macosx',
+            '-fobjc-arc',                           # added for Tint, objc runtime
+            '-fobjc-runtime=macosx',                # added for Tint, objc runtime
           ],
         },
         'target_conditions': [

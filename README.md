@@ -33,14 +33,14 @@ If you don't want to learn (or deal with) native OS languages, you're in luck, t
 Build | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
 Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
 
-*This is intended as a preview release for Tint 2, currently only supported on OSX.*
+*This is intended as a preview release for Tint 2, currently only supported on OSX and Windows.*
 
-Preview releases for Windows, Linux (QT), iOS, and Android are in tests at the moment.
+Preview releases for Linux (QT), iOS, and Android are in tests at the moment.
 
-<h2>Building</h2>
+<h2>Building Tint from Source</h2>
 
-This preview release is limited to OSX only. You'll need OSX 10.7 or higher and Xcode in addition to the Xcode bin utils package.
-
+<h3>MacOS X (Stable)</h3>
+Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
 ```bash
 mkdir tint
 cd tint
@@ -49,11 +49,24 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./build.sh
 ./test.sh
 ```
+<h3>Windows (Unstable)</h3>
+Ensure you have Visual Studio 2010 (or above), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
+```bash
+mkdir tint
+cd tint
+git clone https://github.com/trueinteractions/tint2.git .
+config.bat
+build.bat
+test.bat
+```
 
-After building you'll find the binary in 'build/xcode/Release/tint'. You can also use the Xcode project files contained in the 'build' directory. Optionally you can use ninja build files that are generated in 'build/ninja/out/Release' and 'build/ninja/out/Debug'.
+<h3>Post-Build</h3>
+After building you'll find the binary in 'build/xcode/Release/tint' or 'build\msvs\Release\tint.exe. You can also use the Xcode project files or MSVS 2010 files in build\xcode and build\msvs. Optionally you can use ninja build files that are generated in 'build/ninja/out/Release' and 'build/ninja/out/Debug' on posix (OSX only at the moment).
 
 <h3>Troubleshooting Builds</h3>
-If you have issues compiling ensure you're using Python 2.7 or 2.6 (during ./config.sh it will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use 'echo $PYTHON' and 'echo $CC' to check to see if any of these are set to alternate versions.  Some bin utils systems such as brew may overwrite these to values that are not compatible with Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ./build/xcode/ directory.
+If you have issues compiling ensure you're using Python 2.7 or 2.6 (./config.sh (config.bat on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use 'echo $PYTHON' (echo %PYTHON% on Windows) and 'echo $CC' (echo %CC% on Windows) to check to see if any of these are set to alternate versions.
+
+On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ./build/xcode/ directory.
 
 
 <h2>Running</h2>
@@ -166,7 +179,7 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 
 <h2>FAQ</h2>
 * **Why not as a node module, why a whole other executable?** node does not have bindings for application event loops, in addition resources (when an application is packaged) must be available prior to node spinning up, this required modifiying the front start up layer of node to perform these actions, outside of that the code base for node is the same.
-* **What platforms does this aim to support?** For the moment OSX and Windows are nearing completion, OSX is in preview release and the Windows preview is coming in October. Shortly after we'll have a QT Linux version. iOS and Android have several other issues/challenges that make it difficult to integrate, but our hope and target is to support all platforms.
+* **What platforms does this aim to support?** For the moment OSX and Windows are nearing completion, OSX and Windows have preview releases that will be stable in October. Shortly after we'll have a QT Linux version. iOS and Android have several other issues/challenges that make it difficult to integrate, but our hope and target is to support all platforms.
 * **How do you manage inconsistencies in interfaces?** Very carefully, unit tests for the GUI are essential to ensuring the same behavior for the same application across different operating systems and their OS versions.  If a complementary (or similar in functionality) native widget exists in one OS and not another, it's not included in the SDK (but that's not stopping you from creating it or using non-cross-compatible components). The Tint SDK aims at providing 100% reliable behavior across any OS.
 * **Are there any major differences in desktop programming?** The application lifetime of an app vs. a website is very different, most websites actually have memory leaks, but users are very rarely there long enough to have it affect system performance considerably, this is not the case with desktop applications.  In addition sandboxed environments can introduce complexities for those not familiar with desktop security practices.
 * **When will this be stable?** In short, October 2014. However prior to that we're encouraging people to download and use it for fun or to contribute, this is why there is no downloadable binary. The stable releases in October will support OSX and Windows.
@@ -180,5 +193,5 @@ For the latest updates/news http://www.twitter.com/trevorlinton
 
 Commercial support available at http://www.trueinteractions.com/
 
-Copyright (c) 2014 True Interactions
+Copyright &copy; 2014 True Interactions
 

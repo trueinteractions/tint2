@@ -14,7 +14,8 @@ namespace node {
     extern v8::Persistent<v8::String> process_symbol;
     extern v8::Persistent<v8::String> domain_symbol;
     extern void InitDTrace(v8::Handle<v8::Object> target);
-    extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, v8::Handle<v8::Value> filename);
+    extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, 
+      v8::Handle<v8::Value> filename);
 }
 
 static int embed_closed;
@@ -112,6 +113,7 @@ static void uv_event(void *info) {
     // Start worker that will interrupt main loop when having uv events.
     // keep the UV loop in-sync with CFRunLoop.
     embed_closed = 0;
+
     uv_sem_init(&embed_sem, 0);
     uv_thread_create(&embed_thread, uv_event, NULL);
 }
@@ -119,6 +121,10 @@ static void uv_event(void *info) {
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     node::EmitExit(process_l);
     embed_closed = 1;
+    /*uv_sem_post(&embed_sem);
+    uv_run(uv_default_loop(), UV_RUN_ONCE);
+    uv_thread_join(&embed_thread);
+    uv_sem_destroy(&embed_sem);*/
 }
 @end
 
