@@ -30,7 +30,7 @@ if NOT exist .\libraries\node\node.gyp (
   ::set target_arch=x64
 
   call %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
-  findstr /V AdditionalDependencies build\msvs\tint.vcxproj > build\msvs\tint.vcxproj
+ 
 ::ENDLOCAL
 
 goto:eof
