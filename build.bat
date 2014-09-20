@@ -1,6 +1,14 @@
 @echo off
 set arg1=%1
 
+set pythoncmd = python
+if defined %PYTHON% if exist %PYTHON% (
+  if exist %PYTHON\python (
+    set pythoncmd = %PYTHON%\python
+  ) else (
+    set pythoncmd = %PYTHON%
+  )
+)
 reg.exe query "HKLM\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0" /v MSBuildToolsPath > nul 2>&1
 if ERRORLEVEL 1 goto MissingMSBuildRegistry
 
@@ -14,10 +22,6 @@ if "%arg1%" == "debug" (
 ) else (
   set CONFIG="Release"
 )
-
-dir "C:\Program Files (x86)\Microsoft SDKs\Windows"
-
-dir /S "C:\Program Files (x86)\Microsoft SDKs\Windows"
 
 ::if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 ::  SETLOCAL

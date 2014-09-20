@@ -378,6 +378,7 @@
           'AdditionalOptions': [ 
             '/NODEFAULTLIB:LIBCMT', # remove libcmt, relink with "/MD" (msvcrt.lib/msvcr110.dll)
             '/DEFAULTLIB:MSVCRT',
+            '/DEFAULTLIB:gdi32.lib',
             '/LTCG', # msbuild said i should add it to save time..
           ]
         },

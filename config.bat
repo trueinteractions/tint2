@@ -1,6 +1,15 @@
 
 @ECHO OFF
 
+set pythoncmd = python
+if defined %PYTHON% if exist %PYTHON% (
+  if exist %PYTHON\python (
+    set pythoncmd = %PYTHON%\python
+  ) else (
+    set pythoncmd = %PYTHON%
+  )
+)
+
 if NOT exist .\libraries\node\node.gyp (
   git submodule init
   git submodule update
@@ -20,7 +29,7 @@ SETLOCAL
   set noperfctr_msi_arg=/p:NoPerfCtr=1
   set target_arch=x64
 
-  python tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
+  %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
 ENDLOCAL
 
 goto:eof
