@@ -373,12 +373,13 @@
       ],
       'msvs_settings': {
         'VCLinkerTool': {
+          'AdditionalDependencies': [],
           'SubSystem': 1, # /subsystem:console
           # 'AdditionalOptions': [ 
-            # '/NODEFAULTLIB:LIBCMT', # remove libcmt, relink with "/MD" (msvcrt.lib/msvcr110.dll)
-            # '/DEFAULTLIB:MSVCRT',
-            # '/VERBOSE',
-            # '/LTCG', # msbuild said i should add it to save time..
+          #   '/NODEFAULTLIB:LIBCMT', # remove libcmt, relink with "/MD" (msvcrt.lib/msvcr110.dll)
+          #   '/DEFAULTLIB:MSVCRT',
+          #   '/VERBOSE',
+          #   '/LTCG', # msbuild said i should add it to save time..
           # ]
         },
       }
