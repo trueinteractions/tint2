@@ -385,6 +385,9 @@
       },
       'all_dependent_settings': {
         'msvs_settings': {
+          'VCCLCompilerTool': {
+            'AdditionalOptions':['/wd4355']
+          },
           'VCLinkerTool': {
             'RuntimeLibrary':2,
             'AdditionalOptions':['/IGNORE:4221']

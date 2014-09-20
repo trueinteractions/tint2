@@ -208,6 +208,6 @@ process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) {
 };
 
 
-if(!process.bridge.ref) process.bridge.ref = require('ref');
-if(!process.bridge.struct) process.bridge.struct = require('struct');
-if(!process.bridge.ffi) process.bridge.ffi = require('ffi');
+// if(!process.bridge.ref) process.bridge.ref = require('ref');
+// if(!process.bridge.struct) process.bridge.struct = require('struct');
+// if(!process.bridge.ffi) process.bridge.ffi = require('ffi');

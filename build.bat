@@ -13,9 +13,9 @@ if /i "%1"=="/?" goto help
 
 @rem Process arguments.
 set config=Release
-set msiplatform=x86
+set msiplatform=z64
 set target=Build
-set target_arch=ia32
+set target_arch=x64
 set debug_arg=
 set nosnapshot_arg=
 set noprojgen=
@@ -135,12 +135,12 @@ if defined nosign goto licensertf
 if not defined licensertf goto msi
 
 :: %config%\node tools\license2rtf.js < LICENSE > %config%\license.rtf
-if errorlevel 1 echo Failed to generate license.rtf&goto exit
+:: if errorlevel 1 echo Failed to generate license.rtf&goto exit
 
 :msi
 @rem Skip msi generation if not requested
 if not defined msi goto run
-call :getnodeversion
+:: call :getnodeversion
 
 if not defined NIGHTLY goto msibuild
 set NODE_VERSION=%NODE_VERSION%.%NIGHTLY%
@@ -148,7 +148,7 @@ set NODE_VERSION=%NODE_VERSION%.%NIGHTLY%
 :msibuild
 echo Building node-%NODE_VERSION%
 :: msbuild "%~dp0tools\msvs\msi\nodemsi.sln" /m /t:Clean,Build /p:Configuration=%config% /p:Platform=%msiplatform% /p:NodeVersion=%NODE_VERSION% %noetw_msi_arg% %noperfctr_msi_arg% /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
-if errorlevel 1 goto exit
+:: if errorlevel 1 goto exit
 
 if defined nosign goto run
 :: signtool sign /a Release\node-v%NODE_VERSION%-%msiplatform%.msi
@@ -170,9 +170,9 @@ if "%test%"=="test-all" set test_args=%test_args%
 
 :build-node-weak
 @rem Build node-weak if required
-if "%buildnodeweak%"=="" goto run-tests
+:: if "%buildnodeweak%"=="" goto run-tests
 :: "%config%\node" deps\npm\node_modules\node-gyp\bin\node-gyp rebuild --directory="%~dp0test\gc\node_modules\weak" --nodedir="%~dp0."
-if errorlevel 1 goto build-node-weak-failed
+:: if errorlevel 1 goto build-node-weak-failed
 goto run-tests
 
 :build-node-weak-failed
@@ -191,7 +191,7 @@ goto exit
 
 :upload
 echo uploading .exe .msi .pdb to nodejs.org
-call :getnodeversion
+:: call :getnodeversion
 @echo on
 :: ssh node@nodejs.org mkdir -p web/nodejs.org/dist/v%NODE_VERSION%
 :: scp Release\node.msi node@nodejs.org:~/web/nodejs.org/dist/v%NODE_VERSION%/node-v%NODE_VERSION%.msi
@@ -229,36 +229,17 @@ if not defined NODE_VERSION echo Cannot determine current version of node.js & e
 goto :EOF
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 :: @echo off
 :: set arg1=%1
-
 :: reg.exe query "HKLM\SOFTWARE\Microsoft\MSBuild\ToolsVersions\12.0" /v MSBuildToolsPath > nul 2>&1
 :: if ERRORLEVEL 1 goto MissingMSBuildRegistry
-
 :: for /f "skip=2 tokens=2,*" %%A in ('reg.exe query "HKLM\SOFTWARE\Microsoft\MSBuild\ToolsVersions\12.0" /v MSBuildToolsPath') do SET MSBUILDDIR=%%B
-
 :: IF NOT EXIST "%MSBUILDDIR%msbuild.exe" goto MissingMSBuildExe
-
 :: if "%arg1%" == "debug" (
 ::  set CONFIG="Debug"
 :: ) else (
 ::  set CONFIG="Release"
 :: )
-
 :: if NOT defined "%PYTHON%" (
 ::  for /f "delims=" %%a in ('where python') do (
 ::    set PYTHONLOC=%%a%
@@ -273,25 +254,23 @@ goto :EOF
 :: ) else (
 ::  goto MissingPython
 :: )
-
 ::if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 ::  SETLOCAL
 ::    copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
 ::    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
 ::    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
 ::  ENDLOCAL
-::) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+:: ) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
 ::  SETLOCAL
-    :: if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    ::  call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
-    :: )
-::      echo "Visual Studio 2013"
-    
+:: if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+::  call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
+:: )
+::      echo "Visual Studio 2013"  
 ::      call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
 ::      echo "Windows SDK: %WindowsSdkDir%"
 ::    /p:VisualStudioVersion=12.0 
- ::   "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+::   "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
 ::    ) else if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 ::      echo "Visual Studio 2012"
 ::      copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
@@ -306,13 +285,12 @@ goto :EOF
 ::      "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
 ::    )
 ::  ENDLOCAL
-::) else (
+:: ) else (
 ::  goto MissingMSBuildToolsPath
-::)
-
+:: )
 :: goto:eof
-::ERRORS
-::---------------------
+:: ERRORS
+:: ---------------------
 :: :MissingMSBuildRegistry
 :: echo Cannot obtain path to MSBuild tools from registry
 :: goto:eof
