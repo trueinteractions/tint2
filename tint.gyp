@@ -379,13 +379,15 @@
           #  '/DEFAULTLIB:MSVCRT',
           #  '/VERBOSE',
             '/LTCG', # msbuild said i should add it to save time..
+            '/IGNORE:4098'
           ]
         },
       },
       'all_dependent_settings': {
         'msvs_settings': {
           'VCLinkerTool': {
-            'RuntimeLibrary':2
+            'RuntimeLibrary':2,
+            'AdditionalOptions':['/IGNORE:4221']
           }
         }
       }
