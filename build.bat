@@ -1,14 +1,16 @@
 @echo off
 set arg1=%1
 
-set pythoncmd = python
-if defined %PYTHON% if exist %PYTHON% (
-  if exist %PYTHON\python (
-    set pythoncmd = %PYTHON%\python
+if exist "%PYTHON%" (
+  if exist "%PYTHON\python" (
+    set pythoncmd="%PYTHON%\python"
   ) else (
-    set pythoncmd = %PYTHON%
+    set pythoncmd="%PYTHON%"
   )
+) else (
+  set pythoncmd="C:\Python27\python.exe"
 )
+
 reg.exe query "HKLM\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0" /v MSBuildToolsPath > nul 2>&1
 if ERRORLEVEL 1 goto MissingMSBuildRegistry
 
