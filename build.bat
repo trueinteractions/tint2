@@ -33,6 +33,7 @@ if "%arg1%" == "debug" (
 ::  ENDLOCAL
 ::) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 :: call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+  vcvarsall.bat
   SETLOCAL
     if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
       echo "Visual Studio 2013"
