@@ -16,7 +16,10 @@ if NOT exist .\libraries\node\node.gyp (
   git submodule update
 )
 
-call build.bat release nobuild nosign x64
+set arch=x64
+if /i "%1"=="x86" set arch=ia32&goto arg-ok
+
+call build.bat release nobuild nosign %arch%
 ::SETLOCAL
   ::if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
   ::  call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
