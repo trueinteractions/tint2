@@ -16,21 +16,21 @@ if NOT exist .\libraries\node\node.gyp (
   git submodule update
 )
 
-SETLOCAL
-  if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
-  ) else if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
-  ) else if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-    call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
-  )
-  set msiplatform=x64
-  set noetw_msi_arg=/p:NoETW=1
-  set noperfctr_msi_arg=/p:NoPerfCtr=1
-  set target_arch=x64
+::SETLOCAL
+  ::if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+  ::  call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+  ::) else if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+  ::  call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+  ::) else if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+  ::  call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
+  ::)
+  ::set msiplatform=x64
+  ::set noetw_msi_arg=/p:NoETW=1
+  ::set noperfctr_msi_arg=/p:NoPerfCtr=1
+  ::set target_arch=x64
 
   call %pythoncmd% tools\tint_conf.py --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --tag= > nul
-ENDLOCAL
+::ENDLOCAL
 
 goto:eof
 :MSBuildNotFound

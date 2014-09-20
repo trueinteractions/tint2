@@ -297,7 +297,6 @@
             'libraries/node/deps/v8/include/v8.h',
             'libraries/node/deps/v8/include/v8-debug.h',
           ],
-          'defines': [ 'COMPRESS_STARTUP_DATA_BZ2' ],
           'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host' ],
         }],
         [ 'node_shared_zlib=="false"', {
@@ -374,14 +373,13 @@
       ],
       'msvs_settings': {
         'VCLinkerTool': {
-          'AdditionalDependencies': ['kernel32.lib','user32.lib','gdi32.lib','winspool.lib','comdlg32.lib','advapi32.lib','shell32.lib','ole32.lib','oleaut32.lib','uuid.lib','odbc32.lib','odbccp32.lib'],
           'SubSystem': 1, # /subsystem:console
-          'AdditionalOptions': [ 
+          # 'AdditionalOptions': [ 
             # '/NODEFAULTLIB:LIBCMT', # remove libcmt, relink with "/MD" (msvcrt.lib/msvcr110.dll)
             # '/DEFAULTLIB:MSVCRT',
             # '/VERBOSE',
-            '/LTCG', # msbuild said i should add it to save time..
-          ]
+            # '/LTCG', # msbuild said i should add it to save time..
+          # ]
         },
       }
     }, #end target tint
