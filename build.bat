@@ -46,7 +46,7 @@ if "%arg1%" == "debug" (
 ::      call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" x64
 ::      echo "Windows SDK: %WindowsSdkDir%"
 ::    /p:VisualStudioVersion=12.0 
-    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG%/clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
+    "%MSBUILDDIR%msbuild.exe" /m /P:Configuration=%CONFIG% /clp:NoSummary;NoItemAndPropertyList;ShowCommandLine; /verbosity:minimal /target:tint /nologo build\msvs\tint.sln 
 ::    ) else if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 ::      echo "Visual Studio 2012"
 ::      copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
