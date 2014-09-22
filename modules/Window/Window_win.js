@@ -16,13 +16,13 @@ module.exports = (function() {
     this.private = {previousStyle:'',previousState:'',background:'auto',menu:null,toolbar:null,fullscreen:false};
 
     this.native = new $.System.Windows.Window();
+    //We cannot allow transparency unless there is no window style.
     //this.native.AllowsTransparency = true;
-    //this.native.ShowInTaskbar = true;
-    //this.native.ShowActivated = true;
-    //TODO: this causes a exec violation.
-    //this.native.Width = options.width;
-    //this.native.Height = options.height;
-    //this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
+    this.native.ShowInTaskbar = true;
+    this.native.ShowActivated = true;
+    this.native.Width = options.width;
+    this.native.Height = options.height;
+    this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
     this.native.Show();
 
     application.windows.push(this);

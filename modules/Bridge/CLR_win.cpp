@@ -91,7 +91,9 @@ Handle<Value> throwV8Exception(Handle<Value> exception)
     HandleScope scope;
     return scope.Close(ThrowException(exception));
 }
-/*
+
+Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
+
 Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
 {
     HandleScope scope;
@@ -123,7 +125,7 @@ Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
 
     return scope.Close(result);
 }
-*/
+
 Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
 {
     HandleScope scope;
@@ -152,7 +154,7 @@ Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
             exception = exception->InnerException;
         }
 
-        //result = MarshalCLRObjectToV8(exception);
+        result = MarshalCLRObjectToV8(exception);
         message = stringCLR2V8(exception->Message);
         name = stringCLR2V8(exception->GetType()->FullName);
     }   

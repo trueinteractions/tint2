@@ -23,7 +23,7 @@ function wrap(b) {
     return b;                   // "Other" type (enum, const)
 }
 
-function createEnum(typeNative) {
+function createEnum(typeNative, memberName) {
   var names = dotnet.execMethod(typeNative,"GetEnumNames");
   var values = dotnet.execMethod(typeNative,"GetEnumValues");
   var nameEnumerator = dotnet.execMethod(names, "GetEnumerator");
@@ -34,7 +34,7 @@ function createEnum(typeNative) {
   {
     var ename = dotnet.execGetProperty(nameEnumerator, 'Current');
     var evalue = dotnet.execGetProperty(valueEnumerator, 'Current');
-    obj[ename] = wrap(evalue);
+    obj[ename] = evalue;
   }
   return obj;
 }
@@ -100,7 +100,7 @@ function createJSInstance(pointer) {
   var typeNative = dotnet.getType(pointer);
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
 
-  if(dotnet.execGetProperty(dotnet.getType(typeNative), "IsClass")) {
+  if(dotnet.execGetProperty(typeNative, "IsClass")) {
     var c = createClass(typeNative, typeName);
     var n = function() {
       this.pointer = pointer;
