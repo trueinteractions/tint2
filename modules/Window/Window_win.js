@@ -2,7 +2,11 @@ module.exports = (function() {
   //var Container = require('Container');
   var utilities = require('Utilities');
   //var Color = require('Color');
-  var $ = process.bridge.dotnet;
+  require('Bridge');
+  process.bridge.dotnet.import('WPF\\PresentationFramework.dll');
+  process.bridge.dotnet.import('System.Windows.Forms');
+
+  $ = process.bridge.dotnet;
 
   function Window(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -12,11 +16,12 @@ module.exports = (function() {
     this.private = {previousStyle:'',previousState:'',background:'auto',menu:null,toolbar:null,fullscreen:false};
 
     this.native = new $.System.Windows.Window();
-    this.native.AllowsTransparency = true;
-    this.native.ShowInTaskbar = true;
-    this.native.ShowActivated = true;
-    this.Width = options.width;
-    this.Height = options.height;
+    //this.native.AllowsTransparency = true;
+    //this.native.ShowInTaskbar = true;
+    //this.native.ShowActivated = true;
+    //TODO: this causes a exec violation.
+    //this.native.Width = options.width;
+    //this.native.Height = options.height;
     //this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
     this.native.Show();
 

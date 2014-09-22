@@ -323,7 +323,7 @@
           ],
           'sources': [
             'modules/Runtime/Main_win.cc',
-            #'tools/tint.rc',
+            'tools/tint.rc',
           ],
           'defines': [
             'FD_SETSIZE=1024',
@@ -377,10 +377,7 @@
       'msvs_settings': {
         'VCLinkerTool': {
           'SubSystem': 1, # /subsystem:console
-          'AdditionalOptions': [ 
-          #  '/NODEFAULTLIB:LIBCMT', # remove libcmt, relink with "/MD" (msvcrt.lib/msvcr110.dll)
-          #  '/DEFAULTLIB:MSVCRT',
-          #  '/VERBOSE',
+          'AdditionalOptions': [
             '/LTCG', # msbuild said i should add it to save time..
             '/IGNORE:4098',
             '/CLRTHREADATTRIBUTE:STA'

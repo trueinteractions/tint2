@@ -1,7 +1,7 @@
 @echo off
 
-set newpath=%newpath%;C:\Python27;C:\Python26;C:\Python
-echo %path%|findstr /i /c:"%newpath%">nul  || set path=%path%;%newpath%
+set newpath=C:\Python27;C:\Python26;C:\Python
+echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
 
 cd %~dp0
 
@@ -92,7 +92,7 @@ if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 @rem Generate the VS project.
 SETLOCAL
   if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-  python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --dest-cpu=%target_arch% --tag=%TAG%
+  python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --dest-cpu=%target_arch% --tag=%TAG% > nul
   if errorlevel 1 goto create-msvs-files-failed
   if not exist build\msvs\tint.sln goto create-msvs-files-failed
   echo Project files generated.

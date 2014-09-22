@@ -39,7 +39,7 @@ Preview releases for Linux (QT), iOS, and Android are in tests at the moment.
 
 <h2>Building Tint from Source</h2>
 
-<h3>MacOS X (Stable)</h3>
+<h3>MacOS X (Unstable)</h3>
 Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
 ```bash
 mkdir tint
@@ -49,7 +49,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./build.sh
 ./test.sh
 ```
-<h3>Windows (Unstable)</h3>
+<h3>Windows (Experimental)</h3>
 Ensure you have Visual Studio 2010 (or above), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
 ```bash
 mkdir tint
@@ -116,7 +116,7 @@ In addition applications can be packaged as normal apps using a shell package sy
 * Toolbar
 * WebView (WebKit)
 * Window
-* process.bridge (Objective-C objects and execution bridge in OSX, C# objects and execution bridge in Windows)
+* process.bridge (Objective-C objects and execution bridge in OSX, .NET CLR C#/C++ objects and execution bridge in Windows)
 
 <h2>Documentation</h2>
 Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
