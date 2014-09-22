@@ -22,7 +22,7 @@ Tint contains a set of native components such as Window, Toolbar, Button, WebVie
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
 
-With Tint you have options, you can use the SDK to create native applications or use Tint's language bridge to directly interface with objective-c/C#/C++ or C directly in javascript. 
+With Tint you have options, you can use the SDK to create native applications or use Tint's language bridge to directly interface with Objective-C/C#/C++ or C directly in javascript. 
 
 If you don't want to learn (or deal with) native OS languages, you're in luck, there's a wide variety of cross-compatible widgets for javascript to choose from.
 
@@ -61,10 +61,10 @@ test.bat
 ```
 
 <h3>Post-Build</h3>
-After building you'll find the binary in 'build/xcode/Release/tint' or 'build\msvs\Release\tint.exe. You can also use the Xcode project files or MSVS 2010 files in build\xcode and build\msvs. Optionally you can use ninja build files that are generated in 'build/ninja/out/Release' and 'build/ninja/out/Debug' on posix (OSX only at the moment).
+After building you'll find the binary in ``build/xcode/Release/tint`` or ``build\msvs\Release\tint.exe``. You can also use the Xcode project files or MSVS 2010 files in ``build\xcode`` and ``build\msvs``. Optionally you can use ninja build files that are generated in ``build/ninja/out/Release`` and ``build/ninja/out/Debug`` on posix (OSX only at the moment).
 
 <h3>Troubleshooting Builds</h3>
-If you have issues compiling ensure you're using Python 2.7 or 2.6 (./config.sh (config.bat on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use 'echo $PYTHON' (echo %PYTHON% on Windows) and 'echo $CC' (echo %CC% on Windows) to check to see if any of these are set to alternate versions.
+If you have issues compiling ensure you're using Python 2.7 or 2.6 (./config.sh (config.bat on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use ``echo $PYTHON`` (``echo %PYTHON%`` on Windows) and ``echo $CC`` (``echo %CC%`` on Windows) to check to see if any of these are set to alternate versions.
 
 On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ./build/xcode/ directory.
 

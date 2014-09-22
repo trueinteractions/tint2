@@ -80,6 +80,10 @@ void uv_event(void *info) {
 
 void node_load() {
   //TODO: Register the app:// protocol.
+  //http://msdn.microsoft.com/en-us/library/1f6c88af(v=vs.110).aspx
+  //http://msdn.microsoft.com/en-us/library/system.net.webrequest.registerprefix(v=vs.110).aspx
+  //http://msdn.microsoft.com/en-us/library/system.uri(v=vs.110).aspx
+
   // Register the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);
 

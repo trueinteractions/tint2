@@ -1,4 +1,8 @@
-if(!process.bridge) process.initbridge();
+if(typeof(process.bridge) == 'undefined') process.initbridge();
+if(typeof(process.bridge.dotnet) == 'undefined') process.bridge.dotnet = {};
+if(typeof(process.bridge.ref) == 'undefined') process.bridge.ref = require('ref');
+if(typeof(process.bridge.struct) == 'undefined') process.bridge.struct = require('struct');
+if(typeof(process.bridge.ffi) == 'undefined') process.bridge.ffi = require('ffi');
 
 var dotnet = process.bridge;
 var classCache = {};
@@ -36,8 +40,16 @@ function createEnum(typeNative) {
 }
 
 function createEvent(target, typeNative, typeName, memberNative, memberName, static) {
-  // TODO Perhaps delegates can use addEventListener?..
-  target[memberName] = function() { console.log('unimplemented: '+typeName+'::'+memberName); }
+  if(!target.acceptedEvents) target.acceptedEvents = [];
+  target.acceptedEvents.push(memberName);
+  if(!target.addEventListener || typeof(target.addEventListener) == 'undefined') {
+    target.addEventListener = function(event, callback) {
+      if(!target.events) target.events = {};
+      if(!target.events[event]) target.events[event] = [];
+      target.events[event].push(cb);
+      dotnet.execAddEvent(memberNative,memberName,cb);
+    };
+  }
 }
 
 function createField(target, typeNative, typeName, memberNative, memberName, static) {
@@ -202,12 +214,6 @@ function Import(assembly, onto) {
   }
 }
 
-if(!process.bridge.dotnet) process.bridge.dotnet = {};
 process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) { 
   Import(e, process.bridge.dotnet); 
 };
-
-// TODO: One of these causes a memory access violation in the CLR.
-// if(!process.bridge.ref) process.bridge.ref = require('ref');
-// if(!process.bridge.struct) process.bridge.struct = require('struct');
-// if(!process.bridge.ffi) process.bridge.ffi = require('ffi');

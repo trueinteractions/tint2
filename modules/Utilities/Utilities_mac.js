@@ -176,19 +176,6 @@ module.exports = (function() {
     return imageRef;
   }
 
-  function parseUnits(e) {
-    if(typeof e == 'number') return e;
-    if(e.indexOf('%') > -1) {
-      e = e.replace('%','').trim();
-      e = parseInt(e);
-      e = e/100;
-    } else {
-      e = e.replace('px','').trim();
-      e = parseInt(e);
-    }
-    return e;
-  }
-
   function makePropertyBoolType(name,getselector,setselector) {
     Object.defineProperty(this, name, {
       get:function() { return this.native(getselector); },
@@ -245,7 +232,7 @@ module.exports = (function() {
     parseColor:baseUtilities.parseColor,
     nsDictionaryToObject:nsDictionaryToObject,
     nsArrayToArray:nsArrayToArray,
-    parseUnits:parseUnits,
+    parseUnits:baseUtilities.parseUnits,
     makePropertyBoolType:makePropertyBoolType,
     makePropertyStringType:makePropertyStringType,
     makeNSImage:makeNSImage,

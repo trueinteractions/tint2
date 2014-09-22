@@ -1,5 +1,5 @@
 module.exports = (function() {
-	var $ = process.bridge.objc;
+
 	// TinyColor v1.0.0
 	// https://github.com/bgrins/TinyColor
 	// Brian Grinstead, MIT License
@@ -1090,12 +1090,23 @@ module.exports = (function() {
 	    return false;
 	}
 
-
+  function parseUnits(e) {
+    if(typeof e == 'number') return e;
+    if(e.indexOf('%') > -1) {
+      e = e.replace('%','').trim();
+      e = parseInt(e);
+      e = e/100;
+    } else {
+      e = e.replace('px','').trim();
+      e = parseInt(e);
+    }
+    return e;
+  }
 
 	function parseColor(mixed)  { 
 		var returnedColor = tinycolor(mixed);
 		return returnedColor.toRgb(); 
 	}
 
-	return {parseColor:parseColor};
+	return {parseUnits:parseUnits,parseColor:parseColor};
 })();

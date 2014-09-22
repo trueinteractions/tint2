@@ -26,7 +26,6 @@
       'modules/Bridge/ivar.js',
       'modules/Bridge/method.js',
       'modules/Application/Application_mac.js',
-      'modules/Application/Common_mac.js',
       'modules/AppSchema/AppSchema_mac.js',
       'modules/Box/Box_mac.js',
       'modules/Button/Button_mac.js',
@@ -68,6 +67,9 @@
     ],
     'win_library_files':[
       'modules/Bridge/Bridge_win.js',
+      'modules/Application/Application_win.js',
+      'modules/Utilities/Utilities_win.js',
+      'modules/Window/Window_win.js',
     ],
     'library_files': [
       'libraries/node/src/node.js',
@@ -111,6 +113,7 @@
       'libraries/node/lib/util.js',
       'libraries/node/lib/vm.js',
       'libraries/node/lib/zlib.js',
+      'modules/Application/Common.js',
       'modules/Bridge/ref.js',
       'modules/Bridge/struct.js',
       'modules/Bridge/_foreign_function.js',
@@ -379,7 +382,8 @@
           #  '/DEFAULTLIB:MSVCRT',
           #  '/VERBOSE',
             '/LTCG', # msbuild said i should add it to save time..
-            '/IGNORE:4098'
+            '/IGNORE:4098',
+            '/CLRTHREADATTRIBUTE:STA'
           ]
         },
       },
@@ -417,6 +421,9 @@
         }]
       ],
       'msvs_settings': {
+        'VCLinkerTool': {
+          'AdditionalOptions': [ '/CLRTHREADATTRIBUTE:STA' ],
+        },
         'VCCLCompilerTool': {
           'ExceptionHandling': 0,
           'AdditionalOptions': [ '/CLR', '/EHa' ],
