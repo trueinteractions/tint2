@@ -66,7 +66,7 @@ After building you'll find the binary in ``build/xcode/Release/tint`` or ``build
 <h3>Troubleshooting Builds</h3>
 If you have issues compiling ensure you're using Python 2.7 or 2.6 (``./config.sh`` (``config.bat`` on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use ``echo $PYTHON`` (``echo %PYTHON%`` on Windows) and ``echo $CC`` (``echo %CC%`` on Windows) to check to see if any of these are set to alternate versions.
 
-On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ./build/xcode/ directory.
+On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ``./build/xcode/`` directory.
 
 
 <h2>Running</h2>
