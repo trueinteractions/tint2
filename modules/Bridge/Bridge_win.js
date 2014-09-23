@@ -46,8 +46,8 @@ function createEvent(target, typeNative, typeName, memberNative, memberName, sta
     target.addEventListener = function(event, callback) {
       if(!target.events) target.events = {};
       if(!target.events[event]) target.events[event] = [];
-      target.events[event].push(cb);
-      dotnet.execAddEvent(memberNative,memberName,cb);
+      target.events[event].push(callback);
+      dotnet.execAddEvent(this.pointer,event,callback);
     };
   }
 }
@@ -134,7 +134,7 @@ function createClass(typeNative, typeName) {
 
   // Find all STATIC members.
   typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
-  
+
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
     var memberName = dotnet.execGetProperty(memberNative, 'Name');
@@ -143,7 +143,7 @@ function createClass(typeNative, typeName) {
 
   // Find all INSTANCE members.
   typeEnumerator = dotnet.execMethod(dotnet.getMemberTypes(typeNative),'GetEnumerator');
-  
+
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
     var memberName = dotnet.execGetProperty(memberNative, 'Name');

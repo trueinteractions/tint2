@@ -152,15 +152,18 @@ void win_msg_loop() {
   BOOL bRet;
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
-    if (msg.message == WM_QUIT)
-      break;
-    else if(msg.message == 0x8001)
+    if(bRet == -1) {
+      fprintf(stderr, "Received error %i\n",bRet);
+      exit(1);
+    } else if(msg.message == 0x8001) {
       uv_run_nowait();
+    }
     else { //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
        TranslateMessage(&msg);
        DispatchMessage(&msg);
     }
   }
+  // Received WM_QUIT
   node_terminate();
   exit(0);
 }

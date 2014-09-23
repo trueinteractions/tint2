@@ -559,11 +559,6 @@ public:
   static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      //Handle<v8::String> m = args[2]->ToString();
-      //int buf_size = m->Utf8Length() + 1;
-      //char *buf = new char[buf_size];
-      //m->WriteUtf8(buf, buf_size);
-
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[3]);
       System::String^ field = stringV82CLR(args[2]->ToString()); //gcnew System::String(buf);
@@ -578,11 +573,6 @@ public:
   static Handle<v8::Value> ExecGetField(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      //Handle<v8::String> m = args[1]->ToString();
-      //int buf_size = m->Utf8Length() + 1;
-      //char *buf = new char[buf_size];
-      //m->WriteUtf8(buf, buf_size);
-
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString()); // gcnew System::String(buf);
       System::Object^ rtn = target->GetType()->GetField(field)->GetValue(target);
@@ -597,20 +587,16 @@ public:
     HandleScope scope;
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
-
-      //Handle<v8::String> m = args[1]->ToString();
-      //int buf_size = m->Utf8Length() + 1;
-      //char *buf = new char[buf_size];
-      //m->WriteUtf8(buf, buf_size);
-      System::String^ event = stringV82CLR(args[1]->ToString()); //gcnew System::String(buf);
+      System::String^ event = stringV82CLR(args[1]->ToString());
 
       v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]); // JSfunction
       CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
       
-      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
+      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);      
       System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
-      System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, eh);
-      eInfo->AddEventHandler(handle, d);
+
+      System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
+      eInfo->AddEventHandler(target, d);
 
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
@@ -622,14 +608,9 @@ public:
   static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      //Handle<v8::String> m = args[1]->ToString();
-      //int buf_size = m->Utf8Length() + 1;
-      //char *buf = new char[buf_size];
-      //m->WriteUtf8(buf, buf_size);
-
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[2]);
-      System::String^ field = stringV82CLR(args[1]->ToString()); //gcnew System::String(buf);
+      System::String^ field = stringV82CLR(args[1]->ToString());
       target->GetType()->GetProperty(field)->SetValue(target, value);
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
@@ -641,13 +622,8 @@ public:
   static Handle<v8::Value> ExecGetProperty(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      //Handle<v8::String> m = args[1]->ToString();
-      //int buf_size = m->Utf8Length() + 1;
-      //char *buf = new char[buf_size];
-      //m->WriteUtf8(buf, buf_size);
-
       System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ field = stringV82CLR(args[1]->ToString()); //gcnew System::String(buf);
+      System::String^ field = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = target->GetType()->GetProperty(field)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
@@ -660,11 +636,6 @@ public:
     HandleScope scope;
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
-      //Handle<v8::String> m = args[1]->ToString();
-      //int buf_size = m->Utf8Length() + 1;
-      //char *buf = new char[buf_size];
-      //m->WriteUtf8(buf, buf_size);
-
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
@@ -672,7 +643,7 @@ public:
         cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
       System::Type^ type = target->GetType();
-      System::String^ method = stringV82CLR(args[1]->ToString()); //gcnew System::String(buf);
+      System::String^ method = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
         BindingFlags::Static | BindingFlags::Public | BindingFlags::InvokeMethod | BindingFlags::Instance,
         nullptr,
@@ -690,11 +661,6 @@ public:
       HandleScope scope;
       try {
         System::Object^ target = MarshalV8ToCLR(args[0]);
-        //Handle<v8::String> m = args[1]->ToString();
-        //int buf_size = m->Utf8Length() + 1;
-        //char *buf = new char[buf_size];
-        //m->WriteUtf8(buf, buf_size);
-
         int argSize = args.Length() - 2;
         array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
@@ -702,7 +668,7 @@ public:
           cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
         System::Type^ type = target->GetType();
-        System::String^ method = stringV82CLR(args[1]->ToString()); //gcnew System::String(buf);
+        System::String^ method = stringV82CLR(args[1]->ToString());
         System::Object^ rtn = type->InvokeMember(method,
           BindingFlags::Public | BindingFlags::Instance | BindingFlags::InvokeMethod,
           nullptr,
@@ -719,34 +685,19 @@ public:
   }
 };
 
-
-static Handle<Value> execAddEvent(const v8::Arguments& args) { return CLR::ExecAddEvent(args); }
-static Handle<Value> execMethod(const v8::Arguments& args) { return CLR::ExecMethod(args); }
-static Handle<Value> execStaticMethod(const v8::Arguments& args) { return CLR::ExecStaticMethod(args); }
-static Handle<Value> setField(const v8::Arguments& args) { return CLR::ExecSetField(args); }
-static Handle<Value> getField(const v8::Arguments& args) { return CLR::ExecGetField(args); }
-static Handle<Value> setProperty(const v8::Arguments& args) { return CLR::ExecSetProperty(args); }
-static Handle<Value> getProperty(const v8::Arguments& args) { return CLR::ExecGetProperty(args); }
-static Handle<Value> execNew(const v8::Arguments& args) { return CLR::ExecNew(args); }
-static Handle<Value> loadAssembly(const v8::Arguments& args) { return CLR::LoadAssembly(args); }
-static Handle<Value> getMemberTypes(const v8::Arguments& args) { return CLR::GetMemberTypes(args); }
-static Handle<Value> getStaticMemberTypes(const v8::Arguments& args) { return CLR::GetStaticMemberTypes(args); }
-static Handle<Value> getType(const v8::Arguments& args) { return CLR::GetCLRType(args); }
-
-
 extern "C" void CLR_Init(Handle<Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
         Context::GetCurrent()->Global()->Get(String::New("Buffer")))); 
-    NODE_SET_METHOD(target, "execNew", execNew);
-    NODE_SET_METHOD(target, "execAddEvent", execAddEvent);
-    NODE_SET_METHOD(target, "execMethod", execMethod);
-    NODE_SET_METHOD(target, "execStaticMethod", execStaticMethod);
-    NODE_SET_METHOD(target, "execSetField", setField);
-    NODE_SET_METHOD(target, "execGetField", getField);
-    NODE_SET_METHOD(target, "execSetProperty", setProperty);
-    NODE_SET_METHOD(target, "execGetProperty", getProperty);
-    NODE_SET_METHOD(target, "loadAssembly", loadAssembly);
-    NODE_SET_METHOD(target, "getMemberTypes", getMemberTypes);
-    NODE_SET_METHOD(target, "getStaticMemberTypes", getStaticMemberTypes);
-    NODE_SET_METHOD(target, "getType", getType);
+    NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
+    NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
+    NODE_SET_METHOD(target, "execMethod", CLR::ExecMethod);
+    NODE_SET_METHOD(target, "execStaticMethod", CLR::ExecStaticMethod);
+    NODE_SET_METHOD(target, "execSetField", CLR::ExecSetField);
+    NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
+    NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
+    NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
+    NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
+    NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
+    NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
+    NODE_SET_METHOD(target, "getType", CLR::GetCLRType);
 }
