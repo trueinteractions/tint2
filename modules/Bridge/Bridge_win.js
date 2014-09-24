@@ -17,11 +17,52 @@ function unwrap(a) {
     return a;                   // "Other" type (enum, const)
 }
 
+function unwrapValues(e) {
+  if(Array.isArray(e)) {
+    var unwrapped = [];
+    for(var i=0; i < types.length; i++)
+      unwrapped[i] = unwrap(types[i]);
+    return unwrapped;
+  } else
+    return unwrap(e);
+}
+
 function wrap(b) {
   if(Buffer.isBuffer(b)) {      // Either an instance/class
     return createJSInstance(b);
   } else 
     return b;                   // "Other" type (enum, const)
+}
+
+/* The proto class is a "non sealed" class that can be used
+ * to create new classes in dotnet, it's just a weak object
+ * that shortens the API */
+function ProtoClass(name, base) {
+  this.pointer = dotnet.classCreate(name,unwrap(base),[],[]);
+
+  this.addConstructor = function(public, types, callback) {
+    public = public ? "public" : "private";
+    dotnet.classAddConstructor(this.pointer,public,unwrapValues(types),callback);
+  };
+
+  this.addMethod = function(name, static, public, override, retType, types, callback) {
+    public = public ? "public" : "private";
+    dotnet.classAddMethod(this.pointer,name,public,static,override,unwrapValues(retType),unwrapValues(types),callback);
+  };
+
+  this.addProperty = function(name, static, public, readOnly, propType, value) {
+    public = public ? "public" : "private";
+    dotnet.classAddMethod(this.pointer,name,public,static,readOnly,unwrap(propType),unwrap(value));
+  };
+
+  this.addField = function(name, static, public, readOnly, propType, value) {
+    public = public ? "public" : "private";
+    dotnet.classAddMethod(this.pointer,name,public,static,readOnly,unwrap(propType),unwrap(value));
+  };
+
+  this.register = function() {
+    return dotnet.classRegister(this.pointer);
+  }
 }
 
 function createEnum(typeNative, memberName) {
@@ -43,7 +84,9 @@ function createEnum(typeNative, memberName) {
 function createEvent(target, typeNative, typeName, memberNative, memberName, static) {
   if(!target.acceptedEvents) target.acceptedEvents = [];
   target.acceptedEvents.push(memberName);
-  if(!target.addEventListener || typeof(target.addEventListener) == 'undefined') {
+  
+  if(!target.addEventListener || typeof(target.addEventListener) == 'undefined') 
+  {
     target.addEventListener = function(event, callback) {
       if(!target.events) target.events = {};
       if(!target.events[event]) target.events[event] = [];
@@ -109,6 +152,7 @@ function createJSInstance(pointer) {
       this.toString = function() { return '[Object: ' + typeName + ' @addr '+this.pointer.inspect()+']'; }
       this.inspect = function() { return '\033[33m' + this.toString() + '\033[39m'; }
     }
+    n.extend = function(name) { return new ProtoClass(name,typeNative); }
     n.prototype = c.prototype;
     n.pointer = n.prototype.pointer = pointer;
     n.classPointer = n.prototype.classPointer = typeNative;
@@ -129,6 +173,8 @@ function createClass(typeNative, typeName) {
     this.toString = function() { return '[Object: ' + typeName + ' @addr '+this.pointer.inspect()+']'; }
     this.inspect = function() { return '\033[33m' + this.toString() + '\033[39m'; }
   }
+
+  cls.extend = function(name) { return new ProtoClass(name,this.classPointer); }
   cls.toString = function() { return '[Class: ' + typeName + ' @addr '+typeNative.inspect()+']'; }
   cls.inspect = function() { return '\033[33m' + this.toString() + '\033[39m'; }
   cls.classPointer = cls.prototype.classPointer = typeNative;

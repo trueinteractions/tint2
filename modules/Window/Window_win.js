@@ -9,6 +9,7 @@ module.exports = (function() {
     options.width = options.width || 500;
     options.height = options.height || 500;
 
+    //TODO: This will be overwritten!
     this.private = {previousStyle:'',previousState:'',background:'auto',menu:null,toolbar:null,fullscreen:false,events:{}};
 
     if(NativeObjectClass)
@@ -49,20 +50,6 @@ module.exports = (function() {
   Window.prototype.preferences = {
     animateOnSizeChange:false,
     animateOnPositionChange:false
-  }
-
-  Window.prototype.fireEvent = function(event, args) {
-    try {
-      event = event.toLowerCase();
-      var returnvalue = undefined;
-      if(!this.private.events[event]) this.private.events[event] = [];
-      (this.private.events[event]).forEach(function(item,index,arr) { returnvalue = item.apply(null, args) || returnvalue; });
-      return returnvalue;
-    } catch(e) {
-      console.error(e.message);
-      console.error(e.stack);
-      process.exit(1);
-    }
   }
 
   Object.defineProperty(Window.prototype, 'frame', {

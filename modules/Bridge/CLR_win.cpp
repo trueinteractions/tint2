@@ -4,6 +4,7 @@
 #include <node_buffer.h>
 #include <stdio.h>
 #include <vcclr.h>
+#include <vector>
 
 #using <system.dll>
 #using <System.Core.dll>
@@ -11,6 +12,7 @@
 using namespace v8;
 using namespace System::Collections::Generic;
 using namespace System::Reflection;
+using namespace System::Reflection::Emit;
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
@@ -392,7 +394,24 @@ public ref class CLREventHandler {
 
   }
   ~CLREventHandler() {}
+  void PassThru(... cli::array<System::Object^>^ args) {
+    v8::HandleScope scope;
+    std::vector<v8::Handle<v8::Value>> argv;
+    v8::TryCatch try_catch;
 
+    for(int i=0; i < args->Length; i++) argv.push_back(MarshalCLRToV8(args[i]));
+
+    if (this->callback->function.IsEmpty()) {
+      ThrowException(Exception::Error(
+            String::New("CLR fatal: Callback has been garbage collected.")));
+      return;
+    } else {
+      // invoke the registered callback function
+      this->callback->function->Call(v8::Context::GetCurrent()->Global(), args->Length, argv.data());
+    }
+    if (try_catch.HasCaught())
+        try_catch.ReThrow();
+  }
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
     v8::HandleScope scope;
     v8::Handle<v8::Value> argv[2];
@@ -422,14 +441,220 @@ class CLR {
   CLR() { }
 
 public:
+
+  /** Creation of Classes **/
+  static Handle<v8::Value> CreateClass(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      System::String^ name = stringV82CLR(args[0]->ToString());
+      System::Type^ base = (System::Type ^)MarshalV8ToCLR(args[1]);
+      cli::array<System::Object^>^ interfaces = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[2]);
+      cli::array<System::Object^>^ abstracts = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[3]);
+
+      System::AppDomain^ domain = System::AppDomain::CurrentDomain;
+      AssemblyName^ aName = gcnew AssemblyName(name);
+      AssemblyBuilder^ ab = domain->DefineDynamicAssembly(aName, AssemblyBuilderAccess::RunAndSave);
+      ModuleBuilder^ mb = ab->DefineDynamicModule(aName->Name, aName->Name + ".dll");
+      TypeBuilder^ tb = mb->DefineType(name, TypeAttributes::Public | TypeAttributes::Class, base);
+      return scope.Close(MarshalCLRToV8(tb));
+    } catch (System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> AddConstructor(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ accessibility = stringV82CLR(args[1]->ToString());
+      bool defaultConst = ((System::Boolean ^)MarshalV8ToCLR(args[2]))->CompareTo(true);
+      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(args[3]);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[4]);
+
+      CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
+
+      MethodAttributes attr = MethodAttributes::Public;
+      if(accessibility == "private") attr = MethodAttributes::Private;
+      //else if(accessibility == "private") attr = MethodAttributes::Protected;
+
+      ConstructorBuilder^ ctor0;
+
+      if(types->Length == 0)
+        ctor0 = tb->DefineConstructor(attr, CallingConventions::Standard, System::Type::EmptyTypes);
+      else
+        ctor0 = tb->DefineConstructor(attr, CallingConventions::Standard, (cli::array<System::Type^>^)types);
+
+      ILGenerator ^il = ctor0->GetILGenerator();
+      
+      // Push args
+      for(unsigned short i=0; i < types->Length; i++)
+        il->Emit(OpCodes::Ldarg_S, i);
+
+      // Call method CLREventHandler->PassThru
+      il->EmitCall(OpCodes::Call,
+        handle->GetType()->GetMethod("PassThru"),
+        types);
+
+      // Return back.
+      il->Emit(OpCodes::Ret);
+
+      return scope.Close(Undefined());
+    } catch (System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> AddMethodToClass(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ name = stringV82CLR(args[1]->ToString());
+      System::String^ accessibility = stringV82CLR(args[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
+      bool overrideDef = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
+      System::Type^ rettype = (System::Type ^)MarshalV8ToCLR(args[5]);
+      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(args[6]);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[7]);
+
+      CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
+
+      MethodAttributes attr = MethodAttributes::Public;
+      if(accessibility == "private") attr = MethodAttributes::Private;
+      //else if(accessibility == "protected") attr = MethodAttributes::Protected;
+
+      if(staticDef) attr = attr | MethodAttributes::Static;
+
+      MethodBuilder^ m0;
+
+      if(types->Length == 0) m0 = tb->DefineMethod(name, attr, rettype, System::Type::EmptyTypes);
+      else m0 = tb->DefineMethod(name, attr, rettype, (cli::array<System::Type^>^)types);
+
+      ILGenerator ^il = m0->GetILGenerator();
+      
+      // Push args
+      for(unsigned short i=0; i < types->Length; i++)
+        il->Emit(OpCodes::Ldarg_S,i);
+
+      // Call method CLREventHandler->PassThru
+      il->EmitCall(OpCodes::Call,
+        handle->GetType()->GetMethod("PassThru"),
+        types);
+
+      // Return back.
+      il->Emit(OpCodes::Ret);
+
+      // If we'd like to override the method in the process.
+      if(overrideDef) tb->DefineMethodOverride(m0,tb->BaseType->GetMethod(name));
+
+      return scope.Close(Undefined());
+    } catch (System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> AddPropertyToClass(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ name = stringV82CLR(args[1]->ToString());
+      System::String^ accessibility = stringV82CLR(args[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
+      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
+      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
+      System::Object ^value = MarshalV8ToCLR(args[6]);
+
+      FieldBuilder^ fieldBuilder = tb->DefineField("_" + name, propType, FieldAttributes::Private);
+
+      MethodAttributes attr = MethodAttributes::Public;
+      if(accessibility == "private") attr = MethodAttributes::Private;
+      //else if(accessibility == "protected") attr = MethodAttributes::Protected;
+
+      if(staticDef) attr = attr | MethodAttributes::Static;
+      attr = attr | MethodAttributes::SpecialName | MethodAttributes::HideBySig;
+
+      PropertyBuilder^ propertyBuilder = tb->DefineProperty(name, PropertyAttributes::HasDefault, propType, nullptr);
+      MethodBuilder^ getPropMthdBldr = tb->DefineMethod("get_" + name, attr, propType, System::Type::EmptyTypes);
+      ILGenerator^ getIl = getPropMthdBldr->GetILGenerator();
+
+      getIl->Emit(OpCodes::Ldarg_0);
+      getIl->Emit(OpCodes::Ldfld, fieldBuilder);
+      getIl->Emit(OpCodes::Ret);
+       
+      cli::array<System::Type ^>^ props = gcnew cli::array<System::Type ^>(1);
+      props[0] = propType;
+      MethodBuilder^ setPropMthdBldr = tb->DefineMethod("set_" + name,
+        MethodAttributes::Public | MethodAttributes::SpecialName | MethodAttributes::HideBySig,
+        nullptr, props);
+
+      ILGenerator^ setIl = setPropMthdBldr->GetILGenerator();
+      Label modifyProperty = setIl->DefineLabel();
+      Label exitSet = setIl->DefineLabel();
+
+      setIl->MarkLabel(modifyProperty);
+      setIl->Emit(OpCodes::Ldarg_0);
+      setIl->Emit(OpCodes::Ldarg_1);
+      setIl->Emit(OpCodes::Stfld, fieldBuilder);
+      setIl->Emit(OpCodes::Nop);
+      setIl->MarkLabel(exitSet);
+      setIl->Emit(OpCodes::Ret);
+
+      propertyBuilder->SetGetMethod(getPropMthdBldr);
+      propertyBuilder->SetSetMethod(setPropMthdBldr);
+
+      return scope.Close(Undefined());
+    } catch (System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> AddFieldToClass(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ name = stringV82CLR(args[1]->ToString());
+      System::String^ accessibility = stringV82CLR(args[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
+      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
+      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
+      System::Object ^value = MarshalV8ToCLR(args[6]);
+
+      FieldAttributes attr = FieldAttributes::Public;
+      if(accessibility == "private") attr = FieldAttributes::Private;
+      //else if(accessibility == "protected") attr = FieldAttributes::Protected;
+      
+      if(staticDef) attr = attr | FieldAttributes::Static;
+      FieldBuilder^ fieldBuilder = tb->DefineField(name, propType, attr);
+      
+      return scope.Close(Undefined());
+    } catch (System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> RegisterClass(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::Type^ t = tb->CreateType();
+      return scope.Close(MarshalCLRToV8(t));
+    } catch (System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+
+  /** Load an Execution of DOTNET CLR **/
+
   static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      Handle<v8::String> m = args[0]->ToString();
-      int buf_size = m->Utf8Length() + 1;
-      char *buf = new char[buf_size];
-      m->WriteUtf8(buf, buf_size);
-      System::String^ userpath = gcnew System::String(buf);
+      System::String^ userpath = stringV82CLR(args[0]->ToString());
 
       System::String^ framworkRegPath = "Software\\Microsoft\\.NetFramework";
       Microsoft::Win32::RegistryKey^ netFramework = Microsoft::Win32::Registry::LocalMachine;
@@ -558,11 +783,10 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ event = stringV82CLR(args[1]->ToString());
-
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]); // JSfunction
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
       CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
       
-      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);      
+      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
       System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
 
       System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
@@ -659,7 +883,9 @@ public:
 
 extern "C" void CLR_Init(Handle<Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
-        Context::GetCurrent()->Global()->Get(String::New("Buffer")))); 
+        Context::GetCurrent()->Global()->Get(String::New("Buffer"))));
+
+    // execute classes
     NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
     NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
     NODE_SET_METHOD(target, "execMethod", CLR::ExecMethod);
@@ -668,8 +894,18 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
     NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
     NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
+
+    // get programmatic information
     NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
     NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
     NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
     NODE_SET_METHOD(target, "getCLRType", CLR::GetCLRType);
+
+    // create classes
+    NODE_SET_METHOD(target, "classCreate", CLR::CreateClass);
+    NODE_SET_METHOD(target, "classAddConstructor", CLR::AddConstructor);
+    NODE_SET_METHOD(target, "classAddMethod", CLR::AddMethodToClass);
+    NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
+    NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
+    NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
 }
