@@ -1,16 +1,9 @@
 module.exports = (function() {
   console.assert(typeof application !== "undefined", 'You must use require(\'Application\') prior to using any GUI components.');
-  console.assert(process.bridge.objc, 'Failure to establish objective-c bridge.');
+  console.assert(process.bridge.dotnet, 'Failure to establish dotnet bridge, use require(\'Application\') prior to using window components.');
   
-  var $ = process.bridge.objc;
+  var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
-
-  function addTrackingArea() {
-    var bounds = this.nativeView('bounds');
-    var options = $.NSTrackingMouseEnteredAndExited | $.NSTrackingMouseMoved | $.NSTrackingActiveInActiveApp | $.NSTrackingInVisibleRect;
-    this.private.trackingArea = $.NSTrackingArea('alloc')('initWithRect', bounds, 'options', options, 'owner', this.nativeView, 'userInfo', null);
-    this.nativeView('addTrackingArea',this.private.trackingArea);
-  }
 
   function createLayoutProperty(name, percentName, percentFunc, scalarName, scalarFunc, na) {
     Object.defineProperty(Control.prototype, name, {
@@ -92,22 +85,22 @@ module.exports = (function() {
   function Control(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
+
+    this.nativeClassView = NativeViewClass;
+    this.nativeClass = NativeObjectClass;
+    this.native = new NativeObjectClass();
+    this.nativeView = new NativeViewClass();
+
     if(!options.nonStandardEvents) {
-      options.delegates = options.delegates.concat([
-        ['mouseDown:','v@:@', function(self, cmd, events) {
-            this.fireEvent('mousedown');
-            self.super('mouseDown',events);
-            if(options.mouseDownBlocks) this.fireEvent('mouseup');
-        }.bind(this)],
-        ['mouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('mouseup'); self.super('mouseUp',events); }.bind(this)],
-        ['rightMouseDown:','v@:@', function(self, cmd, events) { this.fireEvent('rightmousedown'); self.super('rightMouseDown',events); }.bind(this)],
-        ['rightMouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('rightmouseup'); self.super('rightMouseUp',events); }.bind(this)],
-        ['keyDown:','v@:@', function(self, cmd, events) { this.fireEvent('keydown'); self.super('keyDown',events); }.bind(this)],
-        ['keyUp:','v@:@', function(self, cmd, events) { this.fireEvent('keyup'); self.super('keyUp',events); }.bind(this)],
-        ['mouseEntered:','v@:@', function(self, cmd, events) { this.fireEvent('mouseenter'); self.super('mouseEntered',events); }.bind(this)],
-        ['mouseExited:','v@:@', function(self, cmd, events) { this.fireEvent('mouseexit'); self.super('mouseExited',events); }.bind(this)],
-        ['mouseMoved:','v@:@', function(self, cmd, events) { this.fireEvent('mousemove'); self.super('mouseMoved',events); }.bind(this)]
-      ]);
+      this.native.addEventListener('MouseRightButtonUp', function() { this.fireEvent('rightmouseup'); }.bind(this));
+      this.native.addEventListener('MouseRightButtonDown', function() { this.fireEvent('rightmousedown'); }.bind(this));
+      this.native.addEventListener('MouseLeftButtonDown', function() { this.fireEvent('mousedown'); }.bind(this));
+      this.native.addEventListener('MouseLeftButtonUp', function() { this.fireEvent('mouseup'); }.bind(this));
+      this.native.addEventListener('MouseMove', function() { this.fireEvent('mousemove'); }.bind(this));
+      this.native.addEventListener('MouseEnter', function() { this.fireEvent('mouseenter'); }.bind(this));
+      this.native.addEventListener('MouseLeave', function() { this.fireEvent('mouseexit'); }.bind(this));
+      this.native.addEventListener('KeyDown', function() { this.fireEvent('keydown'); }.bind(this));
+      this.native.addEventListener('KeyUp', function() { this.fireEvent('keyup'); }.bind(this));
     }
 
     this.private = {
@@ -116,54 +109,52 @@ module.exports = (function() {
       constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null }
     };
 
-    this.nativeClass = NativeObjectClass;
-    this.native = this.nativeView = null;
-
     this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
     this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
-
-    var nativeViewExtended = NativeViewClass.extend(NativeViewClass.getName()+Math.round(Math.random()*1000000));
-    options.delegates.forEach(function(item) {
-      nativeViewExtended.addMethod(item[0],item[1],item[2]);
-    });
-    nativeViewExtended.register();
-    this.nativeViewClass = nativeViewExtended;
   }
 
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
-    get:function() { return this.nativeView('alphaValue'); },
-    set:function(e) { return this.nativeView('setAlphaValue', e); }
+    get:function() { return this.nativeView.Opacity; },
+    set:function(e) { return this.nativeView.Opacity = e; }
   });
 
-  Object.defineProperty(Control.prototype, 'visible', {
-    configurable:true,
-    get:function() { return !this.nativeView('isHidden'); },
-    set:function(e) { return this.nativeView('setHidden', !e); }
-  });
+   Object.defineProperty(Control.prototype, 'visible', {
+      get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
+      set:function(e) {
+        if(e) this.native.Visibility = $.System.Windows.Visibility.Visible;
+        else this.native.Visibility = $.System.Windows.Visibility.Hidden;
+      }
+    });
 
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
-      var scrn = $.NSScreen('mainScreen')('frame');
-      var view = this.nativeView('bounds');
-      var win = this.nativeView('convertRect', view, 'toView', null);
-      var bnds = this.nativeView('window')('convertRectToScreen', win);
-      return { x:bnds.origin.x, y:((scrn.size.height - bnds.origin.y) - view.size.height), width:bnds.size.width, height:bnds.size.height };
+      var point = new $.System.Windows.Point();
+      var target = $.System.Windows.Window.GetWindow(this.nativeView);
+      if(target == null) return null;
+      var bounds = this.nativeView.TransformToVisual(target)
+                      .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      var scnpnt = this.nativeView.PointToScreen(point);
+      return {x:Math.floor(scnpnt.X), y:Math.floor(scnpnt.Y), width:Math.floor(bounds.Width), height:Math.floor(bounds.Height)};
     }
   });
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
-      var view = this.nativeView('bounds');
-      var bnds = this.nativeView('convertRect', view, 'toView', null);
-      return { x:bnds.origin.x, y:bnds.origin.y, width:bnds.size.width, height:bnds.size.height };
+      var target = $.System.Windows.Window.GetWindow(this.nativeView);
+      if(target == null) return null;
+      var bounds = this.nativeView.TransformToVisual(target)
+                    .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      return {x:Math.floor(bounds.X), y:Math.floor(bounds.Y), width:Math.floor(bounds.Width), height:Math.floor(bounds.Height)};
     }
   });
 
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
-      var bounds = this.nativeView('bounds');
-      return {x:bounds.origin.x, y:(bounds.origin.y - bounds.size.height), width:bounds.size.width, height:bounds.size.height};
+      var graphics = this.nativeView.createGraphics()
+      var bounds = this.nativeView.TransformToVisual(this.nativeView.Parent)
+                    .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      return {x:Math.floor(bounds.X), y:Math.floor(bounds.Y), width:Math.floor(bounds.Width), height:Math.floor(bounds.Height)};
     }
   });
 
@@ -172,7 +163,9 @@ module.exports = (function() {
       event = event.toLowerCase();
       var returnvalue = undefined;
       if(!this.private.events[event]) this.private.events[event] = [];
-      (this.private.events[event]).forEach(function(item,index,arr) { returnvalue = item.apply(null, args) || returnvalue; });
+      (this.private.events[event]).forEach(function(item,index,arr) { 
+        returnvalue = item.apply(null, args) || returnvalue; 
+      });
       return returnvalue;
     } catch(e) {
       console.error(e.message);
@@ -183,58 +176,38 @@ module.exports = (function() {
 
   Control.prototype.addEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(event == "mouseenter" || event == "mouseexit" || event == "mousemove") {
-      this.private.needsMouseTracking++;
-      if(this.private.needsMouseTracking == 1 && this.nativeView('window')) 
-        addTrackingArea.apply(this,null);
-      else if (this.private.needsMouseTracking == 1)
-        this.addEventListener('parent-attached', addTrackingArea.bind(this));
-    }
-    if(!this.private.events[event]) this.private.events[event] = []; 
+    if(!this.private.events[event])
+      this.private.events[event] = []; 
     this.private.events[event].push(func);
   }
 
   Control.prototype.removeEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(event == "mouseenter" ||   event == "mouseexit" || event == "mousemove") {
-      this.private.needsMouseTracking--;
-      if(this.private.needsMouseTracking == 0) {
-        this.nativeView('removeTrackingArea',this.private.trackingArea);
-        this.private.trackingArea('release');
-        this.private.trackingArea = null;
-      }
-    }
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+    if(this.private.events[event] && 
+        this.private.events[event].indexOf(func) != -1) 
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
   }
 
-  var attributeMap = { 'left':$.NSLayoutAttributeLeft, 'right':$.NSLayoutAttributeRight, 'top':$.NSLayoutAttributeTop,
-                       'bottom':$.NSLayoutAttributeBottom, 'leading':$.NSLayoutAttributeLeading, 'trailing':$.NSLayoutAttributeTrailing,
-                       'width':$.NSLayoutAttributeWidth, 'height':$.NSLayoutAttributeHeight, 'center':$.NSLayoutAttributeCenterX,
-                       'middle':$.NSLayoutAttributeCenterY, 'baseline':$.NSLayoutAttributeBaseline, '<':$.NSLayoutRelationLessThanOrEqual,
-                       '<=':$.NSLayoutRelationLessThanOrEqual, '>':$.NSLayoutRelationGreaterThanOrEqual, 
-                       '>=':$.NSLayoutRelationGreaterThanOrEqual, '=':$.NSLayoutRelationEqual, '==':$.NSLayoutRelationEqual };
-
-
   Control.prototype.addLayoutConstraint = function(layoutObject) {
-    var constraint = $.NSLayoutConstraint('constraintWithItem',(layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
+    /*var constraint = $.NSLayoutConstraint('constraintWithItem',(layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
                         'attribute',(attributeMap[layoutObject.firstAttribute] || $.NSLayoutAttributeNotAnAttribute),
                         'relatedBy',(attributeMap[layoutObject.relationship] || $.NSLayoutRelationEqual),
                         'toItem',(layoutObject.secondItem ? layoutObject.secondItem.nativeView : null),
                         'attribute',(attributeMap[layoutObject.secondAttribute] || $.NSLayoutAttributeNotAnAttribute),
                         'multiplier', (layoutObject.multiplier ? layoutObject.multiplier : 0), 
                         'constant', (layoutObject.constant ? layoutObject.constant : 0));
-    this.nativeView('addConstraint',constraint);
+    this.nativeView('addConstraint',constraint);*/
+    var constraint = {}; // ?
     return this.private.layoutConstraints.push({js:layoutObject, native:constraint}) - 1;
   }
 
   Control.prototype.removeLayoutConstraint = function(index) {
     if(typeof(index) == 'undefined' || index == null || !this.private.layoutConstraints[index]) return;
-    var objcNative = this.private.layoutConstraints[index].native;
+    var native = this.private.layoutObjcConstraints[index].native;
     this.private.layoutConstraints.splice(index, 1);
-    this.nativeView('removeConstraint',objcNative);
+    /*this.nativeView('removeConstraint',objcNative);
     this.nativeView('updateConstraintsForSubtreeIfNeeded');
-    this.nativeView('layoutSubtreeIfNeeded');
+    this.nativeView('layoutSubtreeIfNeeded');*/
   }
 
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);

@@ -67,6 +67,8 @@
     ],
     'win_library_files':[
       'modules/Bridge/Bridge_win.js',
+      'modules/Container_win.js',
+      'modules/Control_win.js',
       'modules/Application/Application_win.js',
       'modules/Utilities/Utilities_win.js',
       'modules/Window/Window_win.js',
@@ -153,6 +155,7 @@
         'libraries/node/deps/uv/src/',
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
+
       'sources': [
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
@@ -164,7 +167,6 @@
         'libraries/node/src/node_file.cc',
         'libraries/node/src/node_http_parser.cc',
         'libraries/node/src/node_javascript.cc',
-        #'libraries/node/src/node_main.cc',
         'libraries/node/src/node_os.cc',
         'libraries/node/src/node_script.cc',
         'libraries/node/src/node_stat_watcher.cc',
@@ -181,7 +183,6 @@
         'libraries/node/src/process_wrap.cc',
         'libraries/node/src/v8_typed_array.cc',
         'libraries/node/src/udp_wrap.cc',
-        # headers to make for a more pleasant IDE experience
         'libraries/node/src/handle_wrap.h',
         'libraries/node/src/node.h',
         'libraries/node/src/node_buffer.h',

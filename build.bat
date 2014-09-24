@@ -124,7 +124,7 @@ goto run
 :msbuild-found
 @rem Build the sln with msbuild.
 copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
-msbuild build\msvs\tint.sln /m /t:%target% /p:Configuration=%config% /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+msbuild build\msvs\tint.sln /m /t:%target% /p:Configuration=%config%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
 if errorlevel 1 goto exit
 
 :sign
@@ -210,12 +210,7 @@ set PYTHONPATH=tools/closure_linter/
 goto exit
 
 :help
-echo build.bat [debug/release] [msi] [test-all/test-uv/test-internet/test-pummel/test-simple/test-message] [clean] [noprojgen] [nobuild] [nosign] [x86/x64]
-echo Examples:
-echo   build.bat                : builds release build
-echo   build.bat debug          : builds debug build
-echo   build.bat release msi    : builds release build and MSI installer package
-echo   build.bat test           : builds debug build and runs tests
+echo build.bat [debug/release] [noprojgen] [nobuild] [x86/x64]
 goto exit
 
 :exit

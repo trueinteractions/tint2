@@ -31,7 +31,7 @@ If you don't want to learn (or deal with) native OS languages, you're in luck, t
            | OSX        | Windows    | Linux      | iOS        | Android    
 ---------- | ---------- | ---------- | ---------- | ---------- | ----------
 Build | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
-Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
+Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | No, ~6% Pass | N/A | N/A | N/A
 
 *This is intended as a preview release for Tint 2, currently only supported on OSX and Windows.*
 
@@ -50,7 +50,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./test.sh
 ```
 <h3>Windows (Experimental)</h3>
-Ensure you have Visual Studio 2010 (or above), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
+Ensure you have Visual Studio 2010 (or the free msbuild compiler and Windows SDK 7.0A+), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
 ```bash
 mkdir tint
 cd tint

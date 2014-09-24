@@ -1,11 +1,7 @@
 module.exports = (function() {
-  //var Container = require('Container');
+  var Container = require('Container');
   var utilities = require('Utilities');
   //var Color = require('Color');
-  require('Bridge');
-  process.bridge.dotnet.import('WPF\\PresentationFramework.dll');
-  process.bridge.dotnet.import('System.Windows.Forms');
-
   $ = process.bridge.dotnet;
 
   function Window(NativeObjectClass, NativeViewClass, options) {
@@ -13,9 +9,28 @@ module.exports = (function() {
     options.width = options.width || 500;
     options.height = options.height || 500;
 
-    this.private = {previousStyle:'',previousState:'',background:'auto',menu:null,toolbar:null,fullscreen:false};
+    this.private = {previousStyle:'',previousState:'',background:'auto',menu:null,toolbar:null,fullscreen:false,events:{}};
 
-    this.native = new $.System.Windows.Window();
+    if(NativeObjectClass)
+      Container.call(this, NativeObjectClass, NativeViewClass, options);
+    else
+      Container.call(this, $.System.Windows.Window, $.System.Windows.Controls.Canvas, options);
+
+    // Attach System.Windows.Window.Content = System.Windows.Controls.Canvas
+    this.native.Content = this.nativeView; 
+
+    //TODO: Add enter-fullscreen/exit-fullscreen
+    this.native.addEventListener('Closing', function() { this.fireEvent('close'); }.bind(this));
+    this.native.addEventListener('Closed', function() { this.fireEvent('closed'); }.bind(this));
+    this.native.addEventListener('SizeChanged', function() { this.fireEvent('resize'); }.bind(this));
+    this.native.addEventListener('Deactivated', function() { this.fireEvent('blur'); }.bind(this));
+    this.native.addEventListener('Activated', function() { this.fireEvent('focus'); }.bind(this));
+    this.native.addEventListener('StateChanged', function() {
+      if(this.native.WindowState == $.System.Windows.WindowState.Maximized) this.fireEvent('maximize');
+      else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) this.fireEvent('minimize');
+      else this.fireEvent('restore')
+    }.bind(this));
+
     //We cannot allow transparency unless there is no window style.
     //this.native.AllowsTransparency = true;
     this.native.ShowInTaskbar = true;
@@ -28,12 +43,26 @@ module.exports = (function() {
     application.windows.push(this);
   }
   
-  //Window.prototype = Object.create(Container.prototype);
-  //Window.prototype.constructor = Window;
+  Window.prototype = Object.create(Container.prototype);
+  Window.prototype.constructor = Window;
 
   Window.prototype.preferences = {
     animateOnSizeChange:false,
     animateOnPositionChange:false
+  }
+
+  Window.prototype.fireEvent = function(event, args) {
+    try {
+      event = event.toLowerCase();
+      var returnvalue = undefined;
+      if(!this.private.events[event]) this.private.events[event] = [];
+      (this.private.events[event]).forEach(function(item,index,arr) { returnvalue = item.apply(null, args) || returnvalue; });
+      return returnvalue;
+    } catch(e) {
+      console.error(e.message);
+      console.error(e.stack);
+      process.exit(1);
+    }
   }
 
   Object.defineProperty(Window.prototype, 'frame', {
@@ -120,7 +149,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'y', {
-    get:function() { return this.native.Top; },
+    get:function() { return Math.floor(this.native.Top); },
     set:function(e) {
       if(e == 'center') {
        var workingArea = $.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
@@ -134,7 +163,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'x', {
-    get:function() { return this.native.Left; },
+    get:function() { return Math.floor(this.native.Left); },
     set:function(e) {
       if(e == 'center') {
        var workingArea = $.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
@@ -148,7 +177,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'width', {
-    get:function() { return this.native.Width; },
+    get:function() { return Math.floor(this.native.Width); },
     set:function(e) {
         e = utilities.parseUnits(e);
         this.native.Width = e;
@@ -156,7 +185,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'height', {
-    get:function() { return this.native.Height; },
+    get:function() { return Math.floor(this.native.Height); },
     set:function(e) {
         e = utilities.parseUnits(e);
         this.native.Height = e;
@@ -168,6 +197,7 @@ module.exports = (function() {
     set:function(e) { /* TODO ? */ }
   });
 
+  // Override from Control.
   Object.defineProperty(Window.prototype, 'visible', {
     get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
     set:function(e) {

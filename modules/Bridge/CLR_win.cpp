@@ -211,10 +211,10 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
   {
       jsdata = stringCLR2V8(netdata->ToString());
   }
-  else if (type == System::Uri::typeid)
+  /*else if (type == System::Uri::typeid)
   {
       jsdata = stringCLR2V8(netdata->ToString());
-  }
+  }*/
   else if (type == int::typeid)
   {
       jsdata = v8::Integer::New((int)netdata);
@@ -231,7 +231,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
   {
       jsdata = v8::Number::New((float)netdata);
   }
-  else if (type->IsPrimitive || type == System::Decimal::typeid)
+ /* else if (type->IsPrimitive || type == System::Decimal::typeid)
   {
       System::IConvertible^ convertible = dynamic_cast<System::IConvertible^>(netdata);
       if (convertible != nullptr)
@@ -243,7 +243,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
           jsdata = stringCLR2V8(netdata->ToString());
       }
   }
-  /*else if (type->IsEnum)
+  else if (type->IsEnum)
   {
       jsdata = stringCLR2V8(netdata->ToString());
   }*/
@@ -263,53 +263,6 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       };
       jsdata = bufferConstructor->NewInstance(3, args);    
   }
-#ifdef DONOTBUILD
-  else if (dynamic_cast<System::Collections::Generic::IDictionary<System::String^,System::Object^>^>(netdata) != nullptr)
-  {
-      Handle<v8::Object> result = v8::Object::New();
-      for each (System::Collections::Generic::KeyValuePair<System::String^,System::Object^>^ pair 
-          in (System::Collections::Generic::IDictionary<System::String^,System::Object^>^)netdata)
-      {
-          result->Set(stringCLR2V8(pair->Key), MarshalCLRToV8(pair->Value));
-      }
-
-      jsdata = result;
-  }    
-  else if (dynamic_cast<System::Collections::IDictionary^>(netdata) != nullptr)
-  {
-      Handle<v8::Object> result = v8::Object::New();
-      for each (System::Collections::DictionaryEntry^ entry in (System::Collections::IDictionary^)netdata)
-      {
-          if (dynamic_cast<System::String^>(entry->Key) != nullptr)
-          result->Set(stringCLR2V8((System::String^)entry->Key), MarshalCLRToV8(entry->Value));
-      }
-
-      jsdata = result;
-  }
-  else if (dynamic_cast<System::Collections::IEnumerable^>(netdata) != nullptr)
-  {
-      Handle<v8::Array> result = v8::Array::New();
-      unsigned int i = 0;
-      for each (System::Object^ entry in (System::Collections::IEnumerable^)netdata)
-      {
-          result->Set(i++, MarshalCLRToV8(entry));
-      }
-
-      jsdata = result;
-  }
-  else if (type == System::Func<System::Object^,Task<System::Object^>^>::typeid)
-  {
-      jsdata = Initialize((System::Func<System::Object^,Task<System::Object^>^>^)netdata);
-  }
-  else if (System::Exception::typeid->IsAssignableFrom(type))
-  {
-      jsdata = MarshalCLRExceptionToV8((System::Exception^)netdata);
-  }
-  else
-  {
-      //jsdata = MarshalCLRObjectToV8(netdata);
-  }
-#else
   else
   {
     try {
@@ -325,7 +278,6 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-#endif
   return scope.Close(jsdata);
 }
 
@@ -406,8 +358,7 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
         System::Console::WriteLine(e->ToString());
         exit(1);
       }
-    }else if (jsdata->IsObject()) 
-    {
+    } else if (jsdata->IsObject()) {
         IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
         Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
         Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
@@ -478,6 +429,7 @@ public:
       int buf_size = m->Utf8Length() + 1;
       char *buf = new char[buf_size];
       m->WriteUtf8(buf, buf_size);
+      System::String^ userpath = gcnew System::String(buf);
 
       System::String^ framworkRegPath = "Software\\Microsoft\\.NetFramework";
       Microsoft::Win32::RegistryKey^ netFramework = Microsoft::Win32::Registry::LocalMachine;
@@ -489,8 +441,16 @@ public:
         System::Environment::Version->Build); 
       System::String^ netPath = System::IO::Path::Combine(installRoot, version);
 
-      System::Reflection::Assembly^ assembly = System::Reflection::Assembly::LoadFrom(netPath + gcnew System::String(buf));
+      System::Reflection::Assembly^ assembly;
+      if(System::IO::File::Exists(netPath + userpath))
+        assembly = System::Reflection::Assembly::LoadFrom(netPath + userpath);
+      else if (System::IO::File::Exists(userpath))
+        assembly = System::Reflection::Assembly::LoadFrom(userpath);
+      else
+        assembly = System::Reflection::Assembly::Load(userpath);
+
       return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
+
     } catch (System::Exception^ e) {
       System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -561,8 +521,13 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[3]);
-      System::String^ field = stringV82CLR(args[2]->ToString()); //gcnew System::String(buf);
-      target->GetType()->GetField(field)->SetValue(target, value);
+      System::String^ field = stringV82CLR(args[2]->ToString());
+
+      System::Type^ baseType = target->GetType();
+      if(baseType != System::Type::typeid)
+        baseType = (System::Type ^)target;
+
+      baseType->GetField(field)->SetValue(target, value);
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
       System::Console::WriteLine(e->ToString());
@@ -574,8 +539,13 @@ public:
     HandleScope scope;
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ field = stringV82CLR(args[1]->ToString()); // gcnew System::String(buf);
-      System::Object^ rtn = target->GetType()->GetField(field)->GetValue(target);
+      System::String^ field = stringV82CLR(args[1]->ToString());
+      
+      System::Type^ baseType = target->GetType();
+      if(baseType != System::Type::typeid)
+        baseType = (System::Type ^)target;
+
+      System::Object^ rtn = baseType->GetField(field)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       System::Console::WriteLine(e->ToString());
@@ -611,6 +581,7 @@ public:
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[2]);
       System::String^ field = stringV82CLR(args[1]->ToString());
+
       target->GetType()->GetProperty(field)->SetValue(target, value);
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
@@ -624,6 +595,7 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
+
       System::Object^ rtn = target->GetType()->GetProperty(field)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
@@ -642,10 +614,10 @@ public:
       for(int i=0; i < argSize; i++)
         cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
-      System::Type^ type = target->GetType();
+      System::Type^ type = (System::Type ^)target;
       System::String^ method = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
-        BindingFlags::Static | BindingFlags::Public | BindingFlags::InvokeMethod | BindingFlags::Instance,
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::InvokeMethod,
         nullptr,
         target,
         cshargs);
@@ -699,5 +671,5 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
     NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
     NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
-    NODE_SET_METHOD(target, "getType", CLR::GetCLRType);
+    NODE_SET_METHOD(target, "getCLRType", CLR::GetCLRType);
 }

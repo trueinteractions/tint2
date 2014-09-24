@@ -18,6 +18,7 @@ module.exports = (function() {
       ['windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notif) { this.fireEvent('leave-fullscreen'); }.bind(this)],
       ['windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('focus'); }.bind(this)],
       ['windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('blur'); }.bind(this)],
+      //TODO: Maximize?
       ['windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('minimize'); }.bind(this)],
       ['windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('restore'); }.bind(this)],
       ['windowDidMove:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('move'); }.bind(this)],

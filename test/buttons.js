@@ -11,7 +11,7 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
+ * @see {Buttons}
  * @example
  */
 function run($utils) {

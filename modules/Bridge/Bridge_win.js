@@ -5,6 +5,7 @@ if(typeof(process.bridge.struct) == 'undefined') process.bridge.struct = require
 if(typeof(process.bridge.ffi) == 'undefined') process.bridge.ffi = require('ffi');
 
 var dotnet = process.bridge;
+var assemblyImported = {};
 var classCache = {};
 
 function unwrap(a) {
@@ -76,7 +77,8 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
 
 function createProperty(target, typeNative, typeName, memberNative, memberName, static) {
   Object.defineProperty(target, memberName, {
-    configurable:true, enumerable:true,
+    configurable:true, 
+    enumerable:true,
     get:function() { return wrap(dotnet.execGetProperty((static ? this.classPointer : this.pointer), memberName)); },
     set:function(e) { dotnet.execSetProperty((static ? this.classPointer : this.pointer), memberName, unwrap(e)); }
   });
@@ -97,10 +99,10 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
 }
 
 function createJSInstance(pointer) {
-  var typeNative = dotnet.getType(pointer);
+  var typeNative = dotnet.getCLRType(pointer);
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
 
-  if(dotnet.execGetProperty(typeNative, "IsClass")) {
+  if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
     var c = createClass(typeNative, typeName);
     var n = function() {
       this.pointer = pointer;
@@ -168,7 +170,6 @@ function createFromType(nativeType, onto) {
     }
 
     if(dotnet.execGetProperty(nativeType, "IsClass")) {
-      //onto[name] = createClass(nativeType,name);
       Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() {
@@ -177,7 +178,6 @@ function createFromType(nativeType, onto) {
         }.bind(info)
       });
     } else if(dotnet.execGetProperty(nativeType, "IsEnum")) {
-      //onto[name] = createEnum(nativeType,name);
       Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() { 
@@ -186,7 +186,6 @@ function createFromType(nativeType, onto) {
         }.bind(info)
       });
     } else if(dotnet.execGetProperty(nativeType, "IsValueType")) {
-      //onto[name] = createClass(nativeType,name);
       Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() {
@@ -194,11 +193,7 @@ function createFromType(nativeType, onto) {
           return this.onto[this.name] = createClass(this.type,this.name);
         }.bind(info)
       });
-    } //else if(dotnet.execGetProperty(nativeType, "IsInterface")) {
-    //} else if(dotnet.execGetProperty(nativeType, "IsAbstract")) {
-    //} else {
-      //console.warn('The type: '+name+' was not imported or of a known layout.');
-    //}
+    }
   }
 }
 
@@ -214,6 +209,8 @@ function Import(assembly, onto) {
   }
 }
 
-process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) { 
-  Import(e, process.bridge.dotnet); 
+process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) {
+  if(!assemblyImported[e])
+    Import(e, process.bridge.dotnet);
+  assemblyImported[e] = true;
 };
