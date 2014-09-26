@@ -154,7 +154,6 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
-      var top = $.System.Windows.SystemParameters.VirtualScreenTop;
       var view = this.nativeView('bounds');
       var bnds = this.nativeView('convertRect', view, 'toView', null);
       return { x:bnds.origin.x, y:bnds.origin.y, width:bnds.size.width, height:bnds.size.height };
