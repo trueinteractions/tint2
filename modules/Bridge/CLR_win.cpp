@@ -803,7 +803,8 @@ public:
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
-      System::Object^ rtn = target->GetProperty(property)->GetValue(nullptr);
+      System::Object^ rtn = target->GetProperty(property,
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -815,8 +816,15 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
-      System::Object^ rtn = target->GetType()->GetProperty(property)->GetValue(target);
-      return scope.Close(MarshalCLRToV8(rtn));
+      try {
+        System::Object^ rtn = target->GetType()->GetProperty(property,
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
+        return scope.Close(MarshalCLRToV8(rtn));
+      } catch (AmbiguousMatchException^ e) {
+        System::Object^ rtn = target->GetType()->GetProperty(property,
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
+        return scope.Close(MarshalCLRToV8(rtn));
+      }
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }

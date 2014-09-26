@@ -9,9 +9,6 @@ module.exports = (function() {
     options.width = options.width || 500;
     options.height = options.height || 500;
 
-    //TODO: This will be overwritten!
-    this.private = {previousStyle:'',previousState:'',background:'auto',menu:null,toolbar:null,fullscreen:false,events:{}};
-
     if(NativeObjectClass)
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else
@@ -31,6 +28,13 @@ module.exports = (function() {
       else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) this.fireEvent('minimize');
       else this.fireEvent('restore')
     }.bind(this));
+
+    this.private.previousStyle='';
+    this.private.previousState='';
+    this.private.background='auto';
+    this.private.menu=null;
+    this.private.toolbar=null;
+    this.private.fullscreen=false;
 
     //We cannot allow transparency unless there is no window style.
     //this.native.AllowsTransparency = true;
@@ -140,8 +144,8 @@ module.exports = (function() {
     set:function(e) {
       if(e == 'center') {
         var workingArea = $.System.Windows.SystemParameters.WorkArea;
-        this.native.Left = workingArea.width/2;
-        this.native.Top = workingArea.height/2;
+        this.native.Left = workingArea.width/2 - this.native.Width/2;
+        this.native.Top = workingArea.height/2 - this.native.Height/2;
       } else {
         var workingArea = $.System.Windows.SystemParameters.WorkArea;
         e = utilities.parseUnits(e);
@@ -155,8 +159,8 @@ module.exports = (function() {
     set:function(e) {
       if(e == 'center') {
         var workingArea = $.System.Windows.SystemParameters.WorkArea;
-        this.native.Left = workingArea.width/2;
-        this.native.Top = workingArea.height/2;
+        this.native.Left = workingArea.width/2 - this.native.Width/2;
+        this.native.Top = workingArea.height/2 - this.native.Height/2;
       } else {
         var workingArea = $.System.Windows.SystemParameters.WorkArea;
         e = utilities.parseUnits(e);

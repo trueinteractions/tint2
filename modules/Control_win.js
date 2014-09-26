@@ -5,6 +5,11 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
 
+  function wpfDeviceToLogicalPx(w,p) {
+    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
+    return t.Transform(p);
+  }
+
   function createLayoutProperty(name, percentName, percentFunc, scalarName, scalarFunc, na) {
     Object.defineProperty(Control.prototype, name, {
       get: function() { return this.private.user[name]; },
@@ -132,10 +137,10 @@ module.exports = (function() {
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
-                      .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      var scnpnt = this.nativeView.PointToScreen(new $.System.Windows.Point(0,0));
-      return {x:Math.round(scnpnt.X), y:Math.round(scnpnt.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
-    }
+                    .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
+   }
   });
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
@@ -144,10 +149,8 @@ module.exports = (function() {
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
                     .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-
-      var scnpnt = this.nativeView.PointToScreen(new $.System.Windows.Point(0,0));
-      var winpnt = {X:target.Left,Y:target.Top};
-      return {x:Math.round(scnpnt.X - winpnt.X), y:Math.round(scnpnt.Y - winpnt.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
+      var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      return {x:Math.round(p.X - target.Left), y:Math.round(p.Y - target.Top), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
   });
 

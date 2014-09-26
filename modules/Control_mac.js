@@ -154,9 +154,21 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
+      var win = this.nativeView('window');
+      
+      if(win == null) return null;
+
+      // adjust coordinate for top-left not bottom-left.
+      var scrn = $.NSScreen('mainScreen')('frame');
+      var rect = win('frame');
+      rect.origin.y = (scrn.size.height - rect.origin.y) - rect.size.height;
+
+
       var view = this.nativeView('bounds');
       var bnds = this.nativeView('convertRect', view, 'toView', null);
-      return { x:bnds.origin.x, y:bnds.origin.y, width:bnds.size.width, height:bnds.size.height };
+      var winBnds = this.nativeView('window')('convertRectToScreen', win);
+
+      return { x:bnds.origin.x, y:(scrn.size.height - winBnds.origin.y) - view.size.height - rect.origin.y + bnds.origin.y, width:bnds.size.width, height:bnds.size.height };
     }
   });
 
