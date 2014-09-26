@@ -154,6 +154,7 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
+      var top = $.System.Windows.SystemParameters.VirtualScreenTop;
       var view = this.nativeView('bounds');
       var bnds = this.nativeView('convertRect', view, 'toView', null);
       return { x:bnds.origin.x, y:bnds.origin.y, width:bnds.size.width, height:bnds.size.height };
@@ -163,7 +164,7 @@ module.exports = (function() {
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
       var bounds = this.nativeView('bounds');
-      return {x:bounds.origin.x, y:(bounds.origin.y - bounds.size.height), width:bounds.size.width, height:bounds.size.height};
+      return {x:bounds.origin.x, y:bounds.origin.y, width:bounds.size.width, height:bounds.size.height};
     }
   });
 

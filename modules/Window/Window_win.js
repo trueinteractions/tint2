@@ -139,12 +139,13 @@ module.exports = (function() {
     get:function() { return Math.floor(this.native.Top); },
     set:function(e) {
       if(e == 'center') {
-       var workingArea = $.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-       this.native.Left = workingArea.width/2;
-       this.native.Top = workingArea.height/2;
+        var workingArea = $.System.Windows.SystemParameters.WorkArea;
+        this.native.Left = workingArea.width/2;
+        this.native.Top = workingArea.height/2;
       } else {
+        var workingArea = $.System.Windows.SystemParameters.WorkArea;
         e = utilities.parseUnits(e);
-        this.native.Top = e;
+        this.native.Top = e + workingArea.Y;
       }
     }
   });
@@ -153,12 +154,13 @@ module.exports = (function() {
     get:function() { return Math.floor(this.native.Left); },
     set:function(e) {
       if(e == 'center') {
-       var workingArea = $.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-       this.native.Left = workingArea.width/2;
-       this.native.Top = workingArea.height/2;
+        var workingArea = $.System.Windows.SystemParameters.WorkArea;
+        this.native.Left = workingArea.width/2;
+        this.native.Top = workingArea.height/2;
       } else {
+        var workingArea = $.System.Windows.SystemParameters.WorkArea;
         e = utilities.parseUnits(e);
-        this.native.Left = e;
+        this.native.Left = e + workingArea.X;
       }
     }
   });
