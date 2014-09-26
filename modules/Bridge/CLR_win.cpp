@@ -157,13 +157,13 @@ Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
         }
 
         result = MarshalCLRObjectToV8(exception);
-        message = stringCLR2V8(exception->Message);
+        message = stringCLR2V8(exception->GetType()->FullName + " " + exception->Message + "\n" + exception->StackTrace);
         name = stringCLR2V8(exception->GetType()->FullName);
     }   
         
     // Construct an error that is just used for the prototype - not verify efficient
     // but 'typeof Error' should work in JavaScript
-    result->SetPrototype(v8::Exception::Error(message));
+    result->SetPrototype(v8::Exception::Error( message));
     result->Set(String::NewSymbol("message"), message);
     
     // Recording the actual type - 'name' seems to be the common used property
@@ -276,7 +276,6 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       node::Buffer *buf = node::Buffer::New((char *)n, sz, wrap_pointer_cb2, user_data);
       jsdata = buf->handle_;
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -458,7 +457,6 @@ public:
       TypeBuilder^ tb = mb->DefineType(name, TypeAttributes::Public | TypeAttributes::Class, base);
       return scope.Close(MarshalCLRToV8(tb));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -501,7 +499,6 @@ public:
 
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -550,7 +547,6 @@ public:
 
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -606,7 +602,6 @@ public:
 
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -631,7 +626,6 @@ public:
       
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -643,7 +637,6 @@ public:
       System::Type^ t = tb->CreateType();
       return scope.Close(MarshalCLRToV8(t));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -677,7 +670,6 @@ public:
       return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
 
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -688,7 +680,6 @@ public:
       System::Object^ target = MarshalV8ToCLR(args[0]);
       return scope.Close(MarshalCLRToV8(target->GetType()));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -702,7 +693,6 @@ public:
         BindingFlags::FlattenHierarchy);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -716,7 +706,6 @@ public:
         BindingFlags::FlattenHierarchy);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -736,7 +725,6 @@ public:
       System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -749,13 +737,12 @@ public:
       System::String^ field = stringV82CLR(args[2]->ToString());
 
       System::Type^ baseType = target->GetType();
-      if(baseType != System::Type::typeid)
+      if(baseType != System::Type::typeid && target == System::Type::typeid)
         baseType = (System::Type ^)target;
 
       baseType->GetField(field)->SetValue(target, value);
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -767,13 +754,12 @@ public:
       System::String^ field = stringV82CLR(args[1]->ToString());
       
       System::Type^ baseType = target->GetType();
-      if(baseType != System::Type::typeid)
+      if(baseType != System::Type::typeid && target == System::Type::typeid)
         baseType = (System::Type ^)target;
 
       System::Object^ rtn = baseType->GetField(field)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -794,7 +780,6 @@ public:
 
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -809,7 +794,18 @@ public:
       target->GetType()->GetProperty(field)->SetValue(target, value);
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> ExecGetStaticProperty(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Object^ rtn = target->GetProperty(property)->GetValue(nullptr);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -818,12 +814,10 @@ public:
     HandleScope scope;
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
-
-      System::Object^ rtn = target->GetType()->GetProperty(field)->GetValue(target);
+      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Object^ rtn = target->GetType()->GetProperty(property)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -848,7 +842,6 @@ public:
 
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -875,7 +868,6 @@ public:
       } 
       catch (System::Exception^ e)
       {
-        System::Console::WriteLine(e->ToString());
         return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
       }
   }
@@ -894,6 +886,7 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
     NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
     NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
+    NODE_SET_METHOD(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);
 
     // get programmatic information
     NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);

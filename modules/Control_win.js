@@ -134,6 +134,8 @@ module.exports = (function() {
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
                       .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      point.X = bounds.X;
+      point.Y = bounds.Y;
       var scnpnt = this.nativeView.PointToScreen(point);
       return {x:Math.floor(scnpnt.X), y:Math.floor(scnpnt.Y), width:Math.floor(bounds.Width), height:Math.floor(bounds.Height)};
     }
@@ -151,7 +153,8 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
-      var graphics = this.nativeView.createGraphics()
+      var graphics = this.nativeView.CreateGraphics();
+      console.log('Bounds parent is: ',this.nativeView.Parent);
       var bounds = this.nativeView.TransformToVisual(this.nativeView.Parent)
                     .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
       return {x:Math.floor(bounds.X), y:Math.floor(bounds.Y), width:Math.floor(bounds.Width), height:Math.floor(bounds.Height)};

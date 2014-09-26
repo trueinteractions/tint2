@@ -3,11 +3,9 @@
   var utilities = require('Utilities');
   process.bridge.dotnet.import('mscorlib');
   process.bridge.dotnet.import('WPF\\WindowsBase.dll');
+  process.bridge.dotnet.import('WPF\\PresentationCore.dll');
   process.bridge.dotnet.import('WPF\\PresentationFramework.dll');
-
-  // we use WPF, but we need WorkArea from WinForms.
-  process.bridge.dotnet.import('System.Drawing'); // WPF or Winforms?..
-  process.bridge.dotnet.import('System.Windows.Forms'); 
+  process.bridge.dotnet.import('System.Drawing'); 
   
 
   // Include the app schema. app:// registers on NSURL and for node require().

@@ -122,7 +122,12 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
   Object.defineProperty(target, memberName, {
     configurable:true, 
     enumerable:true,
-    get:function() { return wrap(dotnet.execGetProperty((static ? this.classPointer : this.pointer), memberName)); },
+    get:function() {
+      if(static)
+        return wrap(dotnet.execGetStaticProperty(this.classPointer, memberName));
+      else
+        return wrap(dotnet.execGetProperty(this.pointer, memberName)); 
+    },
     set:function(e) { dotnet.execSetProperty((static ? this.classPointer : this.pointer), memberName, unwrap(e)); }
   });
 }
@@ -243,7 +248,7 @@ function createFromType(nativeType, onto) {
   }
 }
 
-function Import(assembly, onto) {
+function ImportOnto(assembly, onto) {
   if(assembly.toLowerCase().indexOf('.dll') == -1) assembly += ".dll";
 
   var types = dotnet.loadAssembly(assembly);
@@ -255,8 +260,14 @@ function Import(assembly, onto) {
   }
 }
 
-process.bridge.dotnet.import = process.bridge.dotnet.Import = function(e) {
+function Import (e) {
   if(!assemblyImported[e])
-    Import(e, process.bridge.dotnet);
+    ImportOnto(e, process.bridge.dotnet);
   assemblyImported[e] = true;
 };
+
+process.bridge.dotnet.import = Import;
+process.bridge.dotnet.Import = Import;
+
+process.bridge.dotnet.importonto = ImportOnto;
+process.bridge.dotnet.Importonto = ImportOnto;
