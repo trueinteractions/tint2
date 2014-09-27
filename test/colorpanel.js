@@ -15,6 +15,11 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  /* @hidden */ var color = new Color('rgba',40,40,40,0.1);
+  /* @hidden */ $utils.assert(color.red == 40/255);
+  /* @hidden */ $utils.assert(color.green == 40/255);
+  /* @hidden */ $utils.assert(color.blue == 40/255);
+  /* @hidden */ $utils.assert(color.alpha == 0.1);
   var panel = new ColorPanel();
   /* @hidden */ //var second = false;
   /* @hidden */ panel.x=0;

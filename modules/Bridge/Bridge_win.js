@@ -3,6 +3,7 @@ if(typeof(process.bridge.dotnet) == 'undefined') process.bridge.dotnet = {};
 if(typeof(process.bridge.ref) == 'undefined') process.bridge.ref = require('ref');
 if(typeof(process.bridge.struct) == 'undefined') process.bridge.struct = require('struct');
 if(typeof(process.bridge.ffi) == 'undefined') process.bridge.ffi = require('ffi');
+if(typeof(process.bridge.win32) == 'undefined') process.bridge.win32 = require('win32');
 
 var dotnet = process.bridge;
 var assemblyImported = {};
@@ -141,6 +142,8 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   else if (strMemberType == 'Field') info.exec = createField;
   else if (strMemberType == 'Method') info.exec = createMethod;
   else if (strMemberType == 'Property') info.exec = createProperty;
+  else if (strMemberType == 'Constructor') ; // already delt with.
+  else console.warn("Unknown type: "+strMemberType);
 
   if(info.exec)
     info.exec(info.cls, info.typeNative, info.typeName, info.memberNative, info.memberName, static);
@@ -162,8 +165,7 @@ function createJSInstance(pointer) {
     n.pointer = n.prototype.pointer = pointer;
     n.classPointer = n.prototype.classPointer = typeNative;
     return new n;
-  } else
-    console.warn('Unknown type passed back: ', typeName);
+  }
 }
 
 function createClass(typeNative, typeName) {
@@ -173,7 +175,7 @@ function createClass(typeNative, typeName) {
   var cls = function() {
     var args = [typeNative];
     for(var i=0; i < arguments.length; i++)
-      args.push(arguments[i]);
+      args.push(unwrap(arguments[i]));
     this.pointer = dotnet.execNew.apply(null,args);
     this.toString = function() { return '[Object: ' + typeName + ' @addr '+this.pointer.inspect()+']'; }
     this.inspect = function() { return '\033[33m' + this.toString() + '\033[39m'; }

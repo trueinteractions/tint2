@@ -3,6 +3,7 @@ module.exports = (function() {
   var utilities = require('Utilities');
   //var Color = require('Color');
   $ = process.bridge.dotnet;
+  $$ = process.bridge;
 
   function Window(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -35,6 +36,7 @@ module.exports = (function() {
     this.private.menu=null;
     this.private.toolbar=null;
     this.private.fullscreen=false;
+    this.private.closeButton = true;
 
     //We cannot allow transparency unless there is no window style.
     //this.native.AllowsTransparency = true;
@@ -205,53 +207,70 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'maximizeButton', {
-    get:function() { 
-      //return this.native('standardWindowButton',$.NSWindowZoomButton)('isHidden'); 
+    get:function() {
+      var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+      return $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
     },
-    set:function(e) { 
-      //this.native('standardWindowButton',$.NSWindowZoomButton)('setHidden',!e); 
+    set:function(e) {
+      if(e) {
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
+      } else {
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
+      }
     }
   });
 
   Object.defineProperty(Window.prototype, 'minimizeButton', {
-    get:function() { 
-      //return this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('isHidden'); 
+    get:function() {
+      var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+      return $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
     },
-    set:function(e) { 
-      //this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('setHidden',!e); 
+    set:function(e) {
+      if(e) {
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
+      } else {
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
+      }
     }
   });
 
   Object.defineProperty(Window.prototype, 'closeButton', {
-    get:function() { 
-      //return this.native('standardWindowButton',$.NSWindowCloseButton)('isHidden'); 
-    },
-    set:function(e) { 
-      //this.native('standardWindowButton',$.NSWindowCloseButton)('setHidden',!e); 
+    get:function() { return this.private.closeButton; },
+    set:function(e) {
+      this.private.closeButton = e;
+      if(e) {
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer, false);
+        $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
+      } else {
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer, false);
+        $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
+      }
     }
   });
 
   Object.defineProperty(Window.prototype, 'fullscreenButton', {
-    get:function() { 
-      //return this.native('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); 
-    },
-    set:function(e) { 
-      //this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); 
-    }
+    get:function() { return false; },
+    set:function(e) { /* Todo ? */ }
   });
 
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { 
-      //return this.native('styleMask') & $.NSResizableWindowMask; 
+      return this.native.ResizeMode != $.System.Windows.ResizeMode.NoResize && 
+        this.native.ResizeMode != $.System.Windows.ResizeMode.CanMinimize;
     },
     set:function(e) {
-      /*if (e) {
-        this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
-        this.native('setStyleMask',this.native('styleMask') | $.NSResizableWindowMask);
-      } else {
-        this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
-        this.native('setStyleMask',this.native('styleMask') ^ $.NSResizableWindowMask);
-      }*/
+      if(e) this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
+      else this.native.ResizeMode = $.System.Windows.ResizeMode.CanMinimize;
     }
   });
 

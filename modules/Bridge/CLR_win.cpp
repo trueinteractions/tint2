@@ -177,93 +177,63 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
   Handle<v8::Value> jsdata;
 
   if (netdata == nullptr)
-  {
       return scope.Close(Null());
-  }
 
   System::Type^ type = netdata->GetType();
   if (type == System::String::typeid)
-  {
-      jsdata = stringCLR2V8((System::String^)netdata);
-  }
+    jsdata = stringCLR2V8((System::String^)netdata);
   else if (type == System::Char::typeid)
-  {
-      jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
-  }
+    jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
   else if (type == bool::typeid)
-  {
-      jsdata = v8::Boolean::New((bool)netdata);
-  }
+    jsdata = v8::Boolean::New((bool)netdata);
   else if (type == System::Guid::typeid)
-  {
-      jsdata = stringCLR2V8(netdata->ToString());
-  }
+    jsdata = stringCLR2V8(netdata->ToString());
   else if (type == System::DateTime::typeid)
   {
-      System::DateTime ^dt = (System::DateTime^)netdata;
-      if (dt->Kind == System::DateTimeKind::Local)
-          dt = dt->ToUniversalTime();
-      else if (dt->Kind == System::DateTimeKind::Unspecified)
-          dt = gcnew System::DateTime(dt->Ticks, System::DateTimeKind::Utc);
-      long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
-      long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
-      jsdata = v8::Date::New((double)value);
+    System::DateTime ^dt = (System::DateTime^)netdata;
+    if (dt->Kind == System::DateTimeKind::Local)
+        dt = dt->ToUniversalTime();
+    else if (dt->Kind == System::DateTimeKind::Unspecified)
+        dt = gcnew System::DateTime(dt->Ticks, System::DateTimeKind::Utc);
+    long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
+    long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
+    jsdata = v8::Date::New((double)value);
   }
   else if (type == System::DateTimeOffset::typeid)
-  {
-      jsdata = stringCLR2V8(netdata->ToString());
-  }
-  /*else if (type == System::Uri::typeid)
-  {
-      jsdata = stringCLR2V8(netdata->ToString());
-  }*/
+    jsdata = stringCLR2V8(netdata->ToString());
   else if (type == int::typeid)
-  {
-      jsdata = v8::Integer::New((int)netdata);
-  }
+    jsdata = v8::Integer::New((int)netdata);
   else if (type == System::Int64::typeid)
-  {
-      jsdata = v8::Number::New(((System::IConvertible^)netdata)->ToDouble(nullptr));
-  }
+    jsdata = v8::Number::New(((System::IConvertible^)netdata)->ToDouble(nullptr));
   else if (type == double::typeid)
-  {
-      jsdata = v8::Number::New((double)netdata);
-  }
+    jsdata = v8::Number::New((double)netdata);
   else if (type == float::typeid)
-  {
-      jsdata = v8::Number::New((float)netdata);
-  }
- /* else if (type->IsPrimitive || type == System::Decimal::typeid)
-  {
-      System::IConvertible^ convertible = dynamic_cast<System::IConvertible^>(netdata);
-      if (convertible != nullptr)
-      {
-          jsdata = stringCLR2V8(convertible->ToString());
-      }
-      else
-      {
-          jsdata = stringCLR2V8(netdata->ToString());
-      }
-  }
-  else if (type->IsEnum)
-  {
-      jsdata = stringCLR2V8(netdata->ToString());
-  }*/
+    jsdata = v8::Number::New((float)netdata);
   else if (type == cli::array<byte>::typeid)
   {
-      cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
-      node::Buffer* slowBuffer = node::Buffer::New(buffer->Length);
-      if (buffer->Length > 0)
-      {
-          pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
-          memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
-      }
-      Handle<v8::Value> args[] = { 
-          slowBuffer->handle_, 
-          v8::Integer::New(buffer->Length), 
-          v8::Integer::New(0) 
-      };
-      jsdata = bufferConstructor->NewInstance(3, args);    
+    cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
+    node::Buffer* slowBuffer = node::Buffer::New(buffer->Length);
+    if (buffer->Length > 0)
+    {
+        pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
+        memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
+    }
+    Handle<v8::Value> args[] = { 
+        slowBuffer->handle_, 
+        v8::Integer::New(buffer->Length), 
+        v8::Integer::New(0) 
+    };
+    jsdata = bufferConstructor->NewInstance(3, args);    
+  }
+  else if (type == System::IntPtr::typeid) 
+  {
+    void *user_data = NULL;
+    size_t sz = sizeof(void *);
+    void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
+    node::Buffer *buf = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
+    Handle<v8::Object> result = v8::Object::New();
+    result->Set(v8::String::New("pointer"),buf->handle_);
+    jsdata = result;
   }
   else
   {
@@ -285,99 +255,57 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
 System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
 {
     HandleScope scope;
-    /*if (jsdata->IsFunction()) 
-    {
-        NodejsFunc^ functionContext = gcnew NodejsFunc(Handle<v8::Function>::Cast(jsdata));
-        System::Func<System::Object^,Task<System::Object^>^>^ netfunc = 
-            gcnew System::Func<System::Object^,Task<System::Object^>^>(
-                functionContext, &NodejsFunc::FunctionWrapper);
-
-        return netfunc;
-    }*/
-    /*else if (node::Buffer::HasInstance(jsdata))
-    {
-        Handle<v8::Object> jsbuffer = jsdata->ToObject();
-        cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
-        if (netbuffer->Length > 0) 
-        {
-            pin_ptr<byte> pinnedNetbuffer = &netbuffer[0];
-            memcpy(pinnedNetbuffer, node::Buffer::Data(jsbuffer), netbuffer->Length);
-        }
-
-        return netbuffer;
-    }else  */
     if (jsdata->IsArray())
     {
-        Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
-        cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
-        for (unsigned int i = 0; i < jsarray->Length(); i++)
-        {
-            netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
-        }
-
-        return netarray;
+      Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
+      cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
+      for (unsigned int i = 0; i < jsarray->Length(); i++)
+          netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
+      return netarray;
     }
     else if (jsdata->IsDate())
     {
-        Handle<v8::Date> jsdate = Handle<v8::Date>::Cast(jsdata);
-        long long  ticks = (long long)jsdate->NumberValue();
-        long long MinDateTimeTicks = 621355968000000000;// (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
-        System::DateTime ^netobject = gcnew System::DateTime(ticks * 10000 + MinDateTimeTicks, System::DateTimeKind::Utc);
-        return netobject;
+      Handle<v8::Date> jsdate = Handle<v8::Date>::Cast(jsdata);
+      long long  ticks = (long long)jsdate->NumberValue();
+      long long MinDateTimeTicks = 621355968000000000;// (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
+      System::DateTime ^netobject = gcnew System::DateTime(ticks * 10000 + MinDateTimeTicks, System::DateTimeKind::Utc);
+      return netobject;
     }
-    else if (jsdata->IsString()) 
-    {
-        return stringV82CLR(Handle<v8::String>::Cast(jsdata));
-    }
+    else if (jsdata->IsString())
+      return stringV82CLR(Handle<v8::String>::Cast(jsdata));
     else if (jsdata->IsBoolean())
-    {
-        return jsdata->BooleanValue();
-    }
+      return jsdata->BooleanValue();
     else if (jsdata->IsInt32())
-    {
-        return jsdata->Int32Value();
-    }
+      return jsdata->Int32Value();
     else if (jsdata->IsUint32()) 
-    {
-        return jsdata->Uint32Value();
-    }
+      return jsdata->Uint32Value();
     else if (jsdata->IsNumber()) 
-    {
-        return jsdata->NumberValue();
-    } 
+      return jsdata->NumberValue();
     else if (jsdata->IsUndefined() || jsdata->IsNull())
+      return nullptr;
+    else if (node::Buffer::HasInstance(jsdata)) 
     {
-        return nullptr;
-    } 
-    else if (node::Buffer::HasInstance(jsdata)) {
-      try {
-        CppClass *data = (CppClass *)node::Buffer::Data(jsdata.As<v8::Object>());
-        System::Object ^obj = (*(data->obj));
-        return obj;
-      } catch (System::Exception^ e) {
-        //throwV8Exception(MarshalCLRExceptionToV8(e));
-        System::Console::WriteLine(e->ToString());
-        exit(1);
+      CppClass *data = (CppClass *)node::Buffer::Data(jsdata.As<v8::Object>());
+      System::Object ^obj = (*(data->obj));
+      return obj;
+    }
+    else if (jsdata->IsObject()) 
+    {
+      IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
+      Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
+      Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
+      for (unsigned int i = 0; i < propertyNames->Length(); i++)
+      {
+          Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
+          String::Utf8Value utf8name(name);
+          System::String^ netname = gcnew System::String(*utf8name);
+          System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
+          netobject->Add(netname, netvalue);
       }
-    } else if (jsdata->IsObject()) {
-        IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
-        Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
-        Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
-        for (unsigned int i = 0; i < propertyNames->Length(); i++)
-        {
-            Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
-            String::Utf8Value utf8name(name);
-            System::String^ netname = gcnew System::String(*utf8name);
-            System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
-            netobject->Add(netname, netvalue);
-        }
-
-        return netobject;
+      return netobject;
     }
     else
-    {
-        throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
-    }
+      throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
 }
 
 struct wrapv8obj {
@@ -719,7 +647,7 @@ public:
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i+1]),i);
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 1]),i);
 
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);

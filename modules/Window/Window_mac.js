@@ -43,7 +43,7 @@ module.exports = (function() {
       var contentView = this.native('contentView');
       this.nativeView = this.nativeViewClass('alloc')('init');
       this.native('setContentView',this.nativeView);
-      this.native('contentView')('addSubview',contentView);
+      this.native('contentView')('addSubview',contentView);      
     }
 
     this.native('setDelegate',this.nativeView);
@@ -56,6 +56,8 @@ module.exports = (function() {
     this.private.background = "auto";
     this.private.menu = null;
     this.private.toolbar = null;
+    this.private.titleTextColor = "auto";
+    this.private.titleTextField = null;
 
     this.native('makeKeyAndOrderFront', this.native);
     this.native('setReleasedWhenClosed', $.YES);
@@ -64,7 +66,25 @@ module.exports = (function() {
 
     application.windows.push(this);
 
+    setTimeout(function() {
+      var titlebarView = this.native('contentView')('superview')('titlebarViewController')('view');
+      var viewEnum = titlebarView('subviews')('objectEnumerator');
+      while(viewObject = viewEnum('nextObject')) {
+        var className = viewObject('className');
+        if(className == "NSTextField")
+          this.private.titleTextField = viewObject;
+      }
+    }.bind(this),10);
+
+    function updateTitleTextColor() {
+      if(this.private.titleTextColor != null && this.private.titleTextColor != "auto" && this.private.titleTextField != null) {
+        this.titleTextColor = this.private.titleTextColor;
+      }
+    }
+
     this.addEventListener('remove', function(control) { this.native('contentsView')('willRemoveSubview',control.nativeView); });
+    this.addEventListener('focus', updateTitleTextColor.bind(this));
+    this.addEventListener('restore', updateTitleTextColor.bind(this));
   }
   
   Window.prototype = Object.create(Container.prototype);
@@ -282,6 +302,28 @@ module.exports = (function() {
         this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
         this.native('setStyleMask',this.native('styleMask') ^ $.NSResizableWindowMask);
       }
+    }
+  });
+
+  Object.defineProperty(Window.prototype, 'titleTextColor', {
+    get:function() { return this.private.titleTextColor; },
+    set:function(e) {
+      this.private.titleTextColor = e;
+      // most of the time when we update this its initially after a
+      // window creation, our title text field won't be around for
+      // another few ms, update the field with a pause to allow the
+      // window to fully display first.
+      setTimeout(function() {
+        var color = new Color(e);
+        // Simple hueristic to use for letting the window know if we
+        // need blurred emphasis or shadows on titles.
+        var b = this.private.background;
+        if((b.red + b.green + b.blue)/3 > 0.5)
+          this.private.titleTextField('cell')('setBackgroundStyle',1);
+        else
+          this.private.titleTextField('cell')('setBackgroundStyle',0);
+        this.private.titleTextField('cell')('setTextColor',color.native);
+      }.bind(this),20);
     }
   });
 

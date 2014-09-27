@@ -3,8 +3,19 @@ module.exports = (function() {
   var utilities = require('Utilities');
 
   function Color(type, c1, c2, c3, c4, c5) {
+
+    if(type == "cmyk" || type == "cmyka" || type == "hsb" || 
+        type == "hsba" || type == "rgb" || type == "rgba")
+    {
+      if(c1 > 1) c1 = c1 / 255;
+      if(c2 > 1) c2 = c2 / 255;
+      if(c3 > 1) c3 = c3 / 255;
+      if(c4 && c4 > 1) c4 = c4 / 255;
+      if(c5 && c5 > 1) c5 = c5 / 255;
+    }
+
     if(type instanceof Color) this = type;
-    if(type.type == '@') this.native = type;
+    else if(type.type == '@') this.native = type;
     else if(type == "black") this.native = $.NSColor('blackColor');
     else if(type == "black") this.native = $.NSColor('blueColor');
     else if(type == "brown") this.native = $.NSColor('brownColor');
@@ -23,11 +34,15 @@ module.exports = (function() {
     else if(type == "catalog") this.native = $.NSColor('colorWithCatalogName', $(c1), 'colorName', $(c2));
     else if(type == "cmyk" || type == "cmyka") this.native = $.NSColor('colorWithDeviceCyan', c1, 'magenta', c2 ,'yellow', c3, 'black', c4, 'alpha', c5 ? c5 : 1);
     else if(type == "hsb" || type == "hsba") this.native = $.NSColor('colorWithCalibratedHue', c1, 'saturation', c2, 'brightness', c3, 'alpha', c4 ? c4 : 1);
-    else if(type == "rgb" || type == "rgba") this.native = $.NSColor('colorWithCalibratedRed', c1, 'green', c2, 'blue', c3, 'alpha', c4 ? c4 : 1);
+    else if(type == "rgb" || type == "rgba") this.native = $.NSColor('colorWithRed', c1, 'green', c2, 'blue', c3, 'alpha', c4 ? c4 : 1);
     else if(type == "image") this.native = $.NSColor('colorWithPatternImage', c1);
     else {
       var rgba = utilities.parseColor(type);
-      this.native = $.NSColor('colorWithCalibratedRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a);
+      if(rgba.r > 1) rgba.r = rgba.r / 255;
+      if(rgba.g > 1) rgba.g = rgba.g / 255;
+      if(rgba.b > 1) rgba.b = rgba.b / 255;
+      if(rgba.a > 1) rgba.a = rgba.a / 255;
+      this.native = $.NSColor('colorWithRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a);
     }
   }
   Object.defineProperty(Color.prototype, 'colorspace', { get:function() { 
@@ -55,3 +70,6 @@ module.exports = (function() {
 
   return Color;
 })();
+
+//System.Drawing::SystemColors
+//https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSColor_Class/Reference/Reference.html#//apple_ref/occ/clm/NSColor/controlBackgroundColor

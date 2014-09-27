@@ -47,3 +47,4 @@ test.js
 Release/*
 Debug/*
 *.vcxproj.user
+win32ref.js

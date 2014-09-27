@@ -36,11 +36,13 @@
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
-            #'RuntimeLibrary': 1, # static debug
+            'RuntimeLibrary': 3, # static debug
             'Optimization': 0, # /Od, no optimization
             'MinimalRebuild': 'false',
             'OmitFramePointers': 'false',
             #'BasicRuntimeChecks': 3, # /RTC1
+            'RuntimeTypeInfo': 'false',
+            'ExceptionHandling': 0,
           },
           'VCLinkerTool': {
             'LinkIncremental': 2, # enable incremental linking
@@ -85,7 +87,7 @@
         ],
         'msvs_settings%': {
           'VCCLCompilerTool': {
-            #'RuntimeLibrary': 0, # static release 
+            'RuntimeLibrary': 2, # static release 
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
