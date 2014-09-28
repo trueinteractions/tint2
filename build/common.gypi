@@ -27,6 +27,9 @@
     'default_configuration': 'Release',
     'configurations': {
       'Debug': {
+        'variables':{
+          'runtime':3,
+        },
         'defines': [ 'DEBUG', '_DEBUG' ],
         'cflags': [ '-g', '-O0' ],
         'conditions': [
@@ -41,7 +44,7 @@
             'MinimalRebuild': 'false',
             'OmitFramePointers': 'false',
             #'BasicRuntimeChecks': 3, # /RTC1
-            'RuntimeTypeInfo': 'false',
+            'RuntimeTypeInfo': 'true',
             'ExceptionHandling': 0,
           },
           'VCLinkerTool': {
@@ -53,6 +56,9 @@
         },
       },
       'Release': {
+        'variables':{
+          'runtime':3,
+        },
         'conditions': [
           ['target_arch=="x64"', {
             'msvs_configuration_platform': 'x64',

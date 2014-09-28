@@ -95,7 +95,6 @@ SETLOCAL
   python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --dest-cpu=%target_arch% --tag=%TAG% > nul
   if errorlevel 1 goto create-msvs-files-failed
   if not exist build\msvs\tint.sln goto create-msvs-files-failed
-  echo Project files generated.
 ENDLOCAL
 
 :msbuild

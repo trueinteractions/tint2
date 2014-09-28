@@ -79,7 +79,9 @@
         return name; 
       },
       set:function(e) { 
-        name = e; 
+        name = e;
+        $.NSProcessInfo('processInfo')('setProcessName',$(name));
+        setTimeout(function() { $.NSProcessInfo('processInfo')('setProcessName',$(name)); },1000);
       }
     });
 
@@ -128,7 +130,7 @@
     this.paste = function() { $app('sendAction', 'paste:', 'to', null, 'from', $app); }
     this.copy = function() { $app('sendAction', 'copy:', 'to', null, 'from', $app); }
     this.cut = function() { $app('sendAction', 'cut:', 'to', null, 'from', $app); }
-    this.undo = function() { $app('sendAction', 'undo:', 'to', null, 'from', app); }
+    this.undo = function() { $app('sendAction', 'undo:', 'to', null, 'from', $app); }
     this.redo = function() { $app('sendAction', 'redo:', 'to', null, 'from', $app); }
     this.delete = function() { $app('sendAction', 'delete:',' to', null, 'from', $app); }
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); }

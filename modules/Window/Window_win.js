@@ -1,9 +1,9 @@
 module.exports = (function() {
   var Container = require('Container');
   var utilities = require('Utilities');
-  //var Color = require('Color');
-  $ = process.bridge.dotnet;
-  $$ = process.bridge;
+  var Color = require('Color');
+  var $ = process.bridge.dotnet;
+  var $$ = process.bridge;
 
   function Window(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -27,7 +27,7 @@ module.exports = (function() {
     this.native.addEventListener('StateChanged', function() {
       if(this.native.WindowState == $.System.Windows.WindowState.Maximized) this.fireEvent('maximize');
       else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) this.fireEvent('minimize');
-      else this.fireEvent('restore')
+      else this.fireEvent('restore');
     }.bind(this));
 
     this.private.previousStyle='';
@@ -45,12 +45,23 @@ module.exports = (function() {
     this.native.ShowActivated = true;
     this.native.Width = options.width;
     this.native.Height = options.height;
+    
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
+
+    var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+    var margin = new $$.win32.structs.MARGIN;
+    margin.cxLeftWidth = -1;
+    margin.cxRightWidth = -1;
+    margin.cyTopHeight = -1;
+    margin.cyBottomHeight = -1;
+    $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer,margin);
+
     this.native.Show();
 
     application.windows.push(this);
   }
-  
+  //http://blogs.msdn.com/b/wpfsdk/archive/2010/08/25/experiments-with-windowchrome.aspx
+
   Window.prototype = Object.create(Container.prototype);
   Window.prototype.constructor = Window;
 
@@ -278,29 +289,24 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'titleTextColor', {
     get:function() { return this.private.titleTextColor; },
     set:function(e) {
-
+      this.private.titleTextColor = e;
     }
   });
 
   Object.defineProperty(Window.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
     set:function(e) {
-      /*if(e == 'auto') {
+      if(e == 'auto') {
         this.private.background = 'auto';
-        this.native('setOpaque', $.YES);
-        this.native('setBackgroundColor', $.NSColor('controlBackgroundColor'));
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
+        this.native.Content.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
       } else {
-        this.private.background = new Color(e);
-        if(this.private.background.alpha > 0) {
-           this.native('setOpaque', $.YES);
-           this.native('setHasShadow', $.YES);
-        } else {
-           this.native('setOpaque', $.NO);
-           this.native('setHasShadow', $.NO);
-        }
-        this.native('setBackgroundColor', this.private.background.native);
-        this.native('setAlphaValue', this.private.background.alpha);
-      }*/
+        this.private.background = e;
+        this.private.backgroundObj = new Color(e);
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
+        this.native.Content.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
+        this.native.Content.BorderBrush = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
+      }
     }
   });
 

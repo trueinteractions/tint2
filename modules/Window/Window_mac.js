@@ -136,7 +136,7 @@ module.exports = (function() {
     get:function() { return this.private.menu; },
     set:function(e) {
       this.private.menu = e;
-      global.application.native('setMainMenu', this.private.menu.native);
+      global.application.native('setMainMenu',this.private.menu.native);
     }
   });
 
@@ -328,7 +328,7 @@ module.exports = (function() {
         var color = new Color(e);
         // Simple hueristic to use for letting the window know if we
         // need blurred emphasis or shadows on titles.
-        var b = this.private.background;
+        var b = this.private.backgroundObj;
         if((b.red + b.green + b.blue)/3 > 0.5)
           this.private.titleTextField('cell')('setBackgroundStyle',1);
         else
@@ -346,16 +346,16 @@ module.exports = (function() {
         this.native('setOpaque', $.YES);
         this.native('setBackgroundColor', $.NSColor('controlBackgroundColor'));
       } else {
-        this.private.background = new Color(e);
-        if(this.private.background.alpha > 0) {
+        this.private.backgroundObj = new Color(e);
+        if(this.private.backgroundObj.alpha > 0) {
            this.native('setOpaque', $.YES);
            this.native('setHasShadow', $.YES);
         } else {
            this.native('setOpaque', $.NO);
            this.native('setHasShadow', $.NO);
         }
-        this.native('setBackgroundColor', this.private.background.native);
-        this.native('setAlphaValue', this.private.background.alpha);
+        this.native('setBackgroundColor', this.private.backgroundObj.native);
+        this.native('setAlphaValue', this.private.backgroundObj.alpha);
       }
     }
   });

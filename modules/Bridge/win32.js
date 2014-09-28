@@ -10,6 +10,7 @@ module.exports = win32;
 
 win32.NULL = ref.NULL;
 win32.isNull = ref.isNull;
+win32.structs = {};
  
 var types = win32.types = {};
 
@@ -50,7 +51,7 @@ function TYPEDEF(name, type){
   //return type.typedef(name);
 }
 function STRUCT(name, fields){
-  return lookup.structs[name] = new Struct(name, fields);
+  return win32.structs[name] = Struct(fields);
 }
  
 function ENUM(name, values){
@@ -339,7 +340,13 @@ var
  HKL = TYPEDEF('HKL', HANDLE),
  HWINEVENTHOOK = TYPEDEF('HWINEVENTHOOK', HANDLE),
  HMONITOR = TYPEDEF('HMONITOR', HANDLE),
- HUMPD = TYPEDEF('HUMPD', HANDLE);
+ HUMPD = TYPEDEF('HUMPD', HANDLE),
+ MARGIN = STRUCT('MARGIN', {
+  cxLeftWidth:int,
+  cxRightWidth:int,
+  cyTopHeight:int,
+  cyBottomHeight:int,
+});
 
 win32.user32 = new ffi.Library('user32.dll', {
   GetWindowLongA: [ LONG, [ HWND, int ] ],
@@ -349,6 +356,11 @@ win32.user32 = new ffi.Library('user32.dll', {
   GetSystemMenu: [ HMENU, [HWND, BOOL ] ],
   EnableMenuItem: [ BOOL, [ HMENU, UINT, UINT ] ]
 });
+
+win32.dwmapi = new ffi.Library('dwmapi.dll', {
+  DwmExtendFrameIntoClientArea: [ HRESULT, [ HWND, MARGIN ] ]
+});
+win32.dwmapi.MARGIN = MARGIN;
 win32.user32.GetWindowLong = win32.user32.GetWindowLongW;
 win32.user32.SetWindowLong = win32.user32.SetWindowLongW;
 win32.user32.WM_SYSCOMMAND = 0x0112;

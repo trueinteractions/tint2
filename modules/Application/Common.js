@@ -22,6 +22,7 @@ global.FontPanel = require('FontPanel');
 global.ImageWell = require('ImageWell');
 global.Menu = require('Menu');
 global.MenuItem = require('MenuItem');
+global.MenuItemSeparator = require('MenuItemSeparator');
 global.Notification = require('Notification');
 global.Panel = require('Panel');
 global.PopOver = require('PopOver');

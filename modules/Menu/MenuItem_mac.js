@@ -31,7 +31,6 @@ module.exports = (function() {
   	this.native = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
     this.native('setTarget',menuDelegate);
     this.native('setAction','click:');
-
     if(titlestring) this.title = titlestring;
     if(keystring) this.key = keystring;
     if(keymodifiers) this.modifiers = keymodifiers;

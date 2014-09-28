@@ -1,10 +1,11 @@
 module.exports = (function() {
-  $ = process.bridge.objc;
+  var $ = process.bridge.objc;
   var utilities = require('Utilities');
 
   function Color(type, c1, c2, c3, c4, c5) {
 
     if(type == "cmyk" || type == "cmyka" || type == "hsb" || 
+        type == "hsv" || type == "hsva" ||
         type == "hsba" || type == "rgb" || type == "rgba")
     {
       if(c1 > 1) c1 = c1 / 255;
@@ -13,13 +14,14 @@ module.exports = (function() {
       if(c4 && c4 > 1) c4 = c4 / 255;
       if(c5 && c5 > 1) c5 = c5 / 255;
     }
-
+    //TODO: Maybe just move this over to our parser?
     if(type instanceof Color) this = type;
     else if(type.type == '@') this.native = type;
     else if(type == "black") this.native = $.NSColor('blackColor');
-    else if(type == "black") this.native = $.NSColor('blueColor');
+    else if(type == "blue") this.native = $.NSColor('blueColor');
     else if(type == "brown") this.native = $.NSColor('brownColor');
     else if(type == "clear") this.native = $.NSColor('clearColor');
+    else if(type == "transparent") this.native = $.NSColor('clearColor');
     else if(type == "cyan") this.native = $.NSColor('cyanColor');
     else if(type == "darkgray") this.native = $.NSColor('darkGrayColor');
     else if(type == "gray") this.native = $.NSColor('grayColor');
@@ -31,11 +33,10 @@ module.exports = (function() {
     else if(type == "red") this.native = $.NSColor('redColor');
     else if(type == "white") this.native = $.NSColor('whiteColor');
     else if(type == "yellow") this.native = $.NSColor('yellowColor');
-    else if(type == "catalog") this.native = $.NSColor('colorWithCatalogName', $(c1), 'colorName', $(c2));
     else if(type == "cmyk" || type == "cmyka") this.native = $.NSColor('colorWithDeviceCyan', c1, 'magenta', c2 ,'yellow', c3, 'black', c4, 'alpha', c5 ? c5 : 1);
-    else if(type == "hsb" || type == "hsba") this.native = $.NSColor('colorWithCalibratedHue', c1, 'saturation', c2, 'brightness', c3, 'alpha', c4 ? c4 : 1);
+    else if(type == "hsb" || type == "hsba" || type == "hsv" || type == "hsva") this.native = $.NSColor('colorWithCalibratedHue', c1, 'saturation', c2, 'brightness', c3, 'alpha', c4 ? c4 : 1);
     else if(type == "rgb" || type == "rgba") this.native = $.NSColor('colorWithRed', c1, 'green', c2, 'blue', c3, 'alpha', c4 ? c4 : 1);
-    else if(type == "image") this.native = $.NSColor('colorWithPatternImage', c1);
+    //else if(type == "image") this.native = $.NSColor('colorWithPatternImage', c1);
     else {
       var rgba = utilities.parseColor(type);
       if(rgba.r > 1) rgba.r = rgba.r / 255;
@@ -46,19 +47,14 @@ module.exports = (function() {
     }
   }
   Object.defineProperty(Color.prototype, 'colorspace', { get:function() { 
-    var name = this.native('colorSpaceName').toString();
-    if(name.indexOf('RGB') > -1) return "rgb";
-    else if (name.indexOf('CMYK') > -1) return "cmyk";
-    else if (name.indexOf('Pattern') > -1) return "image";
-    else if (name.indexOf('Named') > -1) return "named";
-    else return "custom";
-  } });
-  Object.defineProperty(Color.prototype, 'components', { get:function() { return this.native('numberOfComponents'); }});
+    return "rgb";
+  }});
+  Object.defineProperty(Color.prototype, 'components', { get:function() { return 4; }});
   Object.defineProperty(Color.prototype, 'cyan', { get:function() { return this.native('cyanComponent'); }});
   Object.defineProperty(Color.prototype, 'magenta', { get:function() { return this.native('magentaComponent'); }});
   Object.defineProperty(Color.prototype, 'yellow', { get:function() { return this.native('yellowComponent'); }});
   Object.defineProperty(Color.prototype, 'black', { get:function() { return this.native('blackComponent'); }});
-  Object.defineProperty(Color.prototype, 'white', { get:function() { return this.native('whiteComponent'); }});
+  //Object.defineProperty(Color.prototype, 'white', { get:function() { return this.native('whiteComponent'); }});
   Object.defineProperty(Color.prototype, 'red', { get:function() { return this.native('redComponent'); }});
   Object.defineProperty(Color.prototype, 'blue', { get:function() { return this.native('blueComponent'); }});
   Object.defineProperty(Color.prototype, 'green', { get:function() { return this.native('greenComponent'); }});
@@ -66,7 +62,7 @@ module.exports = (function() {
   Object.defineProperty(Color.prototype, 'hue', { get:function() { return this.native('hueComponent'); }});
   Object.defineProperty(Color.prototype, 'saturation', { get:function() { return this.native('saturationComponent'); }});
   Object.defineProperty(Color.prototype, 'brightness', { get:function() { return this.native('brightnessComponent'); }});
-  Object.defineProperty(Color.prototype, 'image', {get:function() { return this.native('patternImage'); }});
+  //Object.defineProperty(Color.prototype, 'image', {get:function() { return this.native('patternImage'); }});
 
   return Color;
 })();

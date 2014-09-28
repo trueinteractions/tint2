@@ -68,6 +68,7 @@
     'win_library_files':[
       'modules/Bridge/win32.js',
       'modules/Bridge/Bridge_win.js',
+      'modules/Color/Color_win.js',
       'modules/Container_win.js',
       'modules/Control_win.js',
       'modules/Application/Application_win.js',
@@ -380,7 +381,6 @@
         'VCLinkerTool': {
           'SubSystem': 1, # /subsystem:console
           'AdditionalOptions': [
-            '/LTCG', # msbuild said i should add it to save time..
             '/IGNORE:4098',
             '/CLRTHREADATTRIBUTE:STA'
           ]
@@ -392,7 +392,7 @@
             'AdditionalOptions':['/wd4355']
           },
           'VCLinkerTool': {
-            'RuntimeLibrary':2,
+            'RuntimeLibrary':'>(runtime)',
             'AdditionalOptions':['/IGNORE:4221']
           }
         }

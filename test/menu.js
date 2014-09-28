@@ -1,32 +1,24 @@
-module.exports = (function() {
-  function Menu(title) {
-    var $ = process.bridge.objc;
-    if(typeof(title) == 'undefined') title = "";
 
-    var $menu = $.NSMenu('alloc')('initWithTitle',$(title));
-    var children = [];
+/**
+ * @unit-test-setup
+ * @ignore
+ */
+function setup() {
+  require('Common');
+}
 
-    this.appendChild = function(menuitem) {
-      children.push(menuitem);
-      $menu('addItem',menuitem.native);
-      return menuitem;
-    }
-    this.insertChildAt = function(menuitem, index) {
-      //children.push(menuitem);
-      //$menu('addItem',menuitem.native);
-    }
-    this.removeChild = function(menuitem) {
-      if(children.indexOf(menuitem) != -1) children.splice(children.indexOf(menuitem),1);
-        $menu('removeItem',menuitem.native);
-    }
-    Object.defineProperty(this, 'native', {
-        get:function() { return $menu; }
-      });
-  }
-  Menu.getMacOSXDefaultMenu = function(name) {
-    var MenuItem = require('MenuItem');
-    var MenuItemSeparator = require('MenuItemSeparator');
+function baseline() {
+}
 
+/**
+ * @see {Menu}
+ * @see {MenuItem}
+ * @see {MenuItemSeparator}
+ * @example
+ */
+function run($utils) {
+  application.name = "My Program";
+  var win = new Window();
 
   var mainMenu = new Menu();
   var appleMenu = new MenuItem(application.name, '');
@@ -41,7 +33,8 @@ module.exports = (function() {
   mainMenu.appendChild(helpMenu);
 
   var appleSubmenu = new Menu(application.name);
-  appleSubmenu.appendChild(new MenuItem('About '+application.name, ''));
+  appleSubmenu.appendChild(new MenuItem('About '+application.name, ''))
+      .addEventListener('click', function() { console.log('Do something for about!'); });
   appleSubmenu.appendChild(new MenuItemSeparator());
   appleSubmenu.appendChild(new MenuItem('Hide '+application.name, 'h'))
       .addEventListener('click', function() { application.visible = false; });
@@ -51,7 +44,10 @@ module.exports = (function() {
       .addEventListener('click', function() { application.unhideAllOtherApplications(); });
   appleSubmenu.appendChild(new MenuItemSeparator());
   appleSubmenu.appendChild(new MenuItem('Quit '+application.name, 'q'))
-      .addEventListener('click', function() { process.exit(0); });
+      .addEventListener('click', function() { 
+        /* @hidden */ $utils.ok();
+        process.exit(0); 
+      });
   appleMenu.submenu = appleSubmenu;
 
   var fileSubmenu = new Menu('File');
@@ -90,13 +86,32 @@ module.exports = (function() {
   windowMenu.submenu = windowSubmenu;
   
   var helpSubmenu = new Menu('Help');
-  helpSubmenu.appendChild(new MenuItem('Website', ''));
-  helpSubmenu.appendChild(new MenuItem('Online Documentation', ''));
-  helpSubmenu.appendChild(new MenuItem('License', ''));
+  helpSubmenu.appendChild(new MenuItem('Website', ''))
+    .addEventListener('click', function() { console.log('Do something for website?!'); });
+  helpSubmenu.appendChild(new MenuItem('Online Documentation', ''))
+    .addEventListener('click', function() { console.log('Do something for docs?!'); });
+  helpSubmenu.appendChild(new MenuItem('License', ''))
+    .addEventListener('click', function() { console.log('Do something for license?!'); });
   helpMenu.submenu = helpSubmenu;
 
+  win.menu = mainMenu;
+  
+  /* @hidden */ setTimeout(function() { $utils.clickAt(65,15); },1000); 
+  /* @hidden */ setTimeout(function() { $utils.clickAt(65,135); },2000); 
 
-    return mainMenu;
-  }
-  return Menu;
-})();
+}
+
+/**
+ * @unit-test-shutdown
+ * @ignore
+ */
+function shutdown() {
+}
+
+module.exports = {
+  setup:setup, 
+  run:run, 
+  shutdown:shutdown, 
+  shell:false,
+  name:"Menu",
+};
