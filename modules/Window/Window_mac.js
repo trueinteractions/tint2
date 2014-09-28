@@ -67,7 +67,17 @@ module.exports = (function() {
     application.windows.push(this);
 
     setTimeout(function() {
-      var titlebarView = this.native('contentView')('superview')('titlebarViewController')('view');
+      var theme = this.native('contentView')('superview');
+      var titlebarView = null;
+      if(theme('respondsToSelector','titlebarViewController'))
+        titlebarView = theme('titlebarViewController')('view');
+      else if (theme('respondsToSelector','titlebarView'))
+        titlebarView = theme('titlebarView');
+      else if (theme('respondsToSelector','_titleTextFieldView'))
+        titlebarView = theme('_titleTextFieldView');
+
+      if(titlebarView == null) return;
+
       var viewEnum = titlebarView('subviews')('objectEnumerator');
       while(viewObject = viewEnum('nextObject')) {
         var className = viewObject('className');
@@ -314,6 +324,7 @@ module.exports = (function() {
       // another few ms, update the field with a pause to allow the
       // window to fully display first.
       setTimeout(function() {
+        if(this.private.titleTextField == null) return;
         var color = new Color(e);
         // Simple hueristic to use for letting the window know if we
         // need blurred emphasis or shadows on titles.
