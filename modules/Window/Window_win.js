@@ -37,6 +37,7 @@ module.exports = (function() {
     this.private.toolbar=null;
     this.private.fullscreen=false;
     this.private.closeButton = true;
+    this.private.titleTextColor = "auto";
 
     //We cannot allow transparency unless there is no window style.
     //this.native.AllowsTransparency = true;
@@ -274,10 +275,15 @@ module.exports = (function() {
     }
   });
 
+  Object.defineProperty(Window.prototype, 'titleTextColor', {
+    get:function() { return this.private.titleTextColor; },
+    set:function(e) {
+
+    }
+  });
+
   Object.defineProperty(Window.prototype, 'backgroundColor', {
-    get:function() { 
-      //return this.private.background; 
-    },
+    get:function() { return this.private.background; },
     set:function(e) {
       /*if(e == 'auto') {
         this.private.background = 'auto';

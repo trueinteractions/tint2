@@ -16,6 +16,7 @@ function baseline() {
 function run($utils) {
   var mainWindow = new Window(), alpha = 1;
   var webview = new WebView();
+  mainWindow.titleTextColor = "blue";
   mainWindow.appendChild(webview);
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
