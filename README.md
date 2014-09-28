@@ -26,6 +26,11 @@ With Tint you have options, you can use the SDK to create native applications or
 
 If you don't want to learn (or deal with) native OS languages, you're in luck, there's a wide variety of cross-compatible widgets for javascript to choose from.
 
+<h2>Help & Questions</h2>
+Community, development and other questions can be discussed at https://groups.google.com/forum/#!categories/trueinteractions/all-questions
+
+In addition we offer commercial support at https://www.trueinteractions.com
+
 <h2>Status</h2>
 
            | OSX        | Windows    | Linux      | iOS        | Android    
