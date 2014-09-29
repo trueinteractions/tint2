@@ -354,9 +354,9 @@ win32.user32 = new ffi.Library('user32.dll', {
   SetWindowLongA: [ LONG, [ HWND, int, LONG ] ],
   SetWindowLongW: [ LONG, [ HWND, int, LONG ] ],
   GetSystemMenu: [ HMENU, [HWND, BOOL ] ],
-  EnableMenuItem: [ BOOL, [ HMENU, UINT, UINT ] ],
+  EnableMenuItem: [ BOOL, [ HMENU, UINT, UINT ] ] /*,
   SetClassLongPtr: [ ULONG_PTR, [ HWND, int, LONG_PTR ] ],
-  GetClassLongPtr: [ ULONG_PTR, [ HWND, int ] ]
+  GetClassLongPtr: [ ULONG_PTR, [ HWND, int ] ]*/
 });
 
 win32.dwmapi = new ffi.Library('dwmapi.dll', {
@@ -389,7 +389,7 @@ win32.user32.SC_KEYMENU = 0xF100;
 win32.user32.SC_MAXIMIZE = 0xF030;
 win32.user32.SC_MINIMIZE = 0xF020;
 
-win32.user32.GCLP_ HBRBACKGROUND = -10;
+win32.user32.GCLP_HBRBACKGROUND = -10;
 
 
 

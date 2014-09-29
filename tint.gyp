@@ -324,6 +324,10 @@
           'dependencies': [
             'tint_clr'
           ],
+          'libraries': [
+            'tools/Microsoft/Microsoft.Windows.Shell.lib',
+            'tools/Microsoft/RibbonControlsLibrary.lib',
+          ],
           'sources': [
             'modules/Runtime/Main_win.cc',
             'tools/tint.rc',

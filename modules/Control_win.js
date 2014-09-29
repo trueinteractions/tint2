@@ -93,8 +93,13 @@ module.exports = (function() {
 
     this.nativeClassView = NativeViewClass;
     this.nativeClass = NativeObjectClass;
-    this.native = new NativeObjectClass();
+    
     this.nativeView = new NativeViewClass();
+    if(options.initViewOnly)
+      this.native = this.nativeView;
+    else
+      this.native = new NativeObjectClass();
+
 
     if(!options.nonStandardEvents) {
       this.native.addEventListener('MouseRightButtonUp', function() { this.fireEvent('rightmouseup'); }.bind(this));

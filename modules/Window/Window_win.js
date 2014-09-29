@@ -16,7 +16,10 @@ module.exports = (function() {
       Container.call(this, $.System.Windows.Window, $.System.Windows.Controls.Canvas, options);
 
     // Attach System.Windows.Window.Content = System.Windows.Controls.Canvas
-    this.native.Content = this.nativeView; 
+    this.native.Content = new $.System.Windows.Controls.Border();
+    this.native.Content.CornerRadius = $.System.Windows.SystemParameters.WindowCornerRadius;
+    this.native.Content.Child = this.nativeView;
+    //this.nativeView; 
 
     //TODO: Add enter-fullscreen/exit-fullscreen
     this.native.addEventListener('Closing', function() { this.fireEvent('close'); }.bind(this));
@@ -38,6 +41,12 @@ module.exports = (function() {
     this.private.fullscreen=false;
     this.private.closeButton = true;
     this.private.titleTextColor = "auto";
+    this.private.chrome = new $.System.Windows.Shell.WindowChrome;
+
+    //$.System.Windows.Shell.WindowChrome.GetWindowChrome(this.native);
+    //this.private.chrome.CaptionHeight = 0;
+    this.private.chrome.IsHitTestVisibleInChrome = true;
+    $.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);
 
     //We cannot allow transparency unless there is no window style.
     this.native.ShowInTaskbar = true;
@@ -279,6 +288,7 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'titleTextColor', {
     get:function() { return this.private.titleTextColor; },
     set:function(e) {
+      //TODO: make this work.
       this.private.titleTextColor = e;
     }
   });
@@ -289,8 +299,9 @@ module.exports = (function() {
       if(e == 'auto') {
         this.private.background = 'auto';
         this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
-        this.native.Content.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
+        this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
       } else {
+        //TODO: Fix it to extend into non-client area.
         this.private.background = e;
         this.private.backgroundObj = new Color(e);
 
@@ -306,8 +317,7 @@ module.exports = (function() {
         $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
 
         this.native.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
-        this.native.Content.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
-        this.native.Content.BorderBrush = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
+        this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
       }
     }
   });
