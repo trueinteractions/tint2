@@ -40,22 +40,12 @@ module.exports = (function() {
     this.private.titleTextColor = "auto";
 
     //We cannot allow transparency unless there is no window style.
-    //this.native.AllowsTransparency = true;
     this.native.ShowInTaskbar = true;
     this.native.ShowActivated = true;
     this.native.Width = options.width;
     this.native.Height = options.height;
-    
+
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
-
-    var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-    var margin = new $$.win32.structs.MARGIN;
-    margin.cxLeftWidth = -1;
-    margin.cxRightWidth = -1;
-    margin.cyTopHeight = -1;
-    margin.cyBottomHeight = -1;
-    $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer,margin);
-
     this.native.Show();
 
     application.windows.push(this);
@@ -221,17 +211,17 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'maximizeButton', {
     get:function() {
       var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-      return $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
+      return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
     },
     set:function(e) {
       if(e) {
         var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
-        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
       } else {
         var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
-        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
       }
     }
   });
@@ -239,17 +229,17 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'minimizeButton', {
     get:function() {
       var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-      return $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
+      return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
     },
     set:function(e) {
       if(e) {
         var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
-        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
       } else {
         var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE);
-        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
+        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
       }
     }
   });
@@ -260,11 +250,11 @@ module.exports = (function() {
       this.private.closeButton = e;
       if(e) {
         var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer, false);
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
         var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer, false);
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
@@ -303,6 +293,18 @@ module.exports = (function() {
       } else {
         this.private.background = e;
         this.private.backgroundObj = new Color(e);
+
+        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
+        mainWindowSrc.CompositionTarget.BackgroundColor = this.private.backgroundObj.native;
+
+        var margin = new $$.win32.structs.MARGINS;
+        margin.cxLeftWidth = -1;
+        margin.cxRightWidth = -1;
+        margin.cyTopHeight = -1;
+        margin.cyBottomHeight = -1;
+        $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
+
         this.native.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
         this.native.Content.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
         this.native.Content.BorderBrush = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);

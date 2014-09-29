@@ -225,16 +225,6 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
     };
     jsdata = bufferConstructor->NewInstance(3, args);    
   }
-  else if (type == System::IntPtr::typeid) 
-  {
-    void *user_data = NULL;
-    size_t sz = sizeof(void *);
-    void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
-    node::Buffer *buf = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
-    Handle<v8::Object> result = v8::Object::New();
-    result->Set(v8::String::New("pointer"),buf->handle_);
-    jsdata = result;
-  }
   else
   {
     try {
@@ -245,6 +235,12 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       size_t sz = sizeof(CppClass *);
       node::Buffer *buf = node::Buffer::New((char *)n, sz, wrap_pointer_cb2, user_data);
       jsdata = buf->handle_;
+
+      if(type == System::IntPtr::typeid) {
+        void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
+        node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
+        (v8::Handle<v8::Object>::Cast(jsdata))->Set(String::NewSymbol("rawpointer"), bufptr->handle_);
+      }
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
