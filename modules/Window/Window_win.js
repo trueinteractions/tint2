@@ -77,6 +77,16 @@ module.exports = (function() {
     }
   });
 
+  Object.defineProperty(Window.prototype, 'textured', {
+    get:function() { },
+    set:function(e) { }
+  });
+
+  Object.defineProperty(Window.prototype, 'shadow', {
+    get:function() { },
+    set:function(e) { }
+  });
+
   Object.defineProperty(Window.prototype, 'menu', {
     get:function() { 
       //  return this.private.menu; 
