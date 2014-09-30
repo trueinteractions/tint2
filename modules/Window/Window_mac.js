@@ -58,6 +58,7 @@ module.exports = (function() {
     this.private.toolbar = null;
     this.private.titleTextColor = "auto";
     this.private.titleTextField = null;
+    this.private.defaultStyleMask = options.styleMask;
 
     this.native('makeKeyAndOrderFront', this.native);
     this.native('setReleasedWhenClosed', $.YES);
@@ -126,10 +127,28 @@ module.exports = (function() {
       var os = require('os');
       var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
       if(version > 13) {
-        if(e) this.native('setStyleMask', defaultStyleMask);
+        if(e) this.native('setStyleMask', this.private.defaultStyleMask);
         else this.native('setStyleMask', 0);
       }
     }
+  });
+
+  Object.defineProperty(Window.prototype, 'textured', {
+    get:function() { return this.native('styleMask') & $.NSTexturedBackgroundWindowMask; },
+    set:function(e) { 
+      if(e) this.native('setStyleMask', this.native('styleMask') | $.NSTexturedBackgroundWindowMask);
+      else this.native('setStyleMask', this.native('styleMask') & ~$.NSTexturedBackgroundWindowMask);
+      setTimeout(function() {
+        this.native('setViewsNeedDisplay', $.YES);
+        this.native('contentView')('setNeedsDisplay', $.YES);
+        this.native('flushWindow');
+      }.bind(this),10);
+    }
+  });
+
+  Object.defineProperty(Window.prototype, 'shadow', {
+    get:function() { return this.native('hasShadow') == $.YES ? true : false; },
+    set:function(e) { this.native('setHasShadow', e ? $.YES : $.NO); }
   });
 
   Object.defineProperty(Window.prototype, 'menu', {
