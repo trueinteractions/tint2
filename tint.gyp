@@ -68,6 +68,7 @@
     'win_library_files':[
       'modules/Bridge/win32.js',
       'modules/Bridge/Bridge_win.js',
+      'modules/Button/Button_win.js',
       'modules/Color/Color_win.js',
       'modules/Container_win.js',
       'modules/Control_win.js',

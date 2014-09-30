@@ -19,7 +19,6 @@ module.exports = (function() {
     this.native.Content = new $.System.Windows.Controls.Border();
     this.native.Content.CornerRadius = $.System.Windows.SystemParameters.WindowCornerRadius;
     this.native.Content.Child = this.nativeView;
-    //this.nativeView; 
 
     //TODO: Add enter-fullscreen/exit-fullscreen
     this.native.addEventListener('Closing', function() { this.fireEvent('close'); }.bind(this));
@@ -41,12 +40,11 @@ module.exports = (function() {
     this.private.fullscreen=false;
     this.private.closeButton = true;
     this.private.titleTextColor = "auto";
-    this.private.chrome = new $.System.Windows.Shell.WindowChrome;
+    /*this.private.chrome = new $.System.Windows.Shell.WindowChrome;
 
-    //$.System.Windows.Shell.WindowChrome.GetWindowChrome(this.native);
-    //this.private.chrome.CaptionHeight = 0;
-    this.private.chrome.IsHitTestVisibleInChrome = true;
-    $.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);
+    this.private.chrome.CaptionHeight = $.System.Windows.SystemParameters.CaptionHeight;
+    this.private.chrome.IsHitTestVisibleInChrome = false;
+    $.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);*/
 
     //We cannot allow transparency unless there is no window style.
     this.native.ShowInTaskbar = true;
@@ -56,10 +54,10 @@ module.exports = (function() {
 
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
     this.native.Show();
+    this.backgroundColor = "rgba(0,0,0,0)";
 
     application.windows.push(this);
   }
-  //http://blogs.msdn.com/b/wpfsdk/archive/2010/08/25/experiments-with-windowchrome.aspx
 
   Window.prototype = Object.create(Container.prototype);
   Window.prototype.constructor = Window;
@@ -79,10 +77,10 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'menu', {
     get:function() { 
-      //  return this.private.menu; 
+      return this.private.menu; 
     },
     set:function(e) {
-      //this.private.menu = e;
+      this.private.menu = e;
       //global.application.native('setMainMenu', this.private.menu.native);
     }
   });
