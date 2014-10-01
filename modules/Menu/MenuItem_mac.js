@@ -9,7 +9,6 @@ module.exports = (function() {
     TintMenuItemDelegate.addMethod('initWithJavascriptObject:', ['@',[TintMenuItemDelegate,$.selector,'@']], 
       utilities.errorwrap(function(self, cmd, id) {
         self.callback = process.bridge.objc.delegates[id.toString()];
-        process.bridge.objc.delegates[id.toString()] = null;
         return self;
     }));
     TintMenuItemDelegate.addMethod('click:','v@:@', 
