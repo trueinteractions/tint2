@@ -48,3 +48,4 @@ Release/*
 Debug/*
 *.vcxproj.user
 win32ref.js
+bench.js

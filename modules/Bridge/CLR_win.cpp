@@ -227,7 +227,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
   }
   else
   {
-    try {
+    //try {
       System::Type^ type = netdata->GetType();
       CppClass *n = new CppClass();
       *(n->obj) = netdata;
@@ -241,9 +241,9 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
         node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
         (v8::Handle<v8::Object>::Cast(jsdata))->Set(String::NewSymbol("rawpointer"), bufptr->handle_);
       }
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
   return scope.Close(jsdata);
 }
@@ -570,7 +570,7 @@ public:
 
   static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
     HandleScope scope;
-    try {
+    //try {
       System::String^ userpath = stringV82CLR(args[0]->ToString());
 
       System::String^ framworkRegPath = "Software\\Microsoft\\.NetFramework";
@@ -593,50 +593,42 @@ public:
 
       return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
 
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
 
   static Handle<v8::Value> GetCLRType(const v8::Arguments& args) {
     HandleScope scope;
-    try {
+    //try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       return scope.Close(MarshalCLRToV8(target->GetType()));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
 
   static Handle<v8::Value> GetStaticMemberTypes(const v8::Arguments& args) {
     HandleScope scope;
-    try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | 
-        BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::Type^ type = (System::Type^)(target);
+    System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | 
+      BindingFlags::FlattenHierarchy);
+    return scope.Close(MarshalCLRToV8(rtn));
   }
 
   static Handle<v8::Value> GetMemberTypes(const v8::Arguments& args) {
     HandleScope scope;
-    try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | 
-        BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::Type^ type = (System::Type^)(target);
+    System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | 
+      BindingFlags::FlattenHierarchy);
+    return scope.Close(MarshalCLRToV8(rtn));
   }
 
   static Handle<v8::Value> ExecNew(const v8::Arguments& args) {
     HandleScope scope;
-    try {
+    //try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
 
       int argSize = args.Length() - 1;
@@ -648,14 +640,14 @@ public:
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
       return scope.Close(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
 
   static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {
     HandleScope scope;
-    try {
+    //try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[3]);
       System::String^ field = stringV82CLR(args[2]->ToString());
@@ -666,14 +658,14 @@ public:
 
       baseType->GetField(field)->SetValue(target, value);
       return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
 
   static Handle<v8::Value> ExecGetField(const v8::Arguments& args) {
     HandleScope scope;
-    try {
+    //try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
       
@@ -683,14 +675,14 @@ public:
 
       System::Object^ rtn = baseType->GetField(field)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
 
   static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
     HandleScope scope;
-    try {
+    //try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ event = stringV82CLR(args[1]->ToString());
       v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
@@ -703,54 +695,133 @@ public:
       eInfo->AddEventHandler(target, d);
 
       return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //} catch (System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
+  }
+
+
+
+
+ static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
+    HandleScope scope;
+    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+    System::String^ method = stringV82CLR(args[1]->ToString());
+    int argSize = args.Length() - 2;
+    array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
+
+    for(int i=0; i < argSize; i++)
+      cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
+
+    MethodInfo^ rtn = target->GetMethod(method, 
+      BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy,
+      nullptr,
+      cshargs,
+      nullptr);
+    return scope.Close(MarshalCLRToV8(rtn));
+  }
+
+  static Handle<v8::Value> ExecGetMethodObject(const v8::Arguments& args) {
+    HandleScope scope;
+    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+    System::String^ method = stringV82CLR(args[1]->ToString());
+
+    int argSize = args.Length() - 2;
+    array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
+
+    for(int i=0; i < argSize; i++)
+      cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
+
+    MethodInfo^ rtn = target->GetMethod(method, 
+      BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy,
+      nullptr,
+      cshargs,
+      nullptr);
+    return scope.Close(MarshalCLRToV8(rtn));
+  }
+
+  static Handle<v8::Value> ExecGetStaticPropertyObject(const v8::Arguments& args) {
+    HandleScope scope;
+    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+    System::String^ property = stringV82CLR(args[1]->ToString());
+    PropertyInfo^ rtn = target->GetProperty(property,  
+      BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy);
+    return scope.Close(MarshalCLRToV8(rtn));
+  }
+
+  static Handle<v8::Value> ExecGetPropertyObject(const v8::Arguments& args) {
+    HandleScope scope;
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::String^ property = stringV82CLR(args[1]->ToString());
+    try {
+      PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (AmbiguousMatchException^ e) {
+      PropertyInfo^ rtn = target->GetType()->GetProperty(property,
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
+      return scope.Close(MarshalCLRToV8(rtn));
     }
+  }
+
+  static Handle<v8::Value> ExecMethodObject(const v8::Arguments& args) {
+    HandleScope scope;
+    MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
+    System::Object^ target = MarshalV8ToCLR(args[1]);
+
+    int argSize = args.Length() - 2;
+    array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+
+    for(int i=0; i < argSize; i++)
+      cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+
+    System::Object^ rtn = method->Invoke(target, cshargs);
+    return scope.Close(MarshalCLRToV8(rtn));
+  }
+
+  static Handle<v8::Value> ExecPropertyGet(const v8::Arguments &args) {
+    HandleScope scope;
+    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
+    return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
+  }
+
+  static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
+    HandleScope scope;
+    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
+    prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
+    return scope.Close(Undefined());
   }
 
   static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
     HandleScope scope;
-    try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Object^ value = MarshalV8ToCLR(args[2]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
-
-      target->GetType()->GetProperty(field)->SetValue(target, value);
-      return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::Object^ value = MarshalV8ToCLR(args[2]);
+    System::String^ field = stringV82CLR(args[1]->ToString());
+    target->GetType()->GetProperty(field)->SetValue(target, value);
+    return scope.Close(Undefined());
   }
 
   static Handle<v8::Value> ExecGetStaticProperty(const v8::Arguments& args) {
     HandleScope scope;
-    try {
-      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-      System::String^ property = stringV82CLR(args[1]->ToString());
-      System::Object^ rtn = target->GetProperty(property,
-        BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
-      return scope.Close(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+    System::String^ property = stringV82CLR(args[1]->ToString());
+    System::Object^ rtn = target->GetProperty(property,
+      BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
+    return scope.Close(MarshalCLRToV8(rtn));
   }
 
   static Handle<v8::Value> ExecGetProperty(const v8::Arguments& args) {
     HandleScope scope;
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::String^ property = stringV82CLR(args[1]->ToString());
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ property = stringV82CLR(args[1]->ToString());
-      try {
-        System::Object^ rtn = target->GetType()->GetProperty(property,
-          BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
-        return scope.Close(MarshalCLRToV8(rtn));
-      } catch (AmbiguousMatchException^ e) {
-        System::Object^ rtn = target->GetType()->GetProperty(property,
-          BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
-        return scope.Close(MarshalCLRToV8(rtn));
-      }
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      System::Object^ rtn = target->GetType()->GetProperty(property,
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (AmbiguousMatchException^ e) {
+      System::Object^ rtn = target->GetType()->GetProperty(property,
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
+      return scope.Close(MarshalCLRToV8(rtn));
     }
   }
 
@@ -809,7 +880,7 @@ extern "C" void CLR_Init(Handle<Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
         Context::GetCurrent()->Global()->Get(String::New("Buffer"))));
 
-    // execute classes
+    // OLD, non-optimized execution methods.
     NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
     NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
     NODE_SET_METHOD(target, "execMethod", CLR::ExecMethod);
@@ -833,4 +904,13 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
     NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
     NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
+
+    // 2nd gen optimized execution
+    NODE_SET_METHOD(target, "getStaticPropertyObject", CLR::ExecGetStaticPropertyObject);
+    NODE_SET_METHOD(target, "getPropertyObject", CLR::ExecGetPropertyObject);
+    NODE_SET_METHOD(target, "getMethodObject", CLR::ExecGetMethodObject);
+    NODE_SET_METHOD(target, "getStaticMethodObject", CLR::ExecGetStaticMethodObject);
+    NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
+    NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
+    NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
 }

@@ -391,6 +391,9 @@
         },
       },
       'all_dependent_settings': {
+        'variables': {
+          'python':'>(python)',
+        },
         'msvs_settings': {
           'VCCLCompilerTool': {
             'AdditionalOptions':['/wd4355']

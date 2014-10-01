@@ -243,8 +243,8 @@ module.exports = (function() {
   Class.prototype.getClassVariable = function(name) { return ivar.wrap(core.class_getClassVariable(this.classPointer, name)); }
   Class.prototype.getInstanceMethod = function(sel) { return method.wrap(core.class_getInstanceMethod(this.classPointer, core.unwrapValue(sel,':'))); }
   Class.prototype.getClassMethod = function(sel) { return method.wrap(core.class_getClassMethod(this.classPointer, core.unwrapValue(sel, ':'))); }
-  Class.prototype.getInstanceVariables = function() { return core.copyIvarList(this.pointer); }
-  Class.prototype.getInstanceMethods = function() { return core.copyMethodList(this.pointer);  }
+  Class.prototype.getInstanceVariables = function() { return core.copyIvarList(this.classPointer); }
+  Class.prototype.getInstanceMethods = function() { return core.copyMethodList(this.classPointer);  }
 
   /**
    * Accepts a SEL and queries the current object for the return type and

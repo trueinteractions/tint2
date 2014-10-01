@@ -41,12 +41,11 @@ module.exports = (function() {
     this.private.fullscreen=false;
     this.private.closeButton = true;
     this.private.titleTextColor = "auto";
-    this.private.chrome = new $.System.Windows.Shell.WindowChrome;
-
+    //this.private.chrome = new $.System.Windows.Shell.WindowChrome;
     //$.System.Windows.Shell.WindowChrome.GetWindowChrome(this.native);
     //this.private.chrome.CaptionHeight = 0;
-    this.private.chrome.IsHitTestVisibleInChrome = true;
-    $.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);
+    //this.private.chrome.IsHitTestVisibleInChrome = true;
+    //$.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);
 
     //We cannot allow transparency unless there is no window style.
     this.native.ShowInTaskbar = true;
@@ -59,7 +58,6 @@ module.exports = (function() {
 
     application.windows.push(this);
   }
-  //http://blogs.msdn.com/b/wpfsdk/archive/2010/08/25/experiments-with-windowchrome.aspx
 
   Window.prototype = Object.create(Container.prototype);
   Window.prototype.constructor = Window;
@@ -292,14 +290,6 @@ module.exports = (function() {
     set:function(e) {
       if(e) this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
       else this.native.ResizeMode = $.System.Windows.ResizeMode.CanMinimize;
-    }
-  });
-
-  Object.defineProperty(Window.prototype, 'titleTextColor', {
-    get:function() { return this.private.titleTextColor; },
-    set:function(e) {
-      //TODO: make this work.
-      this.private.titleTextColor = e;
     }
   });
 

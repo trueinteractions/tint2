@@ -130,9 +130,9 @@ module.exports = (function() {
    */
   function copyIvarList (classPtr) {
     var rtn = []
-      , ivars = objc.class_copyIvarList(classPtr, ref.alloc('uint'))
-      , count = numIvars.deref();
-
+      , count = ref.alloc('uint')
+      , ivars = objc.class_copyIvarList(classPtr, count);
+      count = count.deref();
     for (var i=0; i<count; i++) 
       rtn.push(objc.ivar_getName(ivars.readPointer(i * ref.sizeof.pointer)));
 
