@@ -5,24 +5,16 @@ module.exports = (function() {
 
   function Button(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
-    options.initViewOnly = true;
 
     if(NativeObjectClass && NativeObjectClass.type == '#')
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else
-      Container.call(this, $.System.Windows.Controls.Button, $.System.Windows.Controls.Button, options);
+      Container.call(this, $.System.Windows.Controls.Button, $.System.Windows.Controls.Label, options);
 
     this.private.img = null;
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
-
-    /*this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setButtonType',$.NSMomentaryLightButton);
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
-    this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
-    this.native('cell')('setWraps',$.NO);
-    this.native('setTitle', $(""));*/
-
+    this.native.Content = this.nativeView;
   }
 
   Button.prototype = Object.create(Container.prototype);
@@ -39,8 +31,8 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Button.prototype, 'title', {
-    get:function() { },
-    set:function(e) { }
+    get:function() { return this.nativeView.Content.ToString(); },
+    set:function(e) { this.nativeView.Content = e.toString(); }
   });
 
   Object.defineProperty(Button.prototype, 'type', {
@@ -77,8 +69,8 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Button.prototype, 'enabled', {
-    get:function() {  },
-    set:function(e) {  }
+    get:function() { return this.IsEnabled ? true : false; },
+    set:function(e) { this.native.IsEnabled = e ? true : false; }
   });
 
   Object.defineProperty(Button.prototype, 'image', {
