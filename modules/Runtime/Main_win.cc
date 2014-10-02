@@ -79,7 +79,7 @@ void uv_event(void *info) {
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
-      if (success || overlapped != NULL)
+      if (overlapped != NULL)
         PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
     }
 
