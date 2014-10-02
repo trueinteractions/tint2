@@ -51,8 +51,8 @@ function run() {
       notify.buttonLabel = "Main";
       // The text for the button at @img{assets/notifications_aux_button.png}
       notify.addEventListener('fired', function() {
-        /* @hidden */ var xpos = Screens.active.bounds.width - 80;
-        /* @hidden */ setTimeout(function() { $utils.clickAt(xpos,80); },1000); //TODO: Find a better way than hardcoding 80.
+        /* @hidden */ var xpos = Screens.active.bounds.width - 60;
+        /* @hidden */ setTimeout(function() { $utils.clickAt(xpos,60); },1000); //TODO: Find a better way than hardcoding 80.
       });
       notify.addEventListener('click', function(args) {
         /* @hidden */ //$utils.assert(args == "button");
