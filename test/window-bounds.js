@@ -16,6 +16,7 @@ function baseline() {
 function run($utils) {
   $utils.assert(application.windows.length == 0);
   var w = new Window();
+  w.visible = true;
   $utils.assert(application.windows.length == 1);
   $utils.assert(application.windows[0] == w);
   w.preferences.animateOnSizeChange = true;
@@ -49,7 +50,7 @@ function run($utils) {
   /* @hidden */ setTimeout(function(){ 
     /* @hidden */ $utils.assert(w.x == 400, 'w.x should be 900, was: '+w.x);
     /* @hidden */ $utils.assert(w.y == 400, 'w.y should be 500, was: '+w.y);
-    /* @hidden */ w.close();
+    /* @hidden */ w.destroy();
     /* @hidden */ $utils.ok(); 
   /* @hidden */ }, 5500);
 }

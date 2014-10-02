@@ -15,6 +15,7 @@ function baseline() {
  */
 function run($utils) {
   var w = new Window();
+  w.visible = true;
   w.maximizeButton = true;
   w.minimizeButton = false;
   w.closeButton = false;
@@ -31,7 +32,7 @@ function run($utils) {
     w.resizable = true;
   }, 3000);
   setTimeout(function(){ 
-    w.close();
+    w.destroy();
     $utils.ok(); 
   }, 4000);
 }

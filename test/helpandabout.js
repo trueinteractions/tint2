@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
   var button = new Button();
 
   button.style = 'help';

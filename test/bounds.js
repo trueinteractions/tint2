@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   // TODO: UNFINISHED!!!!!
   var win = new Window();
+  win.visible = true;
   var btn = new Button();
 
   // test bounds prior to being added.

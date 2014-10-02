@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var input = new SelectInput();
   var input2 = new SelectInput();
 

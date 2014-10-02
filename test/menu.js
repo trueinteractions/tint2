@@ -19,6 +19,7 @@ function baseline() {
 function run($utils) {
   application.name = "My Program";
   var win = new Window();
+  win.visible = true;
 
   var mainMenu = new Menu();
   var appleMenu = new MenuItem(application.name, '');

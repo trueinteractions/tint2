@@ -15,6 +15,7 @@ function baseline() {
  */
 function run($utils) {
   var panel = new Panel();
+  panel.visible = true;
   panel.title = "Hello";
   var text = new TextInput();
   text.value = "This is an inspector panel.";
@@ -32,6 +33,7 @@ function run($utils) {
 
 
   var panel2 = new Panel();
+  panel2.visible = true;
   panel2.title = "Hello2";
   panel2.style = "utility";
   panel2.x='0px';

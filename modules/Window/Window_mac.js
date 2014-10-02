@@ -35,7 +35,7 @@ module.exports = (function() {
       this.native = this.nativeClass('alloc')('initWithContentRect', $.NSMakeRect(0,0,options.width,options.height), 
                           'styleMask', options.styleMask,
                           'backing', $.NSBackingStoreBuffered, 
-                          'defer', $.NO);
+                          'defer', $.YES);
       this.nativeView = this.nativeViewClass('alloc')('init');
       this.native('setContentView',this.nativeView);
     } else {
@@ -58,7 +58,6 @@ module.exports = (function() {
     this.private.toolbar = null;
     this.private.defaultStyleMask = options.styleMask;
 
-    this.native('makeKeyAndOrderFront', this.native);
     this.native('setReleasedWhenClosed', $.YES);
     this.native('setExcludedFromWindowsMenu', $.NO);
     this.native('center');
@@ -334,7 +333,7 @@ module.exports = (function() {
     }
   });
 
-  Window.prototype.close = function() {
+  Window.prototype.destroy = function() {
     application.windows.forEach(function(item,ndx,arr) { 
       if(item == this)
         delete arr[ndx];

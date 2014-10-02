@@ -11,12 +11,13 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
+ * @see {ProgressBar}
  * @example
  */
 function run($utils) {
   /* @hidden */ count = 0;
   var win = new Window();
+  win.visible = true;
   var progress = new ProgressBar();
   var interval;
   //progress.size = "large";

@@ -17,6 +17,7 @@ function run($utils) {
 
   // TODO: Fix height %
   var win = new Window();
+  win.visible = true;
 
   var webView = new WebView();
   win.appendChild(webView);

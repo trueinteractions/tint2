@@ -18,6 +18,7 @@ function run($utils) {
   var themessage = "Hello "+Math.random();
 
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var webview = new WebView();
   var imagewell = new ImageWell();
 

@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   //TODO: Add more thorough unit tests for this.
   var win = new Window();
+  win.visible = true;
   var dateWell = new DateWell();
   dateWell.style = "clock";
   dateWell.range = true;

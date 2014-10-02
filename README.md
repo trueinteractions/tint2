@@ -137,6 +137,7 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 
   // Create the widgets.
   var mainWindow = new Window();
+  mainWindow.visible = true; // show the window
   var urlLocation = new TextInput();
   var webView = new WebView();
   var toolbar = new Toolbar();

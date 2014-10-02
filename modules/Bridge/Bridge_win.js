@@ -180,7 +180,9 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   else if (strMemberType == 'Method') info.exec = createMethod;
   else if (strMemberType == 'Property') info.exec = createProperty;
   else if (strMemberType == 'Constructor') ; // already delt with.
-  else console.warn("Unknown type: "+strMemberType);
+  else {
+    console.warn("Unknown type: "+strMemberType);
+  }
 
   if(info.exec)
     info.exec(info.cls, info.typeNative, info.typeName, info.memberNative, info.memberName, static);
@@ -190,7 +192,18 @@ function createJSInstance(pointer) {
   var typeNative = dotnet.getCLRType(pointer);
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
 
-  if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
+  if(dotnet.execGetProperty(typeNative, "IsEnum")) {
+    var fullName = dotnet.execGetProperty(typeNative, "FullName");
+    var v = fullName.split('.');
+    var enumValue = dotnet.execMethod(pointer,'ToString');
+    v.push(enumValue);
+    var dst = process.bridge.dotnet;
+    for(var i=0; i < v.length ; i++) 
+      dst = dst[v[i]];
+
+    return dst;
+  } 
+  else if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
     var c = createClass(typeNative, typeName);
     var n = function() {
       this.pointer = pointer;

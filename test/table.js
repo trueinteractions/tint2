@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   var count = 0; // @{hidden}
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var table = new Table();
   var scroll = new Scroll();
   var textInput = new TextInput();

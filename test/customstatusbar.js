@@ -20,6 +20,7 @@ function run($utils) {
   var statusbar = new StatusBar();
   var imagewell = new ImageWell();
   var popOver = new PopOver();
+  popOver.visible = true;
   var webView = new WebView();
   var opened = false;
 

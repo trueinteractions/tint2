@@ -47,7 +47,9 @@ v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
 }
 
 void uv_event(void *info) {
+
   uv_loop_t* loop = uv_default_loop();
+
   while (!embed_closed) {
     // Unlike Unix, in which we can just rely on one backend fd to determine
     // whether we should iterate libuv loop, on Window, IOCP is just one part
@@ -66,14 +68,33 @@ void uv_event(void *info) {
       ULONG_PTR key;
       OVERLAPPED* overlapped;
       timeout = uv_get_poll_timeout(loop);
+      
+      // Do not indefinately block, set the timeout to a reasonably low
+      // value below the threshold of IO timing out, but not so low it
+      // causes power consumption issues on mobile devices. If higher than
+      // 1s, reset it back, just in case.
+      if(timeout < 0) timeout = 250;
+      else if(timeout > 1000) timeout = 1000;
+      
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
-      if (overlapped != NULL)
+      if (success || overlapped != NULL)
         PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
     }
 
-    PostThreadMessage(mainThreadId, 0x8001 /* magic UV id */, 0, 0);
+    // This may seem obsurd to both broadcast a message and 
+    // post it to the main thread, however if a window is 
+    // is using a subframe without a proper hook (e.g.,) blocking
+    // our event loop we need to broadcast it, the thread post fails
+    // when this happens.  Vise versa, a message loop without a HWND
+    // does not receive HWND_BROADCASTS. ONE OF THESE SHOULD ALWAYS
+    // FAIL.  In practice (Vista,7,8,8.1) these did not produce
+    // duplicate messages so we'll avoid the check for one of them
+    // failing.
+    PostMessage(HWND_BROADCAST, WM_APP+1, 0, 0);
+    PostThreadMessage(mainThreadId, WM_APP+1 /* magic UV id */, 0, 0);
+
     uv_sem_wait(&embed_sem);
   }
 }
@@ -87,9 +108,6 @@ void node_load() {
   // Register the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);
 
-  // Load node and begin processing.
-  node::Load(process_l);
-
   // Start worker that will interrupt main loop when having uv events.
   // keep the UV loop in-sync with windows message loop.
   embed_closed = 0;
@@ -102,11 +120,16 @@ void node_load() {
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
   uv_sem_init(&embed_sem, 0);
   uv_thread_create(&embed_thread, uv_event, NULL);
+
+  // Load node and begin processing.
+  node::Load(process_l);
 }
 
-void uv_run_nowait() {
+// Externalize this, if we've completely blocked the event loop
+// and need to manually pump uv messages (e.g., WPF took over the
+// loop due to a blocking OS reason)
+extern "C" void uv_run_nowait() {
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
-  uv_sem_post(&embed_sem);
 }
 
 void node_terminate() {
@@ -150,19 +173,27 @@ static char **copy_argv(int argc, char **argv) {
 void win_msg_loop() {
   MSG msg;
   BOOL bRet;
+
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
     if(bRet == -1) {
-      fprintf(stderr, "Received error %i\n",bRet);
+      fprintf(stderr, "FATAL ERROR: %i\n",bRet);
       exit(1);
-    } else if(msg.message == 0x8001) {
+    } else if(msg.message == WM_APP+1)
       uv_run_nowait();
-    }
     else { //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
        TranslateMessage(&msg);
        DispatchMessage(&msg);
     }
+
+    // Its entirely possible that an intended message to wake up
+    // the thread was missed due to the transition from cmd->win32 mode
+    // or win32->wpf window mode, etc, etc. Go ahead and release the 
+    // semaphore as its safe to assume uv_run_nowait above finished, and
+    // harmless if it didn't run.
+    uv_sem_post(&embed_sem);
   }
+
   // Received WM_QUIT
   node_terminate();
   exit(0);

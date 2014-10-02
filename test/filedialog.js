@@ -19,6 +19,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
   win.x = 0;
   win.y = 0;
   win.bringToFront();
@@ -34,7 +35,7 @@ function run($utils) {
     console.log('selected values: ',dialog.selection);
   });
   dialog.addEventListener('cancel', function() {
-    /* @hidden */ win.close();
+    /* @hidden */ win.destroy();
     /* @hidden */ $utils.ok();
   });
   dialog.open(win);

@@ -15,6 +15,7 @@ function baseline() {
  */
 function run($utils) {
   var mainWindow = new Window();
+  mainWindow.visible = true;
   /* @hidden */ mainWindow.width = 500;
   /* @hidden */ var mainScreen = Screens.active;
   // Set the maximize button on OSX +10.9 to go fullscreen.

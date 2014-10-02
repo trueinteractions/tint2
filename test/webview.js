@@ -18,6 +18,7 @@ function run($utils) {
   /* @hidden */ var $ = process.bridge.objc;
 
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var webview = new WebView();
   mainWindow.appendChild(webview);
   mainWindow.addLayoutConstraint({
@@ -55,7 +56,7 @@ function run($utils) {
     /* @hidden */ $utils.assert(webview.title == 'Test'+count);
     mainWindow.title = webview.title;
     /* @hidden */ if(count == 4) {
-    /* @hidden */   setTimeout(function() { mainWindow.close();
+    /* @hidden */   setTimeout(function() { mainWindow.destroy();
     /* @hidden */   $utils.ok(); }, 1000);
     /* @hidden */ }
     /* @hidden */ count++;

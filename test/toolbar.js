@@ -15,6 +15,7 @@ function baseline() {
  */
 function run($utils) {
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var urlLocation = new TextInput();
   var webView = new WebView();
   var toolbar = new Toolbar();

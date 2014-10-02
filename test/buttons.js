@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   /* @hidden */ count = 0;
   var win = new Window();
+  win.visible = true;
   var buttonNormal = new Button();
   buttonNormal.title = "Hello";
   buttonNormal.addEventListener('mousedown', function() {
@@ -100,7 +101,7 @@ function run($utils) {
     buttonRadio.state = false;
     /* @hidden */ $utils.assert(buttonRadio1.state == true);
     /* @hidden */ $utils.assert(buttonRadio.state == false);
-    /* @hidden */ win.close();
+    /* @hidden */ win.destroy();
     /* @hidden */ $utils.ok();
   });
   win.appendChild(buttonRadio1);

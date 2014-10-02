@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
   /* @hidden */ countMouseDown = 0, countMouseUp = 0, done = false;
   /* @hidden */ var bounds = win.boundsOnScreen;
   var buttonGroup = new ButtonGroup();

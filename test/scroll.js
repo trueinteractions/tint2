@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   $ = process.bridge.objc;
   var win = new Window();
+  win.visible = true;
   var scrollview = new Scroll();
   var genericview = new Container();
   scrollview.setChild(genericview);

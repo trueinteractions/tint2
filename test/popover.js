@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   /* @hidden */ var closeClicked = false, openClicked = false, openEvent = false;
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var label = new TextInput();
   var popOpen = new Button();
   var input = new TextInput();
@@ -29,6 +30,7 @@ function run($utils) {
   popOpen.title = "Open Pop-Up";
   popClose.title = "Close Pop-Up";
   var popOver = new PopOver();
+  popOver.visible = true;
   popOver.addEventListener('close', function() {
     /* @hidden */ $utils.assert(closeClicked);
     /* @hidden */ $utils.assert(openClicked);

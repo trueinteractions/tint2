@@ -17,6 +17,7 @@ function baseline() {
  */
 function run($utils) {
   var panel = new FontPanel();
+  panel.visible = true;
   /* @hidden */ var trackChange = false;
   /* @hidden */ var trackNewChange = false;
   /* @hidden */ panel.x=0;

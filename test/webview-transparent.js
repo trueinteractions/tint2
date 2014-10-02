@@ -16,6 +16,7 @@ function baseline() {
 function run($utils) {
   var mainWindow = new Window(), alpha = 1;
   var webview = new WebView();
+  mainWindow.visible = true;
   mainWindow.appendChild(webview);
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',
@@ -49,7 +50,7 @@ function run($utils) {
 
 
   setTimeout(function() {
-    mainWindow.close();
+    mainWindow.destroy();
     $utils.ok();
   },2000);
 }

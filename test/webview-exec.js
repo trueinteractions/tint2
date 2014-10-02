@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var webview = new WebView();
   mainWindow.appendChild(webview);
   webview.left = webview.right = webview.top = webview.bottom = 0;

@@ -21,6 +21,7 @@ function run($utils) {
   /* @hidden */ $utils.assert(color.blue == 40/255);
   /* @hidden */ $utils.assert(color.alpha == 0.1);
   var panel = new ColorPanel();
+  panel.visible = true;
   /* @hidden */ //var second = false;
   /* @hidden */ panel.x=0;
   /* @hidden */ panel.y=0;

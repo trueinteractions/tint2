@@ -8,6 +8,7 @@
 
 #using <system.dll>
 #using <System.Core.dll>
+#using <WPF/WindowsBase.dll>
 
 using namespace v8;
 using namespace System::Collections::Generic;
@@ -17,6 +18,8 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
+
+extern "C" void uv_run_nowait();
 
 /* Stubs for CLR, these are needed otherwise we'll get a linking 
  * warning complaining that the exe will not run. */
@@ -235,7 +238,6 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       size_t sz = sizeof(CppClass *);
       node::Buffer *buf = node::Buffer::New((char *)n, sz, wrap_pointer_cb2, user_data);
       jsdata = buf->handle_;
-
       if(type == System::IntPtr::typeid) {
         void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
         node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
@@ -327,13 +329,13 @@ public ref class CLREventHandler {
     if (this->callback->function.IsEmpty()) {
       ThrowException(Exception::Error(
             String::New("CLR fatal: Callback has been garbage collected.")));
-      return;
+      exit(1);
     } else {
       // invoke the registered callback function
       this->callback->function->Call(v8::Context::GetCurrent()->Global(), args->Length, argv.data());
     }
     if (try_catch.HasCaught())
-        try_catch.ReThrow();
+      try_catch.ReThrow();
   }
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
     v8::HandleScope scope;
@@ -347,13 +349,14 @@ public ref class CLREventHandler {
     if (this->callback->function.IsEmpty()) {
       ThrowException(Exception::Error(
             String::New("CLR fatal: Callback has been garbage collected.")));
-      return;
+      exit(1);
     } else {
       // invoke the registered callback function
       this->callback->function->Call(v8::Context::GetCurrent()->Global(), 2, argv);
     }
-    if (try_catch.HasCaught())
-        try_catch.ReThrow();
+    if (try_catch.HasCaught()) {
+      try_catch.ReThrow();
+    }
   }
 private:
 
@@ -443,7 +446,6 @@ public:
 
       MethodAttributes attr = MethodAttributes::Public;
       if(accessibility == "private") attr = MethodAttributes::Private;
-      //else if(accessibility == "protected") attr = MethodAttributes::Protected;
 
       if(staticDef) attr = attr | MethodAttributes::Static;
 
@@ -723,6 +725,7 @@ public:
 
   static Handle<v8::Value> ExecGetMethodObject(const v8::Arguments& args) {
     HandleScope scope;
+    try {
     System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
     System::String^ method = stringV82CLR(args[1]->ToString());
 
@@ -738,19 +741,27 @@ public:
       cshargs,
       nullptr);
     return scope.Close(MarshalCLRToV8(rtn));
+    } catch(System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecGetStaticPropertyObject(const v8::Arguments& args) {
     HandleScope scope;
+    try {
     System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
     System::String^ property = stringV82CLR(args[1]->ToString());
     PropertyInfo^ rtn = target->GetProperty(property,  
       BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy);
     return scope.Close(MarshalCLRToV8(rtn));
+    } catch(System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecGetPropertyObject(const v8::Arguments& args) {
     HandleScope scope;
+    try {
     System::Object^ target = MarshalV8ToCLR(args[0]);
     System::String^ property = stringV82CLR(args[1]->ToString());
     try {
@@ -762,10 +773,15 @@ public:
         BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
       return scope.Close(MarshalCLRToV8(rtn));
     }
+    } catch(System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
+  // deprecated.
   static Handle<v8::Value> ExecMethodObject(const v8::Arguments& args) {
     HandleScope scope;
+    try {
     MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
     System::Object^ target = MarshalV8ToCLR(args[1]);
 
@@ -777,28 +793,49 @@ public:
 
     System::Object^ rtn = method->Invoke(target, cshargs);
     return scope.Close(MarshalCLRToV8(rtn));
+    } catch(System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      System::Console::WriteLine(e->StackTrace);
+      exit(1);
+      //return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecPropertyGet(const v8::Arguments &args) {
     HandleScope scope;
+    try {
     PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
     return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
+    } catch(System::Exception^ e) {
+      System::Console::WriteLine(e->ToString());
+      System::Console::WriteLine(e->StackTrace);
+      exit(1);
+      //return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
     HandleScope scope;
+    try {
     PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
     prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
     return scope.Close(Undefined());
+    } catch(System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::Object^ value = MarshalV8ToCLR(args[2]);
-    System::String^ field = stringV82CLR(args[1]->ToString());
-    target->GetType()->GetProperty(field)->SetValue(target, value);
-    return scope.Close(Undefined());
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::Object^ value = MarshalV8ToCLR(args[2]);
+      System::String^ field = stringV82CLR(args[1]->ToString());
+      target->GetType()->GetProperty(field)->SetValue(target, value);
+      return scope.Close(Undefined());
+    } catch(System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecGetStaticProperty(const v8::Arguments& args) {
@@ -874,7 +911,13 @@ public:
         return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
       }
   }
+
+  static void CLR::HandleMessageLoop(System::Windows::Interop::MSG% msg, bool% handled) {
+    if(msg.message == WM_APP+1)
+      uv_run_nowait();
+  }
 };
+
 
 extern "C" void CLR_Init(Handle<Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
@@ -913,4 +956,9 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
     NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
     NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
+
+    // Register the thread handle to communicate back to handle application
+    // specific events when in WPF mode.
+    System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
+        gcnew System::Windows::Interop::ThreadMessageEventHandler(CLR::HandleMessageLoop);
 }

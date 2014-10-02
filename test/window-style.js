@@ -15,6 +15,7 @@ function baseline() {
  */
 function run($utils) {
   var mainWindow = new Window(), alpha = 1;
+  mainWindow.visible = true;
   var webview = new WebView();
   mainWindow.titleTextColor = "blue";
   mainWindow.appendChild(webview);
@@ -56,7 +57,7 @@ function run($utils) {
         if(alpha >= 1) {
           clearInterval(interval);
           mainWindow.backgroundColor = "auto";
-          mainWindow.close();
+          mainWindow.destroy();
           $utils.ok();
         }
       },1000/30);

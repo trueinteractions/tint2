@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
   var colorWell = new ColorWell();
 
   win.appendChild(colorWell);

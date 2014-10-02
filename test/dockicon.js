@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var w = new Window();
+  w.visible = true;
   application.icon = 'assets/tintcompiler.png';
   application.badge = '2';
   var handler;
@@ -24,7 +25,7 @@ function run($utils) {
   }, 2000);
   setTimeout(function(){
     handler.cancel();
-    w.close();
+    w.destroy();
     $utils.ok(); 
   }, 4000);
 }

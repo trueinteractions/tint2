@@ -18,6 +18,7 @@ function run($utils) {
   var baseX, baseY, baseHeight, baseWidth;
   var win = new Window();
 
+  win.visible = true;
   var webView = new WebView();
   win.appendChild(webView);
   webView.location = "https://www.google.com";

@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
 
   var dockmenu = new Menu("DockMenu");
   var someMenu = new Menu("SomeMenu");
@@ -43,7 +44,7 @@ function run($utils) {
   dockmenu.appendChild(someOtherSuperMenuItem);
   application.dockmenu = dockmenu;
   setTimeout(function(){ 
-    win.close();
+    win.destroy();
     $utils.ok();
   }, 1000);
 }

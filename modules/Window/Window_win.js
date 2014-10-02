@@ -40,8 +40,6 @@ module.exports = (function() {
     this.private.fullscreen=false;
     this.private.closeButton = true;
     this.private.titleTextColor = "auto";
-
-
 /*  this.private.chrome = new $.System.Windows.Shell.WindowChrome;
     $.System.Windows.Shell.WindowChrome.GetWindowChrome(this.native);
     this.private.chrome.CaptionHeight = 0;
@@ -57,10 +55,13 @@ module.exports = (function() {
     this.native.ShowActivated = true;
     this.native.Width = options.width;
     this.native.Height = options.height;
-
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
-    this.native.Show();
-    this.backgroundColor = "rgba(0,0,0,0)";
+
+    // We need to force a HWND creatio otherwise setting any
+    // properties on the WPF Windows object will fail. 
+    this.private.hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).EnsureHandle();
+
+    //this.backgroundColor = "rgba(0,0,0,0)";
 
     application.windows.push(this);
   }
@@ -222,27 +223,29 @@ module.exports = (function() {
     get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
     set:function(e) {
       if(e) {
-        this.native.Visibility = $.System.Windows.Visibility.Visible;
         this.native.Show();
+        this.native.Visibility = $.System.Windows.Visibility.Visible;
+        
       } else {
-        this.native.Visibility = $.System.Windows.Visibility.Hidden;
         this.native.Hide();
+        this.native.Visibility = $.System.Windows.Visibility.Hidden;
+        
       }
     }
   });
 
   Object.defineProperty(Window.prototype, 'maximizeButton', {
     get:function() {
-      var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+      var hwnd = this.private.hwnd;
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
     },
     set:function(e) {
       if(e) {
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
       } else {
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
       }
@@ -251,16 +254,16 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'minimizeButton', {
     get:function() {
-      var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+      var hwnd = this.private.hwnd;
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
     },
     set:function(e) {
       if(e) {
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
       } else {
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
       }
@@ -272,11 +275,11 @@ module.exports = (function() {
     set:function(e) {
       this.private.closeButton = e;
       if(e) {
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
@@ -311,7 +314,7 @@ module.exports = (function() {
         this.private.background = e;
         this.private.backgroundObj = new Color(e);
 
-        var hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).Handle;
+        var hwnd = this.private.hwnd;
         var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
         mainWindowSrc.CompositionTarget.BackgroundColor = this.private.backgroundObj.native;
 
@@ -333,7 +336,7 @@ module.exports = (function() {
     set:function(e) { this.native.Topmost = e ? true : false; }
   });
 
-  Window.prototype.close = function() {
+  Window.prototype.destroy = function() {
     application.windows.forEach(function(item,ndx,arr) { 
       if(item == this)
         delete arr[ndx];

@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   /* @hidden */ count = 0;
   var mainWindow = new Window();
+  mainWindow.visible = true;
   var buttonNormal = new Button();
   var input = new TextInput();
 

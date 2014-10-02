@@ -14,6 +14,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
   var dateWell = new DateWell();
   win.title = "Date well should be 0.5 alpha.";
   dateWell.style = "clock";

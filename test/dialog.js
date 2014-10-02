@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   var win = new Window();
+  win.visible = true;
   /* @hidden */ win.x=0;
   /* @hidden */ win.y=0;
   /* @hidden */ var confirm = 'main';

@@ -17,6 +17,7 @@ function baseline() {
 function run($utils) {
   var count = 0;
   var win = new Window();
+  win.visible = true;
   var split = new Split();
   var webview1 = new WebView();
   var webview2 = new WebView();
