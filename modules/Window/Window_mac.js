@@ -57,6 +57,7 @@ module.exports = (function() {
     this.private.menu = null;
     this.private.toolbar = null;
     this.private.defaultStyleMask = options.styleMask;
+    this.private.type = "Window";
 
     this.native('setReleasedWhenClosed', $.YES);
     this.native('setExcludedFromWindowsMenu', $.NO);

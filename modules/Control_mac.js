@@ -144,38 +144,65 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
+      if(this.private.parent == null && this.private.type !== 'Window' || this.visible == false)
+        return null;
       var scrn = $.NSScreen('mainScreen')('frame');
       var view = this.nativeView('bounds');
       var win = this.nativeView('convertRect', view, 'toView', null);
       var bnds = this.nativeView('window')('convertRectToScreen', win);
-      return { x:bnds.origin.x, y:((scrn.size.height - bnds.origin.y) - view.size.height), width:bnds.size.width, height:bnds.size.height };
+      return { 
+        x:Math.round(bnds.origin.x), 
+        y:Math.round((scrn.size.height - bnds.origin.y) - view.size.height), 
+        width:Math.round(bnds.size.width), 
+        height:Math.round(bnds.size.height)
+      };
     }
   });
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
+      if(this.private.parent == null && this.private.type !== 'Window' || this.visible == false)
+        return null;
+
       var win = this.nativeView('window');
-      
       if(win == null) return null;
 
       // adjust coordinate for top-left not bottom-left.
       var scrn = $.NSScreen('mainScreen')('frame');
       var rect = win('frame');
-      rect.origin.y = (scrn.size.height - rect.origin.y) - rect.size.height;
 
 
       var view = this.nativeView('bounds');
       var bnds = this.nativeView('convertRect', view, 'toView', null);
       var winBnds = this.nativeView('window')('convertRectToScreen', win);
 
-      return { x:bnds.origin.x, y:(scrn.size.height - winBnds.origin.y) - view.size.height - rect.origin.y + bnds.origin.y, width:bnds.size.width, height:bnds.size.height };
+      var y;
+      if(this.private.type == 'Window') {
+        rect.origin.y = (scrn.size.height - rect.origin.y) - rect.size.height;
+        y = Math.round((scrn.size.height - winBnds.origin.y) - view.size.height - rect.origin.y + bnds.origin.y);
+      }
+      else
+        y = Math.round(bnds.origin.y - winBnds.origin.y - bnds.size.height);
+      return { 
+        x:Math.round(bnds.origin.x), 
+        y:y, 
+        width:Math.round(bnds.size.width), 
+        height:Math.round(bnds.size.height)
+     };
     }
   });
 
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
+      if(this.private.parent == null && this.private.type !== 'Window'  || this.visible == false)
+        return null;
       var bounds = this.nativeView('bounds');
-      return {x:bounds.origin.x, y:bounds.origin.y, width:bounds.size.width, height:bounds.size.height};
+      return {
+        x:Math.round(bounds.origin.x), 
+        y:Math.round(bounds.origin.y), 
+        width:Math.round(bounds.size.width), 
+        height:Math.round(bounds.size.height)
+      };
     }
   });
 
