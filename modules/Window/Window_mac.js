@@ -271,35 +271,66 @@ module.exports = (function() {
     }
   });
 
+  // only works on Window, not Panel derived classes (NSPanel doesnt support standardWindowButton)
   Object.defineProperty(Window.prototype, 'maximizeButton', {
-    get:function() { return this.native('standardWindowButton',$.NSWindowZoomButton)('isHidden'); },
-    set:function(e) { this.native('standardWindowButton',$.NSWindowZoomButton)('setHidden',!e); }
+    get:function() { 
+      if(this.native('standardWindowButton',$.NSWindowZoomButton))
+        return this.native('standardWindowButton',$.NSWindowZoomButton)('isHidden'); 
+      else return true;
+    },
+    set:function(e) { 
+      if(this.native('standardWindowButton',$.NSWindowZoomButton))
+        this.native('standardWindowButton',$.NSWindowZoomButton)('setHidden',!e); 
+    }
   });
 
+  // only works on Window, not Panel derived classes
   Object.defineProperty(Window.prototype, 'minimizeButton', {
-    get:function() { return this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('isHidden'); },
-    set:function(e) { this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('setHidden',!e); }
+    get:function() {
+      if(this.native('standardWindowButton',$.NSWindowMiniaturizeButton))
+        return this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('isHidden'); 
+      else return true;
+    },
+    set:function(e) { 
+      if(this.native('standardWindowButton',$.NSWindowMiniaturizeButton))
+        this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('setHidden',!e); 
+    }
   });
 
   Object.defineProperty(Window.prototype, 'closeButton', {
-    get:function() { return this.native('standardWindowButton',$.NSWindowCloseButton)('isHidden'); },
-    set:function(e) { this.native('standardWindowButton',$.NSWindowCloseButton)('setHidden',!e); }
+    get:function() { 
+      if(this.native('standardWindowButton',$.NSWindowCloseButton))
+        return this.native('standardWindowButton',$.NSWindowCloseButton)('isHidden'); 
+    },
+    set:function(e) { 
+      if(this.native('standardWindowButton',$.NSWindowCloseButton))
+        this.native('standardWindowButton',$.NSWindowCloseButton)('setHidden',!e); 
+    }
   });
 
   Object.defineProperty(Window.prototype, 'fullscreenButton', {
-    get:function() { return this.native('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); },
-    set:function(e) { this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); }
+    get:function() { 
+      if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
+        return this.native('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); 
+    },
+    set:function(e) { 
+      if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
+        this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); 
+      else return true;
+    }
   });
 
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },
     set:function(e) {
       if (e) {
-        this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
+        if(this.native('standardWindowButton',$.NSWindowZoomButton))
+          this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
         this.native('setStyleMask',this.native('styleMask') | $.NSResizableWindowMask);
       } else {
-        this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
-        this.native('setStyleMask',this.native('styleMask') ^ $.NSResizableWindowMask);
+        if(this.native('standardWindowButton',$.NSWindowZoomButton))
+          this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
+        this.native('setStyleMask',this.native('styleMask') & ~$.NSResizableWindowMask);
       }
     }
   });

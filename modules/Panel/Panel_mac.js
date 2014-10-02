@@ -5,7 +5,7 @@ module.exports = (function() {
   function Panel(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.styleMask = options.styleMask || ($.NSHUDWindowMask | $.NSTitledWindowMask | $.NSUtilityWindowMask | 
-                                    $.NSClosableWindowMask | $.NSResizableWindowMask);
+                                    $.NSClosableWindowMask | $.NSResizableWindowMask | $.NSMiniaturizableWindowMask );
     options.width = options.width || 200;
     options.height = options.height || 250;
 
