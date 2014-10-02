@@ -3,30 +3,19 @@ module.exports = (function() {
   var utilities = require('Utilities');
   var Container = require('Container');
 
-  if(!$.TintMenuItemDelegate) {
-    if(!process.bridge.objc.delegates) process.bridge.objc.delegates = {};
-    var TintMenuItemDelegate = $.NSObject.extend('TintMenuItemDelegate');
-    TintMenuItemDelegate.addMethod('initWithJavascriptObject:', ['@',[TintMenuItemDelegate,$.selector,'@']], 
-      utilities.errorwrap(function(self, cmd, id) {
-        self.callback = process.bridge.objc.delegates[id.toString()];
-        return self;
-    }));
-    TintMenuItemDelegate.addMethod('click:','v@:@', 
-      utilities.errorwrap(function(self,_cmd,frame) { 
-        self.callback.fireEvent('click');
-    }));
-    TintMenuItemDelegate.register();
-  }
-
   function MenuItem(titlestring,keystring,keymodifiers) {
     if(typeof(keystring)=='undefined') keystring = "";
     if(typeof(keymodifiers)=='undefined') keymodifiers = "";
 
     this.private = {events:{},submenu:null,modifiers:"",imgOn:null,imgOff:null,img:null,custom:null};
+    
+    var TintMenuItemDelegate = $.NSObject.extend('TintMenuItemDelegate'+Math.round(Math.random()*100000));
+    TintMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { 
+        this.fireEvent('click');
+    }.bind(this));
+    TintMenuItemDelegate.register();
 
-    var id = (Math.random()*100000).toString();
-    process.bridge.objc.delegates[id] = this;
-    var menuDelegate = TintMenuItemDelegate('alloc')('initWithJavascriptObject', $(id));
+    var menuDelegate = TintMenuItemDelegate('alloc')('init');
   	this.native = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
     this.native('setTarget',menuDelegate);
     this.native('setAction','click:');
