@@ -64,7 +64,7 @@ function run($utils) {
     $utils.assert(bbw.y == wbw.y, 'btn.boundsOnWindow.y['+bbw.y+'] != win.boundsOnWindow.y['+wbb.y+']');
     var bbs = btn.boundsOnScreen;
     $utils.assert(bbs.x == wbs.x, 'btn.boundsOnScreen.x['+bbs.x+'] != win.boundsOnScreen.x['+wbs.x+']');
-    $utils.assert(bbs.y == wbs.y - 1, 'btn.boundsOnScreen.y['+bbs.y+'] != win.boundsOnScreen.y['+wbs.y+']');
+    $utils.assert(bbs.y == wbs.y, 'btn.boundsOnScreen.y['+bbs.y+'] != win.boundsOnScreen.y['+wbs.y+']');
     $utils.ok();
   },1000);
 }
