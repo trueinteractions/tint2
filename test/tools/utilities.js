@@ -20,6 +20,10 @@ var currentTest = null;
 var createBaseline = false;
 var ex = {};
 var tintexec;
+  
+  function convertBoundsToCGPoint(p) {
+    return p;
+  }
 
 //try {
 	ex.assert = function assert(condition,value) {
@@ -206,13 +210,13 @@ var tintexec;
     bounds.x = bounds.x + bounds.width/2;
     bounds.y = bounds.y + bounds.height/2;
     var point = $.CGPointMake(bounds.x, bounds.y);
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, convertBoundsToCGPoint(point), 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, convertBoundsToCGPoint(point), 0));
   }
   ex.scrollAt = function scrollAt(x, y, upOrDown) {
     var point = $.CGPointMake(x, y);
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateScrollWheelEvent($.kCGScrollEventUnitPixel, 1, upOrDown));
   }
   ex.scrollAtControl = function scrollAtControl(control, upOrDown) {
@@ -220,30 +224,32 @@ var tintexec;
     bounds.x = bounds.x + bounds.width/2;
     bounds.y = bounds.y + bounds.height/2;
     var point = $.CGPointMake(bounds.x, bounds.y);
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
     var scrollEvent = $.CGEventCreateScrollWheelEvent(null, 1, 1, upOrDown);
     $.CGEventPost($.kCGHIDEventTap, scrollEvent);
   }
 	ex.clickAtControl = function clickAtControl(control) {
 		var bounds = control.boundsOnScreen;
+    //console.log('bounds x:'+bounds.x+' y: '+bounds.y);
 		bounds.x = bounds.x + bounds.width/2;
 		bounds.y = bounds.y + bounds.height/2;
+    //console.log('center bounds x:'+bounds.x+' y: '+bounds.y);
 		var point = $.CGPointMake(bounds.x, bounds.y);
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, convertBoundsToCGPoint(point), 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, convertBoundsToCGPoint(point), 0));
 	}
 	ex.clickAt = function clickAt(x,y) {
 		var point = $.CGPointMake(x, y);
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
-		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, convertBoundsToCGPoint(point), 0));
+		$.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, convertBoundsToCGPoint(point), 0));
 	}
   ex.rightClickAt = function rightClickAt(x,y) {
     var point = $.CGPointMake(x, y);
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, convertBoundsToCGPoint(point), 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, convertBoundsToCGPoint(point), 0));
   }
 	ex.writeImage = function writeImage(image, path) {
 	 	var url = $.NSURL('fileURLWithPath',$(path));
