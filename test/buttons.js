@@ -133,6 +133,6 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  timeout:true,
+  timeout:false,
   name:"Buttons",
 };

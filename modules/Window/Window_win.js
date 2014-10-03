@@ -61,7 +61,7 @@ module.exports = (function() {
     // properties on the WPF Windows object will fail. 
     this.private.hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).EnsureHandle();
 
-    //this.backgroundColor = "rgba(0,0,0,0)";
+    this.backgroundColor = "rgba(0,0,0,0)";
 
     application.windows.push(this);
   }

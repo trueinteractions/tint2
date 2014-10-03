@@ -142,49 +142,48 @@ module.exports = (function() {
     set:function(e) { return this.nativeView('setHidden', !e); }
   });
 
+  // Helper function to convert OSX coordinate spaces to 
+  // top-left.
+  function convY(frame, parentFrame) {
+    frame.origin.y = parentFrame.size.height - frame.origin.y - frame.size.height;
+    return frame;
+  }
+
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
-      if(this.private.parent == null && this.private.type !== 'Window' || this.visible == false)
-        return null;
-      var view = this.nativeView('frame');
-      var win = this.nativeView('convertRect', view, 'toView', null);
-      var bnds = this.nativeView('window')('convertRectToScreen', win);
-      return { 
-        x:Math.round(bnds.origin.x), 
-        y:Math.round(bnds.origin.y), 
-        width:Math.round(bnds.size.width), 
-        height:Math.round(bnds.size.height)
+      if(!this.nativeView('superview')) return null;
+      var bnds = this.boundsOnWindow;
+      var wframe = this.nativeView('window')('frame');
+      var wbnds = convY(wframe, $.NSScreen('mainScreen')('frame'));
+      return {
+        x:Math.round(bnds.x + wbnds.origin.x), 
+        y:Math.round(bnds.y + wbnds.origin.y), 
+        width:Math.round(bnds.width), 
+        height:Math.round(bnds.height)
       };
     }
   });
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
-      if(this.private.parent == null 
-          && this.private.type !== 'Window' || 
-          this.visible == false)
-        return null;
-
-      var view = this.nativeView('convertRect', this.nativeView('frame'), 'toView', null);
-      var titlebar = this.nativeView('window')('frame').size.height - this.nativeView('window')('contentView')('frame').size.height;
-      return { 
-        x:Math.round(view.origin.x), 
-        y:Math.round((titlebar) + view.origin.y), 
-        width:Math.round(view.size.width), 
-        height:Math.round(view.size.height)
-     };
+      if(!this.nativeView('superview')) return null;
+      var bnds = convY(this.nativeView('frame'), this.nativeView('window')('frame'));
+      return {
+        x:Math.round(bnds.origin.x), 
+        y:Math.round(bnds.origin.y + (this.private.type != 'Window' ? 1 : 0)), 
+        width:Math.round(bnds.size.width), 
+        height:Math.round(bnds.size.height)
+      };
     }
   });
 
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
-      if(this.private.parent == null && this.private.type !== 'Window'  || this.visible == false)
-        return null;
-      var frame = this.nativeView('frame');
-      var bnds = this.nativeView('convertRect', frame, 'toView', this.nativeView('superview'));
+      if(!this.nativeView('superview')) return null;
+      var bnds = convY(this.nativeView('frame'), this.nativeView('superview')('frame'));
       return {
         x:Math.round(bnds.origin.x), 
-        y:Math.round(bnds.origin.y), 
+        y:Math.round(bnds.origin.y + (this.private.type != 'Window' ? 1 : 0)), 
         width:Math.round(bnds.size.width), 
         height:Math.round(bnds.size.height)
       };

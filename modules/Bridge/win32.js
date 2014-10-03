@@ -13,7 +13,6 @@ win32.isNull = ref.isNull;
 win32.structs = {};
  
 var types = win32.types = {};
-
 var
  VOID = types.void = ffi.types.void,
  bool = types.bool = ffi.types.bool,
@@ -346,7 +345,17 @@ var
   cxRightWidth:int,
   cyTopHeight:int,
   cyBottomHeight:int,
+}),
+COLORIZATIONPARAMS = STRUCT('COLORIZATIONPARAMS', {
+  clrColor:COLORREF,
+  clrAftGlow:COLORREF,
+  nIntensity:UINT,
+  clrAftGlowBal:UINT,
+  clrBlurBal:UINT,
+  clrGlassReflInt:UINT,
+  fOpaque:BOOL
 });
+
 
 win32.user32 = new ffi.Library('user32.dll', {
   GetWindowLongA: [ LONG, [ HWND, int ] ],
@@ -360,9 +369,13 @@ win32.user32 = new ffi.Library('user32.dll', {
 });
 
 win32.dwmapi = new ffi.Library('dwmapi.dll', {
-  DwmExtendFrameIntoClientArea: [ HRESULT, [ HWND, MARGINS ] ]
+  DwmExtendFrameIntoClientArea: [ HRESULT, [ HWND, MARGINS ] ],
+  DwmSetColorizationParameters: [ HRESULT, [ COLORIZATIONPARAMS,  UINT ] ],
+  DwmGetColorizationParameters: [ HRESULT, [ COLORIZATIONPARAMS ]]
 });
 win32.dwmapi.MARGINS = MARGINS;
+win32.dwmapi.COLORIZATIONPARAMS = COLORIZATIONPARAMS;
+
 win32.user32.GetWindowLong = win32.user32.GetWindowLongW;
 win32.user32.SetWindowLong = win32.user32.SetWindowLongW;
 win32.user32.WM_SYSCOMMAND = 0x0112;
