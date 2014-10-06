@@ -192,6 +192,18 @@ Tint is binary compatible with node 0.10.x (it can include native compiled C/C++
 * **Where can I find a binary download?** Since this isn't stable we're discouraging users who aren't familiar with development processes from using it, e.g., the only way to run it is to follow the build instructions above. Once stable in October we'll post binaries for OSX and Windows.
 
 
+<h2>Credits</h2>
+
+Tint relies on these amazing open source projects.  Check them out. 
+
+* Node by Joyent+Contributors https://github.com/joyent/node/
+* NodObjC https://github.com/TooTallNate/NodObjC/
+* Node FFI & FFI Library (Google libffi/node-ffi ?)
+* node-ref, node-buffer https://github.com/TooTallNate/
+* Cassowary .NET Constraint Solver
+* V8 by Google
+* (Inspired content also from Edge.JS, although not used).
+
 <h2>License</h2>
 Tint is licensed under the MIT license.
 
