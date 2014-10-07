@@ -325,10 +325,6 @@
           'dependencies': [
             'tint_clr'
           ],
-          'libraries': [
-            'tools/Microsoft/Microsoft.Windows.Shell.lib',
-            'tools/Microsoft/RibbonControlsLibrary.lib',
-          ],
           'sources': [
             'modules/Runtime/Main_win.cc',
             'tools/tint.rc',
@@ -385,6 +381,9 @@
       'msvs_settings': {
         'VCLinkerTool': {
           'SubSystem': 1, # /subsystem:console
+          'AdditionalDependencies':[
+            '../../libraries/AutoLayoutPanel.lib',
+          ],
           'AdditionalOptions': [
             '/IGNORE:4098',
             '/CLRTHREADATTRIBUTE:STA'
@@ -423,7 +422,7 @@
       'conditions': [
         ['OS=="win"', {
           'sources': [
-            'modules/Bridge/CLR_win.cpp',
+            'modules/Bridge/CLR_win.cpp'
           ]
         }]
       ],

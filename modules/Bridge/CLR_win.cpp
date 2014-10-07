@@ -10,6 +10,8 @@
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
 
+namespace AutoLayoutPanel { class AutoLayoutPanel; }
+
 using namespace v8;
 using namespace System::Collections::Generic;
 using namespace System::Reflection;
@@ -572,7 +574,7 @@ public:
 
   static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
     HandleScope scope;
-    //try {
+    try {
       System::String^ userpath = stringV82CLR(args[0]->ToString());
 
       System::String^ framworkRegPath = "Software\\Microsoft\\.NetFramework";
@@ -595,9 +597,9 @@ public:
 
       return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
 
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> GetCLRType(const v8::Arguments& args) {
@@ -612,20 +614,28 @@ public:
 
   static Handle<v8::Value> GetStaticMemberTypes(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::Type^ type = (System::Type^)(target);
-    System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | 
-      BindingFlags::FlattenHierarchy);
-    return scope.Close(MarshalCLRToV8(rtn));
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::Type^ type = (System::Type^)(target);
+      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | 
+        BindingFlags::FlattenHierarchy);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+    }
   }
 
   static Handle<v8::Value> GetMemberTypes(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::Type^ type = (System::Type^)(target);
-    System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | 
-      BindingFlags::FlattenHierarchy);
-    return scope.Close(MarshalCLRToV8(rtn));
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::Type^ type = (System::Type^)(target);
+      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | 
+        BindingFlags::FlattenHierarchy);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+    }
   }
 
   static Handle<v8::Value> ExecNew(const v8::Arguments& args) {
@@ -904,12 +914,16 @@ public:
     if(msg.message == WM_APP+1)
       uv_run_nowait();
   }
+
+  static Handle<v8::Value> GetAutoLayoutClass(const v8::Arguments& args) {
+    HandleScope scope;
+    return scope.Close(MarshalCLRToV8(AutoLayoutPanel::AutoLayoutPanel::typeid));
+  }
 };
 
 extern "C" void CLR_Init(Handle<Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
         Context::GetCurrent()->Global()->Get(String::New("Buffer"))));
-
     // OLD, non-optimized execution methods.
     NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
     NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
@@ -943,6 +957,7 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
     NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
     NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
+    NODE_SET_METHOD(target, "getAutoLayoutClass", CLR::GetAutoLayoutClass);
     
     // Register the thread handle to communicate back to handle application
     // specific events when in WPF mode.

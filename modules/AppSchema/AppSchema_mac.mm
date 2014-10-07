@@ -19,8 +19,8 @@
 	//NSString *cmd = arguments[0];
 	//NSArray *arr = [cmd pathComponents];
 
-	for(int i=0; i < [arr count]; i++)
-		NSLog((NSString *)arr[i]);
+	//for(int i=0; i < [arr count]; i++)
+	//	NSLog((NSString *)arr[i]);
 
 	NSString *possible = [currentpath stringByAppendingString:url];
 	if ([filemgr fileExistsAtPath:possible] == YES) {

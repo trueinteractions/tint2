@@ -301,7 +301,9 @@ function createFromType(nativeType, onto) {
 }
 
 function ImportOnto(assembly, onto) {
-  if(assembly.toLowerCase().indexOf('.dll') == -1) assembly += ".dll";
+  if(assembly.toLowerCase().indexOf('.dll') == -1 
+    && assembly.toLowerCase().indexOf('.exe') == -1) 
+    assembly += ".dll";
 
   var types = dotnet.loadAssembly(assembly);
   var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");
@@ -323,3 +325,4 @@ process.bridge.dotnet.Import = Import;
 
 process.bridge.dotnet.importonto = ImportOnto;
 process.bridge.dotnet.Importonto = ImportOnto;
+
