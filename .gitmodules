@@ -6,3 +6,4 @@
 [submodule "libraries/wpf-autolayout"]
 	path = libraries/wpf-autolayout
 	url = https://github.com/trueinteractions/wpf-autolayout.git
+	branch = master
