@@ -40,15 +40,7 @@ module.exports = (function() {
     this.private.fullscreen=false;
     this.private.closeButton = true;
     this.private.titleTextColor = "auto";
-/*  this.private.chrome = new $.System.Windows.Shell.WindowChrome;
-    $.System.Windows.Shell.WindowChrome.GetWindowChrome(this.native);
-    this.private.chrome.CaptionHeight = 0;
-    this.private.chrome.IsHitTestVisibleInChrome = true;
-    $.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);
-    this.private.chrome = new $.System.Windows.Shell.WindowChrome;
-    this.private.chrome.CaptionHeight = $.System.Windows.SystemParameters.CaptionHeight;
-    this.private.chrome.IsHitTestVisibleInChrome = false;
-    $.System.Windows.Shell.WindowChrome.SetWindowChrome(this.native, this.private.chrome);*/
+    this.private.type = "Window";
 
     //We cannot allow transparency unless there is no window style.
     this.native.ShowInTaskbar = true;
@@ -244,10 +236,14 @@ module.exports = (function() {
         var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
+        $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
         var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
+        $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
   });
@@ -262,10 +258,13 @@ module.exports = (function() {
         var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
+        $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
         var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
+        $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
   });

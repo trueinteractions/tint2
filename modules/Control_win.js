@@ -139,6 +139,7 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
+      if(!this.private.parent) return null;
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
@@ -150,6 +151,7 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
+      if(!this.private.parent) return null;
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
@@ -161,10 +163,14 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
+      if(!this.private.parent) return null;
       var target = this.nativeView.Parent;
+      console.log('bounds.target: ', target);
       var bounds = this.nativeView.TransformToVisual(target)
                     .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      console.log('fee');
       var winpnt = this.nativeView.PointFromScreen(this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      console.log('foozle');
       return {x:Math.round(winpnt.X), y:Math.round(winpnt.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
   });

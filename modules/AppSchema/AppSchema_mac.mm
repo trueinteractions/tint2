@@ -10,12 +10,17 @@
 	else if([url rangeOfString:@"app://"].location != NSNotFound)
 		url = [url stringByReplacingOccurrencesOfString:@"app://" withString:@"/"];
 
-	// TODO: If packaged app...
-
 	NSFileManager *filemgr;
 	NSString *currentpath;
 	filemgr = [NSFileManager defaultManager];
 	currentpath = [filemgr currentDirectoryPath];
+
+	//NSArray *arguments = [[NSProcessInfo processInfo] arguments];
+	//NSString *cmd = arguments[0];
+	//NSArray *arr = [cmd pathComponents];
+
+	for(int i=0; i < [arr count]; i++)
+		NSLog((NSString *)arr[i]);
 
 	NSString *possible = [currentpath stringByAppendingString:url];
 	if ([filemgr fileExistsAtPath:possible] == YES) {

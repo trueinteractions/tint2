@@ -362,16 +362,14 @@ win32.user32 = new ffi.Library('user32.dll', {
   GetWindowLongW: [ LONG, [ HWND, int ] ],
   SetWindowLongA: [ LONG, [ HWND, int, LONG ] ],
   SetWindowLongW: [ LONG, [ HWND, int, LONG ] ],
-  GetSystemMenu: [ HMENU, [HWND, BOOL ] ],
-  EnableMenuItem: [ BOOL, [ HMENU, UINT, UINT ] ] /*,
-  SetClassLongPtr: [ ULONG_PTR, [ HWND, int, LONG_PTR ] ],
-  GetClassLongPtr: [ ULONG_PTR, [ HWND, int ] ]*/
+  GetSystemMenu: [ HMENU, [ HWND, BOOL ] ],
+  EnableMenuItem: [ BOOL, [ HMENU, UINT, UINT ] ],
+  SetClassLongPtrA: [ ULONG_PTR, [ HWND, int, LONG_PTR ] ],
+  GetClassLongPtrA: [ ULONG_PTR, [ HWND, int ] ]
 });
 
 win32.dwmapi = new ffi.Library('dwmapi.dll', {
-  DwmExtendFrameIntoClientArea: [ HRESULT, [ HWND, MARGINS ] ],
-  DwmSetColorizationParameters: [ HRESULT, [ COLORIZATIONPARAMS,  UINT ] ],
-  DwmGetColorizationParameters: [ HRESULT, [ COLORIZATIONPARAMS ]]
+  DwmExtendFrameIntoClientArea: [ HRESULT, [ HWND, MARGINS ] ]
 });
 win32.dwmapi.MARGINS = MARGINS;
 win32.dwmapi.COLORIZATIONPARAMS = COLORIZATIONPARAMS;

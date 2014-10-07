@@ -2,3 +2,7 @@
 	path = libraries/node
 	url = https://github.com/joyent/node.git
 	branch = v0.10.21-release
+
+[submodule "libraries/wpf-autolayout"]
+	path = libraries/wpf-autolayout
+	url = https://github.com/trueinteractions/wpf-autolayout.git

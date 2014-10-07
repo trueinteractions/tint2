@@ -43,6 +43,8 @@ v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
   FFI::Init(bridge);
   REF::Init(bridge);
   CLR_Init(bridge);
+  
+
   return v8::Object::New();
 }
 

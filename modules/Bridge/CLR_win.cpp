@@ -667,43 +667,32 @@ public:
 
   static Handle<v8::Value> ExecGetField(const v8::Arguments& args) {
     HandleScope scope;
-    //try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
-      
-      System::Type^ baseType = target->GetType();
-      if(baseType != System::Type::typeid && target == System::Type::typeid)
-        baseType = (System::Type ^)target;
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::String^ field = stringV82CLR(args[1]->ToString());
+    
+    System::Type^ baseType = target->GetType();
+    if(baseType != System::Type::typeid && target == System::Type::typeid)
+      baseType = (System::Type ^)target;
 
-      System::Object^ rtn = baseType->GetField(field)->GetValue(target);
-      return scope.Close(MarshalCLRToV8(rtn));
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    System::Object^ rtn = baseType->GetField(field)->GetValue(target);
+    return scope.Close(MarshalCLRToV8(rtn));
   }
 
   static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
     HandleScope scope;
-    //try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ event = stringV82CLR(args[1]->ToString());
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
-      CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
-      
-      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
-      System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::String^ event = stringV82CLR(args[1]->ToString());
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
+    CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
+    
+    System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
+    System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
 
-      System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
-      eInfo->AddEventHandler(target, d);
+    System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
+    eInfo->AddEventHandler(target, d);
 
-      return scope.Close(Undefined());
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    return scope.Close(Undefined());
   }
-
-
-
 
  static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
     HandleScope scope;
@@ -906,8 +895,7 @@ public:
 
         return scope.Close(MarshalCLRToV8(rtn));
       } 
-      catch (System::Exception^ e)
-      {
+      catch (System::Exception^ e) {
         return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
       }
   }
@@ -917,7 +905,6 @@ public:
       uv_run_nowait();
   }
 };
-
 
 extern "C" void CLR_Init(Handle<Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
@@ -956,7 +943,7 @@ extern "C" void CLR_Init(Handle<Object> target) {
     NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
     NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
     NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
-
+    
     // Register the thread handle to communicate back to handle application
     // specific events when in WPF mode.
     System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
