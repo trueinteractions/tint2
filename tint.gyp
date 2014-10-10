@@ -382,11 +382,10 @@
         'VCLinkerTool': {
           'SubSystem': 1, # /subsystem:console
           'AdditionalDependencies':[
-            '../../libraries/AutoLayoutPanel.lib',
           ],
           'AdditionalOptions': [
             '/IGNORE:4098',
-            '/CLRTHREADATTRIBUTE:STA'
+            '/CLRTHREADATTRIBUTE:STA',
           ]
         },
       },
@@ -421,7 +420,70 @@
       ],
       'conditions': [
         ['OS=="win"', {
+          'include_dirs': [
+            'libraries/wpf-autolayout/cpp/include/',
+          ],
           'sources': [
+            'libraries/wpf-autolayout/cpp/AutoLayoutPanel.cpp',
+            'libraries/wpf-autolayout/cpp/ClAbstractVariable.cc',
+            'libraries/wpf-autolayout/cpp/ClC.cc',
+            'libraries/wpf-autolayout/cpp/ClConstraint.cc',
+            'libraries/wpf-autolayout/cpp/ClDummyVariable.cc',
+            'libraries/wpf-autolayout/cpp/ClFDBinaryOneWayConstraint.cc',
+            'libraries/wpf-autolayout/cpp/ClFDConnectorVariable.cc',
+            # 'ClFDSolver.cc',
+            'libraries/wpf-autolayout/cpp/ClFDVariable.cc',
+            'libraries/wpf-autolayout/cpp/ClFloatVariable.cc',
+            'libraries/wpf-autolayout/cpp/ClLinearExpression.cc',
+            'libraries/wpf-autolayout/cpp/ClSimplexSolver.cc',
+            'libraries/wpf-autolayout/cpp/ClSlackVariable.cc',
+            'libraries/wpf-autolayout/cpp/ClSolver.cc',
+            'libraries/wpf-autolayout/cpp/ClStrength.cc',
+            'libraries/wpf-autolayout/cpp/ClSymbolicWeight.cc',
+            'libraries/wpf-autolayout/cpp/ClTableau.cc',
+            'libraries/wpf-autolayout/cpp/ClVariable.cc',
+            'libraries/wpf-autolayout/cpp/include/Cassowary.h',
+            'libraries/wpf-autolayout/cpp/include/Cl.h',
+            'libraries/wpf-autolayout/cpp/include/ClAbstractVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClC.h',
+            'libraries/wpf-autolayout/cpp/include/ClConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClConstraintHash.h',
+            'libraries/wpf-autolayout/cpp/include/ClDummyVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClEditConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClEditOrStayConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClErrors.h',
+            'libraries/wpf-autolayout/cpp/include/ClFDBinaryOneWayConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClFDConnectorVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClFDConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClFDSolver.h',
+            'libraries/wpf-autolayout/cpp/include/ClFDVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClFloatVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClLinearConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClLinearEquation.h',
+            'libraries/wpf-autolayout/cpp/include/ClLinearExpression.h',
+            'libraries/wpf-autolayout/cpp/include/ClLinearExpression_fwd.h',
+            'libraries/wpf-autolayout/cpp/include/ClLinearInequality.h',
+            'libraries/wpf-autolayout/cpp/include/ClMap.h',
+            'libraries/wpf-autolayout/cpp/include/ClObjectiveVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClPoint.h',
+            'libraries/wpf-autolayout/cpp/include/ClReader.h',
+            'libraries/wpf-autolayout/cpp/include/ClSet.h',
+            'libraries/wpf-autolayout/cpp/include/ClSimplexSolver.h',
+            'libraries/wpf-autolayout/cpp/include/ClSlackVariable.h',
+            'libraries/wpf-autolayout/cpp/include/ClSolver.h',
+            'libraries/wpf-autolayout/cpp/include/ClStayConstraint.h',
+            'libraries/wpf-autolayout/cpp/include/ClStrength.h',
+            'libraries/wpf-autolayout/cpp/include/ClSymbolicWeight.h',
+            'libraries/wpf-autolayout/cpp/include/ClTableau.h',
+            'libraries/wpf-autolayout/cpp/include/ClTimedSimplexSolver.h',
+            'libraries/wpf-autolayout/cpp/include/ClTypedefs.h',
+            'libraries/wpf-autolayout/cpp/include/ClVariable.h',
+            'libraries/wpf-autolayout/cpp/include/auto_ptr.h',
+            'libraries/wpf-autolayout/cpp/include/cl_auto_ptr.h',
+            'libraries/wpf-autolayout/cpp/include/config-inline.h',
+            # config.h.in
+            'libraries/wpf-autolayout/cpp/include/debug.h',
+            'libraries/wpf-autolayout/cpp/include/timer.h',
             'modules/Bridge/CLR_win.cpp'
           ]
         }]

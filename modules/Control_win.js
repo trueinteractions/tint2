@@ -165,12 +165,9 @@ module.exports = (function() {
     get:function() {
       if(!this.private.parent) return null;
       var target = this.nativeView.Parent;
-      console.log('bounds.target: ', target);
       var bounds = this.nativeView.TransformToVisual(target)
                     .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      console.log('fee');
       var winpnt = this.nativeView.PointFromScreen(this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
-      console.log('foozle');
       return {x:Math.round(winpnt.X), y:Math.round(winpnt.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
   });
@@ -206,35 +203,33 @@ module.exports = (function() {
   }
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
-    /*var constraint = $.NSLayoutConstraint('constraintWithItem',(layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
-                        'attribute',(attributeMap[layoutObject.firstAttribute] || $.NSLayoutAttributeNotAnAttribute),
-                        'relatedBy',(attributeMap[layoutObject.relationship] || $.NSLayoutRelationEqual),
-                        'toItem',(layoutObject.secondItem ? layoutObject.secondItem.nativeView : null),
-                        'attribute',(attributeMap[layoutObject.secondAttribute] || $.NSLayoutAttributeNotAnAttribute),
-                        'multiplier', (layoutObject.multiplier ? layoutObject.multiplier : 0), 
-                        'constant', (layoutObject.constant ? layoutObject.constant : 0));
-    this.nativeView('addConstraint',constraint);*/
-    var constraint = {}; // ?
+    var constraint = this.private.parent.AddLayoutConstraint(
+        (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
+        layoutObject.firstAttribute,
+        layoutObject.relationship,
+        (layoutObject.secondItem ? layoutObject.secondItem.nativeView : null),
+        (layoutObject.secondAttribute || null),
+        (layoutObject.multiplier ? layoutObject.multiplier : 0), 
+        (layoutObject.constant ? layoutObject.constant : 0) );
+    
     return this.private.layoutConstraints.push({js:layoutObject, native:constraint}) - 1;
   }
 
   Control.prototype.removeLayoutConstraint = function(index) {
     if(typeof(index) == 'undefined' || index == null || !this.private.layoutConstraints[index]) return;
-    var native = this.private.layoutObjcConstraints[index].native;
+    var n = this.private.layoutObjcConstraints[index].native;
     this.private.layoutConstraints.splice(index, 1);
-    /*this.nativeView('removeConstraint',objcNative);
-    this.nativeView('updateConstraintsForSubtreeIfNeeded');
-    this.nativeView('layoutSubtreeIfNeeded');*/
+    this.private.parent.RemoveLayoutConstraint(n);
   }
 
-  createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
-  createLayoutProperty('bottom', 'bottom', inverse, 'bottom', negate, ['top','height']);
-  createLayoutProperty('left', 'right', identity, 'left', identity, ['right','width']);
-  createLayoutProperty('right', 'right', inverse, 'right', negate, ['left','width']);
-  createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
-  createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
-  createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);
-  createLayoutProperty('center', 'center', identity, 'center', identity, null);
+  createLayoutProperty('top', 'Bottom', identity, 'Top', identity, ['Bottom','Height']);
+  createLayoutProperty('bottom', 'Bottom', inverse, 'Bottom', negate, ['Top','Height']);
+  createLayoutProperty('left', 'Right', identity, 'Left', identity, ['Right','Width']);
+  createLayoutProperty('right', 'Right', inverse, 'Right', negate, ['Left','Width']);
+  createLayoutProperty('height', 'Height', identity, null, identity, ['Top','Bottom']);
+  createLayoutProperty('width', 'Width', identity, null, identity, ['Left','Right']);
+  createLayoutProperty('middle', 'Middle', identity, 'Middle', identity, null);
+  createLayoutProperty('center', 'Center', identity, 'Center', identity, null);
 
   return Control;
 })();

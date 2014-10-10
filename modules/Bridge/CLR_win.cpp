@@ -10,7 +10,12 @@
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
 
-namespace AutoLayoutPanel { class AutoLayoutPanel; }
+// #include "AutoLayoutPanel.h"
+//namespace AutoLayout { 
+//  ref class AutoLayoutPanel;
+//}
+
+#include "../AutoLayoutPanel.cpp"
 
 using namespace v8;
 using namespace System::Collections::Generic;
@@ -51,7 +56,7 @@ void wrap_pointer_cb2(char *data, void *hint) {}
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
     HandleScope scope;
-    String::Utf8Value utf8text(text);
+    v8::String::Utf8Value utf8text(text);
     if (*utf8text)
     {
         return gcnew System::String(
@@ -169,10 +174,10 @@ Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
     // Construct an error that is just used for the prototype - not verify efficient
     // but 'typeof Error' should work in JavaScript
     result->SetPrototype(v8::Exception::Error( message));
-    result->Set(String::NewSymbol("message"), message);
+    result->Set(v8::String::NewSymbol("message"), message);
     
     // Recording the actual type - 'name' seems to be the common used property
-    result->Set(String::NewSymbol("name"), name);
+    result->Set(v8::String::NewSymbol("name"), name);
 
     return scope.Close(result);
 }
@@ -243,7 +248,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       if(type == System::IntPtr::typeid) {
         void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
         node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
-        (v8::Handle<v8::Object>::Cast(jsdata))->Set(String::NewSymbol("rawpointer"), bufptr->handle_);
+        (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
       }
     //} catch (System::Exception^ e) {
     //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -291,13 +296,13 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
     }
     else if (jsdata->IsObject()) 
     {
-      IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
+      System::Collections::Generic::IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
       Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
       Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
       for (unsigned int i = 0; i < propertyNames->Length(); i++)
       {
           Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
-          String::Utf8Value utf8name(name);
+          v8::String::Utf8Value utf8name(name);
           System::String^ netname = gcnew System::String(*utf8name);
           System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
           netobject->Add(netname, netvalue);
@@ -329,8 +334,8 @@ public ref class CLREventHandler {
     for(int i=0; i < args->Length; i++) argv.push_back(MarshalCLRToV8(args[i]));
 
     if (this->callback->function.IsEmpty()) {
-      ThrowException(Exception::Error(
-            String::New("CLR fatal: Callback has been garbage collected.")));
+      ThrowException(v8::Exception::Error(
+            v8::String::New("CLR fatal: Callback has been garbage collected.")));
       exit(1);
     } else {
       // invoke the registered callback function
@@ -349,8 +354,8 @@ public ref class CLREventHandler {
     v8::TryCatch try_catch;
 
     if (this->callback->function.IsEmpty()) {
-      ThrowException(Exception::Error(
-            String::New("CLR fatal: Callback has been garbage collected.")));
+      ThrowException(v8::Exception::Error(
+            v8::String::New("CLR fatal: Callback has been garbage collected.")));
       exit(1);
     } else {
       // invoke the registered callback function
@@ -917,13 +922,14 @@ public:
 
   static Handle<v8::Value> GetAutoLayoutClass(const v8::Arguments& args) {
     HandleScope scope;
-    return scope.Close(MarshalCLRToV8(AutoLayoutPanel::AutoLayoutPanel::typeid));
+    AutoLayout::AutoLayoutPanel^ panel = gcnew AutoLayout::AutoLayoutPanel();
+    return scope.Close(MarshalCLRToV8(panel));
   }
 };
 
-extern "C" void CLR_Init(Handle<Object> target) {
+extern "C" void CLR_Init(Handle<v8::Object> target) {
     bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
-        Context::GetCurrent()->Global()->Get(String::New("Buffer"))));
+        Context::GetCurrent()->Global()->Get(v8::String::New("Buffer"))));
     // OLD, non-optimized execution methods.
     NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
     NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);

@@ -13,12 +13,12 @@ module.exports = (function() {
     if(NativeObjectClass)
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else
-      Container.call(this, $.System.Windows.Window, $.System.Windows.Controls.Canvas, options);
+      Container.call(this, $.System.Windows.Window, $.AutoLayout.AutoLayoutPanel, options);
 
     // Attach System.Windows.Window.Content = System.Windows.Controls.Canvas
-    this.native.Content = new $.System.Windows.Controls.Border();
-    this.native.Content.CornerRadius = $.System.Windows.SystemParameters.WindowCornerRadius;
-    this.native.Content.Child = this.nativeView;
+    //this.native.Content = new $.System.Windows.Controls.Border();
+    //this.native.Content.CornerRadius = $.System.Windows.SystemParameters.WindowCornerRadius;
+    this.native.Content = this.nativeView;
 
     //TODO: Add enter-fullscreen/exit-fullscreen
     this.native.addEventListener('Closing', function() { this.fireEvent('close'); }.bind(this));
