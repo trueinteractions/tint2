@@ -380,6 +380,11 @@
         }],
       ],
       'msvs_settings': {
+        'VCManifestTool': {
+          'AdditionalManifestFiles': [
+            '$(ProjectDir)..\\..\\tools\\tint.manifest',
+          ],
+        },
         'VCLinkerTool': {
           'SubSystem': 1, # /subsystem:console
           'AdditionalDependencies':[

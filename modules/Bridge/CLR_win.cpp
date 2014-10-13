@@ -10,11 +10,6 @@
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
 
-// #include "AutoLayoutPanel.h"
-//namespace AutoLayout { 
-//  ref class AutoLayoutPanel;
-//}
-
 #include "../AutoLayoutPanel.cpp"
 
 using namespace v8;
@@ -927,46 +922,97 @@ public:
   }
 };
 
+namespace IEWebBrowserFix {
+  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
+    HKEY key;
+    bool success = true;
+    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
+    wstring path(featuresPath + feature);
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
+      success = false;
+    else {
+      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
+      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
+    } 
+    return success;
+  }
+
+  static void SetBrowserFeatureControl() {
+    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
+    System::String^ pName = process->Modules[0]->FileName;
+    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
+    delim[0]='\\';
+    array<System::String^>^ path = pName->Split(delim);
+    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
+    const wchar_t *fileName = fileNameP;
+
+    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
+    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
+    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
+    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
+    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
+    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+  }
+}
+
 extern "C" void CLR_Init(Handle<v8::Object> target) {
-    bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
-        Context::GetCurrent()->Global()->Get(v8::String::New("Buffer"))));
-    // OLD, non-optimized execution methods.
-    NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
-    NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
-    NODE_SET_METHOD(target, "execMethod", CLR::ExecMethod);
-    NODE_SET_METHOD(target, "execStaticMethod", CLR::ExecStaticMethod);
-    NODE_SET_METHOD(target, "execSetField", CLR::ExecSetField);
-    NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
-    NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
-    NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
-    NODE_SET_METHOD(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);
+  
+  // Fix registry and "FEATURE" controls, these help align IE with a normal behavior
+  // expected (on a per app registry setting basis).  This does not set global registry
+  // values for anything outside of our application.
+  IEWebBrowserFix::SetBrowserFeatureControl();
 
-    // get programmatic information
-    NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
-    NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
-    NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
-    NODE_SET_METHOD(target, "getCLRType", CLR::GetCLRType);
+  bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
+      Context::GetCurrent()->Global()->Get(v8::String::New("Buffer"))));
 
-    // create classes
-    NODE_SET_METHOD(target, "classCreate", CLR::CreateClass);
-    NODE_SET_METHOD(target, "classAddConstructor", CLR::AddConstructor);
-    NODE_SET_METHOD(target, "classAddMethod", CLR::AddMethodToClass);
-    NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
-    NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
-    NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
+  // OLD, non-optimized execution methods.
+  NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
+  NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
+  NODE_SET_METHOD(target, "execMethod", CLR::ExecMethod);
+  NODE_SET_METHOD(target, "execStaticMethod", CLR::ExecStaticMethod);
+  NODE_SET_METHOD(target, "execSetField", CLR::ExecSetField);
+  NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
+  NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
+  NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
+  NODE_SET_METHOD(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);
 
-    // 2nd gen optimized execution
-    NODE_SET_METHOD(target, "getStaticPropertyObject", CLR::ExecGetStaticPropertyObject);
-    NODE_SET_METHOD(target, "getPropertyObject", CLR::ExecGetPropertyObject);
-    NODE_SET_METHOD(target, "getMethodObject", CLR::ExecGetMethodObject);
-    NODE_SET_METHOD(target, "getStaticMethodObject", CLR::ExecGetStaticMethodObject);
-    NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
-    NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
-    NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
-    NODE_SET_METHOD(target, "getAutoLayoutClass", CLR::GetAutoLayoutClass);
-    
-    // Register the thread handle to communicate back to handle application
-    // specific events when in WPF mode.
-    System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
-        gcnew System::Windows::Interop::ThreadMessageEventHandler(CLR::HandleMessageLoop);
+  // get programmatic information
+  NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
+  NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
+  NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
+  NODE_SET_METHOD(target, "getCLRType", CLR::GetCLRType);
+
+  // create classes
+  NODE_SET_METHOD(target, "classCreate", CLR::CreateClass);
+  NODE_SET_METHOD(target, "classAddConstructor", CLR::AddConstructor);
+  NODE_SET_METHOD(target, "classAddMethod", CLR::AddMethodToClass);
+  NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
+  NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
+  NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
+
+  // 2nd gen optimized execution
+  NODE_SET_METHOD(target, "getStaticPropertyObject", CLR::ExecGetStaticPropertyObject);
+  NODE_SET_METHOD(target, "getPropertyObject", CLR::ExecGetPropertyObject);
+  NODE_SET_METHOD(target, "getMethodObject", CLR::ExecGetMethodObject);
+  NODE_SET_METHOD(target, "getStaticMethodObject", CLR::ExecGetStaticMethodObject);
+  NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
+  NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
+  NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
+  NODE_SET_METHOD(target, "getAutoLayoutClass", CLR::GetAutoLayoutClass);
+  
+  // Register the thread handle to communicate back to handle application
+  // specific events when in WPF mode.
+  System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
+      gcnew System::Windows::Interop::ThreadMessageEventHandler(CLR::HandleMessageLoop);
 }
