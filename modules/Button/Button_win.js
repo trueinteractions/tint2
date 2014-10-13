@@ -8,13 +8,16 @@ module.exports = (function() {
 
     if(NativeObjectClass && NativeObjectClass.type == '#')
       Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.System.Windows.Controls.Button, $.System.Windows.Controls.Label, options);
+    else {
+      options.initViewOnly = true;
+      Container.call(this, $.System.Windows.Controls.Button, $.System.Windows.Controls.Button, options);
+    }
 
     this.private.img = null;
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
-    this.native.Content = this.nativeView;
+    this.private.label = new $.System.Windows.Controls.Label();
+    this.native.Content = this.private.label;
   }
 
   Button.prototype = Object.create(Container.prototype);

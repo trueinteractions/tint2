@@ -326,3 +326,5 @@ process.bridge.dotnet.Import = Import;
 process.bridge.dotnet.importonto = ImportOnto;
 process.bridge.dotnet.Importonto = ImportOnto;
 
+process.bridge.dotnet.import(process.execPath);
+
