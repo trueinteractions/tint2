@@ -154,20 +154,8 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
           dotnet.getPropertyObject(this.pointer,memberName);
       }
       dotnet.setProperty(this.props[memberName], static ? null : this.pointer, unwrap(e));
-//      dotnet.execSetProperty((static ? this.classPointer : this.pointer), memberName, unwrap(e)); 
     }
   });
-  /*Object.defineProperty(target, memberName, {
-    configurable:true, 
-    enumerable:true,
-    get:function() {
-      if(static)
-        return wrap(dotnet.execGetStaticProperty(this.classPointer, memberName));
-      else
-        return wrap(dotnet.execGetProperty(this.pointer, memberName)); 
-    },
-    set:function(e) { dotnet.execSetProperty((static ? this.classPointer : this.pointer), memberName, unwrap(e)); }
-  });*/
 }
 
 function createMember(target, typeNative, typeName, memberNative, memberName, static) {
@@ -208,10 +196,13 @@ function createJSInstance(pointer) {
     var n = function() {
       this.pointer = pointer;
       this.toString = function() { return '[object ' + typeName + ']'; }
-      this.inspect = function() { return '\033[33m CLR Object ' + this.toString() + '\033[39m'; }
+      this.inspect = function() { 
+        return '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n" + Object.keys(this.__proto__); 
+      }
     }
     n.extend = function(name) { return new ProtoClass(name,typeNative); }
-    n.prototype = c.prototype;
+    n.prototype = Object.create(c.prototype);
+    n.prototype.constructor = n;
     n.pointer = n.prototype.pointer = pointer;
     n.classPointer = n.prototype.classPointer = typeNative;
     return new n;
@@ -228,12 +219,12 @@ function createClass(typeNative, typeName) {
       args.push(unwrap(arguments[i]));
     this.pointer = dotnet.execNew.apply(null,args);
     this.toString = function() { return '[object ' + typeName + ']'; }
-    this.inspect = function() { return '\033[33m CLR Object ' + this.toString() + '\033[39m'; }
+    this.inspect = function() {  return '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n" + Object.keys(this.__proto__); }
   }
 
   cls.extend = function(name) { return new ProtoClass(name,this.classPointer); }
   cls.toString = function() { return '[object ' + typeName + ']'; }
-  cls.inspect = function() { return '\033[33m CLR Class ' + this.toString() + '\033[39m'; }
+  //cls.inspect = function() { return '\033[33m CLR Class ' + this.toString() + '\033[39m'; }
   cls.classPointer = cls.prototype.classPointer = typeNative;
   cls.className = cls.prototype.className = typeName;
 

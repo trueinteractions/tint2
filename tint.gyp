@@ -74,6 +74,7 @@
       'modules/Control_win.js',
       'modules/Application/Application_win.js',
       'modules/Utilities/Utilities_win.js',
+      'modules/WebView/WebView_win.js',
       'modules/Window/Window_win.js',
     ],
     'library_files': [
