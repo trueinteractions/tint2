@@ -15,8 +15,6 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ var $ = process.bridge.objc;
-
   var mainWindow = new Window();
   mainWindow.visible = true;
   var webview = new WebView();

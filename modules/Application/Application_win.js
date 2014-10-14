@@ -8,12 +8,8 @@
   process.bridge.dotnet.import('WPF\\PresentationFramework.dll');
   process.bridge.dotnet.import('System.Drawing'); 
   
-
   // Include the app schema. app:// registers on NSURL and for node require().
-  //require('AppSchema')(process.cwd());
-
-  // Register our font factory.
-  //require('FontInternals');
+  require('AppSchema');
 
   var $ = process.bridge.dotnet;
 
@@ -58,15 +54,17 @@
     });
 
     this.resource = function(path) {
-      /*if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
-      var url = $.NSURL('URLWithString',$(path.toString()));
-      var data = $.NSData('dataWithContentsOfURL',url);
-      if(data)
-        return process.bridge.reinterpret(data('bytes'),data('length'),0);
-      else {
+      if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
+      try {
+        var url = new $.System.Uri(path);
+        var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
+        var reader = new $.System.IO.StreamReader(stream);
+        var data = reader.ReadToEnd();
+        return data;
+      } catch (e) { 
         if(application.warn) console.warn('Cannot find resource at: ', path);
         return null;
-      }*/
+      }
     }
 
     Object.defineProperty(this, 'windows', {

@@ -17,7 +17,6 @@ function run($utils) {
   var mainWindow = new Window(), alpha = 1;
   mainWindow.visible = true;
   var webview = new WebView();
-  mainWindow.titleTextColor = "blue";
   mainWindow.appendChild(webview);
   mainWindow.addLayoutConstraint({
     priority:'required', relationship:'=',

@@ -34,7 +34,7 @@ module.exports = (function() {
       this.native = $color.FromArgb($.System.Convert.ToByte(c4 ? c4*255 : 255), $.System.Convert.ToByte(c1),$.System.Convert.ToByte(c2),$.System.Convert.ToByte(c3));
     } else {
       var rgba = utilities.parseColor(type);
-      this.native = $color.FromArgb($.System.Convert.ToByte(rgba.a*255),$.System.Convert.ToByte(rgba.r),$.System.Convert.ToByte(rgba.g),$.System.Convert.ToByte(rgba.b));
+      this.native = $color.FromArgb($.System.Convert.ToByte(Math.round(rgba.a*255)),$.System.Convert.ToByte(Math.round(rgba.r)),$.System.Convert.ToByte(Math.round(rgba.g)),$.System.Convert.ToByte(Math.round(rgba.b)));
     }
   }
   Object.defineProperty(Color.prototype, 'colorspace', { get:function() { 

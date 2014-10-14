@@ -22,6 +22,9 @@ v8::Handle<v8::Object> process_l;
 v8::Persistent<v8::Object> bridge;
 DWORD mainThreadId = 0;
 
+
+extern "C" void InitAppRequest();
+
 namespace REF {
   extern void Init(v8::Handle<v8::Object> target);
 }
@@ -106,6 +109,7 @@ void node_load() {
   //http://msdn.microsoft.com/en-us/library/1f6c88af(v=vs.110).aspx
   //http://msdn.microsoft.com/en-us/library/system.net.webrequest.registerprefix(v=vs.110).aspx
   //http://msdn.microsoft.com/en-us/library/system.uri(v=vs.110).aspx
+  InitAppRequest();
 
   // Register the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);

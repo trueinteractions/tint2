@@ -354,7 +354,12 @@ COLORIZATIONPARAMS = STRUCT('COLORIZATIONPARAMS', {
   clrBlurBal:UINT,
   clrGlassReflInt:UINT,
   fOpaque:BOOL
-});
+}),
+POINT = STRUCT('POINT', {
+  x:LONG,
+  y:LONG
+}),
+LPPOINT = TYPEDEF('POINT', PTR(POINT));
 
 
 win32.user32 = new ffi.Library('user32.dll', {
@@ -365,7 +370,11 @@ win32.user32 = new ffi.Library('user32.dll', {
   GetSystemMenu: [ HMENU, [ HWND, BOOL ] ],
   EnableMenuItem: [ BOOL, [ HMENU, UINT, UINT ] ],
   SetClassLongPtrA: [ ULONG_PTR, [ HWND, int, LONG_PTR ] ],
-  GetClassLongPtrA: [ ULONG_PTR, [ HWND, int ] ]
+  GetClassLongPtrA: [ ULONG_PTR, [ HWND, int ] ],
+  PostMessageA: [ BOOL, [ HWND, UINT, WPARAM, LPARAM ] ],
+  PostMessageW: [ BOOL, [ HWND, UINT, WPARAM, LPARAM ] ],
+  GetCursorPos: [ BOOL, [ LPPOINT ]],
+  SetCursorPos: [ BOOL, [ int, int ]]
 });
 
 win32.dwmapi = new ffi.Library('dwmapi.dll', {

@@ -827,9 +827,7 @@ public:
 
       return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
-      System::Console::WriteLine(e->StackTrace);
-      exit(1);
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -839,9 +837,7 @@ public:
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
       return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
     } catch(System::Exception^ e) {
-      System::Console::WriteLine(e->ToString());
-      System::Console::WriteLine(e->StackTrace);
-      exit(1);
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
