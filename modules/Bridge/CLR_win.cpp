@@ -606,12 +606,8 @@ public:
 
   static Handle<v8::Value> GetCLRType(const v8::Arguments& args) {
     HandleScope scope;
-    //try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      return scope.Close(MarshalCLRToV8(target->GetType()));
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    return scope.Close(MarshalCLRToV8(target->GetType()));
   }
 
   static Handle<v8::Value> GetStaticMemberTypes(const v8::Arguments& args) {
@@ -642,21 +638,17 @@ public:
 
   static Handle<v8::Value> ExecNew(const v8::Arguments& args) {
     HandleScope scope;
-    //try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::Object^ target = MarshalV8ToCLR(args[0]);
 
-      int argSize = args.Length() - 1;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+    int argSize = args.Length() - 1;
+    array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-      for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 1]),i);
+    for(int i=0; i < argSize; i++)
+      cshargs->SetValue(MarshalV8ToCLR(args[i + 1]),i);
 
-      System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
-      return scope.Close(MarshalCLRToV8(rtn));
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    System::Type^ type = (System::Type^)(target);
+    System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
+    return scope.Close(MarshalCLRToV8(rtn));
   }
 
   static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {

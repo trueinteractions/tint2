@@ -122,7 +122,7 @@ module.exports = (function() {
     this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
     this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
 
-    var nativeViewExtended = NativeViewClass.extend(NativeViewClass.getName()+Math.round(Math.random()*1000000));
+    var nativeViewExtended = NativeViewClass.extend(NativeViewClass.getName()+Math.round(Math.random()*10000000));
     options.delegates.forEach(function(item) {
       nativeViewExtended.addMethod(item[0],item[1],item[2]);
     });
