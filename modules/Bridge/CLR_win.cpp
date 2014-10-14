@@ -5,12 +5,14 @@
 #include <stdio.h>
 #include <vcclr.h>
 #include <vector>
+#include <msclr/marshal.h>
+
+
+#include "../AutoLayoutPanel.cpp"
 
 #using <system.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
-
-#include "../AutoLayoutPanel.cpp"
 
 using namespace v8;
 using namespace System::Collections::Generic;
@@ -617,7 +619,7 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | 
+      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Static | 
         BindingFlags::FlattenHierarchy);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
@@ -630,7 +632,7 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | 
+      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Instance | 
         BindingFlags::FlattenHierarchy);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
@@ -659,7 +661,7 @@ public:
 
   static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {
     HandleScope scope;
-    //try {
+    try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[3]);
       System::String^ field = stringV82CLR(args[2]->ToString());
@@ -668,24 +670,52 @@ public:
       if(baseType != System::Type::typeid && target == System::Type::typeid)
         baseType = (System::Type ^)target;
 
-      baseType->GetField(field)->SetValue(target, value);
+      baseType->GetField(field,
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->SetValue(target, value);
       return scope.Close(Undefined());
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> ExecGetStaticField(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::String^ field = stringV82CLR(args[1]->ToString());
+
+      System::Type^ baseType = target->GetType();
+      if(baseType != System::Type::typeid && target == System::Type::typeid)
+        baseType = (System::Type ^)target;
+
+      System::Reflection::FieldInfo ^fieldinfo = baseType->GetField(field, 
+         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+
+      System::Object^ rtn = fieldinfo->GetValue(target);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecGetField(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::String^ field = stringV82CLR(args[1]->ToString());
-    
-    System::Type^ baseType = target->GetType();
-    if(baseType != System::Type::typeid && target == System::Type::typeid)
-      baseType = (System::Type ^)target;
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::String^ field = stringV82CLR(args[1]->ToString());
+      System::Type^ baseType = target->GetType();
+      if(baseType != System::Type::typeid && target == System::Type::typeid)
+        baseType = (System::Type ^)target;
 
-    System::Object^ rtn = baseType->GetField(field)->GetValue(target);
-    return scope.Close(MarshalCLRToV8(rtn));
+      System::Reflection::FieldInfo ^fieldinfo = baseType->GetField(field, 
+         BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+
+      System::Object^ rtn = fieldinfo->GetValue(target);
+
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
@@ -715,31 +745,34 @@ public:
       cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
 
     MethodInfo^ rtn = target->GetMethod(method, 
-      BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy,
-      nullptr,
-      cshargs,
-      nullptr);
+      BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
+      nullptr, cshargs, nullptr);
+
     return scope.Close(MarshalCLRToV8(rtn));
   }
 
   static Handle<v8::Value> ExecGetMethodObject(const v8::Arguments& args) {
     HandleScope scope;
     try {
-    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-    System::String^ method = stringV82CLR(args[1]->ToString());
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+      System::String^ method = stringV82CLR(args[1]->ToString());
 
-    int argSize = args.Length() - 2;
-    array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
+      int argSize = args.Length() - 2;
+      array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
 
-    for(int i=0; i < argSize; i++)
-      cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
+      for(int i=0; i < argSize; i++) {
+        System::Object^ obj = MarshalV8ToCLR(args[i + 2]);
+        System::Type ^type = obj->GetType();
+        cshargs->SetValue(type,i);
+      }
 
-    MethodInfo^ rtn = target->GetMethod(method, 
-      BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy,
-      nullptr,
-      cshargs,
-      nullptr);
-    return scope.Close(MarshalCLRToV8(rtn));
+      MethodInfo^ rtn = target->GetMethod(method, 
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
+        nullptr,
+        cshargs,
+        nullptr);
+
+      return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -748,11 +781,11 @@ public:
   static Handle<v8::Value> ExecGetStaticPropertyObject(const v8::Arguments& args) {
     HandleScope scope;
     try {
-    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-    System::String^ property = stringV82CLR(args[1]->ToString());
-    PropertyInfo^ rtn = target->GetProperty(property,  
-      BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy);
-    return scope.Close(MarshalCLRToV8(rtn));
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+      System::String^ property = stringV82CLR(args[1]->ToString());
+      PropertyInfo^ rtn = target->GetProperty(property,  
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+      return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -761,17 +794,17 @@ public:
   static Handle<v8::Value> ExecGetPropertyObject(const v8::Arguments& args) {
     HandleScope scope;
     try {
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::String^ property = stringV82CLR(args[1]->ToString());
-    try {
-      PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
-        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
-    } catch (AmbiguousMatchException^ e) {
-      PropertyInfo^ rtn = target->GetType()->GetProperty(property,
-        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
-      return scope.Close(MarshalCLRToV8(rtn));
-    }
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::String^ property = stringV82CLR(args[1]->ToString());
+      try {
+        PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+        return scope.Close(MarshalCLRToV8(rtn));
+      } catch (AmbiguousMatchException^ e) {
+        PropertyInfo^ rtn = target->GetType()->GetProperty(property,
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
+        return scope.Close(MarshalCLRToV8(rtn));
+      }
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -781,44 +814,43 @@ public:
   static Handle<v8::Value> ExecMethodObject(const v8::Arguments& args) {
     HandleScope scope;
     try {
-    MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
-    System::Object^ target = MarshalV8ToCLR(args[1]);
+      MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
+      System::Object^ target = MarshalV8ToCLR(args[1]);
 
-    int argSize = args.Length() - 2;
-    array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      int argSize = args.Length() - 2;
+      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-    for(int i=0; i < argSize; i++)
-      cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+      for(int i=0; i < argSize; i++)
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
-    System::Object^ rtn = method->Invoke(target, cshargs);
-    return scope.Close(MarshalCLRToV8(rtn));
+      System::Object^ rtn = method->Invoke(target, cshargs);
+
+      return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
       System::Console::WriteLine(e->ToString());
       System::Console::WriteLine(e->StackTrace);
       exit(1);
-      //return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static Handle<v8::Value> ExecPropertyGet(const v8::Arguments &args) {
     HandleScope scope;
     try {
-    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
-    return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
+      PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
+      return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
     } catch(System::Exception^ e) {
       System::Console::WriteLine(e->ToString());
       System::Console::WriteLine(e->StackTrace);
       exit(1);
-      //return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
     HandleScope scope;
     try {
-    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
-    prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
-    return scope.Close(Undefined());
+      PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
+      prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
+      return scope.Close(Undefined());
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -842,7 +874,7 @@ public:
     System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
     System::String^ property = stringV82CLR(args[1]->ToString());
     System::Object^ rtn = target->GetProperty(property,
-      BindingFlags::Static | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
+      BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
     return scope.Close(MarshalCLRToV8(rtn));
   }
 
@@ -856,7 +888,7 @@ public:
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (AmbiguousMatchException^ e) {
       System::Object^ rtn = target->GetType()->GetProperty(property,
-        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
+        BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
       return scope.Close(MarshalCLRToV8(rtn));
     }
   }
@@ -874,7 +906,7 @@ public:
       System::Type^ type = (System::Type ^)target;
       System::String^ method = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
-        BindingFlags::Static | BindingFlags::Public | BindingFlags::InvokeMethod,
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
         nullptr,
         target,
         cshargs);
@@ -898,7 +930,7 @@ public:
         System::Type^ type = target->GetType();
         System::String^ method = stringV82CLR(args[1]->ToString());
         System::Object^ rtn = type->InvokeMember(method,
-          BindingFlags::Public | BindingFlags::Instance | BindingFlags::InvokeMethod,
+          BindingFlags::Public | BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
           nullptr,
           target,
           cshargs);
@@ -922,49 +954,50 @@ public:
   }
 };
 
-namespace IEWebBrowserFix {
-  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
-    HKEY key;
-    bool success = true;
-    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
-    wstring path(featuresPath + feature);
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
-      success = false;
-    else {
-      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
-      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
-    } 
-    return success;
-  }
+  namespace IEWebBrowserFix {
+    static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
+      HKEY key;
+      bool success = true;
+      wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
+      wstring path(featuresPath + feature);
+      if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
+        success = false;
+      else {
+        if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
+        if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
+      } 
+      return success;
+    }
 
-  static void SetBrowserFeatureControl() {
-    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
-    System::String^ pName = process->Modules[0]->FileName;
-    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
-    delim[0]='\\';
-    array<System::String^>^ path = pName->Split(delim);
-    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
-    const wchar_t *fileName = fileNameP;
+    static void SetBrowserFeatureControl() {
+      System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
+      System::String^ pName = process->Modules[0]->FileName;
+      array<wchar_t>^ delim = gcnew array<wchar_t>(1);
+      delim[0]='\\';
+      array<System::String^>^ path = pName->Split(delim);
+      pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
+      const wchar_t *fileName = fileNameP;
 
-    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
-    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
-    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
-    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
-    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
-    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+      SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
+      SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+      SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
+      SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
+      SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
+      SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
+      SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
+      SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
+      SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
+      SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
+      SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+    }
+    
   }
-}
 
 extern "C" void CLR_Init(Handle<v8::Object> target) {
   
@@ -983,6 +1016,7 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "execStaticMethod", CLR::ExecStaticMethod);
   NODE_SET_METHOD(target, "execSetField", CLR::ExecSetField);
   NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
+  NODE_SET_METHOD(target, "execGetStaticField", CLR::ExecGetStaticField);
   NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
   NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
   NODE_SET_METHOD(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);

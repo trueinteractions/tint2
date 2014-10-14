@@ -101,7 +101,12 @@ function createField(target, typeNative, typeName, memberNative, memberName, sta
   Object.defineProperty(target, memberName, {
     configurable:true,
     enumerable:true,
-      get:function() { return wrap(dotnet.execGetField((static ? this.classPointer : this.pointer), memberName)); },
+      get:function() {
+        if(static)
+          return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
+        else 
+          return wrap(dotnet.execGetField(this.pointer, memberName));
+      },
       set:function(e) { dotnet.execSetField((static ? this.classPointer : this.pointer),memberName,unwrap(e)); }
     });
 }
@@ -144,7 +149,10 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
           dotnet.getStaticPropertyObject(this.classPointer,memberName) : 
           dotnet.getPropertyObject(this.pointer,memberName);
       }
-      return wrap(dotnet.getProperty(this.props[memberName], static ? null : this.pointer)); 
+      if(typeof(this.props[memberName]) !== 'undefined' && this.props[memberName] !== null)
+        return wrap(dotnet.getProperty(this.props[memberName], static ? null : this.pointer)); 
+      else
+        return null;
     },
     set:function(e) {
       if(!this.props) this.props={};
@@ -168,7 +176,9 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   else if (strMemberType == 'Method') info.exec = createMethod;
   else if (strMemberType == 'Property') info.exec = createProperty;
   else if (strMemberType == 'Constructor') ; // already delt with.
-  else {
+  else if (strMemberType == 'NestedType') ; // do not use these.
+  else
+  {
     console.warn("Unknown type: "+strMemberType);
   }
 
@@ -197,7 +207,12 @@ function createJSInstance(pointer) {
       this.pointer = pointer;
       this.toString = function() { return '[object ' + typeName + ']'; }
       this.inspect = function() { 
-        return '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n" + Object.keys(this.__proto__); 
+        var out = '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n";
+
+        for(var prop in this) {
+          out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
+        } 
+        return out;
       }
     }
     n.extend = function(name) { return new ProtoClass(name,typeNative); }
@@ -219,7 +234,14 @@ function createClass(typeNative, typeName) {
       args.push(unwrap(arguments[i]));
     this.pointer = dotnet.execNew.apply(null,args);
     this.toString = function() { return '[object ' + typeName + ']'; }
-    this.inspect = function() {  return '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n" + Object.keys(this.__proto__); }
+    this.inspect = function() { 
+        var out = '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n";
+
+        for(var prop in this) {
+          out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
+        } 
+        return out;
+      }
   }
 
   cls.extend = function(name) { return new ProtoClass(name,this.classPointer); }

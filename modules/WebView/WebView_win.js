@@ -55,7 +55,16 @@ module.exports = (function() {
   }
 
   Object.defineProperty(WebView.prototype, 'icon', {
-    get:function() { }
+    get:function() {
+      var exeCmd = "function(){\n"+
+        "var favicon = undefined;\n"+
+        "var nodeList = document.getElementsByTagName('link');\n"+
+        "for (var i = 0; i < nodeList.length; i++)\n"+
+        "  if((nodeList[i].getAttribute('rel') == 'icon')||(nodeList[i].getAttribute('rel') == 'shortcut icon'))\n"+
+        "      favicon = nodeList[i].getAttribute('href');\n"+
+        "return favicon; }()";
+      return this.execute(exeCmd);
+    }
   })
 
   // no
