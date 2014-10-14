@@ -14,6 +14,7 @@ module.exports = (function() {
     }
 
     this.private.loading = false;
+    var firstLoad = true;
 
     this.nativeView.addEventListener('LoadCompleted', function() { 
       this.private.loading = false;
@@ -22,10 +23,19 @@ module.exports = (function() {
     }.bind(this));
     this.nativeView.addEventListener('Navigated', function() { this.fireEvent('loading') }.bind(this));
     this.nativeView.addEventListener('Navigating', function() {
+      if(firstLoad) {
+        // establish the activex instance, store a ref for later.
+        this.private.comObject = this.native._axIWebBrowser2;
+
+        // Use the activeX object to silent error messages.
+        this.private.comObject.GetType().InvokeMember("Silent", $.System.Reflection.BindingFlags.SetProperty, null, this.private.comObject, [ true ], null, null, null);
+        
+        firstLoad = false;
+      }
       this.private.loading = true;
       this.fireEvent('locationchange');
     }.bind(this));
-    
+  
     // cancel
     // unload
     // error
@@ -41,7 +51,10 @@ module.exports = (function() {
   WebView.prototype.back = function() { this.nativeView.GoBack(); }
   WebView.prototype.forward = function() { this.nativeView.GoFroward(); }
   WebView.prototype.reload = function() { this.nativeView.Refresh(); }
-  WebView.prototype.stop = function() { }
+  WebView.prototype.stop = function() { 
+    this.private.loading = false;
+    this.private.comObject.GetType().InvokeMember("Stop", $.System.Reflection.BindingFlags.InvokeMember, null, this.private.comObject, null, null, null, null);
+  }
 
   WebView.prototype.postMessage = function(e) {
     var msg = "var msg=document.createEvent('MessageEvent');\n";
@@ -56,14 +69,14 @@ module.exports = (function() {
 
   Object.defineProperty(WebView.prototype, 'icon', {
     get:function() {
-      var exeCmd = "function(){\n"+
+      /**var exeCmd = "function(){\n"+
         "var favicon = undefined;\n"+
         "var nodeList = document.getElementsByTagName('link');\n"+
-        "for (var i = 0; i < nodeList.length; i++)\n"+
+        "for (var i = 0; nodeList && (i < nodeList.length); i++)\n"+
         "  if((nodeList[i].getAttribute('rel') == 'icon')||(nodeList[i].getAttribute('rel') == 'shortcut icon'))\n"+
         "      favicon = nodeList[i].getAttribute('href');\n"+
         "return favicon; }()";
-      return this.execute(exeCmd);
+      return this.execute(exeCmd);**/
     }
   })
 
@@ -122,7 +135,7 @@ module.exports = (function() {
 
   Object.defineProperty(WebView.prototype, 'loading', { 
     get:function() { return this.private.loading; },
-    set:function(e) {  }
+    set:function(e) { if(e == false) this.stop(); }
   });
 
   Object.defineProperty(WebView.prototype, 'transparent', {

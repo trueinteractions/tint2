@@ -754,8 +754,17 @@ public:
 
       for(int i=0; i < argSize; i++) {
         System::Object^ obj = MarshalV8ToCLR(args[i + 2]);
-        System::Type ^type = obj->GetType();
-        cshargs->SetValue(type,i);
+        if(obj != nullptr)
+          cshargs->SetValue(obj->GetType(),i);
+        else {
+          // null was passed in, since we cannot use this to properly get the method overload
+          // be reflected types we'll try jut a name match.
+          MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
+          if(rtnl == nullptr)
+            return scope.Close(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
+          else
+            return scope.Close(MarshalCLRToV8(rtnl));
+        }
       }
 
       MethodInfo^ rtn = target->GetMethod(method, 
@@ -808,7 +817,6 @@ public:
     try {
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
       System::Object^ target = MarshalV8ToCLR(args[1]);
-
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
