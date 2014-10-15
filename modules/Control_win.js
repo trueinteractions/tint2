@@ -144,7 +144,7 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
-      if(!this.private.parent) return null;
+      //if(!this.private.parent) return null;
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
@@ -156,7 +156,7 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
-      if(!this.private.parent) return null;
+      //if(!this.private.parent) return null;
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
@@ -222,9 +222,9 @@ module.exports = (function() {
 
   Control.prototype.removeLayoutConstraint = function(index) {
     if(typeof(index) == 'undefined' || index == null || !this.private.layoutConstraints[index]) return;
-    var n = this.private.layoutObjcConstraints[index].native;
+    var n = this.private.layoutConstraints[index].native;
     this.private.layoutConstraints.splice(index, 1);
-    this.private.parent.RemoveLayoutConstraint(n);
+    this.nativeView.RemoveLayoutConstraint(n);
   }
 
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);

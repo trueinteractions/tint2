@@ -25,8 +25,6 @@ using namespace Microsoft::Win32;
 
 extern "C" void uv_run_nowait();
 
-/* Stubs for CLR, these are needed otherwise we'll get a linking 
- * warning complaining that the exe will not run. */
 namespace v8 {
   namespace internal {
     class Object {};

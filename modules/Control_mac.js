@@ -16,52 +16,51 @@ module.exports = (function() {
     Object.defineProperty(Control.prototype, name, {
       get: function() { return this.private.user[name]; },
       set: function(value) {
+        var propertyName = name;
         var p = this.private;
 
         if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null)
           throw new Error('A '+name+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
 
-        p.user[name] = value;
+        p.user[propertyName] = value;
 
-        var attached = function() {
-          this.removeEventListener('parent-attached',attached);
-          this[name] = p.user[name];
-        }.bind(this);
-
-        if(p.constraints[name] !== null && p.constraints[name])
-          p.parent.removeLayoutConstraint(p.constraints[name]);
+        if(p.constraints[propertyName] !== null && p.constraints[propertyName])
+          p.parent.removeLayoutConstraint(p.constraints[propertyName]);
 
         if(value == null)
           return;
 
-        this.addEventListener('parent-attached', attached);
-        if(!p.parent) return;
-
-        this.addEventListener('parent-dettached', function() {
-          p.parent.removeLayoutConstraint(p.constraints[name]);
+        this.addEventListener('parent-attached', function() {
+          this[propertyName] = p.user[propertyName];
         }.bind(this));
 
-        var layoutObject = {priority:'required', firstItem:this, firstAttribute:name, relationship:'=', secondItem:p.parent};
+        this.addEventListener('parent-dettached', function() {
+          p.parent.removeLayoutConstraint(p.constraints[propertyName]);
+        }.bind(this));
+
+        if(!p.parent) return;
+
+        var layoutObject = {priority:'required', firstItem:this, firstAttribute:propertyName, relationship:'=', secondItem:p.parent};
 
         if (value instanceof Control) {
           layoutObject.secondItem = value;
           layoutObject.multiplier = 1.0;
           layoutObject.constant = 0.0;
           if((p.parent == value || this == value.private.parent) 
-                || name == "middle" || name == "center") 
+                || propertyName == "middle" || propertyName == "center") 
           {
-            layoutObject.firstAttribute = layoutObject.secondAttribute = name;
+            layoutObject.firstAttribute = layoutObject.secondAttribute = propertyName;
           }
-          else if (name == "left") {
+          else if (propertyName == "left") {
             layoutObject.firstAttribute = "left";
             layoutObject.secondAttribute = "right";
-          } else if (name == "right") {
+          } else if (propertyName == "right") {
             layoutObject.firstAttribute = "right";
             layoutObject.secondAttribute = "left";
-          } else if (name == "top") {
+          } else if (propertyName == "top") {
             layoutObject.firstAttribute = "top";
             layoutObject.secondAttribute = "bottom";
-          } else if (name == "bottom") {
+          } else if (propertyName == "bottom") {
             layoutObject.firstAttribute = "bottom";
             layoutObject.secondAttribute = "top";
           }
@@ -78,7 +77,7 @@ module.exports = (function() {
         }
 
         if(!layoutObject.secondAttribute) layoutObject.secondItem = null;
-        p.constraints[name] = p.parent.addLayoutConstraint(layoutObject);
+        p.constraints[propertyName] = p.parent.addLayoutConstraint(layoutObject);
       }
     });
   }
@@ -262,8 +261,8 @@ module.exports = (function() {
 
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
   createLayoutProperty('bottom', 'bottom', inverse, 'bottom', negate, ['top','height']);
-  createLayoutProperty('left', 'right', identity, 'left', identity, ['right','width']);
-  createLayoutProperty('right', 'right', inverse, 'right', negate, ['left','width']);
+  createLayoutProperty('left', 'left', identity, 'left', identity, ['right','width']);
+  createLayoutProperty('right', 'right', inverse, 'right', identity, ['left','width']);
   createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
   createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
   createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);
