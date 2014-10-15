@@ -36,7 +36,7 @@ In addition we offer commercial support at https://www.trueinteractions.com
            | OSX        | Windows    | Linux      | iOS        | Android    
 ---------- | ---------- | ---------- | ---------- | ---------- | ----------
 Build | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
-Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | No, ~46% Pass | N/A | N/A | N/A
+Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | No, ~56% Pass | N/A | N/A | N/A
 
 *This is intended as a preview release for Tint 2, currently only supported on OSX and Windows.*
 
