@@ -160,7 +160,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'y', {
-    get:function() { return Math.floor(this.native.Top); },
+    get:function() { return Math.round(this.native.Top); },
     set:function(e) {
       if(e == 'center') {
         var workingArea = $.System.Windows.SystemParameters.WorkArea;
@@ -175,7 +175,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'x', {
-    get:function() { return Math.floor(this.native.Left); },
+    get:function() { return Math.round(this.native.Left); },
     set:function(e) {
       if(e == 'center') {
         var workingArea = $.System.Windows.SystemParameters.WorkArea;
@@ -190,7 +190,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'width', {
-    get:function() { return Math.floor(this.native.Width); },
+    get:function() { return Math.round(this.native.ActualWidth); },
     set:function(e) {
         e = utilities.parseUnits(e);
         this.native.Width = e;
@@ -198,7 +198,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Window.prototype, 'height', {
-    get:function() { return Math.floor(this.native.Height); },
+    get:function() { return Math.round(this.native.ActualHeight); },
     set:function(e) {
         e = utilities.parseUnits(e);
         this.native.Height = e;

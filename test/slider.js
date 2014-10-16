@@ -27,7 +27,6 @@ function run($utils) {
   slider.height = 20;
   
   setTimeout(function() {
-//    $utils.clickAt(239,55);
     $utils.clickAtControl(slider);
     setTimeout(function() {
       $utils.assert(Math.round(slider.value * 1000) == 500,'Slider value should be 500, is: ', slider.value*1000);
