@@ -21,19 +21,36 @@ module.exports = (function() {
     this.native.Padding = new $.System.Windows.Thickness(5.75,1.75,5.75,1.75);
     // convert pxl based measure to point (18/17) * PixelSize
     this.native.FontSize = this.native.FontSize * 1.05882352941176;
+    this.private.defaultBorder = this.nativeView.BorderThickness;
+    this.private.defaultBorderColor = this.nativeView.BorderBrush;
   }
 
   Button.prototype = Object.create(Container.prototype);
   Button.prototype.constructor = Button;
 
   Object.defineProperty(Button.prototype, 'border', {
-    get:function() { },
-    set:function(e) { }
+    get:function() { 
+      if(this.private.defaultBorder == this.nativeView.BorderThickness) return true;
+      else return false;
+    },
+    set:function(e) {
+      if(e) {
+        this.nativeView.BorderThickness = this.private.defaultBorder;
+        this.nativeView.BorderBrush = this.private.defaultBorderColor;
+      } else {
+        this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
+        this.nativeView.BorderBrush = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+      }
+    }
   });
 
   Object.defineProperty(Button.prototype, 'state', {
-    get:function() { },
-    set:function(e) { }
+    get:function() { return typeof(this.nativeView.IsChecked) != undefined ? this.nativeView.IsChecked : false;  },
+    set:function(e) { 
+      if(typeof(this.nativeView.IsChecked) != undefined) {
+        this.nativeView.IsChecked = e;
+      }
+    }
   });
 
   Object.defineProperty(Button.prototype, 'title', {

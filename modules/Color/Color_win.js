@@ -2,26 +2,27 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
   var $color = $.System.Windows.Media.Color;
+  var $colors = $.System.Windows.Media.Colors;
 
   function Color(type, c1, c2, c3, c4, c5) {
     if(type instanceof Color) this = type;
     else if(type.pointer) this.native = type;
-    else if(type == "black") this.native = $color.Black;
-    else if(type == "blue") this.native = $color.Blue;
-    else if(type == "brown") this.native = $color.Brown;
-    else if(type == "clear") this.native = $color.Transparent;
-    else if(type == "transparent") this.native = $color.Transparent;
-    else if(type == "cyan") this.native = $color.Cyan;
-    else if(type == "darkgray") this.native = $color.DarkGray;
-    else if(type == "gray") this.native = $color.Gray;
-    else if(type == "green") this.native = $color.Green;
-    else if(type == "lightgray") this.native = $color.LightGray;
-    else if(type == "magenta") this.native = $color.Magenta;
-    else if(type == "orange") this.native = $color.Orange;
-    else if(type == "purple") this.native = $color.Purple;
-    else if(type == "red") this.native = $color.Red;
-    else if(type == "white") this.native = $color.White;
-    else if(type == "yellow") this.native = $color.Yellow;
+    else if(type == "black") this.native = $colors.Black;
+    else if(type == "blue") this.native = $colors.Blue;
+    else if(type == "brown") this.native = $colors.Brown;
+    else if(type == "clear") this.native = $colors.Transparent;
+    else if(type == "transparent") this.native = $colors.Transparent;
+    else if(type == "cyan") this.native = $colors.Cyan;
+    else if(type == "darkgray") this.native = $colors.DarkGray;
+    else if(type == "gray") this.native = $colors.Gray;
+    else if(type == "green") this.native = $colors.Green;
+    else if(type == "lightgray") this.native = $colors.LightGray;
+    else if(type == "magenta") this.native = $colors.Magenta;
+    else if(type == "orange") this.native = $colors.Orange;
+    else if(type == "purple") this.native = $colors.Purple;
+    else if(type == "red") this.native = $colors.Red;
+    else if(type == "white") this.native = $colors.White;
+    else if(type == "yellow") this.native = $colors.Yellow;
     else if(type == "cmyk" || type == "cmyka") {
       var rgb = utilities.cmyk2rgb([c1,c2,c3,c4]);
       this.native = $color.FromArgb($.System.Convert.ToByte(c4 ? c4*255 : 255), $.System.Convert.ToByte(rgb[0]),$.System.Convert.ToByte(rgb[1]),$.System.Convert.ToByte(rgb[2]));

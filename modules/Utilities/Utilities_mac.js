@@ -101,12 +101,12 @@ module.exports = (function() {
       case 'folder':
         imageRef = "NSFolder";
         break;
-      case 'folder-burnable':
-        imageRef = "NSFolderBurnable";
-        break;
-      case 'folder-smart':
-        imageRef = "NSFolderSmart";
-        break;
+      //case 'folder-burnable':
+      //  imageRef = "NSFolderBurnable";
+      //  break;
+      //case 'folder-smart':
+      //  imageRef = "NSFolderSmart";
+      //  break;
       case 'advanced':
         imageRef = "NSAdvanced";
         break;
@@ -137,12 +137,12 @@ module.exports = (function() {
       case 'look':
         imageRef = "NSQuickLookTemplate";
         break;
-      case 'trash':
-        imageRef = "NSTrashEmpty";
-        break;
-      case 'trash-full':
-        imageRef = "NSTrashFull";
-        break;
+      //case 'trash':
+      //  imageRef = "NSTrashEmpty";
+      //  break;
+      //case 'trash-full':
+      //  imageRef = "NSTrashFull";
+      //  break;
       case 'bookmarks':
         imageRef = "NSBookmarksTemplate";
         break;
