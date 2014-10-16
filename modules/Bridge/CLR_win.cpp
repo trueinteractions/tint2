@@ -7,7 +7,6 @@
 #include <vector>
 #include <msclr/marshal.h>
 
-
 #include "../AutoLayoutPanel.cpp"
 
 #using <system.dll>
@@ -22,6 +21,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
+
 
 extern "C" void uv_run_nowait();
 

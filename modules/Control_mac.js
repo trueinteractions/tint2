@@ -110,10 +110,11 @@ module.exports = (function() {
     }
 
     this.private = {
-      events:{}, layoutConstraints:[], parent:null, trackingArea:null, needsMouseTracking:0,
+      events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
       user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
       constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null }
     };
+    //layoutConstraints:[],
 
     this.nativeClass = NativeObjectClass;
     this.native = this.nativeView = null;
@@ -167,9 +168,12 @@ module.exports = (function() {
     get:function() {
       if(!this.nativeView('superview')) return null;
       var bnds = convY(this.nativeView('frame'), this.nativeView('window')('frame'));
+      var offsetY = 0;
+      if(!this.nativeView('isEqual',this.nativeView('window')('contentView')))
+        offsetY = 1;
       return {
         x:Math.round(bnds.origin.x), 
-        y:Math.round(bnds.origin.y + (this.private.type != 'Window' ? 1 : 0)), 
+        y:Math.round(bnds.origin.y) + offsetY, 
         width:Math.round(bnds.size.width), 
         height:Math.round(bnds.size.height)
       };
@@ -180,9 +184,13 @@ module.exports = (function() {
     get:function() {
       if(!this.nativeView('superview')) return null;
       var bnds = convY(this.nativeView('frame'), this.nativeView('superview')('frame'));
+      var offsetY = 0;
+      if(this.nativeView('superview')('isEqual',this.nativeView('window')('contentView'))
+          && bnds.origin.y == -1)
+        offsetY = 1;
       return {
         x:Math.round(bnds.origin.x), 
-        y:Math.round(bnds.origin.y + (this.private.type != 'Window' ? 1 : 0)), 
+        y:Math.round(bnds.origin.y) + offsetY, 
         width:Math.round(bnds.size.width), 
         height:Math.round(bnds.size.height)
       };
@@ -237,28 +245,33 @@ module.exports = (function() {
                        '<=':$.NSLayoutRelationLessThanOrEqual, '>':$.NSLayoutRelationGreaterThanOrEqual, 
                        '>=':$.NSLayoutRelationGreaterThanOrEqual, '=':$.NSLayoutRelationEqual, '==':$.NSLayoutRelationEqual };
 
-
   Control.prototype.addLayoutConstraint = function(layoutObject) {
-    var constraint = $.NSLayoutConstraint('constraintWithItem',(layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
+    var constraint = $.NSLayoutConstraint('constraintWithItem',
+                        (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
                         'attribute',(attributeMap[layoutObject.firstAttribute] || $.NSLayoutAttributeNotAnAttribute),
                         'relatedBy',(attributeMap[layoutObject.relationship] || $.NSLayoutRelationEqual),
                         'toItem',(layoutObject.secondItem ? layoutObject.secondItem.nativeView : null),
                         'attribute',(attributeMap[layoutObject.secondAttribute] || $.NSLayoutAttributeNotAnAttribute),
                         'multiplier', (layoutObject.multiplier ? layoutObject.multiplier : 0), 
                         'constant', (layoutObject.constant ? layoutObject.constant : 0));
+    constraint('setPriority', $.NSLayoutPriorityDragThatCannotResizeWindow);
+    this.nativeView('setContentHuggingPriority',$.NSLayoutPriorityDefaultLow,'forOrientation', 1);
+    this.nativeView('setContentHuggingPriority',$.NSLayoutPriorityDefaultLow,'forOrientation', 0);
     this.nativeView('addConstraint',constraint);
-    return this.private.layoutConstraints.push({js:layoutObject, native:constraint}) - 1;
+    this.nativeView('updateConstraintsForSubtreeIfNeeded');
+    this.nativeView('layoutSubtreeIfNeeded');
+    return constraint;
   }
 
-  Control.prototype.removeLayoutConstraint = function(index) {
-    if(typeof(index) == 'undefined' || index == null || !this.private.layoutConstraints[index]) return;
-    var objcNative = this.private.layoutConstraints[index].native;
-    this.private.layoutConstraints.splice(index, 1);
-    this.nativeView('removeConstraint',objcNative);
+  Control.prototype.removeLayoutConstraint = function(obj) {
+    this.nativeView('removeConstraint',obj);
     this.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.nativeView('layoutSubtreeIfNeeded');
   }
-
+  //TODO: Figure out if these mappings are really equal to
+  // the mappings on Windows
+  //TODO: Figure out a way of invaliding intrinsic content size, buttons cannot have
+  // explicit heights in auto layout!!
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
   createLayoutProperty('bottom', 'bottom', inverse, 'bottom', negate, ['top','height']);
   createLayoutProperty('left', 'left', identity, 'left', identity, ['right','width']);

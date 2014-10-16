@@ -208,10 +208,8 @@ if (ismac) {
     }
     ex.clickAtControl = function clickAtControl(control) {
       var bounds = control.boundsOnScreen;
-      //console.log('bounds x:'+bounds.x+' y: '+bounds.y);
       bounds.x = bounds.x + bounds.width/2;
       bounds.y = bounds.y + bounds.height/2;
-      //console.log('center bounds x:'+bounds.x+' y: '+bounds.y);
       var point = $.CGPointMake(bounds.x, bounds.y);
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, convertBoundsToCGPoint(point), 0));
@@ -259,7 +257,7 @@ if (ismac) {
       var windowNumber = currentWindow('windowNumber');
       this.takeSnapshotOfWindowNumber(windowNumber, path);
     } 
-    function setupShell(name, cmd) {
+    ex.setupShell = function setupShell(name, cmd) {
       execAndPump("mkdir "+name+"-test", function() {
         execAndPump("cp -a -p tools/Shell.app "+name+"-test", function() {
           execAndPump("cp -a -p "+tintexec+" "+name+"-test/Shell.app/Contents/MacOS/Runtime", function() {
@@ -271,13 +269,13 @@ if (ismac) {
       }, notok);
     }
 
-    function runShell(name, cb, err, options) {
+    ex.runShell = function runShell(name, cb, err, options) {
       spawnAndPump("./"+name+"-test/Shell.app/Contents/MacOS/Runtime ./"+name+"-test/Shell.app/Contents/Resources/test.js tests", cb, err, options);
     }
-    function runBaseline(name, cb, err, options) {
+    ex.runBaseline = function runBaseline(name, cb, err, options) {
       spawnAndPump("./"+name+"-test/Shell.app/Contents/MacOS/Runtime ./"+name+"-test/Shell.app/Contents/Resources/test.js baseline", cb, err, options);
     }
-    function shutdownShell(name, cb) {
+    ex.shutdownShell = function shutdownShell(name, cb) {
       execAndPump("rm -rf ./"+name+"-test/", cb, function() { console.error('*** FATAL *** Cannot cleanup!'); });
     }
 } // END MAC SPECIFIC CODE
@@ -344,7 +342,7 @@ function execAndPump(cmd, cb, err, options) {
 	return child;
 }
 ex.ok = function ok() {
-	if(currentTest.shell) shutdownShell(currentTest.name, function() {});
+	if(currentTest.shell) ex.shutdownShell(currentTest.name, function() {});
 	process.stdout.write(brightBlueBegin + successMark + colorEnd + '\n');
 	nextTest();
 }
@@ -354,7 +352,7 @@ ex.fail = function fail() {
 }
 function notok(code) {
 	if(currentTest.shell) {
-		shutdownShell(currentTest.name, function() { process.exit(1); });
+		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
 }
 function nextTest() {
@@ -367,9 +365,9 @@ function test(item) {
 	currentTest = require('../'+item);
 	process.stdout.write(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
 	if(currentTest.shell) {
-		setupShell(currentTest.name,function() {
-			if(createBaseline) runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
-			else runShell(currentTest.name,ex.ok,notok,currentTest.shell_options); 
+		ex.setupShell(currentTest.name,function() {
+			if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
+			else ex.runShell(currentTest.name,ex.ok,notok,currentTest.shell_options); 
 		},notok);
 	} else {
 		try {

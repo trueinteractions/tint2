@@ -65,7 +65,7 @@ module.exports = (function() {
 
     application.windows.push(this);
 
-    this.addEventListener('remove', function(control) { this.native('contentsView')('willRemoveSubview',control.nativeView); });
+    this.addEventListener('remove', function(control) { this.native('contentView')('willRemoveSubview',control.nativeView); });
   }
   
   Window.prototype = Object.create(Container.prototype);

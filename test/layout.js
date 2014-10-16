@@ -28,10 +28,9 @@ function run($utils) {
   //$utils.assert(win.boundsOnScreen.width === webView.boundsOnScreen.width, // @hidden
   //  'window width: '+win.boundsOnScreen.width+' webview width: '+webView.boundsOnScreen.width);  // @hidden
 
-  var buttonNormal = new Button();
   var buttonSecond = new Button();
   var buttonThird = new Button();
-
+  var buttonNormal = new Button();
   buttonNormal.title = "Hello";
   buttonNormal.middle = '100%';
   buttonNormal.center = '100%';
@@ -49,23 +48,42 @@ function run($utils) {
   win.appendChild(buttonSecond);
   win.appendChild(buttonNormal);
   win.appendChild(buttonThird);
-/*
-  setTimeout(function() {
 
-    buttonNormal.title = "Hello2";
-    buttonNormal.middle = '50%';
-    buttonNormal.center = '50%';
-    //buttonNormal.width = '100%';
+  /* @hidden */ var winbnds = win.bounds;
+  /* @hidden */ var bnds1 = buttonNormal.bounds;
+  /* @hidden */ var bnds2 = buttonSecond.bounds;
+  /* @hidden */ var bnds3 = buttonThird.bounds;
+  
+  /* @hidden */ $utils.assert(bnds1.width == 100, 'width does not equal 100: '+bnds1.width);
+  /* @hidden */ $utils.assert(bnds1.x == Math.round(winbnds.width/2 - bnds1.width/2), ' x value is: '+bnds1.x+ ' and should be: '+Math.round(winbnds.width/2 - bnds1.width/2));
+  /* @hidden */ $utils.assert(bnds1.y == Math.round((winbnds.height/2 - bnds1.height/2)), ' y value is: '+bnds1.y+ ' and should be: '+Math.round(winbnds.height/2 - bnds1.height/2));
+ 
+  /* @hidden */ $utils.assert(bnds2.x == (winbnds.width - bnds2.width), 'x value '+bnds2.x+' does not equal: '+(winbnds.width - bnds2.width));
+  /* @hidden */ $utils.assert(bnds2.y == 0, 'bounds should be 0, but was: '+bnds2.y);
+  
+  /* @hidden */ $utils.assert(bnds3.x == 0, 'bounds should be 0, but was: '+bnds3.x);
+  /* @hidden */ $utils.assert(bnds3.y == 0, 'bounds should be 0, but was: '+bnds3.y);
 
-    buttonSecond.title = "Second";
-    //buttonSecond.bottom = 0;
-    //buttonSecond.right = 0;
+  buttonNormal.title = "Hello2";
+  buttonNormal.middle = '50%';
+  buttonNormal.center = '50%';
+  buttonNormal.width = '100%';
 
-    buttonThird.title = "Third";
-    //buttonThird.left = 0;
-    //buttonThird.bottom = 0;
-  },2000);*/
-  $utils.ok();
+  buttonSecond.title = "Second2";
+  buttonSecond.bottom = 0;
+  buttonSecond.right = 0;
+
+  buttonThird.title = "Third2";
+  buttonThird.right = 0;
+  buttonThird.top = 0;
+
+  /* @hidden */ bnds1 = buttonNormal.bounds;
+  /* @hidden */ bnds2 = buttonSecond.bounds;
+  /* @hidden */ bnds3 = buttonThird.bounds;
+  
+  /* @hidden */ $utils.assert(bnds1.width == winbnds.width, 'bnds width '+bnds1.width+' does not equal window bounds width: '+winbnds.width);
+  
+  /* @hidden */ $utils.ok();
 }
 
 /**

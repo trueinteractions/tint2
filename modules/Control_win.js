@@ -144,7 +144,8 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
-      //if(!this.private.parent) return null;
+      if(!this.native.GetType().Equals($.System.Windows.Window) 
+        && !this.private.parent) return null;
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
@@ -156,7 +157,11 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
-      //if(!this.private.parent) return null;
+      if(this.native.GetType().Equals($.System.Windows.Window)) {
+        target = this.native;
+      } else {
+        if(!this.private.parent) return null;
+      }
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
       if(target == null) return null;
       var bounds = this.nativeView.TransformToVisual(target)
@@ -168,12 +173,16 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
-      if(!this.private.parent) return null;
       var target = this.nativeView.Parent;
+      if(this.native.GetType().Equals($.System.Windows.Window)) {
+        return this.boundsOnWindow;
+      } else {
+        if(!this.private.parent) return null;
+      }
       var bounds = this.nativeView.TransformToVisual(target)
                     .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      var winpnt = this.nativeView.PointFromScreen(this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
-      return {x:Math.round(winpnt.X), y:Math.round(winpnt.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
+      var p = this.nativeView.TransformToAncestor(target).Transform(new $.System.Windows.Point(0,0));
+      return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
   });
 
@@ -216,21 +225,17 @@ module.exports = (function() {
         (layoutObject.secondAttribute ? capitalize(layoutObject.secondAttribute) : null),
         (layoutObject.multiplier ? layoutObject.multiplier : 0), 
         (layoutObject.constant ? layoutObject.constant : 0) );
-    
-    return this.private.layoutConstraints.push({js:layoutObject, native:constraint}) - 1;
+    return constraint;
   }
 
-  Control.prototype.removeLayoutConstraint = function(index) {
-    if(typeof(index) == 'undefined' || index == null || !this.private.layoutConstraints[index]) return;
-    var n = this.private.layoutConstraints[index].native;
-    this.private.layoutConstraints.splice(index, 1);
+  Control.prototype.removeLayoutConstraint = function(n) {
     this.nativeView.RemoveLayoutConstraint(n);
   }
 
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
-  createLayoutProperty('bottom', 'bottom', inverse, 'bottom', negate, ['top','height']);
-  createLayoutProperty('left', 'width', identity, 'left', identity, ['right','width']);
-  createLayoutProperty('right', 'width', inverse, 'right', negate, ['left','width']);
+  createLayoutProperty('bottom', 'bottom', identity, 'bottom', identity, ['top','height']);
+  createLayoutProperty('left', 'left', identity, 'left', identity, ['right','width']);
+  createLayoutProperty('right', 'right', inverse, 'right', negate, ['left','width']);
   createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
   createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
   createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);

@@ -18,7 +18,7 @@ module.exports = (function() {
     this.private.buttonStyle = "normal";
     this.private.label = new $.System.Windows.Controls.Label();
     this.native.Content = this.private.label;
-    this.native.Padding = new $.System.Windows.Thickness(6,0,6,0);
+    this.native.Padding = new $.System.Windows.Thickness(5.75,1.75,5.75,1.75);
     // convert pxl based measure to point (18/17) * PixelSize
     this.native.FontSize = this.native.FontSize * 1.05882352941176;
   }
