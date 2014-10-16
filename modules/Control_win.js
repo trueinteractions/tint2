@@ -235,7 +235,7 @@ module.exports = (function() {
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
   createLayoutProperty('bottom', 'bottom', identity, 'bottom', identity, ['top','height']);
   createLayoutProperty('left', 'left', identity, 'left', identity, ['right','width']);
-  createLayoutProperty('right', 'right', inverse, 'right', negate, ['left','width']);
+  createLayoutProperty('right', 'right', identity, 'right', identity, ['left','width']);
   createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
   createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
   createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);

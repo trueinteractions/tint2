@@ -87,7 +87,6 @@ module.exports = (function() {
   function negate(v) { return -1*v; }
 
   /* Control Class */
-
   function Control(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -114,7 +113,6 @@ module.exports = (function() {
       user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
       constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null }
     };
-    //layoutConstraints:[],
 
     this.nativeClass = NativeObjectClass;
     this.native = this.nativeView = null;
@@ -152,14 +150,16 @@ module.exports = (function() {
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
       if(!this.nativeView('superview')) return null;
-      var bnds = this.boundsOnWindow;
-      var wframe = this.nativeView('window')('frame');
-      var wbnds = convY(wframe, $.NSScreen('mainScreen')('frame'));
+      var b = this.nativeView('window')('convertRectToScreen',this.nativeView('convertRect',this.nativeView('bounds'),'toView',null));
+      var bnds = convY(b,$.NSScreen('mainScreen')('frame'));
+      var offsetY = 0;
+      if(!this.nativeView('isEqual',this.nativeView('window')('contentView')))
+        offsetY = 1;
       return {
-        x:Math.round(bnds.x + wbnds.origin.x), 
-        y:Math.round(bnds.y + wbnds.origin.y), 
-        width:Math.round(bnds.width), 
-        height:Math.round(bnds.height)
+        x:Math.round(bnds.origin.x), 
+        y:Math.round(bnds.origin.y) + offsetY, 
+        width:Math.round(bnds.size.width), 
+        height:Math.round(bnds.size.height)
       };
     }
   });
@@ -275,7 +275,7 @@ module.exports = (function() {
   createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
   createLayoutProperty('bottom', 'bottom', inverse, 'bottom', negate, ['top','height']);
   createLayoutProperty('left', 'left', identity, 'left', identity, ['right','width']);
-  createLayoutProperty('right', 'right', inverse, 'right', identity, ['left','width']);
+  createLayoutProperty('right', 'right', negate, 'right', negate, ['left','width']);
   createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
   createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
   createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);

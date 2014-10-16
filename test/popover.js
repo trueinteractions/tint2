@@ -53,104 +53,20 @@ function run($utils) {
     /* @hidden */ setTimeout(function() { $utils.clickAtControl(popClose); },1000);
   });
 
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:label, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:label, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:25.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:label, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:label, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:-10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popOpen, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:55.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popOpen, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:85.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popOpen, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popOpen, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:-10.0
-  });
+  label.top = 10;
+  label.left = 10;
+  label.right = 10;
+  popOpen.top = 55;
+  popOpen.left = 10;
+  popOpen.right = 10;
 
-
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'top',
-    secondItem:popOver, secondAttribute:'top',
-    multiplier:1.0, constant:10.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'bottom',
-    secondItem:popOver, secondAttribute:'top',
-    multiplier:1.0, constant:35.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'left',
-    secondItem:popOver, secondAttribute:'left',
-    multiplier:1.0, constant:10.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'right',
-    secondItem:popOver, secondAttribute:'right',
-    multiplier:1.0, constant:-10.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popClose, firstAttribute:'top',
-    secondItem:input, secondAttribute:'top',
-    multiplier:1.0, constant:25.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popClose, firstAttribute:'bottom',
-    secondItem:input, secondAttribute:'bottom',
-    multiplier:1.0, constant:45.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popClose, firstAttribute:'left',
-    secondItem:popOver, secondAttribute:'left',
-    multiplier:1.0, constant:10.0
-  });
-  popOver.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:popClose, firstAttribute:'right',
-    secondItem:popOver, secondAttribute:'right',
-    multiplier:1.0, constant:-10.0
-  });
+  input.top = 10;
+  input.left = 10;
+  input.right = 10;
+  popClose.top = 45;
+  popClose.left = 10;
+  popClose.right = 10;
+  
   /* @hidden */ setTimeout(function() {
   /* @hidden */   $utils.clickAtControl(popOpen);
   /* @hidden */ }, 500);

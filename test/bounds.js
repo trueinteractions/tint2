@@ -20,6 +20,14 @@ function run($utils) {
   win.visible = true;
   var btn = new Button();
 
+  var btnMargin = new Button();
+  win.appendChild(btnMargin);
+  btnMargin.left = btnMargin.right = 10;
+  btnMargin.middle = '75%';
+
+  //$utils.assert(btnMargin.bounds.width == (win.bounds.width - 20), 
+  //  'btnMargin.bounds.width['+btnMargin.bounds.width+'] != win.bounds.width - 20 ['+(win.bounds.width - 20)+']');
+
   // test bounds prior to being added.
   var nbb = btn.bounds; 
   $utils.assert(nbb == null);

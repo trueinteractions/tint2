@@ -22,35 +22,15 @@ function run($utils) {
   win.appendChild(slider);
   /* @hidden */ win.x = 0;
   /* @hidden */ win.y = 0;
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:slider, firstAttribute:'top',
-    secondItem:win, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:slider, firstAttribute:'left',
-    secondItem:win, secondAttribute:'left',
-    multiplier:1.0, constant:0.0
-  });
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:slider, firstAttribute:'right',
-    secondItem:win, secondAttribute:'right',
-    multiplier:1.0, constant:0.0
-  });
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:slider, firstAttribute:'bottom',
-    secondItem:win, secondAttribute:'top',
-    multiplier:1.0, constant:20.0
-  });
-
+  slider.top = 20;
+  slider.left = slider.right = 0;
+  slider.height = 20;
+  
   setTimeout(function() {
-    $utils.clickAt(239,55);
+//    $utils.clickAt(239,55);
+    $utils.clickAtControl(slider);
     setTimeout(function() {
-      $utils.assert(Math.round(slider.value * 1000) == 477);
+      $utils.assert(Math.round(slider.value * 1000) == 500,'Slider value should be 500, is: ', slider.value*1000);
       $utils.ok();
     },500);
   },1000);
