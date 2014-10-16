@@ -254,9 +254,9 @@ module.exports = (function() {
                         'attribute',(attributeMap[layoutObject.secondAttribute] || $.NSLayoutAttributeNotAnAttribute),
                         'multiplier', (layoutObject.multiplier ? layoutObject.multiplier : 0), 
                         'constant', (layoutObject.constant ? layoutObject.constant : 0));
-    constraint('setPriority', $.NSLayoutPriorityDragThatCannotResizeWindow);
-    this.nativeView('setContentHuggingPriority',$.NSLayoutPriorityDefaultLow,'forOrientation', 1);
-    this.nativeView('setContentHuggingPriority',$.NSLayoutPriorityDefaultLow,'forOrientation', 0);
+    constraint('setPriority', 490); // NSLayoutPriorityDragThatCannotResizeWindow
+    this.nativeView('setContentHuggingPriority',250,'forOrientation', 1); // NSLayoutPriorityDefaultLow
+    this.nativeView('setContentHuggingPriority',250,'forOrientation', 0); // NSLayoutPriorityDefaultLow
     this.nativeView('addConstraint',constraint);
     this.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.nativeView('layoutSubtreeIfNeeded');
