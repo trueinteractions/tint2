@@ -19,30 +19,8 @@ function run($utils) {
   mainWindow.visible = true;
   var webview = new WebView();
   mainWindow.appendChild(webview);
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:1.0, constant:0.0
-  });
+  webview.top = webview.left = webview.right = webview.bottom = 0;
+
   webview.addEventListener('load', function() {
     mainWindow.title = webview.title;
     webview.postMessage('hello');

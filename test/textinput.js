@@ -23,54 +23,14 @@ function run($utils) {
   mainWindow.appendChild(input);
   mainWindow.appendChild(input2);
 
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:35.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:-10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input2, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:55.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input2, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:85.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input2, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:10.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:input2, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:-10.0
-  });
+  input.top = 10;
+  input.height = 25;
+  input.left = 10;
+  input.right = 10;
+  input2.top = 55;
+  input2.left = 10;
+  input2.right = 10;
+  input2.height = 25;
 
   /* @hidden */ var inputStart = false;
   /* @hidden */ var inputEnd = false;

@@ -18,30 +18,8 @@ function run($utils) {
   var webview = new WebView();
   mainWindow.visible = true;
   mainWindow.appendChild(webview);
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webview, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:1.0, constant:0.0
-  });
+  webview.top = webview.left = webview.right = webview.bottom = 0;
+
   webview.location = "app://assets/webview-transparency.html";
   mainWindow.title = "You should be able to see this.";
   //mainWindow.frame = false;

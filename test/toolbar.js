@@ -48,30 +48,7 @@ function run($utils) {
 
   webView.addEventListener('load', function() { urlLocation.value = webView.location; });
 
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'top',
-    secondItem:mainWindow, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'bottom',
-    secondItem:mainWindow, secondAttribute:'bottom',
-    multiplier:1.0, constant:0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'left',
-    secondItem:mainWindow, secondAttribute:'left',
-    multiplier:1.0, constant:0.0
-  });
-  mainWindow.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:webView, firstAttribute:'right',
-    secondItem:mainWindow, secondAttribute:'right',
-    multiplier:1.0, constant:0
-  });
+  webView.top = webView.bottom = webView.left = webView.right = 0;
 
   $utils.ok(); // add unit tests.
 }
