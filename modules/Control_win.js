@@ -3,95 +3,14 @@ module.exports = (function() {
   console.assert(process.bridge.dotnet, 'Failure to establish dotnet bridge, use require(\'Application\') prior to using window components.');
   
   var $ = process.bridge.dotnet;
-  var utilities = require('Utilities');
+  var utils = require('Utilities_base');
 
   function wpfDeviceToLogicalPx(w,p) {
     var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
     return t.Transform(p);
   }
 
-  function capitalize(s) {
-    s = s.toLowerCase();
-    return s[0].toUpperCase() + s.substr(1);
-  }
-
-  function createLayoutProperty(name, percentName, percentFunc, scalarName, scalarFunc, na) {
-    Object.defineProperty(Control.prototype, name, {
-      get: function() { return this.private.user[name]; },
-      set: function(value) {
-        var propertyName = name;
-        var p = this.private;
-
-        if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null)
-          throw new Error('A '+propertyName+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
-
-        p.user[propertyName] = value;
-
-        if(p.constraints[propertyName] !== null && p.constraints[propertyName])
-          p.parent.removeLayoutConstraint(p.constraints[propertyName]);
-
-        if(value == null)
-          return;
-
-        this.addEventListener('parent-attached', function() {
-          this[propertyName] = p.user[propertyName];
-        }.bind(this));
-
-
-        this.addEventListener('parent-dettached', function() {
-          p.parent.removeLayoutConstraint(p.constraints[propertyName]);
-        }.bind(this));
-
-        if(!p.parent) return;
-
-        var layoutObject = {priority:'required', firstItem:this, firstAttribute:propertyName, relationship:'=', secondItem:p.parent};
-
-        if (value instanceof Control) {
-          layoutObject.secondItem = value;
-          layoutObject.multiplier = 1.0;
-          layoutObject.constant = 0.0;
-          if((p.parent == value || this == value.parent) 
-                || propertyName == "middle" || propertyName == "center") 
-          {
-            layoutObject.firstAttribute = layoutObject.secondAttribute = propertyName;
-          }
-          else if (propertyName == "left") {
-            layoutObject.firstAttribute = "left";
-            layoutObject.secondAttribute = "right";
-          } else if (propertyName == "right") {
-            layoutObject.firstAttribute = "right";
-            layoutObject.secondAttribute = "left";
-          } else if (propertyName == "top") {
-            layoutObject.firstAttribute = "top";
-            layoutObject.secondAttribute = "bottom";
-          } else if (propertyName == "bottom") {
-            layoutObject.firstAttribute = "bottom";
-            layoutObject.secondAttribute = "top";
-          }
-        } else if(value && value.indexOf && value.indexOf('%') > -1) {
-          var parsedValue = utilities.parseUnits(value);
-          layoutObject.multiplier = percentFunc(parsedValue);
-          layoutObject.constant = 0.0;
-          layoutObject.secondAttribute = percentName;
-        } else {
-          var parsedValue = utilities.parseUnits(value);
-          layoutObject.multiplier = 1.0;
-          layoutObject.constant = scalarFunc(parsedValue);
-          layoutObject.secondAttribute = scalarName;
-        }
-
-        if(!layoutObject.secondAttribute) layoutObject.secondItem = null;
-        p.constraints[propertyName] = p.parent.addLayoutConstraint(layoutObject);
-      }
-    });
-  }
-
-  function identity(v) { return v; }
-  function inverse(v) { return (1-v); }
-  function negate(v) { return -1*v; }
-
   /* Control Class */
-
   function Control(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -104,7 +23,6 @@ module.exports = (function() {
       this.native = this.nativeView;
     else
       this.native = new NativeObjectClass();
-
 
     if(!options.nonStandardEvents) {
       this.native.addEventListener('MouseRightButtonUp', function() { this.fireEvent('rightmouseup'); }.bind(this));
@@ -232,14 +150,14 @@ module.exports = (function() {
     this.nativeView.RemoveLayoutConstraint(n);
   }
 
-  createLayoutProperty('top', 'bottom', identity, 'top', identity, ['bottom','height']);
-  createLayoutProperty('bottom', 'bottom', identity, 'bottom', identity, ['top','height']);
-  createLayoutProperty('left', 'left', identity, 'left', identity, ['right','width']);
-  createLayoutProperty('right', 'right', identity, 'right', identity, ['left','width']);
-  createLayoutProperty('height', 'height', identity, null, identity, ['top','bottom']);
-  createLayoutProperty('width', 'width', identity, null, identity, ['left','right']);
-  createLayoutProperty('middle', 'middle', identity, 'middle', identity, null);
-  createLayoutProperty('center', 'center', identity, 'center', identity, null);
+  utils.createLayoutProperty(Control.prototype, 'top', 'bottom', utils.identity, 'top', utils.identity, ['bottom','height']);
+  utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.identity, 'bottom', utils.identity, ['top','height']);
+  utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
+  utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.identity, ['left','width']);
+  utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
+  utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
+  utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
+  utils.createLayoutProperty(Control.prototype, 'center', 'center', utils.identity, 'center', utils.identity, null);
 
   return Control;
 })();

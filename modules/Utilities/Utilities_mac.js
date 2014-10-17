@@ -229,10 +229,10 @@ module.exports = (function() {
   return {
     //attachSizeProperties:attachSizeProperties,
     getImageFromString:getImageFromString,
+    parseUnits:baseUtilities.parseUnits,
     parseColor:baseUtilities.parseColor,
     nsDictionaryToObject:nsDictionaryToObject,
     nsArrayToArray:nsArrayToArray,
-    parseUnits:baseUtilities.parseUnits,
     makePropertyBoolType:makePropertyBoolType,
     makePropertyStringType:makePropertyStringType,
     makeNSImage:makeNSImage,
