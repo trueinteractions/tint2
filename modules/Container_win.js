@@ -22,7 +22,7 @@ module.exports = (function() {
       for(var i=0; i < control.length; i++) this.appendChild(control[i]);
     else {
       this.private.children.push(control);
-      this.nativeView.Children.Add(control.native);
+      this.nativeView.InternalChildren.Add(control.native);
       control.fireEvent('parent-attached', [this]);
       this.fireEvent('child-attached', [control]);
     }
@@ -32,7 +32,7 @@ module.exports = (function() {
     this.fireEvent('remove', element);
     if(this.private.children.indexOf(control) != -1) 
       this.private.children.splice(children.indexOf(control),1);
-    this.nativeView.Children.Add(control.native);
+    this.nativeView.InternalChildren.Remove(control.native);
     control.fireEvent('parent-dettached', [this]);
     this.fireEvent('child-dettached', [control]);
   }

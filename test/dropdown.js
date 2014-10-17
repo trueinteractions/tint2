@@ -44,49 +44,49 @@ function run($utils) {
   mainWindow.appendChild(dropdown);
   input.readonly = true;
 
-  mainWindow.addLayoutConstraint({
+  input.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'top',
     secondItem:mainWindow, secondAttribute:'top',
     multiplier:1.0, constant:10.0
   });
-  mainWindow.addLayoutConstraint({
+  input.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'bottom',
     secondItem:mainWindow, secondAttribute:'top',
     multiplier:1.0, constant:35.0
   });
-  mainWindow.addLayoutConstraint({
+  input.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
     multiplier:1.0, constant:10.0
   });
-  mainWindow.addLayoutConstraint({
+  input.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:input, firstAttribute:'right',
     secondItem:mainWindow, secondAttribute:'right',
     multiplier:1.0, constant:-10.0
   });
-  mainWindow.addLayoutConstraint({
+  dropdown.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:dropdown, firstAttribute:'top',
     secondItem:input, secondAttribute:'bottom',
     multiplier:1.0, constant:10.0
   });
-  mainWindow.addLayoutConstraint({
+  dropdown.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:dropdown, firstAttribute:'bottom',
     secondItem:input, secondAttribute:'bottom',
     multiplier:1.0, constant:30.0
   });
-  mainWindow.addLayoutConstraint({
+  dropdown.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:dropdown, firstAttribute:'left',
     secondItem:mainWindow, secondAttribute:'left',
     multiplier:1.0, constant:10.0
   });
-  mainWindow.addLayoutConstraint({
+  dropdown.addLayoutConstraint({
     priority:'required', relationship:'=',
     firstItem:dropdown, firstAttribute:'right',
     secondItem:mainWindow, secondAttribute:'right',

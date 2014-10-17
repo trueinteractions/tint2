@@ -29,10 +29,10 @@ function unwrapValues(e) {
 }
 
 function wrap(b) {
-  if(Buffer.isBuffer(b)) {      // Either an instance/class
+  if(Buffer.isBuffer(b) && !b.array) {      // Either an instance/class
     return createJSInstance(b);
   } else 
-    return b;                   // "Other" type (enum, const)
+    return b;                   // "Other" type (enum, const, array)
 }
 
 /* The proto class is a "non sealed" class that can be used

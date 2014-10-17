@@ -45,7 +45,7 @@ module.exports = (function() {
     set:function(e) {
       // Private event, do not rely on it.
       this.fireEvent('property-change', ['title', e]);
-      return this.nativeView('setTitle', $(e)); 
+      return this.nativeView('setTitle', $(e));
     }
   });
 
@@ -53,11 +53,14 @@ module.exports = (function() {
     get:function() { return this.private.buttonType; },
     set:function(type) {
       this.private.buttonType = type;
-      if(type == "normal") this.nativeView('setButtonType',$.NSMomentaryLightButton);
-      else if (type == "toggle") this.nativeView('setButtonType',$.NSPushOnPushOffButton);
+      
+      if (type == "toggle") this.nativeView('setButtonType',$.NSPushOnPushOffButton);
       else if (type == "checkbox") this.nativeView('setButtonType', $.NSSwitchButton);
       else if (type == "radio") this.nativeView('setButtonType', $.NSRadioButton);
-      else if (type == "none") this.nativeView('setButtonType', $.NSMomentaryPushInButton);
+      else this.nativeView('setButtonType',$.NSMomentaryLightButton);
+      
+      // no complement on other systems.
+      //else if (type == "none") this.nativeView('setButtonType', $.NSMomentaryPushInButton);
     }
   });
 

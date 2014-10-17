@@ -228,7 +228,8 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
         v8::Integer::New(buffer->Length), 
         v8::Integer::New(0) 
     };
-    jsdata = bufferConstructor->NewInstance(3, args);    
+    jsdata = bufferConstructor->NewInstance(3, args);
+    (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("array"), v8::Boolean::New(true));
   }
   else
   {
@@ -283,6 +284,17 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
       return jsdata->NumberValue();
     else if (jsdata->IsUndefined() || jsdata->IsNull())
       return nullptr;
+    else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(v8::String::NewSymbol("array"))->BooleanValue()) {
+      Handle<v8::Object> jsbuffer = jsdata->ToObject();
+      cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
+      if (netbuffer->Length > 0) 
+      {
+          pin_ptr<byte> pinnedNetbuffer = &netbuffer[0];
+          memcpy(pinnedNetbuffer, node::Buffer::Data(jsbuffer), netbuffer->Length);
+      }
+
+      return netbuffer;
+    }
     else if (node::Buffer::HasInstance(jsdata)) 
     {
       CppClass *data = (CppClass *)node::Buffer::Data(jsdata.As<v8::Object>());
@@ -636,17 +648,21 @@ public:
 
   static Handle<v8::Value> ExecNew(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
 
-    int argSize = args.Length() - 1;
-    array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      int argSize = args.Length() - 1;
+      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-    for(int i=0; i < argSize; i++)
-      cshargs->SetValue(MarshalV8ToCLR(args[i + 1]),i);
+      for(int i=0; i < argSize; i++)
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 1]),i);
 
-    System::Type^ type = (System::Type^)(target);
-    System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
-    return scope.Close(MarshalCLRToV8(rtn));
+      System::Type^ type = (System::Type^)(target);
+      System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {
@@ -726,19 +742,23 @@ public:
 
  static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
     HandleScope scope;
-    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-    System::String^ method = stringV82CLR(args[1]->ToString());
-    int argSize = args.Length() - 2;
-    array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
+    try {
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+      System::String^ method = stringV82CLR(args[1]->ToString());
+      int argSize = args.Length() - 2;
+      array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
 
-    for(int i=0; i < argSize; i++)
-      cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
+      for(int i=0; i < argSize; i++)
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
 
-    MethodInfo^ rtn = target->GetMethod(method, 
-      BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
-      nullptr, cshargs, nullptr);
+      MethodInfo^ rtn = target->GetMethod(method, 
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
+        nullptr, cshargs, nullptr);
 
-    return scope.Close(MarshalCLRToV8(rtn));
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecGetMethodObject(const v8::Arguments& args) {
@@ -865,25 +885,33 @@ public:
 
   static Handle<v8::Value> ExecGetStaticProperty(const v8::Arguments& args) {
     HandleScope scope;
-    System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-    System::String^ property = stringV82CLR(args[1]->ToString());
-    System::Object^ rtn = target->GetProperty(property,
-      BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
-    return scope.Close(MarshalCLRToV8(rtn));
+    try {
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Object^ rtn = target->GetProperty(property,
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecGetProperty(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::String^ property = stringV82CLR(args[1]->ToString());
     try {
-      System::Object^ rtn = target->GetType()->GetProperty(property,
-        BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
-      return scope.Close(MarshalCLRToV8(rtn));
-    } catch (AmbiguousMatchException^ e) {
-      System::Object^ rtn = target->GetType()->GetProperty(property,
-        BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
-      return scope.Close(MarshalCLRToV8(rtn));
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::String^ property = stringV82CLR(args[1]->ToString());
+      try {
+        System::Object^ rtn = target->GetType()->GetProperty(property,
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
+        return scope.Close(MarshalCLRToV8(rtn));
+      } catch (AmbiguousMatchException^ e) {
+        System::Object^ rtn = target->GetType()->GetProperty(property,
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
+        return scope.Close(MarshalCLRToV8(rtn));
+      }
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -939,12 +967,6 @@ public:
   static void CLR::HandleMessageLoop(System::Windows::Interop::MSG% msg, bool% handled) {
     if(msg.message == WM_APP+1)
       uv_run_nowait();
-  }
-
-  static Handle<v8::Value> GetAutoLayoutClass(const v8::Arguments& args) {
-    HandleScope scope;
-    AutoLayout::AutoLayoutPanel^ panel = gcnew AutoLayout::AutoLayoutPanel();
-    return scope.Close(MarshalCLRToV8(panel));
   }
 };
 
@@ -1037,7 +1059,6 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
   NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
   NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
-  NODE_SET_METHOD(target, "getAutoLayoutClass", CLR::GetAutoLayoutClass);
   
   // Register the thread handle to communicate back to handle application
   // specific events when in WPF mode.

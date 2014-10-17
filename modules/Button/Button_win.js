@@ -13,16 +13,29 @@ module.exports = (function() {
       Container.call(this, $.System.Windows.Controls.Button, $.System.Windows.Controls.Button, options);
     }
 
-    this.private.img = null;
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
+    this.private.stack = new $.System.Windows.Controls.StackPanel();
+    this.private.stack.Orentation = $.System.Windows.Controls.Horizontal;
     this.private.label = new $.System.Windows.Controls.Label();
-    this.native.Content = this.private.label;
-    this.native.Padding = new $.System.Windows.Thickness(5.75,1.75,5.75,1.75);
-    // convert pxl based measure to point (18/17) * PixelSize
-    this.native.FontSize = this.native.FontSize * 1.05882352941176;
-    this.private.defaultBorder = this.nativeView.BorderThickness;
-    this.private.defaultBorderColor = this.nativeView.BorderBrush;
+    //this.private.label.VerticalContentAlignment = $.System.Windows.VerticalAlignment.Center;
+    //this.private.label.VerticalAlignment = $.System.Windows.VerticalAlignment.Center;
+    this.private.stack.InternalChildren.Add(this.private.label);
+    this.private.img = null;
+
+    this.private.remapNaturalStates = function() {
+      this.native.Content = this.private.stack;
+      if(this.type == "normal" || this.type == "toggle")
+        this.native.Padding = new $.System.Windows.Thickness(5.75,1.75,5.75,1.75);
+      else
+        this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
+      // convert pxl based measure to point (18/17) * PixelSize
+      this.native.FontSize = this.native.FontSize * 1.05882352941176;
+      this.private.defaultBorder = this.nativeView.BorderThickness;
+      this.private.defaultBorderColor = this.nativeView.BorderBrush;
+      //this.native.VerticalContentAlignment = $.System.Windows.VerticalAlignment.Center;
+      //this.native.VerticalAlignment = $.System.Windows.VerticalAlignment.Center;
+    }.bind(this);
   }
 
   Button.prototype = Object.create(Container.prototype);
@@ -34,6 +47,7 @@ module.exports = (function() {
       else return false;
     },
     set:function(e) {
+      this.private.states['border'] = e;
       if(e) {
         this.nativeView.BorderThickness = this.private.defaultBorder;
         this.nativeView.BorderBrush = this.private.defaultBorderColor;
@@ -45,35 +59,57 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Button.prototype, 'state', {
-    get:function() { return typeof(this.nativeView.IsChecked) != undefined ? this.nativeView.IsChecked : false;  },
+    get:function() { 
+      return typeof(this.nativeView.IsChecked) != 'undefined' ? this.nativeView.IsChecked : false;  },
     set:function(e) { 
-      if(typeof(this.nativeView.IsChecked) != undefined) {
-        this.nativeView.IsChecked = e;
-      }
+      this.private.states['state'] = e;
+      if(typeof(this.nativeView.IsChecked) != undefined)
+        this.nativeView.IsChecked = e ? true : false;
     }
   });
 
   Object.defineProperty(Button.prototype, 'title', {
-    get:function() { return this.nativeView.Content.ToString(); },
-    set:function(e) { this.nativeView.Content = e.toString(); }
+    get:function() { return this.private.label.Content.ToString(); },
+    set:function(e) { 
+      this.private.states['title'] = e;
+      this.private.label.Content = e.toString(); 
+    }
   });
 
   Object.defineProperty(Button.prototype, 'type', {
-    get:function() { },
+    enumerable:true,
+    configurable:true,
+    get:function() { return this.private.buttonType; },
     set:function(type) {
-      /*
+      this.private.states['type'] = type;
+      
+      if(this.private.buttonType == type) 
+        return;
+      
       this.private.buttonType = type;
-      if(type == "normal") this.nativeView('setButtonType',$.NSMomentaryLightButton);
-      else if (type == "toggle") this.nativeView('setButtonType',$.NSPushOnPushOffButton);
-      else if (type == "checkbox") this.nativeView('setButtonType', $.NSSwitchButton);
-      else if (type == "radio") this.nativeView('setButtonType', $.NSRadioButton);
-      else if (type == "none") this.nativeView('setButtonType', $.NSMomentaryPushInButton);*/
+
+      var oldNative = this.nativeView;
+      var parent = this.native.Parent;
+      if(parent != null)
+        this.native.Parent.InternalChildren.Remove(this.native);
+
+      if (type == "toggle") this.nativeView = this.native = new $.System.Windows.Controls.Primitives.ToggleButton();
+      else if (type == "checkbox") this.nativeView = this.native = new $.System.Windows.Controls.CheckBox();
+      else if (type == "radio") this.nativeView = this.native = new $.System.Windows.Controls.RadioButton();
+      else this.nativeView = this.native = new $.System.Windows.Controls.Button();
+
+      if(parent != null)
+        parent.InternalChildren.Add(this.nativeView);
+
+      this.private.remapNaturalStates();
+      this.private.remapStates(oldNative);
     }
   });
 
   Object.defineProperty(Button.prototype, 'style', {
     get:function() {  },
     set:function(type) {
+      this.private.states['style'] = type;
       /*this.private.buttonStyle = type;
       if(type == "normal") this.nativeView('setBezelStyle',$.NSTexturedRoundedBezelStyle);
       else if (type == "rounded") this.nativeView('setBezelStyle',$.NSRoundedBezelStyle);
@@ -88,17 +124,29 @@ module.exports = (function() {
 
   Object.defineProperty(Button.prototype, 'showBorderOnHover', {
     get:function() {  },
-    set:function(e) {  }
+    set:function(e) { 
+      this.private.states['showBorderOnHover'] = e;
+    }
   });
 
   Object.defineProperty(Button.prototype, 'enabled', {
     get:function() { return this.IsEnabled ? true : false; },
-    set:function(e) { this.native.IsEnabled = e ? true : false; }
+    set:function(e) {
+      this.private.states['enabled'] = e;
+      this.native.IsEnabled = e ? true : false; 
+    }
   });
 
   Object.defineProperty(Button.prototype, 'image', {
-    get:function() {  },
-    set:function(e) {  }
+    get:function() { return this.private.states['image']; },
+    set:function(e) { 
+      this.private.states['image'] = e;
+      if(this.private.img != null)
+        this.private.stack.Children.Remove(this.private.img);
+      this.private.img = utilities.makeImage(e);
+      if(this.private.img != null)
+        this.private.stack.Children.Insert(0,this.private.img);
+    }
   });
 
   return Button;

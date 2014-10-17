@@ -37,31 +37,11 @@ function run($utils) {
   },1000);
 
   win.appendChild(progress);
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:progress, firstAttribute:'top',
-    secondItem:win, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:progress, firstAttribute:'left',
-    secondItem:win, secondAttribute:'left',
-    multiplier:1.0, constant:0.0
-  });
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:progress, firstAttribute:'right',
-    secondItem:win, secondAttribute:'right',
-    multiplier:1.0, constant:0.0
-  });
-
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:progress, firstAttribute:'bottom',
-    secondItem:win, secondAttribute:'top',
-    multiplier:1.0, constant:20.0
-  });
+  progress.top = 0;
+  progress.left = 0;
+  progress.right = 0;
+  progress.height = 20;
+  
 }
 
 /**

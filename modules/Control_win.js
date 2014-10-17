@@ -24,7 +24,8 @@ module.exports = (function() {
     else
       this.native = new NativeObjectClass();
 
-    if(!options.nonStandardEvents) {
+    var addNativeEventHandlers = function() {
+      if(options.nonStandardEvents) return;
       this.native.addEventListener('MouseRightButtonUp', function() { this.fireEvent('rightmouseup'); }.bind(this));
       this.native.addEventListener('MouseRightButtonDown', function() { this.fireEvent('rightmousedown'); }.bind(this));
       this.native.addEventListener('MouseLeftButtonDown', function() { this.fireEvent('mousedown'); }.bind(this));
@@ -34,13 +35,25 @@ module.exports = (function() {
       this.native.addEventListener('MouseLeave', function() { this.fireEvent('mouseexit'); }.bind(this));
       this.native.addEventListener('KeyDown', function() { this.fireEvent('keydown'); }.bind(this));
       this.native.addEventListener('KeyUp', function() { this.fireEvent('keyup'); }.bind(this));
-    }
+    }.bind(this);
+
+    addNativeEventHandlers();
 
     this.private = {
       events:{}, layoutConstraints:[], parent:null, trackingArea:null, needsMouseTracking:0,
       user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null }
+      constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+      states:{}
     };
+
+    // Incase the base native type needs to be remapped we need to re-apply all of the 
+    // subsequent settings back to "normal".
+    this.private.remapStates = function(oldNative) {
+      var keys = Object.keys(this.private.states);
+      for(var i=0; i < keys.length; i++)
+        this[keys[i]] = this.private.states[keys[i]];
+      addNativeEventHandlers();
+    }.bind(this);
 
     this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
     this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
@@ -49,12 +62,16 @@ module.exports = (function() {
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
     get:function() { return this.nativeView.Opacity; },
-    set:function(e) { return this.nativeView.Opacity = e; }
+    set:function(e) { 
+      this.private.states['alpha'] = e;
+      return this.nativeView.Opacity = e; 
+    }
   });
 
    Object.defineProperty(Control.prototype, 'visible', {
       get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
       set:function(e) {
+        this.private.states['visible'] = e;
         if(e) this.native.Visibility = $.System.Windows.Visibility.Visible;
         else this.native.Visibility = $.System.Windows.Visibility.Hidden;
       }
@@ -135,19 +152,21 @@ module.exports = (function() {
   }
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
-    var constraint = this.nativeView.AddLayoutConstraint(
+    var constraint = this.private.parent.nativeView.AddLayoutConstraint(
         (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
-        capitalize(layoutObject.firstAttribute),
+        utils.capitalize(layoutObject.firstAttribute),
         layoutObject.relationship,
         (layoutObject.secondItem ? layoutObject.secondItem.nativeView : null),
-        (layoutObject.secondAttribute ? capitalize(layoutObject.secondAttribute) : null),
+        (layoutObject.secondAttribute ? utils.capitalize(layoutObject.secondAttribute) : null),
         (layoutObject.multiplier ? layoutObject.multiplier : 0), 
         (layoutObject.constant ? layoutObject.constant : 0) );
+    this.private.layoutConstraints.push(layoutObject);
     return constraint;
   }
 
   Control.prototype.removeLayoutConstraint = function(n) {
-    this.nativeView.RemoveLayoutConstraint(n);
+    this.private.parent.nativeView.RemoveLayoutConstraint(n);
+    this.private.layoutConstraints.splice(this.private.layoutConstraints.indexOf(n),1);
   }
 
   utils.createLayoutProperty(Control.prototype, 'top', 'bottom', utils.identity, 'top', utils.identity, ['bottom','height']);

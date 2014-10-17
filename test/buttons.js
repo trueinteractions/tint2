@@ -28,12 +28,7 @@ function run($utils) {
   });
   win.appendChild(buttonNormal);
 
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:buttonNormal, firstAttribute:'top',
-    secondItem:win, secondAttribute:'top',
-    multiplier:1.0, constant:0.0
-  });
+  buttonNormal.top = 0;
 
   var buttonToggle = new Button();
   buttonToggle.title = "Off";
@@ -50,12 +45,7 @@ function run($utils) {
     /* @hidden */ $utils.clickAtControl(buttonRadio);
   });
   win.appendChild(buttonToggle);
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:buttonToggle, firstAttribute:'top',
-    secondItem:buttonNormal, secondAttribute:'bottom',
-    multiplier:1, constant:10
-  });
+  buttonToggle.top = buttonNormal;
 
   var buttonRadio = new Button();
   buttonRadio.title = "Radio Box 1";
@@ -70,12 +60,7 @@ function run($utils) {
     /* @hidden */ $utils.clickAtControl(buttonRadio1);
   });
   win.appendChild(buttonRadio);
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:buttonRadio, firstAttribute:'top',
-    secondItem:buttonToggle, secondAttribute:'bottom',
-    multiplier:1, constant:10
-  });
+  buttonRadio.top = buttonToggle;
 
   var buttonRadio1 = new Button();
   buttonRadio1.title = 'Radio Box 2 (Selected)';
@@ -105,18 +90,9 @@ function run($utils) {
     /* @hidden */ $utils.ok();
   });
   win.appendChild(buttonRadio1);
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:buttonRadio1, firstAttribute:'leading',
-    secondItem:buttonRadio, secondAttribute:'trailing',
-    multiplier:1, constant:10
-  });
-  win.addLayoutConstraint({
-    priority:'required', relationship:'=',
-    firstItem:buttonRadio1, firstAttribute:'top',
-    secondItem:buttonToggle, secondAttribute:'bottom',
-    multiplier:1, constant:10
-  });
+  buttonRadio1.left = buttonRadio;
+  buttonRadio1.middle = buttonRadio;
+
 
   /* @hidden */ setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 1000);
 }

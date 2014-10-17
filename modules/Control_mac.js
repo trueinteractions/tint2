@@ -37,7 +37,8 @@ module.exports = (function() {
     this.private = {
       events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
       user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null }
+      constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+      states:{}
     };
 
     this.nativeClass = NativeObjectClass;
@@ -183,25 +184,25 @@ module.exports = (function() {
     constraint('setPriority', 490); // NSLayoutPriorityDragThatCannotResizeWindow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 1); // NSLayoutPriorityDefaultLow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 0); // NSLayoutPriorityDefaultLow
-    this.nativeView('addConstraint',constraint);
-    this.nativeView('updateConstraintsForSubtreeIfNeeded');
-    this.nativeView('layoutSubtreeIfNeeded');
+    this.private.parent.nativeView('addConstraint',constraint);
+    this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
+    this.private.parent.nativeView('layoutSubtreeIfNeeded');
     return constraint;
   }
 
   Control.prototype.removeLayoutConstraint = function(obj) {
-    this.nativeView('removeConstraint',obj);
-    this.nativeView('updateConstraintsForSubtreeIfNeeded');
-    this.nativeView('layoutSubtreeIfNeeded');
+    this.private.parent.nativeView('removeConstraint',obj);
+    this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
+    this.private.parent.nativeView('layoutSubtreeIfNeeded');
   }
   //TODO: Figure out if these mappings are really equal to
   // the mappings on Windows
   //TODO: Figure out a way of invaliding intrinsic content size, buttons cannot have
   // explicit heights in auto layout!!
-  utils.createLayoutProperty(Control.prototype, 'top', 'bottom', utils.identity, 'top', utils.identity, ['bottom','height']);
-  utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.identity, 'bottom', utils.identity, ['top','height']);
+  utils.createLayoutProperty(Control.prototype, 'top', 'top', utils.identity, 'top', utils.identity, ['bottom','height']);
+  utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
-  utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.identity, ['left','width']);
+  utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.negate, 'right', utils.negate, ['left','width']);
   utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
   utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);

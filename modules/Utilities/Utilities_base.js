@@ -30,10 +30,11 @@ module.exports = (function() {
         if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null)
           throw new Error('A '+name+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
 
+        this.private.states[propertyName] = value;
         p.user[propertyName] = value;
 
         if(p.constraints[propertyName] !== null && p.constraints[propertyName])
-          p.parent.removeLayoutConstraint(p.constraints[propertyName]);
+          this.removeLayoutConstraint(p.constraints[propertyName]);
 
         if(value == null)
           return;
@@ -43,7 +44,7 @@ module.exports = (function() {
         }.bind(this));
 
         this.addEventListener('parent-dettached', function() {
-          p.parent.removeLayoutConstraint(p.constraints[propertyName]);
+          this.removeLayoutConstraint(p.constraints[propertyName]);
         }.bind(this));
 
         if(!p.parent) return;
@@ -89,7 +90,7 @@ module.exports = (function() {
           }
         } 
         if(!layoutObject.secondAttribute) layoutObject.secondItem = null;
-        p.constraints[propertyName] = p.parent.addLayoutConstraint(layoutObject);
+        p.constraints[propertyName] = this.addLayoutConstraint(layoutObject);
       }
     });
     }
@@ -1832,6 +1833,7 @@ module.exports = (function() {
 
   // Exports
   return {
+    capitalize:capitalize,
     createLayoutProperty:createLayoutProperty,
     identity:identity,
     negate:negate,
