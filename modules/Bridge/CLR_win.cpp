@@ -22,7 +22,6 @@ using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
 
-
 extern "C" void uv_run_nowait();
 
 namespace v8 {

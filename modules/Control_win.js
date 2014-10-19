@@ -28,8 +28,16 @@ module.exports = (function() {
       if(options.nonStandardEvents) return;
       this.native.addEventListener('MouseRightButtonUp', function() { this.fireEvent('rightmouseup'); }.bind(this));
       this.native.addEventListener('MouseRightButtonDown', function() { this.fireEvent('rightmousedown'); }.bind(this));
-      this.native.addEventListener('MouseLeftButtonDown', function() { this.fireEvent('mousedown'); }.bind(this));
-      this.native.addEventListener('MouseLeftButtonUp', function() { this.fireEvent('mouseup'); }.bind(this));
+      this.native.addEventListener('MouseLeftButtonDown', function() { this.fireEvent('leftmousedown'); }.bind(this));
+      this.native.addEventListener('MouseLeftButtonUp', function() { 
+        this.fireEvent('leftmouseup');
+        this.fireEvent('click');
+      }.bind(this));
+      this.native.addEventListener('PreviewMouseUp', function() { 
+        this.fireEvent('mouseup');
+        this.fireEvent('click');
+      }.bind(this));
+      this.native.addEventListener('PreviewMouseDown', function() { this.fireEvent('mousedown'); }.bind(this));
       this.native.addEventListener('MouseMove', function() { this.fireEvent('mousemove'); }.bind(this));
       this.native.addEventListener('MouseEnter', function() { this.fireEvent('mouseenter'); }.bind(this));
       this.native.addEventListener('MouseLeave', function() { this.fireEvent('mouseexit'); }.bind(this));

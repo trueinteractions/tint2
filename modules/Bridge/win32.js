@@ -374,7 +374,8 @@ win32.user32 = new ffi.Library('user32.dll', {
   PostMessageA: [ BOOL, [ HWND, UINT, WPARAM, LPARAM ] ],
   PostMessageW: [ BOOL, [ HWND, UINT, WPARAM, LPARAM ] ],
   GetCursorPos: [ BOOL, [ LPPOINT ]],
-  SetCursorPos: [ BOOL, [ int, int ]]
+  SetCursorPos: [ BOOL, [ int, int ]],
+  BroadcastSystemMessage: [ long, [ DWORD, LPDWORD, UINT, WPARAM, LPARAM ] ]
 });
 
 win32.dwmapi = new ffi.Library('dwmapi.dll', {
@@ -409,7 +410,22 @@ win32.user32.SC_KEYMENU = 0xF100;
 win32.user32.SC_MAXIMIZE = 0xF030;
 win32.user32.SC_MINIMIZE = 0xF020;
 
+win32.user32.HWND_BROADCAST = 0xffff;
+
 win32.user32.GCLP_HBRBACKGROUND = -10;
 
+win32.user32.WM_MOUSEMOVE = 0x0200;
+win32.user32.WM_LBUTTONUP = 0x0202;
+win32.user32.WM_LBUTTONDOWN = 0x0201;
 
+win32.user32.WM_RBUTTONUP = 0x0205;
+win32.user32.WM_RBUTTONDOWN = 0x0204;
+
+win32.user32.WM_MOUSELEAVE = 0x02A3;
+win32.user32.WM_MOUSEHOVER = 0x02A1;
+
+win32.user32.MK_LBUTTON = 0x0001;
+
+win32.user32.WM_KEYUP = 0x0101;
+win32.user32.WM_KEYDOWN = 0x0100;
 

@@ -17,10 +17,7 @@ module.exports = (function() {
     this.private.buttonStyle = "normal";
     this.private.stack = new $.System.Windows.Controls.StackPanel();
     this.private.stack.Orentation = $.System.Windows.Controls.Horizontal;
-    this.private.label = new $.System.Windows.Controls.Label();
-    //this.private.label.VerticalContentAlignment = $.System.Windows.VerticalAlignment.Center;
-    //this.private.label.VerticalAlignment = $.System.Windows.VerticalAlignment.Center;
-    this.private.stack.InternalChildren.Add(this.private.label);
+    this.private.label = null;
     this.private.img = null;
 
     this.private.remapNaturalStates = function() {
@@ -33,9 +30,8 @@ module.exports = (function() {
       this.native.FontSize = this.native.FontSize * 1.05882352941176;
       this.private.defaultBorder = this.nativeView.BorderThickness;
       this.private.defaultBorderColor = this.nativeView.BorderBrush;
-      //this.native.VerticalContentAlignment = $.System.Windows.VerticalAlignment.Center;
-      //this.native.VerticalAlignment = $.System.Windows.VerticalAlignment.Center;
     }.bind(this);
+    this.private.remapNaturalStates();
   }
 
   Button.prototype = Object.create(Container.prototype);
@@ -69,10 +65,22 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Button.prototype, 'title', {
-    get:function() { return this.private.label.Content.ToString(); },
+    get:function() { 
+      if(this.private.label == null) return ""; 
+      else return this.private.label.Content.toString(); 
+    },
     set:function(e) { 
       this.private.states['title'] = e;
-      this.private.label.Content = e.toString(); 
+      if(this.private.label != null)
+      {
+        this.private.stack.InternalChildren.Remove(this.private.label);
+        this.private.label = null;
+      }
+      if(e && e != null) {
+        this.private.label = new $.System.Windows.Controls.Label();
+        this.private.stack.InternalChildren.Add(this.private.label);
+        this.private.label.Content = e.toString(); 
+      }
     }
   });
 
@@ -107,7 +115,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Button.prototype, 'style', {
-    get:function() {  },
+    get:function() { return this.private.states['style']; },
     set:function(type) {
       this.private.states['style'] = type;
       /*this.private.buttonStyle = type;

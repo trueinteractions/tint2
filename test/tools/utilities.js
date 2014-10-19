@@ -16,6 +16,7 @@ if(ismac) {
   var $ = process.bridge.dotnet;
   var successMark = 'Pass';
   var failureMark = 'Fail';
+  var $w32 = process.bridge.win32;
 }
 
 var exec = require('child_process').exec;
@@ -282,13 +283,133 @@ if (ismac) {
 else 
 { // BEGIN WINDOWS SPECIFIC CODE
 
-  ex.keyAtControl = function keyAtControl(input) { }
+    ex.keyCodeFromChar = function keyCodeFromChar(keyString)
+    {
+      var keys = {
+        '\b':0x0008,
+        '\t':0x0009,
+        '\n':0x000D,
+        'SHIFT':0x0010,
+        'CONTROL':0x0011,
+        'ALT':0x0012,
+        'CAPSLOCK':0x0014,
+        'PAUSE':0x0013,
+        'ESC':0x001B,
+        ':':0x0020,
+        'PGUP':0x0021,
+        'PGDN':0x0022,
+        'DEL':0x002E,
+        '0':0x0030,
+        '1':0x0031,
+        '2':0x0032,
+        '3':0x0033,
+        '4':0x0034,
+        '5':0x0035,
+        '6':0x0036,
+        '7':0x0037,
+        '8':0x0038,
+        '9':0x0039,
+        'a':0x0041,
+        'b':0x0042,
+        'c':0x0043,
+        'd':0x0044,
+        'e':0x0045,
+        'f':0x0046,
+        'g':0x0047,
+        'h':0x0048,
+        'i':0x0049,
+        'j':0x004A,
+        'k':0x004B,
+        'l':0x004C,
+        'm':0x004D,
+        'n':0x004E,
+        'o':0x004F,
+        'p':0x0050,
+        'q':0x0051,
+        'r':0x0052,
+        's':0x0053,
+        't':0x0054,
+        'u':0x0055,
+        'v':0x0056,
+        'w':0x0057,
+        'x':0x0058,
+        'y':0x0059,
+        'z':0x005A,
+        '0':0x0060,
+        '1':0x0061,
+        '2':0x0062,
+        '3':0x0063,
+        '4':0x0064,
+        '5':0x0065,
+        '6':0x0066,
+        '7':0x0067,
+        '8':0x0068,
+        '9':0x0069,
+        '*':0x006A,
+        '+':0x006B,
+        ',':0x006C,
+        '-':0x006D,
+        '.':0x006E,
+        '/':0x006F,
+        'F1':0x0070,
+        'F2':0x0071,
+        'F3':0x0072,
+        'F4':0x0073,
+        'F5':0x0074,
+        'F6':0x0075,
+        'F7':0x0076,
+        'F8':0x0077,
+        'F9':0x0078,
+        'F10':0x0079,
+        'F11':0x007A,
+        'F12':0x007B,
+        'LSHIFT':0x00A0,
+        'RSHIFT':0x00A1,
+        'LCONTROL':0x00A2,
+        'RCONTROL':0x00A3,
+        'LALT':0x00A4,
+        'RALT':0x00A5,
+        ':':0x00BA,
+        '+':0x00BB,
+        ',':0x00BC,
+        '-':0x00BD,
+        '.':0x00BE,
+        '?':0x00BF,
+        '~':0x00C0,
+        '[':0x00DB,
+        '\\':0x00DC,
+        ']':0x00DD,
+        '"':0x00DE,
+        '!':0x00DF,
+        '<':0x00E2
+      };
+    return keys[keyString];
+  }
+
+
+  ex.keyAtControl = function keyAtControl(input) {
+    var key = ex.keyCodeFromChar(input);
+    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_KEYDOWN, key, 0);
+    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_KEYUP, key, 0);
+  }
   ex.rightClickAtControl = function rightClickAtControl(control) { }
   ex.scrollAt = function scrollAt(x, y, upOrDown) { }
   ex.scrollAtControl = function scrollAtControl(control, upOrDown) { }
-  ex.clickAtControl = function clickAtControl(control) { }
-  ex.clickAt = function clickAt(x,y) { }
-  ex.rightClickAt = function rightClickAt(x,y) { }
+  ex.clickAtControl = function clickAtControl(control) { 
+    var z = control.boundsOnScreen;
+    return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
+  }
+  ex.clickAt = function clickAt(x,y) {
+    console.log('clicking at: ', x, y);
+    console.log($w32.user32.SetCursorPos(x,y));
+    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_LBUTTONDOWN, 0, 0);
+    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_LBUTTONUP, 0, 0);
+  }
+  ex.rightClickAt = function rightClickAt(x,y) { 
+    console.log($w32.user32.SetCursorPos(x,y));
+    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_RBUTTONDOWN, 0, 0);
+    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_RBUTTONUP, 0, 0);
+  }
   ex.writeImage = function writeImage(image, path) { }
   ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) { }
   ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) { }
