@@ -968,6 +968,54 @@ public:
   }
 };
 
+
+/*
+struct FLASHWINFO
+{
+    unsigned cbSize; //The size of the structure in bytes.
+    void * hwnd; //A Handle to the Window to be Flashed. The window can be either opened or minimized.
+    unsigned dwFlags; //The Flash Status.
+    unsigned uCount; // number of times to flash the window
+    unsigned dwTimeout; //The rate at which the Window is to be flashed, in milliseconds. If Zero, the function uses the default cursor blink rate.
+};*/
+
+//static extern bool FlashWindowEx(const FLASHWINFO& pwfi);
+namespace FlashWPFWindow {
+    public ref class WindowExtensions
+    {
+
+    public:
+  
+        static void FlashWindow(System::Windows::Window^ win, unsigned count)
+        {
+            //Don't flash if the window is active
+            if (win->IsActive) return;
+ 
+            System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
+ 
+            FLASHWINFO info;
+            info.hwnd = (HWND)h->Handle.ToPointer();
+            info.dwFlags = 3 | 4;
+            info.uCount = count;
+            info.dwTimeout = 0;
+            info.cbSize = sizeof(info);
+            FlashWindowEx(&info);
+        }
+ 
+        static void StopFlashingWindow(System::Windows::Window^ win)
+        {
+            System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
+            FLASHWINFO info;
+            info.hwnd = (HWND)h->Handle.ToPointer();
+            info.cbSize = sizeof(info);
+            info.dwFlags = 0;
+            info.uCount = 0xffffffff;
+            info.dwTimeout = 0;
+            FlashWindowEx(&info);
+        }
+    };
+  }
+
   namespace IEWebBrowserFix {
     static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
       HKEY key;
