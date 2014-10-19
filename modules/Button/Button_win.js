@@ -55,11 +55,12 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Button.prototype, 'state', {
-    get:function() { 
-      return typeof(this.nativeView.IsChecked) != 'undefined' ? this.nativeView.IsChecked : false;  },
+    get:function() {
+      return typeof(this.nativeView.IsChecked) != 'undefined' ? this.nativeView.IsChecked : false;  
+    },
     set:function(e) { 
       this.private.states['state'] = e;
-      if(typeof(this.nativeView.IsChecked) != undefined)
+      if(typeof(this.nativeView.IsChecked) != 'undefined')
         this.nativeView.IsChecked = e ? true : false;
     }
   });
@@ -130,10 +131,11 @@ module.exports = (function() {
     }
   });
 
+  //TODO: IMPLEMENT ME
   Object.defineProperty(Button.prototype, 'showBorderOnHover', {
-    get:function() {  },
+    get:function() { return this.private.states['showBorderOnHover']; },
     set:function(e) { 
-      this.private.states['showBorderOnHover'] = e;
+      this.private.states['showBorderOnHover'] = e ? true : false;
     }
   });
 

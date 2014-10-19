@@ -6,7 +6,6 @@
 #include <vcclr.h>
 #include <vector>
 #include <msclr/marshal.h>
-
 #include "../AutoLayoutPanel.cpp"
 
 #using <system.dll>

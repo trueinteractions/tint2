@@ -375,7 +375,10 @@ win32.user32 = new ffi.Library('user32.dll', {
   PostMessageW: [ BOOL, [ HWND, UINT, WPARAM, LPARAM ] ],
   GetCursorPos: [ BOOL, [ LPPOINT ]],
   SetCursorPos: [ BOOL, [ int, int ]],
-  BroadcastSystemMessage: [ long, [ DWORD, LPDWORD, UINT, WPARAM, LPARAM ] ]
+  BroadcastSystemMessage: [ long, [ DWORD, LPDWORD, UINT, WPARAM, LPARAM ] ],
+  ShowCursor: [ int, [ BOOL ] ],
+  SetPhysicalCursorPos: [ BOOL, [ int, int ]],
+  mouse_event: [ VOID, [ DWORD, DWORD, DWORD, DWORD, ULONG_PTR ]]
 });
 
 win32.dwmapi = new ffi.Library('dwmapi.dll', {

@@ -392,23 +392,29 @@ else
     $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_KEYDOWN, key, 0);
     $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_KEYUP, key, 0);
   }
-  ex.rightClickAtControl = function rightClickAtControl(control) { }
+  ex.rightClickAtControl = function rightClickAtControl(control) {
+    var z = control.boundsOnScreen;
+    return ex.rightClickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
+  }
   ex.scrollAt = function scrollAt(x, y, upOrDown) { }
   ex.scrollAtControl = function scrollAtControl(control, upOrDown) { }
-  ex.clickAtControl = function clickAtControl(control) { 
+  ex.clickAtControl = function clickAtControl(control) {
     var z = control.boundsOnScreen;
     return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
   ex.clickAt = function clickAt(x,y) {
-    console.log('clicking at: ', x, y);
-    console.log($w32.user32.SetCursorPos(x,y));
-    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_LBUTTONDOWN, 0, 0);
-    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_LBUTTONUP, 0, 0);
+    $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
+    $w32.user32.SetPhysicalCursorPos(x*2,y*2); //TODO: Figure out a better way of transitioning DPI.
+    $w32.user32.ShowCursor(1);
+    $w32.user32.mouse_event(0x0002, 0, 0, 0, 0); //LMOUSEDOWN
+    $w32.user32.mouse_event(0x0004, 0, 0, 0, 0); //LMOUSEUP
   }
-  ex.rightClickAt = function rightClickAt(x,y) { 
-    console.log($w32.user32.SetCursorPos(x,y));
-    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_RBUTTONDOWN, 0, 0);
-    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_RBUTTONUP, 0, 0);
+  ex.rightClickAt = function rightClickAt(x,y) {
+    $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
+    $w32.user32.SetPhysicalCursorPos(x*2,y*2); //TODO: Figure out a better way of transitioning DPI.
+    $w32.user32.ShowCursor(1);
+    $w32.user32.mouse_event(0x0008, 0, 0, 0, 0); //RMOUSEDOWN
+    $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
   }
   ex.writeImage = function writeImage(image, path) { }
   ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) { }

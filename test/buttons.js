@@ -72,7 +72,7 @@ function run($utils) {
     /* @hidden */ //$utils.takeSnapshotOfCurrentWindow('assets/buttons_mac.png');
     /* @hidden */ $utils.assert(buttonRadio.title == "Radio Box 1");
     /* @hidden */ $utils.assert(buttonRadio.type == "radio");
-    /* @hidden */ $utils.assert(buttonRadio.state == true);
+    /* @hidden */ $utils.assert(buttonRadio.state == true, 'buttonRadio.state should equal true, instead: ',buttonRadio.state);
     /* @hidden */ $utils.assert(buttonRadio1.title == "Radio Box 2 (Selected)");
     /* @hidden */ $utils.assert(buttonRadio1.type == "radio");
     /* @hidden */ $utils.assert(buttonRadio1.state == false);
