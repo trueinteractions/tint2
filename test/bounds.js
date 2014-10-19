@@ -21,6 +21,7 @@ function run($utils) {
   var btn = new Button();
 
   var btnMargin = new Button();
+  btnMargin.title = "Button Margin";
   win.appendChild(btnMargin);
   btnMargin.left = btnMargin.right = 10;
   btnMargin.middle = '75%';
