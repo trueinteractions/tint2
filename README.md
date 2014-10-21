@@ -17,7 +17,7 @@ var mainWindow = new Window();
 mainWindow.title = "I'm a native window built in node.";
 ```
 
-Tint contains a set of native components such as Window, Toolbar, Button, WebView, Text Inputs, Panels, Menus, etc. It also allows you to integrate with the OS on many levels and supports alerts and native notifications. 
+Tint allows you to create real OS widgets and integrate HTML/CSS/Javascript and Node functionality with them.
 
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
@@ -30,6 +30,9 @@ If you don't want to learn (or deal with) native OS languages, you're in luck, t
 Community, development and other questions can be discussed at https://groups.google.com/forum/#!categories/trueinteractions
 
 In addition we offer commercial support at https://www.trueinteractions.com
+
+<h2>Using .NET CLR & Objective-C in Tint</h2>
+See the wiki's language bridge page for more information on using C++, C# and Objective-C directly in Tint. https://github.com/trueinteractions/tint2/wiki/Tint's-Language-Bridge
 
 <h2>Status</h2>
 
