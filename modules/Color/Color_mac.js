@@ -15,7 +15,7 @@ module.exports = (function() {
       if(c5 && c5 > 1) c5 = c5 / 255;
     }
     //TODO: Maybe just move this over to our parser?
-    if(type instanceof Color) this = type;
+    if(type instanceof Color) this.native = type.native;
     else if(type.type == '@') this.native = type;
     else if(type == "black") this.native = $.NSColor('blackColor');
     else if(type == "blue") this.native = $.NSColor('blueColor');

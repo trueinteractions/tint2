@@ -1,6 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.dotnet;
   var Container = require('Container');
+  var Color = require('Color');
 
   function TextInput(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -35,8 +36,11 @@ module.exports = (function() {
   });
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {
-    get:function() { return new Color(this.nativeView.Foreground); },
-    set:function(e) { this.nativeView.Foreground = new Color(e); }
+    get:function() { return new Color(this.nativeView.Foreground.Color); },
+    set:function(e) {
+      var c = new Color(e);
+      this.nativeView.Foreground = new $.System.Windows.Media.SolidColorBrush(c.native);
+    }
   });
 
   Object.defineProperty(TextInput.prototype, 'readonly', {

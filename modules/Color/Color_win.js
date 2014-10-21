@@ -5,7 +5,7 @@ module.exports = (function() {
   var $colors = $.System.Windows.Media.Colors;
 
   function Color(type, c1, c2, c3, c4, c5) {
-    if(type instanceof Color) this = type;
+    if(type instanceof Color) this.native = type.native;
     else if(type.pointer) this.native = type;
     else if(type == "black") this.native = $colors.Black;
     else if(type == "blue") this.native = $colors.Blue;

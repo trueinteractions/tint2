@@ -98,17 +98,21 @@ function createEvent(target, typeNative, typeName, memberNative, memberName, sta
 }
 
 function createField(target, typeNative, typeName, memberNative, memberName, static) {
-  Object.defineProperty(target, memberName, {
-    configurable:true,
-    enumerable:true,
-      get:function() {
-        if(static)
-          return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
-        else 
-          return wrap(dotnet.execGetField(this.pointer, memberName));
-      },
-      set:function(e) { dotnet.execSetField((static ? this.classPointer : this.pointer),memberName,unwrap(e)); }
-    });
+  if(!target.hasOwnProperty(memberName)) {
+    Object.defineProperty(target, memberName, {
+      configurable:true,
+      enumerable:true,
+        get:function() {
+          if(static)
+            return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
+          else 
+            return wrap(dotnet.execGetField(this.pointer, memberName));
+        },
+        set:function(e) { 
+          dotnet.execSetField((static ? this.classPointer : this.pointer),memberName,unwrap(e)); 
+        }
+      });
+  }
 }
 
 function typeSignature(memberName, args) {
@@ -207,11 +211,11 @@ function createJSInstance(pointer) {
       this.pointer = pointer;
       this.toString = function() { return '[object ' + typeName + ']'; }
       this.inspect = function() { 
-        var out = '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n";
+        var out = '\033[33m CLR Object ' + this.toString() + ' @ ' + this.pointer.address() + '\033[39m';
 
-        for(var prop in this) {
-          out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
-        } 
+        //for(var prop in this) {
+        //  out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
+        //} 
         return out;
       }
     }
@@ -225,8 +229,9 @@ function createJSInstance(pointer) {
 }
 
 function createClass(typeNative, typeName) {
-  if(classCache[typeNative.inspect()])
-    return classCache[typeNative];
+  var qualifiedName = dotnet.execGetProperty(typeNative,'AssemblyQualifiedName');
+  if(classCache[qualifiedName])
+    return classCache[qualifiedName];
 
   var cls = function() {
     var args = [typeNative];
@@ -235,23 +240,23 @@ function createClass(typeNative, typeName) {
     this.pointer = dotnet.execNew.apply(null,args);
     this.toString = function() { return '[object ' + typeName + ']'; }
     this.inspect = function() { 
-        var out = '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n";
+        var out = '\033[33m CLR Object ' + this.toString() + ' @ ' + this.pointer.address() + '\033[39m';
 
-        for(var prop in this) {
-          out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
-        } 
+       // for(var prop in this) {
+       //   out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
+       // } 
         return out;
       }
   }
 
   cls.extend = function(name) { return new ProtoClass(name,this.classPointer); }
   cls.toString = function() { return '[object ' + typeName + ']'; }
-  //cls.inspect = function() { return '\033[33m CLR Class ' + this.toString() + '\033[39m'; }
+  cls.inspect = function() { return '\033[33m CLR Class ' + this.toString() + '\033[39m'; }
   cls.classPointer = cls.prototype.classPointer = typeNative;
   cls.className = cls.prototype.className = typeName;
 
   // Find all STATIC members.
-  typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
+  var typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
 
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
@@ -268,7 +273,7 @@ function createClass(typeNative, typeName) {
     createMember(cls.prototype, typeNative, typeName, memberNative, memberName, false);
   }
 
-  return classCache[typeNative.inspect()] = cls;
+  return classCache[qualifiedName] = cls;
 }
 
 function createFromType(nativeType, onto) {
