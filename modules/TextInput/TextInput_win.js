@@ -32,7 +32,7 @@ module.exports = (function() {
 
   Object.defineProperty(TextInput.prototype, 'enabled', {
     get:function() { return this.native.IsReadOnly; },
-    set:function(e) { this.native.IsReadOnly = e; }
+    set:function(e) { this.native.IsReadOnly = e ? true : false; }
   });
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {

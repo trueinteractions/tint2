@@ -23,6 +23,7 @@ function run($utils) {
   mainWindow.appendChild(input);
   mainWindow.appendChild(input2);
 
+  input.textcolor = 'rgba(0,0,0,0.8);';
   input.top = 10;
   input.height = 25;
   input.left = 10;

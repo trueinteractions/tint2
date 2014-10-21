@@ -1,6 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var Container = require('Container');
+  var Color = require('Color');
 
   function TextInput(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -44,7 +45,7 @@ module.exports = (function() {
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {
     get:function() { return new Color(this.nativeView('textColor')); },
-    set:function(e) { this.nativeView('setTextColor',new Color(e)); }
+    set:function(e) { this.nativeView('setTextColor',(new Color(e)).native); }
   });
 
   Object.defineProperty(TextInput.prototype, 'readonly', {
