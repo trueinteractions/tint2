@@ -359,15 +359,15 @@ public ref class CLREventHandler {
     v8::TryCatch try_catch;
 
     if (this->callback->function.IsEmpty()) {
-      ThrowException(v8::Exception::Error(
-            v8::String::New("CLR fatal: Callback has been garbage collected.")));
+      throw gcnew System::Exception("CLR Fatal: Callback has been garbage collected.");
       exit(1);
     } else {
       // invoke the registered callback function
       this->callback->function->Call(v8::Context::GetCurrent()->Global(), 2, argv);
     }
     if (try_catch.HasCaught()) {
-      try_catch.ReThrow();
+      throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
+      exit(1);
     }
   }
 private:
@@ -983,36 +983,34 @@ struct FLASHWINFO
 namespace FlashWPFWindow {
     public ref class WindowExtensions
     {
+      public:
+      static void FlashWindow(System::Windows::Window^ win, unsigned count)
+      {
+          //Don't flash if the window is active
+          if (win->IsActive) return;
 
-    public:
-  
-        static void FlashWindow(System::Windows::Window^ win, unsigned count)
-        {
-            //Don't flash if the window is active
-            if (win->IsActive) return;
- 
-            System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
- 
-            FLASHWINFO info;
-            info.hwnd = (HWND)h->Handle.ToPointer();
-            info.dwFlags = 3 | 4;
-            info.uCount = count;
-            info.dwTimeout = 0;
-            info.cbSize = sizeof(info);
-            FlashWindowEx(&info);
-        }
- 
-        static void StopFlashingWindow(System::Windows::Window^ win)
-        {
-            System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
-            FLASHWINFO info;
-            info.hwnd = (HWND)h->Handle.ToPointer();
-            info.cbSize = sizeof(info);
-            info.dwFlags = 0;
-            info.uCount = 0xffffffff;
-            info.dwTimeout = 0;
-            FlashWindowEx(&info);
-        }
+          System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
+
+          FLASHWINFO info;
+          info.hwnd = (HWND)h->Handle.ToPointer();
+          info.dwFlags = 3 | 4;
+          info.uCount = count;
+          info.dwTimeout = 0;
+          info.cbSize = sizeof(info);
+          FlashWindowEx(&info);
+      }
+
+      static void StopFlashingWindow(System::Windows::Window^ win)
+      {
+          System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
+          FLASHWINFO info;
+          info.hwnd = (HWND)h->Handle.ToPointer();
+          info.cbSize = sizeof(info);
+          info.dwFlags = 0;
+          info.uCount = 0xffffffff;
+          info.dwTimeout = 0;
+          FlashWindowEx(&info);
+      }
     };
   }
 

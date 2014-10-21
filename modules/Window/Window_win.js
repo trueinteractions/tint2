@@ -15,9 +15,6 @@ module.exports = (function() {
     else
       Container.call(this, $.System.Windows.Window, $.AutoLayout.AutoLayoutPanel, options);
 
-    // Attach System.Windows.Window.Content = System.Windows.Controls.Canvas
-    //this.native.Content = new $.System.Windows.Controls.Border();
-    //this.native.Content.CornerRadius = $.System.Windows.SystemParameters.WindowCornerRadius;
     this.native.Content = this.nativeView;
 
     //TODO: Add enter-fullscreen/exit-fullscreen
@@ -74,16 +71,19 @@ module.exports = (function() {
     }
   });
 
+  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'textured', {
     get:function() { },
     set:function(e) { }
   });
 
+  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'shadow', {
     get:function() { },
     set:function(e) { }
   });
 
+  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'menu', {
     get:function() { 
       return this.private.menu; 
@@ -94,6 +94,7 @@ module.exports = (function() {
     }
   });
 
+  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'toolbar', {
     get:function() { 
       //return this.private.toolbar; 
@@ -115,6 +116,7 @@ module.exports = (function() {
     }
   });
 
+  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'canBeFullscreen', {
     get:function() { return true; },
     set:function(e) { }
@@ -205,6 +207,7 @@ module.exports = (function() {
     }
   });
 
+  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'titleVisible', {
     get:function() { return true; },
     set:function(e) { /* TODO ? */ }
@@ -217,7 +220,6 @@ module.exports = (function() {
       if(e) {
         this.native.Show();
         this.native.Visibility = $.System.Windows.Visibility.Visible;
-        
       } else {
         this.native.Hide();
         this.native.Visibility = $.System.Windows.Visibility.Hidden;

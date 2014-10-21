@@ -209,9 +209,9 @@ function createJSInstance(pointer) {
       this.inspect = function() { 
         var out = '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n";
 
-        //for(var prop in this) {
-        //  out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
-        //} 
+        for(var prop in this) {
+          out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
+        } 
         return out;
       }
     }
@@ -237,9 +237,9 @@ function createClass(typeNative, typeName) {
     this.inspect = function() { 
         var out = '\033[33m CLR Object ' + this.toString() + '\033[39m' + "\n";
 
-        //for(var prop in this) {
-        //  out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
-        //} 
+        for(var prop in this) {
+          out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
+        } 
         return out;
       }
   }

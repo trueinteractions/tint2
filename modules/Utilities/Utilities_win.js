@@ -172,12 +172,11 @@ module.exports = (function() {
     else if(e.indexOf(':') > -1) {
     	img = new $.System.Windows.Controls.Image();
     	img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(new $.System.Uri(e));
-
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
     	img = new $.System.Windows.Controls.Image();
-    	var strm = $.System.IO.FileStream(e, $.System.IO.FileMode.Open);
-    	img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
-    	img.Stretch = $.System.Windows.Media.Stretch.None;
+		var strm = $.System.IO.File.OpenRead(e);
+		img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
+		img.Stretch = $.System.Windows.Media.Stretch.None;
     }
     else {
       var imageRef = getImageFromString(e);

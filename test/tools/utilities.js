@@ -389,8 +389,8 @@ else
 
   ex.keyAtControl = function keyAtControl(input) {
     var key = ex.keyCodeFromChar(input);
-    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_KEYDOWN, key, 0);
-    $w32.user32.BroadcastSystemMessage(null, null, $w32.user32.WM_KEYUP, key, 0);
+    $w32.user32.keybd_event(key, 0, 0, 0);
+    $w32.user32.keybd_event(key, 0, 0x0002, 0);
   }
   ex.rightClickAtControl = function rightClickAtControl(control) {
     var z = control.boundsOnScreen;

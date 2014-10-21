@@ -46,8 +46,12 @@ module.exports = (function() {
       this.native.addEventListener('MouseMove', function() { this.fireEvent('mousemove'); }.bind(this));
       this.native.addEventListener('MouseEnter', function() { this.fireEvent('mouseenter'); }.bind(this));
       this.native.addEventListener('MouseLeave', function() { this.fireEvent('mouseexit'); }.bind(this));
-      this.native.addEventListener('KeyDown', function() { this.fireEvent('keydown'); }.bind(this));
-      this.native.addEventListener('KeyUp', function() { this.fireEvent('keyup'); }.bind(this));
+      this.native.addEventListener('KeyDown', function() { 
+        setTimeout(function() { this.fireEvent('keydown'); }.bind(this),0);
+      }.bind(this));
+      this.native.addEventListener('KeyUp', function() { 
+        setTimeout(function() { this.fireEvent('keyup'); }.bind(this),0);
+      }.bind(this));
     }.bind(this);
 
     addNativeEventHandlers();

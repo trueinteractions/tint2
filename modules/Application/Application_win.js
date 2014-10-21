@@ -18,7 +18,9 @@
         name = "", badgeText = "", 
         dockmenu = null, icon = "", _windows = [];
 
-    this.native = $.System.Windows.Application;
+    this.native = $.System.Windows.Application.Current;
+    if(this.native == null)
+      this.native = new $.System.Windows.Application();
 
     function fireEvent(event, args) {
       if(events[event])
@@ -79,10 +81,10 @@
         e = utilities.makeImage(e);
         if(e) {
           var coll = this.native.Windows.GetEnumerator();
-          do {
+          while(coll.MoveNext()) {
             var _win = coll.Current;
-            _win.Icon = e;
-          } while (coll.MoveNext());
+            _win.Icon = e.Source;
+          }
         }
       }
     });
@@ -105,44 +107,46 @@
       get:function() {
         var visible = false;
         var coll = this.native.Windows.GetEnumerator();
-        do {
+        while (coll.MoveNext()) {
           var _win = coll.Current;
           if(_win.Visibility == $.System.Windows.Visibility.Visible)
             visible = true;
-        } while (coll.MoveNext());
+        }
         return visible;
       },
       set:function(e) { 
         var coll = this.native.Windows.GetEnumerator();
-        do {
+        while (coll.MoveNext()) {
           var _win = coll.Current;
           if(e) _win.Visibility = $.System.Windows.Visibility.Visible;
           else _win.Visibility = $.System.Windows.Visibility.Hidden;
-        } while (coll.MoveNext());
+        }
       }
     })
 
     this.attention = function(critical) {
       var coll = this.native.Windows.GetEnumerator();
-      do {
+      while (coll.MoveNext()) {
         var _win = coll.Current;
-        $.FlashWPFWindow.WindowExtensions.FlashWindow(_win,20);
-      } while (coll.MoveNext());
-      return {cancel:function() {
-        do {
-          var _win = coll.Current;
-          $.FlashWPFWindow.WindowExtensions.StopFlashingWindow(_win);
-        } while (coll.MoveNext());
-      }.bind(this)};
+        $.FlashWPFWindow.WindowExtensions.FlashWindow(_win, 20);
+      }
+      return {
+        cancel:function() {
+          while (coll.MoveNext()) {
+            var _win = coll.Current;
+            $.FlashWPFWindow.WindowExtensions.StopFlashingWindow(_win);
+          }
+        }.bind(this)
+      };
     }
 
     function GetActiveWindow() {
       var coll = this.native.Windows.GetEnumerator();
-      do {
+      while (coll.MoveNext()) {
         var _win = coll.Current;
         if(_win.IsActive) return _win;
         $.FlashWPFWindow.WindowExtensions.FlashWindow(_win,20);
-      } while (coll.MoveNext());
+      }
       return null;
     }
 

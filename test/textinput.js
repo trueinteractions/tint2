@@ -35,28 +35,57 @@ function run($utils) {
   /* @hidden */ var inputStart = false;
   /* @hidden */ var inputEnd = false;
   /* @hidden */ var inputEv = false;
-  input.addEventListener('input', function(e) { 
-    /* @hidden */ inputEv = true; 
+  /* @hidden */ var keydownEv = false;
+  /* @hidden */ var keyupEv = false;
+  /* @hidden */ var mouseupEv = false;
+  /* @hidden */ var mousedownEv = false; 
+  input.addEventListener('mousedown', function(e) {
+    /* @hidden */ mousedownEv = true;
   });
-  input.addEventListener('inputstart', function(e) { 
+  input.addEventListener('mouseup', function(e) { 
+    /* @hidden */ mouseupEv = true;
+    /* @hidden */ $utils.assert(mousedownEv);
+    /* @hidden */ $utils.keyAtControl('a');
+  }); 
+  input.addEventListener('inputstart', function(e) {
+    /* @hidden */ $utils.assert(mouseupEv);
+    /* @hidden */ $utils.assert(mousedownEv);
     /* @hidden */ inputStart = true; 
   });
-  input.addEventListener('inputend', function(e) { 
-    /* @hidden */ $utils.ok();
-  });
-  input.addEventListener('mousedown', function(e) { 
-    /* @hidden */ $utils.keyAtControl('a'); 
-  });
-  input.addEventListener('mousemove', function(e) { 
+  input.addEventListener('keydown', function(e) {
+    /* @hidden */ keydownEv = true;
+    /* @hidden */ $utils.assert(mousedownEv);
+    /* @hidden */ $utils.assert(mouseupEv);
+    /* @hidden */ $utils.assert(inputStart);
+  }); 
+  input.addEventListener('input', function(e) {
+    /* @hidden */ $utils.assert(mousedownEv);
+    /* @hidden */ $utils.assert(mouseupEv);
+    /* @hidden */ $utils.assert(inputStart);
+    /* @hidden */ $utils.assert(keydownEv);
+    /* @hidden */ $utils.assert(input.value == 'a');
+    /* @hidden */ inputEv = true; 
   });
   input.addEventListener('keyup', function(e) {
-    /* @hidden */ $utils.assert(inputStart);
+    /* @hidden */ keyupEv = true;
     /* @hidden */ $utils.assert(inputEv);
+    /* @hidden */ $utils.assert(mousedownEv);
+    /* @hidden */ $utils.assert(mouseupEv);
+    /* @hidden */ $utils.assert(inputStart);
+    /* @hidden */ $utils.assert(keydownEv);
     /* @hidden */ $utils.assert(input.value == 'a');
     /* @hidden */ $utils.clickAtControl(input2);
   });
-  /* @hidden */ input.addEventListener('keydown', function(e) { }); // doesn't work
-  /* @hidden */ input.addEventListener('mouseup', function(e) { }); // doesn't work
+  input.addEventListener('inputend', function(e) {
+    /* @hidden */ $utils.assert(keyupEv);
+    /* @hidden */ $utils.assert(inputEv);
+    /* @hidden */ $utils.assert(mousedownEv);
+    /* @hidden */ $utils.assert(mouseupEv);
+    /* @hidden */ $utils.assert(inputStart);
+    /* @hidden */ $utils.assert(keydownEv);
+    /* @hidden */ $utils.assert(input.value == 'a');
+    /* @hidden */ $utils.ok();
+  });
   /* @hidden */ input.addEventListener('rightmousedown', function(e) { }); // doesn't work
   /* @hidden */ input.addEventListener('rightmouseup', function(e) { }); // doesn't work
   /* @hidden */ input.addEventListener('mouseenter', function(e) { }); // doesn't work

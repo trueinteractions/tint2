@@ -44,7 +44,7 @@ module.exports = (function() {
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {
     get:function() { return new Color(this.nativeView('textColor')); },
-    set:function(e) { this.nativeView('setTextColor',e.native); }
+    set:function(e) { this.nativeView('setTextColor',new Color(e)); }
   });
 
   Object.defineProperty(TextInput.prototype, 'readonly', {
