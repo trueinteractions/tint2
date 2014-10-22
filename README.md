@@ -2,7 +2,7 @@
 
 Create Desktop Javascript Applications.
 
-Tint is binary compatible with node 10.x and integrated support for Windows .NET Framework and OSX Objective-C and allows you to access and create native OS objects:
+Tint is binary compatible with node 10.x and allows you to access and create native OS objects:
 ```javascript
 require('Application');
 Window = require('Window');
@@ -11,7 +11,7 @@ var mainWindow = new Window();
 mainWindow.title = "I'm a native window built in node.";
 ```
 
-Or use Windows .NET Framework or Objective-C directly from node.
+You can also directly interface with classes, objects and enums from any Windows DLL (.NET/CLR) or OSX Objective-C Framework from Tint.
 
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
