@@ -1,8 +1,8 @@
 <h1>Tint</h1>
 
-Create desktop javascript applications, binary compatible with node 10.x and integrated support for Windows .NET Framework and OSX Objective-C.
+Create Desktop Javascript Applications.
 
-Create a window with Tint:
+Tint is binary compatible with node 10.x and integrated support for Windows .NET Framework and OSX Objective-C and allows you to access and create native OS objects:
 ```javascript
 require('Application');
 Window = require('Window');
