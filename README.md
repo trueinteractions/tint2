@@ -1,14 +1,8 @@
 <h1>Tint</h1>
 
-Create native applications with Javascript, CSS, HTML5 and node.
+Create desktop javascript applications, binary compatible with node 10.x and integrated support for Windows .NET Framework and OSX Objective-C.
 
-<h2>What is Tint?</h2>
-
-Tint is a slightly modified version of node. It allows you to go beyond the shell command of node and turns javascript based node applications into fully functional desktop applications. It's also backwards compatible with node 0.10.
-
-You can perform various things you'd never be able to do normally with node. For example:
-
-
+Create a window with Tint:
 ```javascript
 require('Application');
 Window = require('Window');
@@ -17,7 +11,7 @@ var mainWindow = new Window();
 mainWindow.title = "I'm a native window built in node.";
 ```
 
-Tint allows you to create real OS widgets and integrate HTML/CSS/Javascript and Node functionality with them.
+Or use Windows .NET Framework or Objective-C directly from node.
 
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
@@ -77,7 +71,7 @@ If you have issues compiling ensure you're using Python 2.7 or 2.6 (``./config.s
 On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ``./build/xcode/`` directory.
 
 
-<h2>Running</h2>
+<h2>Tint is binary compatible with node.</h2>
 You can run applications using:
 
 ```bash
@@ -90,7 +84,11 @@ Or you can run it in interactive mode.
 $ tint
 ```
 
-In addition applications can be packaged as normal apps using a shell package system (more instructions coming on this).
+Or package your app into a single executable or OSX Application:
+
+```bash
+$ tntbuild somedir/package.json
+```
 
 <h2>Current Built-In Modules</h2>
 
@@ -129,8 +127,6 @@ In addition applications can be packaged as normal apps using a shell package sy
 <h2>Documentation</h2>
 Currently documentation is fairly sparse, look at the individual modules for information on each component, in addition the test folder has examples (unit tests) for various components.  
 
-<h2>Node Compatibility</h2>
-Tint is binary compatible with node 0.10.x (it can include native compiled C/C++ modules), in addition its command line compatible with node 0.10.x.
 <h2>Creating a Browser in Tint</h2>
 
 ```javascript
