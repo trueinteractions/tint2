@@ -18,7 +18,7 @@
   var $ = process.bridge.objc;
 
   function Application() {
-    var events = {}, mainMenu = null, 
+    var events = {}, 
         name = "", badgeText = "", 
         dockmenu = null, icon = "", nswindows = [],
         terminateWhenLastWindowClosed = $.NO;

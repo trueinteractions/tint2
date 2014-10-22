@@ -89,8 +89,20 @@ module.exports = (function() {
       return this.private.menu; 
     },
     set:function(e) {
+      if(this.private.menu != null) {
+        this.nativeView.RemoveLayoutConstraint(this.private.menuConst1);
+        this.nativeView.RemoveLayoutConstraint(this.private.menuConst2);
+        this.nativeView.RemoveLayoutConstraint(this.private.menuConst3);
+        this.nativeView.Internalchildren.Remove(this.private.menu.native);
+        this.private.menuConst1 = null;
+        this.private.menuConst2 = null;
+        this.private.menuConst3 = null;
+      }
       this.private.menu = e;
-      //global.application.native('setMainMenu', this.private.menu.native);
+      this.nativeView.InternalChildren.Add(e.native);
+      this.private.menuConst1 = this.nativeView.AddLayoutConstraint(this.nativeView,'Left','=',e.native,'Left',0,0);
+      this.private.menuConst2 = this.nativeView.AddLayoutConstraint(this.nativeView,'Top','=',e.native,'Top',0,0);
+      this.private.menuConst3 = this.nativeView.AddLayoutConstraint(this.nativeView,'Width','=',e.native,'Width',1,0);
     }
   });
 

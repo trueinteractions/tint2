@@ -11,13 +11,11 @@ module.exports = (function() {
       $menu('addItem',menuitem.native);
       return menuitem;
     }
-    this.insertChildAt = function(menuitem, index) {
-      //children.push(menuitem);
-      //$menu('addItem',menuitem.native);
-    }
     this.removeChild = function(menuitem) {
-      if(children.indexOf(menuitem) != -1) children.splice(children.indexOf(menuitem),1);
+      if(children.indexOf(menuitem) != -1) {
+        children.splice(children.indexOf(menuitem),1);
         $menu('removeItem',menuitem.native);
+      }
     }
     Object.defineProperty(this, 'native', {
         get:function() { return $menu; }

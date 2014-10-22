@@ -192,10 +192,8 @@ module.exports = (function() {
     return img;
   }
 
-  return {
-    getImageFromString:getImageFromString,
-    makeImage:makeImage,
-    parseColor:baseUtilities.parseColor,
-    parseUnits:baseUtilities.parseUnits
-  }
+  baseUtilities.getImageFromString = getImageFromString;
+  baseUtilities.makeImage = makeImage;
+
+  return baseUtilities;
 })();

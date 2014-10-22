@@ -7,7 +7,7 @@ module.exports = (function() {
     if(typeof(keystring)=='undefined') keystring = "";
     if(typeof(keymodifiers)=='undefined') keymodifiers = "";
 
-    this.private = {events:{},submenu:null,modifiers:"",imgOn:null,imgOff:null,img:null,custom:null};
+    this.private = {events:{},submenu:null,modifiers:"",imgOn:null,imgOff:null,img:null,custom:null,state:false};
     
     var TintMenuItemDelegate = $.NSObject.extend('TintMenuItemDelegate'+Math.round(Math.random()*100000));
     TintMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { 
@@ -39,7 +39,9 @@ module.exports = (function() {
     if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
   }
-
+/*
+  TODO: See if we can support a hover state rather
+  than these properties, do not transfer to other OS'
   Object.defineProperty(MenuItem.prototype, 'imageOn', {
     get:function() { return this.private.imgOn; },
     set:function(e) { 
@@ -57,7 +59,7 @@ module.exports = (function() {
       if(e) this.native('setOffStateImage', e);
     }
   });
-
+*/
   Object.defineProperty(MenuItem.prototype, 'image', {
     get:function() { return this.private.img; },
     set:function(e) { 
@@ -75,24 +77,32 @@ module.exports = (function() {
     }
   });
 
+  Object.defineProperty(MenuItem.prototype, 'checked', {
+    get:function() { return this.private.state; },
+    set:function(e) { 
+      this.private.state = e ? true : false;
+      this.native('setState', e ? 1 : 0);
+    }
+  });
+
   Object.defineProperty(MenuItem.prototype, 'title', {
     get:function() { return this.native('title')('UTF8String'); },
-    set:function(e) { return this.native('setTitle',$(e)); }
+    set:function(e) { this.native('setTitle',$(e)); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'enabled', {
     get:function() { return this.native('isEnabled'); },
-    set:function(e) { return this.native('setEnabled',e); }
+    set:function(e) { this.native('setEnabled',e); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'hidden', {
     get:function() { return this.native('isHidden'); },
-    set:function(e) { return this.native('setHidden',e); }
+    set:function(e) { this.native('setHidden',e); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'key', {
     get:function() { return this.native('keyEquivalent')('UTF8String'); },
-    set:function(e) { return this.native('setKeyEquivalent',$(e)); }
+    set:function(e) { this.native('setKeyEquivalent',$(e)); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'modifiers', {
@@ -124,7 +134,7 @@ module.exports = (function() {
 
   Object.defineProperty(MenuItem.prototype, 'tooltip', {
     get:function() { return this.native('toolTip')('UTF8String'); },
-    set:function(e) { return this.native('setToolTip',$(e)); }
+    set:function(e) { this.native('setToolTip',$(e)); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'custom', {
