@@ -2,7 +2,8 @@
 
 Create Desktop Javascript Applications.
 
-Tint is binary compatible with node 10.x and allows you to access and create native OS objects:
+With Tint your options are no longer bound to browsers or emulators, use our SDK to build cross-compatible applications or directly interface with Objective-C frameworks or Windows DLL's to create OS-specific functionality.
+
 ```javascript
 require('Application');
 Window = require('Window');
@@ -11,7 +12,27 @@ var mainWindow = new Window();
 mainWindow.title = "I'm a native window built in node.";
 ```
 
-You can also directly interface with classes, objects and enums from any Windows DLL (.NET/CLR) or OSX Objective-C Framework from Tint.
+
+<h2>Create real applications with Javascript</h2>
+
+
+Run an application from a script
+
+```bash
+$ tint some.js
+```
+
+Prototype functionality quickly in interactive mode
+
+```bash
+$ tint
+```
+
+Or create a standalone Windows or OSX executable
+
+```bash
+$ tntbuild somedir/package.json
+```
 
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
@@ -70,25 +91,6 @@ If you have issues compiling ensure you're using Python 2.7 or 2.6 (``./config.s
 
 On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ``./build/xcode/`` directory.
 
-
-<h2>Tint is binary compatible with node.</h2>
-You can run applications using:
-
-```bash
-$ tint some.js
-```
-
-Or you can run it in interactive mode.
-
-```bash
-$ tint
-```
-
-Or package your app into a single executable or OSX Application:
-
-```bash
-$ tntbuild somedir/package.json
-```
 
 <h2>Current Built-In Modules</h2>
 
