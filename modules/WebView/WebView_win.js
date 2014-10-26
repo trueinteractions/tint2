@@ -49,7 +49,7 @@ module.exports = (function() {
   WebView.prototype.constructor = Container;
 
   WebView.prototype.back = function() { this.nativeView.GoBack(); }
-  WebView.prototype.forward = function() { this.nativeView.GoFroward(); }
+  WebView.prototype.forward = function() { this.nativeView.GoForward(); }
   WebView.prototype.reload = function() { this.nativeView.Refresh(); }
   WebView.prototype.stop = function() { 
     this.private.loading = false;
