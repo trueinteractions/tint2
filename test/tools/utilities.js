@@ -469,7 +469,7 @@ function execAndPump(cmd, cb, err, options) {
 	return child;
 }
 ex.ok = function ok() {
-	if(currentTest.shell) ex.shutdownShell(currentTest.name, function() {});
+	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
 	process.stdout.write(brightBlueBegin + successMark + colorEnd + '\n');
 	nextTest();
 }
@@ -478,7 +478,7 @@ ex.fail = function fail() {
   process.exit(1);
 }
 function notok(code) {
-	if(currentTest.shell) {
+	if(currentTest.shell && ismac) {
 		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
 }
@@ -491,7 +491,7 @@ function nextTest() {
 function test(item) {
 	currentTest = require('../'+item);
 	process.stdout.write(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
-	if(currentTest.shell) {
+	if(currentTest.shell && ismac) {
 		ex.setupShell(currentTest.name,function() {
 			if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
 			else ex.runShell(currentTest.name,ex.ok,notok,currentTest.shell_options); 

@@ -31,8 +31,9 @@ function baseline() {
  * @see {Notification}
  * @example
  */
-function run() {
-  /* @hidden */ $utils = require('../../../../tools/utilities.js');
+function run($utils) {
+  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
+  /* @hidden */ //$utils = require('../../../../tools/utilities.js');
   Notification.requestPermission(function(result) {
     /* @hidden */ $utils.assert(result);
     // If we get the OK we'll send up a new notificaiton.
@@ -51,12 +52,18 @@ function run() {
       notify.buttonLabel = "Main";
       // The text for the button at @img{assets/notifications_aux_button.png}
       notify.addEventListener('fired', function() {
-        /* @hidden */ var xpos = Screens.active.bounds.width - 60;
-        /* @hidden */ setTimeout(function() { $utils.clickAt(xpos,60); },1000); //TODO: Find a better way than hardcoding 80.
+        /* @hidden */ if(ismac) {
+          /* @hidden */ var xpos = Screens.active.bounds.width - 60;
+          /* @hidden */ setTimeout(function() { $utils.clickAt(xpos,60); },1000); //TODO: Find a better way than hardcoding 80.
+        /* @hidden */ } else {
+          /* @hidden */ var xpos = Screens.active.bounds.width - 80;
+          /* @hidden */ setTimeout(function() { $utils.clickAt(xpos, Screens.active.bounds.height - 60); },500);
+        /* @hidden */ }
       });
       notify.addEventListener('click', function(args) {
         /* @hidden */ //$utils.assert(args == "button");
-        /* @hidden */ process.exit(0);
+        /* @hidden */ if(ismac) process.exit(0); 
+        /* @hidden */ else $utils.ok();
       });
 
       // Throw the notification out.

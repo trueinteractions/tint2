@@ -685,17 +685,17 @@ public:
   static Handle<v8::Value> ExecGetStaticField(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
 
-      System::Type^ baseType = target->GetType();
-      if(baseType != System::Type::typeid && target == System::Type::typeid)
-        baseType = (System::Type ^)target;
+      //System::Type^ baseType = target->GetType();
+      //if(baseType != System::Type::typeid && target == System::Type::typeid)
+      //  baseType = (System::Type ^)target;
 
-      System::Reflection::FieldInfo ^fieldinfo = baseType->GetField(field, 
+      System::Reflection::FieldInfo ^fieldinfo = target->GetField(field, 
          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
 
-      System::Object^ rtn = fieldinfo->GetValue(target);
+      System::Object^ rtn = fieldinfo->GetValue(nullptr);
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
