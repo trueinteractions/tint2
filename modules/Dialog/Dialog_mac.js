@@ -73,7 +73,8 @@ module.exports = (function() {
       }
     });
 
-    this.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
+    //TODO: Doesn't work on MacOSX, unsure why.
+    //this.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
 
     this.open = function(z) {
       if(!buttonsSet) {
