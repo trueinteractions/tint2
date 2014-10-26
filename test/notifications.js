@@ -33,7 +33,7 @@ function baseline() {
  */
 function run($utils) {
   /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
-  /* @hidden */ //$utils = require('../../../../tools/utilities.js');
+  /* @hidden */ if(ismac) $utils = require('../../../../tools/utilities.js');
   Notification.requestPermission(function(result) {
     /* @hidden */ $utils.assert(result);
     // If we get the OK we'll send up a new notificaiton.
