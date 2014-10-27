@@ -94,7 +94,8 @@ module.exports = (function() {
       }
     });
 
-    this.setChild = function(e) { $dialog('setAccessoryView',e); }
+    // Not supported on Windows.
+    //this.setChild = function(e) { $dialog('setAccessoryView',e); }
 
     this.open = function(z) {
       var w = z ? z : $.NSApplication('sharedApplication')('mainWindow');

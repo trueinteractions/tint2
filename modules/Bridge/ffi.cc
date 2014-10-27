@@ -2,9 +2,6 @@
 #include <node_version.h>
 #include "ffi.h"
 #include <queue>
-#include <sys/types.h>
-#include <sys/event.h>
-#include <sys/time.h>
 
 pthread_t          CallbackInfo::g_mainthread;
 pthread_mutex_t    CallbackInfo::g_queue_mutex;
@@ -103,6 +100,7 @@ void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
   }
 
   pthread_mutex_unlock(&g_queue_mutex);
+  //TODO: reset kqueue to unblock somehow, SIGNAL?..
 }
 
 /*
