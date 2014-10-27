@@ -72,21 +72,27 @@ void uv_event(void *info) {
       DWORD bytes, timeout;
       ULONG_PTR key;
       OVERLAPPED* overlapped;
-      timeout = uv_get_poll_timeout(loop);
       
+      // libuv needs an accurate time prior to asking for the timeout,
+      // it may be more efficient to check if there are timers prior
+      // to updating but the cost is so insignificant and not worth the
+      // maintenance issues of peaking inside the internals to see.
+      uv_update_time(loop);
+      timeout = uv_get_poll_timeout(loop);
+
       // Do not indefinately block, set the timeout to a reasonably low
       // value below the threshold of IO timing out, but not so low it
       // causes power consumption issues on mobile devices. If higher than
       // 1s, reset it back, just in case.
-      if(timeout < 0) timeout = 250;
-      else if(timeout > 1000) timeout = 1000;
+      //if(timeout == INFINITE) 
+      //  timeout = 160;
       
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
       if (overlapped != NULL)
         PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
-    }
+    } 
 
     // This may seem obsurd to both broadcast a message and 
     // post it to the main thread, however if a window is 
@@ -99,7 +105,6 @@ void uv_event(void *info) {
     // failing.
     PostMessage(HWND_BROADCAST, WM_APP+1, 0, 0);
     PostThreadMessage(mainThreadId, WM_APP+1 /* magic UV id */, 0, 0);
-
     uv_sem_wait(&embed_sem);
   }
 }
@@ -114,21 +119,23 @@ void node_load() {
   // Register the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);
 
-  // Start worker that will interrupt main loop when having uv events.
-  // keep the UV loop in-sync with windows message loop.
-  embed_closed = 0;
-
   // The dummy handle prevents UV from exiting and throwing incorrect
   // timeout values, its necessary since uv can't see many of the app
   // events to keep it assuming something else will come and return -1
   // from uv_backend_timeout.
   uv_async_t dummy_uv_handle_;
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
-  uv_sem_init(&embed_sem, 0);
-  uv_thread_create(&embed_thread, uv_event, NULL);
 
   // Load node and begin processing.
   node::Load(process_l);
+
+  // This must post after the node::Load otherwise we will get infinte
+  // timeouts from libuv and if there isn't file descirptor setup yet
+  // the entire thing will simply never wake back up.
+  embed_closed = 0;
+  
+  uv_sem_init(&embed_sem, 0);
+  uv_thread_create(&embed_thread, uv_event, NULL);
 }
 
 // Externalize this, if we've completely blocked the event loop
@@ -136,6 +143,7 @@ void node_load() {
 // loop due to a blocking OS reason)
 extern "C" void uv_run_nowait() {
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+  uv_sem_post(&embed_sem);
 }
 
 void node_terminate() {
@@ -187,17 +195,11 @@ void win_msg_loop() {
       exit(1);
     } else if(msg.message == WM_APP+1)
       uv_run_nowait();
-    else { //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
+    //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
+    else {
        TranslateMessage(&msg);
        DispatchMessage(&msg);
     }
-
-    // Its entirely possible that an intended message to wake up
-    // the thread was missed due to the transition from cmd->win32 mode
-    // or win32->wpf window mode, etc, etc. Go ahead and release the 
-    // semaphore as its safe to assume uv_run_nowait above finished, and
-    // harmless if it didn't run.
-    uv_sem_post(&embed_sem);
   }
 
   // Received WM_QUIT

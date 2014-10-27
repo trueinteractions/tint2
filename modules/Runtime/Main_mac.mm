@@ -63,14 +63,21 @@ static void uv_event(void *info) {
     int r;
     struct kevent errors[1];
     uv_loop_t* loop = uv_default_loop();
-    int timeout = uv_backend_timeout(loop);
+    int timeout;
     
     while (!embed_closed) {
         int fd = uv_backend_fd(loop);
-
         timeout = uv_backend_timeout(loop);
-        if(timeout < 0) timeout = 250;
-        if(timeout > 500) timeout = 500;
+
+        // This is unfortunately necessary, since we have callbacks from
+        // objective-c a peice of code that may, perhaps set a timeout or
+        // other item will not be called because we started waiting indefinately
+        // prior to its execution.  The simple hack is to wait 100ms, however
+        // a better way would be to change Modules/Bridge/ffi.cc to interrupt 
+        // the kevent block below so we can handle infinite timeouts.  
+        // Lets add that to the TODO actually.  
+        // For now we'll just waste cycles and miss setTimeout targets.
+        if(timeout == -1) timeout = 100; // wake back up in 100ms.
 
         do {
             struct timespec ts;

@@ -2,6 +2,10 @@
 #include <node_version.h>
 #include "ffi.h"
 #include <queue>
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+
 pthread_t          CallbackInfo::g_mainthread;
 pthread_mutex_t    CallbackInfo::g_queue_mutex;
 std::queue<ThreadedCallbackInvokation *> CallbackInfo::g_queue;

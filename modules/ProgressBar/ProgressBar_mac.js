@@ -50,7 +50,8 @@ module.exports = (function() {
       else this.native('setControlSize', $.NSSmallControlSize);
     }
   });
-
+/*
+  TODO: Not supported on Windows, bring back once we've added it.
   Object.defineProperty(ProgressBar.prototype, 'style', {
     get:function() { 
       var s = this.native('style');
@@ -62,7 +63,7 @@ module.exports = (function() {
       else if (e == "spinning") this.native('setStyle', $.NSProgressIndicatorSpinningStyle | $.NSProgressIndicatorPreferredLargeThickness);
     }
   });
-
+*/
   return ProgressBar;
 
 })();

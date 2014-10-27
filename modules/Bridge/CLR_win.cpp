@@ -859,13 +859,13 @@ public:
 
   static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
     HandleScope scope;
-    try {
+    //try {
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
       prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
       return scope.Close(Undefined());
-    } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
+    //} catch(System::Exception^ e) {
+    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    //}
   }
 
   static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
