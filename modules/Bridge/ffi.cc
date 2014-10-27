@@ -2,6 +2,11 @@
 #include <node_version.h>
 #include "ffi.h"
 #include <queue>
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+#endif
 
 pthread_t          CallbackInfo::g_mainthread;
 pthread_mutex_t    CallbackInfo::g_queue_mutex;
@@ -77,6 +82,11 @@ void CallbackInfo::DispatchToV8(callback_info *info, void *retval, void **parame
   } else {
     // invoke the registered callback function
     info->function->Call(Context::GetCurrent()->Global(), 2, argv);
+#ifdef __APPLE__
+  struct kevent event;
+  EV_SET(&event, -1, EVFILT_TIMER | EV_ONESHOT, EV_ADD, NOTE_NSECONDS, 0, 0);
+  kevent(uv_backend_fd(uv_default_loop()), &event, 1, NULL, 0, NULL);
+#endif
   }
 
   if (try_catch.HasCaught()) {
@@ -90,7 +100,6 @@ void CallbackInfo::DispatchToV8(callback_info *info, void *retval, void **parame
 
 void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
   pthread_mutex_lock(&g_queue_mutex);
-
   while (!g_queue.empty()) {
     ThreadedCallbackInvokation *inv = g_queue.front();
     g_queue.pop();
@@ -100,7 +109,6 @@ void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
   }
 
   pthread_mutex_unlock(&g_queue_mutex);
-  //TODO: reset kqueue to unblock somehow, SIGNAL?..
 }
 
 /*
@@ -592,7 +600,7 @@ void FFI::FinishAsyncFFICall(uv_work_t *req) {
   // dispose of our persistent handle to the callback function
   p->callback.Dispose();
   p->callback.Clear();
-
+  
   // free up our memory (allocated in FFICallAsync)
   delete p;
   delete req;

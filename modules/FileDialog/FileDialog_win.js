@@ -31,7 +31,7 @@ module.exports = (function() {
 
     Object.defineProperty(this, "directory", {
       get:function() { return $dialog.InitialDirectory.toString(); },
-      set:function(e) { $dialog.InitialDirectory = e.toString(); }
+      set:function(e) { $dialog.InitialDirectory = $.System.IO.Path.GetFullPath(e.toString()); }
     });
 
     Object.defineProperty(this, 'filename', {
@@ -43,27 +43,31 @@ module.exports = (function() {
       get:function() { return type; }
     });
 
+    var allfiles = "All Files (*.*) | *.*";
+
     Object.defineProperty(this, 'allowAnyFileType', {
       get:function() { return allowAnyFileType; },
       set:function(val) {
         allowAnyFileType = val ? true : false;
         var b = allowedFileTypes;
         if(b == null) b = [];
-        if(val && !b.indexOf('*.*')) b.push('*.*');
-        else if(!val && b.indexOf('*.*')) b.splice(b.indexOf('*.*'),1);
+        if(val && !b.indexOf(allfiles)) b.push(allfiles);
+        else if(!val && b.indexOf(allfiles)) b.splice(b.indexOf(allfiles),1);
         this.allowFileTypes = allowFileTypes;
       }
     });
 
     Object.defineProperty(this, "allowFileTypes", {
-      get:function() { return allowedFileTypes.filter(function(item) { return item == "*.*"; }); },
+      get:function() { return allowedFileTypes.filter(function(item) { return item == allfiles; }); },
       set:function(items) { 
         console.assert(Array.isArray(items));
         allowedFileTypes = items;
-        if(allowAnyFileType) allowedFileTypes.push('*.*');
         items = allowedFileTypes;
         for(var i=0; i < items.length ; i++)
-          if(items[i].indexOf('*.') == -1) items[i] = '*.'+items[i];
+          items[i] = (items[i]).toUpperCase() + ' Files ('+items[i]+') |*.'+items[i];
+
+        if(allowAnyFileType && !items.indexOf(allfiles)) 
+          items.push(allfiles);
         $dialog.Filter = items.join('|');
       }
     });
@@ -93,9 +97,9 @@ module.exports = (function() {
 
     Object.defineProperty(this, "selection", {
       get:function() {
-        if(type == "open") {
+        if(type == "open")
           return $dialog.FileNames;
-        } else
+        else
           return $dialog.FileNames[0];
       }
     });
@@ -104,13 +108,15 @@ module.exports = (function() {
     //this.setChild = function(e) { $dialog('setAccessoryView',e); }
 
     this.open = function(z) {
-      if(z) {
-        if(!$dialog.ShowDialog(z.native)) fireEvent('cancel');
-        else fireEvent('select');
-      } else {
-        if(!$dialog.ShowDialog()) fireEvent('cancel');
-        else fireEvent('select');
-      }
+      setTimeout(function() {
+        if(z) {
+          if(!$dialog.ShowDialog(z.native)) fireEvent('cancel');
+          else fireEvent('select');
+        } else {
+          if(!$dialog.ShowDialog()) fireEvent('cancel');
+          else fireEvent('select');
+        }
+      }, 100);
     }
 
     this.cancel = function() {

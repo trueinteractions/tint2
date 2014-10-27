@@ -1,13 +1,13 @@
-var fs = require('fs');
-var logfile = __filename + '.log';
-var fd = fs.openSync(logfile, 'w');
+//var fs = require('fs');
+//var logfile = __filename + '.log';
+//var fd = fs.openSync(logfile, 'w');
 /**
  * @unit-test-setup
  * @ignore
  */
 function setup() {
   require('Common');
-  fs.closeSync(2);
+  //fs.closeSync(2);
 }
 
 function baseline() {
@@ -43,7 +43,6 @@ function run($utils) {
   /* @hidden */ $utils.assert(dialog.message == "Message dialog")
   /* @hidden */ $utils.assert(dialog.prompt == "PROMPT")
   /* @hidden */ $utils.assert(dialog.allowMultiple == true)
-  /* @hidden */ $utils.assert(dialog.allowMultiple == true)
   /* @hidden */ //$utils.assert(dialog.directory == "file:///Users/tlinton/Pictures/",dialog.directory);
   /* @hidden */ $utils.assert(dialog.filename == "somefile.png");
   /* @hidden */ $utils.assert(dialog.type == "open");
@@ -58,9 +57,9 @@ function run($utils) {
  * @ignore
  */
 function shutdown() {
-  fs.closeSync(fd);
-  var log = fs.readFileSync(logfile, 'utf8');
-  fs.unlinkSync(logfile);
+  //fs.closeSync(fd);
+  //var log = fs.readFileSync(logfile, 'utf8');
+  //fs.unlinkSync(logfile);
 }
 
 module.exports = {

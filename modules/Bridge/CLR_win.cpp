@@ -231,7 +231,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
   }
   else
   {
-    //try {
+    try {
       System::Type^ type = netdata->GetType();
       CppClass *n = new CppClass();
       *(n->obj) = netdata;
@@ -244,9 +244,9 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
         node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
         (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
       }
-    //} catch (System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
   return scope.Close(jsdata);
 }
@@ -859,13 +859,13 @@ public:
 
   static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
     HandleScope scope;
-    //try {
+    try {
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
       prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
       return scope.Close(Undefined());
-    //} catch(System::Exception^ e) {
-    //  return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    //}
+    } catch(System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
   static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
