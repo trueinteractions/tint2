@@ -40,11 +40,14 @@ class CppClass {
     }
     ~CppClass() {
       handle.Free();
-      delete obj; 
+      delete obj;
     }
 };
 
-void wrap_pointer_cb2(char *data, void *hint) {}
+void CppClassCleanUp(char *data, void *hint) {
+  CppClass *n = (CppClass *)data;
+  delete n;
+}
 
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
@@ -237,11 +240,11 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       *(n->obj) = netdata;
       void *user_data = NULL;
       size_t sz = sizeof(CppClass *);
-      node::Buffer *buf = node::Buffer::New((char *)n, sz, wrap_pointer_cb2, user_data);
+      node::Buffer *buf = node::Buffer::New((char *)n, sz, CppClassCleanUp, user_data);
       jsdata = buf->handle_;
       if(type == System::IntPtr::typeid) {
         void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
-        node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, wrap_pointer_cb2, user_data);
+        node::Buffer *bufptr = node::Buffer::New((char *)ptr, sz, CppClassCleanUp, user_data);
         (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
       }
     } catch (System::Exception^ e) {
@@ -938,29 +941,82 @@ public:
   }
 
   static Handle<v8::Value> ExecMethod(const v8::Arguments& args) {
-      HandleScope scope;
-      try {
-        System::Object^ target = MarshalV8ToCLR(args[0]);
-        int argSize = args.Length() - 2;
-        array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+    HandleScope scope;
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      int argSize = args.Length() - 2;
+      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-        for(int i=0; i < argSize; i++)
-          cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+      for(int i=0; i < argSize; i++)
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
-        System::Type^ type = target->GetType();
-        System::String^ method = stringV82CLR(args[1]->ToString());
-        System::Object^ rtn = type->InvokeMember(method,
-          BindingFlags::Public | BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
-          nullptr,
-          target,
-          cshargs);
+      System::Type^ type = target->GetType();
+      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::Object^ rtn = type->InvokeMember(method,
+        BindingFlags::Public | BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
+        nullptr,
+        target,
+        cshargs);
 
-        return scope.Close(MarshalCLRToV8(rtn));
-      } 
-      catch (System::Exception^ e) {
-        return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-      }
+      return scope.Close(MarshalCLRToV8(rtn));
+    } 
+    catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
+/*
+  static Handle<v8::Value> ExecAsyncStaticMethod(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      int argSize = args.Length() - 2;
+      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+
+      for(int i=0; i < argSize; i++)
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+
+      System::Type^ type = (System::Type ^)target;
+      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::Object^ rtn = type->InvokeMember(method,
+        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
+        nullptr,
+        target,
+        cshargs);
+
+      return scope.Close(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> ExecAsyncMethod(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      System::ComponentModel::BackgroundWorker worker = gcnew System::ComponentModel::BackgroundWorker();
+
+
+      System::ComponentModel::DoWorkEventHandler
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      int argSize = args.Length() - 2;
+      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+
+      for(int i=0; i < argSize; i++)
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+
+      System::Type^ type = target->GetType();
+      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::Object^ rtn = type->InvokeMember(method,
+        BindingFlags::Public | BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
+        nullptr,
+        target,
+        cshargs);
+
+      return scope.Close(MarshalCLRToV8(rtn));
+    } 
+    catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }*/
 
   static void CLR::HandleMessageLoop(System::Windows::Interop::MSG% msg, bool% handled) {
     if(msg.message == WM_APP+1)

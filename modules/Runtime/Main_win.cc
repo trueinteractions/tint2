@@ -48,10 +48,6 @@ v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
   return v8::Object::New();
 }
 
-extern "C" void uv_event_bump() {
-
-}
-
 void uv_event(void *info) {
 
   uv_loop_t* loop = uv_default_loop();

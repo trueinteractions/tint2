@@ -298,6 +298,7 @@ else
         ':':0x0020,
         'PGUP':0x0021,
         'PGDN':0x0022,
+        'DOWN':0x0028,
         'DEL':0x002E,
         '0':0x0030,
         '1':0x0031,
@@ -381,7 +382,8 @@ else
         ']':0x00DD,
         '"':0x00DE,
         '!':0x00DF,
-        '<':0x00E2
+        '<':0x00E2,
+        'RETURN':0x000D
       };
     return keys[keyString];
   }

@@ -6,20 +6,20 @@ module.exports = (function() {
   function TextInput(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 
-    if(NativeObjectClass && NativeObjectClass.type == '#')
+    if(NativeObjectClass)
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else {
       options.initViewOnly = true;
       Container.call(this, $.System.Windows.Controls.TextBox, $.System.Windows.Controls.TextBox, options);
-    }
 
-    this.native.addEventListener('GotFocus', function() { 
-      setTimeout(function() { this.fireEvent('inputstart'); }.bind(this),5);
-    }.bind(this));
-    this.native.addEventListener('LostFocus', function() { this.fireEvent('inputend'); }.bind(this));
-    this.native.addEventListener('TextChanged', function() { 
-      setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
-    }.bind(this));
+      this.native.addEventListener('GotFocus', function() { 
+        setTimeout(function() { this.fireEvent('inputstart'); }.bind(this),5);
+      }.bind(this));
+      this.native.addEventListener('LostFocus', function() { this.fireEvent('inputend'); }.bind(this));
+      this.native.addEventListener('TextChanged', function() { 
+        setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
+      }.bind(this));
+    }
   }
 
   TextInput.prototype = Object.create(Container.prototype);
