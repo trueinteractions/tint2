@@ -22,7 +22,6 @@ v8::Handle<v8::Object> process_l;
 v8::Persistent<v8::Object> bridge;
 DWORD mainThreadId = 0;
 
-
 extern "C" void InitAppRequest();
 
 namespace REF {
@@ -46,9 +45,11 @@ v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
   FFI::Init(bridge);
   REF::Init(bridge);
   CLR_Init(bridge);
-  
-
   return v8::Object::New();
+}
+
+extern "C" void uv_event_bump() {
+
 }
 
 void uv_event(void *info) {
@@ -80,18 +81,23 @@ void uv_event(void *info) {
       uv_update_time(loop);
       timeout = uv_get_poll_timeout(loop);
 
-      // Do not indefinately block, set the timeout to a reasonably low
-      // value below the threshold of IO timing out, but not so low it
-      // causes power consumption issues on mobile devices. If higher than
-      // 1s, reset it back, just in case.
-      //if(timeout == INFINITE) 
-      //  timeout = 160;
-      
+      // Negative one means infinite timeout here. Resetting to 16 should be fine
+      // for performance and energy effeciency (MS docs say it must be 
+      // above 15.6 for energy efficiency, oddly enough exactly 60 fps)
+      // Note that this is only needed for the transition between a setTimout
+      // or setInterval call that was invoked from a CLR/FFI callback, 
+      // afterwards a correct positive valued timeout happens.
+      //
+      // TODO: Inspect to see if theres a way to trip teh GetQueuedCompletionStatus
+      // when timeout == -1 with PostQueuedCompletionStatus (without libuv
+      // segfaulting, maybe faking a TCP request?)
+      if(timeout == -1) timeout = 16;
+
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
       if (overlapped != NULL)
-        PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
+          PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
     } 
 
     // This may seem obsurd to both broadcast a message and 
