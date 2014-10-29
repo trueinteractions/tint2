@@ -9,7 +9,8 @@ module.exports = (function() {
 
     this.private = {events:{},submenu:null,key:"",modifiers:"",imgOn:null,imgOff:null,img:null,custom:null,state:false};
     this.native = new $.System.Windows.Controls.MenuItem();
-    this.native.addEventListener('Click', function() {
+    this.native.addEventListener('PreviewMouseDown', function() {
+      this.fireEvent('mousedown');
       this.fireEvent('click');
     }.bind(this));
 
@@ -64,22 +65,10 @@ module.exports = (function() {
   Object.defineProperty(MenuItem.prototype, 'submenu', {
     get:function() { return this.private.submenu; },
     set:function(e) { 
-      
-      if(this.private.submenu != null) {
-        var c = this.private.submenu.children;
-        for(var i=0; i < c.length; i++) {
-          this.native.Items.Remove(c[i].native);
-          this.private.submenu.Items.Add(c[i].native);
-        }
-      }
-
       this.private.submenu = e;
-      var c = this.private.submenu.children;
-      this.native.Items.Clear();
-      for(var i=0; i < c.length; i++) {
-        this.private.submenu.native.Items.Remove(c[i].native);
-        this.native.Items.Add(c[i].native);
-      }
+      this.private.submenu.parent = this.native;
+      for(var i=0; i < e.children.length ; i++)
+        this.native.Items.Add(e.children[i].native);
     }
   });
 
@@ -97,13 +86,13 @@ module.exports = (function() {
   });
 
   Object.defineProperty(MenuItem.prototype, 'enabled', {
-    get:function() { return this.native('isEnabled'); },
-    set:function(e) { return this.native('setEnabled',e); }
+    get:function() { return this.native.IsEnabled; },
+    set:function(e) { return this.native.IsEnabled = e ? true : false; }
   });
 
   Object.defineProperty(MenuItem.prototype, 'hidden', {
-    get:function() { return this.native('isHidden'); },
-    set:function(e) { return this.native('setHidden',e); }
+    get:function() { return !this.native.IsVisible; },
+    set:function(e) { return this.native.IsVisible = e ? false : true; }
   });
 
   Object.defineProperty(MenuItem.prototype, 'key', {

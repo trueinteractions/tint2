@@ -23,9 +23,10 @@ module.exports = (function() {
     }
   });
 
-  Object.defineProperty(DropDown.prototype, 'selectedIndex', {
-    get:function() { return this.nativeView('indexOfSelectedItem'); },
-    set:function(e) { this.nativeView('selectItemAtIndex', e); }
+  //TODO: Standardize this:
+  Object.defineProperty(DropDown.prototype, 'value', {
+    get:function() { return this.nativeView('titleOfSelectedItem')('UTF8String'); },
+    set:function(e) { this.nativeView('setTitle', $(e)); }
   });
 
   return DropDown;

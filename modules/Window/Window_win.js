@@ -93,16 +93,24 @@ module.exports = (function() {
         this.nativeView.RemoveLayoutConstraint(this.private.menuConst1);
         this.nativeView.RemoveLayoutConstraint(this.private.menuConst2);
         this.nativeView.RemoveLayoutConstraint(this.private.menuConst3);
-        this.nativeView.Internalchildren.Remove(this.private.menu.native);
+        this.nativeView.Internalchildren.Remove(this.private.menuNative);
         this.private.menuConst1 = null;
         this.private.menuConst2 = null;
         this.private.menuConst3 = null;
+        this.private.menuNative = null;
       }
       this.private.menu = e;
-      this.nativeView.InternalChildren.Add(e.native);
-      this.private.menuConst1 = this.nativeView.AddLayoutConstraint(this.nativeView,'Left','=',e.native,'Left',0,0);
-      this.private.menuConst2 = this.nativeView.AddLayoutConstraint(this.nativeView,'Top','=',e.native,'Top',0,0);
-      this.private.menuConst3 = this.nativeView.AddLayoutConstraint(this.nativeView,'Width','=',e.native,'Width',1,0);
+      this.private.menu.parent = this.nativeView;
+      if(e) {
+        this.private.menuNative = new $.System.Windows.Controls.Menu();
+        for(var i=0; i < e.children.length; i++) {
+          this.private.menuNative.Items.Add(e.children[i].native);
+        }
+        this.nativeView.InternalChildren.Add(this.private.menuNative);
+        this.private.menuConst1 = this.nativeView.AddLayoutConstraint(this.nativeView,'Left','=',this.private.menuNative,'Left',0,0);
+        this.private.menuConst2 = this.nativeView.AddLayoutConstraint(this.nativeView,'Top','=',this.private.menuNative,'Top',0,0);
+        this.private.menuConst3 = this.nativeView.AddLayoutConstraint(this.nativeView,'Width','=',this.private.menuNative,'Width',1,0);
+      }
     }
   });
 
