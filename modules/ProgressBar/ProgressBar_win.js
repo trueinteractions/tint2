@@ -19,6 +19,7 @@ module.exports = (function() {
     this.native.IsIndeterminate = false;
     this.private.border = false;
     this.private.valueCache = 0.0;
+    //TODO: Implement event for changes to value.
   }
 
   ProgressBar.prototype = Object.create(Container.prototype);

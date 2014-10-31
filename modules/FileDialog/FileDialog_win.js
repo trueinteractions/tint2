@@ -107,6 +107,7 @@ module.exports = (function() {
     // Not supported on Windows, perhaps add?
     //this.setChild = function(e) { $dialog('setAccessoryView',e); }
 
+    // TODO: Make this asyncronous.
     this.open = function(z) {
       setTimeout(function() {
         if(z) {
@@ -119,6 +120,7 @@ module.exports = (function() {
       }, 100);
     }
 
+    //TODO: This is not supported "native" in windows.
     this.cancel = function() {
       // cannot be executed.
     }

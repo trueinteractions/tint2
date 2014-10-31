@@ -57,7 +57,6 @@ function run($utils) {
   mainWindow.appendChild(dropdown);
 
   setTimeout(function() {
-    dropdown.value = "Foo";
     $utils.clickAtControl(dropdown);
     var b = dropdown.boundsOnScreen;
     setTimeout(function() {

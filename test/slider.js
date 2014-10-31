@@ -24,12 +24,10 @@ function run($utils) {
   /* @hidden */ win.y = 0;
   slider.top = 20;
   slider.left = slider.right = 0;
-  slider.height = 20;
-  
   setTimeout(function() {
     $utils.clickAtControl(slider);
     setTimeout(function() {
-      $utils.assert(Math.round(slider.value * 1000) == 500,'Slider value should be 500, is: ', slider.value*1000);
+      $utils.assert(Math.round(Math.round(slider.value*100)/100 * 1000) == 500,'Slider value should be 500, is: '+ (slider.value));
       $utils.ok();
     },500);
   },1000);

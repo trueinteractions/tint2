@@ -14,6 +14,7 @@ module.exports = (function() {
     this.native('setDoubleValue', 0);
     this.native('setStyle', $.NSProgressIndicatorBarStyle);
     this.native('setIndeterminate', false);
+    //TODO: Implement event for changes to value.
   }
 
   ProgressBar.prototype = Object.create(Container.prototype);
