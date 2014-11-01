@@ -181,10 +181,7 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   else if (strMemberType == 'Property') info.exec = createProperty;
   else if (strMemberType == 'Constructor') ; // already delt with.
   else if (strMemberType == 'NestedType') ; // do not use these.
-  else
-  {
-    console.warn("Unknown type: "+strMemberType);
-  }
+  else console.warn("Unknown type: " + strMemberType);
 
   if(info.exec)
     info.exec(info.cls, info.typeNative, info.typeName, info.memberNative, info.memberName, static);

@@ -41,6 +41,7 @@ module.exports = (function() {
         }.bind(this),0);
       }.bind(this));
       this.native.addEventListener('PreviewMouseDown', function() { 
+        this.fireEvent('private-pre-mousedown');
         this.fireEvent('mousedown'); 
       }.bind(this));
       this.native.addEventListener('MouseMove', function() { this.fireEvent('mousemove'); }.bind(this));
