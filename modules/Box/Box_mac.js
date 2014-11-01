@@ -80,7 +80,7 @@ module.exports = (function() {
     set:function(e) { this.nativeView('setCornerRadius',e); }
   });
 
-  Object.defineProperty(Box.prototype, 'fillColor', {
+  Object.defineProperty(Box.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('fillColor')); },
     set:function(e) { this.nativeView('setFillColor',e.native); }
   });

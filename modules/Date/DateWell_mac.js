@@ -24,7 +24,7 @@ module.exports = (function() {
 
   Object.defineProperty(DateWell.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('backgroundColor')); },
-    set:function(e) { this.nativeView('setBackgroundColor',e.native); }
+    set:function(e) { this.nativeView('setBackgroundColor',new Color(e.native)); }
   });
 
   Object.defineProperty(DateWell.prototype, 'transparent', {

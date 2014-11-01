@@ -23,8 +23,8 @@ function run($utils) {
   win.appendChild(box);
   box.left = box.right = box.top = box.bottom = 20;
   box.title = "My Box";
-  $utils.assert(box.title == "My Box");
-  $utils.assert(box.titlePosition == "top");
+  $utils.assert(box.title == "My Box", "Expected 'My Box' got "+box.title);
+  $utils.assert(box.titlePosition == "top", "Expected 'top', but got "+box.titlePosition);
   $utils.ok();
 }
 

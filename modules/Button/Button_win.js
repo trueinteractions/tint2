@@ -6,7 +6,7 @@ module.exports = (function() {
   function Button(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 
-    if(NativeObjectClass && NativeObjectClass.type == '#')
+    if(NativeObjectClass)
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else {
       options.initViewOnly = true;
