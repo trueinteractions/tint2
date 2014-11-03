@@ -6,6 +6,8 @@ module.exports = (function() {
   function ImageWell(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
+    this.animates = false;
+    this.alignment = "center";
 
     if(NativeObjectClass && NativeObjectClass.type == '#')
       Container.call(this, NativeObjectClass, NativeViewClass, options);
@@ -30,7 +32,8 @@ module.exports = (function() {
       img('release');
     }
   });
-
+  /*
+  TODO: Support this on Windows
   Object.defineProperty(ImageWell.prototype, 'alignment', {
     get:function() { 
       var align = this.nativeView('imageAlignment');
@@ -55,7 +58,7 @@ module.exports = (function() {
       else if(e == "bottom-right") this.nativeView('setImageAlignment', $.NSImageAlignBottomRight);
       else if(e == "right") this.nativeView('setImageAlignment', $.NSImageAlignRight);
     }
-  });
+  }); */
 
   Object.defineProperty(ImageWell.prototype, 'scale', {
     get:function() { 
@@ -72,11 +75,12 @@ module.exports = (function() {
       else if(e == "none") this.nativeView('setImageScaling', $.NSImageScaleNone);
     }
   });
-  
+  /*
+  TODO: Support this on Windows
   Object.defineProperty(ImageWell.prototype, 'animates', {
     get:function() { return this.nativeView('animates') == $.YES ? true : false; },
     set:function(e) { this.nativeView('setAnimates', e ? $.YES : $.NO); }
-  });
+  });*/
 
   return ImageWell;
 })();

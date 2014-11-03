@@ -20,16 +20,16 @@ function run($utils) {
   var colorWell = new ColorWell();
 
   win.appendChild(colorWell);
-  colorWell.color = new Color('rgba',1,0,0,1);
+  colorWell.color = new Color('rgba',255,0,0,1);
   colorWell.left = colorWell.top = 10;
   colorWell.width = 40;
   colorWell.height = 20;
 
   var myColor = colorWell.color;
-  $utils.assert(myColor.red == 1);
-  $utils.assert(myColor.green == 0);
-  $utils.assert(myColor.blue == 0);
-  $utils.assert(myColor.alpha == 1);
+  $utils.assert(myColor.red == 1, 'myColor.red:'+myColor.red);
+  $utils.assert(myColor.green == 0, 'myColor.green:'+myColor.green);
+  $utils.assert(myColor.blue == 0, 'myColor.blue:'+myColor.blue);
+  $utils.assert(myColor.alpha == 1, 'myColor.alpha:'+myColor.alpha);
   $utils.ok();
 }
 

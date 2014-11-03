@@ -127,19 +127,32 @@ function typeSignature(memberName, args) {
 
 function createMethod(target, typeNative, typeName, memberNative, memberName, static) {
   
-  if(!target._methods) target._methods={};
+  //if(!target._methods) target._methods={};
 
   target[memberName] = function() {
     var s = typeSignature(memberName, arguments);
+    if(!this._methods) this._methods = {};
     if(!this._methods[s.signature]) {
       var mArgs = [this.classPointer,memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = static ? 
         dotnet.getStaticMethodObject.apply(null,mArgs) : 
         dotnet.getMethodObject.apply(null,mArgs);
     }
-    
     var args = [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
-    return wrap(dotnet.callMethod.apply(null,args));
+    return wrap(dotnet.callMethod.apply(null, args));
+  }
+
+  target[memberName+"Async"] = function() {
+    var s = typeSignature(memberName, arguments);
+    if(!this._methods) this._methods = {};
+    if(!this._methods[s.signature]) {
+      var mArgs = [this.classPointer,memberName].concat(s.unwrappedArgs);
+      this._methods[s.signature] = static ?
+        dotnet.getStaticMethodObject.apply(null,mArgs) : 
+        dotnet.getMethodObject.apply(null,mArgs);
+    }
+    var args = [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
+    dotnet.callMethodAsync.apply(null, args);
   }
 }
 

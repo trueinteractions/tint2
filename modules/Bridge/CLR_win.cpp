@@ -11,6 +11,8 @@
 #using <system.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
+#using <System.Windows.Forms.dll>
+#using <System.Drawing.dll>
 
 using namespace v8;
 using namespace System::Collections::Generic;
@@ -30,6 +32,35 @@ namespace v8 {
   struct HeapStatsUpdate {};
 }
 Persistent<Function> bufferConstructor;
+
+namespace TintInterop {
+  public ref class AsyncEventDelegate {
+  public:
+    AsyncEventDelegate(
+      System::Object^ target,
+      MethodInfo^ method,
+      array<System::Object^>^ cshargs)
+    {
+      this->target = target;
+      this->method = method;
+      this->cshargs = cshargs;
+    }
+
+    void DoWorkHandler(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
+      try {
+        System::Object^ rtn = method->Invoke(target, cshargs);
+      } catch (System::Exception^ e) {
+        Console::WriteLine(e);
+        abort();
+      }
+    }
+
+  private:
+    System::Object^ target;
+    MethodInfo^ method;
+    array<System::Object^>^ cshargs;
+  };
+}
 
 class CppClass {
   public:
@@ -339,7 +370,8 @@ public ref class CLREventHandler {
     std::vector<v8::Handle<v8::Value>> argv;
     v8::TryCatch try_catch;
 
-    for(int i=0; i < args->Length; i++) argv.push_back(MarshalCLRToV8(args[i]));
+    for(int i=0; i < args->Length; i++) 
+      argv.push_back(MarshalCLRToV8(args[i]));
 
     if (this->callback->function.IsEmpty()) {
       ThrowException(v8::Exception::Error(
@@ -964,59 +996,28 @@ public:
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-/*
-  static Handle<v8::Value> ExecAsyncStaticMethod(const v8::Arguments& args) {
+
+  static Handle<v8::Value> ExecMethodObjectAsync(const v8::Arguments& args) {
     HandleScope scope;
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
+      MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
+      System::Object^ target = MarshalV8ToCLR(args[1]);
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
         cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
-      System::Type^ type = (System::Type ^)target;
-      System::String^ method = stringV82CLR(args[1]->ToString());
-      System::Object^ rtn = type->InvokeMember(method,
-        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
-        nullptr,
-        target,
-        cshargs);
-
-      return scope.Close(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-  static Handle<v8::Value> ExecAsyncMethod(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      System::ComponentModel::BackgroundWorker worker = gcnew System::ComponentModel::BackgroundWorker();
-
-
-      System::ComponentModel::DoWorkEventHandler
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      int argSize = args.Length() - 2;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
-
-      for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
-
-      System::Type^ type = target->GetType();
-      System::String^ method = stringV82CLR(args[1]->ToString());
-      System::Object^ rtn = type->InvokeMember(method,
-        BindingFlags::Public | BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
-        nullptr,
-        target,
-        cshargs);
-
-      return scope.Close(MarshalCLRToV8(rtn));
+      TintInterop::AsyncEventDelegate^ del = gcnew TintInterop::AsyncEventDelegate(target,method,cshargs);
+      System::ComponentModel::BackgroundWorker^ worker = gcnew System::ComponentModel::BackgroundWorker();
+      worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(del, &(TintInterop::AsyncEventDelegate::DoWorkHandler));
+      worker->RunWorkerAsync();
+      return scope.Close(Undefined());
     } 
     catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
-  }*/
+  }
 
   static void CLR::HandleMessageLoop(System::Windows::Interop::MSG% msg, bool% handled) {
     if(msg.message == WM_APP+1)
@@ -1114,6 +1115,59 @@ namespace FlashWPFWindow {
     }
     
   }
+/*
+namespace TintInterop {
+  public ref class ColorControl : System::Windows::Interop::HwndHost {
+    public:
+      ColorControl() {}
+
+      property System::Windows::Media::Color^ Color {
+        System::Windows::Media::Color^ get() {
+          System::Drawing::Color color = colorDialog->Color;
+          return System::Windows::Media::Color::FromArgb(color.A, color.R, color.G, color.B);
+        }
+        void set(System::Windows::Media::Color^ color) {
+          colorDialog->Color = System::Drawing::Color::FromArgb(color->A, color->R, color->G, color->B);
+        }
+      }
+
+      property bool FullOpen {
+        bool get() { return colorDialog->FullOpen; }
+        void set(bool value) { colorDialog->FullOpen = value; }
+      }
+
+      property bool SolidColorOnly {
+        bool get() { return colorDialog->SolidColorOnly; }
+        void set(bool value) { colorDialog->SolidColorOnly = value; }
+      }
+      
+    protected:
+      virtual System::Runtime::InteropServices::HandleRef BuildWindowCore(HandleRef hwnd) override {
+        colorDialog = gcnew System::Windows::Forms::ColorDialog();
+        System::Type^ type = colorDialog->GetType();
+        //array<System::Object^>^ cshargs = gcnew array<System::Object^>(1);
+        //cshargs[0] = hwnd.Handle;
+        //type->InvokeMember("RunDialog",
+        //  BindingFlags::NonPublic | BindingFlags::Instance| BindingFlags::InvokeMethod,
+        //  nullptr,
+        //  colorDialog,
+        //  cshargs);
+
+        
+        PropertyInfo^ prop = type->GetProperty("Instance", BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+        System::Object^ rtn = prop->GetValue(colorDialog);
+        SetParent((HWND)((IntPtr)rtn).ToPointer(), (HWND)hwnd.Handle.ToPointer());
+        return System::Runtime::InteropServices::HandleRef(colorDialog, (IntPtr)rtn);
+      }
+
+      virtual void DestroyWindowCore(HandleRef hwnd) override {
+        //colorDialog->Dispose();
+      };
+
+    private:
+      System::Windows::Forms::ColorDialog^ colorDialog;
+  };
+}*/
 
 extern "C" void CLR_Init(Handle<v8::Object> target) {
   
@@ -1159,6 +1213,7 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
   NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
   NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
+  NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
   
   // Register the thread handle to communicate back to handle application
   // specific events when in WPF mode.

@@ -24,10 +24,10 @@ function run($utils) {
   imageWell.left = imageWell.top = 0;
   imageWell.width = '100%';
   imageWell.height = '100%';
-  imageWell.image = "app://assets/tintcompiler.png";
+  imageWell.image = "app:///assets/tintcompiler.png";
   $utils.assert(imageWell.animates == false);
   $utils.assert(imageWell.scale == "constrain");
-  $utils.assert(imageWell.image == "app://assets/tintcompiler.png");
+  $utils.assert(imageWell.image == "app:///assets/tintcompiler.png");
   $utils.assert(imageWell.alignment == "center");
   $utils.ok();
 }

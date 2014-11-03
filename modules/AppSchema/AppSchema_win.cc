@@ -6,7 +6,11 @@ using namespace System;
 using namespace System::Net;
 using namespace System::IO;
 using namespace Microsoft::Win32;
-
+/*
+ * The AppSchema is initialized in ./modules/Runtime/Main_win.cc
+ * and ./modules/Bridge/CLR_Win.cpp
+ * See that file for more information on how it is brought to life.
+ */
 public ref class AppWebResponse : public WebResponse {
 public:
 	virtual property Uri^ ResponseUri  {

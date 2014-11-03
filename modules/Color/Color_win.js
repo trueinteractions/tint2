@@ -46,10 +46,10 @@ module.exports = (function() {
   Object.defineProperty(Color.prototype, 'magenta', { get:function() { var cmyk = utilities.rgb2cmyk([this.native.R,this.native.G,this.native.B]); return cmyk[1]; }});
   Object.defineProperty(Color.prototype, 'yellow', { get:function() { var cmyk = utilities.rgb2cmyk([this.native.R,this.native.G,this.native.B]); return cmyk[2]; }});
   Object.defineProperty(Color.prototype, 'black', { get:function() { var cmyk = utilities.rgb2cmyk([this.native.R,this.native.G,this.native.B]); return cmyk[3]; }});
-  Object.defineProperty(Color.prototype, 'red', { get:function() { return this.native.R; }});
-  Object.defineProperty(Color.prototype, 'blue', { get:function() { return this.native.B; }});
-  Object.defineProperty(Color.prototype, 'green', { get:function() { return this.native.G; }});
-  Object.defineProperty(Color.prototype, 'alpha', { get:function() { return this.native.A; }});
+  Object.defineProperty(Color.prototype, 'red', { get:function() { return parseInt(this.native.R.ToString())/255; }});
+  Object.defineProperty(Color.prototype, 'blue', { get:function() { return parseInt(this.native.B.ToString())/255; }});
+  Object.defineProperty(Color.prototype, 'green', { get:function() { return parseInt(this.native.G.ToString())/255; }});
+  Object.defineProperty(Color.prototype, 'alpha', { get:function() { return parseInt(this.native.A.ToString())/255; }});
   Object.defineProperty(Color.prototype, 'hue', { get:function() { var hsb = utilities.rgb2hsl([this.native.R,this.native.G,this.native.B]); return hsb[0]; }});
   Object.defineProperty(Color.prototype, 'saturation', { get:function() { var hsb = utilities.rgb2hsl([this.native.R,this.native.G,this.native.B]); return hsb[1]; }});
   Object.defineProperty(Color.prototype, 'brightness', { get:function() { var hsb = utilities.rgb2hsl([this.native.R,this.native.G,this.native.B]); return hsb[2]; }});

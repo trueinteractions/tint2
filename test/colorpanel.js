@@ -16,10 +16,10 @@ function baseline() {
  */
 function run($utils) {
   /* @hidden */ var color = new Color('rgba',40,40,40,0.1);
-  /* @hidden */ $utils.assert(color.red == 40/255);
-  /* @hidden */ $utils.assert(color.green == 40/255);
-  /* @hidden */ $utils.assert(color.blue == 40/255);
-  /* @hidden */ $utils.assert(color.alpha == 0.1);
+  /* @hidden */ $utils.assert(color.red == (40/255*10)/10, 'color.red should be: '+(40/255)+' was: '+color.red);
+  /* @hidden */ $utils.assert(color.green == (40/255*10)/10, 'color.green should be: '+(40/255)+' was: '+color.green);
+  /* @hidden */ $utils.assert(color.blue == (40/255*10)/10, 'color.blue should be: '+(40/255)+' was: '+color.blue);
+  /* @hidden */ $utils.assert(Math.round(color.alpha*10)/10 == 0.1, 'color.alpha should be: '+0.1+' was: '+color.alpha);
   var panel = new ColorPanel();
   panel.visible = true;
   /* @hidden */ //var second = false;

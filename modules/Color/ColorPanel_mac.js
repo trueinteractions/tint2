@@ -6,7 +6,7 @@ module.exports = (function() {
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
-    options.delegates = options.delegates.concat([['changeColor:', 'v@:@', function(self, cmd, notif) { this.fireEvent('colorChange'); }.bind(this)]]);
+    options.delegates = options.delegates.concat([['changeColor:', 'v@:@', function(self, cmd, notif) { this.fireEvent('colorchange'); }.bind(this)]]);
 
     if(NativeObjectClass && NativeObjectClass.type == '#')
       Panel.call(this, NativeObjectClass, NativeViewClass, options);
@@ -19,10 +19,11 @@ module.exports = (function() {
   ColorPanel.prototype = Object.create(Panel.prototype);
   ColorPanel.prototype.constructor = ColorPanel;
 
-  ColorPanel.prototype.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
-  ColorPanel.prototype.appendChild = ColorPanel.prototype.removeChild = null;
+  //TODO: This is not supported on Windows, but is on OSX, add to win?.
+  //ColorPanel.prototype.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
+  //ColorPanel.prototype.appendChild = ColorPanel.prototype.removeChild = null;
 
-  Object.defineProperty(ColorPanel.prototype, 'alpha', {
+  Object.defineProperty(ColorPanel.prototype, 'allowAlpha', {
     get:function() { return this.native('showsAlpha'); },
     set:function(e) { this.native('setShowsAlpha', e ? true : false); }
   });
