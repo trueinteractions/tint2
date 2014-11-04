@@ -17,7 +17,7 @@ module.exports = (function() {
       ['splitViewWillResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resize'); }.bind(this)]
     ]);*/
 
-    if(NativeObjectClass && NativeObjectClass.type == '#')
+    if(NativeObjectClass)
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else {
       options.initViewOnly = true;

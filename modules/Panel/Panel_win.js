@@ -4,15 +4,19 @@ module.exports = (function() {
 
   function Panel(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
-    //options.styleMask = options.styleMask || ($.NSHUDWindowMask | $.NSTitledWindowMask | $.NSUtilityWindowMask | 
-    //                                $.NSClosableWindowMask | $.NSResizableWindowMask | $.NSMiniaturizableWindowMask );
     options.width = options.width || 200;
     options.height = options.height || 250;
 
     if(NativeObjectClass)
       Window.call(this, NativeObjectClass, NativeViewClass, options);
     else
-      Window.call(this, $.System.Windows.Window, $.System.Windows.Window, options);
+      Window.call(this, $.System.Windows.Window, $.AutoLayout.AutoLayoutPanel, options);
+
+    this.native.WindowStyle = $.System.Windows.WindowStyle.ToolWindow;
+
+    this.style = "inspector";
+    this.floating = true;
+    this.toolbar = null;
   }
 
   Panel.prototype = Object.create(Window.prototype);

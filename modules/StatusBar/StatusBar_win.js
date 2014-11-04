@@ -4,22 +4,6 @@ module.exports = (function() {
   var Container = require('Container');
   var Menu = require('Menu');
 
-  //if(!$.TintStatusBarDelegate) {
-  //  if(!process.bridge.objc.delegates) process.bridge.objc.delegates = {};
-  //  var TintStatusBarDelegate = $.NSObject.extend('TintStatusBarDelegate');
-  //  TintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[TintStatusBarDelegate,$.selector,'@']], 
-  //    utilities.errorwrap(function(self, cmd, id) {
-  //      self.callback = process.bridge.objc.delegates[id.toString()];
-  //      process.bridge.objc.delegates[id.toString()] = null;
-  //      return self;
-  //  }));
-  //  TintStatusBarDelegate.addMethod('click:','v@:@', 
-  //    utilities.errorwrap(function(self,_cmd,frame) { 
-  //      self.callback.fireEvent('click');
-  //  }));
-  //  TintStatusBarDelegate.register();
-  //}
-
   function StatusBar() {
     this.private = {
       events:{},
@@ -27,16 +11,18 @@ module.exports = (function() {
       imgOn:null,
       img:null,
       custom:null,
-      custommenu:null
+      custommenu:null,
+      highlight:false,
+      title:""
     };
+    this.native = new $.System.Windows.Forms.NotifyIcon();
+    this.native.addEventListener('Click', function() {
+      this.fireEvent('click');
+    }.bind(this));
 
-    //var id = (Math.random()*100000).toString();
-    //process.bridge.objc.delegates[id] = this;
-    //var delegate = TintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
-    //this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
-    //this.native('retain'); // required else we'll find it GC'd 
-    //this.native('setTarget',delegate);
-    //this.native('setAction','click:');
+    this.private.showContextMenu = function() {
+      this.private.contextMenu.IsOpen = true;
+    }
   }
 
   StatusBar.prototype.fireEvent = function(event, args) {
@@ -56,115 +42,82 @@ module.exports = (function() {
   }
 
   StatusBar.prototype.close = function() { 
-    //this.native('release');
+    this.native.Dispose();
   }
 
+  // TODO: Remove this, its deprecated in OSX and unsupported in Windows.
   Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
-    get:function() {
-      //return this.private.imgOn;
-    },
-    set:function(e) { 
-      //this.private.imgOn = e; 
-      //e = utilities.makeNSImage(e);
-      //if(e) this.native('setAlternateImage', e);
-    }
+    get:function() { return this.private.imgOn; },
+    set:function(e) { this.private.imgOn = e; }
   });
 
   Object.defineProperty(StatusBar.prototype, 'image', {
-    get:function() { 
-      //return this.private.img; 
-    },
-    set:function(e) { 
-      //this.private.img = e;
-      //e = utilities.makeNSImage(e);
-      //if(e) this.native('setImage', e);
+    get:function() { return this.private.img; },
+    set:function(e) {
+      this.private.img = e;
+      var icon = utilities.makeWinFormsIcon(e);
+      this.native.Icon = icon;
+      this.native.Visible = true;
     }
   });
 
+  // TODO: Remove this, its deprecated in OSX and unsupported in Windows.
   Object.defineProperty(StatusBar.prototype, 'length', {
-    get:function() { 
-      //return this.native('length'); 
-    },
-    set:function(e) { 
-      //this.native('setLength', e); 
-    }
+    get:function() { return 22; },
+    set:function(e) { }
   });
 
+  // TODO: Better more native way of handling this then converting to context menu
+  // doesn't support overriding the menu once.
   Object.defineProperty(StatusBar.prototype, 'menu', {
     get:function() {
-      //return this.private.submenu;
+      return this.private.submenu;
     },
-    set:function(e) { 
-      //if(e instanceof Menu) {
-      //  this.private.submenu = e;
-      //  this.native('setMenu',e.native);
-      //} else throw new Error("The passed in object was not a valid menu object.");
+    set:function(e) {
+      if(e instanceof Menu) {
+        this.private.submenu = e;
+        this.private.contextMenu = new $.System.Windows.Controls.ContextMenu();
+
+        for(var i=0; i < e.children.length ; i++)
+          this.private.contextMenu.Items.Add(e.children[i].native);
+
+        this.native.addEventListener('MouseDown',this.private.showContextMenu.bind(this));
+      } else throw new Error("The passed in object was not a valid menu object.");
     }
   });
 
+  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'highlight', {
-    get:function() {
-      //return this.native('highlightMode') == $.YES ? true : false;
-    },
-    set:function(e) {
-      //this.native('setHighlightMode', e ? $.YES : $.NO);
-    }
+    get:function() { return this.private.highlight; },
+    set:function(e) { this.private.highlight = e ? true : false; }
   });
 
   Object.defineProperty(StatusBar.prototype, 'title', {
-    get:function() {
-      //return this.native('title')('UTF8String');
-    },
-    set:function(e) {
-      //return this.native('setTitle',$(e));
-    }
+    get:function() { this.private.title = e; },
+    set:function(e) { return this.private.title; }
   });
 
   Object.defineProperty(StatusBar.prototype, 'enabled', {
-    get:function() {
-      //return this.native('isEnabled');
-    },
-    set:function(e) {
-      //return this.native('setEnabled',e);
-    }
+    get:function() { return this.native.Visible ? true : false; },
+    set:function(e) { this.native.Visible = e ? true : false; }
   });
 
+  // TODO: Remove this, its not supported (effectively) in ODX.
   Object.defineProperty(StatusBar.prototype, 'tooltip', {
-    get:function() {
-      //return this.native('toolTip')('UTF8String');
-    },
-    set:function(e) {
-      //return this.native('setToolTip',$(e));
-    }
+    get:function() { return this.native.Text.toString(); },
+    set:function(e) { this.native.Text = e.toString(); }
   });
 
-  // Note: setting a custom view overrides title, tooltip, enabled, highlight, menu
-  // and events such as mousedown, mouseup, etc.
+  // TODO: Remove this, its unsupported in Windows, and deprecated in OSX.
   Object.defineProperty(StatusBar.prototype, 'custom', {
-    get:function() {
-      //return this.private.custom;
-    },
-    set:function(e) {
-      //if(e instanceof Container) {
-      //  this.private.custom = e;
-      //  this.nativeView = e.nativeView;
-      //  if(this.length == -1) this.length = 22; // set a default.
-      //  return this.native('setView',e.nativeView);
-      //}
-      //else throw new Error("The passed in object was not a valid container or control.");
-    }
+    get:function() { return this.private.custom; },
+    set:function(e) { this.private.custom = e; }
   });
 
+  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'custommenu', {
-    get:function() {
-      //return this.private.custommenu;
-    },
-    set:function(e) {
-      //if(e instanceof Menu) {
-      //  this.private.custommenu = e;
-      //  return this.native('popUpStatusItemMenu',e.native);
-      //} else throw new Error("The passed in object was not a valid menu object.");
-    }
+    get:function() { },
+    set:function(e) { }
   });
   return StatusBar;
 

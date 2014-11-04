@@ -15,7 +15,8 @@ function baseline() {
  * @example
  */
 function run($utils) {
-
+  var win = new Window();
+  win.visible = true;
   var statusmenu = new Menu("StatusMenu");
   var someMenu = new Menu("SomeMenu");
   var someSuperMenuItem = new MenuItem('Some Item 1');

@@ -22,11 +22,11 @@ public:
 	}
 	
 	virtual Stream^ GetResponseStream() override {
-		String^ newpath = System::IO::Directory::GetCurrentDirectory() + _responseuri->AbsolutePath->Replace("/","\\");
+		String^ newpath = System::IO::Directory::GetCurrentDirectory() + "\\" + _responseuri->Host + "\\" + _responseuri->AbsolutePath->Replace("/","\\");
 
 		if(System::IO::File::Exists(newpath))
 			return gcnew FileStream(newpath, System::IO::FileMode::Open);
-		throw gcnew WebException("The specified application resource at: "+_responseuri->AbsolutePath+" cannot be found.");
+		throw gcnew WebException("The specified application resource at: "+newpath+" cannot be found.");
 	}
 
 	private:
@@ -71,7 +71,7 @@ public ref class AppWebRequestCreate : public IWebRequestCreate {
 
 extern "C" void InitAppRequest() {
 	AppWebRequestCreate ^creator = gcnew AppWebRequestCreate();
-	if(!WebRequest::RegisterPrefix("app://", creator)) {
+	if(!WebRequest::RegisterPrefix("app:", creator)) {
 		throw gcnew Exception("Cannot instantiate app handler.");
 	}
 }

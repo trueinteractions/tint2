@@ -52,6 +52,7 @@ module.exports = (function() {
     this.native('release');
   }
 
+  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
     get:function() { return this.private.imgOn; },
     set:function(e) { 
@@ -70,6 +71,7 @@ module.exports = (function() {
     }
   });
 
+  // TODO: Remove this, its deprecated in OSX and unsupported in Windows.
   Object.defineProperty(StatusBar.prototype, 'length', {
     get:function() { return this.native('length'); },
     set:function(e) { this.native('setLength', e); }
@@ -85,6 +87,7 @@ module.exports = (function() {
     }
   });
 
+  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'highlight', {
     get:function() { return this.native('highlightMode') == $.YES ? true : false; },
     set:function(e) { this.native('setHighlightMode', e ? $.YES : $.NO); }
@@ -105,6 +108,7 @@ module.exports = (function() {
     set:function(e) { return this.native('setToolTip',$(e)); }
   });
 
+  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   // Note: setting a custom view overrides title, tooltip, enabled, highlight, menu
   // and events such as mousedown, mouseup, etc.
   Object.defineProperty(StatusBar.prototype, 'custom', {
@@ -120,6 +124,7 @@ module.exports = (function() {
     }
   });
 
+  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'custommenu', {
     get:function() { return this.private.custommenu; },
     set:function(e) {

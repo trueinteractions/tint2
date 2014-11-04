@@ -28,7 +28,8 @@ function run($utils) {
   panel.x='0px';
   panel.y='0px';
   /* @hidden */ panel.addEventListener('close', function() {
-    /* @hidden */ $utils.clickAt(10,530);
+    /* @hidden */ $utils.clickAt(panel2.x + 10, panel2.y + 10);
+    /* @hidden */ $utils.clickAt(panel2.x + panel2.width - 15, panel2.y + 10);
   /* @hidden */ });
 
 
@@ -42,7 +43,8 @@ function run($utils) {
     /* @hidden */ $utils.ok();
   });
   /* @hidden */ setTimeout(function() {
-    /* @hidden */ $utils.clickAt(10,30);
+    /* @hidden */ $utils.clickAt(panel.x + 10, panel.y + 10);
+    /* @hidden */ $utils.clickAt(panel.x + panel.width - 15, panel.y + 10);
   /* @hidden */ },1000);
   
 }

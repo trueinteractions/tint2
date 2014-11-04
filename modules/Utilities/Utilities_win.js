@@ -166,6 +166,31 @@ module.exports = (function() {
     return imageRef;
   }
 
+  function makeWinFormsIcon(e) {
+    var img = null;
+    if(!e || typeof(e) !== 'string') return null;
+    else if(e.indexOf(':') > -1) {
+      var url = new $.System.Uri(e);
+      var wr = $.System.Net.WebRequest.Create(url);
+      var strm = wr.GetResponse().GetResponseStream();
+      var bmp = new $.System.Drawing.Bitmap(strm);
+      img = $.System.Drawing.Icon.FromHandle(bmp.GetHicon());
+    } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
+      var strm = $.System.IO.File.OpenRead(e);
+      img = new $.System.Drawing.Icon(strm);
+    } else {
+      var imageRef = getImageFromString(e);
+      if(imageRef==null)
+        img = null;
+      else {
+        var s = $.System.Convert.FromBase64String(imageRef);
+        var ms = new $.System.IO.MemoryStream(s);
+        img = new $.System.Drawing.Icon(ms);
+      }
+    }
+    return img;
+  }
+
   function makeImage(e) {
     var img = null;
     if(!e || typeof(e) !== 'string') return null;
@@ -215,6 +240,7 @@ module.exports = (function() {
   baseUtilities.forEachItemInControl = forEachItemInControl;
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.makeImage = makeImage;
+  baseUtilities.makeWinFormsIcon = makeWinFormsIcon;
 
   return baseUtilities;
 })();
