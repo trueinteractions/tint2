@@ -1072,6 +1072,47 @@ namespace FlashWPFWindow {
   }
 
   namespace IEWebBrowserFix {
+    public ref class ScriptInterface
+    {
+    public:
+      ScriptInterface(v8::Persistent<v8::Function> cb) {
+        callback = new wrapv8obj();
+        callback->function = cb;
+      }
+      
+      [System::Runtime::InteropServices::ComVisibleAttribute(true)]
+      void postMessageBack(System::String^ str)
+      {
+        v8::HandleScope scope;
+        v8::Handle<v8::Value> argv[1];
+
+        argv[0] = MarshalCLRToV8(str);
+
+        v8::TryCatch try_catch;
+
+        if (this->callback->function.IsEmpty()) {
+          throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
+          abort();
+        } else {
+          // invoke the registered callback function
+          this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
+        }
+        if (try_catch.HasCaught()) {
+          throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
+          exit(1);
+        }
+      }
+
+    private:
+      wrapv8obj *callback;
+
+    };
+    
+    static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
+      HandleScope scope;
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
+      return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
+    }
     static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
       HKEY key;
       bool success = true;
@@ -1214,6 +1255,8 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
   NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
   NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
+
+  NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
   
   // Register the thread handle to communicate back to handle application
   // specific events when in WPF mode.

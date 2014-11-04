@@ -23,7 +23,6 @@ public:
 	
 	virtual Stream^ GetResponseStream() override {
 		String^ newpath = System::IO::Directory::GetCurrentDirectory() + "\\" + _responseuri->Host + "\\" + _responseuri->AbsolutePath->Replace("/","\\");
-
 		if(System::IO::File::Exists(newpath))
 			return gcnew FileStream(newpath, System::IO::FileMode::Open);
 		throw gcnew WebException("The specified application resource at: "+newpath+" cannot be found.");

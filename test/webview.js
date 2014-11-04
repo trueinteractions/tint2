@@ -29,7 +29,7 @@ function run($utils) {
   });
   /* @hidden */ var count = 1;
   webview.addEventListener('title', function() {
-    /* @hidden */ $utils.assert(webview.title == 'Test'+count);
+    /* @hidden */ $utils.assert(webview.title == 'Test'+count, 'expected window.title['+webview.title+'] == Test'+count);
     mainWindow.title = webview.title;
     /* @hidden */ if(count == 4) {
     /* @hidden */   setTimeout(function() { mainWindow.destroy();

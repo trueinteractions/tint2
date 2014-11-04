@@ -5,7 +5,6 @@ module.exports = (function() {
 
   function WebView(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
-
     if(NativeObjectClass && NativeObjectClass.type == '#')
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     else {
@@ -13,15 +12,32 @@ module.exports = (function() {
       Container.call(this, $.System.Windows.Controls.WebBrowser, $.System.Windows.Controls.WebBrowser, options);
     }
 
-    this.private.loading = false;
     var firstLoad = true;
+    this.private.previousTitle = "";
+    this.private.loading = false;
+
+    this.private.checkForNewTitle = function() {
+      var currentTitle = this.nativeView.InvokeScript("eval",['document.title']);
+      if(this.private.previousTitle != currentTitle) {
+        this.private.previousTitle = currentTitle;
+        this.fireEvent('title');
+      }
+    }.bind(this);
 
     this.nativeView.addEventListener('LoadCompleted', function() { 
       this.private.loading = false;
-      this.fireEvent('load');
-      this.fireEvent('title');
+      setTimeout(function() {
+        if(!this.nativeView.Source)
+          this.fireEvent('error');
+        else
+        {
+          this.nativeView.InvokeScript("eval",['window.postMessageToHost = function(e) { window.external.postMessageBack(e); };']);
+          this.fireEvent('title');
+          this.fireEvent('load');
+        }
+      }.bind(this),5);
     }.bind(this));
-    this.nativeView.addEventListener('Navigated', function() { this.fireEvent('loading') }.bind(this));
+    this.nativeView.addEventListener('Navigated', function() { this.fireEvent('loading'); }.bind(this));
     this.nativeView.addEventListener('Navigating', function() {
       if(firstLoad) {
         // establish the activex instance, store a ref for later.
@@ -31,18 +47,24 @@ module.exports = (function() {
         this.private.comObject.GetType().InvokeMember("Silent", $.System.Reflection.BindingFlags.SetProperty, null, this.private.comObject, [ true ], null, null, null);
         
         firstLoad = false;
+      } else {
+        this.fireEvent('unload');
+        this.fireEvent('request');
       }
       this.private.loading = true;
       this.fireEvent('locationchange');
     }.bind(this));
   
+    // Callback class for IE to call postMessage;
+    function callbackHandle(str) {
+      this.fireEvent('message',[str]);
+    }
+    var scriptInterface = process.bridge.createScriptInterface(callbackHandle.bind(this));
+    this.nativeView.ObjectForScripting = scriptInterface;
     // cancel
-    // unload
-    // error
+    // close
     // redirect
     // icon
-    // request
-    // close
   }
 
   WebView.prototype = Object.create(Container.prototype);
@@ -58,13 +80,14 @@ module.exports = (function() {
 
   WebView.prototype.postMessage = function(e) {
     var msg = "var msg=document.createEvent('MessageEvent');\n";
-    msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'")+"');\n";
+    msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'")+"','*',0,window);\n";
     msg += "window.dispatchEvent(msg);\n";
     this.execute(msg);
+    this.private.checkForNewTitle();
   }
 
   WebView.prototype.execute = function(e) { 
-    return this.nativeView.InvokeScript("eval",[e]);  
+    return this.nativeView.InvokeScript("eval",[e]);
   }
 
   Object.defineProperty(WebView.prototype, 'icon', {
@@ -121,10 +144,20 @@ module.exports = (function() {
     get:function() { }
   });
 
-  // yes
   Object.defineProperty(WebView.prototype, 'location', {
-    get:function() { return this.nativeView.Source.AbsoluteUri; },
-    set:function(url) { this.nativeView.Source = new $.System.Uri(url); }
+    get:function() { 
+      return this.private.url;
+    },
+    set:function(url) { 
+      this.private.url = url;
+      //TODO: Fix this to support res as well.  Long term look for a better solution?
+      // Win8 adds (or seemingly adds) new support for URI schemas, investigate url monikers
+      // as well, asyncronous pluggable protocols wont work since they're system wide and
+      // not app dependent.
+      if(url.indexOf("app:") > -1 && !application.packaged)
+        url = url.replace("app:/","file:///"+process.cwd().replace(/\\/g,'/'));
+      this.nativeView.Navigate(new $.System.Uri(url));
+    }
   });
 
   // no

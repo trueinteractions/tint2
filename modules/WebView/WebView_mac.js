@@ -50,7 +50,7 @@ module.exports = (function() {
           var frameWinObj = this.nativeView('windowScriptObject');
           if(frameWinObj) {
             frameWinObj('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
-            this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessage = function(e) { window.TintMessages.postMessage(e); }"));
+            this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessageToHost = function(e) { window.TintMessages.postMessage(e); }"));
           }
           this.fireEvent('load');
         } catch(e) {

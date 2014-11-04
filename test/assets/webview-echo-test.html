@@ -3,7 +3,7 @@
 	<title>Echo</title>
 	<script>
 		window.addEventListener('message', function(e) {
-			window.postMessage(e.data);
+			window.postMessageToHost(e.data);
 		});
 	</script>
 </head>

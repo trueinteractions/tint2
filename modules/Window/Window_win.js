@@ -280,6 +280,7 @@ module.exports = (function() {
         var hwnd = this.private.hwnd;
         var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
+        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
         var hwnd = this.private.hwnd;
@@ -307,6 +308,7 @@ module.exports = (function() {
     }
   });
 
+  //TODO: Support this, or remove it as yosemite no longer supports fullscreen buttons.
   Object.defineProperty(Window.prototype, 'fullscreenButton', {
     get:function() { return false; },
     set:function(e) { /* Todo ? */ }

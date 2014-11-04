@@ -34,6 +34,7 @@
 
     this.private = {};
 
+    //TODO: implement this.
     Object.defineProperty(this, 'packaged', {
       get:function() { return false; }
     });
