@@ -122,6 +122,7 @@ module.exports = (function() {
 
     //TODO: This is not supported "native" in windows.
     this.cancel = function() {
+      fireEvent('cancel');
       // cannot be executed.
     }
   }

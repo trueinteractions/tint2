@@ -15,6 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
   /* @hidden */ var color = new Color('rgba',40,40,40,0.1);
   /* @hidden */ $utils.assert(color.red == (40/255*10)/10, 'color.red should be: '+(40/255)+' was: '+color.red);
   /* @hidden */ $utils.assert(color.green == (40/255*10)/10, 'color.green should be: '+(40/255)+' was: '+color.green);
@@ -25,7 +26,6 @@ function run($utils) {
   /* @hidden */ //var second = false;
   /* @hidden */ panel.x=0;
   /* @hidden */ panel.y=0;
-  /* @hidden */ $utils.clickAt(125,125);
   panel.addEventListener('colorchange', function() {
     var selected = panel.selected;
     /* @hidden */ $utils.assert(selected.red <= 1 && selected.red >= 0, 'selected.red='+selected.red+' < 0.96 && selected.red='+selected.red+' > 0.93');
@@ -33,9 +33,15 @@ function run($utils) {
     /* @hidden */ $utils.assert(selected.blue <= 1 && selected.blue >= 0, 'selected.blue['+selected.blue+'] < 0.96 && selected.blue['+selected.blue+'] > 0.93');
     /* @hidden */ $utils.assert(selected.alpha === 1, 'selected.alpha['+selected.alpha+'] === 1');
     /* @hidden */ $utils.assert(selected.colorspace === "rgb", 'colorspace should be rgb, was '+selected.colorspace);
-    panel.style = "inspector";
     /* @hidden */ $utils.ok();
   });
+  /* @hidden */ setTimeout(function() {
+  /* @hidden */ if(ismac) $utils.clickAt(125,125);
+  /* @hidden */ else {
+  /* @hidden */   $utils.clickAt(410,304);
+  /* @hidden */   $utils.clickAt(327,435)
+  /* @hidden */ }
+  /* @hidden */ },1000);
 }
 
 /**

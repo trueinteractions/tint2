@@ -35,10 +35,11 @@ module.exports = (function() {
     Object.defineProperty(this, 'all', { 
       get:function() {
         var screens = $.System.Windows.Forms.Screen.AllScreens;
-        var count = screens.length;
+        var count = screens.Length;
+        var values = [];
         for(var i=0; i < count; i++) {
-          var scrn = getScreenInfo(screens[i]);
-          scrn.isPrimary = screens[i].Primary ? true : false;
+          var scrn = getScreenInfo(screens.GetValue(i));
+          scrn.isPrimary = scrn.Primary ? true : false;
           values.push(scrn);
         }
         return values;

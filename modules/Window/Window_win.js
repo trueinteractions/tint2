@@ -49,7 +49,22 @@ module.exports = (function() {
     // We need to force a HWND creatio otherwise setting any
     // properties on the WPF Windows object will fail. 
     this.private.hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).EnsureHandle();
+    // Force directx to not re-draw the background, we already do it anyway.
+    var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
+    mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.Transparent;
+    // Just as above, tell WPF not to redraw the background, The Desktop Window Manager (DWM) will do it 
+    // anyway as long as the style isn't set to "None"
+    this.native.Background = $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
 
+    // We're happy to draw or own client region, tell DWM to not bother.
+    var margin = new $$.win32.structs.MARGINS;
+    margin.cxLeftWidth = -1;
+    margin.cxRightWidth = -1;
+    margin.cyTopHeight = -1;
+    margin.cyBottomHeight = -1;
+    $$.win32.dwmapi.DwmExtendFrameIntoClientArea(this.private.hwnd.pointer.rawpointer,margin);
+
+    // Lets just set our background to transparent for now (similar to OSX brushed window)
     this.backgroundColor = "rgba(0,0,0,0)";
 
     application.windows.push(this);
@@ -67,7 +82,7 @@ module.exports = (function() {
     get:function() { return this.native.WindowStyle == $.System.Windows.WindowStyle.SingleBorderWindow; },
     set:function(e) {
       if(e) this.native.WindowStyle = $.System.Windows.WindowStyle.SingleBorderWindow;
-      else if (e) this.native.WindowStyle = $.System.Windows.WindowStyle.None;
+      else this.native.WindowStyle = $.System.Windows.WindowStyle.None;
     }
   });
 
@@ -330,25 +345,11 @@ module.exports = (function() {
     set:function(e) {
       if(e == 'auto') {
         this.private.background = 'auto';
-        this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
+        //this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
       } else {
-        //TODO: Fix it to extend into non-client area.
         this.private.background = e;
         this.private.backgroundObj = new Color(e);
-
-        var hwnd = this.private.hwnd;
-        var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
-        mainWindowSrc.CompositionTarget.BackgroundColor = this.private.backgroundObj.native;
-
-        var margin = new $$.win32.structs.MARGINS;
-        margin.cxLeftWidth = -1;
-        margin.cxRightWidth = -1;
-        margin.cyTopHeight = -1;
-        margin.cyBottomHeight = -1;
-        $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
-
-        this.native.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
       }
     }

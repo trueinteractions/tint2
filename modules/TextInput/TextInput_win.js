@@ -20,6 +20,11 @@ module.exports = (function() {
         setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
       }.bind(this));
     }
+    this.private.readyonly = false;
+    this.private.previousBackground = this.native.Background;
+    this.private.previousBorder = this.native.BorderBrush;
+    this.private.previousBorderThickness = this.native.BorderThickness;
+    this.private.previousPadding = this.native.Padding;
   }
 
   TextInput.prototype = Object.create(Container.prototype);
@@ -44,8 +49,36 @@ module.exports = (function() {
   });
 
   Object.defineProperty(TextInput.prototype, 'readonly', {
-    get:function() { /* TODO */ },
-    set:function(e) { /* TODO */ }
+    get:function() { return this.private.readonly; },
+    set:function(e) {
+      this.private.readonly = e ? true : false;
+      if(this.private.readonly) {
+        this.private.previousBackground = this.native.Background;
+        this.private.previousBorder = this.native.BorderBrush;
+        this.private.previousBorderThickness = this.native.BorderThickness;
+        this.private.previousPadding = this.native.Padding;
+
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+        this.native.BorderBrush = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+        this.native.BorderThickness = new $.System.Windows.Thickness(0,0,0,0);
+        this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
+        this.native.IsReadOnly = true;
+        this.native.AcceptsTab = false;
+        this.native.Focusable = false;
+      } else if(this.private.readonly) {
+        
+        this.native.Background = this.private.previousBackground;
+        this.native.BorderBrush = this.private.previousBorder;
+        this.native.BorderThickness = this.private.previousBorderThickness;
+        this.native.Padding = this.private.previousPadding;
+
+        this.native.IsReadOnly = false;
+        this.native.AcceptsTab = true;
+        this.native.Focusable = true;
+
+      }
+
+    }
   });
 
   Object.defineProperty(TextInput.prototype, 'placeholder', {

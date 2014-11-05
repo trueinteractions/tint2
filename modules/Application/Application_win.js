@@ -129,13 +129,14 @@
       var coll = this.native.Windows.GetEnumerator();
       while (coll.MoveNext()) {
         var _win = coll.Current;
-        $.FlashWPFWindow.WindowExtensions.FlashWindow(_win, 20);
+        if(!_win.TaskbarItemInfo) _win.TaskbarItemInfo = new $.System.Windows.Shell.TaskbarItemInfo();
+        _win.TaskbarItemInfo.ProgressState = $.System.Windows.Shell.TaskbarItemProgressState.Indeterminate;
       }
       return {
         cancel:function() {
           while (coll.MoveNext()) {
             var _win = coll.Current;
-            $.FlashWPFWindow.WindowExtensions.StopFlashingWindow(_win);
+            _win.TaskbarItemInfo.ProgressState = $.System.Windows.Shell.TaskbarItemProgressState.None;
           }
         }.bind(this)
       };

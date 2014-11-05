@@ -7,7 +7,7 @@
 #include <vector>
 #include <msclr/marshal.h>
 #include "../AutoLayoutPanel.cpp"
-
+//#include <Dwmapi.h>
 #using <system.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
@@ -34,6 +34,45 @@ namespace v8 {
 Persistent<Function> bufferConstructor;
 
 namespace TintInterop {
+  public ref class Wpf32Window : System::Windows::Forms::IWin32Window
+  {
+  public:
+      property System::IntPtr Handle {
+        virtual System::IntPtr get() { return _handle; };
+        void set(IntPtr h) { _handle = h; };
+      }
+
+      Wpf32Window(System::Windows::Window^ wpfWindow)
+      {
+          this->Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfWindow))->Handle;
+      }
+    private:
+      IntPtr _handle;
+  };
+/*
+  public ref class CommonWindowExtensions
+  {
+  public:
+    static void DwmExtendClientArea(System::Windows::Window^ wpfwin, int left, int top, int right, int bottom) {
+      System::IntPtr Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfwin))->Handle;
+      MARGINS margins = {left,right,top,bottom};
+      DwmExtendFrameIntoClientArea((HWND)Handle.ToPointer(), &margins);
+    }
+    static void AllowNonClientAreaPaint(System::Windows::Window^ wpfwin, bool onoff) {
+      System::IntPtr Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfwin))->Handle;
+      DwmSetWindowAttribute((HWND)Handle.ToPointer(),DWMWA_ALLOW_NCPAINT, &onoff, sizeof(onoff));
+    }
+  };
+*/
+  public ref class CommonDialogExtensions
+  {
+  public:
+      static System::Windows::Forms::DialogResult^ ShowDialog(System::Windows::Forms::CommonDialog^ dialog, System::Windows::Window^ parent)
+      {
+          return dialog->ShowDialog(gcnew Wpf32Window(parent));
+      }
+  };
+
   public ref class AsyncEventDelegate {
   public:
     AsyncEventDelegate(

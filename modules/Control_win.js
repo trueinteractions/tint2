@@ -187,6 +187,7 @@ module.exports = (function() {
     this.private.layoutConstraints.splice(this.private.layoutConstraints.indexOf(n),1);
   }
 
+  // control, name, percentName, percentFunc, scalarName, scalarFunc, notallowed
   utils.createLayoutProperty(Control.prototype, 'top', 'bottom', utils.identity, 'top', utils.identity, ['bottom','height']);
   utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);

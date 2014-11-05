@@ -44,7 +44,7 @@ function run($utils) {
   var someOtherMenuItem = new MenuItem("New","n","shift");
   someOtherMenuItem.enabled = true;
   someOtherSuperMenuItem.addEventListener('click', function() {
-    $utils.ok();
+    //$utils.ok();
   });
   var someOtherMenu = new Menu("SomeMenu2");
   someOtherMenu.appendChild(someOtherMenuItem);
