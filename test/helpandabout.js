@@ -27,7 +27,7 @@ function run($utils) {
   button.height = 20;
   button.width = 20;
 
-  /* @hidden */ //$utils.ok();
+  /* @hidden */ $utils.ok();
 }
 
 /**
