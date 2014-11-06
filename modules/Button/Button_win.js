@@ -119,6 +119,9 @@ module.exports = (function() {
     get:function() { return this.private.states['style']; },
     set:function(type) {
       this.private.states['style'] = type;
+      if(type == "help") {
+        
+      }
       /*this.private.buttonStyle = type;
       if(type == "normal") this.nativeView('setBezelStyle',$.NSTexturedRoundedBezelStyle);
       else if (type == "rounded") this.nativeView('setBezelStyle',$.NSRoundedBezelStyle);

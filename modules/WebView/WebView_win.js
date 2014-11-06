@@ -61,8 +61,8 @@ module.exports = (function() {
     }
     var scriptInterface = process.bridge.createScriptInterface(callbackHandle.bind(this));
     this.nativeView.ObjectForScripting = scriptInterface;
-    // cancel
-    // close
+    
+    // TODO: Support events
     // redirect
     // icon
   }
@@ -76,6 +76,7 @@ module.exports = (function() {
   WebView.prototype.stop = function() { 
     this.private.loading = false;
     this.private.comObject.GetType().InvokeMember("Stop", $.System.Reflection.BindingFlags.InvokeMember, null, this.private.comObject, null, null, null, null);
+    this.fireEvent('cancel');
   }
 
   WebView.prototype.postMessage = function(e) {
@@ -101,53 +102,51 @@ module.exports = (function() {
         "return favicon; }()";
       return this.execute(exeCmd);**/
     }
-  })
+  });
 
-  // no
+  // TODO: Support
   Object.defineProperty(WebView.prototype, 'allowAnimatedImages', {
     get:function() { },
     set:function(e) { }
   });
 
-  // no
+  // TODO: Support
   Object.defineProperty(WebView.prototype, 'allowAnimatedImagesToLoop', {
     get:function() { },
     set:function(e) { }
   });
 
-  // no
+  // TODO: Support
   Object.defineProperty(WebView.prototype, 'allowJava', {
     get:function() { },
     set:function(e) { }
   });
 
-  // no
+  // TODO: Support
   Object.defineProperty(WebView.prototype, 'allowJavascript', {
     get:function() { },
     set:function(e) { }
   });
 
-  // no
+  // TODO: Support
   Object.defineProperty(WebView.prototype, 'allowPlugins', {
     get:function() { },
     set:function(e) { }
   });
 
-  // no
-  Object.defineProperty(WebView.prototype, 'privateBrowsing', {
-    get:function() {  },
-    set:function(e) {  }
-  });
+  // Doesnt work on OSX, no path to support on IE.
+  //Object.defineProperty(WebView.prototype, 'privateBrowsing', {
+  //  get:function() {  },
+  //  set:function(e) {  }
+  //});
 
-  // no
+  // Indeterminate on windows.
   Object.defineProperty(WebView.prototype, 'progress', {
-    get:function() { }
+    get:function() { return -1; }
   });
 
   Object.defineProperty(WebView.prototype, 'location', {
-    get:function() { 
-      return this.private.url;
-    },
+    get:function() { return this.private.url; },
     set:function(url) { 
       this.private.url = url;
       //TODO: Fix this to support res as well.  Long term look for a better solution?
@@ -160,10 +159,10 @@ module.exports = (function() {
     }
   });
 
-  // no
+  //TODO: Enable support for this?
   Object.defineProperty(WebView.prototype, "useragent", {
-    get:function() {  },
-    set:function(e) {  }
+    get:function() { return "MSIE -- Option not supported yet."; },
+    set:function(e) { throw new Error('Warning: Support is not enabled yet for user agent customization.'); }
   });
 
   Object.defineProperty(WebView.prototype, 'loading', { 
@@ -171,15 +170,19 @@ module.exports = (function() {
     set:function(e) { if(e == false) this.stop(); }
   });
 
+  //TODO: Enable support for this?  This requires bouncing IE's HWND
+  // to a directX surface and potentially cleaning out the 'transparent'
+  // color base then presenting it to a D3Dimage, more work required.
   Object.defineProperty(WebView.prototype, 'transparent', {
     get:function() { },
     set:function(e) { }
   });
 
-  Object.defineProperty(WebView.prototype, 'textScale', {
-    get:function() {  },
-    set:function(e) {  }
-  });
+  // Broken on OSX, not working on Windows.
+  //Object.defineProperty(WebView.prototype, 'textScale', {
+  //  get:function() {  },
+  //  set:function(e) {  }
+  //});
 
   Object.defineProperty(WebView.prototype, 'title', { 
     get:function() { return this.execute("document.title"); }

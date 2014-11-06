@@ -150,9 +150,14 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'canBeFullscreen', {
     get:function() { return this.native('collectionBehavior') && $.NSWindowCollectionBehaviorFullScreenPrimary ? true : false; },
-    set:function(e) { 
+    set:function(e) {
+      e = e ? true : false;
       if(e) this.native('setCollectionBehavior', this.native('collectionBehavior') | $.NSWindowCollectionBehaviorFullScreenPrimary);
       else this.native('setCollectionBehavior', this.native('collectionBehavior') ^ $.NSWindowCollectionBehaviorFullScreenPrimary);
+      
+      // enable the button (or disable the button on Mavericks/Lion)
+      if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
+        this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e);
     }
   });
 
@@ -308,17 +313,17 @@ module.exports = (function() {
     }
   });
 
-  Object.defineProperty(Window.prototype, 'fullscreenButton', {
-    get:function() { 
-      if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
-        return this.native('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); 
-    },
-    set:function(e) { 
-      if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
-        this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e); 
-      else return true;
-    }
-  });
+  // Deprecated, retired in Mavericks.
+  //Object.defineProperty(Window.prototype, 'fullscreenButton', {
+  //  get:function() { 
+  //    if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
+  //      return this.native('standardWindowButton',$.NSWindowFullScreenButton)('isHidden'); 
+  //  },
+  //  set:function(e) { 
+  //    if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
+  //      this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e);
+  //  }
+  //});
 
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },

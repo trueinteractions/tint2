@@ -24,14 +24,14 @@ function run($utils) {
   mainWindow.state = "fullscreen";
 
   /* @hidden */ setTimeout(function() { 
-  /* @hidden */   $utils.assert(mainWindow.bounds.width == mainScreen.bounds.width, 'width assertion failed: '+mainWindow.bounds.width+' != '+mainScreen.bounds.width); 
+  /* @hidden */   $utils.assert(mainWindow.bounds.width >= mainScreen.bounds.width, 'width assertion failed: '+mainWindow.bounds.width+' != '+mainScreen.bounds.width); 
   /* @hidden */ }, 1000);
   /* @hidden */ setTimeout(function() { 
   /* @hidden */   mainWindow.state = "normal"; 
   /* @hidden */ }, 2000);
   /* @hidden */ 
   /* @hidden */ setTimeout(function() { 
-  /* @hidden */   $utils.assert(mainWindow.bounds.width == 500);
+  /* @hidden */   $utils.assert(mainWindow.width == 500, 'main windows bounds was: ' + mainWindow.bounds.width);
   /* @hidden */   $utils.ok();
   /* @hidden */ }, 3000);
 

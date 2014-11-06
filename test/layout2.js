@@ -19,9 +19,11 @@ function run($utils) {
   var win = new Window();
 
   win.visible = true;
-  var webView = new WebView();
-  win.appendChild(webView);
-  webView.location = "https://www.google.com";
+  //IE on Windows does not support elements on top of it, 
+  //TODO: Re-enable once IE/win build supports this.
+  //var webView = new WebView();
+  //win.appendChild(webView);
+  //webView.location = "https://www.google.com";
   
   win.width = 700;
   var buttonNormal = new Button();
@@ -49,10 +51,10 @@ function run($utils) {
   });
   win.appendChild(buttonThird);
 
-  webView.top = win;
-  webView.left = win;
-  webView.bottom = win;
-  webView.right = win;
+  //webView.top = win;
+  //webView.left = win;
+  //webView.bottom = win;
+  //webView.right = win;
 
   buttonNormal.top = win;
   buttonNormal.left = win;

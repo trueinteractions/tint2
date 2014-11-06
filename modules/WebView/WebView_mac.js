@@ -164,11 +164,13 @@ TODO:
     set:function(e) { this.private.preferences('setPlugInsEnabled', e ? $.YES : $.NO); }
   });
 
-  Object.defineProperty(WebView.prototype, 'privateBrowsing', {
-    get:function() { return this.private.preferences('privateBrowsingEnabled') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', (e ? $.YES : $.NO)); }
-  });
+  // Doesnot work on OSX, not supported on Win, commenting out.
+  //Object.defineProperty(WebView.prototype, 'privateBrowsing', {
+  //  get:function() { return this.private.preferences('privateBrowsingEnabled') == $.YES ? true : false; },
+  //  set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', (e ? $.YES : $.NO)); }
+  //});
 
+  // Returns -1 for indeterminate
   Object.defineProperty(WebView.prototype, 'progress', {
     get:function() { return this.nativeView('estimatedProgress')*100; }
   });
@@ -193,10 +195,11 @@ TODO:
     set:function(e) { this.nativeView('setDrawsBackground', !e ? $.YES : $.NO ); }
   });
 
-  Object.defineProperty(WebView.prototype, 'textScale', {
-    get:function() { return this.nativeView('textSizeMultiplier') * 100; },
-    set:function(e) { this.nativeView('setTextSizeMultiplier', (e / 100)); }
-  });
+  // Broken on OSX not working either on Windows.
+  //Object.defineProperty(WebView.prototype, 'textScale', {
+  //  get:function() { return this.nativeView('textSizeMultiplier') * 100; },
+  //  set:function(e) { this.nativeView('setTextSizeMultiplier', (e / 100)); }
+  //});
 
   Object.defineProperty(WebView.prototype, 'title', { 
     get:function() {  return this.nativeView('mainFrameTitle')('UTF8String'); }

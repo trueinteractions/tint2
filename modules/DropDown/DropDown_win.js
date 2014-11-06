@@ -60,7 +60,6 @@ module.exports = (function() {
     }
   });
 
-  //TODO: Standardize this:
   Object.defineProperty(DropDown.prototype, 'value', {
     get:function() { return this.native.SelectionBoxItem.toStirng(); },
     set:function(e) { this.native.SelectionBoxItem = e.toString(); }

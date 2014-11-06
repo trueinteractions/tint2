@@ -24,6 +24,19 @@ module.exports = (function() {
     this.native.addEventListener('Deactivated', function() { this.fireEvent('blur'); }.bind(this));
     this.native.addEventListener('Activated', function() { this.fireEvent('focus'); }.bind(this));
     this.native.addEventListener('StateChanged', function() {
+      if(this.native.WindowState == $.System.Windows.WindowState.Maximized
+          && this.native.WindowStyle == $.System.Windows.WindowStyle.None && 
+          this.private.fullscreen == false) 
+      {
+        this.private.fullscreen = true;
+         this.fireEvent('enter-fullscreen');
+      } else if(this.private.fullscreen == true 
+          && (this.native.WindowState != $.System.Windows.WindowState.Maximized
+              || this.native.WindowStyle != $.System.Windows.WindowStyle.None)) 
+      {
+         this.fireEvent('exit-fullscreen');
+        this.private.fullscreen = false;
+      }
       if(this.native.WindowState == $.System.Windows.WindowState.Maximized) this.fireEvent('maximize');
       else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) this.fireEvent('minimize');
       else this.fireEvent('restore');
@@ -31,6 +44,7 @@ module.exports = (function() {
 
     this.private.previousStyle='';
     this.private.previousState='';
+    this.private.previousResize = '';
     this.private.background='auto';
     this.private.menu=null;
     this.private.toolbar=null;
@@ -38,6 +52,7 @@ module.exports = (function() {
     this.private.closeButton = true;
     this.private.titleTextColor = "auto";
     this.private.type = "Window";
+    this.private.canBeFullscreen = true;
 
     //We cannot allow transparency unless there is no window style.
     this.native.ShowInTaskbar = true;
@@ -64,8 +79,8 @@ module.exports = (function() {
     margin.cyBottomHeight = -1;
     $$.win32.dwmapi.DwmExtendFrameIntoClientArea(this.private.hwnd.pointer.rawpointer,margin);
 
-    // Lets just set our background to transparent for now (similar to OSX brushed window)
-    this.backgroundColor = "rgba(0,0,0,0)";
+    // Lets just set our background to white 
+    this.backgroundColor = "rgba(255,255,255,1)";
 
     application.windows.push(this);
   }
@@ -153,8 +168,8 @@ module.exports = (function() {
 
   //TODO: Implement me
   Object.defineProperty(Window.prototype, 'canBeFullscreen', {
-    get:function() { return true; },
-    set:function(e) { }
+    get:function() { return this.private.canBeFullscreen; },
+    set:function(e) { this.private.canBeFullscreen = e ? true : false; }
   });
 
   Object.defineProperty(Window.prototype, 'state', {
@@ -172,6 +187,9 @@ module.exports = (function() {
         if(this.private.previousState != "") this.native.WindowState = this.private.previousState;
         else this.native.WindowState = $.System.Windows.WindowState.Normal;
 
+        if(this.private.previousResize != "") this.native.ResizeMode = this.private.previousResize;
+        else this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
+
         this.private.fullscreen = false;
       } 
       
@@ -184,8 +202,10 @@ module.exports = (function() {
       else if (e == 'fullscreen' && !this.private.fullscreen) {
         this.native.previousStyle = this.native.WindowStyle;
         this.native.previousState = this.native.WindowState;
+        this.native.previousResize = this.native.ResizeMode;
         this.native.WindowState = $.System.Windows.WindowState.Maximized;
         this.native.WindowStyle = $.System.Windows.WindowStyle.None;
+        this.native.ResizeMode = $.System.Windows.ResizeMode.NoResize;
         this.private.fullscreen = true;
       }
     }
@@ -321,12 +341,6 @@ module.exports = (function() {
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
-  });
-
-  //TODO: Support this, or remove it as yosemite no longer supports fullscreen buttons.
-  Object.defineProperty(Window.prototype, 'fullscreenButton', {
-    get:function() { return false; },
-    set:function(e) { /* Todo ? */ }
   });
 
   Object.defineProperty(Window.prototype, 'resizable', {

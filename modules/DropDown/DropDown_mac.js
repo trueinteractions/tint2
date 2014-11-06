@@ -23,7 +23,6 @@ module.exports = (function() {
     }
   });
 
-  //TODO: Standardize this:
   Object.defineProperty(DropDown.prototype, 'value', {
     get:function() { return this.nativeView('titleOfSelectedItem')('UTF8String'); },
     set:function(e) { this.nativeView('setTitle', $(e)); }

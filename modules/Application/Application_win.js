@@ -24,7 +24,9 @@
 
     function fireEvent(event, args) {
       if(events[event])
-        (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+        (events[event]).forEach(function(item,index,arr) {
+          item.apply(null,args);
+        });
     }
 
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }

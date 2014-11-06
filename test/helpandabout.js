@@ -20,14 +20,14 @@ function run($utils) {
   var button = new Button();
 
   button.style = 'help';
-  button.title = '';
+  //button.title = '';
   win.appendChild(button);
   button.right = 100;
   button.bottom = 10;
   button.height = 20;
   button.width = 20;
 
-  /* @hidden */ $utils.ok();
+  /* @hidden */ //$utils.ok();
 }
 
 /**
