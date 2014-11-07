@@ -61,18 +61,19 @@ module.exports = (function() {
   Split.prototype.constructor = Split;
 
   Split.prototype.appendChild = function(e) {
+    this.fireEvent('resize');
     var isVertical = this.orientation == "vertical" ? true : false;
     var index = this.private.definitions.length;
 
     if(index != 0) 
     {
-      var definition1 = createNewDefinition(this, 5);
+      var definition1 = createNewDefinition(this, this.private.dividerWidth);
       if(isVertical) this.nativeView.ColumnDefinitions.Add(definition1);
       else this.nativeView.RowDefinitions.Add(definition1);
       this.private.definitions.push(definition1);
       
       var divider = new $.System.Windows.Controls.GridSplitter();
-      setGridSplitterDirection(divider, isVertical, index, 5);
+      setGridSplitterDirection(divider, isVertical, index, this.private.dividerWidth);
       divider.addEventListener('DragStarted', function() {
         this.fireEvent('resize');
       }.bind(this));
@@ -99,9 +100,11 @@ module.exports = (function() {
       e.native.SetValue($.System.Windows.Controls.Grid.RowProperty, index);
     }
     this.private.definitions.push(definition);
+    this.fireEvent('resized');
   }
 
   Split.prototype.removeChild = function(e) {
+    this.fireEvent('resize');
     var isVertical = this.orientation == "vertical" ? true : false;
     var index = this.private.children.indexOf(e);
     if(this.private.children.length < 1) {
@@ -126,9 +129,11 @@ module.exports = (function() {
       this.private.definitions.splice(index, 1);
     }
     this.private.backupRemove.apply(this,arguments);
+    this.fireEvent('resized');
   }
 
   Split.prototype.setPosition = function(position, index) {
+    this.fireEvent('resize');
     var isVertical = this.orientation == "vertical" ? true : false,
         defs = this.private.definitions,
         totalSize = 0,
@@ -173,6 +178,7 @@ module.exports = (function() {
 
       runningPercent += percent;
     }
+    this.fireEvent('resized');
   }
 
   Object.defineProperty(Split.prototype, 'orientation', {
@@ -180,38 +186,36 @@ module.exports = (function() {
     set:function(e) { 
       if(e == "vertical" && this.private.orientation != "vertical") {
         // This must be changed otherwise helper methods may
-        // accidently still think we're horizontal.
+        // accidently still think we're vertical.
         this.private.orientation = "vertical";
 
-        // Recreate the row definitions as column definitions,
+        // Recreate the column definitions as row definitions,
         // but do not add them yet.
-        var defs = this.private.definitions;
-        var newdefs = [];
-        defs.forEach(function(item, index, arr) {
-          newdefs.push(createNewDefinition(this,item.Height));
+        //var defs = this.private.definitions;
+        //var newdefs = [];
+        this.private.definitions.forEach(function(item, index, arr) {
+          arr[index] = createNewDefinition(this, item.Height);
         }.bind(this));
 
         // Clear any existing column definitions,
         // any definitions in our own set.
         this.nativeView.ColumnDefinitions.Clear();
         this.nativeView.RowDefinitions.Clear();
-        this.private.definitions = [];
 
-        // Re-add column definitions from above,
-        // ensure we flip the horizontal/veritcal alignments
-        // and settings on the GridSlidder
-       /* newdefs.forEach(function(item, index, arr) {
+        // Re-add row definitions from above,
+        // Re-set the grid splitter dirctions.
+        // reassign column/row values for children.
+        for(var index=0; index < this.private.definitions.length; index++) {
+          var item = this.private.definitions[index];
           this.nativeView.ColumnDefinitions.Add(item);
-          this.private.definitions.push(item);
-          if(index % 2 == 1)
-            setGridSplitterDirection(this.private.dividers[((index - 1) / 2)], false, index, 5);
-        }.bind(this));*/
-
-        for(var i=0; i < this.private.children.length; i=i+2) {
-          this.private.children[i].native.SetValue($.System.Windows.Controls.Grid.ColumnProperty, i);
-          this.private.children[i].native.SetValue($.System.Windows.Controls.Grid.RowProperty, 0);
+          var child = this.private.children[index];
+          if(child.isSplitter)
+            setGridSplitterDirection(this.private.children[index].native, true, index, this.private.dividerWidth);
+          else {
+            this.private.children[index].native.SetValue($.System.Windows.Controls.Grid.RowProperty, index);
+            this.private.children[index].native.SetValue($.System.Windows.Controls.Grid.ColumnProperty, 0);
+          }
         }
-
       } else if (e == "horizontal" && this.private.orientation != "horizontal") {
         // This must be changed otherwise helper methods may
         // accidently still think we're vertical.
@@ -238,7 +242,7 @@ module.exports = (function() {
           this.nativeView.RowDefinitions.Add(item);
           var child = this.private.children[index];
           if(child.isSplitter)
-            setGridSplitterDirection(this.private.children[index].native, false, index, 5);
+            setGridSplitterDirection(this.private.children[index].native, false, index, this.private.dividerWidth);
           else {
             this.private.children[index].native.SetValue($.System.Windows.Controls.Grid.ColumnProperty, 0);
             this.private.children[index].native.SetValue($.System.Windows.Controls.Grid.RowProperty, index);
@@ -256,6 +260,7 @@ module.exports = (function() {
       else if(this.private.dividerWidth == 5) return "thick";
     },
     set:function(e) {
+      this.fireEvent('resize');
       var isVertical = this.orientation == "vertical" ? true : false;
       if(e == "thin") this.private.dividerWidth = 1;
       else if(e == "pane") this.private.dividerWidth = 3;
@@ -264,10 +269,16 @@ module.exports = (function() {
         var child = this.private.children[i];
         if(child.isSplitter)
         {
-          child.native.Width = this.private.dividerWidth;
-          this.private.definitions.Width.Value = this.private.dividerWidth;
+          if(isVertical) {
+            child.native.Width = this.private.dividerWidth;
+            //this.private.definitions[i].Width.Value = this.private.dividerWidth;
+          } else {
+            child.native.Height = this.private.dividerWidth;
+            //this.private.definitions[i].Height.Value = this.private.dividerWidth;
+          }
         }
       }
+      this.fireEvent('resized');
     }
   });
 
