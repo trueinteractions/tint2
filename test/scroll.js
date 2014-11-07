@@ -15,7 +15,6 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  $ = process.bridge.objc;
   var win = new Window();
   win.visible = true;
   var scrollview = new Scroll();

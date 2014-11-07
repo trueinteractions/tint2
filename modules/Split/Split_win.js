@@ -73,6 +73,9 @@ module.exports = (function() {
       
       var divider = new $.System.Windows.Controls.GridSplitter();
       setGridSplitterDirection(divider, isVertical, index, 5);
+      divider.addEventListener('DragStarted', function() {
+        this.fireEvent('resize');
+      }.bind(this));
       divider.addEventListener('DragCompleted', function() {
         this.fireEvent('resized');
       }.bind(this));

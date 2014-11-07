@@ -298,6 +298,7 @@ else
         ':':0x0020,
         'PGUP':0x0021,
         'PGDN':0x0022,
+        'UP':0x0026,
         'DOWN':0x0028,
         'DEL':0x002E,
         '0':0x0030,
@@ -398,8 +399,29 @@ else
     var z = control.boundsOnScreen;
     return ex.rightClickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
-  ex.scrollAt = function scrollAt(x, y, upOrDown) { }
-  ex.scrollAtControl = function scrollAtControl(control, upOrDown) { }
+  ex.scrollAt = function scrollAt(x, y, upOrDown) { 
+    ex.clickAt(x,y);
+    if(upOrDown > 0) {
+      ex.keyAtControl('UP');
+      ex.keyAtControl('UP');
+      ex.keyAtControl('UP');
+      ex.keyAtControl('UP');
+      ex.keyAtControl('UP');
+      ex.keyAtControl('UP');
+    }
+    else {
+      ex.keyAtControl('DOWN');
+      ex.keyAtControl('DOWN');
+      ex.keyAtControl('DOWN');
+      ex.keyAtControl('DOWN');
+      ex.keyAtControl('DOWN');
+      ex.keyAtControl('DOWN');
+    }
+  }
+  ex.scrollAtControl = function scrollAtControl(control, upOrDown) {
+    var z = control.boundsOnScreen;
+    ex.scrollAt(z.x,z.y, upOrDown);
+  }
   ex.clickAtControl = function clickAtControl(control) {
     var z = control.boundsOnScreen;
     return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));

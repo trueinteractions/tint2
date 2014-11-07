@@ -72,7 +72,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./build.sh
 ./test.sh
 ```
-<h3>Windows (Experimental)</h3>
+<h3>Windows (Unstable)</h3>
 Ensure you have Visual Studio 2010 (or the free msbuild compiler and Windows SDK 7.0A+), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
 ```bash
 mkdir tint

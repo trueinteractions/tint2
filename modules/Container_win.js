@@ -5,10 +5,14 @@ module.exports = (function() {
   var parseValue = utilities.parseUnits;
 
   function Container(NativeObjectClass, NativeViewClass, options) {
+    options = options || {};
+
     if(NativeObjectClass)
       Control.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Control.call(this, $.System.Windows.Control, $.System.Windows.Control, options);
+    else {
+      options.initViewOnly = true;
+      Control.call(this, $.AutoLayout.AutoLayoutPanel, $.AutoLayout.AutoLayoutPanel, options);
+    }
     this.private.children = [];
   }
 
@@ -38,10 +42,13 @@ module.exports = (function() {
   }
 
   Container.prototype.scrollTo = function(x, y) {
-    var b = this.bounds;
-    //this.nativeView('scrollPoint', $.NSMakePoint(x,b.height - y));
-    //http://msdn.microsoft.com/en-us/library/system.windows.controls.scrollviewer.scrolltohorizontaloffset(v=vs.110).aspx
-    //http://msdn.microsoft.com/en-us/library/system.windows.controls.scrollviewer.scrolltoverticaloffset(v=vs.110).aspx
+    if(this.native.ScrollToVerticalOffset) {
+      this.native.ScrollToVerticalOffset(y);
+      this.native.ScrollToHorizontalOffset(x);
+    } else if (this.private.parent && this.private.parent.native.ScrollToVerticalOffset) {
+      this.private.parent.native.ScrollToVerticalOffset(y);
+      this.private.parent.native.ScrollToHorizontalOffset(x);
+    }
   }
 
   return Container;

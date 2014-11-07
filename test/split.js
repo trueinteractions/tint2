@@ -33,12 +33,12 @@ function run($utils) {
   webview1.location = 'https://www.google.com';
   webview2.location = 'https://www.bing.com';
   webview3.location = 'https://www.yahoo.com';
-  webview1.width='100%';
+  /*webview1.width='100%';
   webview1.height='100%';
   webview2.width='100%';
   webview2.height='100%';
   webview3.width='100%';
-  webview3.height='100%';
+  webview3.height='100%';*/
   split.style = "thin";
   /* @hidden */ $utils.assert(split.orientation == "vertical");
   // The first value is a percentage indicating where the divider should be
