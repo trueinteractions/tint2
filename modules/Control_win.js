@@ -170,6 +170,9 @@ module.exports = (function() {
   }
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
+    // incase we're added to a panel that isn't auto-layout, go ahead and ignore.
+    if(!this.private.parent.nativeView.AddLayoutConstraint)
+      return;
     var constraint = this.private.parent.nativeView.AddLayoutConstraint(
         (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
         utils.capitalize(layoutObject.firstAttribute),
