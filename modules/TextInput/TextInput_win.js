@@ -19,6 +19,10 @@ module.exports = (function() {
       this.native.addEventListener('TextChanged', function() { 
         setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
       }.bind(this));
+      this.native.addEventListener('PreviewKeyUp', function(e,args) {
+        if(args.Key == $.System.Windows.Input.Enter || args.Key == $.System.Windows.Input.Return)
+          this.fireEvent('inputend');
+      }.bind(this));
     }
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;
@@ -112,8 +116,8 @@ module.exports = (function() {
 
   //TODO: Is this 1:1 functionality? Can users still scroll with no visible scrollbar?
   Object.defineProperty(TextInput.prototype, 'scrollable', {
-    get:function() { return this.nativeView.VerticalScrollBarVisibility; },
-    set:function(e) { this.nativeView.VerticalScrollBarVisibility = e ? true : false; }
+    get:function() { return this.nativeView.VerticalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Auto; },
+    set:function(e) { this.nativeView.VerticalScrollBarVisibility = e ?  $.System.Windows.Controls.ScrollBarVisibility.Auto :  $.System.Windows.Controls.ScrollBarVisibility.Hidden; }
   });
 
   return TextInput;

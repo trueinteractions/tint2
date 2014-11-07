@@ -17,7 +17,6 @@ module.exports = (function() {
 
     this.native.Content = this.nativeView;
 
-    //TODO: Add enter-fullscreen/exit-fullscreen
     this.native.addEventListener('Closing', function() { this.fireEvent('close'); }.bind(this));
     this.native.addEventListener('Closed', function() { this.fireEvent('closed'); }.bind(this));
     this.native.addEventListener('SizeChanged', function() { this.fireEvent('resize'); }.bind(this));
@@ -113,7 +112,6 @@ module.exports = (function() {
     set:function(e) { }
   });
 
-  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'menu', {
     get:function() { 
       return this.private.menu; 
@@ -144,25 +142,27 @@ module.exports = (function() {
     }
   });
 
-  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'toolbar', {
-    get:function() { 
-      //return this.private.toolbar; 
-    },
+    get:function() { return this.private.toolbar; },
     set:function(e) {
-      /*if(this.frame == false && e) {
+      if(this.frame == false && e) {
         if(application.warn) console.warn('Cannot add a toolbar to a window that has Window.frame = false;');
         return;
       }
-
-      if(!e || e == null) {
-        this.native('setStyleMask',this.native('styleMask') & ~$.NSUnifiedTitleAndToolbarWindowMask);
-      } else {
-        this.native('setStyleMask',this.native('styleMask') | $.NSUnifiedTitleAndToolbarWindowMask);
+      if(e) {
         this.private.toolbar = e;
-        this.native('setToolbar', this.private.toolbar.native);
-      }*/
-      
+        this.native.Content = new $.System.Windows.Controls.StackPanel();
+        this.native.Content.Orientation = $.System.Windows.Controls.Orientation.Vertical;
+        this.native.Content.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
+        this.native.Content.VerticalAlignment = $.System.Windows.VerticalAlignment.Stretch;
+        this.native.Content.InternalChildren.Add(this.private.toolbar.native);
+        this.native.Content.InternalChildren.Add(this.nativeView);
+      } else {
+        this.private.toolbar = null;
+        this.native.Content.InternalChildren.Remove(this.private.toolbar.native);
+        this.native.Content.InternalChildren.Remove(this.nativeView);
+        this.native.Content = this.nativeView;
+      }
     }
   });
 

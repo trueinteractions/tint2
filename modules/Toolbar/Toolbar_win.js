@@ -1,57 +1,49 @@
 module.exports = (function() {
-  var Control = require('Control');
+  var Container = require('Container');
   var $ = process.bridge.dotnet;
 
   function Toolbar() {
-    //var $toolbar = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
-    var children = [];
-    var toolbarCache = [];
+    var options = {};
+    options.initViewOnly = true;
+    Container.call(this, $.System.Windows.Controls.DockPanel, $.System.Windows.Controls.DockPanel, options);
+    this.native.Orientation = $.System.Windows.Controls.Orientation.Horizontal;
+    this.native.Height = 22;
+    this.private.backupAppend = this.appendChild;
+    this.private.backupRemove = this.removeChild;
 
-    //$toolbar('setAllowsUserCustomization',$.NO);
-    //$toolbar('setAutosavesConfiguration',$.NO);
-    //$toolbar('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
-    //$toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
-
-
-    Object.defineProperty(this, 'state', {
-      get:function() { 
-        // iconandlabel
-        // icon
-        // label
-
-      },
-      set:function(e) {
-
+    this.appendChild = function(e) {
+      if(Array.isArray(e)) {
+        var dst = [];
+        for(var i=0; i < e.length; i++)
+          if(e[i] != 'space') dst.push(e[i]);
+        this.private.backupAppend.apply(this,[dst]);
+      } else if(e != 'space') {
+        this.private.backupAppend.apply(this,[e]);
       }
-    });
+    }.bind(this);
+    //this.removeChild = 
+  }
 
-    Object.defineProperty(this, 'size', {
-      get:function() { 
-      },
-      set:function(e) {
+  Toolbar.prototype = Object.create(Container.prototype);
+  Toolbar.prototype.constructor = Toolbar;
 
-      }
-    });
+  // TODO: Finish me
+  // iconandlabel
+  // icon
+  // label
+  Object.defineProperty(Toolbar.prototype, 'state', {
+    get:function() { return "iconandlabel"; },
+    set:function(e) { }
+  });
 
-    this.appendChild = function(child) {
-      //TODO: Ensure all append childs work like this.
-      if(Array.isArray(child)) {
-        for(var i=0; i < child.length; i++) this.appendChild(child[i]);
-      } else {
-        //
-      }
-    }
-
-    this.removeChild = function(child) {
-      var index = children.indexOf(child);
-      if(index != -1) {
-        children.splice(index,1);
-        //
-      }
-    }
-
-    Object.defineProperty(this, 'native', { get:function() { return $toolbar; }});
-  } 
+  // TODO: Finish me
+  // regular
+  // small
+  // default
+  Object.defineProperty(Toolbar.prototype, 'size', {
+    get:function() { return "default"; },
+    set:function(e) { }
+  });
 
   return Toolbar;
 })();

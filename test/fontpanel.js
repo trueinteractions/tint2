@@ -16,6 +16,7 @@ function baseline() {
  * @example 
  */
 function run($utils) {
+  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
   var panel = new FontPanel();
   panel.visible = true;
   /* @hidden */ var trackChange = false;
@@ -47,6 +48,7 @@ function run($utils) {
     /* @hidden */ }
   });
 
+  if(ismac) {
   /* @hidden */ setTimeout(function() {
   /* @hidden */   $utils.clickAt(58,109);
   /* @hidden */   setTimeout(function() {
@@ -70,6 +72,7 @@ function run($utils) {
   /* @hidden */     },500);
   /* @hidden */   },500);
   /* @hidden */ },500);
+  }
 }
 
 /**

@@ -49,8 +49,8 @@ function run($utils) {
   webView.addEventListener('load', function() { urlLocation.value = webView.location; });
 
   webView.top = webView.bottom = webView.left = webView.right = 0;
-
-  $utils.ok(); // add unit tests.
+  webView.location = "https://www.google.com";
+  $utils.ok(); // TODO: add more unit tests.
 }
 
 /**
