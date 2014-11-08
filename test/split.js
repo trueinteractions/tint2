@@ -23,13 +23,13 @@ function run($utils) {
   var webview2 = new WebView();
   var webview3 = new WebView();
   win.appendChild(split);
+  /* @hidden */ split.addEventListener('resized', function() {
+  /* @hidden */   count++;
+  /* @hidden */ });
   split.appendChild(webview1);
   split.appendChild(webview2);
   split.appendChild(webview3);
   split.left = split.right = split.top = split.bottom = 0;
-  /* @hidden */ split.addEventListener('resized', function() {
-  /* @hidden */   count++;
-  /* @hidden */ });
   webview1.location = 'https://www.google.com';
   webview2.location = 'https://www.bing.com';
   webview3.location = 'https://www.yahoo.com';
