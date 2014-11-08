@@ -157,7 +157,7 @@ module.exports = (function() {
         this.native.Content.VerticalAlignment = $.System.Windows.VerticalAlignment.Stretch;
         this.native.Content.InternalChildren.Add(this.private.toolbar.native);
         this.native.Content.InternalChildren.Add(this.nativeView);
-      } else {
+      } else if(this.private.toolbar) {
         this.private.toolbar = null;
         this.native.Content.InternalChildren.Remove(this.private.toolbar.native);
         this.native.Content.InternalChildren.Remove(this.nativeView);

@@ -17,9 +17,11 @@ function baseline() {
 function run($utils) {
   $utils.assert(Font.fonts.length > 0);
   $utils.assert(Font.fontFamilies.length > 0);
-  var helvetica = Font.fontsInFamily("Helvetica");
-  $utils.assert(helvetica[0].name.indexOf('Helvetica') !== -1);
-  $utils.assert(helvetica[0].weight < 1000 && helvetica[0].weight > 0);
+  var fonts = Font.fontFamilies;
+  var found = false;
+  for(var i=0; i < fonts.length; i++)
+    if(fonts[i].indexOf('Arial') != -1) found = true;
+  $utils.assert(found);
   $utils.ok();
 }
 

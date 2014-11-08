@@ -29,7 +29,7 @@ function run($utils) {
     /* @hidden */ if(trackChange){
     var selected = panel.selected;
     /* @hidden */   $utils.assert(selected.face.indexOf('Arial') > -1);
-    /* @hidden */   $utils.assert(selected.size === 15);
+    /* @hidden */   $utils.assert(Math.round(selected.size) === 15, 'size was: ' + selected.size);
     /* @hidden */   $utils.assert(selected.family === 'Arial');
     /* @hidden */   $utils.assert(selected.italic === false);
     /* @hidden */   $utils.assert(selected.bold === false);
@@ -38,14 +38,13 @@ function run($utils) {
     /* @hidden */   setTimeout(function() {
     /* @hidden */     trackChange = false;
     /* @hidden */     trackNewChange = true;
-    /* @hidden */     panel.selected = new Font('Helvetica', 12);
+    /* @hidden */     panel.selected = new Font('Times New Roman', 12);
+    /* @hidden */     var font = panel.selected;
+    /* @hidden */     $utils.assert(font.family === 'Times New Roman');
+    /* @hidden */     $utils.assert(font.size === 12);
+    /* @hidden */     $utils.ok();
     /* @hidden */   },500);
-    /* @hidden */ } else if (trackNewChange) {
-    /* @hidden */   var font = panel.selected;
-    /* @hidden */   $utils.assert(font.family === 'Helvetica');
-    /* @hidden */   $utils.assert(font.size === 12);
-    /* @hidden */   $utils.ok();
-    /* @hidden */ }
+    /* @hidden */ } 
   });
 
   if(ismac) {
@@ -72,6 +71,24 @@ function run($utils) {
   /* @hidden */     },500);
   /* @hidden */   },500);
   /* @hidden */ },500);
+  } else {
+  /* @hidden */  setTimeout(function() {
+  /* @hidden */     $utils.clickAt(500,160);
+  /* @hidden */    setTimeout(function() {
+  /* @hidden */      $utils.clickAt(500,160);
+  /* @hidden */      $utils.keyAtControl('a');
+  /* @hidden */      $utils.keyAtControl('r');
+  /* @hidden */      $utils.keyAtControl('i');
+  /* @hidden */      $utils.keyAtControl('a');
+  /* @hidden */      $utils.keyAtControl('l');
+  /* @hidden */      $utils.keyAtControl('TAB');
+  /* @hidden */      $utils.keyAtControl('TAB');
+  /* @hidden */      $utils.keyAtControl('1');
+  /* @hidden */      $utils.keyAtControl('5');
+  /* @hidden */      trackChange = true;
+  /* @hidden */      $utils.keyAtControl('RETURN');
+  /* @hidden */    },500)
+  /* @hidden */  },500);
   }
 }
 
@@ -87,6 +104,6 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  timeout:true,
+  timeout:false,
   name:"FontPanel",
 };

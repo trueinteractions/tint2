@@ -96,7 +96,7 @@ if (ismac) {
         case "TAB": return 48;
         case "SPACE": return 49;
         case "`": return 50;
-        case "DELETE": return 51;
+        case "BACK": return 51;
         case "ENTER": return 52;
         case "ESCAPE": return 53;
         // some more missing codes abound, reserved I presume, but it would
@@ -288,6 +288,7 @@ else
       var keys = {
         '\b':0x0008,
         '\t':0x0009,
+        'TAB':0x0009,
         '\n':0x000D,
         'SHIFT':0x0010,
         'CONTROL':0x0011,

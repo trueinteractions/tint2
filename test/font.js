@@ -17,7 +17,7 @@ function baseline() {
 function run($utils) {
   var font = new Font('Arial', 12);
   $utils.assert(font.family == 'Arial');
-  $utils.assert(font.face.indexOf('Arial') > -1);
+  $utils.assert(font.face.indexOf('Arial') > -1, 'font.face was: '+font.face);
   $utils.assert(font.size === 12);
   $utils.assert(font.italic === false);
   $utils.assert(font.bold === false);
@@ -38,7 +38,7 @@ function run($utils) {
   font.italic = true;
   $utils.assert(font.italic === true);
   font.family = "Times New Roman";
-  $utils.assert(font.face.indexOf('Times') > -1);
+  $utils.assert(font.face.indexOf('Times') > -1, 'font.face was: '+font.face);
   $utils.assert(font.vertical === false);
   $utils.assert(font.monospaced === false);
   $utils.ok();

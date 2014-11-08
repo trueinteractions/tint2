@@ -24,8 +24,8 @@ module.exports = (function() {
   FontPanel.prototype.scanForNewFonts = function() { }
 
   Object.defineProperty(FontPanel.prototype, 'selected', {
-    get:function() { },
-    set:function(fontObj) { }
+    get:function() { return this.private.selected; },
+    set:function(fontObj) { this.private.selected = fontObj; }
   });
 
   Object.defineProperty(FontPanel.prototype, 'multiple', {
@@ -39,33 +39,42 @@ module.exports = (function() {
       e = e ? true : false;
       this.private.visible = e;
       if(e) { 
-        //var selectedFont = this.native.Color;
+        var s = this.native.Font;
         this.native.ShowDialogAsync();
-        //TODO: Create a real color component so we don't have to poll
-        // on this.
+        //TODO: Create a real font dialog.
         var interval = setInterval(function() {
-          //var c = this.native.Color;
-          //if(c.R.ToString() != selectedColor.R.ToString() || 
-          //    c.G.ToString() != selectedColor.G.ToString() || 
-          //    c.B.ToString() != selectedColor.B.ToString() || 
-          //    (this.showAlpha && c.A.ToString() != selectedColor.A.ToString()))
-          //{
-          //  this.fireEvent('colorchange');
-          //  this.fireEvent('closed');
-          //  this.private.visible = false;
-          //  this.native.Dispose();
+          var c = this.native.Font;
+          if(c.Bold != s.Bold || 
+              s.Name != c.Name ||
+              c.Size != s.Size ||
+              c.Italic != s.Italic || 
+              c.Strikeout != s.Strikeout ||
+              c.Height != s.Height || 
+              c.Underline != s.Underline)
+          {
 
-          //  this.native = new $.System.Windows.Forms.ColorDialog();
-          //  this.native.FullOpen = true;
-          //  this.native.SolidColorOnly = false;
-          //  clearInterval(interval);
-          //}
+            var f = new Font(c.Name,c.Size);
+            f.bold = c.Bold;
+            f.italic = c.Italic;
+            f.size = c.Size;
+
+            this.private.selected = f;
+            this.fireEvent('fontchange');
+            this.fireEvent('closed');
+            this.private.visible = false;
+            this.native.Dispose();
+
+            this.native = new $.System.Windows.Forms.FontDialog();
+            this.native.ShowColor = true;
+            this.native.ShowEffects = true;
+            clearInterval(interval);
+          }
         }.bind(this),250);
       } else {
         this.native.Dispose();
-        this.native = new $.System.Windows.Forms.ColorDialog();
-        this.native.FullOpen = true;
-        this.native.SolidColorOnly = false;
+        this.native = new $.System.Windows.Forms.FontDialog();
+        this.native.ShowColor = true;
+        this.native.ShowEffects = true;
       }
     }
   });

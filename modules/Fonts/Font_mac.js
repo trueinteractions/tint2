@@ -95,7 +95,7 @@ module.exports = (function() {
   Object.defineProperty(Font, 'fontFamilies', {
     get:function() { return $utilities.nsArrayToArray(fontManager('availableFontFamilies')); }
   });
-
+/*
   Object.defineProperty(Font, 'fontCollections', {
     get:function() { return $utilities.nsArrayToArray(fontManager('collectionNames')); }
   });
@@ -125,5 +125,6 @@ module.exports = (function() {
     }
     return values;
   }
+*/
   return Font;
 })();
