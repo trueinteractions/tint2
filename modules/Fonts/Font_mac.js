@@ -93,7 +93,12 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Font, 'fontFamilies', {
-    get:function() { return $utilities.nsArrayToArray(fontManager('availableFontFamilies')); }
+    get:function() { 
+      var fonts = $utilities.nsArrayToArray(fontManager('availableFontFamilies'));
+      for(var i=0; i < fonts.length ; i++)
+        fonts[i] = fonts[i].toString();
+      return fonts;
+    }
   });
 /*
   Object.defineProperty(Font, 'fontCollections', {

@@ -110,7 +110,7 @@ module.exports = (function() {
                     'columnIndexes',$.NSIndexSet('indexSetWithIndex', this.nativeView('columnWithIdentifier',$(columnId))));
   }
 
-  Object.defineProperty(Table.prototype, 'rowHeightStyle', {
+  /*Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() { 
       var rowSize = this.nativeView('rowSizeStyle');
       if(rowSize == $.NSTableViewRowSizeStyleDefault) return "default";
@@ -125,7 +125,7 @@ module.exports = (function() {
       else if(e == "medium") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
       else if(e == "large") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
     }
-  });
+  });*/
 
   Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
     get:function() { return this.nativeView('allowsColumnRecording') == $.YES ? true : false; },
