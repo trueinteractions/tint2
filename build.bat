@@ -1,29 +1,5 @@
 @echo off
 
-@echo off
-:GetWindowsSdkDir
-@call :GetWindowsSdkDirHelper HKLM
-@if errorlevel 1 call :GetWindowsSdkDirHelper HKCU
-@if errorlevel 1 echo WindowsSdkDir not found
-@exit /B 0
-
-:GetWindowsSdkDirHelper
-@SET WindowsSdkDir=
-@for /F "tokens=1,2*" %%i in ('reg query "%1\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows" /v "CurrentInstallFolder"') DO (
-if "%%i"=="CurrentInstallFolder" (
-echo Using Windows SDK @ %%k
-SET "WindowsSdkDir=%%k"
-)
-)
-@if "%WindowsSdkDir%"=="" exit /B 1
-
-set newpath=C:\Python27;C:\Python26;C:\Python
-echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
-
-set newlibpath=%WindowsSdkDir%\lib
-echo %lib%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set lib=%lib%;%newlibpath%
-echo Library Path %lib%
-
 cd %~dp0
 
 if /i "%1"=="help" goto help
