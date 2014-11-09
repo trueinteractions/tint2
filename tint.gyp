@@ -435,7 +435,10 @@
           },
           'VCLinkerTool': {
             'RuntimeLibrary':'>(runtime)',
-            'AdditionalOptions':['/IGNORE:4221']
+            'AdditionalOptions':['/IGNORE:4221'],
+            'AdditionalLibraryDirectories':[
+              '$(WindowsSdkDir)'
+            ]
           }
         }
       }
