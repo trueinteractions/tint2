@@ -1,6 +1,21 @@
 @echo off
 
-echo Using SDK %WINDOWSSDKDIR%
+@echo off
+:GetWindowsSdkDir
+@call :GetWindowsSdkDirHelper HKLM
+@if errorlevel 1 call :GetWindowsSdkDirHelper HKCU
+@if errorlevel 1 echo WindowsSdkDir not found
+@exit /B 0
+
+:GetWindowsSdkDirHelper
+@SET WindowsSdkDir=
+@for /F "tokens=1,2*" %%i in ('reg query "%1\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows" /v "CurrentInstallFolder"') DO (
+if "%%i"=="CurrentInstallFolder" (
+echo Using Windows SDK @ %%k
+SET "WindowsSdkDir=%%k"
+)
+)
+@if "%WindowsSdkDir%"=="" goto failed
 
 set newpath=C:\Python27;C:\Python26;C:\Python
 echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
@@ -226,3 +241,7 @@ set NODE_VERSION=
 :: for /F "usebackq tokens=*" %%i in (`python "%~dp0tools\getnodeversion.py"`) do set NODE_VERSION=%%i
 if not defined NODE_VERSION echo Cannot determine current version of node.js & exit /b 1
 goto :EOF
+
+:failed
+echo "Could not find a Windows SDK installed."
+exit /B 1
