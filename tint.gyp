@@ -424,7 +424,7 @@
             '/CLRTHREADATTRIBUTE:STA',
           ],
           'AdditionalLibraryDirectories':[
-            '$(WINDOWSSDKDIR)'
+            '$(WINDOWSSDKDIR)\\lib'
           ]
         },
       },
@@ -440,7 +440,7 @@
             'RuntimeLibrary':'>(runtime)',
             'AdditionalOptions':['/IGNORE:4221'],
             'AdditionalLibraryDirectories':[
-              '$(WINDOWSSDKDIR)'
+              '$(WINDOWSSDKDIR)\\lib'
             ]
           }
         }
