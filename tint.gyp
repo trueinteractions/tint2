@@ -422,6 +422,9 @@
           'AdditionalOptions': [
             '/IGNORE:4098',
             '/CLRTHREADATTRIBUTE:STA',
+          ],
+          'AdditionalLibraryDirectories':[
+            '$(WINDOWSSDKDIR)'
           ]
         },
       },
@@ -437,7 +440,7 @@
             'RuntimeLibrary':'>(runtime)',
             'AdditionalOptions':['/IGNORE:4221'],
             'AdditionalLibraryDirectories':[
-              '$(WindowsSdkDir)'
+              '$(WINDOWSSDKDIR)'
             ]
           }
         }

@@ -73,7 +73,7 @@ module.exports = (function() {
     //this.setChild = function(e) {  }
 
     this.open = function(z) {
-      var bgcolor = new Color('transparent');
+      var bgcolor = new Color('#f7f7f7');
 
       var w = new $.System.Windows.Window();
       w.Width = 420;
@@ -122,9 +122,9 @@ module.exports = (function() {
       nimg.Width = 50;
       nimg.Height = 50;
       w.Content.InternalChildren.Add(nimg);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', nimg, 'Top', 1.0, 0);
-      w.Content.AddLayoutConstraint(nimg, 'Height', '=', nimg, null, null, 50);
-      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', nimg, 'Left', 1.0, 0);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', nimg, 'Top', 1.0, -20);
+      w.Content.AddLayoutConstraint(nimg, 'Height', '=', nimg, null, null, 70);
+      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', nimg, 'Left', 1.0, -20);
       w.Content.AddLayoutConstraint(nimg, 'Right', '=', nimg, 'Left', 1.0, 70);
 
       var text = new $.System.Windows.Controls.TextBlock();
@@ -133,7 +133,7 @@ module.exports = (function() {
       text.FontWeight = $.System.Windows.FontWeight.FromOpenTypeWeight(600);
       w.Content.AddLayoutConstraint(nimg, 'Right', '=', text, 'Left', 1.0, -10);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text, 'Right', 1.0, 0);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -5);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -20);
       w.Content.InternalChildren.Add(text);
 
       var text2 = new $.System.Windows.Controls.TextBlock();
