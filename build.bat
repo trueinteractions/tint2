@@ -15,10 +15,14 @@ echo Using Windows SDK @ %%k
 SET "WindowsSdkDir=%%k"
 )
 )
-@if "%WindowsSdkDir%"=="" goto failed
+@if "%WindowsSdkDir%"=="" exit /B 1
 
 set newpath=C:\Python27;C:\Python26;C:\Python
 echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
+
+set newlibpath=%WindowsSdkDir%\lib
+echo %lib%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set lib=%lib%;%newlibpath%
+echo Library Path %lib%
 
 cd %~dp0
 
@@ -241,7 +245,3 @@ set NODE_VERSION=
 :: for /F "usebackq tokens=*" %%i in (`python "%~dp0tools\getnodeversion.py"`) do set NODE_VERSION=%%i
 if not defined NODE_VERSION echo Cannot determine current version of node.js & exit /b 1
 goto :EOF
-
-:failed
-echo "Could not find a Windows SDK installed."
-exit /B 1
