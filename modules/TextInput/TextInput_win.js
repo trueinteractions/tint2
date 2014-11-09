@@ -19,10 +19,10 @@ module.exports = (function() {
       this.native.addEventListener('TextChanged', function() { 
         setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
       }.bind(this));
-      this.native.addEventListener('PreviewKeyUp', function(e,args) {
-        if(args.Key == $.System.Windows.Input.Enter || args.Key == $.System.Windows.Input.Return)
-          this.fireEvent('inputend');
-      }.bind(this));
+      //this.native.addEventListener('PreviewKeyUp', function(e,args) {
+        //if(args.Key == $.System.Windows.Input.Enter || args.Key == $.System.Windows.Input.Return)
+          //this.fireEvent('inputend');
+      //}.bind(this));
     }
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;

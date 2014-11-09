@@ -46,7 +46,7 @@ function run($utils) {
 
   setTimeout(function() { // @{hidden}
     $utils.assert(count == 3); // @{hidden}
-    //$utils.ok(); // @{hidden}
+    $utils.ok(); // @{hidden}
   },1500); // @{hidden}
 }
 
