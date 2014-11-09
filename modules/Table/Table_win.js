@@ -158,8 +158,8 @@ module.exports = (function() {
       container:s
     };
     s.Child = item.view.native;
-    //if(row % 2 == 0)
-    //  s.Backgorund = $.System.Windows.SystemColors.GrayTextBrush;
+    if(row % 2 == 0)
+      s.BorderBrush = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Black);
     this.private.items.push(item);
     s.SetValue($.System.Windows.Controls.Grid.RowProperty, row + 1); //item.view.native
     this.nativeView.InternalChildren.Add(s);

@@ -68,7 +68,7 @@ module.exports = (function() {
     mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.Transparent;
     // Just as above, tell WPF not to redraw the background, The Desktop Window Manager (DWM) will do it 
     // anyway as long as the style isn't set to "None"
-    this.native.Background = $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+    this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
 
     // We're happy to draw or own client region, tell DWM to not bother.
     var margin = new $$.win32.structs.MARGINS;

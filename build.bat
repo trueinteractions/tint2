@@ -1,5 +1,7 @@
 @echo off
 
+echo Using SDK %WINDOWSSDKDIR%
+
 set newpath=C:\Python27;C:\Python26;C:\Python
 echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
 

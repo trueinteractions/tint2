@@ -11,6 +11,8 @@
 #using <system.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
+#using <WPF/PresentationCore.dll>
+#using <WPF/PresentationFramework.dll>
 #using <System.Windows.Forms.dll>
 #using <System.Drawing.dll>
 
