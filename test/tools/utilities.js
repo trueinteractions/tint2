@@ -150,38 +150,6 @@ if (ismac) {
           return 0;
       }
     }
-    /*
-       kCGEventNull                = NX_NULLEVENT,
-       kCGEventLeftMouseDown       = NX_LMOUSEDOWN,
-       kCGEventLeftMouseUp         = NX_LMOUSEUP,
-       kCGEventRightMouseDown      = NX_RMOUSEDOWN,
-       kCGEventRightMouseUp        = NX_RMOUSEUP,
-       kCGEventMouseMoved          = NX_MOUSEMOVED,
-       kCGEventLeftMouseDragged    = NX_LMOUSEDRAGGED,
-       kCGEventRightMouseDragged   = NX_RMOUSEDRAGGED,
-       kCGEventKeyDown             = NX_KEYDOWN,
-       kCGEventKeyUp               = NX_KEYUP,
-       kCGEventFlagsChanged        = NX_FLAGSCHANGED,
-       kCGEventScrollWheel         = NX_SCROLLWHEELMOVED,
-       kCGEventTabletPointer       = NX_TABLETPOINTER,
-       kCGEventTabletProximity     = NX_TABLETPROXIMITY,
-       kCGEventOtherMouseDown      = NX_OMOUSEDOWN,
-       kCGEventOtherMouseUp        = NX_OMOUSEUP,
-       kCGEventOtherMouseDragged   = NX_OMOUSEDRAGGED,
-       kCGEventTapDisabledByTimeout = 0xFFFFFFFE,
-       kCGEventTapDisabledByUserInput = 0xFFFFFFFF
-    */
-    /*ex.screenShotAt = function screenShotAt(x,y) {
-      console.log('trying.... ugh. taking a screen shot at x, y ', x, y);
-      var point = $.CGPointMake(x, y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-      $.CGEventCreateKeyboardEvent(null,0x37,true); // cmd
-      $.CGEventCreateKeyboardEvent(null,0x38,true); // shift
-      $.CGEventCreateKeyboardEvent(null,0x15,true); // 4
-      $.CGEventCreateKeyboardEvent(null,0x37,false); // cmd
-      $.CGEventCreateKeyboardEvent(null,0x38,false); // shift
-      $.CGEventCreateKeyboardEvent(null,0x15,false); // 4
-    }*/
     ex.keyAtControl = function keyAtControl(input) {
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), true));
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), false));
@@ -500,34 +468,21 @@ ex.ok = function ok() {
 	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
 	process.stdout.write(brightBlueBegin + successMark + colorEnd +nl);
   process.exit(0);
-	//nextTest();
 }
 ex.fail = function fail() {
 	process.stdout.write('explicit fail thrown'+nl);
-  throw new Error('explicit fail.');
   process.exit(1);
 }
 function notok(code) {
 	if(currentTest.shell && ismac) {
 		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
-  process.stdout.write(brightRedBegin+failureMark+colorEnd+' 509:['+code+']'+nl);
+  process.stdout.write(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
   process.exit(1);
 }
-function nextTest() {
-	if(inputs.length > 0)
-		test(inputs.pop());
-	process.exit(0);
-	//else if (inputs.length == 0)
-	//	process.exit(0);
-}
 function test(item) {
-  //console.log(1);
 	currentTest = require('../'+item);
-  //console.log(2);
 	process.stdout.write(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
-
-  //console.log(3);
 	if(currentTest.shell && ismac) {
 		ex.setupShell(currentTest.name,function() {
 			if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
@@ -535,22 +490,15 @@ function test(item) {
 		},notok);
 	} else {
 		try {
-			//if(createBaseline) {
-			//	currentTest.setup();
-			//	currentTest.baseline();
-			//	currentTest.shutdown();
-			//} else {
-				currentTest.setup();
-				currentTest.run(ex);
-				currentTest.shutdown();
-				process.stdout.write('--end--');
-        if(currentTest.timeout) {
-          setTimeout(function() {
-            process.stdout.write('timeout exceeded.'+nl);
-            process.exit(1);
-          }, 50000);
-        }
-			//}
+			currentTest.setup();
+			currentTest.run(ex);
+			currentTest.shutdown();
+      if(currentTest.timeout) {
+        setTimeout(function() {
+          process.stdout.write('timeout exceeded.'+nl);
+          process.exit(1);
+        }, 50000);
+      }
 		} catch(e) {
 			notok(e.message);
 		}
@@ -561,10 +509,7 @@ if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
 	var argv = args(process.argv.slice(3));
 	if(argv.baseline == "true") createBaseline = true;
 	var inputs = argv['_'];
-	//console.log('received: ', inputs);
 	test(inputs[0]);
-  //console.log('done');
-  process.exit(0);
 }
 module.exports = ex;
 

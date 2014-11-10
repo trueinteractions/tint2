@@ -1,4 +1,15 @@
 @echo off
+:CheckOS
+IF EXIST "%PROGRAMFILES(X86)%" (GOTO 64BIT) ELSE (GOTO 32BIT)
+
+:64BIT
+set hostarch=x64
+goto begin
+
+:32BIT
+set hostarch=x86
+
+:begin
 
 :: This must come before GetWindowsSdkDir as GetWindowsSdkDir tramples on 
 :: the passed in arguments.
@@ -14,7 +25,7 @@ if /i "%1"=="x86" set arch=ia32
 :GetWindowsSdkDirHelper
 :: Microsoft Windows SDK regkey differs depending on the architecture
 @SET RegPath=
-if "%arch%"=="x64" SET RegPath=Wow6432Node\
+if "%hostarch%"=="x64" SET RegPath=Wow6432Node\
 @SET WindowsSdkDir=
 @for /F "tokens=1,2*" %%i in ('reg query "%1\SOFTWARE\%RegPath%Microsoft\Microsoft SDKs\Windows" /v "CurrentInstallFolder"') DO (
 if "%%i"=="CurrentInstallFolder" (
@@ -31,7 +42,7 @@ set newlibpath=%WindowsSdkDir%lib\x64
 if /i "%arch%"=="ia32" set newlibpath=%WindowsSdkDir%lib
 echo %libpath%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set libpath=%libpath%;%newlibpath%
 echo Windows SDK Library Path %newlibpath%
-echo Architecture %arch%
+echo Architecture %arch% (host architecture %hostarch%)
 
 if NOT exist .\libraries\node\node.gyp (
   git submodule init
