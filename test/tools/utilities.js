@@ -555,7 +555,7 @@ if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
 	var argv = args(process.argv.slice(3));
 	if(argv.baseline == "true") createBaseline = true;
 	var inputs = argv['_'];
-	process.stdout.write('received: ', inputs);
+	console.log('received: ', inputs);
 	nextTest();
 }
 module.exports = ex;
