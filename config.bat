@@ -20,9 +20,11 @@ SET "WindowsSdkDir=%%k"
 set newpath=C:\Python27;C:\Python26;C:\Python
 echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
 
-set newlibpath=%WindowsSdkDir%lib
+set newlibpath=%WindowsSdkDir%lib\x64
+if /i "%1"=="x86" set newlibpath=%WindowsSdkDir%lib
 echo %libpath%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set libpath=%libpath%;%newlibpath%
 echo Library Path %libpath%
+dir "%newlibpath%"
 
 if NOT exist .\libraries\node\node.gyp (
   git submodule init
