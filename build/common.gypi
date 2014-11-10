@@ -49,6 +49,7 @@
           },
           'VCLinkerTool': {
             'LinkIncremental': 2, # enable incremental linking
+            'GenerateDebugInformation': 'true',
           },
         },
         'xcode_settings': {
