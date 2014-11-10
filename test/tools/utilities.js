@@ -511,12 +511,13 @@ function notok(code) {
 		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
   process.stdout.write(brightRedBegin+failureMark+colorEnd+' 509:['+code+']'+nl);
+  process.exit(1);
 }
 function nextTest() {
 	if(inputs.length > 0)
 		test(inputs.pop());
-	else if (inputs.length == 0)
-		process.exit(0);
+	//else if (inputs.length == 0)
+	//	process.exit(0);
 }
 function test(item) {
 	currentTest = require('../'+item);
@@ -536,11 +537,12 @@ function test(item) {
 				currentTest.setup();
 				currentTest.run(ex);
 				currentTest.shutdown();
+				process.stdout.write('--end--');
         if(currentTest.timeout) {
           setTimeout(function() {
             process.stdout.write('timeout exceeded.'+nl);
             process.exit(1);
-          }, 20000);
+          }, 50000);
         }
 			}
 		} catch(e) {
@@ -553,6 +555,7 @@ if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
 	var argv = args(process.argv.slice(3));
 	if(argv.baseline == "true") createBaseline = true;
 	var inputs = argv['_'];
+	process.stdout.write('received: ', inputs);
 	nextTest();
 }
 module.exports = ex;
