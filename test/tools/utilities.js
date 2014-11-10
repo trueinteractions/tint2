@@ -516,6 +516,7 @@ function notok(code) {
 function nextTest() {
 	if(inputs.length > 0)
 		test(inputs.pop());
+	process.exit(0);
 	//else if (inputs.length == 0)
 	//	process.exit(0);
 }
