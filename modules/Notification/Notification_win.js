@@ -132,7 +132,7 @@ module.exports = (function() {
       margin.cxRightWidth = -1;
       margin.cyTopHeight = -1;
       margin.cyBottomHeight = -1;
-      $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
+      //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
 
       var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
       mainWindowSrc.CompositionTarget.BackgroundColor = bgcolor.native;

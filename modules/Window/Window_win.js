@@ -76,7 +76,7 @@ module.exports = (function() {
     margin.cxRightWidth = -1;
     margin.cyTopHeight = -1;
     margin.cyBottomHeight = -1;
-    $$.win32.dwmapi.DwmExtendFrameIntoClientArea(this.private.hwnd.pointer.rawpointer,margin);
+    //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(this.private.hwnd.pointer.rawpointer,margin);
 
     // Lets just set our background to white 
     this.backgroundColor = "rgba(255,255,255,1)";

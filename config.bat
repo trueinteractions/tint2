@@ -1,6 +1,10 @@
-@ECHO OFF
-
 @echo off
+
+:: This must come before GetWindowsSdkDir as GetWindowsSdkDir tramples on 
+:: the passed in arguments.
+set arch=x64
+if /i "%1"=="x86" set arch=ia32
+
 :GetWindowsSdkDir
 @call :GetWindowsSdkDirHelper HKLM
 @if errorlevel 1 call :GetWindowsSdkDirHelper HKCU
@@ -21,17 +25,14 @@ set newpath=C:\Python27;C:\Python26;C:\Python
 echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
 
 set newlibpath=%WindowsSdkDir%lib\x64
-if /i "%1"=="x86" set newlibpath=%WindowsSdkDir%lib
+if /i "%arch%"=="ia32" set newlibpath=%WindowsSdkDir%lib
 echo %libpath%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set libpath=%libpath%;%newlibpath%
-echo Library Path %libpath%
-:: dir "%newlibpath%"
+echo Windows SDK Library Path %newlibpath%
+echo Architecture %arch%
 
 if NOT exist .\libraries\node\node.gyp (
   git submodule init
   git submodule update
 )
-
-set arch=x64
-if /i "%1"=="x86" set arch=ia32
 
 call build.bat release nobuild nosign %arch%
