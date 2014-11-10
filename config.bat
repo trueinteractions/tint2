@@ -24,7 +24,7 @@ set newlibpath=%WindowsSdkDir%lib\x64
 if /i "%1"=="x86" set newlibpath=%WindowsSdkDir%lib
 echo %libpath%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set libpath=%libpath%;%newlibpath%
 echo Library Path %libpath%
-dir "%newlibpath%"
+:: dir "%newlibpath%"
 
 if NOT exist .\libraries\node\node.gyp (
   git submodule init

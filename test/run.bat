@@ -13,7 +13,7 @@ goto done
 
 :all
 for %%f in (.\*.js) do (
-  call "%curpath%%TINTEXEC%" tools\utilities.js %curpath%%TINTEXEC% %%f || EXIT /B 1
+  call "%curpath%%TINTEXEC%" tools\utilities.js %curpath%%TINTEXEC% %%f || EXIT /B 1000
 )
 
 :done
