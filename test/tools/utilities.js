@@ -12,11 +12,13 @@ if(ismac) {
   var $ = process.bridge.objc;
   var successMark = '✓';
   var failureMark = '✕';
+  var nl = '\n';
 } else {
   var $ = process.bridge.dotnet;
   var successMark = 'Pass';
   var failureMark = 'Fail';
   var $w32 = process.bridge.win32;
+  var nl = '\r\n';
 }
 
 var exec = require('child_process').exec;
@@ -277,7 +279,7 @@ if (ismac) {
       spawnAndPump("./"+name+"-test/Shell.app/Contents/MacOS/Runtime ./"+name+"-test/Shell.app/Contents/Resources/test.js baseline", cb, err, options);
     }
     ex.shutdownShell = function shutdownShell(name, cb) {
-      execAndPump("rm -rf ./"+name+"-test/", cb, function() { console.error('*** FATAL *** Cannot cleanup!'); });
+      execAndPump("rm -rf ./"+name+"-test/", cb, function() { console.log('*** FATAL *** Cannot cleanup!'); });
     }
 } // END MAC SPECIFIC CODE
 else 
@@ -457,9 +459,9 @@ ex.assert = function assert(condition,value) {
 	if(!condition) {
 		var msg;
 		try { throw new Error(value ? value : ''); } catch(e) { msg = e; };
-		console.log('assertion failed.');
-		console.error(msg.message);
-		console.error(msg.stack);
+		process.stdout.write('assertion failed.');
+		process.stdout.write(msg.message);
+		process.stdout.write(msg.stack);
 		process.exit(1);
 	}
 }
@@ -467,7 +469,7 @@ function spawnAndPump(cmd, cb, err, options) {
 	var cmds = cmd.split(' ');
 	var child = spawn(cmds[0], cmds.slice(1), { stdio: 'inherit' }).on('exit',function(code, signal) {
 		if(code !== 0) {
-			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]\n\texited abnormally: '+code+' signal: '+signal);
+			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
 		} else {
 			if(cb) cb();
@@ -478,14 +480,15 @@ function spawnAndPump(cmd, cb, err, options) {
 function execAndPump(cmd, cb, err, options) {
 	var child =exec(cmd, options, function(error,stdout,stderr) { 
 		if(error || stderr) {
-			console.log('got error');
-			if(error) console.error('\t',error);
-			if(stderr) console.error('\t',stderr);
+			process.stdout.write('got error'+nl);
+			if(error) process.stdout.write('\t'+error+nl);
+			if(stderr) process.stdout.write('\t'+stderr+nl);
 		} else if(stdout)
 			console.log(stdout);
 	}).on('exit',function(code, signal) {
-		if(code !== 0) {
-			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]\n\texited abnormally: '+code+' signal: '+signal);
+		process.stdout.write('[exit code: '+code+']');
+		if(code != 0) {
+			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
 		} else {
 			if(cb) cb();
@@ -495,10 +498,11 @@ function execAndPump(cmd, cb, err, options) {
 }
 ex.ok = function ok() {
 	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
-	process.stdout.write(brightBlueBegin + successMark + colorEnd + '\n');
+	process.stdout.write(brightBlueBegin + successMark + colorEnd +nl);
 	nextTest();
 }
 ex.fail = function fail() {
+	process.stdout.write('explicit fail thrown'+nl);
   throw new Error('explicit fail.');
   process.exit(1);
 }
@@ -506,7 +510,7 @@ function notok(code) {
 	if(currentTest.shell && ismac) {
 		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
-  process.stdout.write(brightRedBegin+failureMark+colorEnd+' 509:['+code+']\n');
+  process.stdout.write(brightRedBegin+failureMark+colorEnd+' 509:['+code+']'+nl);
 }
 function nextTest() {
 	if(inputs.length > 0)
@@ -534,7 +538,7 @@ function test(item) {
 				currentTest.shutdown();
         if(currentTest.timeout) {
           setTimeout(function() {
-            console.log(ex.takeSnapshotOfActiveScreen());
+            process.stdout.write('timeout exceeded.'+nl);
             process.exit(1);
           }, 20000);
         }
