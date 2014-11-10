@@ -24,10 +24,10 @@ if(ismac) {
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var args = require('./minimist');
-var grayedOutBegin = '\033[90m';
-var brightRedBegin = '\033[31m'
-var brightBlueBegin = '\033[36m'
-var colorEnd = '\033[0m';
+var grayedOutBegin = '';//'\033[90m';
+var brightRedBegin = '';//'\033[31m'
+var brightBlueBegin = '';//'\033[36m'
+var colorEnd = '';//'\033[0m';
 var currentTest = null;
 var createBaseline = false;
 var ex = {};
@@ -499,7 +499,8 @@ function execAndPump(cmd, cb, err, options) {
 ex.ok = function ok() {
 	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
 	process.stdout.write(brightBlueBegin + successMark + colorEnd +nl);
-	nextTest();
+  process.exit(0);
+	//nextTest();
 }
 ex.fail = function fail() {
 	process.stdout.write('explicit fail thrown'+nl);
@@ -534,11 +535,11 @@ function test(item) {
 		},notok);
 	} else {
 		try {
-			if(createBaseline) {
-				currentTest.setup();
-				currentTest.baseline();
-				currentTest.shutdown();
-			} else {
+			//if(createBaseline) {
+			//	currentTest.setup();
+			//	currentTest.baseline();
+			//	currentTest.shutdown();
+			//} else {
 				currentTest.setup();
 				currentTest.run(ex);
 				currentTest.shutdown();
@@ -549,7 +550,7 @@ function test(item) {
             process.exit(1);
           }, 50000);
         }
-			}
+			//}
 		} catch(e) {
 			notok(e.message);
 		}

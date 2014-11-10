@@ -75,7 +75,10 @@ module.exports = (function() {
     this.open = function(z) {
       var bgcolor = new Color('#f7f7f7');
 
+      this.native = {};
+
       var w = new $.System.Windows.Window();
+      this.native.window = w;
       w.Width = 420;
       w.MinWidth = 420;
       w.MaxWidth = 420;
@@ -93,7 +96,7 @@ module.exports = (function() {
       margin.cxRightWidth = -1;
       margin.cyTopHeight = -1;
       margin.cyBottomHeight = -1;
-      $$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
+      //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
       var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
       mainWindowSrc.CompositionTarget.BackgroundColor = bgcolor.native;
       w.Background = new $.System.Windows.Media.SolidColorBrush(bgcolor.native);
@@ -118,6 +121,7 @@ module.exports = (function() {
       if(!img && application.icon) nimg = utils.makeImage(application.icon);
       else if(!img) nimg = utils.makeImage('info');
       else nimg = utils.makeImage(img);
+      this.native.image = nimg;
       nimg.Stretch = $.System.Windows.Media.Stretch.UniformToFill;
       nimg.Width = 50;
       nimg.Height = 50;
@@ -147,6 +151,7 @@ module.exports = (function() {
 
       if(suppression) {
         var cbox = new $.System.Windows.Controls.CheckBox();
+        this.native.supression = cbox;
         cbox.Content = suppression.toString();
         cbox.IsChecked = suppressionChecked ? true : false;
         cbox.addEventListener('PreviewMouseDown', function() {
@@ -159,6 +164,7 @@ module.exports = (function() {
       }
 
       var btn = new $.System.Windows.Controls.Button();
+      this.native.mainbutton = btn;
       btn.addEventListener('PreviewMouseDown', function() {
         fireEvent('click',['main']);
         w.Close();
@@ -178,6 +184,7 @@ module.exports = (function() {
 
       if(auxButton) {
         var btn2 = new $.System.Windows.Controls.Button();
+        this.native.auxbutton = btn2;
         btn2.addEventListener('PreviewMouseDown', function() {
           fireEvent('click',['aux']);
           w.Close();

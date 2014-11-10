@@ -42,11 +42,11 @@ function run($utils) {
     /* @hidden */ confirm = 'aux';
     /* @hidden */ setTimeout(function() {
     /* @hidden */   if(ismac) $utils.clickAt(250,124); // TODO: Fix this hard coded value, hopefully this is consistant, should hit supression
-    /* @hidden */   else $utils.clickAt((scn.bounds.width/2)-115,(scn.bounds.height/2)-5);
+    /* @hidden */   else $utils.clickAt((scn.bounds.width/2)-95,(scn.bounds.height/2)+10); // click no supression checkbox 415,398 (cbox)
     /* @hidden */ },500);
     /* @hidden */ setTimeout(function() {
     /* @hidden */   if(ismac) $utils.clickAt(300,154); // TODO: Fix this hard coded value, hopefully this is consistant, should hit aux 
-    /* @hidden */   else $utils.clickAt((scn.bounds.width/2)+85,(scn.bounds.height/2)+40);
+    /* @hidden */   else $utils.clickAt((scn.bounds.width/2)+85,(scn.bounds.height/2)+40); // click aux/cancel.
     /* @hidden */ },1500);
   });
   dialog.open(win);
@@ -59,9 +59,9 @@ function run($utils) {
   /* @hidden */     $utils.clickAt(400,154); // hopefully this is consistant, should hit main
   /* @hidden */                              // find a better way of doing this :/
   /* @hidden */   else
-  /* @hidden */     $utils.clickAt((scn.bounds.width/2)+175,(scn.bounds.height/2)+40);
+  /* @hidden */     $utils.clickAt((scn.bounds.width/2)+175,(scn.bounds.height/2)+40); // click main
   /* @hidden */   //$utils.takeSnapshotOfCurrentWindow('assets/dialog_mac.png');
-  /* @hidden */ },1000);
+  /* @hidden */ },100);
 }
 
 /**

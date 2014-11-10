@@ -14,7 +14,7 @@ if /i "%1"=="x86" set arch=ia32
 :GetWindowsSdkDirHelper
 :: Microsoft Windows SDK regkey differs depending on the architecture
 @SET RegPath=
-if "%2"=="x64" SET RegPath=Wow6432Node\
+if "%arch%"=="x64" SET RegPath=Wow6432Node\
 @SET WindowsSdkDir=
 @for /F "tokens=1,2*" %%i in ('reg query "%1\SOFTWARE\%RegPath%Microsoft\Microsoft SDKs\Windows" /v "CurrentInstallFolder"') DO (
 if "%%i"=="CurrentInstallFolder" (
