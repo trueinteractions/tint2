@@ -121,7 +121,7 @@ goto run
 @rem Build the sln with msbuild.
 copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
 :: /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal
-echo Before build SDK is %%WINDOWSSDKDIR%%
+echo Before build SDK is %WINDOWSSDKDIR%
 msbuild build\msvs\tint.sln /m /t:%target% /p:Configuration=%config%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true  /nologo
 if errorlevel 1 goto exit
 

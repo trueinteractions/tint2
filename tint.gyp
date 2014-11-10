@@ -426,12 +426,14 @@
           'conditions': [
             ['target_arch=="x64"', {
               'AdditionalLibraryDirectories':[
-                '$(WINDOWSSDKDIR)lib\\x64'
+                # '$(WINDOWSSDKDIR)lib\\x64'
+                '$(newlibpath)'
               ]
             }],
             ['target_arch=="ia32"', {
               'AdditionalLibraryDirectories':[
-                '$(WINDOWSSDKDIR)lib'
+                # '$(WINDOWSSDKDIR)lib'
+                '$(newlibpath)'
               ]
             }]
           ]
