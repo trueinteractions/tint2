@@ -467,7 +467,7 @@ function spawnAndPump(cmd, cb, err, options) {
 	var cmds = cmd.split(' ');
 	var child = spawn(cmds[0], cmds.slice(1), { stdio: 'inherit' }).on('exit',function(code, signal) {
 		if(code !== 0) {
-			console.error(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]\n\texited abnormally: '+code+' signal: '+signal);
+			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]\n\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
 		} else {
 			if(cb) cb();
@@ -485,7 +485,7 @@ function execAndPump(cmd, cb, err, options) {
 			console.log(stdout);
 	}).on('exit',function(code, signal) {
 		if(code !== 0) {
-			console.error(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]\n\texited abnormally: '+code+' signal: '+signal);
+			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]\n\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
 		} else {
 			if(cb) cb();
@@ -506,6 +506,7 @@ function notok(code) {
 	if(currentTest.shell && ismac) {
 		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
+  process.stdout.write(brightRedBegin+failureMark+colorEnd+' 509:['+code+']\n');
 }
 function nextTest() {
 	if(inputs.length > 0)
@@ -539,10 +540,7 @@ function test(item) {
         }
 			}
 		} catch(e) {
-			notok();
-			console.log(e.message);
-			console.log(e.stack);
-			process.exit(2);
+			notok(e.message);
 		}
 	}
 }
