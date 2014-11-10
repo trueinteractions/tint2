@@ -423,8 +423,17 @@
             '/IGNORE:4098',
             '/CLRTHREADATTRIBUTE:STA',
           ],
-          'AdditionalLibraryDirectories':[
-            '$(WINDOWSSDKDIR)\\lib'
+          'conditions': [
+            ['target_arch=="x64"', {
+              'AdditionalLibraryDirectories':[
+                '$(WINDOWSSDKDIR)\\lib\\x64'
+              ]
+            }],
+            ['target_arch=="ia32"', {
+              'AdditionalLibraryDirectories':[
+                '$(WINDOWSSDKDIR)\\lib'
+              ]
+            }]
           ]
         },
       },
@@ -439,8 +448,17 @@
           'VCLinkerTool': {
             'RuntimeLibrary':'>(runtime)',
             'AdditionalOptions':['/IGNORE:4221'],
-            'AdditionalLibraryDirectories':[
-              '$(WINDOWSSDKDIR)\\lib'
+            'conditions': [
+              ['target_arch=="x64"', {
+                'AdditionalLibraryDirectories':[
+                  '$(WINDOWSSDKDIR)\\lib\\x64'
+                ]
+              }],
+              ['target_arch=="ia32"', {
+                'AdditionalLibraryDirectories':[
+                  '$(WINDOWSSDKDIR)\\lib'
+                ]
+              }]
             ]
           }
         }
