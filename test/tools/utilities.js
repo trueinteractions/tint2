@@ -521,8 +521,12 @@ function nextTest() {
 	//	process.exit(0);
 }
 function test(item) {
+  console.log(1);
 	currentTest = require('../'+item);
+  console.log(2);
 	process.stdout.write(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
+
+  console.log(3);
 	if(currentTest.shell && ismac) {
 		ex.setupShell(currentTest.name,function() {
 			if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
@@ -557,7 +561,8 @@ if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
 	if(argv.baseline == "true") createBaseline = true;
 	var inputs = argv['_'];
 	console.log('received: ', inputs);
-	nextTest();
+	test(inputs[0]);
+  console.log('done');
 }
 module.exports = ex;
 
