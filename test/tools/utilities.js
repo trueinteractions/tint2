@@ -1,6 +1,7 @@
 require('Application');
 
 var os = require('os');
+var fs = require('fs');
 var ismac = os.platform().toLowerCase() == "darwin";
 var log = null;
 
