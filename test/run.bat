@@ -1,6 +1,14 @@
 
 @echo off
 
+
+:: this is necessary to remove any login screens that impede 
+:: GDI/HWND creation and mouse movements (obviously.)
+if defined APPVEYOR (
+	echo Building as %USERDOMAIN%\%USERNAME%
+	runas trustlevel:0x20000 "net user %USERNAME% /ACTIVE:YES"
+)
+
 set TINTEXEC=..\build\msvs\Release\tint.exe
 for /f %%i in ("%0") do set curpath=%%~dpi
 

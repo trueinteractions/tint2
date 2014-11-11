@@ -116,6 +116,10 @@ class CppClass {
     }
 };
 
+void wrap_cb(char *data, void *hint) {
+  // called for items passed from .NET to JS, we don't
+  // recollect these.
+}
 void CppClassCleanUp(char *data, void *hint) {
   CppClass *n = (CppClass *)data;
   delete n;
@@ -316,7 +320,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
       jsdata = buf->handle_;
       if(type == System::IntPtr::typeid) {
         void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
-        node::Buffer *bufptr = node::Buffer::New((char *)ptr, sizeof(ptr), CppClassCleanUp, user_data);
+        node::Buffer *bufptr = node::Buffer::New((char *)ptr, sizeof(ptr), wrap_cb, user_data);
         (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
       }
     } catch (System::Exception^ e) {
