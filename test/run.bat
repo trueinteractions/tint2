@@ -6,7 +6,7 @@
 :: GDI/HWND creation and mouse movements (obviously.)
 if defined APPVEYOR (
 	echo Building as %USERDOMAIN%\%USERNAME%
-	runas trustlevel:0x20000 "net user %USERNAME% /ACTIVE:YES"
+	runas /trustlevel:0x20000 "net user %USERNAME% /ACTIVE:YES"
 )
 
 set TINTEXEC=..\build\msvs\Release\tint.exe
