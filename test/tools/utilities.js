@@ -483,6 +483,7 @@ function notok(code) {
 function test(item) {
 	currentTest = require('../'+item);
 	process.stdout.write(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
+
 	if(currentTest.shell && ismac) {
 		ex.setupShell(currentTest.name,function() {
 			if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
@@ -506,6 +507,10 @@ function test(item) {
 }
 if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
   tintexec = process.argv[2];
+  process.stdout.write('stdout\n');
+  process.stderr.write('stderr\n');
+  console.log('console.log');
+  console.error('console.error');
 	var argv = args(process.argv.slice(3));
 	if(argv.baseline == "true") createBaseline = true;
 	var inputs = argv['_'];
