@@ -10,17 +10,17 @@ exports.NULL = process.bridge.NULL;
 exports.address = process.bridge.address;
 exports.hexAddress = process.bridge.hexAddress;
 exports.isNull = process.bridge.isNull;
-exports._readObject = process.bridge.readObject;
-exports._writeObject = process.bridge.writeObject;
-exports.readPointer = process.bridge.readPointer;
-exports._writePointer = process.bridge.writePointer;
-exports._readInt64 = process.bridge.readInt64;
-exports._writeInt64 = process.bridge.writeInt64;
-exports._readUInt64 = process.bridge.readUInt64;
-exports._writeUInt64 = process.bridge.writeUInt64;
-exports._readCString = process.bridge.readCString;
-exports._reinterpret = process.bridge.reinterpret;
-exports._reinterpretUntilZeros = process.bridge.reinterpretUntilZeros;
+exports._readObject = exports.readObject = process.bridge.readObject;
+exports._writeObject = exports.writeObject = process.bridge.writeObject;
+exports._readPointer = exports.readPointer = process.bridge.readPointer;
+exports._writePointer = exports.writePointer = process.bridge.writePointer;
+exports.readInt64 = process.bridge.readInt64;
+exports.writeInt64 = process.bridge.writeInt64;
+exports.readUInt64 = process.bridge.readUInt64;
+exports.writeUInt64 = process.bridge.writeUInt64;
+exports.readCString = process.bridge.readCString;
+exports._reinterpret = exports.reinterpret = process.bridge.reinterpret;
+exports._reinterpretUntilZeros = exports.reinterpretUntilZeros = process.bridge.reinterpretUntilZeros;
 /**
  * A `Buffer` that references the C NULL pointer. That is, its memory address
  * points to 0. Its `length` is 0 because accessing any data from this buffer

@@ -15,7 +15,7 @@ if(ismac) {
   var successMark = '✓';
   var failureMark = '✕';
   var nl = '\n';
-  log = process.stdout.write;
+  log = function(e) { process.stdout.write(e); };
 } else {
   var $ = process.bridge.dotnet;
   var successMark = 'Pass';
