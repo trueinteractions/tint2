@@ -24,12 +24,12 @@ if(ismac) {
   var failureMark = 'Fail';
   var $w32 = process.bridge.win32;
   var nl = '\r\n';
-  log = function(e) { fs.writeSync(1, e); }
+  log = function(e) { fs.writeSync(1, e.toString()); }
   exit = function(code) {
     fs.writeSync(1, '');
     fs.writeSync(2, ''); 
-    fs.fsyncSync(1);
-    fs.fsyncSync(2);
+    //fs.fsyncSync(1);
+    //fs.fsyncSync(2);
     process.exit(code);
   }
 }
@@ -425,7 +425,27 @@ else
     $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
   }
   ex.writeImage = function writeImage(image, path) { }
-  ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) { }
+  ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
+    var bounds = $.System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+    var screenBmp = new $.System.Drawing.Bitmap(bounds.Width, bounds.Height, $.System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+    var bmpGraphics = $.System.Drawing.Graphics.FromImage(screenBmp);
+    bmpGraphics.CopyFromScreen(bounds.Left,bounds.Top, 0, 0, new $.System.Drawing.Size(bounds.Width,bounds.Height));
+    var bitmapSource = $.System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+        screenBmp.GetHbitmap(),
+        $.System.IntPtr.Zero,
+        $.System.Windows.Int32Rect.Empty,
+        $.System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
+      );
+
+    var bitmapFrame = $.System.Windows.Media.Imaging.BitmapFrame.Create(bitmapSource);
+    var data = new $.System.IO.MemoryStream();
+    var png = new $.System.Windows.Media.Imaging.PngBitmapEncoder();
+    png.Frames.Add(bitmapFrame);
+    png.Save(data);
+
+    var s = $.System.Convert.ToBase64String(data.ToArray());
+    return s;
+  }
   ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) { }
   ex.takeSnapshotOfWindowNumber = function takeSnapshotOfWindowNumber(windowNumber, path) { }
   ex.takeSnapshotOfCurrentWindow = function takeSnapshotOfCurrentWindow(path) { }
@@ -509,6 +529,7 @@ function test(item) {
       if(currentTest.timeout) {
         setTimeout(function() {
           log('timeout exceeded.'+nl);
+          log(ex.takeSnapshotOfActiveScreen(''));
           exit(1);
         }, 50000);
       }
