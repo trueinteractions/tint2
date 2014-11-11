@@ -4,6 +4,7 @@ var os = require('os');
 var fs = require('fs');
 var ismac = os.platform().toLowerCase() == "darwin";
 var log = null;
+var exit = null;
 
 if(ismac) {
   process.bridge.objc.import('Foundation');
@@ -16,6 +17,7 @@ if(ismac) {
   var failureMark = '✕';
   var nl = '\n';
   log = function(e) { process.stdout.write(e); };
+  exit = function(code) { process.exit(code); };
 } else {
   var $ = process.bridge.dotnet;
   var successMark = 'Pass';
@@ -23,15 +25,22 @@ if(ismac) {
   var $w32 = process.bridge.win32;
   var nl = '\r\n';
   log = function(e) { fs.writeSync(1, e); }
+  exit = function(code) {
+    fs.writeSync(1, '');
+    fs.writeSync(2, ''); 
+    fs.fsyncSync(1);
+    fs.fsyncSync(2);
+    process.exit(code);
+  }
 }
 
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var args = require('./minimist');
-var grayedOutBegin = '';//'\033[90m';
-var brightRedBegin = '';//'\033[31m'
-var brightBlueBegin = '';//'\033[36m'
-var colorEnd = '';//'\033[0m';
+var grayedOutBegin = '\033[90m';
+var brightRedBegin = '\033[31m'
+var brightBlueBegin = '\033[36m'
+var colorEnd = '\033[0m';
 var currentTest = null;
 var createBaseline = false;
 var ex = {};
@@ -434,7 +443,7 @@ ex.assert = function assert(condition,value) {
 		log('assertion failed.');
 		log(msg.message);
 		log(msg.stack);
-		process.exit(1);
+		exit(1);
 	}
 }
 function spawnAndPump(cmd, cb, err, options) {
@@ -458,7 +467,6 @@ function execAndPump(cmd, cb, err, options) {
 		} else if(stdout)
 			log(stdout);
 	}).on('exit',function(code, signal) {
-		log('[exit code: '+code+']');
 		if(code != 0) {
 			log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
@@ -471,18 +479,18 @@ function execAndPump(cmd, cb, err, options) {
 ex.ok = function ok() {
 	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
 	log(brightBlueBegin + successMark + colorEnd +nl);
-  process.exit(0);
+  exit(0);
 }
 ex.fail = function fail() {
 	log('explicit fail thrown'+nl);
-  process.exit(1);
+  exit(1);
 }
 function notok(code) {
 	if(currentTest.shell && ismac) {
-		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
+		ex.shutdownShell(currentTest.name, function() { exit(1); });
 	}
   log(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
-  process.exit(1);
+  exit(1);
 }
 function test(item) {
 	currentTest = require('../'+item);
@@ -501,7 +509,7 @@ function test(item) {
       if(currentTest.timeout) {
         setTimeout(function() {
           log('timeout exceeded.'+nl);
-          process.exit(1);
+          exit(1);
         }, 50000);
       }
 		} catch(e) {
