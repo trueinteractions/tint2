@@ -120,7 +120,7 @@ goto run
 :msbuild-found
 @rem Build the sln with msbuild.
 copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
-msbuild build\msvs\tint.sln /maxcpucount:4 /t:%target% /p:Configuration=%config%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+msbuild build\msvs\tint.sln /maxcpucount:3 /t:%target% /p:Configuration=%config%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
 if errorlevel 1 goto exit
 
 :sign
