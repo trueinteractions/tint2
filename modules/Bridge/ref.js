@@ -1,8 +1,26 @@
 
 var assert = require('assert')
 if(!process.bridge) process.initbridge();
-exports = module.exports = process.bridge;
+exports = module.exports;// = process.bridge;
 
+exports.sizeof = process.bridge.sizeof;
+exports.alignof = process.bridge.alignof;
+exports.endianness = process.bridge.endianness;
+exports.NULL = process.bridge.NULL;
+exports.address = process.bridge.address;
+exports.hexAddress = process.bridge.hexAddress;
+exports.isNull = process.bridge.isNull;
+exports._readObject = process.bridge.readObject;
+exports._writeObject = process.bridge.writeObject;
+exports.readPointer = process.bridge.readPointer;
+exports._writePointer = process.bridge.writePointer;
+exports._readInt64 = process.bridge.readInt64;
+exports._writeInt64 = process.bridge.writeInt64;
+exports._readUInt64 = process.bridge.readUInt64;
+exports._writeUInt64 = process.bridge.writeUInt64;
+exports._readCString = process.bridge.readCString;
+exports._reinterpret = process.bridge.reinterpret;
+exports._reinterpretUntilZeros = process.bridge.reinterpretUntilZeros;
 /**
  * A `Buffer` that references the C NULL pointer. That is, its memory address
  * points to 0. Its `length` is 0 because accessing any data from this buffer
@@ -672,7 +690,7 @@ exports._attach = function _attach (buf, obj) {
  * @api private
  */
 
-exports._writeObject = exports.writeObject
+//exports._writeObject = exports.writeObject
 
 /**
  * Writes a pointer to _object_ into _buffer_ at the specified _offset.
@@ -707,7 +725,7 @@ exports.writeObject = function writeObject (buf, offset, obj, persistent) {
  * @api private
  */
 
-exports._writePointer = exports.writePointer
+//exports._writePointer = exports.writePointer
 
 /**
  * Writes the memory address of _pointer_ to _buffer_ at the specified _offset_.
@@ -743,7 +761,7 @@ exports.writePointer = function writePointer (buf, offset, ptr) {
  * @api private
  */
 
-exports._reinterpret = exports.reinterpret
+//exports._reinterpret = exports.reinterpret
 
 /**
  * Returns a new Buffer instance with the specified _size_, with the same memory
@@ -776,7 +794,7 @@ exports.reinterpret = function reinterpret (buffer, size, offset) {
  * @api private
  */
 
-exports._reinterpretUntilZeros = exports.reinterpretUntilZeros
+//exports._reinterpretUntilZeros = exports.reinterpretUntilZeros
 
 /**
  * Accepts a `Buffer` instance and a number of `NULL` bytes to read from the

@@ -64,6 +64,7 @@ Preview releases for Linux (QT), iOS, and Android are in tests at the moment.
 
 <h3>MacOS X (Unstable)</h3>
 Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
+
 ```bash
 mkdir tint
 cd tint
@@ -74,12 +75,26 @@ git clone https://github.com/trueinteractions/tint2.git .
 ```
 <h3>Windows (Unstable)</h3>
 Ensure you have Visual Studio 2010 (or the free msbuild compiler and Windows SDK 7.0A+), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
+
+64-bit build (default)
+
 ```bash
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
 config.bat
 build.bat
+test.bat
+```
+
+32-bit build
+
+```bash
+mkdir tint
+cd tint
+git clone https://github.com/trueinteractions/tint2.git .
+config.bat x86
+build.bat release x86
 test.bat
 ```
 

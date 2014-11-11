@@ -2,6 +2,7 @@ require('Application');
 
 var os = require('os');
 var ismac = os.platform().toLowerCase() == "darwin";
+var log = null;
 
 if(ismac) {
   process.bridge.objc.import('Foundation');
@@ -13,12 +14,14 @@ if(ismac) {
   var successMark = '✓';
   var failureMark = '✕';
   var nl = '\n';
+  log = process.stdout.write;
 } else {
   var $ = process.bridge.dotnet;
   var successMark = 'Pass';
   var failureMark = 'Fail';
   var $w32 = process.bridge.win32;
   var nl = '\r\n';
+  log = function(e) { fs.writeSync(1, e); }
 }
 
 var exec = require('child_process').exec;
@@ -427,9 +430,9 @@ ex.assert = function assert(condition,value) {
 	if(!condition) {
 		var msg;
 		try { throw new Error(value ? value : ''); } catch(e) { msg = e; };
-		process.stdout.write('assertion failed.');
-		process.stdout.write(msg.message);
-		process.stdout.write(msg.stack);
+		log('assertion failed.');
+		log(msg.message);
+		log(msg.stack);
 		process.exit(1);
 	}
 }
@@ -437,7 +440,7 @@ function spawnAndPump(cmd, cb, err, options) {
 	var cmds = cmd.split(' ');
 	var child = spawn(cmds[0], cmds.slice(1), { stdio: 'inherit' }).on('exit',function(code, signal) {
 		if(code !== 0) {
-			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
+			log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
 		} else {
 			if(cb) cb();
@@ -448,15 +451,15 @@ function spawnAndPump(cmd, cb, err, options) {
 function execAndPump(cmd, cb, err, options) {
 	var child =exec(cmd, options, function(error,stdout,stderr) { 
 		if(error || stderr) {
-			process.stdout.write('got error'+nl);
-			if(error) process.stdout.write('\t'+error+nl);
-			if(stderr) process.stdout.write('\t'+stderr+nl);
+			log('got error'+nl);
+			if(error) log('\t'+error+nl);
+			if(stderr) log('\t'+stderr+nl);
 		} else if(stdout)
-			console.log(stdout);
+			log(stdout);
 	}).on('exit',function(code, signal) {
-		process.stdout.write('[exit code: '+code+']');
+		log('[exit code: '+code+']');
 		if(code != 0) {
-			process.stdout.write(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
+			log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
 			if(err) err(code,signal);
 		} else {
 			if(cb) cb();
@@ -466,23 +469,23 @@ function execAndPump(cmd, cb, err, options) {
 }
 ex.ok = function ok() {
 	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
-	process.stdout.write(brightBlueBegin + successMark + colorEnd +nl);
+	log(brightBlueBegin + successMark + colorEnd +nl);
   process.exit(0);
 }
 ex.fail = function fail() {
-	process.stdout.write('explicit fail thrown'+nl);
+	log('explicit fail thrown'+nl);
   process.exit(1);
 }
 function notok(code) {
 	if(currentTest.shell && ismac) {
 		ex.shutdownShell(currentTest.name, function() { process.exit(1); });
 	}
-  process.stdout.write(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
+  log(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
   process.exit(1);
 }
 function test(item) {
 	currentTest = require('../'+item);
-	process.stdout.write(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
+	log(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
 
 	if(currentTest.shell && ismac) {
 		ex.setupShell(currentTest.name,function() {
@@ -496,7 +499,7 @@ function test(item) {
 			currentTest.shutdown();
       if(currentTest.timeout) {
         setTimeout(function() {
-          process.stdout.write('timeout exceeded.'+nl);
+          log('timeout exceeded.'+nl);
           process.exit(1);
         }, 50000);
       }
@@ -507,10 +510,6 @@ function test(item) {
 }
 if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
   tintexec = process.argv[2];
-  process.stdout.write('stdout\n');
-  process.stderr.write('stderr\n');
-  console.log('console.log');
-  console.error('console.error');
 	var argv = args(process.argv.slice(3));
 	if(argv.baseline == "true") createBaseline = true;
 	var inputs = argv['_'];
