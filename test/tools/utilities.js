@@ -418,15 +418,19 @@ else
     return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
   ex.clickAt = function clickAt(x,y) {
+    var dpi = Screens.active.scaleFactor;
+    log('clicking at: ('+x+','+y+') with desktop DPI: '+(96 * dpi));
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
-    $w32.user32.SetPhysicalCursorPos(x*2,y*2); //TODO: Figure out a better way of transitioning DPI.
+    $w32.user32.SetPhysicalCursorPos(x*dpi,y*dpi);
     $w32.user32.ShowCursor(1);
     $w32.user32.mouse_event(0x0002, 0, 0, 0, 0); //LMOUSEDOWN
     $w32.user32.mouse_event(0x0004, 0, 0, 0, 0); //LMOUSEUP
   }
   ex.rightClickAt = function rightClickAt(x,y) {
+    var dpi = Screens.active.scaleFactor;
+    log('right clicking at: ('+x+','+y+') with desktop DPI: '+(96 * dpi));
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
-    $w32.user32.SetPhysicalCursorPos(x*2,y*2); //TODO: Figure out a better way of transitioning DPI.
+    $w32.user32.SetPhysicalCursorPos(x*dpi,y*dpi);
     $w32.user32.ShowCursor(1);
     $w32.user32.mouse_event(0x0008, 0, 0, 0, 0); //RMOUSEDOWN
     $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
