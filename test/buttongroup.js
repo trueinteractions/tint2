@@ -67,7 +67,7 @@ function run($utils) {
 
   setTimeout(function() {
     $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
-  }, 1000);
+  }, 5000);
   win.appendChild(buttonGroup);
 }
 
