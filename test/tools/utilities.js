@@ -531,7 +531,7 @@ function test(item) {
           log('timeout exceeded.'+nl);
           log(ex.takeSnapshotOfActiveScreen(''));
           exit(1);
-        }, 2000);
+        }, 50000);
       }
 		} catch(e) {
 			notok(e.message);
