@@ -35,13 +35,12 @@ function run($utils) {
     /* @hidden */ $utils.assert(selected.colorspace === "rgb", 'colorspace should be rgb, was '+selected.colorspace);
     /* @hidden */ $utils.ok();
   });
-  /* @hidden */ setTimeout(function() {
-  /* @hidden */ if(ismac) $utils.clickAt(125,125);
-  /* @hidden */ else {
-  /* @hidden */   $utils.clickAt(410,304);
-  /* @hidden */   $utils.clickAt(327,435)
+  /* @hidden */ if(ismac) {
+  /* @hidden */  setTimeout(function() { $utils.clickAt(125,125); }, 500);
+  /* @hidden */ } else {
+  /* @hidden */  setTimeout(function() { $utils.clickAt(410,304); }, 500);
+  /* @hidden */  setTimeout(function() { $utils.clickAt(327,435); }, 1000);
   /* @hidden */ }
-  /* @hidden */ },1000);
 }
 
 /**
