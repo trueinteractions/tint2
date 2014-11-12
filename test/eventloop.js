@@ -26,7 +26,7 @@ function run($utils) {
     var time = process.hrtime();
     setTimeout(function() { 
       var diff = process.hrtime(time);
-      $utils.assert((diff[0] * 1e9 + diff[1]) >= 2 * 1e9, 'timeout executed early, diff was: ', diff[0] * 1e9 + diff[1],' >= ', 2*1e9);
+      $utils.assert((diff[0] * 1e9 + diff[1]) >= 2 * 1e8, 'timeout executed early, diff was: ' +( diff[0] * 1e9 + diff[1] ) +' >= ' + (2*1e8));
       $utils.ok();
     },2000);
   });
