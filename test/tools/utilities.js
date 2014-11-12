@@ -537,6 +537,7 @@ function test(item) {
 		}
 	}
 }
+ex.log = function(e) { log(e); }
 if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
   tintexec = process.argv[2];
 	var argv = args(process.argv.slice(3));
