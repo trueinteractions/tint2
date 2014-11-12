@@ -419,12 +419,13 @@ else
   }
   ex.clickAt = function clickAt(x,y) {
     var dpi = Screens.active.scaleFactor;
-    log('clicking at: ('+x+','+y+') with desktop DPI: '+(96 * dpi));
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
     $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
     $w32.user32.ShowCursor(1);
-    $w32.user32.mouse_event(0x0002, 0, 0, 0, 0); //LMOUSEDOWN
-    $w32.user32.mouse_event(0x0004, 0, 0, 0, 0); //LMOUSEUP
+    log('left mouse down at: ('+Math.round(x*dpi)+','+Math.round(y*dpi)+') with desktop scale factor of: '+(96 * dpi));
+    setTimeout(function() { $w32.user32.mouse_event(0x8000|0x0002, Math.round(x*dpi), Math.round(y*dpi), 0, 0); },10); //LMOUSEDOWN 
+    log('left mouse up at: ('+Math.round(x*dpi)+','+Math.round(y*dpi)+') with desktop scale factor of: '+(96 * dpi));
+    setTimeout(function() { $w32.user32.mouse_event(0x8000|0x0004, Math.round(x*dpi), Math.round(y*dpi), 0, 0); }, 10); //LMOUSEUP
   }
   ex.rightClickAt = function rightClickAt(x,y) {
     var dpi = Screens.active.scaleFactor;
