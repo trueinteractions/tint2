@@ -421,7 +421,7 @@ else
     var dpi = Screens.active.scaleFactor;
     log('clicking at: ('+x+','+y+') with desktop DPI: '+(96 * dpi));
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
-    $w32.user32.SetPhysicalCursorPos(x*dpi,y*dpi);
+    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
     $w32.user32.ShowCursor(1);
     $w32.user32.mouse_event(0x0002, 0, 0, 0, 0); //LMOUSEDOWN
     $w32.user32.mouse_event(0x0004, 0, 0, 0, 0); //LMOUSEUP
@@ -430,7 +430,7 @@ else
     var dpi = Screens.active.scaleFactor;
     log('right clicking at: ('+x+','+y+') with desktop DPI: '+(96 * dpi));
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
-    $w32.user32.SetPhysicalCursorPos(x*dpi,y*dpi);
+    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
     $w32.user32.ShowCursor(1);
     $w32.user32.mouse_event(0x0008, 0, 0, 0, 0); //RMOUSEDOWN
     $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
