@@ -24,7 +24,14 @@ if(ismac) {
   var failureMark = 'Fail';
   var $w32 = process.bridge.win32;
   var nl = '\r\n';
-  log = function(e) { fs.writeSync(1, e.toString()); }
+  log = function(e) {
+    e = e.toString();
+    while(e.length > 512) {
+      fs.writeSync(1, e.substring(0,512));
+      e = e.substring(512);
+    }
+    fs.writeSync(1, e);
+  }
   exit = function(code) {
     fs.writeSync(1, '');
     fs.writeSync(2, ''); 
@@ -427,22 +434,11 @@ else
   ex.writeImage = function writeImage(image, path) { }
   ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
     var bounds = $.System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-    var screenBmp = new $.System.Drawing.Bitmap(bounds.Width, bounds.Height, $.System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+    var screenBmp = new $.System.Drawing.Bitmap(bounds.Width, bounds.Height, $.System.Drawing.Imaging.PixelFormat.Format24bppRgb)
     var bmpGraphics = $.System.Drawing.Graphics.FromImage(screenBmp);
     bmpGraphics.CopyFromScreen(bounds.Left,bounds.Top, 0, 0, new $.System.Drawing.Size(bounds.Width,bounds.Height));
-    var bitmapSource = $.System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-        screenBmp.GetHbitmap(),
-        $.System.IntPtr.Zero,
-        $.System.Windows.Int32Rect.Empty,
-        $.System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()
-      );
-
-    var bitmapFrame = $.System.Windows.Media.Imaging.BitmapFrame.Create(bitmapSource);
     var data = new $.System.IO.MemoryStream();
-    var png = new $.System.Windows.Media.Imaging.PngBitmapEncoder();
-    png.Frames.Add(bitmapFrame);
-    png.Save(data);
-
+    screenBmp.Save(data,$.System.Drawing.Imaging.ImageFormat.Jpeg);
     var s = $.System.Convert.ToBase64String(data.ToArray());
     return s;
   }
@@ -531,7 +527,7 @@ function test(item) {
           log('timeout exceeded.'+nl);
           log(ex.takeSnapshotOfActiveScreen(''));
           exit(1);
-        }, 50000);
+        }, 2000);
       }
 		} catch(e) {
 			notok(e.message);
