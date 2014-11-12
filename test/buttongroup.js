@@ -73,6 +73,7 @@ function run($utils) {
 
   $utils.log('ready...');
   setTimeout(function() {
+    $utils.log('click!\n');
     $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
   }, 500);
   $utils.log('set...');
