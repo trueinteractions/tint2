@@ -194,7 +194,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'top', 'bottom', utils.identity, 'top', utils.identity, ['bottom','height']);
   utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
-  utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.negate, 'right', utils.negate, ['left','width']);
+  utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.negate, ['left','width']);
   utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
   utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);

@@ -20,6 +20,7 @@ module.exports = (function() {
         return returnedColor.toRgb(); 
     }
 
+    //TODO: Move to Control_base ?.
     function createLayoutProperty(base, name, percentName, percentFunc, scalarName, scalarFunc, na) {
     Object.defineProperty(base, name, {
       get: function() { return this.private.user[name]; },
