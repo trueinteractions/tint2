@@ -24,12 +24,10 @@ function run($utils) {
   var button1 = new Button();
   button1.image = "back";
   button1.addEventListener('mousedown', function() {
-    $utils.log('mousedown1\n');
     /* @hidden */ countMouseDown++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 0);
   });
   button1.addEventListener('mouseup', function() {
-    $utils.log('mouseup1\n');
     /* @hidden */ countMouseUp++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 0);
     /* @hidden */ $utils.clickAt(bounds.x + 45, bounds.y + 15); // hope htis hardcoded value works.
@@ -38,12 +36,10 @@ function run($utils) {
   var button3 = new Button();
   button3.image = "reload";
   button3.addEventListener('mousedown', function() {
-    $utils.log('mousedown2\n');
     /* @hidden */ countMouseDown++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 1, 'expected buttonGroup.selected == 1, got: '+(buttonGroup.selected));
   });
   button3.addEventListener('mouseup', function() {
-    $utils.log('mouseup2\n');
     /* @hidden */ countMouseUp++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 1, 'expected buttonGroup.selected == 1, got: '+(buttonGroup.selected));
     /* @hidden */ $utils.clickAt(bounds.x + 65, bounds.y + 15); // hope htis hardcoded value works.
@@ -52,12 +48,10 @@ function run($utils) {
   var button2 = new Button();
   button2.image = "forward";
   button2.addEventListener('mousedown', function() {
-    $utils.log('mousedown3\n');
     /* @hidden */ countMouseDown++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 2);
   });
   button2.addEventListener('mouseup', function() {
-    $utils.log('mouseup3\n');
     /* @hidden */ countMouseUp++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 2);
     /* @hidden */ $utils.assert(countMouseDown == 3);
@@ -71,14 +65,10 @@ function run($utils) {
   buttonGroup.appendChild(button2);
   buttonGroup.left = buttonGroup.top = 0;
 
-  $utils.log('ready...');
   setTimeout(function() {
-    $utils.log('click!\n');
     $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
-  }, 500);
-  $utils.log('set...');
+  }, 1000);
   win.appendChild(buttonGroup);
-  $utils.log('fired....');
 }
 
 /**
