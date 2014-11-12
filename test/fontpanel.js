@@ -43,7 +43,7 @@ function run($utils) {
     /* @hidden */     $utils.assert(font.family === 'Times New Roman');
     /* @hidden */     $utils.assert(font.size === 12);
     /* @hidden */     $utils.ok();
-    /* @hidden */   },500);
+    /* @hidden */   },1000);
     /* @hidden */ } 
   });
 
@@ -87,8 +87,8 @@ function run($utils) {
   /* @hidden */      $utils.keyAtControl('5');
   /* @hidden */      trackChange = true;
   /* @hidden */      $utils.keyAtControl('RETURN');
-  /* @hidden */    },500)
-  /* @hidden */  },500);
+  /* @hidden */    },2500)
+  /* @hidden */  },2500);
   }
 }
 
