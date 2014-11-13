@@ -33,8 +33,8 @@ if(ismac) {
     fs.writeSync(1, e);
   }
   exit = function(code) {
-    fs.writeSync(1, '');
-    fs.writeSync(2, ''); 
+    fs.writeSync(1, ''); // fix for appveyor
+    fs.writeSync(2, '');  // fix for appveyor
     //fs.fsyncSync(1);
     //fs.fsyncSync(2);
     process.exit(code);
@@ -382,7 +382,7 @@ else
 
 
   ex.keyAtControl = function keyAtControl(input) {
-    log('');
+    log('.');
     var key = ex.keyCodeFromChar(input);
     $w32.user32.keybd_event(key, 0, 0, 0);
     $w32.user32.keybd_event(key, 0, 0x0002, 0);
@@ -419,7 +419,7 @@ else
     return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
   ex.clickAt = function clickAt(x,y) {
-    log('');
+    log('.');
     var dpi = Screens.active.scaleFactor;
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
     $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
