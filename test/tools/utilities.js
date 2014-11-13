@@ -382,7 +382,6 @@ else
 
 
   ex.keyAtControl = function keyAtControl(input) {
-    log('.');
     var key = ex.keyCodeFromChar(input);
     $w32.user32.keybd_event(key, 0, 0, 0);
     $w32.user32.keybd_event(key, 0, 0x0002, 0);
@@ -419,7 +418,6 @@ else
     return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
   ex.clickAt = function clickAt(x,y) {
-    log('.');
     var dpi = Screens.active.scaleFactor;
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
     $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));

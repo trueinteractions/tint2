@@ -19,6 +19,7 @@ build/zlib.build
 build/xcode
 build/ninja
 build/msvs
+build/dist/
 .DS_Store
 node_modules/
 node_modules

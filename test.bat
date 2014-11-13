@@ -1,4 +1,4 @@
 @echo off
 
 cd test
-test.bat *.js
+run.bat *.js
