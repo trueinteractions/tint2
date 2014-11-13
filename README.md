@@ -35,7 +35,7 @@ $ tntbuild somedir/package.json
 ```
 <h2>Get Started</h2>
 
-The release candidate is currently available. You can download OSX and Windows (64-bit) binaries at https://www.trueinteractions.com/tint-2.0-rc1.zip
+The release candidate is currently available. You can download OSX and Windows (64-bit) binaries from Github at https://github.com/trueinteractions/tint2/releases/ or at https://www.trueinteractions.com/tint-2.0-rc1.zip
 
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
