@@ -9,6 +9,7 @@ require('Application');
 Window = require('Window');
 
 var mainWindow = new Window();
+mainWindow.visible = true;
 mainWindow.title = "I'm a native window built in node.";
 ```
 
@@ -207,8 +208,6 @@ Currently documentation is fairly sparse, look at the individual modules for inf
 * **What platforms does this aim to support?** For the moment OSX and Windows are nearing completion, OSX and Windows have preview releases that will be stable in October. Shortly after we'll have a QT Linux version. iOS and Android have several other issues/challenges that make it difficult to integrate, but our hope and target is to support all platforms.
 * **How do you manage inconsistencies in interfaces?** Very carefully, unit tests for the GUI are essential to ensuring the same behavior for the same application across different operating systems and their OS versions.  If a complementary (or similar in functionality) native widget exists in one OS and not another, it's not included in the SDK (but that's not stopping you from creating it or using non-cross-compatible components). The Tint SDK aims at providing 100% reliable behavior across any OS.
 * **Are there any major differences in desktop programming?** The application lifetime of an app vs. a website is very different, most websites actually have memory leaks, but users are very rarely there long enough to have it affect system performance considerably, this is not the case with desktop applications.  In addition sandboxed environments can introduce complexities for those not familiar with desktop security practices.
-* **When will this be stable?** In short, October 2014. However prior to that we're encouraging people to download and use it for fun or to contribute, this is why there is no downloadable binary. The stable releases in October will support OSX and Windows.
-* **Where can I find a binary download?** Since this isn't stable we're discouraging users who aren't familiar with development processes from using it, e.g., the only way to run it is to follow the build instructions above. Once stable in October we'll post binaries for OSX and Windows.
 
 
 <h2>Credits</h2>
