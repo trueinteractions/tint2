@@ -1,8 +1,8 @@
 module.exports = (function() {
-  $ = process.bridge.dotnet;
+  var $ = process.bridge.dotnet;
   $.import('System.Windows.Forms.dll');
 
-  $utilities = require('Utilities');
+  var $utilities = require('Utilities');
 
   function Screens() {
     var scaleFactor = $.System.Windows.SystemParameters.Dpi/96;

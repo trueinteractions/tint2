@@ -1,6 +1,6 @@
 module.exports = (function() {
-  $ = process.bridge.dotnet;
-  $utilities = require('Utilities');
+  var $ = process.bridge.dotnet;
+  var $utilities = require('Utilities');
 
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');

@@ -9,7 +9,17 @@ if defined APPVEYOR (
 	runas /trustlevel:0x20000 "net user %USERNAME% /ACTIVE:YES"
 )
 
-set TINTEXEC=..\build\msvs\Release\tint.exe
+if exist ..\build\msvs\Release\tint.exe (
+	set TINTEXEC=..\build\msvs\Release\tint.exe
+) else if exist ..\tint.exe (
+	set TINTEXEC=..\tint.exe
+) else if exist tint.exe (
+	set TINTEXEC=.\tint.exe
+) else (
+  echo Cannot find the binary for tint, exiting.
+  exit /b 1
+)
+
 for /f %%i in ("%0") do set curpath=%%~dpi
 
 if "%1"=="" goto all

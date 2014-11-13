@@ -1,6 +1,6 @@
 module.exports = (function() {
-  $ = process.bridge.objc;
-  $utilities = require('Utilities');
+  var $ = process.bridge.objc;
+  var $utilities = require('Utilities');
 
   function Screens() {
 
