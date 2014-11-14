@@ -21,9 +21,16 @@ module.exports = (function() {
         ['mouseDown:','v@:@', function(self, cmd, events) {
             this.fireEvent('mousedown');
             self.super('mouseDown',events);
-            if(options.mouseDownBlocks) this.fireEvent('mouseup');
+            if(options.mouseDownBlocks) {
+              this.fireEvent('mouseup');
+              this.fireEvent('click');
+            }
         }.bind(this)],
-        ['mouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('mouseup'); self.super('mouseUp',events); }.bind(this)],
+        ['mouseUp:','v@:@', function(self, cmd, events) { 
+          this.fireEvent('mouseup'); 
+          this.fireEvent('click');
+          self.super('mouseUp',events); 
+        }.bind(this)],
         ['rightMouseDown:','v@:@', function(self, cmd, events) { this.fireEvent('rightmousedown'); self.super('rightMouseDown',events); }.bind(this)],
         ['rightMouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('rightmouseup'); self.super('rightMouseUp',events); }.bind(this)],
         ['keyDown:','v@:@', function(self, cmd, events) { this.fireEvent('keydown'); self.super('keyDown',events); }.bind(this)],

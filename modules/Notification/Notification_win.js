@@ -6,7 +6,6 @@ module.exports = (function() {
 
   function Notification()
   {
-    var $ = process.bridge.dotnet;
     var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
         soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "",
         timeoutHandle = null;
@@ -56,7 +55,7 @@ module.exports = (function() {
       w.MinHeight = 65;
       w.MaxHeight = 65;
       w.ShowInTaskbar = false;
-      w.ResizeMode = $.System.Windows.ResizeMode.CanResize;
+      w.ResizeMode = $.System.Windows.ResizeMode.NoResize;
       w.Content = new $.AutoLayout.AutoLayoutPanel();
       w.TopMost = true;
       w.WindowStyle = $.System.Windows.WindowStyle.None;
@@ -77,7 +76,9 @@ module.exports = (function() {
       }.bind(this));
 
 
-      var bgcolor = new Color('transparent');
+      //var bgcolor = new Color('transparent');
+      var bgcolor = new Color('#f7f7f7');
+
       var img;
       if(application.icon) img = utils.makeImage(application.icon);
       else img = utils.makeImage('info');
@@ -85,7 +86,7 @@ module.exports = (function() {
       img.Width = 50;
       img.Height = 50;
       w.Content.InternalChildren.Add(img);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', img, 'Top', 1.0, 0);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', img, 'Top', 1.0, -5);
       w.Content.AddLayoutConstraint(img, 'Height', '=', img, null, null, 50);
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', img, 'Left', 1.0, 0);
       w.Content.AddLayoutConstraint(img, 'Right', '=', img, 'Left', 1.0, 50);
@@ -102,7 +103,7 @@ module.exports = (function() {
 
       btn.Content.InternalChildren.Add(label);
       w.Content.InternalChildren.Add(btn);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', btn, 'Top', 1.0, 0);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', btn, 'Top', 1.0, -5);
       w.Content.AddLayoutConstraint(w.Content, 'Bottom', '=', btn, 'Bottom', 1.0, 0);
       w.Content.AddLayoutConstraint(btn, 'Left', '=', btn, 'Right', 1.0, -50);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', btn, 'Right', 1.0, 0);
@@ -114,7 +115,7 @@ module.exports = (function() {
       text.FontWeight = $.System.Windows.FontWeight.FromOpenTypeWeight(600);
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text, 'Left', 1.0, -55);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text, 'Right', 1.0, 60);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, 0);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -5);
       w.Content.InternalChildren.Add(text);
 
       var text2 = new $.System.Windows.Controls.TextBlock();
@@ -127,12 +128,9 @@ module.exports = (function() {
       w.Content.InternalChildren.Add(text2);
 
       var hwnd = new $.System.Windows.Interop.WindowInteropHelper(w).EnsureHandle();
-      var margin = new $$.win32.structs.MARGINS;
-      margin.cxLeftWidth = -1;
-      margin.cxRightWidth = -1;
-      margin.cyTopHeight = -1;
-      margin.cyBottomHeight = -1;
-      //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
+      var chrome = new $.System.Windows.Shell.WindowChrome();
+      chrome.GlassFrameThickness = new $.System.Windows.Thickness(0);
+      $.System.Windows.Shell.WindowChrome.SetWindowChrome(w,chrome);
 
       var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
       mainWindowSrc.CompositionTarget.BackgroundColor = bgcolor.native;

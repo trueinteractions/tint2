@@ -91,12 +91,6 @@ module.exports = (function() {
       w.TopMost = true;
 
       var hwnd = new $.System.Windows.Interop.WindowInteropHelper(w).EnsureHandle();
-      var margin = new $$.win32.structs.MARGINS;
-      margin.cxLeftWidth = -1;
-      margin.cxRightWidth = -1;
-      margin.cyTopHeight = -1;
-      margin.cyBottomHeight = -1;
-      //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(hwnd.pointer.rawpointer,margin);
       var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(hwnd);
       mainWindowSrc.CompositionTarget.BackgroundColor = bgcolor.native;
       w.Background = new $.System.Windows.Media.SolidColorBrush(bgcolor.native);
