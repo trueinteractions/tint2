@@ -22,9 +22,6 @@ module.exports = (function() {
     this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
     this.native('cell')('setWraps',$.NO);
     this.native('setTitle', $(""));
-
-    // Create proxy for click event.
-    this.addEventListener('mouseup', function() { this.fireEvent('click'); }.bind(this));
   }
 
   Button.prototype = Object.create(Container.prototype);

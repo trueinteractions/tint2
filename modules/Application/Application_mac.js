@@ -17,6 +17,16 @@
 
   var $ = process.bridge.objc;
 
+  /**
+   * @class Application
+   * @description An object always available named 'application' that allows control over
+   *            multiple window contexts and the ability to listen or respond to OS events.
+   *            You can use the application object to change its icon, name or request
+   *            attention from the user.
+   *
+   *            Important: The Application object is created automatically.
+   * @see process
+   */
   function Application() {
     var events = {}, 
         name = "", badgeText = "", 
@@ -41,22 +51,58 @@
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
     $app('setDelegate',delegate);
+    this.private = {};
     function fireEvent(event, args) {
       if(events[event])
         (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
     }
 
+    /**
+     * @method addEventListener
+     * @param {String} eventName The name of the application event to start listening to.
+     * @param {function} callback The function that will be called when it occurs.
+     * @memberof Application
+     * @description Adds an event listener for various application level events. The first
+     *              parameter is the name of the event, the second parameter is the function
+     *              to call when the event happens (e.g., a callback).
+     */
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
+
+    /**
+     * @method removeEventListener
+     * @param {String} eventName The name of the application event to stop listening to.
+     * @param {function} callback The function that would have been called.
+     * @memberof Application
+     * @description Removes an event listener for various application level events. The first
+     *              parameter is the name of the event, the second parameter is the function
+     *              that was originally given as the callback for addEventListener.
+     */
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
     this.launch = function() { fireEvent('launch'); }.bind(this);
     this.uninstall = function() { console.warn('unimplemented'); }
 
-    this.private = {};
-
+    /**
+     * @member packaged
+     * @type {boolean}
+     * @memberof Application
+     * @description Gets a true or false boolean value if the application is packaged
+     *              or is being ran as a script.
+     * @see Window
+     */
     Object.defineProperty(this, 'packaged', {
       get:function() { return false; }
     });
 
+    /**
+     * @method resource
+     * @param {String} path
+     * @returns {Buffer}
+     * @memberof Application
+     * @description Takes a path to an application resource and returns a {@link Buffer} 
+     *              object.  This is useful if you need to get access to packaged 
+     *              resources.
+     * @see Window
+     */
     this.resource = function(path) {
       if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
       var url = $.NSURL('URLWithString',$(path.toString()));
@@ -68,11 +114,28 @@
         return null;
       }
     }
-
+    /**
+     * @member windows
+     * @type {Array}
+     * @memberof Application
+     * @description Gets an array of windows that the application has ownership of. 
+     *              If you loose your window object or a new one is created by a seperate
+     *              module you can access any window that the application owns from this.
+     *              Note: When you create or remove a window this is automatically updated.
+     *              and subsequently should only be read from, the array should not be changed.
+     */
     Object.defineProperty(this, 'windows', {
       get:function() { return nswindows; }
     });
-
+    
+    /**
+     * @member name
+     * @type {String}
+     * @memberof Application
+     * @description The name property is used to get or set the process name in the task
+     *              manager, or when the application is shown.  Note that the packaged
+     *              application name should match this name.
+     */
     Object.defineProperty(this, 'name', {
       get:function() { 
         if(!name || name == "") return process.cwd();
@@ -97,7 +160,17 @@
       get:function() { return dockmenu; },
       set:function(e) { dockmenu = e; }
     });
-
+    
+    /**
+     * @member icon
+     * @type {String}
+     * @memberof Application
+     * @description The icon property allows you to set or get the current image associated
+     *              with the application (and subsequently used in the dock/task bar or on
+     *              window decorations).  The string must be a valid URL or path to an image
+     *              on the file system or application resource (For best results use 512x512 
+     *              PNG image).
+     */
     Object.defineProperty(this, 'icon', {
       get:function() { return icon; },
       set:function(e) {
@@ -107,6 +180,15 @@
       }
     });
 
+    /**
+     * @member exitAfterWindowsClose
+     * @type {boolean}
+     * @memberof Application
+     * @description Gets or sets if the application should quit (or exit returning 0) when the
+     *              last remaining window is closed (Note: hidden windows still count as open
+     *              windows and will prevent applications from closing).
+     * @see Window
+     */
     Object.defineProperty(this, 'exitAfterWindowsClose', {
       get:function() { return terminateWhenLastWindowClosed == $.YES ? true : false; },
       set:function(e) { terminateWhenLastWindowClosed = e ? $.YES : $.NO; }
@@ -117,23 +199,94 @@
     this.hideAllOtherApplications = function() { $app('hideOtherApplications', $app); }
     this.unhideAllOtherApplications = function() { $app('unhideAllApplications', $app); }
 
+    /**
+     * @member visible
+     * @type {boolean}
+     * @memberof Application
+     * @description Gets or sets the visibility of the application.  This will reveal or hide
+     *              all windows associated with the application.  Note that other OS/UI elements
+     *              may not be hidden, such as modal dialogs, or indicator icons in the taskbar.
+     * @see Window
+     */
     Object.defineProperty(this, 'visible', {
       get:function() { return $app('isHidden') == $.NO ? true : false; },
       set:function(e) { if(e) $app('unhide',$app); else $app('hide', $app); }
-    })
+    });
 
+    /**
+     * @method attention
+     * @param {boolean} critical
+     * @returns {Object} An object with one function "cancel" allowing you to cancel the request.
+     * @memberof Application
+     * @description Animates the icon in the dock or task bar to "bounce" (on OSX) or "highlight" 
+     *              (in Windows). If false (or nothing) is passed into this the animation 
+     *              is played for a short time (depending on OS preferences), if true is passed in 
+     *              (e.g., a critical alert is needed) the icon continues to animate until a window
+     *              or the application icon in the dock is clicked.
+     */
     this.attention = function(critical) {
       $app('requestUserAttention', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) );
       return {cancel:function() { $app('cancelUserAttentionRequest', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) ); }.bind(this)};
     }
-
+    
+    /**
+     * @method paste
+     * @memberof Application
+     * @description Invokes a paste operation, this takes whatever is currently in the clipboard
+     *              and sends a paste operation to the focused window and control.
+     */
     this.paste = function() { $app('sendAction', 'paste:', 'to', null, 'from', $app); }
+
+    /**
+     * @method copy
+     * @memberof Application
+     * @description Invokes a copy operation, this takes whatever is currently selected in the
+     *              focused window and control and places it into the clipboard.
+     */
     this.copy = function() { $app('sendAction', 'copy:', 'to', null, 'from', $app); }
+
+    /**
+     * @method cut
+     * @memberof Application
+     * @description Invokes a cut operation, this takes whatever is currently selected in the
+     *              focused window and control and places it into the clipboard and removes the
+     *              selected element from the application (usually text or images)
+     */
     this.cut = function() { $app('sendAction', 'cut:', 'to', null, 'from', $app); }
+
+    /**
+     * @method undo
+     * @memberof Application
+     * @description This rewinds a controls value (e.g., perhaps text in a textbox) for the
+     *              currently focused window and control.
+     */
     this.undo = function() { $app('sendAction', 'undo:', 'to', null, 'from', $app); }
+
+    /**
+     * @method redo
+     * @memberof Application
+     * @description This repeats the last rewound value of the currently focused window and
+     *              control. 
+     */
     this.redo = function() { $app('sendAction', 'redo:', 'to', null, 'from', $app); }
+
+    /**
+     * @method delete
+     * @memberof Application
+     * @description Deletes the currently selected value for the currently focused window
+     *              and control.
+     */
     this.delete = function() { $app('sendAction', 'delete:',' to', null, 'from', $app); }
+
+    /**
+     * @method selectAll
+     * @memberof Application
+     * @description Selects all the values in the UI of the currently focused window and
+     *              control.
+     */
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); }
+
+
     $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
     $app('activateIgnoringOtherApps', true);
   }
