@@ -410,6 +410,11 @@
         }],
       ],
       'msvs_settings': {
+        'VCCLCompilerTool':{
+          'AdditionalIncludeDirectories': [
+            '$(newincludepath)'
+          ]
+        },
         'VCManifestTool': {
           'AdditionalManifestFiles': [
             '$(ProjectDir)..\\..\\tools\\tint.manifest',
@@ -445,7 +450,10 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'AdditionalOptions':['/wd4355']
+            'AdditionalOptions':['/wd4355'],
+            'AdditionalIncludeDirectories': [
+              '$(newincludepath)'
+            ]
           },
           'VCLinkerTool': {
             'RuntimeLibrary':'>(runtime)',

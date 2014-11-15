@@ -38,6 +38,7 @@ SET "WindowsSdkDir=%%k"
 set newpath=C:\Python27;C:\Python26;C:\Python
 echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
 
+set newincludepath=%WindowsSdkDir%include
 set newlibpath=%WindowsSdkDir%lib\x64
 if /i "%arch%"=="ia32" set newlibpath=%WindowsSdkDir%lib
 echo %libpath%|findstr /i /c:"Microsoft SDKs\Windows">nul  || set libpath=%libpath%;%newlibpath%
