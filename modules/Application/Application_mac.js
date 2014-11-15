@@ -6,13 +6,18 @@
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
   
-  // Help reign in garbage collection
+  // Help with garbage collection, this allows objective-c to reclaim
+  // objective-c objects once we're finished with them. The FFI bridge in
+  // modules/Bridge/ for OSX "retain" an Obj-C object on creation with the node::Buffer
+  // object, when the node::Buffer object is reclaimed by v8, it calls a release
+  // to decremenet the number of handles.  Once no handle exists, objc decides
+  // whether it should be reclaimed natively.
   var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
 
   // Include the app schema. app:// registers on NSURL and for node require().
   require('AppSchema')(process.cwd());
 
-  // Register our font factory.
+  // Register our font factory, this is a "boot" step for any app using fonts.
   require('FontInternals');
 
   var $ = process.bridge.objc;
