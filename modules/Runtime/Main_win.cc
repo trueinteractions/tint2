@@ -21,6 +21,7 @@ static char **init_argv;
 v8::Handle<v8::Object> process_l;
 v8::Persistent<v8::Object> bridge;
 DWORD mainThreadId = 0;
+bool uv_trip_safety = false;
 
 extern "C" void InitAppRequest();
 
@@ -89,7 +90,6 @@ void uv_event(void *info) {
       // segfaulting, maybe faking a TCP request?)
       if(timeout == -1) timeout = 16;
       if(timeout > 250) timeout = 250;
-
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
@@ -106,8 +106,10 @@ void uv_event(void *info) {
     // FAIL.  In practice (Vista,7,8,8.1) these did not produce
     // duplicate messages so we'll avoid the check for one of them
     // failing.
+
     PostMessage(HWND_BROADCAST, WM_APP+1, 0, 0);
     PostThreadMessage(mainThreadId, WM_APP+1 /* magic UV id */, 0, 0);
+    uv_trip_safety = true;
     uv_sem_wait(&embed_sem);
   }
 }
@@ -193,13 +195,17 @@ void win_msg_loop() {
 
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
+    if(uv_trip_safety == true) {
+      uv_run_nowait();
+      uv_trip_safety = false;
+    }
     if(bRet == -1) {
       fprintf(stderr, "FATAL ERROR: %i\n",bRet);
       exit(1);
-    } else if(msg.message == WM_APP+1)
+    } else if(msg.message == WM_APP+1) {
       uv_run_nowait();
-    //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
-    else {
+      //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
+    } else {
        TranslateMessage(&msg);
        DispatchMessage(&msg);
     }
