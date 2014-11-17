@@ -435,12 +435,12 @@ else
     if(debug) log(' cursorhidden ');
     $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
     if(debug) log(' cursorposset('+(x*dpi)+','+(y*dpi)+') ');
+    $w32.user32.mouse_event(0x0002, 1, 1, 0, 0);  //LMOUSEDOWN 
+    if(debug) log(' lmousedown ');
+    $w32.user32.mouse_event(0x0004, 1, 1, 0, 0); //LMOUSEUP
+    if(debug) log(' lmouseup\n');
     $w32.user32.ShowCursor(1);
     if(debug) log(' cursorshown ');
-    $w32.user32.mouse_event(0x8000|0x0002, 1, 1, 0, 0);  //LMOUSEDOWN 
-    if(debug) log(' lmousedown ');
-    $w32.user32.mouse_event(0x8000|0x0004, 1, 1, 0, 0); //LMOUSEUP
-    if(debug) log(' lmouseup\n');
   }
   ex.rightClickAt = function rightClickAt(x,y) {
     var dpi = Screens.active.scaleFactor;
