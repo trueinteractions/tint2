@@ -12,7 +12,59 @@ module.exports = (function() {
     this.nativeView('addTrackingArea',this.private.trackingArea);
   }
 
-  /* Control Class */
+  /**
+   * @class Control
+   * @description The control class is the base class that provides all common methods used
+   *              and available to any Tint control.  This cannot be initialized on its own
+   *              as its only purpose is to provide common functionality to all controls. To
+   *              initialize a basic control use Container.
+   * @see Container
+   */
+  /**
+   * @event mousedown
+   * @memberof Control
+   * @description Fires when a user presses the left mouse button down and before it's released.
+   */
+  /**
+   * @event mouseup
+   * @memberof Control
+   * @description Fires when a user releases the left mouse button and after the mousedown event.
+   */
+  /**
+   * @event rightmousedown
+   * @memberof Control
+   * @description Fires when a user presses the right mouse button down and before it's released.
+   */
+  /**
+   * @event rightmouseup
+   * @memberof Control
+   * @description Fires when a user releases the right mouse button and after the rightmousedown event.
+   */
+  /**
+   * @event keydown
+   * @memberof Control
+   * @description Fires when a keyboard key is down but before its released.
+   */
+  /**
+   * @event keyup
+   * @memberof Control
+   * @description Fires when a keyboard key is up and after the keydown event.
+   */
+  /**
+   * @event mouseenter
+   * @memberof Control
+   * @description Fires when the mouse cursor enters the visible bounds of the control.
+   */
+  /**
+   * @event mouseexit
+   * @memberof Control
+   * @description Fires when the mouse cursor leaves the visible bounds of the control.
+   */
+  /**
+   * @event mousemove
+   * @memberof Control
+   * @description Fires when the mouse moves, and only when its moving over the control.
+   */
   function Control(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -81,6 +133,17 @@ module.exports = (function() {
     return frame;
   }
 
+  /**
+   * @member boundsOnScreen
+   * @type {Object}
+   * @memberof Control
+   * @attrib readonly
+   * @description Gets an object with the properties width, height, x, and y that represent the position of the
+   *              control on the current screen (in logical pixels or adjusted for the monitors DPI or scalefactor)
+   *              where the coordinates start from the top (y) and left (x) of the screen. If the control is not on 
+   *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window) 
+   *              this throws an error.
+   */
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
       if(!this.nativeView('superview')) return null;
@@ -98,6 +161,18 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member boundsOnWindow
+   * @type {Object}
+   * @memberof Control
+   * @attrib readonly
+   * @description Gets an object with the properties width, height, x, and y that represent the position of the
+   *              control on the current window content area (in logical pixels or adjusted for the monitors DPI or scalefactor)
+   *              where the coordinates start from the top (y) and left (x) of the window's content area. Note that
+   *              this takes into account non-content area of the window such as frame.  E.g., if your window is at 500 pixels
+   *              from the top, and your control is placed at 20 pixels from the top of the window the boundsOnWindow will return
+   *              500 + (the native windows titlebar height) + 20.  If the control is not on a window this throws an error.
+   */
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
       if(!this.nativeView('superview')) return null;
@@ -114,6 +189,17 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member bounds
+   * @type {Object}
+   * @memberof Control
+   * @attrib readonly
+   * @description Gets an object with the properties width, height, x, and y that represent the position of the
+   *              control from its parent control (in logical pixels or adjusted for the monitors DPI or scalefactor)
+   *              where the coordinates start from the top (y) and left (x) of the parent. If the control is not on 
+   *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window) 
+   *              this throws an error.
+   */
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
       if(!this.nativeView('superview')) return null;
@@ -145,6 +231,15 @@ module.exports = (function() {
     }
   }
 
+  /**
+   * @method addEventListener
+   * @param {String} eventName The name of the application event to start listening to.
+   * @param {function} callback The function that will be called when it occurs.
+   * @memberof Control
+   * @description Adds an event listener for various control level events. The first
+   *              parameter is the name of the event, the second parameter is the function
+   *              to call when the event happens (e.g., a callback).
+   */
   Control.prototype.addEventListener = function(event, func) {
     event = event.toLowerCase();
     if(event == "mouseenter" || event == "mouseexit" || event == "mousemove") {
@@ -158,6 +253,15 @@ module.exports = (function() {
     this.private.events[event].push(func);
   }
 
+  /**
+   * @method removeEventListener
+   * @param {String} eventName The name of the application event to stop listening to.
+   * @param {function} callback The function that would have been called.
+   * @memberof Control
+   * @description Removes an event listener for various application level events. The first
+   *              parameter is the name of the event, the second parameter is the function
+   *              that was originally given as the callback for addEventListener.
+   */
   Control.prototype.removeEventListener = function(event, func) {
     event = event.toLowerCase();
     if(event == "mouseenter" ||   event == "mouseexit" || event == "mousemove") {
@@ -206,13 +310,89 @@ module.exports = (function() {
   // the mappings on Windows
   //TODO: Figure out a way of invaliding intrinsic content size, buttons cannot have
   // explicit heights in auto layout!!
+  /**
+   * @member top
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred top position of the control.  If this is set to a number its considered the amount
+   *              of pixels below the top of the parent control.  If a percentage represented as a string (E.g., '50%') is passed in, this
+   *              is translated as positioning the top at fifty percent of the parents height. If a control is set to the top the top
+   *              is translated as placing it right below the assigned control element.
+   */
   utils.createLayoutProperty(Control.prototype, 'top', 'top', utils.identity, 'top', utils.identity, ['bottom','height']);
+  /**
+   * @member bottom
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred bottom position of the control.  If this is set to a number its translated as the amount
+   *              of pixels the bottom of the control should be to the bottom of the parent control.  If a percentage represented 
+   *              as a string (E.g., '50%') is passed in, this is translated as positioning the bottom of the control at fifty percent of the parents height. 
+   *              If a control is passed in, this is translated as positioning the bottom it to the top of the passed in control.
+   */
   utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
+  /**
+   * @member left
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred left position of the control.  If this is set to a number its translated as the amount
+   *              of pixels to the right the control should be to the left of the parent control.  If a percentage represented 
+   *              as a string (E.g., '50%') is passed in, this is translated as positioning the left of the control at fifty percent of the parents width. 
+   *              If a control is passed in, this is translated as positioning the left of the control to the right of the passed in control.
+   */
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
+  /**
+   * @member right
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred right position of the control.  If this is set to a number its translated as the amount
+   *              of pixels to the left of the parent's right the control should be.  If a percentage represented 
+   *              as a string (E.g., '50%') is passed in, this is translated as positioning the right of the control at fifty percent of the parents width. 
+   *              If a control is passed in, this is translated as positioning the right of the control to the left of the passed in control.
+   */
   utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.negate, ['left','width']);
+  /**
+   * @member height
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred height of the control.  If the value of this is a number its translated as the pixel height
+   *              that the control should have.  If the value is a string representing a percentage (e.g., '50%') then the height is
+   *              set to 50% of the parents height.  Note that height cannot be calculated if both top and bottom are set (as the height
+   *              is implicitly set in that circumstance).
+   */
   utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
+  /**
+   * @member width
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred width of the control.  If the value of this is a number its translated as the pixel width
+   *              that the control should have.  If the value is a string representing a percentage (e.g., '50%') then the width is
+   *              set to 50% of the parents width.  Note that width cannot be calculated if both left and right are set (as the width
+   *              is implicitly set in that circumstance).
+   */
   utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
+  /**
+   * @member middle
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred middle position of the control. If the value of this is set to a number the control's
+   *              middle (or verticla center) is positioned to parent's middle plus the offset (positive being below, negative above).
+   *              If the passed in value is a string representing a percentage (e.g., 50%) the control's middle (or vertical center) is
+   *              positioned to the parents middle + the parents height/2 times the percentage. For example, to ensure the control is
+   *              positioned at the half-of-middle of the parents control (or in the first 1/4 of the height), use 50%. If a control
+   *              is set as the value the middle of this controls is aligned to the middle of the assigned control.
+   */
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
+  /**
+   * @member center
+   * @type {Various}
+   * @memberof Control
+   * @description Gets or sets the preferred center position of the control. If the value of this is set to a number the control's
+   *              center (horizontally) is positioned to parent's center plus the offset (positive being below, negative above).
+   *              If the passed in value is a string representing a percentage (e.g., 50%) the control's center is
+   *              positioned to the parents center + the parents width/2 times the percentage. For example, to ensure the control is
+   *              positioned at half-of-center of the parents control (or in the first 1/4 of the width), use 50%. If a control
+   *              is set as the value the center of this controls is aligned to the center of the assigned control.
+   */
   utils.createLayoutProperty(Control.prototype, 'center', 'center', utils.identity, 'center', utils.identity, null);
 
   return Control;
