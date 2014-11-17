@@ -110,7 +110,7 @@ module.exports = (function() {
                     'columnIndexes',$.NSIndexSet('indexSetWithIndex', this.nativeView('columnWithIdentifier',$(columnId))));
   }
 
-  /*Object.defineProperty(Table.prototype, 'rowHeightStyle', {
+  Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() { 
       var rowSize = this.nativeView('rowSizeStyle');
       if(rowSize == $.NSTableViewRowSizeStyleDefault) return "default";
@@ -125,7 +125,7 @@ module.exports = (function() {
       else if(e == "medium") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
       else if(e == "large") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
     }
-  });*/
+  });
 
   Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
     get:function() { return this.nativeView('allowsColumnRecording') == $.YES ? true : false; },
@@ -151,17 +151,18 @@ module.exports = (function() {
     get:function() { return this.nativeView('allowsColumnSelection') == $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsColumnSelection', e ? $.YES : $.NO); }
   });
-
+/* Unable to get this working in Yosemite, doesn't seem to work.
   Object.defineProperty(Table.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('backgroundColor')); },
     set:function(e) { this.nativeView('setBackgroundColor',e.native); }
   });
-
+ */
+/* Unable to get this working in Yosemite, doesn't seem to work.
   Object.defineProperty(Table.prototype, 'borderColor', {
     get:function() { return new Color(this.nativeView('gridColor')); },
     set:function(e) { this.nativeView('setGridColor',e.native); }
   });
-
+*/
   Object.defineProperty(Table.prototype, 'spaceX', {
     get:function() { return this.nativeView('intercellSpacing').width; },
     set:function(e) { 
@@ -182,14 +183,17 @@ module.exports = (function() {
 
   Object.defineProperty(Table.prototype, 'rowHeight', {
     get:function() { return this.nativeView('rowHeight'); },
-    set:function(e) { this.nativeView('setRowHeight',e.native); }
+    set:function(e) { 
+      this.nativeView('setRowHeight',e.native);
+      this.nativeView('setNeedsDisplay', $.YES);
+    }
   });
-
+/* Retired in Yosemite
   Object.defineProperty(Table.prototype, 'focusedColumn', {
     get:function() { return this.nativeView('focusedColumn'); },
     set:function(e) { this.nativeView('setFocusedColumn', e); }
   });
-
+*/
   Object.defineProperty(Table.prototype, 'numberOfColumns', {
     get:function() { return this.nativeView('numberOfColumns'); }
   });
@@ -198,14 +202,51 @@ module.exports = (function() {
     get:function() { return this.nativeView('numberOfRows'); }
   });
 
-  Object.defineProperty(Table.prototype, 'alternatingColors', {
-    get:function() { return this.nativeView('usesAlternatingRowBackgroundColors') == $.YES ? true : false; },
-    set:function(e) { this.nativeView('setUsesAlternatingRowBackgroundColors',e ? $.YES : $.NO); }
+  Object.defineProperty(Table.prototype, 'selectedColumns', {
+    get:function() {
+      var indexes = this.nativeView('selectedColumnIndexes');
+      var ind = [];
+      indexes('enumerateIndexesUsingBlock', function(self, index, boolStop) {
+        ind.push(index);
+      },['v',['?','@','I','B']]);
+      return ind;
+    },
+    set:function(e) {
+      var indexes = $.NSMutableIndexSet('indexSet');
+      for(var i=0; i < e.length; i++)
+        indexes('addIndex',e[i]);
+      this.nativeView('selectColumnIndexes',indexes,'byExtendingSelection',false);
+    }
   });
 
+  Object.defineProperty(Table.prototype, 'selectedRows', {
+    get:function() {
+      var indexes = this.nativeView('selectedRowIndexes');
+      var ind = [];
+      indexes('enumerateIndexesUsingBlock', $(function(self, index, boolStop) {
+        ind.push(index);
+      },['v',['?','I','B']]));
+      return ind;
+    },
+    set:function(e) {
+      var indexes = $.NSMutableIndexSet('indexSet');
+      for(var i=0; i < e.length; i++)
+        indexes('addIndex',e[i]);
+      this.nativeView('selectRowIndexes',indexes,'byExtendingSelection',false);
+    }
+  });
+
+  Object.defineProperty(Table.prototype, 'alternatingColors', {
+    get:function() { return this.nativeView('usesAlternatingRowBackgroundColors') == $.YES ? true : false; },
+    set:function(e) { 
+      this.nativeView('setUsesAlternatingRowBackgroundColors',e ? $.YES : $.NO);
+      this.nativeView('setNeedsDisplay', $.YES);
+    }
+  });
+/* When placed in scroll view this is not necessary
   Table.prototype.scrollToRow = function(ndx) { this.nativeView('scrollRowToVisible',ndx); }
 
   Table.prototype.scrollToColumn = function(ndx) { this.nativeView('scrollColumnToVisible',ndx); }
-
+*/
   return Table;
 })();
