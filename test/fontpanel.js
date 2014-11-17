@@ -26,6 +26,7 @@ function run($utils) {
   /* @hidden */ panel.width = 500;
   /* @hidden */ panel.height = 280;
   panel.addEventListener('fontchange', function() {
+    /* @hidden */ if($utils.debug) $utils.log('panel.fontchange\n');
     /* @hidden */ if(trackChange){
     var selected = panel.selected;
     /* @hidden */   $utils.assert(selected.face.indexOf('Arial') > -1);

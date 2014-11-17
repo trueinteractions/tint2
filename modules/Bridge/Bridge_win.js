@@ -8,6 +8,7 @@ if(typeof(process.bridge.win32) == 'undefined') process.bridge.win32 = require('
 var dotnet = process.bridge;
 var assemblyImported = {};
 var classCache = {};
+dotnet.statistics = {enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
 function unwrap(a) {
   if(a && a.pointer)            // Return instance
@@ -72,9 +73,11 @@ function createEnum(typeNative, memberName) {
   var nameEnumerator = dotnet.execMethod(names, "GetEnumerator");
   var valueEnumerator = dotnet.execMethod(values, "GetEnumerator");
   var obj = {};
+  dotnet.statistics.enums++;
   while(dotnet.execMethod(nameEnumerator,'MoveNext') && 
         dotnet.execMethod(valueEnumerator, 'MoveNext'))
   {
+    dotnet.statistics.values++;
     var ename = dotnet.execGetProperty(nameEnumerator, 'Current');
     var evalue = dotnet.execGetProperty(valueEnumerator, 'Current');
     obj[ename] = evalue;
@@ -85,7 +88,7 @@ function createEnum(typeNative, memberName) {
 function createEvent(target, typeNative, typeName, memberNative, memberName, static) {
   if(!target.acceptedEvents) target.acceptedEvents = [];
   target.acceptedEvents.push(memberName);
-  
+  dotnet.statistics.events++;
   if(!target.addEventListener || typeof(target.addEventListener) == 'undefined') 
   {
     target.addEventListener = function(event, callback) {
@@ -98,6 +101,7 @@ function createEvent(target, typeNative, typeName, memberNative, memberName, sta
 }
 
 function createField(target, typeNative, typeName, memberNative, memberName, static) {
+  dotnet.statistics.fields++;
   if(!target.hasOwnProperty(memberName)) {
     Object.defineProperty(target, memberName, {
       configurable:true,
@@ -126,9 +130,7 @@ function typeSignature(memberName, args) {
 }
 
 function createMethod(target, typeNative, typeName, memberNative, memberName, static) {
-  
-  //if(!target._methods) target._methods={};
-
+  dotnet.statistics.methods++;
   target[memberName] = function() {
     var s = typeSignature(memberName, arguments);
     if(!this._methods) this._methods = {};
@@ -157,6 +159,7 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
 }
 
 function createProperty(target, typeNative, typeName, memberNative, memberName, static) {
+  dotnet.statistics.properties++;
   Object.defineProperty(target, memberName, {
     configurable:true, enumerable:true,
     get:function() {
@@ -205,27 +208,26 @@ function createJSInstance(pointer) {
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
 
   if(dotnet.execGetProperty(typeNative, "IsEnum")) {
+    dotnet.statistics.enums++;
     var fullName = dotnet.execGetProperty(typeNative, "FullName");
     var v = fullName.split('.');
     var enumValue = dotnet.execMethod(pointer,'ToString');
     v.push(enumValue);
     var dst = process.bridge.dotnet;
-    for(var i=0; i < v.length ; i++) 
+    for(var i=0; i < v.length ; i++) {
+      dotnet.statistics.values++;
       dst = dst[v[i]];
-
+    }
     return dst;
   } 
   else if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
+    dotnet.statistics.classes++;
     var c = createClass(typeNative, typeName);
     var n = function() {
       this.pointer = pointer;
       this.toString = function() { return '[object ' + typeName + ']'; }
       this.inspect = function() { 
         var out = '\033[33m CLR Object ' + this.toString() + ' @ ' + this.pointer.address() + '\033[39m';
-
-        //for(var prop in this) {
-        //  out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
-        //} 
         return out;
       }
     }
@@ -239,9 +241,13 @@ function createJSInstance(pointer) {
 }
 
 function createClass(typeNative, typeName) {
+  dotnet.statistics.classes++;
   var qualifiedName = dotnet.execGetProperty(typeNative,'AssemblyQualifiedName');
-  if(classCache[qualifiedName])
+  if(classCache[qualifiedName]) {
+    dotnet.statistics.cachehit++;
     return classCache[qualifiedName];
+  } else
+    dotnet.statistics.cachemiss++;
 
   var cls = function() {
     var args = [typeNative];
@@ -251,10 +257,6 @@ function createClass(typeNative, typeName) {
     this.toString = function() { return '[object ' + typeName + ']'; }
     this.inspect = function() { 
         var out = '\033[33m CLR Object ' + this.toString() + ' @ ' + this.pointer.address() + '\033[39m';
-
-       // for(var prop in this) {
-       //   out += '\033[33m CLR ' + this.toString() + '.'+prop+'\033[39m' + "\n";
-       // } 
         return out;
       }
   }
@@ -301,6 +303,7 @@ function createFromType(nativeType, onto) {
     }
 
     if(dotnet.execGetProperty(nativeType, "IsClass")) {
+      dotnet.statistics.classes++;
       Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() {
@@ -309,6 +312,7 @@ function createFromType(nativeType, onto) {
         }.bind(info)
       });
     } else if(dotnet.execGetProperty(nativeType, "IsEnum")) {
+      dotnet.statistics.enums++;
       Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() { 
@@ -317,6 +321,7 @@ function createFromType(nativeType, onto) {
         }.bind(info)
       });
     } else if(dotnet.execGetProperty(nativeType, "IsValueType")) {
+      dotnet.statistics.values++;
       Object.defineProperty(info.onto, name, {
         configurable:true, enumerable:true,
         get:function() {

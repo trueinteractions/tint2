@@ -5,6 +5,9 @@ var fs = require('fs');
 var ismac = os.platform().toLowerCase() == "darwin";
 var log = null;
 var exit = null;
+var isappveyor = process.env['APPVEYOR'] ? true : false;
+var debugappveyor = true;
+var debug = debugappveyor && isappveyor;
 
 if(ismac) {
   process.bridge.objc.import('Foundation');
@@ -382,15 +385,20 @@ else
 
 
   ex.keyAtControl = function keyAtControl(input) {
+    if(debug) log('-- keyAtControl: '+input+' ');
     var key = ex.keyCodeFromChar(input);
+    if(debug) log(key+' ');
     $w32.user32.keybd_event(key, 0, 0, 0);
+    if(debug) log(' up ');
     $w32.user32.keybd_event(key, 0, 0x0002, 0);
+    if(debug) log(' down\n');
   }
   ex.rightClickAtControl = function rightClickAtControl(control) {
     var z = control.boundsOnScreen;
     return ex.rightClickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
   ex.scrollAt = function scrollAt(x, y, upOrDown) {
+    if(debug) log('-- scrollAt: '+x+' '+y+' upOrDown '+upOrDown+'\n');
     ex.clickAt(x,y);
     if(upOrDown > 0) {
       ex.keyAtControl('UP');
@@ -410,20 +418,29 @@ else
     }
   }
   ex.scrollAtControl = function scrollAtControl(control, upOrDown) {
+    if(debug) log('-- scrollAtControl\n');
     var z = control.boundsOnScreen;
     ex.scrollAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2),upOrDown);
   }
   ex.clickAtControl = function clickAtControl(control) {
+    if(debug) log('-- clickAtControl\n');
     var z = control.boundsOnScreen;
     return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
   }
   ex.clickAt = function clickAt(x,y) {
+    if(debug) log('-- clickAt '+x+' '+y+' ');
     var dpi = Screens.active.scaleFactor;
+    if(debug) log(' dpi '+dpi+' ');
     $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
+    if(debug) log(' cursorhidden ');
     $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
+    if(debug) log(' cursorposset('+(x*dpi)+','+(y*dpi)+') ');
     $w32.user32.ShowCursor(1);
+    if(debug) log(' cursorshown ');
     $w32.user32.mouse_event(0x8000|0x0002, 1, 1, 0, 0);  //LMOUSEDOWN 
+    if(debug) log(' lmousedown ');
     $w32.user32.mouse_event(0x8000|0x0004, 1, 1, 0, 0); //LMOUSEUP
+    if(debug) log(' lmouseup\n');
   }
   ex.rightClickAt = function rightClickAt(x,y) {
     var dpi = Screens.active.scaleFactor;
@@ -545,5 +562,6 @@ if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
 	var inputs = argv['_'];
 	test(inputs[0]);
 }
+ex.debug = debug;
 module.exports = ex;
 

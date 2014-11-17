@@ -1,4 +1,5 @@
 (function() {
+  if(global.application) return global.application;
   require('Bridge');
   var utilities = require('Utilities');
   process.bridge.objc.import('Foundation',0);
