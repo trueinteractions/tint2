@@ -4,11 +4,58 @@ module.exports = (function() {
   var TextInput = require('TextInput');
   var Color = require('Color');
 
+  /**
+   * @class Table
+   * @description Creates a table view to place UI elements into a column and row grid system.
+   *              It also provides the ability to highlight rows, columns and allow users to
+   *              move items up or down. 
+   * @extends Container
+   */
   function Table(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
     options.delegates = options.delegates || [];
+
+    /**
+     * @event row-added
+     * @memberof Table
+     * @description Fires when a new row is added to the table by the user or programmatically.
+     */
+
+    /**
+     * @event row-removed
+     * @memberof Table
+     * @description Fires when a row is removed form the table by the user or programmatically.
+     */
+
+    /**
+     * @event select
+     * @memberof Table
+     * @description Fires when the selected rows change by the user or programmatically. This fires 
+     *              prior to the selection actually changing.
+     */
+
+    /**
+     * @event selected
+     * @memberof Table
+     * @description Fires when the selected rows change by the user or programmatically. This fires
+     *              after the selection has changed.
+     */
+
+    /**
+     * @event column-clicked
+     * @memberof Table
+     * @params {string} columnName The name of the column that was clicked.
+     * @description Fires when the user clicks a column (e.g., after any processing has occured).
+     */
+
+    /**
+     * @event column-mousedown
+     * @memberof Table
+     * @params {string} columnName The name of the column that was clicked.
+     * @description Fires when the user begins to click a column but prior to any processing.
+     */
     options.delegates = options.delegates.concat([
       ['tableView:viewForTableColumn:row:','@@:@@l', function(self,cmd,table,column,rowIndex) {
         var identifier = column('identifier').toString();
@@ -58,6 +105,13 @@ module.exports = (function() {
   Table.prototype = Object.create(Container.prototype);
   Table.prototype.constructor = Table;
 
+  /**
+   * @method addColumn
+   * @memberof Table
+   * @param {String} columnName The name used for identifying the column and the label used in the header.
+   * @description Adds a new column to the table, the columns name is used in the header's label, and 
+   *              uniquely identifies the column in the table (regardless if its moved by a user).
+   */
   Table.prototype.addColumn = function(e) {
     var column = $.NSTableColumn('alloc')('initWithIdentifier', $(e.toString()));
     this.private.columns[e] = column;
@@ -67,6 +121,12 @@ module.exports = (function() {
     this.nativeView('reloadData');
   }
 
+  /**
+   * @method removeColumn
+   * @memberof Table
+   * @param {String} columnName The name used for identifying the column and the label used in the header.
+   * @description Removes the column specified by the name passed in (or the headers label).
+   */
   Table.prototype.removeColumn = function(e) {
     var column = this.private.columns[e];
     column('release');
@@ -76,40 +136,93 @@ module.exports = (function() {
     this.nativeView('reloadData');
   }
 
+  /**
+   * @method addRow
+   * @memberof Table
+   * @param {number} rowIndex A positive whole number that represents the index to add a row at, if
+   *                 nothing is passed for this value the row is appended to the end of the table.
+   * @description Appends a new row to the end of the table, if a index is passed in the row is added
+   *              at that location.
+   */
   Table.prototype.addRow = function(ndx) {
     ndx = ndx || this.nativeView('numberOfRows');
     this.nativeView('insertRowsAtIndexes', $.NSIndexSet('indexSetWithIndex',ndx),
                 'withAnimation', $.NSTableViewAnimationSlideUp);
   }
 
+  /**
+   * @method removeRow
+   * @memberof Table
+   * @param {number} rowIndex A positive whole number that represents the index to remove.
+   * @description Removes the last row in the table, if an index is passed in the specified row
+   *              is removed.
+   */
   Table.prototype.removeRow = function(ndx) {
     ndx = ndx || this.nativeView('numberOfRows');
     this.nativeView('removeRowsAtIndexes', $.NSIndexSet('indexSetWithIndex',ndx),
             'withAnimation', $.NSTableViewAnimationSlideUp);
   }
 
+  /**
+   * @method moveColumn
+   * @memberof Table
+   * @param {number} fromIndex A positive whole number that represents the column's index to move from.
+   * @param {number} toIndex A positive whole number that represents the column's index to move to.
+   * @description Moves the column specified by fromIndex to the location specified by toIndex.
+   */
   Table.prototype.moveColumn = function(ndx, toNdx) {
     this.native('moveColumn', $.NSIndexSet('indexSetWithIndex',ndx),
             'toColumn', $.NSIndexSet('indexSetWithIndex',toNdx));
   }
-
+  /**
+   * @method moveRow
+   * @memberof Table
+   * @param {number} fromIndex A positive whole number that represents the row's index to move from.
+   * @param {number} toIndex A positive whole number that represents the row's index to move to.
+   * @description Moves the row specified by fromIndex to the location specified by toIndex.
+   */
   Table.prototype.moveRow = function(ndx, toNdx) {
     this.native('moveRowAtIndex', $.NSIndexSet('indexSetWithIndex',ndx),
             'toIndex', $.NSIndexSet('indexSetWithIndex',toNdx));
   }
 
+  /**
+   * @method setColumnWidth
+   * @memberof Table
+   * @param {string} columnName The name of the column (or header's label).
+   * @param {number} width A positive whole number that represents the logical pixel width of the column.
+   * @description Resizes a column's width to the specified width passed in.
+   */
   Table.prototype.setColumnWidth = function(id,e) {
     var column = this.private.columns[id];
     this.private.columnWidth[id] = e;
     column('setWidth',e);
   }
 
+  /**
+   * @method setValueAt
+   * @memberof Table
+   * @param {string} columnName The name of the column (or header's label).
+   * @param {number} rowIndex A positive whole number that represents the rows index.
+   * @param {Control|string} value What to render at the specified row and column.  
+   *        This can be either a string, or any user interface control.
+   * @description Set the value of the specified cell at the column indicated by columnName, 
+   *              and the row indicated by rowIndex.  The value can be either a user interface control
+   *              string.
+   */
   Table.prototype.setValueAt = function(columnId,row,value) {
     this.private.views[columnId][row] = value;
     this.nativeView('reloadDataForRowIndexes', $.NSIndexSet('indexSetWithIndex',row),
                     'columnIndexes',$.NSIndexSet('indexSetWithIndex', this.nativeView('columnWithIdentifier',$(columnId))));
   }
 
+  /**
+   * @member rowHeightStyle
+   * @type {string}
+   * @memberof Table
+   * @description Gets or sets the height of the row based on system recommended defaults, this
+   *  can be either "default", "small", "medium" or "large".
+   */
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() { 
       var rowSize = this.nativeView('rowSizeStyle');
@@ -137,11 +250,28 @@ module.exports = (function() {
     set:function(e) { this.nativeView('setAllowsColumnResizing', e ? $.YES : $.NO); }
   });
 
-  Object.defineProperty(Table.prototype, 'multiple', {
+  /**
+   * @member multipleSelection
+   * @type {boolean}
+   * @memberof Table
+   * @description Gets or sets whether multiple items can be selected, the default value is 
+   *              true.
+   */
+  Object.defineProperty(Table.prototype, 'multipleSelection', {
     get:function() { return this.nativeView('allowsMultipleSelection') == $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsMultipleSelection', e ? $.YES : $.NO); }
   });
 
+  /**
+   * @member emptySelection
+   * @type {boolean}
+   * @memberof Table
+   * @description Gets or sets whether no items are allowed to be selected, 
+   *              the default value is true. Note that if set to false, and
+   *              no item is selected, you'll need to use selectedRows to specify
+   *              a selection.  This only prevents the user for deselecting an item
+   *              it does not prevent no items from being selected.
+   */
   Object.defineProperty(Table.prototype, 'emptySelection', {
     get:function() { return this.nativeView('allowsEmptySelection') == $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsEmptySelection', e ? $.YES : $.NO); }
@@ -181,6 +311,12 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member rowHeight
+   * @type {number}
+   * @memberof Table
+   * @description Gets or sets the height of the rows by pixel value.
+   */
   Object.defineProperty(Table.prototype, 'rowHeight', {
     get:function() { return this.nativeView('rowHeight'); },
     set:function(e) { 
@@ -188,16 +324,30 @@ module.exports = (function() {
       this.nativeView('setNeedsDisplay', $.YES);
     }
   });
+
 /* Retired in Yosemite
   Object.defineProperty(Table.prototype, 'focusedColumn', {
     get:function() { return this.nativeView('focusedColumn'); },
     set:function(e) { this.nativeView('setFocusedColumn', e); }
   });
 */
+
+  /**
+   * @member numberOfColumns
+   * @type {number}
+   * @memberof Table
+   * @description Gets the number of columns in the table.
+   */
   Object.defineProperty(Table.prototype, 'numberOfColumns', {
     get:function() { return this.nativeView('numberOfColumns'); }
   });
 
+  /**
+   * @member numberOfRows
+   * @type {number}
+   * @memberof Table
+   * @description Gets the number of rows in the table.
+   */
   Object.defineProperty(Table.prototype, 'numberOfRows', {
     get:function() { return this.nativeView('numberOfRows'); }
   });
@@ -219,6 +369,13 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member selectedRows
+   * @type {Array}
+   * @memberof Table
+   * @description Gets or sets an array of the rows that are selected. The array 
+   *              contains the indexes of all the rows selected.
+   */
   Object.defineProperty(Table.prototype, 'selectedRows', {
     get:function() {
       var indexes = this.nativeView('selectedRowIndexes');
@@ -243,6 +400,7 @@ module.exports = (function() {
       this.nativeView('setNeedsDisplay', $.YES);
     }
   });
+
 /* When placed in scroll view this is not necessary
   Table.prototype.scrollToRow = function(ndx) { this.nativeView('scrollRowToVisible',ndx); }
 

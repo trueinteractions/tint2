@@ -259,7 +259,7 @@ module.exports = (function() {
     }
   });
 
-  Object.defineProperty(Table.prototype, 'multiple', {
+  Object.defineProperty(Table.prototype, 'multipleSelection', {
     get:function() { return this.private.multiple; },
     set:function(e) { this.private.multiple = e ? true : false; }
   });
