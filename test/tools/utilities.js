@@ -430,14 +430,17 @@ else
   ex.clickAt = function clickAt(x,y) {
     if(debug) log('-- clickAt '+x+' '+y+' ');
     var dpi = Screens.active.scaleFactor;
+    var w = Screens.active.bounds.width;
+    var h = Screens.active.bounds.height;
     if(debug) log(' dpi '+dpi+' ');
     //$w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
     //if(debug) log(' cursorhidden ');
-    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
-    if(debug) log(' cursorposset('+(x*dpi)+','+(y*dpi)+') ');
-    $w32.user32.mouse_event(0x0002, 1, 1, 0, 0);  //LMOUSEDOWN 
+    //$w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
+    //if(debug) log(' cursorposset('+(x*dpi)+','+(y*dpi)+') ');
+    $w32.user32.mouse_event(0x8000|0x0001, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0);  //MOUSEMOVE 
+    $w32.user32.mouse_event(0x8000|0x0002, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0);  //LMOUSEDOWN 
     if(debug) log(' lmousedown ');
-    $w32.user32.mouse_event(0x0004, 1, 1, 0, 0); //LMOUSEUP
+    $w32.user32.mouse_event(0x8000|0x0004, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0); //LMOUSEUP
     if(debug) log(' lmouseup\n');
     //$w32.user32.ShowCursor(1);
     //if(debug) log(' cursorshown ');
