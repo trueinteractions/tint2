@@ -108,7 +108,7 @@ module.exports = (function() {
   /**
    * @method addColumn
    * @memberof Table
-   * @param {String} columnName The name used for identifying the column and the label used in the header.
+   * @param {string} columnName The name used for identifying the column and the label used in the header.
    * @description Adds a new column to the table, the columns name is used in the header's label, and 
    *              uniquely identifies the column in the table (regardless if its moved by a user).
    */
@@ -124,7 +124,7 @@ module.exports = (function() {
   /**
    * @method removeColumn
    * @memberof Table
-   * @param {String} columnName The name used for identifying the column and the label used in the header.
+   * @param {string} columnName The name used for identifying the column and the label used in the header.
    * @description Removes the column specified by the name passed in (or the headers label).
    */
   Table.prototype.removeColumn = function(e) {
@@ -204,7 +204,19 @@ module.exports = (function() {
    * @memberof Table
    * @param {string} columnName The name of the column (or header's label).
    * @param {number} rowIndex A positive whole number that represents the rows index.
-   * @param {Control|string} value What to render at the specified row and column.  
+   * @param {Control} control Control to render at the specified row and column.  
+   *        This can be either a string, or any user interface control.
+   * @description Set the value of the specified cell at the column indicated by columnName, 
+   *              and the row indicated by rowIndex.  The value can be either a user interface control
+   *              string.
+   */
+
+  /**
+   * @method setValueAt
+   * @memberof Table
+   * @param {string} columnName The name of the column (or header's label).
+   * @param {number} rowIndex A positive whole number that represents the rows index.
+   * @param {string} text Text to render at the specified row and column.  
    *        This can be either a string, or any user interface control.
    * @description Set the value of the specified cell at the column indicated by columnName, 
    *              and the row indicated by rowIndex.  The value can be either a user interface control
@@ -371,7 +383,7 @@ module.exports = (function() {
 
   /**
    * @member selectedRows
-   * @type {Array}
+   * @type {array}
    * @memberof Table
    * @description Gets or sets an array of the rows that are selected. The array 
    *              contains the indexes of all the rows selected.
