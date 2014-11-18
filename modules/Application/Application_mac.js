@@ -65,7 +65,7 @@
 
     /**
      * @method addEventListener
-     * @param {String} eventName The name of the application event to start listening to.
+     * @param {string} eventName The name of the application event to start listening to.
      * @param {function} callback The function that will be called when it occurs.
      * @memberof Application
      * @description Adds an event listener for various application level events. The first
@@ -76,7 +76,7 @@
 
     /**
      * @method removeEventListener
-     * @param {String} eventName The name of the application event to stop listening to.
+     * @param {string} eventName The name of the application event to stop listening to.
      * @param {function} callback The function that would have been called.
      * @memberof Application
      * @description Removes an event listener for various application level events. The first
@@ -101,7 +101,7 @@
 
     /**
      * @method resource
-     * @param {String} path
+     * @param {string} path
      * @returns {Buffer}
      * @memberof Application
      * @description Takes a path to an application resource and returns a {@link Buffer} 
@@ -122,7 +122,7 @@
     }
     /**
      * @member windows
-     * @type {Array}
+     * @type {array}
      * @memberof Application
      * @description Gets an array of windows that the application has ownership of. 
      *              If you loose your window object or a new one is created by a seperate
@@ -136,7 +136,7 @@
     
     /**
      * @member name
-     * @type {String}
+     * @type {string}
      * @memberof Application
      * @description The name property is used to get or set the process name in the task
      *              manager, or when the application is shown.  Note that the packaged
@@ -169,7 +169,7 @@
     
     /**
      * @member icon
-     * @type {String}
+     * @type {string}
      * @memberof Application
      * @description The icon property allows you to set or get the current image associated
      *              with the application (and subsequently used in the dock/task bar or on

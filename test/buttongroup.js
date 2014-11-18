@@ -72,16 +72,11 @@ function run($utils) {
   buttonGroup.left = buttonGroup.top = 0;
 
   setTimeout(function() {
-    $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
+    $utils.clickAt(bounds.x + 20, bounds.y + 20); // hope this hardcoded value works.
     if($utils.debug) {
-    $utils.clickAt(bounds.x + 15, bounds.y); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x + 15, bounds.y - 15); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x , bounds.y + 15); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x , bounds.y); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x , bounds.y - 15); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x - 15 , bounds.y + 15); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x - 15 , bounds.y - 15); // hope this hardcoded value works.
-    $utils.clickAt(bounds.x - 15 , bounds.y); // hope this hardcoded value works.
+      $utils.clickAt(bounds.x + 20, bounds.y); // hope this hardcoded value works.
+      $utils.clickAt(bounds.x , bounds.y + 20); // hope this hardcoded value works.
+      $utils.clickAt(bounds.x , bounds.y); // hope this hardcoded value works.
     }
   }, 1000);
   win.appendChild(buttonGroup);

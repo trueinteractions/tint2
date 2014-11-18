@@ -135,7 +135,7 @@ module.exports = (function() {
 
   /**
    * @member boundsOnScreen
-   * @type {Object}
+   * @type {object}
    * @memberof Control
    * @attrib readonly
    * @description Gets an object with the properties width, height, x, and y that represent the position of the
@@ -163,7 +163,7 @@ module.exports = (function() {
 
   /**
    * @member boundsOnWindow
-   * @type {Object}
+   * @type {object}
    * @memberof Control
    * @attrib readonly
    * @description Gets an object with the properties width, height, x, and y that represent the position of the
@@ -191,7 +191,7 @@ module.exports = (function() {
 
   /**
    * @member bounds
-   * @type {Object}
+   * @type {object}
    * @memberof Control
    * @attrib readonly
    * @description Gets an object with the properties width, height, x, and y that represent the position of the
@@ -233,7 +233,7 @@ module.exports = (function() {
 
   /**
    * @method addEventListener
-   * @param {String} eventName The name of the application event to start listening to.
+   * @param {string} eventName The name of the application event to start listening to.
    * @param {function} callback The function that will be called when it occurs.
    * @memberof Control
    * @description Adds an event listener for various control level events. The first
@@ -255,7 +255,7 @@ module.exports = (function() {
 
   /**
    * @method removeEventListener
-   * @param {String} eventName The name of the application event to stop listening to.
+   * @param {string} eventName The name of the application event to stop listening to.
    * @param {function} callback The function that would have been called.
    * @memberof Control
    * @description Removes an event listener for various application level events. The first
@@ -312,7 +312,7 @@ module.exports = (function() {
   // explicit heights in auto layout!!
   /**
    * @member top
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred top position of the control.  If this is set to a number its considered the amount
    *              of pixels below the top of the parent control.  If a percentage represented as a string (E.g., '50%') is passed in, this
@@ -322,7 +322,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'top', 'top', utils.identity, 'top', utils.identity, ['bottom','height']);
   /**
    * @member bottom
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred bottom position of the control.  If this is set to a number its translated as the amount
    *              of pixels the bottom of the control should be to the bottom of the parent control.  If a percentage represented 
@@ -332,7 +332,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
   /**
    * @member left
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred left position of the control.  If this is set to a number its translated as the amount
    *              of pixels to the right the control should be to the left of the parent control.  If a percentage represented 
@@ -342,7 +342,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
   /**
    * @member right
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred right position of the control.  If this is set to a number its translated as the amount
    *              of pixels to the left of the parent's right the control should be.  If a percentage represented 
@@ -352,7 +352,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.negate, ['left','width']);
   /**
    * @member height
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred height of the control.  If the value of this is a number its translated as the pixel height
    *              that the control should have.  If the value is a string representing a percentage (e.g., '50%') then the height is
@@ -362,7 +362,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
   /**
    * @member width
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred width of the control.  If the value of this is a number its translated as the pixel width
    *              that the control should have.  If the value is a string representing a percentage (e.g., '50%') then the width is
@@ -372,7 +372,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
   /**
    * @member middle
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred middle position of the control. If the value of this is set to a number the control's
    *              middle (or verticla center) is positioned to parent's middle plus the offset (positive being below, negative above).
@@ -384,7 +384,7 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
   /**
    * @member center
-   * @type {Various}
+   * @type {various}
    * @memberof Control
    * @description Gets or sets the preferred center position of the control. If the value of this is set to a number the control's
    *              center (horizontally) is positioned to parent's center plus the offset (positive being below, negative above).
