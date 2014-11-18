@@ -4,6 +4,7 @@ module.exports = (function() {
   var Delegate = require('Bridge');
   var Color = require('Color');
   var $ = process.bridge.objc;
+
   /**
    * @class Window
    * @description Creates a new Window for controls to be placed on. The window is
@@ -613,12 +614,13 @@ module.exports = (function() {
    *              the background color of the content area for Windows, on OSX this changes the
    *              full window color (except when textured = false). The color can be a named, rgba
    *              hexadecimal value or a CSS color value.
+   * @see Color
    * @example
    *  require('Common');
    *  var win = new Window();
    *  win.visible = true; // Show the window.
    *  win.backgroundColor = 'red'; // red
-   *  win.backgroundColor = 'transparent'; // transparent
+   *  win.backgroundColor = 'transparent'; // Allow the window or glass frame to bleed through.
    *  win.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
    */
   Object.defineProperty(Window.prototype, 'backgroundColor', {

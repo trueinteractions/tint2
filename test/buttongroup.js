@@ -17,6 +17,10 @@ function baseline() {
 function run($utils) {
   var win = new Window();
   win.visible = true;
+  if($utils.debug) {
+    var utildebug = 0;
+    setInterval(function() { $utils.log('utildebug: '+(utildebug++)+'\n'); },500);
+  }
   /* @hidden */ countMouseDown = 0, countMouseUp = 0, done = false;
   /* @hidden */ var bounds = win.boundsOnScreen;
   var buttonGroup = new ButtonGroup();
@@ -73,15 +77,15 @@ function run($utils) {
 
   setTimeout(function() {
     $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
-    $utils.log('1');
-    if($utils.debug) {
-      $utils.clickAt(bounds.x + 15, bounds.y); // hope this hardcoded value works.
-    $utils.log('2');
-      $utils.clickAt(bounds.x , bounds.y + 15); // hope this hardcoded value works.
-    $utils.log('3');
-      $utils.clickAt(bounds.x , bounds.y); // hope this hardcoded value works.
-    $utils.log('5');
-    }
+    //$utils.log('1');
+    //if($utils.debug) {
+    //  $utils.clickAt(bounds.x + 15, bounds.y); // hope this hardcoded value works.
+    //$utils.log('2');
+    //  $utils.clickAt(bounds.x , bounds.y + 15); // hope this hardcoded value works.
+    //$utils.log('3');
+    //  $utils.clickAt(bounds.x , bounds.y); // hope this hardcoded value works.
+    //$utils.log('5');
+    //}
   }, 1000);
   win.appendChild(buttonGroup);
   $utils.log('setup-end');

@@ -232,8 +232,10 @@ module.exports = (function() {
    * @member rowHeightStyle
    * @type {string}
    * @memberof Table
-   * @description Gets or sets the height of the row based on system recommended defaults, this
-   *  can be either "default", "small", "medium" or "large".
+   * @description Gets or sets the height of the row based on user preferences and
+   *              system recommendations, this can be either "default", "small", 
+   *              "medium" or "large". Note that this will override the value of
+   *              rowHeight.
    */
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() { 
@@ -280,8 +282,8 @@ module.exports = (function() {
    * @memberof Table
    * @description Gets or sets whether no items are allowed to be selected, 
    *              the default value is true. Note that if set to false, and
-   *              no item is selected, you'll need to use selectedRows to specify
-   *              a selection.  This only prevents the user for deselecting an item
+   *              no item is selected use selectedRows to specify a default
+   *              selection.  This only prevents the user for deselecting an item
    *              it does not prevent no items from being selected.
    */
   Object.defineProperty(Table.prototype, 'emptySelection', {
@@ -327,7 +329,8 @@ module.exports = (function() {
    * @member rowHeight
    * @type {number}
    * @memberof Table
-   * @description Gets or sets the height of the rows by pixel value.
+   * @description Gets or sets the height of the rows by pixel value.  Note
+   *              that setting this will override the value of rowHeightStyle.
    */
   Object.defineProperty(Table.prototype, 'rowHeight', {
     get:function() { return this.nativeView('rowHeight'); },
