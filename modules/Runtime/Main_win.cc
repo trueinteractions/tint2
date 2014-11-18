@@ -106,9 +106,16 @@ void uv_event(void *info) {
     // FAIL.  In practice (Vista,7,8,8.1) these did not produce
     // duplicate messages so we'll avoid the check for one of them
     // failing.
-
     PostMessage(HWND_BROADCAST, WM_APP+1, 0, 0);
     PostThreadMessage(mainThreadId, WM_APP+1 /* magic UV id */, 0, 0);
+
+    // This is in place to act as a safety valve before we begin waiting.
+    // If the postmessage is collected by a rogue handler (such as winforms)
+    // this forces the main loop to run the next time any event is processed, 
+    // it reset back to false when the event loop executes. If we don't have this 
+    // placed after postmessage or if we remove postmessage we take up 
+    // extrenous CPU.  This is a fail safe, it must be right here before 
+    // semwait.
     uv_trip_safety = true;
     uv_sem_wait(&embed_sem);
   }
@@ -204,6 +211,7 @@ void win_msg_loop() {
       exit(1);
     } else if(msg.message == WM_APP+1) {
       uv_run_nowait();
+      uv_trip_safety = false;
       //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
     } else {
        TranslateMessage(&msg);

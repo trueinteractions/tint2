@@ -15,6 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  var firer;
   var win = new Window();
   win.visible = true;
   if($utils.debug) {
@@ -28,6 +29,7 @@ function run($utils) {
   var button1 = new Button();
   button1.image = "back";
   button1.addEventListener('mousedown', function() {
+    clearInterval(firer);
     /* @hidden */ if($utils.debug) $utils.log('button1.mousedown\n');
     /* @hidden */ countMouseDown++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 0);
@@ -75,7 +77,7 @@ function run($utils) {
   buttonGroup.appendChild(button2);
   buttonGroup.left = buttonGroup.top = 0;
 
-  setTimeout(function() {
+  firer = setInterval(function() {
     $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
     //$utils.log('1');
     //if($utils.debug) {

@@ -274,6 +274,17 @@ module.exports = (function() {
    * @description Gets or sets whether the window can be set to "fullscreen".  The behavior of some
    *              operating systems is to default to fullscreen when maximized.  This determines whether
    *              the Window will go into fullscreen on maximize or if it can when the OS requests so.
+   *              The default value is false.
+   * @example
+   *  require('Common');
+   *  var win = new Window();
+   *  win.visible = true; // make sure the window is shown.
+   *  win.canBeFullscreen = false; // do not allow the window to go fullscreen.
+   *                               // on some operating systems, this will disable or remove
+   *                               // the fullscreen button.
+   *  win.state = "fullscreen";    // try and take the window fullscreen. this will not work.
+   *  win.canBeFullscreen = true;  // allow the window to be fullscreen, renable any buttons.
+   *  win.state = "fullscreen";    // the window will now be fullscreen.
    */
   Object.defineProperty(Window.prototype, 'canBeFullscreen', {
     get:function() { return this.native('collectionBehavior') && $.NSWindowCollectionBehaviorFullScreenPrimary ? true : false; },
@@ -306,6 +317,9 @@ module.exports = (function() {
    *  win.state = "minimized";
    *  // brings the window back to its normal, unmaximized state on screen.
    *  win.state = "normal"
+   *  win.canBeFullscreen = true;  // allow the window to be fullscreen, 
+   *                               //   this enables any native buttons.
+   *  win.state = "fullscreen";    // the window will now be fullscreen.
    */
   Object.defineProperty(Window.prototype, 'state', {
     get:function() { 
@@ -394,6 +408,21 @@ module.exports = (function() {
    * @memberof Window
    * @description Gets or sets the value of the horizontal position (from the left of the screen)
    *              where the window is at.
+   * @example
+   *  require('Common');
+   *  var win = new Window();
+   *  win.visible = true;       // Show the window.
+   *
+   *  // Move the window from 0, to 400 pixels (left to right) over 
+   *  // 400*16 milliseconds (or roughly 4 seconds);
+   *
+   *  var xLoc = 0;             // Set initial left position to 0.
+   *  setInterval(function() {  // execute this function every X milliseconds (see time below).
+   *    win.x = xLoc;           // Move the window to whatever xLoc has stored.
+   *    xLoc = xLoc + 1;        // The next call will move the window by one pixel to the right.
+   *    if(xLoc > 400)          // If the x location is greater than 400, exit the program.
+   *      process.exit();
+   *  }, 16);                   // execute this every 16 milliseconds.
    */
   Object.defineProperty(Window.prototype, 'x', {
     get:function() { return this.native('frame').origin.x; },
@@ -416,6 +445,13 @@ module.exports = (function() {
    * @memberof Window
    * @description Gets or sets the width of the window. The default is 500.
    * @default 500
+   * @example
+   *  require('Common');
+   *  var win = new Window();
+   *  win.width = 900;  // change the width of the window from 500 (default) to 900.
+   *                    // this happens before the window is shown so there isnt a
+   *                    // noticable flicker when the application loads.
+   *  win.visible = true; // Show the window.
    */
   Object.defineProperty(Window.prototype, 'width', {
     get:function() { return this.native('frame').size.width; },
@@ -435,6 +471,13 @@ module.exports = (function() {
    * @memberof Window
    * @description Gets or sets the height of the window. The default value is 500.
    * @default 500
+   * @example
+   *  require('Common');
+   *  var win = new Window();
+   *  win.height = 900; // change the height of the window from 500 (default) to 900.
+   *                    // this happens before the window is shown so there isnt a
+   *                    // noticable flicker when the application loads.
+   *  win.visible = true; // Show the window.
    */
   Object.defineProperty(Window.prototype, 'height', {
     get:function() { return this.native('frame').size.height; },
@@ -588,8 +631,15 @@ module.exports = (function() {
    * @member resizable
    * @type {boolean}
    * @memberof Window
-   * @description Gets or sets whether the window is resizable.  If set to false the native
-   *              UI Widget for resizing is also not shown.
+   * @description Gets or sets whether the window is resizable by the user.  If set to false the native
+   *              UI Widget for resizing is also not shown. Note that you can still change the window
+   *              size programmatically through the width and height attributes.
+   * @example
+   * require('Common');
+   * var win = new Window(); // Create a new window.
+   * win.visible = true; // make sure the window is shown.
+   * win.resizable = false; // the window will not be able to be resized by the user, but can still be
+   *                        // resized programmatically with the width/height properties.
    */
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },
@@ -619,8 +669,9 @@ module.exports = (function() {
    *  require('Common');
    *  var win = new Window();
    *  win.visible = true; // Show the window.
-   *  win.backgroundColor = 'red'; // red
-   *  win.backgroundColor = 'transparent'; // Allow the window or glass frame to bleed through.
+   *  win.backgroundColor = 'red'; // make the background red.
+   *  win.backgroundColor = 'transparent'; // change the background to be transluent 
+   *                                       // with the frame or windows behind it showing.
    *  win.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
    */
   Object.defineProperty(Window.prototype, 'backgroundColor', {
@@ -656,6 +707,12 @@ module.exports = (function() {
    *              that if not focused still stays on top of other windows. By default this is
    *              false. Note that two windows that are both set to alwaysOnTop will be swap
    *              ordering if the windows loose and gain focus.
+   *
+   * @example
+   * require('Common');
+   * var win = new Window(); // Create a new window.
+   * win.visible = true; // make sure the window is shown.
+   * win.alwaysOnTop = true; // the window will now remain on top of all others.
    */
   Object.defineProperty(Window.prototype, "alwaysOnTop", {
     get:function() { return this.native('level') == $.NSFloatingWindowLevel ? true : false; },
@@ -670,6 +727,12 @@ module.exports = (function() {
    * @memberof Window
    * @description Destroys the window along with its resources.  This method will remove the
    *              window entirely and its memory.
+   *
+   * @example
+   * require('Common');
+   * var win = new Window(); // Create a new window.
+   * win.visible = true; // make sure the window is shown.
+   * win.destroy(); // the window is no longer visible, AND the memory is released.
    */
   Window.prototype.destroy = function() {
     application.windows.forEach(function(item,ndx,arr) { 
@@ -683,7 +746,13 @@ module.exports = (function() {
    * @method bringToFront
    * @memberof Window
    * @description Causes the window to be placed in front of other windows, even if it is not
-   *              currently focused.
+   *              currently focused. Note that this does not pull the window above windows that
+   *              are set to be always on top (see alwaysOnTop).
+   * @example
+   * require('Common');
+   * var win = new Window(); // Create a new window.
+   * win.visible = true; // make sure the window is shown.
+   * win.bringToFront(); // the window is pulled in front of all others (with the exception if a windows that are "alwaysOnTop")
    */
   Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
 
