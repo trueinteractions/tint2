@@ -301,14 +301,10 @@ module.exports = (function() {
    *  win.visible = true;
    *  // maximizes the new window, previous state is "normal"
    *  win.state = "maximized";
-   * @assert win.state == "maximized"
-   * @image win
    *  // minimizes the window, previous state was "maximized"
    *  win.state = "minimized";
-   * @assert win.state == "minimized"
    *  // brings the window back to its normal, unmaximized state on screen.
    *  win.state = "normal"
-   * @image win
    */
   Object.defineProperty(Window.prototype, 'state', {
     get:function() { 
@@ -353,8 +349,6 @@ module.exports = (function() {
    *  win.visible = true;
    *  // Set the title bar caption to "hello"
    *  win.title = "hello";
-   * @assert win.title == "hello"
-   * @image win
    */
   (utilities.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
 
@@ -563,8 +557,8 @@ module.exports = (function() {
    *  require('Common');
    *  var win = new Window();
    *  win.visible = true; // Show the window.
-   *  win.minimizeButton = false; // The window will not have a minimize button, or on some OS'
-   *                              // the minimize button is grayed out or disabled.
+   *  win.closeButton = false; // The window will not have a close button, or on some OS'
+   *                           // the close button is grayed out or disabled.
    */
   Object.defineProperty(Window.prototype, 'closeButton', {
     get:function() { 

@@ -72,9 +72,9 @@ function run($utils) {
   buttonGroup.left = buttonGroup.top = 0;
 
   setTimeout(function() {
-    $utils.log('start');
+    $utils.log('start: '+$utils.debug);
     $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
-    $utils.log('end');
+    $utils.log(' end\n');
   }, 1000);
   win.appendChild(buttonGroup);
   $utils.log('setup-end');
