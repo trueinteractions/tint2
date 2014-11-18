@@ -209,6 +209,7 @@ void win_msg_loop() {
        TranslateMessage(&msg);
        DispatchMessage(&msg);
     }
+      uv_run_nowait();
   }
 
   // Received WM_QUIT
