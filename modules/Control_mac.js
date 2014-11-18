@@ -114,12 +114,49 @@ module.exports = (function() {
     this.nativeViewClass = nativeViewExtended;
   }
 
+  /**
+   * @member alpha
+   * @type {number}
+   * @memberof Control
+   * @description Gets or sets the translucency of the control.  This is a range 
+   *              from 0 to 1 (where 1 = completely visible, 0 = completely hidden).
+   * @example
+   *  require('Common'); // include defaults, creates application context.
+   *  var window = new Window(); // create a new window.
+   *  win.visible = true; // make the window visible.
+   *  var dateWell = new DateWell();
+   *  win.title = "Date well should be 0.5 alpha.";
+   *  dateWell.style = "clock";
+   *  dateWell.range = true;
+   *  win.appendChild(dateWell);
+   *  dateWell.left = dateWell.top = 0;
+   *  dateWell.width = '300px';
+   *  dateWell.alpha = 0.5; // Set our newly added component to 50% visible.
+   */
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
     get:function() { return this.nativeView('alphaValue'); },
     set:function(e) { return this.nativeView('setAlphaValue', e); }
   });
 
+  /**
+   * @member visible
+   * @type {boolean}
+   * @memberof Control
+   * @description Gets or sets whether the control is visible or not.
+   * @example
+   *  require('Common'); // include defaults, creates application context.
+   *  var window = new Window(); // create a new window.
+   *  win.visible = true; // make the window visible.
+   *  var dateWell = new DateWell();
+   *  win.title = "Date well should be 0.5 alpha.";
+   *  dateWell.style = "clock";
+   *  dateWell.range = true;
+   *  win.appendChild(dateWell);
+   *  dateWell.left = dateWell.top = 0;
+   *  dateWell.width = '300px';
+   *  dateWell.visible = false; // Make our date picker hidden.
+   */
   Object.defineProperty(Control.prototype, 'visible', {
     configurable:true,
     get:function() { return !this.nativeView('isHidden'); },
@@ -143,6 +180,15 @@ module.exports = (function() {
    *              where the coordinates start from the top (y) and left (x) of the screen. If the control is not on 
    *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window) 
    *              this throws an error.
+   * @example
+   *  require('Common'); // include defaults, creates application context.
+   *  var window = new Window(); // create a new window.
+   *  win.visible = true; // make the window visible.
+   *  var bounds = win.boundsOnScreen;
+   *  console.log('Windows content area is '+bounds.x+' from the left.');
+   *  console.log('Windows content area is '+bounds.y+' from the top.');
+   *  console.log('Windows content area is '+bounds.width+' wide.');
+   *  console.log('Windows content area is '+bounds.height+' tall.');
    */
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
@@ -172,6 +218,27 @@ module.exports = (function() {
    *              this takes into account non-content area of the window such as frame.  E.g., if your window is at 500 pixels
    *              from the top, and your control is placed at 20 pixels from the top of the window the boundsOnWindow will return
    *              500 + (the native windows titlebar height) + 20.  If the control is not on a window this throws an error.
+   * @example
+   *  require('Common'); // include defaults, creates application context.
+   *  var window = new Window(); // create a new window.
+   *  win.visible = true; // make the window visible.
+   *
+   *  var bounds = win.boundsOnWindow;
+   *  console.log('Windows content area is '+bounds.x+' from the left corner of window frame.');
+   *  console.log('Windows content area is '+bounds.y+' from the top of the window frame.');
+   *  console.log('Windows content area is '+bounds.width+' wide.');
+   *  console.log('Windows content area is '+bounds.height+' tall.');
+   *
+   *  var buttonNormal = new Button();
+   *  buttonNormal.title = "Hello"; // set its text label.
+   *  win.appendChild(buttonNormal); // add button to window.
+   *  buttonNormal.left = buttonNormal.top = 0; // position top left.
+   *
+   *  var bounds = buttonNormal.boundsOnWindow; // get the buttons location.
+   *  console.log('The button is '+bounds.x+' from the left corner of window frame.');
+   *  console.log('The button is '+bounds.y+' from the top of the window frame.');
+   *  console.log('The button is '+bounds.width+' wide.');
+   *  console.log('The button is '+bounds.height+' tall.');
    */
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
@@ -318,6 +385,32 @@ module.exports = (function() {
    *              of pixels below the top of the parent control.  If a percentage represented as a string (E.g., '50%') is passed in, this
    *              is translated as positioning the top at fifty percent of the parents height. If a control is set to the top the top
    *              is translated as placing it right below the assigned control element.
+   * @example
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonSecond = new Button();
+   * var buttonThird = new Button();
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Hello";
+   * buttonNormal.middle = '100%'; // Vertically centered to window.
+   * buttonNormal.center = '100%'; // Horizontally centered to window.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   * // buttonNormal uses the default height requested by button.
+   *
+   * buttonSecond.title = "Second";
+   * buttonSecond.top = 0; // Position at the top of the window.
+   * buttonSecond.right = 0; // "Right align" or make this button flush
+   *                         // with the right of the window.
+   *
+   * buttonThird.title = "Third";
+   * buttonThird.left = 0; // Position at the top of the window.
+   * buttonThird.top = 0; // "Left align" or make this button flush
+   *                      // with the left of the window.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonSecond); 
+   * win.appendChild(buttonNormal);
+   * win.appendChild(buttonThird);
    */
   utils.createLayoutProperty(Control.prototype, 'top', 'top', utils.identity, 'top', utils.identity, ['bottom','height']);
   /**

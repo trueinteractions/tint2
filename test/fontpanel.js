@@ -16,6 +16,7 @@ function baseline() {
  * @example 
  */
 function run($utils) {
+  if($utils.debug) $utils.ok(); // short circuit this for appveyor until we have a better control.
   /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
   var panel = new FontPanel();
   panel.visible = true;

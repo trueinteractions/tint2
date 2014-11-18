@@ -5,8 +5,40 @@ module.exports = (function() {
 
   /**
    * @class TextInput
-   * @description Creates a label or text input area.
+   * @description Creates a text label or text input area for the user to
+   *              provide a free-form value from the keyboard.
    * @extends Container
+   */
+  /**
+   * @event input
+   * @memberof TextInput
+   * @description Fires when the text has changed and new text is available.
+   *              This is after the keydown event. This is useful if you'd
+   *              not like to listen to keyup or keydown as those events may
+   *              fire even if the value did not change (e.g., if the user
+   *              changes the cursor selection with the arrow keys.)
+   */
+  /**
+   * @event inputstart
+   * @memberof TextInput
+   * @description Fires when the user begins inputting text prior to keyup, 
+   *              keydown or input. This event is useful if an animation
+   *              or other event should fire when the user first types, but
+   *              not on every key afterwards.  For example, you might listen
+   *              to this event to show some sort of in-context dialog or
+   *              menu while the user is typing (like an auto-fill menu).
+   */
+  /**
+   * @event inputend
+   * @memberof TextInput
+   * @description Fires when the user has finished inputting text.  This is
+   *              determined by when the user presses return when linewrap = false
+   *              (e.g., the text input only takes a single line of text), or
+   *              when the control looses focus or another event prevents input.
+   *              This event is useful to listen to if you need to take an action
+   *              AFTER a user has fully inputted all the text, for example the URL
+   *              input field on a browser, only until the user is fully done typing
+   *              should we try and load the URL.
    */
   function TextInput(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
@@ -93,7 +125,7 @@ module.exports = (function() {
   });
 
   /**
-   * @member readonly
+   * @member placeholder
    * @type {string}
    * @memberof TextInput
    * @description Gets or sets the text that is displayed in the text input or
