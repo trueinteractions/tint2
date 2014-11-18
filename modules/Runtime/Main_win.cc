@@ -88,7 +88,7 @@ void uv_event(void *info) {
       // TODO: Inspect to see if theres a way to trip teh GetQueuedCompletionStatus
       // when timeout == -1 with PostQueuedCompletionStatus (without libuv
       // segfaulting, maybe faking a TCP request?)
-      if(timeout == -1) timeout = 16;
+      if(timeout < 0) timeout = 16;
       if(timeout > 250) timeout = 250;
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
