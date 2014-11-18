@@ -73,11 +73,6 @@ function run($utils) {
 
   setTimeout(function() {
     $utils.clickAt(bounds.x + 20, bounds.y + 20); // hope this hardcoded value works.
-    if($utils.debug) {
-      $utils.clickAt(bounds.x + 20, bounds.y); // hope this hardcoded value works.
-      $utils.clickAt(bounds.x , bounds.y + 20); // hope this hardcoded value works.
-      $utils.clickAt(bounds.x , bounds.y); // hope this hardcoded value works.
-    }
   }, 1000);
   win.appendChild(buttonGroup);
   $utils.log('setup-end');
