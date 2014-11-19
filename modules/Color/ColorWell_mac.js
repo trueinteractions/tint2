@@ -35,7 +35,7 @@ module.exports = (function() {
    */
   Object.defineProperty(ColorWell.prototype, 'color', {
     get:function() { return new Color(this.nativeView('color')); },
-    set:function(e) { this.nativeView('setColor',new Color(e.native)); }
+    set:function(e) { this.nativeView('setColor',(new Color(e)).native); }
   });
 
   return ColorWell;

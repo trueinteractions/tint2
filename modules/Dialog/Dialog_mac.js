@@ -4,31 +4,70 @@ module.exports = (function() {
 
   var Control = require('Control');
 
+  /**
+   * @class Dialog
+   * @description The dialog allows you to ask a question to the user or prompt them 
+   *              with a choice prior to the application continuing.
+   * @extends Control
+   */
   function Dialog() {
     Control.call(this, $.NSAlert, $.NSView, {});
     var img = null, buttonsSet = false, mainButton = null, auxButton = null; events = {};
     this.nativeView = this.native = $.NSAlert('alloc')('init');
 
+   /**
+    * @member title
+    * @type {string}
+    * @memberof Dialog
+    * @description Gets or sets the caption or title of the dialog modal window.
+    */
     Object.defineProperty(this, "title", {
       get:function() { return this.native('messageText'); },
       set:function(e) { this.native('setMessageText', $(e)); }
     });
 
+   /**
+    * @member message
+    * @type {string}
+    * @memberof Dialog
+    * @description Gets or sets the text shown as a message or question to the user.
+    */
     Object.defineProperty(this, "message", {
       get:function() { return this.native('informativeText'); },
       set:function(e) { this.native('setInformativeText', $(e)); }
     });
 
+   /**
+    * @member mainbutton
+    * @type {string}
+    * @memberof Dialog
+    * @description Gets or sets the text label of the main button.
+    */
     Object.defineProperty(this, "mainbutton", {
       get:function() { return mainButton; },
       set:function(e) { mainButton = e; }
     });
 
+   /**
+    * @member auxbutton
+    * @type {string}
+    * @memberof Dialog
+    * @description Gets or sets the text label of the auxillary button.
+    */
     Object.defineProperty(this, "auxbutton", {
       get:function() { return auxButton; },
       set:function(e) { auxButton = e; }
     });
 
+   /**
+    * @member suppression
+    * @type {string}
+    * @memberof Dialog
+    * @description Gets or sets the text label of the suppress option.
+    *              This is useful if you'd like to add an option on the dialog to
+    *              not show this dialog again.  Setting this to anything other than
+    *              null uses the value as the title and makes the check box visible.
+    */
     Object.defineProperty(this, "suppression", {
       get:function() {
         if(!this.native('showsSuppressionButton')) return null;
@@ -40,6 +79,15 @@ module.exports = (function() {
       }
     });
 
+   /**
+    * @member suppression
+    * @type {string}
+    * @memberof Dialog
+    * @description Gets or sets the text label of the suppress option.
+    *              This is useful if you'd like to add an option on the dialog to
+    *              not show this dialog again.  Setting this to anything other than
+    *              null uses the value as the title and makes the check box visible.
+    */
     Object.defineProperty(this, "suppressionChecked", {
       get:function() {
         if(!this.native('showsSuppressionButton')) return false;
