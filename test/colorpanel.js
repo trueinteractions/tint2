@@ -15,7 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  if($utils.debug) $utils.ok(); // short circuit this for appveyor until we have a better control.
+  if($utils.debug) $utils.ok(); // TOOD: short circuit this for appveyor until we have a better control.
   /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
   /* @hidden */ var color = new Color('rgba',40,40,40,0.1);
   /* @hidden */ $utils.assert(color.red == (40/255*10)/10, 'color.red should be: '+(40/255)+' was: '+color.red);

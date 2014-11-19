@@ -284,6 +284,7 @@ module.exports = (function() {
     }
   });
 
+  // TODO? private, move as a function in closure?
   Control.prototype.fireEvent = function(event, args) {
     try {
       event = event.toLowerCase();

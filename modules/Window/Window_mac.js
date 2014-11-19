@@ -25,69 +25,71 @@ module.exports = (function() {
     // and behavior. This is done so that we can provide consistant behavior across
     // OSX/Windows, and so we can add functionality and proper events.
     options.delegates = options.delegates || [];
-    /**
-     * @event close
-     * @memberof Window
-     * @description Fires when the window is destroyed and resources are released, this is 
-     *              fired just before the window is closed.
-     */
-    /**
-     * @event enter-fullscreen
-     * @memberof Window
-     * @description Fires when the window is entering into full screen mode.
-     */
-    /**
-     * @event leave-fullscreen
-     * @memberof Window
-     * @description Fires when the window is exiting into full screen mode.
-     */
-    /**
-     * @event focus
-     * @memberof Window
-     * @description Fires when the window gains focus from the mouse or keyboard.
-     */
-    /**
-     * @event blur
-     * @memberof Window
-     * @description Fires when the window looses focus from the mouse or keyboard.
-     */
-    /**
-     * @event minimize
-     * @memberof Window
-     * @description Fires when the state of the window becomes minimized.
-     */
-    /**
-     * @event restore
-     * @memberof Window
-     * @description Fires when the state of the window goes from being minimized into a new state.
-     */
-    /**
-     * @event move
-     * @memberof Window
-     * @description Fires when the window is moved by the user through the title bar.
-     */
-    /**
-     * @event resize
-     * @memberof Window
-     * @description Fires when the window is resized by the user.
-     */
-    /**
-     * @event closed
-     * @memberof Window
-     * @description Fires after the window has been destroyed and all resources have been
-     *              released.  Do not refer to the window during this event.
-     */
     options.delegates = options.delegates.concat([
+      /**
+       * @event close
+       * @memberof Window
+       * @description Fires when the window is destroyed and resources are released, this is 
+       *              fired just before the window is closed.
+       */
       ['windowWillClose:', 'v@:@@', function(self, cmd, window) { this.fireEvent('close'); return $.YES; }.bind(this)],
+      /**
+       * @event enter-fullscreen
+       * @memberof Window
+       * @description Fires when the window is entering into full screen mode.
+       */
       ['windowWillEnterFullScreen:', 'v@:@@', function(self, cmd, notif) { this.fireEvent('enter-fullscreen'); }.bind(this)],
+      /**
+       * @event leave-fullscreen
+       * @memberof Window
+       * @description Fires when the window is exiting into full screen mode.
+       */
       ['windowWillExitFullScreen:', 'v@:@@', function(self, cmd, notif) { this.fireEvent('leave-fullscreen'); }.bind(this)],
+      /**
+       * @event focus
+       * @memberof Window
+       * @description Fires when the window gains focus from the mouse or keyboard.
+       */
       ['windowDidBecomeKey:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('focus'); }.bind(this)],
+      /**
+       * @event blur
+       * @memberof Window
+       * @description Fires when the window looses focus from the mouse or keyboard.
+       */
       ['windowDidResignKey:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('blur'); }.bind(this)],
+      
       //TODO: Maximize? OSX does not have a default "maximize" state like Windows, it just "zooms" the window.
+      
+      /**
+       * @event minimize
+       * @memberof Window
+       * @description Fires when the state of the window becomes minimized.
+       */
       ['windowDidMiniaturize:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('minimize'); }.bind(this)],
+      /**
+       * @event restore
+       * @memberof Window
+       * @description Fires when the state of the window goes from being minimized into a new state.
+       */
       ['windowDidDeminiaturize:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('restore'); }.bind(this)],
+      /**
+       * @event move
+       * @memberof Window
+       * @description Fires when the window is moved by the user through the title bar.
+       */
       ['windowDidMove:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('move'); }.bind(this)],
+      /**
+       * @event resize
+       * @memberof Window
+       * @description Fires when the window is resized by the user.
+       */
       ['windowDidResize:', 'v@:@@', function(self, cmd, notification) { this.fireEvent('resize'); }.bind(this)],
+      /**
+       * @event closed
+       * @memberof Window
+       * @description Fires after the window has been destroyed and all resources have been
+       *              released.  Do not refer to the window during this event.
+       */
       ['windowDidClose:', 'v@:@@', function(self,cmd,notification) { this.fireEvent('closed'); }.bind(this)]
     ]);
 

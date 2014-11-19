@@ -2,6 +2,12 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
 
+  /**
+   * @class Box
+   * @description Creates a generic control that conatins other controls thats stylized. 
+   *              The box control can group elements, set background colors, borders, radius, etc.
+   * @extends Container
+   */
   function Box(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -19,16 +25,25 @@ module.exports = (function() {
   Box.prototype = Object.create(Container.prototype);
   Box.prototype.constructor = Box;
 
+  /**
+   * @member title
+   * @type {string}
+   * @memberof Box
+   * @description Gets or sets the title displayed at the top of the box. 
+   * @default ""
+   */
   Object.defineProperty(Box.prototype, 'title', {
     get:function() { return this.nativeView('title').toString(); },
     set:function(e) { this.nativeView('setTitle', $(e.toString())); }
   });
 
+  // TODO: removed on windows, supported on OSX?
   Object.defineProperty(Box.prototype, 'transparent', {
     get:function() { return this.nativeView('transparent') == $.YES ? true : false; },
     set:function(e) { this.nativeView('setTransparent', e ? $.YES : $.NO ); }
   });
 
+  // TODO: removed on windows, supported on OSX?
   Object.defineProperty(Box.prototype, 'titlePosition', {
     get:function() { 
       var position = this.nativeView('titlePosition');
@@ -49,6 +64,14 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member borderType
+   * @type {string}
+   * @memberof Box
+   * @description Gets or sets the type of border, the values for this can be
+   *              "none" or "line". 
+   * @default "none"
+   */
   Object.defineProperty(Box.prototype, 'borderType', {
     get:function() { 
       var type = this.nativeView('borderType');
@@ -65,26 +88,59 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member borderColor
+   * @type {Color}
+   * @memberof Box
+   * @description Gets or sets the color of the border, this should be a CSS-style
+   *              color attribute, such as rgba(0-255,0-255,0-255,0-1) or named color
+   *              such as "red" or a Color object.
+   * @see Color
+   */
   Object.defineProperty(Box.prototype, 'borderColor', {
     get:function() { return new Color(this.nativeView('borderColor')); },
     set:function(e) { this.nativeView('setBorderColor',e.native); }
   });
 
+  /**
+   * @member borderWidth
+   * @type {number}
+   * @memberof Box
+   * @description Gets or sets the width of the border in logical pixels
+   * @default 0
+   */
   Object.defineProperty(Box.prototype, 'borderWidth', {
     get:function() { return this.nativeView('borderWidth'); },
     set:function(e) { this.nativeView('setBorderWidth',e); }
   });
 
+  /**
+   * @member borderRadius
+   * @type {string}
+   * @memberof Box
+   * @description Gets or sets the radius of the corners of the border.
+   * @default 0
+   */
   Object.defineProperty(Box.prototype, 'borderRadius', {
     get:function() { return this.nativeView('cornerRadius'); },
     set:function(e) { this.nativeView('setCornerRadius',e); }
   });
 
+  /**
+   * @member backgroundColor
+   * @type {Color}
+   * @memberof Box
+   * @description Gets or sets the background color of the box. This should be a CSS-style
+   *              color attribute, such as rgba(0-255,0-255,0-255,0-1) or named color
+   *              such as "red" or a Color object.
+   * @see Color
+   */
   Object.defineProperty(Box.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('fillColor')); },
     set:function(e) { this.nativeView('setFillColor',e.native); }
   });
 
+  // TODO: Unsupported on Windows, what do we do?
   Object.defineProperty(Box.prototype, 'style', {
     get:function() {
       var type = this.nativeView('boxType');

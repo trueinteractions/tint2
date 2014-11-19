@@ -3,6 +3,11 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
 
+  /**
+   * @class Button
+   * @description Creates a button for the user to active or indicate status or steps.
+   * @extends Container
+   */
   function Button(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.mouseDownBlocks = true;
@@ -27,16 +32,39 @@ module.exports = (function() {
   Button.prototype = Object.create(Container.prototype);
   Button.prototype.constructor = Button;
 
+  /**
+   * @member border
+   * @type {boolean}
+   * @memberof Button
+   * @description Gets or sets whether the button has a border around it.
+   * @default true
+   */
   Object.defineProperty(Button.prototype, 'border', {
     get:function() { return this.nativeView('isBordered') == $.YES ? true : false; },
     set:function(e) { return this.nativeView('setBordered', e === true ? $.YES : $.NO); }
   });
 
+  /**
+   * @member state
+   * @type {boolean}
+   * @memberof Button
+   * @description Gets or sets whether the button is "on" or "off". This has different
+   *              meanings depending on the type of button, for radio, checkbox and 
+   *              toggle type buttons this changes its visual style. This has no meaning
+   *              (visually) for normal buttons. The default is false.
+   * @default false
+   */
   Object.defineProperty(Button.prototype, 'state', {
     get:function() { return this.nativeView('state') === $.NSOnState ? true : false; },
     set:function(e) { return this.nativeView('setState', e === true ? $.NSOnState : $.NSOffState); }
   });
 
+  /**
+   * @member title
+   * @type {string}
+   * @memberof Button
+   * @description Gets or sets the text label on the button.
+   */
   Object.defineProperty(Button.prototype, 'title', {
     get:function() { return this.nativeView('title').toString(); },
     set:function(e) {
@@ -46,6 +74,13 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member type
+   * @type {string}
+   * @memberof Button
+   * @description Gets or sets the type of button, this can be 
+   *              "toggle", "checkbox", "radio" or "normal".
+   */
   Object.defineProperty(Button.prototype, 'type', {
     get:function() { return this.private.buttonType; },
     set:function(type) {
@@ -61,6 +96,7 @@ module.exports = (function() {
     }
   });
 
+  // TODO: Not supported on Win, perhaps investigate differences in behavior and replicate?
   Object.defineProperty(Button.prototype, 'style', {
     get:function() { return this.private.buttonStyle; },
     set:function(type) {
@@ -76,11 +112,21 @@ module.exports = (function() {
     }
   });
 
+  // TODO: Not supported on Win, perhaps investigate differences in behavior and replicate?
   Object.defineProperty(Button.prototype, 'showBorderOnHover', {
     get:function() { return this.nativeView('showsBorderOnlyWhileMouseInside') ? true : false; },
     set:function(e) { this.nativeView('setShowsBorderOnlyWhileMouseInside', e ? true : false ); }
   });
 
+  /**
+   * @member enabled
+   * @type {string}
+   * @memberof Button
+   * @description Gets or sets the buttons availability and visual presentation to the user.
+   *              When set to false the button is grayed out and does not respond to clicks.
+   *              The default is true.
+   * @default true
+   */
   Object.defineProperty(Button.prototype, 'enabled', {
     get:function() { return this.nativeView('isEnabled'); },
     set:function(e) {
@@ -90,6 +136,13 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member image
+   * @type {string}
+   * @memberof Button
+   * @description Gets or sets the associated image to be displayed on the button.  This can be
+   *              a named icon resource for the OS, or a URL to an image (including the app:// schema).
+   */
   Object.defineProperty(Button.prototype, 'image', {
     get:function() { return this.private.img; },
     set:function(e) {

@@ -4,6 +4,12 @@ module.exports = (function() {
   var Button = require('Button');
   var $ = process.bridge.objc;
 
+  /**
+   * @class ButtonGroup
+   * @description Creates a set of buttons that can represent various states and
+   *              similar to a toggle button can be toggled between modes.
+   * @see Button
+   */
   function ButtonGroup(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.mouseDownBlocks = true;
@@ -32,6 +38,7 @@ module.exports = (function() {
   ButtonGroup.prototype = Object.create(Container.prototype);
   ButtonGroup.prototype.constructor = ButtonGroup;
 
+  // TODO: Not supported in OSX, standardize?
   Object.defineProperty(ButtonGroup.prototype, 'style', {
     get:function() { 
       var buttonStyle = this.nativeView('segmentStyle');
@@ -54,11 +61,27 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member selected
+   * @type {number}
+   * @memberof Window
+   * @description Gets or sets the index of the button that is selected, the value must be
+   *              from 0 to the amount of buttons in the group.  This returns null if no item
+   *              is selected.
+   */
   Object.defineProperty(ButtonGroup.prototype, 'selected', {
     get:function() { return this.nativeView('selectedSegment'); },
     set:function(e) { this.nativeView('setSelectedSegment', e); }
   });
 
+
+  /**
+   * @method appendChild
+   * @memberof ButtonGroup
+   * @param {Button} button A button to add as a segment to the group.
+   * @description Append child adds the passed in button as a segment in the group. 
+   * @see removeChild
+   */
   ButtonGroup.prototype.appendChild = function(button) {
     console.assert(!button.private.outOfBoundsListener);
     var ndx = this.private.segmentedButtons.push(button)-1;
@@ -83,6 +106,13 @@ module.exports = (function() {
     this.nativeView('setImageScaling',$.NSImageScaleProportionallyDown,'forSegment',ndx);
   }
 
+  /**
+   * @method removeChild
+   * @memberof ButtonGroup
+   * @param {Button} button The button to remove as a segment to the group.
+   * @description Remove child removes the passed in button from the group. 
+   * @see appendChild
+   */
   ButtonGroup.prototype.removeChild = function(button) {
     console.assert(button.private.outOfBoundsListener);
     button.removeEventListener('property-change', button.private.outOfBoundsListener);

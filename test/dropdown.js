@@ -60,7 +60,7 @@ function run($utils) {
     $utils.clickAtControl(dropdown);
     var b = dropdown.boundsOnScreen;
     setTimeout(function() {
-      $utils.clickAt(b.x+20,b.y+30);
+      $utils.clickAt(b.x+25,b.y+25);
     },200);
   },1000);
 }
@@ -75,7 +75,8 @@ function shutdown() {
 module.exports = {
   setup:setup, 
   run:run, 
-  shutdown:shutdown, 
+  shutdown:shutdown,
+  timeout:true, 
   shell:false,
   name:"DropDown",
 };

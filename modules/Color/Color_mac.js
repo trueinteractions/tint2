@@ -2,6 +2,24 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
 
+  /**
+   * @class Color
+   * @description Creates a new color, this is mainly a convenience class used to convert back to RGBA, most
+   *              color properties in Tint accept css-type values such as "rgba(red,blue,green,alpha)" or 
+   *              named colors such as "red" or "blue".
+   * @see ColorPanel
+   * @see ColorWell
+   */
+  /**
+   * @constructor
+   * @description Creates a color object with the specified type and components.
+   * @params {string} type A string represent the type of the color, either "cmyk", "hsb", or "rgb" or a named color such as "red"
+   * @params {value} componentA The first component, optional depend on the specified type.
+   * @params {value} componentB The second component, optional depend on the specified type.
+   * @params {value} componentC The third component, optional depend on the specified type.
+   * @params {value} componentD The forth component, optional depend on the specified type.
+   * @params {value} componentE The fifth component, optional depend on the specified type.
+   */
   function Color(type, c1, c2, c3, c4, c5) {
 
     if(type == "cmyk" || type == "cmyka" || type == "hsb" || 
@@ -46,18 +64,41 @@ module.exports = (function() {
       this.native = $.NSColor('colorWithRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a);
     }
   }
-  Object.defineProperty(Color.prototype, 'colorspace', { get:function() { 
-    return "rgb";
-  }});
+  Object.defineProperty(Color.prototype, 'colorspace', { get:function() { return "rgb"; }});
   Object.defineProperty(Color.prototype, 'components', { get:function() { return 4; }});
   Object.defineProperty(Color.prototype, 'cyan', { get:function() { return this.native('cyanComponent'); }});
   Object.defineProperty(Color.prototype, 'magenta', { get:function() { return this.native('magentaComponent'); }});
   Object.defineProperty(Color.prototype, 'yellow', { get:function() { return this.native('yellowComponent'); }});
   Object.defineProperty(Color.prototype, 'black', { get:function() { return this.native('blackComponent'); }});
   //Object.defineProperty(Color.prototype, 'white', { get:function() { return this.native('whiteComponent'); }});
+
+  /**
+   * @member red
+   * @type {number}
+   * @memberof Color
+   * @description Gets the amount of red in the color.
+   */
   Object.defineProperty(Color.prototype, 'red', { get:function() { return this.native('redComponent'); }});
+  /**
+   * @member blue
+   * @type {number}
+   * @memberof Color
+   * @description Gets the amount of blue in the color.
+   */
   Object.defineProperty(Color.prototype, 'blue', { get:function() { return this.native('blueComponent'); }});
+  /**
+   * @member green
+   * @type {number}
+   * @memberof Color
+   * @description Gets the amount of green in the color.
+   */
   Object.defineProperty(Color.prototype, 'green', { get:function() { return this.native('greenComponent'); }});
+  /**
+   * @member alpha
+   * @type {number}
+   * @memberof Color
+   * @description Gets the amount of translucency in the color.
+   */
   Object.defineProperty(Color.prototype, 'alpha', { get:function() { return this.native('alphaComponent'); }});
   Object.defineProperty(Color.prototype, 'hue', { get:function() { return this.native('hueComponent'); }});
   Object.defineProperty(Color.prototype, 'saturation', { get:function() { return this.native('saturationComponent'); }});
