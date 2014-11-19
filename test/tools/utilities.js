@@ -531,6 +531,18 @@ function notok(code) {
   log(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
   exit(1);
 }
+
+ex.log = function(e) { log(e); }
+if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
+  tintexec = process.argv[2];
+  var argv = args(process.argv.slice(3));
+  if(argv.baseline == "true") createBaseline = true;
+  var inputs = argv['_'];
+  test(inputs[0]);
+}
+
+ex.debug = debug;
+
 function test(item) {
 	currentTest = require('../'+item);
 	log(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
@@ -557,14 +569,5 @@ function test(item) {
 		}
 	}
 }
-ex.log = function(e) { log(e); }
-if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
-  tintexec = process.argv[2];
-	var argv = args(process.argv.slice(3));
-	if(argv.baseline == "true") createBaseline = true;
-	var inputs = argv['_'];
-	test(inputs[0]);
-}
-ex.debug = debug;
 module.exports = ex;
 

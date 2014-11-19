@@ -9,7 +9,10 @@ module.exports = (function() {
    * @description A generic standard container for other components, this component allows you to group
    *              elements together in a single nested view. Most components within Tint's framework 
    *              inherit (or use) the functionality of this component as a starting point. This component
-   *              is good to use if there's quite a few components you'd like to lump into one large one.
+   *              is useful when a set of components rely on one another to accomplish a common behavior. 
+   *              
+   *              For example, a file selection may have both a text input and a button associated with it,
+   *              combining the two into a new control using the container is a good way of reusing controls.
    * @extends Control
    */
   function Container(NativeObjectClass, NativeViewClass, options) {

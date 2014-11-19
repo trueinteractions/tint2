@@ -13,6 +13,11 @@ module.exports = (function() {
    * @extends Container
    * @see Dialog
    */
+  /**
+   * @new 
+   * @memberof Window
+   * @description Creates a new window that is initially hidden.
+   */
   function Window(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 

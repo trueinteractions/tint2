@@ -64,7 +64,7 @@ module.exports = (function() {
   /**
    * @member selected
    * @type {number}
-   * @memberof Window
+   * @memberof ButtonGroup
    * @description Gets or sets the index of the button that is selected, the value must be
    *              from 0 to the amount of buttons in the group.  This returns null if no item
    *              is selected.

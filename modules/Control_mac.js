@@ -15,10 +15,11 @@ module.exports = (function() {
   /**
    * @class Control
    * @description The control class is the base class that provides all common methods used
-   *              and available to any Tint control.  This cannot be initialized on its own
-   *              as its only purpose is to provide common functionality to all controls. To
-   *              initialize a basic control use Container.
+   *              and available on almost every Tint control.  This cannot be initialized on its own
+   *              as its only purpose is to provide common functionality to other controls. To
+   *              initialize a basic control use Container or Box.
    * @see Container
+   * @see Box
    */
   /**
    * @event mousedown
