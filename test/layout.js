@@ -56,7 +56,7 @@ function run($utils) {
   
   /* @hidden */ $utils.assert(bnds1.width == 100, 'width does not equal 100: '+bnds1.width);
   /* @hidden */ $utils.assert(bnds1.x == Math.round(winbnds.width/2 - bnds1.width/2), ' x value is: '+bnds1.x+ ' and should be: '+Math.round(winbnds.width/2 - bnds1.width/2));
-  /* @hidden */ $utils.assert(bnds1.y == Math.round((winbnds.height/2 - bnds1.height/2)), ' y value is: '+bnds1.y+ ' and should be: '+Math.round(winbnds.height/2 - bnds1.height/2));
+  /* @hidden */ $utils.assert(bnds1.y <= Math.round((winbnds.height/2 - bnds1.height/2)), ' y value is: '+bnds1.y+ ' and should be: '+Math.round(winbnds.height/2 - bnds1.height/2));
  
   /* @hidden */ $utils.assert(bnds2.x == (winbnds.width - bnds2.width), 'x value '+bnds2.x+' does not equal: '+(winbnds.width - bnds2.width));
   /* @hidden */ $utils.assert(bnds2.y == 0, 'bounds should be 0, but was: '+bnds2.y);
