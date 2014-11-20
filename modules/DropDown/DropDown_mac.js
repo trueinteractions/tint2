@@ -7,6 +7,11 @@ module.exports = (function() {
    * @extends Container
    * @see Menu
    */
+   /**
+    * @new
+    * @memberof DropDown
+    * @description Creates a new DropDown control.
+    */
   function DropDown() {
     Button.call(this, $.NSPopUpButton, $.NSPopUpButton, {mouseDownBlocks:true,keyDownBlocks:true});
     this.private.menu = null;

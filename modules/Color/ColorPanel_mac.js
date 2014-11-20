@@ -8,6 +8,11 @@ module.exports = (function() {
    * @description Creates a new color panel that allows the user to select a color. 
    *              This opens the native OS window that handles color selection.
    */
+   /**
+    * @new
+    * @memberof ColorPanel
+    * @description Creates a new ColorPanel window that's hidden by default.
+    */
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];

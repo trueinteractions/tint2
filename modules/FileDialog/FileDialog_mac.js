@@ -1,6 +1,17 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
 
+   /**
+    * @class FileDialog
+    * @description Creates a new file dialog where a user can select a file to open or save.
+    * @extends Container
+    */
+   /**
+    * @new
+    * @memberof FileDialog
+    * @params {string} type The type of file dialog, can be "save" or "open".  Default is open if no parameter is passed in.
+    * @description Creates a new FileDialog window that is not shown by default.
+    */
   function FileDialog(type) {
     var $dialog = (type == "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
     var allowedFileTypes = null, events = {};
@@ -9,43 +20,100 @@ module.exports = (function() {
       if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
     }
 
+    /**
+     * @method addEventListener
+     * @param {string} eventName The name of the dialog event to start listening to.
+     * @param {function} callback The function that will be called when it occurs.
+     * @memberof FileDialog
+     * @description Adds an event listener for various dialog level events. The first
+     *              parameter is the name of the event, the second parameter is the function
+     *              to call when the event happens (e.g., a callback).
+     */
     this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
+
+    /**
+     * @method removeEventListener
+     * @param {string} eventName The name of the dialog event to stop listening to.
+     * @param {function} callback The function that would have been called.
+     * @memberof FileDialog
+     * @description Removes an event listener for various dialog level events. The first
+     *              parameter is the name of the event, the second parameter is the function
+     *              that was originally given as the callback for addEventListener.
+     */
     this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
 
+    /**
+     * @member title
+     * @type {string}
+     * @memberof FileDialog
+     * @description Gets or sets the title for the file dialog window.
+     */
     Object.defineProperty(this, "title", {
       get:function() { return $dialog('title'); },
       set:function(e) { $dialog('setTitle', $(e)); }
     });
 
+    // TODO: Not supported on windows.
     Object.defineProperty(this, "message", {
       get:function() { return $dialog('message'); },
       set:function(e) { $dialog('setMessage', $(e)); }
     });
 
+    // TODO: Not supported on windows.
     Object.defineProperty(this, "prompt", {
       get:function() { return $dialog('prompt'); },
       set:function(e) { $dialog('setPrompt', $(e)); }
     });
 
+    /**
+     * @member directory
+     * @type {string}
+     * @memberof FileDialog
+     * @description Gets or sets the directory the file dialog is in.
+     */
     Object.defineProperty(this, "directory", {
       get:function() { return $dialog('directoryURL')('absoluteString'); },
       set:function(e) { $dialog('setDirectoryURL', $.NSURL('URLWithString',$(e))); }
     });
 
+    /**
+     * @member filename
+     * @type {string}
+     * @memberof FileDialog
+     * @description Gets or sets the filename the file dialog has (specified by the user).
+     */
     Object.defineProperty(this, 'filename', {
       get:function() { return $dialog('nameFieldStringValue'); },
       set:function(val) { $dialog('setNameFieldStringValue', $(val)); }
     });
 
+    /**
+     * @member type
+     * @type {string}
+     * @memberof FileDialog
+     * @description Gets the type of the file dialog (open or save). This is read only.
+     */
     Object.defineProperty(this, 'type', {
       get:function() { return type; }
     });
 
+    /**
+     * @member allowAnyFileType
+     * @type {boolean}
+     * @memberof FileDialog
+     * @description Gets or sets whether the use can select any file type.
+     */
     Object.defineProperty(this, 'allowAnyFileType', {
       get:function() { return $dialog('allowsOtherFileTypes') ? true : false; },
       set:function(val) { $dialog('setAllowedOtherFileTypes', val ? $.YES : $.NO); }
     });
 
+    /**
+     * @member allowFileTypes
+     * @type {array}
+     * @memberof FileDialog
+     * @description Gets or sets an array containing the file types (by extension) that are allowed.
+     */
     Object.defineProperty(this, "allowFileTypes", {
       get:function() { return allowedFileTypes; },
       set:function(items) { 
@@ -57,6 +125,13 @@ module.exports = (function() {
       }
     });
 
+    /**
+     * @member allowMultiple
+     * @type {boolean}
+     * @memberof FileDialog
+     * @description Gets or sets whether selecting multiple files is allowed, if the file dialog is a 
+     *              save dialog type this value is ignored.
+     */
     Object.defineProperty(this, "allowMultiple", {
       get:function() {
         if(type == "save") return false;
@@ -69,6 +144,12 @@ module.exports = (function() {
       }
     });
 
+    /**
+     * @member allowDirectories
+     * @type {boolean}
+     * @memberof FileDialog
+     * @description Gets or sets if the user is allowed to select a directory in addition to a file.
+     */
     Object.defineProperty(this, "allowDirectories", {
       get:function() {
         if(type == "save") return false;
@@ -80,6 +161,12 @@ module.exports = (function() {
       }
     });
 
+    /**
+     * @member selection
+     * @type {string}
+     * @memberof FileDialog
+     * @description Gets the selection specified by the user once the dialog has been closed. The result is a URL or file path.
+     */
     Object.defineProperty(this, "selection", {
       get:function() {
         if(type == "open") {
@@ -97,6 +184,16 @@ module.exports = (function() {
     // Not supported on Windows.
     //this.setChild = function(e) { $dialog('setAccessoryView',e); }
 
+    /**
+     * @method open
+     * @param {Window} window The window to associate with this file dialog.
+     * @memberof FileDialog
+     * @description Opens the file dialog window, if a window object is passed in the file dialog is placed
+     *              on top of the passed in window preventing any user interaction with it. On OSX this causes
+     *              a "sheet" effect, on Windows the file dialog is a modal window aligned with the passed in window.
+     *              Note: Because of security and sandboxing on applications all event loops are paused until a 
+     *              selection is made by the user
+     */
     this.open = function(z) {
       var w = z ? z : $.NSApplication('sharedApplication')('mainWindow');
       if(w) {
@@ -113,6 +210,7 @@ module.exports = (function() {
       }
     }
 
+    // TODO: Not supported by windows.
     this.cancel = function() {
       $dialog('cancel',$dialog);
     }

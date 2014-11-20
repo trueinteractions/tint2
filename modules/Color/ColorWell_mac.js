@@ -10,6 +10,11 @@ module.exports = (function() {
    *              to represent a current selected color.
    * @extends Container
    */
+   /**
+    * @new
+    * @memberof ColorWell
+    * @description Creates a new ColorWell control.
+    */
   function ColorWell(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];

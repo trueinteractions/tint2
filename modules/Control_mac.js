@@ -302,7 +302,7 @@ module.exports = (function() {
 
   /**
    * @method addEventListener
-   * @param {string} eventName The name of the application event to start listening to.
+   * @param {string} eventName The name of the control event to start listening to.
    * @param {function} callback The function that will be called when it occurs.
    * @memberof Control
    * @description Adds an event listener for various control level events. The first
@@ -324,10 +324,10 @@ module.exports = (function() {
 
   /**
    * @method removeEventListener
-   * @param {string} eventName The name of the application event to stop listening to.
+   * @param {string} eventName The name of the control event to stop listening to.
    * @param {function} callback The function that would have been called.
    * @memberof Control
-   * @description Removes an event listener for various application level events. The first
+   * @description Removes an event listener for various control level events. The first
    *              parameter is the name of the event, the second parameter is the function
    *              that was originally given as the callback for addEventListener.
    */

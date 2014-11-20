@@ -8,6 +8,11 @@ module.exports = (function() {
    * @description Creates a button for the user to active or indicate status or steps.
    * @extends Container
    */
+   /**
+    * @new
+    * @memberof Button
+    * @description Creates a new Button control.
+    */
   function Button(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.mouseDownBlocks = true;

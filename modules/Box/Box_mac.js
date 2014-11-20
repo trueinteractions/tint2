@@ -8,6 +8,11 @@ module.exports = (function() {
    *              The box control can group elements, set background colors, borders, radius, etc.
    * @extends Container
    */
+   /**
+    * @new
+    * @memberof Box
+    * @description Creates a new Box generic control.
+    */
   function Box(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];

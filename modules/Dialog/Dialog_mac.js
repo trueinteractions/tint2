@@ -13,8 +13,9 @@ module.exports = (function() {
    *              to indicate the pressed button on the dialog.
    * @extends Control
    */
-  /* @constructor Dialog
-   * @description Creates a new dialog instance.
+  /* @new
+   * @memberof Dialog
+   * @description Creates a new Dialog window hidden by default.
    */
   function Dialog() {
     Control.call(this, $.NSAlert, $.NSView, {});

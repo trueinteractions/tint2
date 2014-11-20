@@ -9,6 +9,11 @@ module.exports = (function() {
    *              A change in the date can be tracked using the "mouseup" event.
    * @extends Container
    */
+   /**
+    * @new
+    * @memberof DateWell
+    * @description Creates a new DateWell control.
+    */
   function DateWell(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];

@@ -554,6 +554,7 @@ function test(item) {
 		},notok);
 	} else {
 		try {
+      ex.debug = debug;
 			currentTest.setup();
 			currentTest.run(ex);
 			currentTest.shutdown();

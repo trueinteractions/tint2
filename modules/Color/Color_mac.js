@@ -11,7 +11,8 @@ module.exports = (function() {
    * @see ColorWell
    */
   /**
-   * @constructor
+   * @new
+   * @memberof Color
    * @description Creates a color object with the specified type and components.
    * @params {string} type A string represent the type of the color, either "cmyk", "hsb", or "rgb" or a named color such as "red"
    * @params {value} componentA The first component, optional depend on the specified type.
