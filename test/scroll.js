@@ -59,7 +59,7 @@ function run($utils) {
 
     previousButton = button;
   }
-
+  if($utils.debug) $utils.log('-- setup\n');
   /* @hidden */ setTimeout(function() {
   /* @hidden */   for(var i=0; i < 20; i++)
   /* @hidden */     $utils.scrollAtControl(scrollview, -10);
