@@ -42,6 +42,8 @@ The release candidate is currently available. You can download OSX and Windows (
 You can find an initial set of (incomplete) documentation at: 
 http://www.trueinteractions.com/tint2/docs/
 
+Note that the API is still unstable and subject to change, however we will be tracking API changes after the release candidate goes final.
+
 <h2>Help & Questions</h2>
 Community, development and other questions can be discussed at https://groups.google.com/forum/#!categories/trueinteractions
 
@@ -71,7 +73,7 @@ Preview releases for Linux (QT), iOS, and Android are in tests at the moment.
 
 <h2>Building Tint from Source</h2>
 
-<h3>MacOS X (Unstable)</h3>
+<h3>MacOS X</h3>
 Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
 
 ```bash
@@ -82,7 +84,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./build.sh
 ./test.sh
 ```
-<h3>Windows (Unstable)</h3>
+<h3>Windows</h3>
 Ensure you have Visual Studio 2010 (or the free msbuild compiler and Windows SDK 7.0A+), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
 
 64-bit build (default)
