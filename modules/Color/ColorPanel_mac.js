@@ -66,7 +66,7 @@ module.exports = (function() {
   // TODO: Remove once we have a standard color panel that derives/inherits
   /**
    * @method addEventListener
-   * @param {string} eventName The name of the application event to start listening to.
+   * @param {string} eventName The name of the event to start listening to.
    * @param {function} callback The function that will be called when it occurs.
    * @memberof ColorPanel
    * @description Adds an event listener for various control level events. The first
@@ -75,7 +75,7 @@ module.exports = (function() {
    */
   /**
    * @method removeEventListener
-   * @param {string} eventName The name of the application event to stop listening to.
+   * @param {string} eventName The name of the event to stop listening to.
    * @param {function} callback The function that would have been called.
    * @memberof ColorPanel
    * @description Removes an event listener for various application level events. The first
@@ -86,11 +86,7 @@ module.exports = (function() {
    * @member visible
    * @type {boolean}
    * @memberof ColorPanel
-   * @description Gets or sets whether the window is visible or hidden. Hidden windows
-   *              are not minimized, but removed from the screen regardless if their
-   *              minimized, maximized or fullscreen.  By default the windows visibility
-   *              is set to false so windows can have specific styling set prior to being
-   *              shown.
+   * @description Gets or sets whether the color panel is visible or hidden.
    */
   return ColorPanel;
 })();

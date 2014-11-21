@@ -3,6 +3,17 @@ module.exports = (function() {
   var $utilities = require('Utilities');
   var fontManager = $.NSFontManager('sharedFontManager');
 
+  /**
+   * @class Font
+   * @description The Font object represents a native font in javascript.
+   */
+  /**
+   * @new 
+   * @memberof Font
+   * @params {string} name The name of the font, for example Arial.
+   * @params {size} number The size of the font.
+   * @description Gets a system font and creates a font object for it.
+   */
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');
     if(name.type == '@')
@@ -10,24 +21,54 @@ module.exports = (function() {
     else
       this.native = $.NSFont('fontWithName',$(name),'size', size);
 
+    /**
+     * @member face
+     * @type {string}
+     * @memberof Font
+     * @description Gets or sets the face fo the font.
+     */
     Object.defineProperty(this, 'face', { 
       get:function() { return this.native('fontName').toString(); },
       set:function(e) { 
         this.native = fontManager('convertFont', this.native,'toFace', $(e.toString()));
       }
     });
+
+    /**
+     * @member size
+     * @type {number}
+     * @memberof Font
+     * @description Gets or sets the size of the font in logical pixels.
+     * @default 12
+     */
     Object.defineProperty(this, 'size', { 
       get:function() { return this.native('pointSize'); },
       set:function(e) { 
         this.native = fontManager('convertFont', this.native, 'toSize', $(e.toString()));
       }
     }); 
+
+    /**
+     * @member family
+     * @type {string}
+     * @memberof Font
+     * @description Gets or sets the font's family.
+     * @default 12
+     */
     Object.defineProperty(this, 'family', { 
       get:function() { return this.native('familyName').toString(); },
       set:function(e) { 
         this.native = fontManager('convertFont', this.native, 'toFamily', $(e.toString()));
       }
     });
+
+    /**
+     * @member italic
+     * @type {boolean}
+     * @memberof Font
+     * @description Gets or sets whether the font is italicized.
+     * @default false
+     */
     Object.defineProperty(this, 'italic', {
       get:function() { return (fontManager('traitsOfFont', this.native) & $.NSItalicFontMask) === $.NSItalicFontMask ? true : false; },
       set:function(e) {
@@ -40,6 +81,14 @@ module.exports = (function() {
         }
       }
     });
+
+    /**
+     * @member bold
+     * @type {boolean}
+     * @memberof Font
+     * @description Gets or sets whether the font is bolded. Note, for finer control over the font's boldness use the weight property.
+     * @default false
+     */
     Object.defineProperty(this, 'bold', {
       get:function() { return (fontManager('traitsOfFont', this.native) & $.NSBoldFontMask) === $.NSBoldFontMask ? true : false; },
       set:function(e) {
@@ -52,6 +101,14 @@ module.exports = (function() {
         }
       }
     });
+
+    /**
+     * @member expanded
+     * @type {boolean}
+     * @memberof Font
+     * @description Gets or sets whether the font is expanded.
+     * @default false
+     */
     Object.defineProperty(this, 'expanded', {
       get:function() { return (fontManager('traitsOfFont', this.native) & $.NSExpandedFontMask) === $.NSExpandedFontMask ? true : false; },
       set:function(e) {
@@ -65,10 +122,29 @@ module.exports = (function() {
       }
     });
 
+    /**
+     * @member monospaced
+     * @type {boolean}
+     * @memberof Font
+     * @description Gets whether the font is monospaced.
+     */
     Object.defineProperty(this, 'monospaced', { get:function() { return this.native('isFixedPitch'); } });
 
+    /**
+     * @member monospaced
+     * @type {boolean}
+     * @memberof Font
+     * @description Gets whether the font is vertical or horizontal.
+     */
     Object.defineProperty(this, 'vertical', { get:function() { return this.native('isVertical'); } });
 
+    /**
+     * @member weight
+     * @type {number}
+     * @memberof Font
+     * @description Gets or sets the boldness of the font, this can be a range from 0 to 999.
+     * @default 400
+     */
     Object.defineProperty(this, 'weight', {
       get:function() { return fontManager('weightOfFont',this.native)*100; },
       set:function(e) {
@@ -88,10 +164,23 @@ module.exports = (function() {
     });
   }
 
+  /**
+   * @member fonts
+   * @type {array}
+   * @memberof Font
+   * @description Gets a list of all available fonts on the system.  This is a 'static' method, 
+   *              and does not require creating a font (E.g., Font.fonts).
+   */
   Object.defineProperty(Font, 'fonts', {
     get:function() { return $utilities.nsArrayToArray(fontManager('availableFonts')); }
   });
 
+  /**
+   * @member fontFamilies
+   * @type {array}
+   * @memberof Font
+   * @description Gets a list of all available font families installed on the system.
+   */
   Object.defineProperty(Font, 'fontFamilies', {
     get:function() { 
       var fonts = $utilities.nsArrayToArray(fontManager('availableFontFamilies'));

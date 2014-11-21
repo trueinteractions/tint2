@@ -2,7 +2,16 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
-
+  /**
+   * @class ImageWell
+   * @description The image well class creates a way to display photos, icons or other imagery.
+   * @extends Container
+   */
+  /**
+   * @new 
+   * @memberof ImageWell
+   * @description Creates a new imagewell object.
+   */
   function ImageWell(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -22,6 +31,13 @@ module.exports = (function() {
   ImageWell.prototype = Object.create(Container.prototype);
   ImageWell.prototype.constructor = ImageWell;
 
+  /**
+   * @member image
+   * @type {string}
+   * @memberof ImageWell
+   * @description Gets or sets the image to use, this can be any URL including the app:// schema,
+   *              or a named system image.
+   */
   Object.defineProperty(ImageWell.prototype, 'image', {
     get:function() { return this.private.currentImage; },
     set:function(e) {
@@ -60,6 +76,13 @@ module.exports = (function() {
     }
   }); */
 
+  /**
+   * @member scale
+   * @type {string}
+   * @memberof ImageWell
+   * @description Gets or sets the scaling of the image, this can be "constrain", "fit", "contain" or "none"
+   * @default "constrain"
+   */
   Object.defineProperty(ImageWell.prototype, 'scale', {
     get:function() { 
       var scaling = this.nativeView('imageScaling');

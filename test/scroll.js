@@ -15,6 +15,8 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  //TODO: figure out why performance on appveyor is so slow and remove this circuit break.
+  if($utils.debug) $utils.ok();
   var win = new Window();
   win.visible = true;
   var scrollview = new Scroll();
@@ -59,7 +61,7 @@ function run($utils) {
 
     previousButton = button;
   }
-  if($utils.debug) $utils.log('-- setup\n');
+
   /* @hidden */ setTimeout(function() {
   /* @hidden */   for(var i=0; i < 20; i++)
   /* @hidden */     $utils.scrollAtControl(scrollview, -10);
