@@ -90,7 +90,7 @@ module.exports = (function() {
     set:function(e) { return this.native.IsEnabled = e ? true : false; }
   });
 
-  Object.defineProperty(MenuItem.prototype, 'hidden', {
+  Object.defineProperty(MenuItem.prototype, 'visible', {
     get:function() { return !this.native.IsVisible; },
     set:function(e) { return this.native.IsVisible = e ? false : true; }
   });
