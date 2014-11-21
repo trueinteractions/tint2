@@ -2,7 +2,19 @@ module.exports = (function() {
   var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.objc;
-
+  /**
+   * @class Split
+   * @description The Split class can be used to store multiple views horizontally or vertically with a seperator
+   *              that can be moved between the two to resize one view or another.  This class is useful for having
+   *              a "tools" view on one side and a "content" view on the other allowing the user the option to collapse
+   *              or resize one view as needed.
+   * @extends Container
+   */
+  /**
+   * @new 
+   * @memberof Split
+   * @description Creates a new split view
+   */
   function Split(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -37,16 +49,37 @@ module.exports = (function() {
   Split.prototype = Object.create(Container.prototype);
   Split.prototype.constructor = Split;
 
+  /**
+   * @method appendChild
+   * @params {control} The control to append to the split control.
+   * @memberof Split
+   * @description appendChild adds a new control to the split control with a seperator between the previous and appended control.
+   */
   Split.prototype.appendChild = function() { 
     this.private.backupAppend.apply(this,arguments);
     this.nativeView('adjustSubviews');
   }
 
+  /**
+   * @method removeChild
+   * @params {control} The control to remove from the split control.
+   * @memberof Split
+   * @description Removes a control from the split control.
+   */
   Split.prototype.removeChild = function() { 
     this.private.backupRemove.apply(this,arguments);
     this.nativeView('adjustSubviews'); 
   }
 
+  /**
+   * @method setPosition
+   * @params {number} position The position of the seperator, a value of 0 to 1 representing the percentage of 
+   *                  available area it should be at, for example two views are sharing 50% of the possible
+   *                  area if the position is set to 0.5.
+   * @params {number} index The index identifying the seperator to position.
+   * @memberof Split
+   * @description Sets the position (a value of 0 to 1) of a seperator identified by the index.
+   */
   Split.prototype.setPosition = function(position, index) {
     position = position > 1 ? 1 : position;
     position = position < 0 ? 0 : position;
@@ -64,11 +97,28 @@ module.exports = (function() {
     }.bind(this),100);
   }
 
+  /**
+   * @member orientation
+   * @type {string}
+   * @memberof Split
+   * @description Gets or sets the orientation of all the seperators in the view, the values can be
+   *              either "vertical" or "horizontal".  The default is "horizontal".
+   * @default "horizontal"
+   */
   Object.defineProperty(Split.prototype, 'orientation', {
     get:function() { return this.nativeView('isVertical') ? "vertical" : "horizontal"; },
     set:function(e) { this.nativeView('setVertical', e == "vertical" ? $.YES : $.NO); }
   });
 
+  /**
+   * @member style
+   * @type {string}
+   * @memberof Split
+   * @description Gets or sets the style or size of the seperators, the values can be "thick", "thin"
+   *              or "pane". The actual size is determined by the native widget styles and recommended
+   *              operating system standards. The default is "thin".
+   * @default "thin"
+   */
   Object.defineProperty(Split.prototype, 'style', {
     get:function() {
       var s = this.nativeView('dividerStyle');

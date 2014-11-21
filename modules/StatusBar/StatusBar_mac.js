@@ -20,6 +20,17 @@ module.exports = (function() {
     TintStatusBarDelegate.register();
   }
 
+  /**
+   * @class StatusBar
+   * @description The status bar acts as a consistant element in the UI that can be accessed even if all other windows
+   *              are closed.  It can also have status indicators as icons or text to represent the state.  On OSX this
+   *              creates a new icon or text label in the Status Bar area.  In Windows this creates a new task tray icon.
+   */
+  /**
+   * @new 
+   * @memberof StatusBar
+   * @description Creates a new status bar.
+   */
   function StatusBar() {
     this.private = {events:{},submenu:null,imgOn:null,img:null,custom:null,custommenu:null};
 
@@ -37,17 +48,39 @@ module.exports = (function() {
       (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
   }
 
+  /**
+   * @method addEventListener
+   * @param {string} eventName The name of the event to start listening to.
+   * @param {function} callback The function that will be called when it occurs.
+   * @memberof StatusBar
+   * @description Adds an event listener for events. The first
+   *              parameter is the name of the event, the second parameter is the function
+   *              to call when the event happens (e.g., a callback).
+   */
   StatusBar.prototype.addEventListener = function(event, func) { 
     if(!this.private.events[event]) 
       this.private.events[event] = []; 
     this.private.events[event].push(func); 
   }
 
+  /**
+   * @method removeEventListener
+   * @param {string} eventName The name of the event to stop listening to.
+   * @param {function} callback The function that would have been called.
+   * @memberof StatusBar
+   * @description Removes an event listener for events. The first
+   *              parameter is the name of the event, the second parameter is the function
+   *              that was originally given as the callback for addEventListener.
+   */
   StatusBar.prototype.removeEventListener = function(event, func) { 
     if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
   }
-
+  /**
+   * @method close
+   * @memberof StatusBar
+   * @description Closes the status bar and removes it from operating system UI.
+   */
   StatusBar.prototype.close = function() { 
     this.native('release');
   }
@@ -62,6 +95,14 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member image
+   * @type {string}
+   * @memberof StatusBar
+   * @description Gets or sets the image used in the status bar.  The image is automatically
+   *              resized to fit the OS requirements.  An image can be a url including the app:// schema,
+   *              or can be named system icon.
+   */
   Object.defineProperty(StatusBar.prototype, 'image', {
     get:function() { return this.private.img; },
     set:function(e) { 
@@ -77,6 +118,12 @@ module.exports = (function() {
     set:function(e) { this.native('setLength', e); }
   });
 
+  /**
+   * @member menu
+   * @type {Menu}
+   * @memberof StatusBar
+   * @description Gets or sets the menu to display when the user clicks on the status bar.
+   */
   Object.defineProperty(StatusBar.prototype, 'menu', {
     get:function() { return this.private.submenu; },
     set:function(e) { 
@@ -93,16 +140,40 @@ module.exports = (function() {
     set:function(e) { this.native('setHighlightMode', e ? $.YES : $.NO); }
   });
 
+  /**
+   * @member title
+   * @type {string}
+   * @memberof StatusBar
+   * @description Gets or sets the title of the status bar. Most status bar's do not have 
+   *              titles and only icons. The title should be limited to no more than 3 words
+   *              as the space available is limited.
+   */
   Object.defineProperty(StatusBar.prototype, 'title', {
     get:function() { return this.native('title')('UTF8String'); },
     set:function(e) { return this.native('setTitle',$(e)); }
   });
 
+  /**
+   * @member enabled
+   * @type {boolean}
+   * @memberof StatusBar
+   * @description Gets or sets whether the status bar displays as "active" or "disabled". The
+   *              disabled state grays out the icon and title, in addition it does not respond
+   *              to mouse or keyboard actions.
+   */
   Object.defineProperty(StatusBar.prototype, 'enabled', {
     get:function() { return this.native('isEnabled'); },
     set:function(e) { return this.native('setEnabled',e); }
   });
 
+  /**
+   * @member tooltip
+   * @type {string}
+   * @memberof StatusBar
+   * @description Gets or sets the text displayed when the user keeps the mouse cursor over the
+   *              icon without taking any action. This can be thought of as a description as to
+   *              what the status bar does.
+   */
   Object.defineProperty(StatusBar.prototype, 'tooltip', {
     get:function() { return this.native('toolTip')('UTF8String'); },
     set:function(e) { return this.native('setToolTip',$(e)); }

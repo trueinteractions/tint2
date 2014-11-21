@@ -1,6 +1,20 @@
 module.exports = (function() {
   var Control = require('Control');
 
+  /**
+   * @class Toolbar
+   * @description The toolbar is a strip applied to the top of a window allowing elements to be
+   *              added and customized per the user preferences. Note that items in the toolbar 
+   *              are not guaranteed to show depending on how the user decides to remove/add items.
+   *              A toolbar can be assigned to a window using Window.toolbar.
+   * @extends Control
+   * @see Window
+   */
+  /**
+   * @new 
+   * @memberof Toolbar
+   * @description Creates a new toolbar.
+   */
   function Toolbar() {
     var $ = process.bridge.objc;
     var $toolbar = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
@@ -70,6 +84,13 @@ module.exports = (function() {
     var $NSToolbarDelegateInstance = $NSToolbarDelegateClass('alloc')('init');
     $toolbar('setDelegate',$NSToolbarDelegateInstance);
 
+    /**
+     * @member state
+     * @type {string}
+     * @memberof Toolbar
+     * @description Gets or sets the style of the toolbar, the values can be "iconandlabel", "icon"
+     *              or "label".
+     */
     Object.defineProperty(this, 'state', {
       get:function() { 
         if($toolbar('displayMode') == $.NSToolbarDisplayModeIconAndLabel) 
@@ -99,6 +120,13 @@ module.exports = (function() {
       }
     });
 
+    /**
+     * @member size
+     * @type {string}
+     * @memberof Toolbar
+     * @description Gets or sets the size of the toolbar based on OS recommended values. 
+     *              The values for this can be "regular", "small" or "default".
+     */
     Object.defineProperty(this, 'size', {
       get:function() { 
         if($toolbar('sizeMode') == $.NSToolbarSizeModeRegular) 
@@ -123,6 +151,12 @@ module.exports = (function() {
       }
     });
 
+    /**
+     * @method appendChild
+     * @params {child} The control to append to the toolbar control.
+     * @memberof Toolbar
+     * @description appendChild adds a new control to the toolbar.
+     */
     this.appendChild = function(child) {
       if(Array.isArray(child)) {
         for(var i=0; i < child.length; i++) this.appendChild(child[i]);
@@ -137,6 +171,12 @@ module.exports = (function() {
       }
     }
 
+    /**
+     * @method removeChild
+     * @params {child} The control to remove from the toolbar.
+     * @memberof Toolbar
+     * @description removeChild removes a control from the toolbar.
+     */
     this.removeChild = function(child) {
       var index = children.indexOf(child);
       if(index != -1) {
