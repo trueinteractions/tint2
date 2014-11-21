@@ -40,7 +40,7 @@ module.exports = (function() {
   /**
    * @method setChild
    * @memberof Scroll
-   * @params {Control} control The control to set as the child
+   * @param {Control} control The control to set as the child
    * @description Sets the child control that will be scrollable, if multiple children are needed create
    *              a generic Box or Container control to append multiple children.
    */

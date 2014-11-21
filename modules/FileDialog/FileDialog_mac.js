@@ -9,7 +9,7 @@ module.exports = (function() {
    /**
     * @new
     * @memberof FileDialog
-    * @params {string} type The type of file dialog, can be "save" or "open".  Default is open if no parameter is passed in.
+    * @param {string} type The type of file dialog, can be "save" or "open".  Default is open if no parameter is passed in.
     * @description Creates a new FileDialog window that is not shown by default.
     */
   function FileDialog(type) {

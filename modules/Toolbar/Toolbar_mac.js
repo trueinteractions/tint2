@@ -153,7 +153,7 @@ module.exports = (function() {
 
     /**
      * @method appendChild
-     * @params {child} The control to append to the toolbar control.
+     * @param {child} The control to append to the toolbar control.
      * @memberof Toolbar
      * @description appendChild adds a new control to the toolbar.
      */
@@ -173,7 +173,7 @@ module.exports = (function() {
 
     /**
      * @method removeChild
-     * @params {child} The control to remove from the toolbar.
+     * @param {child} The control to remove from the toolbar.
      * @memberof Toolbar
      * @description removeChild removes a control from the toolbar.
      */

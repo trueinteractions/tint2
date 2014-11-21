@@ -14,12 +14,12 @@ module.exports = (function() {
    * @new
    * @memberof Color
    * @description Creates a color object with the specified type and components.
-   * @params {string} type A string represent the type of the color, either "cmyk", "hsb", or "rgb" or a named color such as "red"
-   * @params {value} componentA The first component, optional depend on the specified type.
-   * @params {value} componentB The second component, optional depend on the specified type.
-   * @params {value} componentC The third component, optional depend on the specified type.
-   * @params {value} componentD The forth component, optional depend on the specified type.
-   * @params {value} componentE The fifth component, optional depend on the specified type.
+   * @param {string} type A string represent the type of the color, either "cmyk", "hsb", or "rgb" or a named color such as "red"
+   * @param {value} componentA The first component, optional depend on the specified type.
+   * @param {value} componentB The second component, optional depend on the specified type.
+   * @param {value} componentC The third component, optional depend on the specified type.
+   * @param {value} componentD The forth component, optional depend on the specified type.
+   * @param {value} componentE The fifth component, optional depend on the specified type.
    */
   function Color(type, c1, c2, c3, c4, c5) {
 

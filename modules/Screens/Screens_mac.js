@@ -44,8 +44,8 @@ module.exports = (function() {
      * @example
      *  var Screens = require('Screens');
      *  var active = Screens.active;
-     *  console.log('The active screen's sharpness (scale factor) is:'+active.scaleFactor);
-     *  console.log('The active screen's color resolution (bitsPerPixel) is:'+active.bitsPerPixel);
+     *  console.log('The active screens sharpness (scale factor) is:'+active.scaleFactor);
+     *  console.log('The active screens color resolution (bitsPerPixel) is:'+active.bitsPerPixel);
      *  console.log('The active screen width is: '+active.bounds.width+' in logical pixels.');
      *  console.log('The active screen height is: '+active.bounds.height+' in logical pixels.');
      *  // The position of a screen is normalized across all screens.  For example if screen 1 is 

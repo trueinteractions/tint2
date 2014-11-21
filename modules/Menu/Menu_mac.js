@@ -82,7 +82,7 @@ module.exports = (function() {
   /**
    * @new 
    * @memberof Menu
-   * @params {string} title The text title or label of the menu.
+   * @param {string} title The text title or label of the menu.
    * @description Creates a new menu object.
    */
   function Menu(title) {
@@ -96,7 +96,7 @@ module.exports = (function() {
      * @method appendChild
      * @memberof Menu
      * @description Appends a menu item to this menu.
-     * @params {MenuItem} menuitem The submenu item to add to the menu object.
+     * @param {MenuItem} menuitem The submenu item to add to the menu object.
      * @example
      * require('Common');
      * var win = new Window(); // Create a new window.
@@ -139,7 +139,7 @@ module.exports = (function() {
      * @method removeChild
      * @memberof Menu
      * @description Removes a menu item that is on this menu.
-     * @params {MenuItem} menuitem The submenu item to remove from the menu object.
+     * @param {MenuItem} menuitem The submenu item to remove from the menu object.
      */
     this.removeChild = function(menuitem) {
       if(children.indexOf(menuitem) != -1) {

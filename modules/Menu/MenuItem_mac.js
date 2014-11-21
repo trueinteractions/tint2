@@ -13,9 +13,9 @@ module.exports = (function() {
   /**
    * @new 
    * @memberof MenuItem
-   * @params {string} title The text title or label of the menuitem.
-   * @params {string} key The character for the hot-key that activates this menu item (optional)
-   * @params {string} modifier The modifiers for the hot-key (optional).
+   * @param {string} title The text title or label of the menuitem.
+   * @param {string} key The character for the hot-key that activates this menu item (optional)
+   * @param {string} modifier The modifiers for the hot-key (optional).
    * @description Creates a new menuitem object.
    */
   function MenuItem(titlestring,keystring,keymodifiers) {

@@ -10,8 +10,8 @@ module.exports = (function() {
   /**
    * @new 
    * @memberof Font
-   * @params {string} name The name of the font, for example Arial.
-   * @params {size} number The size of the font.
+   * @param {string} name The name of the font, for example Arial.
+   * @param {size} number The size of the font.
    * @description Gets a system font and creates a font object for it.
    */
   function Font(name, size) {
@@ -131,7 +131,7 @@ module.exports = (function() {
     Object.defineProperty(this, 'monospaced', { get:function() { return this.native('isFixedPitch'); } });
 
     /**
-     * @member monospaced
+     * @member vertical
      * @type {boolean}
      * @memberof Font
      * @description Gets whether the font is vertical or horizontal.

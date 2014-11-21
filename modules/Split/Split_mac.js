@@ -51,7 +51,7 @@ module.exports = (function() {
 
   /**
    * @method appendChild
-   * @params {control} The control to append to the split control.
+   * @param {control} The control to append to the split control.
    * @memberof Split
    * @description appendChild adds a new control to the split control with a seperator between the previous and appended control.
    */
@@ -62,7 +62,7 @@ module.exports = (function() {
 
   /**
    * @method removeChild
-   * @params {control} The control to remove from the split control.
+   * @param {control} The control to remove from the split control.
    * @memberof Split
    * @description Removes a control from the split control.
    */
@@ -73,10 +73,10 @@ module.exports = (function() {
 
   /**
    * @method setPosition
-   * @params {number} position The position of the seperator, a value of 0 to 1 representing the percentage of 
+   * @param {number} position The position of the seperator, a value of 0 to 1 representing the percentage of 
    *                  available area it should be at, for example two views are sharing 50% of the possible
    *                  area if the position is set to 0.5.
-   * @params {number} index The index identifying the seperator to position.
+   * @param {number} index The index identifying the seperator to position.
    * @memberof Split
    * @description Sets the position (a value of 0 to 1) of a seperator identified by the index.
    */

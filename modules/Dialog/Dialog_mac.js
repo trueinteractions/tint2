@@ -140,7 +140,7 @@ module.exports = (function() {
 
    /**
     * @method open
-    * @params {Window}
+    * @param {Window}
     * @memberof Dialog
     * @description Opens the dialog and presents it to the user.  An optional window can be passed
     *              into the function to specify which window the dialog may be protecting.  This is

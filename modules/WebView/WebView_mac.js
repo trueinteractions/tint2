@@ -192,7 +192,7 @@ module.exports = (function() {
 
   /**
    * @method postMessage
-   * @params {string} message The string or message to pass.
+   * @param {string} message The string or message to pass.
    * @memberof WebView
    * @description Posts an HTML "Message" event to the top frame (and window) of the HTML page. The HTML page can listen to window message events
    *              to receive these messages.  Strings are only allowed to be passed, complex objects may be serialized via JSON to transfer them back and forth.
@@ -207,7 +207,7 @@ module.exports = (function() {
 
   /**
    * @method execute
-   * @params {string} javascript Executes the javascript (passed in as a string) in the window context of the top frame of the page.
+   * @param {string} javascript Executes the javascript (passed in as a string) in the window context of the top frame of the page.
    * @memberof WebView
    * @description This will execute the passed in javascript in the window context of the top frame of the currently loaded page.  The result is
    *              passed back.  Note that if the execution creates an error the exception will bubble up into this context.  Becareful running 

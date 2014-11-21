@@ -60,7 +60,7 @@ module.exports = (function() {
 
   /**
    * @method addItem
-   * @params {string} option The text title of the option the user may select.
+   * @param {string} option The text title of the option the user may select.
    * @memberof SelectInput
    * @description Adds an item to the select input as an option, this is added to the end of the options list.
    */
@@ -68,8 +68,8 @@ module.exports = (function() {
 
   /**
    * @method addItemAtIndex
-   * @params {string} option The text title of the option the user may select.
-   * @params {number} index The index (from 0 to length-1) of where to add the option.
+   * @param {string} option The text title of the option the user may select.
+   * @param {number} index The index (from 0 to length-1) of where to add the option.
    * @memberof SelectInput
    * @description Adds an item to the select input as an option, the item is inserted at the index.
    */
@@ -77,7 +77,7 @@ module.exports = (function() {
 
   /**
    * @method removeItemAtIndex
-   * @params {number} index The index (from 0 to length-1) of the item to remove.
+   * @param {number} index The index (from 0 to length-1) of the item to remove.
    * @memberof SelectInput
    * @description Removes the item at the specified index.
    */
@@ -86,7 +86,7 @@ module.exports = (function() {
 
   /**
    * @method removeItem
-   * @params {string} option The text title of the option to be removed.
+   * @param {string} option The text title of the option to be removed.
    * @memberof SelectInput
    * @description Removes the option where the text title matches the passed in value.
    */
@@ -94,7 +94,7 @@ module.exports = (function() {
 
   /**
    * @method item
-   * @params {number} index The index used to get the items information.
+   * @param {number} index The index used to get the items information.
    * @returns {string}
    * @memberof SelectInput
    * @description Returns the text title for the item at the specified index.

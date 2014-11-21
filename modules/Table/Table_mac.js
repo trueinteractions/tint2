@@ -46,14 +46,14 @@ module.exports = (function() {
     /**
      * @event column-clicked
      * @memberof Table
-     * @params {string} columnName The name of the column that was clicked.
+     * @param {string} columnName The name of the column that was clicked.
      * @description Fires when the user clicks a column (e.g., after any processing has occured).
      */
 
     /**
      * @event column-mousedown
      * @memberof Table
-     * @params {string} columnName The name of the column that was clicked.
+     * @param {string} columnName The name of the column that was clicked.
      * @description Fires when the user begins to click a column but prior to any processing.
      */
     options.delegates = options.delegates.concat([

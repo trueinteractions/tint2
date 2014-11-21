@@ -157,7 +157,7 @@ module.exports = (function() {
 
   /**
    * @method requestPermission
-   * @params {function} callback A function to callback as to the result of the request. The function will be passed on parameter that is either true or false.
+   * @param {function} callback A function to callback as to the result of the request. The function will be passed on parameter that is either true or false.
    * @memberof Notification
    * @description This method requests permission to use notifications from the underlying operating system. At the moment this always returns true unless there
    *              is an explicit ban on the application pushing notifications (perhaps it was done too often or the user has explicitly set them not to show in
