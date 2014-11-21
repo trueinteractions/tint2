@@ -53,10 +53,9 @@ module.exports = (function() {
 
   /**
    * @member selected
-   * @type {boolean}
+   * @type {Color}
    * @memberof ColorPanel
    * @description Gets or sets the selected color in the color panel.
-   * @default true
    */
   Object.defineProperty(ColorPanel.prototype, 'selected', {
     get:function() { return new Color(this.native('color')); },

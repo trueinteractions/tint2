@@ -117,17 +117,9 @@ module.exports = (function() {
   /**
    * @member backgroundColor
    * @type {Color}
-   * @memberof Window
-   * @description Gets or sets the background color of the container.
+   * @memberof Scroll
+   * @description Gets or sets the background color of the container. See the Color class for more information.
    * @see Color
-   * @example
-   *  require('Common');
-   *  var win = new Window();
-   *  win.visible = true; // Show the window.
-   *  win.backgroundColor = 'red'; // make the background red.
-   *  win.backgroundColor = 'transparent'; // change the background to be transluent 
-   *                                       // with the frame or windows behind it showing.
-   *  win.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
    */
   Object.defineProperty(Scroll.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },

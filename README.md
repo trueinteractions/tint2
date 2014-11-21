@@ -13,9 +13,6 @@ mainWindow.visible = true;
 mainWindow.title = "I'm a native window built in node.";
 ```
 
-<h2>Create real applications with Javascript</h2>
-
-
 Run an application from a script
 
 ```bash
@@ -33,22 +30,13 @@ Or create a standalone Windows or OSX executable
 ```bash
 $ tntbuild somedir/package.json
 ```
+
 <h2>Get Started</h2>
 
-The release candidate is currently available. You can download OSX and Windows (64-bit) binaries from Github at https://github.com/trueinteractions/tint2/releases/ or at https://www.trueinteractions.com/tint-2.0-rc1.zip
-
-<h2>Documentation</h2>
-
-You can find an initial set of (incomplete) documentation at: 
-http://www.trueinteractions.com/tint2/docs/
-
-Note that the API is still unstable and subject to change, however we will be tracking API changes after the release candidate goes final.
-
-<h2>Help & Questions</h2>
-Community, development and other questions can be discussed at https://groups.google.com/forum/#!categories/trueinteractions
-
-In addition we offer commercial support at https://www.trueinteractions.com
-
+* Download the release candidate: https://github.com/trueinteractions/tint2/releases/ or at https://www.trueinteractions.com/tint-2.0-rc1.zip
+* Browse initial (unstable) API documentation: https://www.trueinteractions.com/tint2/docs/
+* Ask questions, get help, and search for answers: https://groups.google.com/forum/#!categories/trueinteractions
+* Need commercial support? https://www.trueinteractions.com
 
 <h2>Why is Tint different?</h2>
 There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
