@@ -9,6 +9,11 @@ module.exports = (function() {
    *              provide a free-form value from the keyboard.
    * @extends Container
    */
+  /** 
+   * @new 
+   * @description Creates a new TextInput control.
+   * @memberof TextInput
+   */
   /**
    * @event input
    * @memberof TextInput

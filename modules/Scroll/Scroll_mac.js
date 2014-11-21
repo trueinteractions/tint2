@@ -4,6 +4,17 @@ module.exports = (function() {
   var Color = require('Color');
   var $ = process.bridge.objc;
 
+  /**
+   * @class Scroll
+   * @description Creates a Container that allows its child controls to overflow out of its height
+   *              and width where the user can scroll left, right, up or down to specific controls.
+   * @extends Container
+   */
+  /**
+   * @new 
+   * @memberof Scroll
+   * @description Creates a new scroll container.
+   */
   function Scroll(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 
@@ -26,12 +37,27 @@ module.exports = (function() {
   Scroll.prototype = Object.create(Container.prototype);
   Scroll.prototype.constructor = Scroll;
 
+  /**
+   * @method setChild
+   * @memberof Scroll
+   * @params {Control} control The control to set as the child
+   * @description Sets the child control that will be scrollable, if multiple children are needed create
+   *              a generic Box or Container control to append multiple children.
+   */
   Scroll.prototype.setChild = function(control) { 
     this.native('setDocumentView', control.nativeView);
     control.fireEvent('parent-attached', [this]);
     this.fireEvent('child-attached', [control]);
   }
 
+  /**
+   * @member border
+   * @type {string}
+   * @memberof Scroll
+   * @description Gets or sets the border type for the scroll window. This can be one of the following values
+   *              "none", "line", "normal" or "concave".  The default is "normal".
+   * @default "normal"
+   */
   Object.defineProperty(Scroll.prototype, 'border', {
     get:function() {
       var s = this.nativeView('borderType');
@@ -49,21 +75,60 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member vertical
+   * @type {boolean}
+   * @memberof Scroll
+   * @description Gets or sets whether the scroll has a vertical scrollbar (and can scroll vertically).
+   *              The default is true. Note a scrollbar may not appear if the content does not push outside
+   *              the bounds of the scroll view.
+   * @default true
+   */
   Object.defineProperty(Scroll.prototype, 'vertical', {
     get:function() { return this.native('hasVerticalScroller') == $.YES ? true : false; },
     set:function(e) { this.native('setHasVerticalScroller', e ? $.YES : $.NO); }
   });
 
+  /**
+   * @member horizontal
+   * @type {boolean}
+   * @memberof Scroll
+   * @description Gets or sets whether the scroll has a horizontal scrollbar (and can scroll horizontally).
+   *              The default is true.
+   * @default true
+   */
   Object.defineProperty(Scroll.prototype, 'horizontal', {
     get:function() { return this.native('hasHorizontalScroller') == $.YES ? true : false; },
     set:function(e) { this.native('setHasHorizontalScroller', e ? $.YES : $.NO); }
   });
 
+  /**
+   * @member speed
+   * @type {number}
+   * @memberof Scroll
+   * @description Gets or sets the speed of the scrolling by unit of lines.
+   * @default 1
+   */
   Object.defineProperty(Scroll.prototype, 'speed', {
     get:function() { return this.native('lineScroll'); },
     set:function(e) { this.native('setLineScroll', e); }
   });
 
+  /**
+   * @member backgroundColor
+   * @type {Color}
+   * @memberof Window
+   * @description Gets or sets the background color of the container.
+   * @see Color
+   * @example
+   *  require('Common');
+   *  var win = new Window();
+   *  win.visible = true; // Show the window.
+   *  win.backgroundColor = 'red'; // make the background red.
+   *  win.backgroundColor = 'transparent'; // change the background to be transluent 
+   *                                       // with the frame or windows behind it showing.
+   *  win.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
+   */
   Object.defineProperty(Scroll.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
     set:function(e) {
