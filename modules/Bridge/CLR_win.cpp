@@ -1198,6 +1198,8 @@ namespace FlashWPFWindow {
       SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
       SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
       SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+      SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
+      SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 0); // allow file's to integrate with IWebBrowser JS execute.
     }
     
   }
