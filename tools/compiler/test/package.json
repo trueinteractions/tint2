@@ -1,0 +1,24 @@
+{
+  "name": "shortname",
+  "longname": "My Application",
+  "version": "10.3.1",
+  "description": "An example module to illustrate the usage of a package.json",
+  "author": "Your Name <you.name@example.org>",
+  "contributors": [{
+    "name": "Foo Bar",
+    "email": "foo.bar@example.com"
+  }],
+  "main": "lib/foo.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/some/repo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/some/repo/issues"
+  },
+  "keywords": [],
+  "dependencies": { },
+  "devDependencies": { },
+  "license": "MIT",
+  "copyright": "2014 True Interactions"
+}

@@ -1,4 +1,8 @@
 #!/usr/local/bin/node
+var argv = require('optimist')
+    .usage('Usage: $0 package.json')
+    .demand([1])
+    .argv;
 
 var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	tintExecutableOSX = '@@@TINT_OSX_EXECUTABLE@@@',
@@ -12,8 +16,6 @@ var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	Stream = require('stream');
 
 if(typeof($tint)=='undefined') $tint = {};
-
-
 
 /// Main Tint Compile/Build Control Functions ///
 
@@ -29,6 +31,7 @@ $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) 
 	outputDirectory=$tint.absolute(outputDirectory,path); 
 	b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],path); 
 	b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],path);
+	b.manifest = path;
 	return b; 
 };
 
@@ -77,7 +80,6 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			obj.macpkgdst=$tint.path([macresources, 'Package']);
 			obj.perms=[	$tint.path([maccontents, 'MacOS', 'Runtime']) ];
 			obj.icon=$tint.path([this.data.icon]);
-			obj.manifest=$tint.path([this.data.,'package.json']);
 			// Create a list of what to prepare for packaging
 			obj.toprepare=obj.topackage=$tint.getfiles(obj.srcdir)
 				// filter out excemptions.
@@ -216,6 +218,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 
 /// Begin execution. ///
 var build = $tint.builder(
+	argv._,
 	function error(e) {
 		console.error(e);
 		process.exit(1);
@@ -225,7 +228,6 @@ var build = $tint.builder(
 	function success(e) { process.exit(0); }, 
 	function start() { }
 );
-build.data = fs.readSync(process.argv[1]);
 build.play();
 
 
@@ -635,7 +637,7 @@ $tint.winmanifest = function(target, values) {
 				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
 				break;
 			case 'ProductVersion':
-				$tint.writebindata($tint.convtoucs2(values.version.replace('.','').replace('.','').replace('.','').replace('-'.'')),target,pos);
+				$tint.writebindata($tint.convtoucs2(values.version.replace('.','').replace('.','').replace('.','').replace('-','')),target,pos);
 				break;
 			default:
 				break;
@@ -742,7 +744,7 @@ $tint.manifest = function (data) {
     infoPlist=infoPlist.replace(/{{copyright}}/g,data.copyright);
     infoPlist=infoPlist.replace(/{{website}}/g,data.website);
     infoPlist=infoPlist.replace(/{{bundlename}}/g,data.shortname);
-    infoPlist=infoPlist.replace(/{{buildnumber}}/g,data.version.replace('.','').replace('.','').replace('.','').replace('-'.''));
+    infoPlist=infoPlist.replace(/{{buildnumber}}/g,data.version.replace('.','').replace('.','').replace('.','').replace('-',''));
     infoPlist=infoPlist.replace(/{{extension-upper}}/g,data.extensions.toUpperCase());
     
     return infoPlist;
