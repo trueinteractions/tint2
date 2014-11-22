@@ -1,13 +1,15 @@
 #!/usr/local/bin/node
+
 var argv = require('optimist')
-    .usage('Usage: $0 package.json')
+    .usage('Usage: $0 --clean [--no-windows-build] [--no-osx-build] package.json')
     .demand([1])
     .argv;
 
 var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	tintExecutableOSX = '@@@TINT_OSX_EXECUTABLE@@@',
 	tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
-	outputDirectory = process.cwd(),
+	outputDirectory = 'build',
+	sourceDirectory = ".",
 	pa = require('path'),
 	fs = require('fs'),
 	os = require('os'),
@@ -15,22 +17,32 @@ var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	util = require('util'),
 	Stream = require('stream');
 
-if(typeof($tint)=='undefined') $tint = {};
 
 /// Main Tint Compile/Build Control Functions ///
 
+$tint = {};
+if(typeof(window) == 'undefined') window = {}; // incase we're in a html context, its odd, i know.
+
 $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) {
+	if(!$tint.file(path)) throw new Error("The path "+path+" was not found or is not a file.");
+	var pathDir = sourceDirectory = $tint.dotdot(path);
 	if(!onError) onError = function(e){ if(e.stack) console.log(e.stack); else console.log('Error: '+e); }.bind(window);
 	if(!onWarning) onWarning = function(e){console.log('Warning: '+e);}.bind(window);
 	if(!onProgress) onProgress = function(e){console.log('Progress '+e);}.bind(window);
 	if(!onSuccess) onSuccess = function(e){console.log('Success');}.bind(window);
 	if(!onStart) onStart = function(e){console.log('Start '+e);}.bind(window);
 	var b = new $tint.builder(onError,onWarning,onProgress,onSuccess,onStart); 
-	b.data=$tint.mergeobjs(b.data,JSON.parse($tint.read(path))); 
-	b.data.sources.directory=$tint.absolute(b.data.sources.directory,path); 
-	outputDirectory=$tint.absolute(outputDirectory,path); 
-	b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],path); 
-	b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],path);
+	try {
+		var pjdata = $tint.read(path).toString('utf8');
+		var packagejson = JSON.parse(pjdata);
+	} catch(e) {
+		onError(e, 'The format of the package.json file has a syntax error\n'+$tint.read(path));
+	}
+	b.data=$tint.mergeobjs(b.data,packagejson); 
+	b.data.sources.directory=$tint.absolute(b.data.sources.directory,pathDir);
+	outputDirectory=$tint.absolute(outputDirectory,pathDir); 
+	b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],pathDir);
+	b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],pathDir);
 	b.manifest = path;
 	return b; 
 };
@@ -47,16 +59,16 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		windowsicon:[],
 		macosxicon:[],
 		checkdata:function () {
-			if (this.data.name.trim() === "") throw new Error("The display name must contain at least one character.");
+			if (this.data.name.trim() === "") throw new Error("The bundle name must be a valid file name without an extension or special characters.");
 			if (!this.data.version) throw new Error("The version number does not exist.");
 			if (!this.data.sources) throw new Error("A source directory has not been selected.");
-			if (this.data.shortname.trim() === "") throw new Error("The short name is invalid, bundle name must be a valid file name without an extension or special characters.");
+			if (this.data.longname.trim() === "") throw new Error("The long name is invalid");
 			if ($tint.ndef(this.data.icon.osx) || !$tint.file(this.data.icon.osx[0]) || this.data.icon.osx[0].indexOf(".png") == -1)
 		    	throw new Error("Select an icon (as a PNG image) to build an application.");
 		    if ($tint.ndef(this.data.icon.windows) || !$tint.file(this.data.icon.windows[0]) || this.data.icon.windows[0].indexOf(".png") == -1)
 		    	throw new Error("Select an icon (as a PNG image) to build an application.");
 		    if (this.data.namespace.trim() == "") throw new Error("The namespace field is required.");
-		    if (!$tint.exists($tint.path([this.data.sources.trim(),this.data.main.trim()]))) throw new Error("A main.js file is required n the root of your source directory.");
+		    if (!$tint.exists($tint.path([this.data.sources.directory.trim(),this.data.main.trim()]))) throw new Error("A main.js file is required n the root of your source directory.");
         },
 		config:function() {
 			var obj = {};
@@ -66,11 +78,12 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			// Create build configuration
 			obj.srcex=this.data.sources.exclude === '' ? null : this.data.sources.exclude;
 			obj.dstdir=$tint.path([outputDirectory, 'build']);
+			obj.manifest = this.manifest;
 			obj.srcdir=$tint.path([this.data.sources.directory]);
 			obj.pkgmid=$tint.path([obj.dstdir, 'Package']);
 			obj.runtime=$tint.path([obj.rescdir, 'Runtime']);
-			obj.macapp=$tint.path([outputDirectory, this.data.shortname + '.app']);
-			obj.winapp=$tint.path([outputDirectory, this.data.shortname + '.exe']);
+			obj.macapp=$tint.path([outputDirectory, this.data.name + '.app']);
+			obj.winapp=$tint.path([outputDirectory, this.data.name + '.exe']);
 			obj.main=$tint.path([this.data.sources.directory,this.data.main]);
 			var maccontents = $tint.path([obj.macapp,'Contents']);
 			var macresources = $tint.path([maccontents,'Resources']);
@@ -81,24 +94,27 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			obj.perms=[	$tint.path([maccontents, 'MacOS', 'Runtime']) ];
 			obj.icon=$tint.path([this.data.icon]);
 			// Create a list of what to prepare for packaging
-			obj.toprepare=obj.topackage=$tint.getfiles(obj.srcdir)
-				// filter out excemptions.
-				.filter(function (e) { return !e.match(obj.srcex); })
-				// create absolute & relative in/out paths.
-				.map(function(e) { return $tint.getpaths(e,obj.dstdir,obj.srcdir); })
-				// filter out anything going to the destination directory.
-				.filter(function(e) { return !$tint.issubdir(e.absin,outputDirectory); }.bind(this))
-				// add manifest, wrapper information and resources.	
-				.concat([$tint.getpaths(obj.manifest,obj.dstdir,obj.dstdir)])
-				//.concat($tint.resources.map(function(e){return $tint.getpaths(e,obj.dstdir,obj.rescdir);}));
-			
+			var files = $tint.getfiles(obj.srcdir);
+			obj.toprepare=obj.topackage=files.map(function(e){ return $tint.getpaths(e,".",outputDirectory); });
+			console.log(outputDirectory);
+			console.log(obj.toprepare);
+			process.exit(1);
+				//   filter out excemptions.
+				//.filter(function (e) { return !e.match(obj.srcex); })
+				//   create absolute & relative in/out paths.
+				//.map(function(e) {return $tint.getpaths(e,obj.dstdir,obj.srcdir); })
+				//   filter out anything going to the destination directory.
+				//.filter(function(e) { return !$tint.issubdir(e.absin,outputDirectory); }.bind(this))
+				//   add manifest, wrapper information and resources.	
+				//  .concat([$tint.getpaths(obj.manifest,'.', '.')])
+				//  .concat($tint.resources.map(function(e){return $tint.getpaths(e,obj.dstdir,obj.rescdir);}));
 			// Create a list for the pre-checks needed to succeed. Files that need to be removed, 
 			// Directories that should exist prior to running, files that should exist prior to running.
 			obj.prechecks={
 				//  Old: remove:[obj.dstdir,obj.macapp,obj.winapp,obj.pkgmid].concat(obj.topackage.map(function(e){return e.absout+'.o';})),
 				remove:[obj.macapp,obj.winapp,obj.pkgmid],
-				dirs:[obj.srcdir,obj.rescdir],
-				files:obj.topackage.map(function(e){return e.absin;}).concat([$tint.path([obj.srcdir,'main.js'])])
+				dirs:[obj.srcdir],
+				files:obj.topackage//.concat([$tint.path([obj.srcdir,obj.main])])
 			};
 			return obj;
 		},
@@ -131,28 +147,29 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		prepobj:function () {
 			try {
 				// Get the configuration, this has already been validated.
-				var prepfunc = function(b){this.tasks.push(function(){
+				var prepfunc = function(b){this.tasks.push(function() {
 					// If the input file is newer, or larger, rebuild. 
 					var fin = $tint.minfo(b.absin);
 					var fout = ($tint.exists(b.absout+'.jsz')) ? $tint.minfo(b.absout+'.jsz') : null;
 					if(fout === null || (fin.mtime.getTime() > fout.mtime.getTime())) {
-						$tint.remove(b.absout+'.o');
-						$tint.compress(b.absin,b.absout+'.jsz',function(){this.tick("Packaging "+b.relin);}.bind(this),function(e){this.onError(e);}.bind(this));
-					} else this.tick("Skipped Packing "+b.relin+ " (No Changes)");
+						$tint.remove(b.absout+'.jsz');
+						$tint.compress(b.absin,b.absout+'.jsz',function(){this.tick("packaging "+b.relin);}.bind(this),function(e){this.onError(e);}.bind(this));
+					} else this.tick("skipped Packing "+b.relin+ " (no changes)");
 				}.bind(this));};
-				var packfunc = function(b){this.tasks.push(function(){$tint.appendpkg(b.absout+'.jsz', b.relname, this.conf.pkgmid); this.tick("Linking "+b.relname);}.bind(this));};
+				var packfunc = function(b){this.tasks.push(function(){this.onProgress("linking "+b.relname); $tint.appendpkg(b.absout+'.jsz', b.relname, this.conf.pkgmid); this.tick();}.bind(this));};
 				// Pre-package, read in data, write out temporary files, perform pre-checks to ensure a safe build.
-				this.conf.prechecks.remove.forEach(function(e){this.tasks.push(function(){$tint.remove(e);this.tick("Validating Build");}.bind(this));}.bind(this));
+				this.conf.prechecks.remove.forEach(function(e){this.tasks.push(function(){this.onProgress("validating to remove ["+e+"]"); $tint.remove(e);this.tick();}.bind(this));}.bind(this));
 				//this.tasks.push(function(){$tint.copy(this.conf.manifest,$tint.packagejson(this.data));this.tick("Writing Manifest");}.bind(this));
-				this.conf.prechecks.dirs.forEach(function(e){this.tasks.push(function(){$tint.exists(e,false,"Directory does not exist: %s");this.tick("Validating Build");}.bind(this));}.bind(this));
-				this.conf.prechecks.files.forEach(function(e){this.tasks.push(function(){$tint.exists(e,true,"File does not exist: %s");this.tick("Validating Build");}.bind(this));}.bind(this));
+				this.conf.prechecks.dirs.forEach(function(e){this.tasks.push(function(){this.onProgress("validating directory ["+e+"]"); $tint.exists(e,false,"Directory does not exist: %s");this.tick();}.bind(this));}.bind(this));
+				this.conf.prechecks.files.forEach(function(e){this.tasks.push(function(){this.onProgress("validating file ["+e.absin+"]"); $tint.exists(e.absin,true,"File does not exist: %s");this.tick();}.bind(this));}.bind(this));
 				// Compress or 'prepare' the objects to the destination folder.
 				this.conf.toprepare.forEach(prepfunc.bind(this));
 				// Package these by appending them to a package location with the stamped magic key/file size.
 				this.conf.topackage.forEach(packfunc.bind(this));
 				// Remove temporary files
 				this.tasks=this.tasks.concat([
-					function(){ $tint.remove(this.conf.manifest); this.tick("Cleaning Up"); }.bind(this)
+					//$tint.remove(this.conf.manifest); 
+					function(){ this.tick("cleaning Up"); }.bind(this)
 				]);
 			} catch (e) { this.onError(e); return false; }
 			return true;
@@ -212,24 +229,6 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		}
 	};
 }
-
-
-
-
-/// Begin execution. ///
-var build = $tint.builder(
-	argv._,
-	function error(e) {
-		console.error(e);
-		process.exit(1);
-	}, 
-	function warning(e) { console.warn(e); }, 
-	function progress(e) { console.log(e); }, 
-	function success(e) { process.exit(0); }, 
-	function start() { }
-);
-build.play();
-
 
 
 
@@ -616,25 +615,25 @@ $tint.winmanifest = function(target, values) {
 		switch(key)
 		{
 			case 'CompanyName':
-				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+				$tint.writebindata($tint.convtoucs2(values.author),target,pos);
 				break;
 			case 'FileDescription':
-				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+				$tint.writebindata($tint.convtoucs2(values.description),target,pos);
 				break;
 			case 'FileVersion':
 				$tint.writebindata($tint.convtoucs2(values.version.replace(/\./g,',')),target,pos);
 				break;
 			case 'InternalName':
-				$tint.writebindata($tint.convtoucs2(values.shortname),target,pos);
+				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
 				break;
 			case 'LegalCopyright':
 				$tint.writebindata($tint.convtoucs2(values.copyright),target,pos);
 				break;
 			case 'OriginalFilename':
-				$tint.writebindata($tint.convtoucs2(values.shortname),target,pos);
+				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
 				break;
 			case 'ProductName':
-				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+				$tint.writebindata($tint.convtoucs2(values.longname),target,pos);
 				break;
 			case 'ProductVersion':
 				$tint.writebindata($tint.convtoucs2(values.version.replace('.','').replace('.','').replace('.','').replace('-','')),target,pos);
@@ -739,11 +738,11 @@ $tint.manifest = function (data) {
 
     infoPlist=infoPlist.replace(/{{extension}}/g,data.extensions);
     infoPlist=infoPlist.replace(/{{namespace}}/g,data.namespace);
-    infoPlist=infoPlist.replace(/{{displayname}}/g,data.name);
+    infoPlist=infoPlist.replace(/{{displayname}}/g,data.longname);
     infoPlist=infoPlist.replace(/{{displayversion}}/g,data.version);
     infoPlist=infoPlist.replace(/{{copyright}}/g,data.copyright);
     infoPlist=infoPlist.replace(/{{website}}/g,data.website);
-    infoPlist=infoPlist.replace(/{{bundlename}}/g,data.shortname);
+    infoPlist=infoPlist.replace(/{{bundlename}}/g,data.name);
     infoPlist=infoPlist.replace(/{{buildnumber}}/g,data.version.replace('.','').replace('.','').replace('.','').replace('-',''));
     infoPlist=infoPlist.replace(/{{extension-upper}}/g,data.extensions.toUpperCase());
     
@@ -1865,3 +1864,34 @@ WindowsExeFile.prototype.WindowsExeRead = function() {
 	this.Resources 		= this.ResourceDirectoryRead(this);	// Read resource headers
 	delete this.ResourcePosition;	
 }
+
+
+
+
+
+/// Begin execution. ///
+var build = $tint.loadbuilder(
+	argv._[0],
+	function error(e, msg) {
+		if(msg) console.error(msg);
+		if(e.stack) console.error(e.stack);
+		else if(!e) throw new Error('unknown');
+		console.error(e);
+		process.exit(1);
+	}, 
+	function warning(e) { console.warn(e); }, 
+	function progress(e) { console.log(e); }, 
+	function success(e) { process.exit(0); }, 
+	function start() { }
+);
+build.reset();
+if(argv.clean) build.prepclean();
+build.prepconfig();
+build.prepobj();
+if(!argv['no-windows-build']) build.prepwin();
+if(!argv['no-osx-build']) build.prepmac();
+build.postbuild();
+build.play();
+
+
+

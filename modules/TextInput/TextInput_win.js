@@ -13,7 +13,7 @@ module.exports = (function() {
       Container.call(this, $.System.Windows.Controls.TextBox, $.System.Windows.Controls.TextBox, options);
 
       this.native.addEventListener('GotFocus', function() { 
-        setTimeout(function() { this.fireEvent('inputstart'); }.bind(this),25);
+        setTimeout(function() { this.fireEvent('inputstart'); }.bind(this),150);
       }.bind(this));
       this.native.addEventListener('LostFocus', function() { this.fireEvent('inputend'); }.bind(this));
       this.native.addEventListener('TextChanged', function() { 
