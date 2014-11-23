@@ -1,22 +1,22 @@
 #!/usr/local/bin/node
 
 var argv = require('optimist')
-    .usage('Usage: $0 --clean [--no-windows-build] [--no-osx-build] package.json')
+    .usage('Usage: $0 --clean [--no-windows-build] [--windows-runtime=tint.exe] [--osx-runtime=tint] [--no-osx-build] package.json')
     .demand([1])
     .argv;
 
 var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	tintExecutableOSX = '@@@TINT_OSX_EXECUTABLE@@@',
 	tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
-	outputDirectory = 'build',
-	sourceDirectory = ".",
+	baseDirectory = process.cwd(),
+	outputDirectory = baseDirectory+'/'+'build',
+	sourceDirectory = null,
 	pa = require('path'),
 	fs = require('fs'),
 	os = require('os'),
 	zlib = require('zlib'),
 	util = require('util'),
 	Stream = require('stream');
-
 
 /// Main Tint Compile/Build Control Functions ///
 
@@ -25,7 +25,6 @@ if(typeof(window) == 'undefined') window = {}; // incase we're in a html context
 
 $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) {
 	if(!$tint.file(path)) throw new Error("The path "+path+" was not found or is not a file.");
-	var pathDir = sourceDirectory = $tint.dotdot(path);
 	if(!onError) onError = function(e){ if(e.stack) console.log(e.stack); else console.log('Error: '+e); }.bind(window);
 	if(!onWarning) onWarning = function(e){console.log('Warning: '+e);}.bind(window);
 	if(!onProgress) onProgress = function(e){console.log('Progress '+e);}.bind(window);
@@ -38,11 +37,12 @@ $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) 
 	} catch(e) {
 		onError(e, 'The format of the package.json file has a syntax error\n'+$tint.read(path));
 	}
-	b.data=$tint.mergeobjs(b.data,packagejson); 
-	b.data.sources.directory=$tint.absolute(b.data.sources.directory,pathDir);
-	outputDirectory=$tint.absolute(outputDirectory,pathDir); 
-	b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],pathDir);
-	b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],pathDir);
+	b.data=$tint.mergeobjs(b.data,packagejson);
+	b.data.sources.directory=$tint.absolute(b.data.sources.directory,'.');
+	sourceDirectory = baseDirectory + '/' + $tint.absolute($tint.dotdot(path),b.data.sources.directory);
+	// outputDirectory=$tint.absolute(outputDirectory,pathDir); 
+	b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
+	b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],sourceDirectory);
 	b.manifest = path;
 	return b; 
 };
@@ -59,6 +59,9 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		windowsicon:[],
 		macosxicon:[],
 		checkdata:function () {
+			if (!$tint.exists(outputDirectory, false)) {
+				$tint.makedir(outputDirectory);
+			}
 			if (this.data.name.trim() === "") throw new Error("The bundle name must be a valid file name without an extension or special characters.");
 			if (!this.data.version) throw new Error("The version number does not exist.");
 			if (!this.data.sources) throw new Error("A source directory has not been selected.");
@@ -68,7 +71,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		    if ($tint.ndef(this.data.icon.windows) || !$tint.file(this.data.icon.windows[0]) || this.data.icon.windows[0].indexOf(".png") == -1)
 		    	throw new Error("Select an icon (as a PNG image) to build an application.");
 		    if (this.data.namespace.trim() == "") throw new Error("The namespace field is required.");
-		    if (!$tint.exists($tint.path([this.data.sources.directory.trim(),this.data.main.trim()]))) throw new Error("A main.js file is required n the root of your source directory.");
+		    if (!$tint.exists($tint.path([sourceDirectory,this.data.sources.directory.trim(),this.data.main.trim()]))) throw new Error("A main.js file is required n the root of your source directory.");
         },
 		config:function() {
 			var obj = {};
@@ -76,10 +79,10 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			// give a few options to check before giving up.
 			var runproc = process.execPath.split(pa.sep);
 			// Create build configuration
-			obj.srcex=this.data.sources.exclude === '' ? null : this.data.sources.exclude;
-			obj.dstdir=$tint.path([outputDirectory, 'build']);
+			obj.srcex= !this.data.sources.exclude ? null : this.data.sources.exclude;
+			obj.dstdir=outputDirectory;
 			obj.manifest = this.manifest;
-			obj.srcdir=$tint.path([this.data.sources.directory]);
+			obj.srcdir=$tint.path([sourceDirectory,this.data.sources.directory]);
 			obj.pkgmid=$tint.path([obj.dstdir, 'Package']);
 			obj.runtime=$tint.path([obj.rescdir, 'Runtime']);
 			obj.macapp=$tint.path([outputDirectory, this.data.name + '.app']);
@@ -95,12 +98,13 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			obj.icon=$tint.path([this.data.icon]);
 			// Create a list of what to prepare for packaging
 			var files = $tint.getfiles(obj.srcdir);
-			obj.toprepare=obj.topackage=files.map(function(e){ return $tint.getpaths(e,".",outputDirectory); });
-			console.log(outputDirectory);
-			console.log(obj.toprepare);
-			process.exit(1);
+			obj.toprepare=obj.topackage=files
+				.filter(function (e) { return !e.match(obj.srcex); })
+				.map(function(e){
+					return $tint.getpaths(e,outputDirectory,sourceDirectory); 
+				});
 				//   filter out excemptions.
-				//.filter(function (e) { return !e.match(obj.srcex); })
+				//
 				//   create absolute & relative in/out paths.
 				//.map(function(e) {return $tint.getpaths(e,obj.dstdir,obj.srcdir); })
 				//   filter out anything going to the destination directory.
@@ -113,7 +117,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			obj.prechecks={
 				//  Old: remove:[obj.dstdir,obj.macapp,obj.winapp,obj.pkgmid].concat(obj.topackage.map(function(e){return e.absout+'.o';})),
 				remove:[obj.macapp,obj.winapp,obj.pkgmid],
-				dirs:[obj.srcdir],
+				dirs:[obj.srcdir,obj.dstdir],
 				files:obj.topackage//.concat([$tint.path([obj.srcdir,obj.main])])
 			};
 			return obj;
@@ -121,18 +125,18 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		reset:function() { this.tasks=[]; },
 		tick:function(e) { if(e) this.onProgress(e); if(this.tasks.length){var task=this.tasks.shift(); setTimeout(function(){try{task.bind(this)();}catch(e){return this.onError(e);}}.bind(this),10);}},
 		play:function() { this.onStart(this.tasks.length); this.tick(); },
-		stop:function() { this.tasks = [function(e){this.onError('Build was stopped.');}.bind(this)]; },
+		stop:function() { this.tasks = [function(e){this.onError('build was stopped.');}.bind(this)]; },
 		running:function() { return this.tasks.length !== 0; },
 		prepclean:function() {
 			try {
 				this.checkdata();
 				this.conf = this.config();
-				var packclean = function(b){this.tasks.push(function(){$tint.remove(b.absout+'.jsz'); this.tick("Cleaning Files");}.bind(this));};
+				var packclean = function(b){this.tasks.push(function(){$tint.remove(b.absout+'.jsz'); this.tick("cleaning files "+b.absout+'.jsz');}.bind(this));};
 				this.conf.topackage.forEach(packclean.bind(this));
 				this.tasks=this.tasks.concat([
-					function(){ $tint.remove(this.conf.macapp); this.tick("Cleaning MacOSX Application"); }.bind(this),
-					function(){ $tint.remove(this.conf.winapp); this.tick("Cleaning Windows Application"); }.bind(this),
-					function(){ $tint.remove(this.conf.pkgmid); this.tick("Cleaning"); }.bind(this)
+					function(){ $tint.remove(this.conf.macapp); this.tick("cleaning macosx application"); }.bind(this),
+					function(){ $tint.remove(this.conf.winapp); this.tick("cleaning windows application"); }.bind(this),
+					function(){ $tint.remove(this.conf.pkgmid); this.tick("cleaning temporary package"); }.bind(this)
 				]);
 			} catch(e) { this.onError(e); return false; }
 			return true;
@@ -147,16 +151,30 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		prepobj:function () {
 			try {
 				// Get the configuration, this has already been validated.
-				var prepfunc = function(b){this.tasks.push(function() {
-					// If the input file is newer, or larger, rebuild. 
-					var fin = $tint.minfo(b.absin);
-					var fout = ($tint.exists(b.absout+'.jsz')) ? $tint.minfo(b.absout+'.jsz') : null;
-					if(fout === null || (fin.mtime.getTime() > fout.mtime.getTime())) {
-						$tint.remove(b.absout+'.jsz');
-						$tint.compress(b.absin,b.absout+'.jsz',function(){this.tick("packaging "+b.relin);}.bind(this),function(e){this.onError(e);}.bind(this));
-					} else this.tick("skipped Packing "+b.relin+ " (no changes)");
-				}.bind(this));};
-				var packfunc = function(b){this.tasks.push(function(){this.onProgress("linking "+b.relname); $tint.appendpkg(b.absout+'.jsz', b.relname, this.conf.pkgmid); this.tick();}.bind(this));};
+				var prepfunc = function(b){
+					this.tasks.push(function() {
+						// If the input file is newer, or larger, rebuild. 
+						var fin = $tint.minfo(b.absin);
+						var fout = ($tint.exists(b.absout+'.jsz')) ? $tint.minfo(b.absout+'.jsz') : null;
+						if(fout === null || (fin.mtime.getTime() > fout.mtime.getTime())) {
+							$tint.remove(b.absout+'.jsz');
+							$tint.compress(b.absin,b.absout+'.jsz',
+								function(){
+									this.tick("packaging "+b.relin);
+								}.bind(this),
+								function(e){this.onError(e);}.bind(this)
+							);
+						} else 
+							this.tick("skipped packing "+b.relin+ " (no changes)");
+					}.bind(this));
+				};
+				var packfunc = function(b){
+					this.tasks.push(function(){
+						this.onProgress("linking "+b.relname); 
+						$tint.appendpkg(b.absout+'.jsz', b.relname, this.conf.pkgmid); 
+						this.tick();
+					}.bind(this));
+				};
 				// Pre-package, read in data, write out temporary files, perform pre-checks to ensure a safe build.
 				this.conf.prechecks.remove.forEach(function(e){this.tasks.push(function(){this.onProgress("validating to remove ["+e+"]"); $tint.remove(e);this.tick();}.bind(this));}.bind(this));
 				//this.tasks.push(function(){$tint.copy(this.conf.manifest,$tint.packagejson(this.data));this.tick("Writing Manifest");}.bind(this));
@@ -167,21 +185,28 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				// Package these by appending them to a package location with the stamped magic key/file size.
 				this.conf.topackage.forEach(packfunc.bind(this));
 				// Remove temporary files
-				this.tasks=this.tasks.concat([
+				//this.tasks=this.tasks.concat([
 					//$tint.remove(this.conf.manifest); 
-					function(){ this.tick("cleaning Up"); }.bind(this)
-				]);
+				//	function(){ this.tick("cleaning up"); }.bind(this)
+				//]);
 			} catch (e) { this.onError(e); return false; }
 			return true;
 		},
 		prepwin:function() {
 			try {
 			this.tasks=this.tasks.concat([
-				function(){ this.pngdata=$tint.read(this.data.icon.windows[0]);this.tick("Reading Windows Icon");}.bind(this),
-				function(){ $tint.parsepng(this.pngdata,function(e){this.onError(e);}.bind(this),function(e){this.windowsiconlrg=e;this.tick("Parsing Icon Data"); }.bind(this));}.bind(this),
-				function(){ $tint.copy(this.conf.runtime+'.exe',this.conf.winapp); this.tick("Creating Windows Application"); }.bind(this),
-				function(){ $tint.append(this.conf.winapp, this.conf.pkgmid); this.tick("Finalizing Windows"); }.bind(this),
+				function(){ this.pngdata=$tint.read(this.data.icon.windows[0]);this.tick("reading windows icon");}.bind(this),
+				function(){ $tint.parsepng(this.pngdata,function(e){this.onError(e);}.bind(this),function(e){this.windowsiconlrg=e;this.tick("creating icon data"); }.bind(this));}.bind(this),
+				function(){ 
+					this.onProgress("creating windows application");
+					var winExec = new Buffer(tintExecutableWindows, 'base64');
+					fs.writeFileSync(this.conf.winapp,winExec);
+					this.tick();
+					//$tint.copy(this.conf.runtime+'.exe',this.conf.winapp); this.tick("Creating Windows Application"); 
+				}.bind(this),
+				function(){ $tint.append(this.conf.winapp, this.conf.pkgmid); this.tick("finalizing windows"); }.bind(this),
 				function(){
+					this.onProgress("writing icon for windows");
 					if(typeof(this.windowsicon)=='undefined'||this.windowsicon==null)this.windowsicon=new Array();
 					if(typeof(this.windowsicon[16])=='undefined')this.windowsicon[16]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 16);
 					if(typeof(this.windowsicon[32])=='undefined')this.windowsicon[32]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 32);
@@ -189,17 +214,18 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					if(typeof(this.windowsicon[64])=='undefined')this.windowsicon[64]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 64);
 					if(typeof(this.windowsicon[128])=='undefined')this.windowsicon[128]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 128);
 					if(typeof(this.windowsicon[256])=='undefined')this.windowsicon[256]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 256);
-					
-					$tint.stampwindows(this.windowsicon[16], 16, this.conf.winapp);
-					$tint.stampwindows(this.windowsicon[32], 32, this.conf.winapp);
-					$tint.stampwindows(this.windowsicon[48], 48, this.conf.winapp);
-					$tint.stampwindows(this.windowsicon[64], 64, this.conf.winapp);
-					$tint.stampwindows(this.windowsicon[128], 128, this.conf.winapp);
-					$tint.stampwindows(this.windowsicon[256], 256, this.conf.winapp);
-
-					$tint.iconcache(this.onWarning); 
-					$tint.winmanifest(this.conf.winapp, this.data);
-					this.tick("Writing icon for Windows"); 
+					try {
+						$tint.stampwindows(this.windowsicon, this.conf.winapp);
+					} catch (e) {
+						this.onWarning('Failed to stamp windows icon.');
+					}
+					//$tint.iconcache(this.onWarning); 
+					try {
+						$tint.winmanifest(this.conf.winapp, this.data);
+					} catch (e) {
+						this.onWarning('Failed to write manifest data to windows application.');
+					}
+					this.tick(); 
 				}.bind(this)
 			]);
 			} catch(e) { this.onError(e); return false; }
@@ -208,12 +234,23 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		prepmac:function() {
 			try {
 			this.tasks=this.tasks.concat([
-				function(){ this.macosxicon=$tint.read(this.data.IconMacOSX);this.tick("Reading MacOSX Icon");}.bind(this),
-				function(){ $tint.copy(this.conf.runtime+'.app',this.conf.macapp); this.tick("Creating MacOSX Application"); }.bind(this),
-				function(){ $tint.copy(this.conf.pkgmid, $tint.makepath($tint.dotdot(this.conf.macpkgdst))); this.tick("Finalizing MacOSX"); }.bind(this),
-				function(){ $tint.write(this.conf.macinfo, $tint.manifest(this.data)); this.tick("Stamping MacOSX"); }.bind(this),
-				function(){ if(os.platform()=='darwin') { this.conf.perms.forEach(function(e){ fs.chmodSync(e,'755'); }.bind(this)); } this.tick("Fixing permissions"); }.bind(this),
-				function(){ $tint.stampmacosx(this.macosxicon, this.conf.macicon); this.tick("Writing icon for MacOSX"); }.bind(this)
+				function(){ this.macosxicon=$tint.read(this.data.icon.osx[0]);this.tick("reading macosx icon");}.bind(this),
+				function(){ 
+					this.onProgress("creating macosx application");
+					//$tint.copy(this.conf.runtime+'.app',this.conf.macapp); 
+					var macExec = new Buffer(tintExecutableOSX, 'base64');
+					$tint.makedir(this.conf.macapp);
+					$tint.makedir($tint.path([this.conf.macapp,'Contents']));
+					$tint.makedir($tint.path([this.conf.macapp,'Contents','Resources']));
+					$tint.makedir($tint.path([this.conf.macapp,'Contents','MacOS']));
+					$tint.makedir($tint.path([this.conf.macapp,'Contents','Frameworks']));
+					fs.writeFileSync($tint.path([this.conf.macapp, 'Contents','MacOS','Runtime']), macExec);
+					this.tick();
+				}.bind(this),
+				function(){ $tint.copy(this.conf.pkgmid, $tint.makepath($tint.dotdot(this.conf.macpkgdst))); this.tick("finalizing macosx"); }.bind(this),
+				function(){ $tint.write(this.conf.macinfo, $tint.manifest(this.data)); this.tick("stamping macosx"); }.bind(this),
+				function(){ if(os.platform()=='darwin') { this.conf.perms.forEach(function(e){ fs.chmodSync(e,'755'); }.bind(this)); } this.tick("fixing permissions"); }.bind(this),
+				function(){ $tint.stampmacosx(this.macosxicon, this.conf.macicon); this.tick("writing icon for macosx"); }.bind(this)
 			]);
 			} catch(e) { this.onError(e); return false; }
 			return true;
@@ -344,7 +381,7 @@ $tint.getpaths=function(file,dstdir,srcdir) {
 	return {
 		absin:$tint.absolute(file,srcdir), 
 		absout:$tint.absolute($tint.relative(file, srcdir), dstdir),
-		relout:$tint.relative(file,dstdir),
+		relout:$tint.relative($tint.relative(file, srcdir), dstdir),
 		relin:$tint.relative(file,srcdir),
 		relname:$tint.relative(file,srcdir).replace(/\\/g,"/")
 	};
@@ -364,8 +401,8 @@ $tint.relative2=function(file,base) {
 	file=file.replace(/\\/g,pa.sep).replace(/\//g,pa.sep);
 	base=base.replace(/\\/g,pa.sep).replace(/\//g,pa.sep);
 
-	if(_fs.syncExists(file) && _fs.statStync(file).isFile()) file = $tint.dotdot(file);
-	if(_fs.syncExists(base) && _fs.statStync(base).isFile()) file = $tint.dotdot(base);
+	if(fs.syncExists(file) && fs.statStync(file).isFile()) file = $tint.dotdot(file);
+	if(fs.syncExists(base) && fs.statStync(base).isFile()) file = $tint.dotdot(base);
 
 	if(base[0] != '/') throw new Error('Asked for a relative path where the base isnt absolute');
 	if(file[0] != '/') throw new Error('Asked for a relative path where the file path isnt absolute');
@@ -444,34 +481,33 @@ $tint.writepkg = function(files,base,pkgfile) {
 	while(file=files.shift())
 		$tint.appendpkg($tint.absolute(file,base)+'.o',$tint.relative(file,base),pkgfile);
 }
-$tint.stampwindows = function(imgdata, size, dst) {
-	// Stamp Windows Icon
-	var dstBuffer = imgdata;
-	var fd = _fs.openSync(dst,'r+');
+$tint.stampwindows = function(imgdata, dst) {
+	var fd = fs.openSync(dst,'r+');
 	var w = new WindowsExeFile(fd);
 	w.WindowsExeRead();
-	if(size==16) index=0;
-	else if(size==32) index=1;
-	else if(size==48) index=2;
-	else if(size==64) index=3;
-	else if(size==128) index=4;
-	else if(size==256) index=5;
-	else index=-1;
-	var pos = w.Resources.Entries[1].Directory.Entries[index].Directory.Entries[0].Data.Icon.getDataPosition();
-	var buf = new Buffer(size*size*4);
-	for(var i=0; i < dstBuffer.length;i+=4) {
-		var row = size-Math.floor(i/(4*size)), col = i%(size*4), index=(row-1)*(size*4)+col;
-		r = dstBuffer[index];
-		g = dstBuffer[index+1];
-		b = dstBuffer[index+2];
-		a = dstBuffer[index+3];
-		buf.writeUInt8(b,i);
-		buf.writeUInt8(g,i+1);
-		buf.writeUInt8(r,i+2);
-		buf.writeUInt8(a,i+3);
+	fs.closeSync(fd);
+	var iconDb = w.Resources.Entries[0].Directory.Entries;
+	for(var z=0; z < iconDb.length; z++) {
+		var fd = fs.openSync(dst,'r+');
+		var icon = iconDb[z].Directory.Entries[0].Data.Icon;
+		var pos = icon.getDataPosition();
+		var size = icon.biWidth;
+		var dstBuffer = imgdata[size];
+		var buf = new Buffer(size*size*4);
+		for(var i=0; i < dstBuffer.length;i+=4) {
+			var row = size-Math.floor(i/(4*size)), col = i%(size*4), index=(row-1)*(size*4)+col;
+			r = dstBuffer[index];
+			g = dstBuffer[index+1];
+			b = dstBuffer[index+2];
+			a = dstBuffer[index+3];
+			buf.writeUInt8(b,i);
+			buf.writeUInt8(g,i+1);
+			buf.writeUInt8(r,i+2);
+			buf.writeUInt8(a,i+3);
+		}
+		fs.writeSync(fd, buf, 0, buf.length, pos);
+		fs.closeSync(fd);
 	}
-	_fs.writeSync(fd, buf, 0, buf.length, pos);
-	_fs.closeSync(fd);
 }
 $tint.execute = function(exec,args,ischild,isapp,output,error,exit) {
 	//var execd = (os.platform()=='darwin' && isapp) ? '/usr/bin/open' : exec;
@@ -590,8 +626,8 @@ $tint.convtowinversion = function(str) {
 
 $tint.writebindata = function(buf,target,pos) {
 	var fd = fs.openSync(target,'r+');
-	_fs.writeSync(fd, buf, 0, buf.length, pos);
-	_fs.closeSync(fd);
+	fs.writeSync(fd, buf, 0, buf.length, pos);
+	fs.closeSync(fd);
 }
 $tint.convtoucs2 = function(str) {
 	var z = [];
@@ -606,7 +642,7 @@ $tint.winmanifest = function(target, values) {
 	var fd = fs.openSync(target,'r+');
 	var winexe = new WindowsExeFile(fd);
 	winexe.WindowsExeRead();
-	var point = winexe.Resources.Entries[5].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children[0].Children;
+	var point = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children[0].Children;
 	fs.closeSync(fd);
 
 	for(var i=0; i < point.length ; i++) {
@@ -642,7 +678,7 @@ $tint.winmanifest = function(target, values) {
 				break;
 		}
 	}
-	var versionPosition = winexe.Resources.Entries[5].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.ValuePosition;
+	var versionPosition = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.ValuePosition;
 	$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 2 * 4);
 	$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 4 * 4);
 
@@ -744,7 +780,8 @@ $tint.manifest = function (data) {
     infoPlist=infoPlist.replace(/{{website}}/g,data.website);
     infoPlist=infoPlist.replace(/{{bundlename}}/g,data.name);
     infoPlist=infoPlist.replace(/{{buildnumber}}/g,data.version.replace('.','').replace('.','').replace('.','').replace('-',''));
-    infoPlist=infoPlist.replace(/{{extension-upper}}/g,data.extensions.toUpperCase());
+    if(data.extensions)
+	    infoPlist=infoPlist.replace(/{{extension-upper}}/g,data.extensions.toUpperCase());
     
     return infoPlist;
 }
@@ -1437,7 +1474,7 @@ WindowsConst.GETOFFSETBYDIRECTORY = function(directory, winObj) {
 }
 WindowsConst.READ = function(size, wef) {
 	var buf = new Buffer(size);
-	_fs.readSync(wef.FileDescriptor, buf, 0, size, wef.Position);
+	fs.readSync(wef.FileDescriptor, buf, 0, size, wef.Position);
 	wef.Increment(size);
 	return buf;
 }
@@ -1866,10 +1903,11 @@ WindowsExeFile.prototype.WindowsExeRead = function() {
 }
 
 
-
-
-
 /// Begin execution. ///
+function readToBase64(e) {
+	return fs.readFileSync(e).toString('base64');
+}
+
 var build = $tint.loadbuilder(
 	argv._[0],
 	function error(e, msg) {
@@ -1885,9 +1923,11 @@ var build = $tint.loadbuilder(
 	function start() { }
 );
 build.reset();
-if(argv.clean) build.prepclean();
 build.prepconfig();
+if(argv.clean) build.prepclean();
 build.prepobj();
+if(argv['windows-runtime']) tintExecutableWindows = readToBase64(argv['windows-runtime']);
+if(argv['osx-runtime']) tintExecutableOSX = readToBase64(argv['osx-runtime']);
 if(!argv['no-windows-build']) build.prepwin();
 if(!argv['no-osx-build']) build.prepmac();
 build.postbuild();
