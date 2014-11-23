@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<title>Echo</title>
 	<script>
 		window.addEventListener('message', function(e) {
+			document.getElementById('foo').innerText = e.data;
 			window.postMessageToHost(e.data);
 		});
 	</script>

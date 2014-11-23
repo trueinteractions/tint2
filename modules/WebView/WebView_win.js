@@ -154,7 +154,7 @@ module.exports = (function() {
       // as well, asyncronous pluggable protocols wont work since they're system wide and
       // not app dependent.
       if(url.indexOf("app:") > -1 && !application.packaged)
-        url = url.replace("app:/","file:///"+process.cwd().replace(/\\/g,'/'));
+        url = url.replace("app:/","http://127.0.0.1:"+application.private.appSchemaPort+"/"); //file:///"+process.cwd().replace(/\\/g,'/'));
       this.nativeView.Navigate(new $.System.Uri(url));
     }
   });

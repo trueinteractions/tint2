@@ -1199,7 +1199,13 @@ namespace FlashWPFWindow {
       SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
       SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
       SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
-      SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 0); // allow file's to integrate with IWebBrowser JS execute.
+      SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
+      SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
+      SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
+      SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
+      SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
+      SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
+      SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
     }
     
   }

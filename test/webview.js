@@ -24,21 +24,23 @@ function run($utils) {
   webview.addEventListener('load', function() {
     mainWindow.title = webview.title;
     webview.postMessage('hello');
-    /* @hidden */ webview.postMessage('hello2');
-    /* @hidden */ webview.postMessage('hello3');
+    webview.postMessage('hello2');
+    webview.postMessage('hello3');
   });
   /* @hidden */ var count = 1;
+  
   webview.addEventListener('title', function() {
-    /* @hidden */ $utils.assert(webview.title == 'Test'+count, 'expected window.title['+webview.title+'] == Test'+count);
     mainWindow.title = webview.title;
-    /* @hidden */ if(count == 4) {
-    /* @hidden */   setTimeout(function() { mainWindow.destroy();
-    /* @hidden */   $utils.ok(); }, 1000);
-    /* @hidden */ }
-    /* @hidden */ count++;
+    $utils.assert(webview.title == 'Test'+count, 'expected window.title['+webview.title+'] == Test'+count);
+    if(count == 4) {
+      setTimeout(function() { 
+        mainWindow.destroy();
+        $utils.ok(); 
+      }, 1000);
+    }
+    count++;
   });
   webview.location = 'app://assets/webview-test.html';
-
 }
 
 /**
