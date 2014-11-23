@@ -220,11 +220,12 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 						this.onWarning('Failed to stamp windows icon.');
 					}
 					//$tint.iconcache(this.onWarning); 
-					try {
+					//try {
+						this.onProgress("writing manifest for windows");
 						$tint.winmanifest(this.conf.winapp, this.data);
-					} catch (e) {
-						this.onWarning('Failed to write manifest data to windows application.');
-					}
+					//} catch (e) {
+					//	this.onWarning('Failed to write manifest data to windows application.');
+					//}
 					this.tick(); 
 				}.bind(this)
 			]);
@@ -638,49 +639,63 @@ $tint.convtoucs2 = function(str) {
 	for(var i=0; i < (110 - 2*z.length); i++) z.push(0);
 	return new Buffer(z);
 }
-$tint.winmanifest = function(target, values) {
-	var fd = fs.openSync(target,'r+');
-	var winexe = new WindowsExeFile(fd);
-	winexe.WindowsExeRead();
-	var point = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children[0].Children;
-	fs.closeSync(fd);
 
-	for(var i=0; i < point.length ; i++) {
-		var key = point[i].szKey.map(function(e){return e[0];}).join('');
-		var pos = point[i].ValuePosition;
-		switch(key)
-		{
-			case 'CompanyName':
-				$tint.writebindata($tint.convtoucs2(values.author),target,pos);
-				break;
-			case 'FileDescription':
-				$tint.writebindata($tint.convtoucs2(values.description),target,pos);
-				break;
-			case 'FileVersion':
-				$tint.writebindata($tint.convtoucs2(values.version.replace(/\./g,',')),target,pos);
-				break;
-			case 'InternalName':
-				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
-				break;
-			case 'LegalCopyright':
-				$tint.writebindata($tint.convtoucs2(values.copyright),target,pos);
-				break;
-			case 'OriginalFilename':
-				$tint.writebindata($tint.convtoucs2(values.name),target,pos);
-				break;
-			case 'ProductName':
-				$tint.writebindata($tint.convtoucs2(values.longname),target,pos);
-				break;
-			case 'ProductVersion':
-				$tint.writebindata($tint.convtoucs2(values.version.replace('.','').replace('.','').replace('.','').replace('-','')),target,pos);
-				break;
-			default:
-				break;
+function recurseManifest(container, target, values) {
+	for(var cont=0; cont < container.length; cont++) {
+		var point = container[cont].Children;
+		//console.log('point is: ', point);
+		for(var i=0; i < point.length ; i++) {
+			var key = point[i].szKey.map(function(e){return e[0];}).join('');
+			var pos = point[i].ValuePosition;
+			//console.log('found key: '+key+'');
+			switch(key)
+			{
+				case 'CompanyName':
+					//console.log('writing ['+values.author+']');
+					$tint.writebindata($tint.convtoucs2(values.author),target,pos);
+					break;
+				case 'FileDescription':
+					$tint.writebindata($tint.convtoucs2(values.description),target,pos);
+					break;
+				case 'FileVersion':
+					$tint.writebindata($tint.convtoucs2(values.version.replace(/\./g,',')),target,pos);
+					break;
+				case 'InternalName':
+					$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+					break;
+				case 'LegalCopyright':
+					$tint.writebindata($tint.convtoucs2(values.copyright),target,pos);
+					break;
+				case 'OriginalFilename':
+					$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+					break;
+				case 'ProductName':
+					$tint.writebindata($tint.convtoucs2(values.longname),target,pos);
+					break;
+				case 'ProductVersion':
+					$tint.writebindata($tint.convtoucs2(values.version.replace('.','').replace('.','').replace('.','').replace('-','')),target,pos);
+					break;
+				default:
+					break;
+			}
+			recurseManifest(point[i].Children,target,values);
 		}
+		
 	}
 	var versionPosition = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.ValuePosition;
 	$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 2 * 4);
 	$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 4 * 4);
+}
+
+$tint.winmanifest = function(target, values) {
+	var fd = fs.openSync(target,'r+');
+	var winexe = new WindowsExeFile(fd);
+	winexe.WindowsExeRead();
+	fs.closeSync(fd);
+	//console.log(winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo);
+	var container = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children; //[0].Children
+	recurseManifest(container,target,values);
+	//console.log('children, there are: ',winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children)
 
 }
 $tint.manifest = function (data) {
