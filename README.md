@@ -73,7 +73,7 @@ git clone https://github.com/trueinteractions/tint2.git .
 ./test.sh
 ```
 <h3>Windows</h3>
-Ensure you have Visual Studio 2010 (or the free msbuild compiler and Windows SDK 7.0A+), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
+Ensure you have Visual Studio 2010 SP1 and WinSDK 7.0 (note problems occur with different WinSDK's and Visual Studio Systems), Windows 7, git and Python 2.6 (or 2.7).  Building does not require (nor support) cygwin or other shell systems.
 
 64-bit build (default)
 

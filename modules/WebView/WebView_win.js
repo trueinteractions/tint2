@@ -155,6 +155,7 @@ module.exports = (function() {
       // not app dependent.
       if(url.indexOf("app:") > -1 && !application.packaged)
         url = url.replace("app:/","http://127.0.0.1:"+application.private.appSchemaPort+"/"); //file:///"+process.cwd().replace(/\\/g,'/'));
+      console.log('going to: ', url);
       this.nativeView.Navigate(new $.System.Uri(url));
     }
   });

@@ -1,7 +1,7 @@
 #!/usr/local/bin/node
 
 var argv = require('optimist')
-    .usage('Usage: $0 --clean [--no-windows-build] [--windows-runtime=tint.exe] [--osx-runtime=tint] [--no-osx-build] package.json')
+    .usage('Usage: $0 [--clean] [--no-windows-build]  [--no-osx-build] [--windows-runtime=tint.exe] [--osx-runtime=tint] package.json')
     .demand([1])
     .argv;
 
@@ -219,10 +219,12 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					} catch (e) {
 						this.onWarning('Failed to stamp windows icon.');
 					}
+					// Icon reset and cache is currently disabled.
 					//$tint.iconcache(this.onWarning); 
+					// Writing the manifest information is disabled and not, especiially functional..
 					//try {
-						this.onProgress("writing manifest for windows");
-						$tint.winmanifest(this.conf.winapp, this.data);
+					//	this.onProgress("writing manifest for windows");
+					//	$tint.winmanifest(this.conf.winapp, this.data);
 					//} catch (e) {
 					//	this.onWarning('Failed to write manifest data to windows application.');
 					//}
@@ -626,9 +628,9 @@ $tint.convtowinversion = function(str) {
 }
 
 $tint.writebindata = function(buf,target,pos) {
-	var fd = fs.openSync(target,'r+');
-	fs.writeSync(fd, buf, 0, buf.length, pos);
-	fs.closeSync(fd);
+	//var fd = fs.openSync(target,'r+');
+	//fs.writeSync(fd, buf, 0, buf.length, pos);
+	//fs.closeSync(fd);
 }
 $tint.convtoucs2 = function(str) {
 	var z = [];
@@ -640,18 +642,22 @@ $tint.convtoucs2 = function(str) {
 	return new Buffer(z);
 }
 
-function recurseManifest(container, target, values) {
-	for(var cont=0; cont < container.length; cont++) {
-		var point = container[cont].Children;
-		//console.log('point is: ', point);
+function recurseManifest(point, target, values) {
+	//console.log(container);
+	//for(var cont=0; cont < container.length; cont++) {
+	//	var point = container[cont].Children;
 		for(var i=0; i < point.length ; i++) {
-			var key = point[i].szKey.map(function(e){return e[0];}).join('');
+			var key = point[i].szKey.map(function(e){
+				if(e[1] != '\u0000')
+					return e[0] + e[1];
+				else
+					return e[0];
+			}).join('');
 			var pos = point[i].ValuePosition;
-			//console.log('found key: '+key+'');
+			console.log('key: ', key);
 			switch(key)
 			{
 				case 'CompanyName':
-					//console.log('writing ['+values.author+']');
 					$tint.writebindata($tint.convtoucs2(values.author),target,pos);
 					break;
 				case 'FileDescription':
@@ -678,13 +684,15 @@ function recurseManifest(container, target, values) {
 				default:
 					break;
 			}
-			recurseManifest(point[i].Children,target,values);
+			if(point[i].Children) recurseManifest(point[i].Children,target,values);
 		}
 		
-	}
-	var versionPosition = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.ValuePosition;
-	$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 2 * 4);
-	$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 4 * 4);
+	//	if(point.Children)
+	//		recurseManifest(point.Children,target,values);
+	//}
+	//var versionPosition = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.ValuePosition;
+	//$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 2 * 4);
+	//$tint.writebindata($tint.convtowinversion(values.version),target,versionPosition + 4 * 4);
 }
 
 $tint.winmanifest = function(target, values) {
@@ -692,7 +700,6 @@ $tint.winmanifest = function(target, values) {
 	var winexe = new WindowsExeFile(fd);
 	winexe.WindowsExeRead();
 	fs.closeSync(fd);
-	//console.log(winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo);
 	var container = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children; //[0].Children
 	recurseManifest(container,target,values);
 	//console.log('children, there are: ',winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children)
@@ -1543,16 +1550,17 @@ WindowsExeFile.prototype.DynamicTableRead = function() {
 	obj.wValueLength = this.WORD();
 	obj.wType = this.WORD();
 	obj.szKey = [];
-
+	var count = 3;
 	var data = this.WCHAR();
+	count++;
 	while(data != "\u0000\u0000") {
 		obj.szKey.push(data);
 		data = this.WCHAR();
+		count++;
 	}
-	
 	// obj.Padding
-	while(this.WORD() === 0)
-		;
+	for(var i=0; i < count % 2; i++)
+		console.assert(this.WORD() === 0);
 
 	this.Position = obj.PaddingPosition = this.Position - 2;
 	return obj;
@@ -1615,17 +1623,20 @@ WindowsExeFile.prototype.ResourceDataVersionRead = function() {
 	obj.wValueLength	= this.WORD();
 	obj.wType			= this.WORD();
 	obj.szKey			= [];
+	var count = 3
 
 	var key = new String("VS_VERSION_INFO");
 
-	for(var i=0; i < key.length ; i++) 
+	for(var i=0; i < key.length ; i++) {
 		obj.szKey.push(this.WCHAR());
+		count++;
+	}
 
 	// obj.Padding1
-	while(this.WORD() === 0)
-		;
-	
-	this.Position = obj.Padding1Position = this.Position - 2;
+	for(var i=0; i < count % 2; i++)
+		console.assert(this.WORD() === 0);
+
+	this.Position = obj.Padding1Position = this.Position;
 	obj.ValuePosition = this.Position;
 	obj.Value = {
 		dwSignature:this.DWORD(),
