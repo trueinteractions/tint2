@@ -35,7 +35,6 @@
   mimetype['mkv'] = 'video/x-matroska';
   // Part of the application schema (app://)
   var server = http.createServer(function (request, response) {
-    console.log('received: ',request.url);
     var path = request.url;
     var data = "";
     var ext = path.substring(path.lastIndexOf('.')+1);

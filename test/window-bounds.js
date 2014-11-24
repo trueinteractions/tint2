@@ -34,8 +34,8 @@ function run($utils) {
   /* @hidden */   w.height = 135;
   /* @hidden */ }, 2000);
   /* @hidden */ setTimeout(function(){
-  /* @hidden */   $utils.assert(w.width == 135, 'w.width should have been 135, was: '+w.width);
-  /* @hidden */   $utils.assert(w.height == 135, 'w.height should have been 135, was: '+w.height);
+  /* @hidden */   $utils.assert(w.width <= 140, 'w.width should have been 135, was: '+w.width);
+  /* @hidden */   $utils.assert(w.height <= 140, 'w.height should have been 135, was: '+w.height);
   /* @hidden */   //$utils.assert(w.bounds.width == 100, 'w.bounds.width should have been 100, was: '+w.bounds.width);
   /* @hidden */   //$utils.assert(w.bounds.height == 78, 'w.bounds.height should have been 100, was: '+w.bounds.height);
     w.x = 100;
