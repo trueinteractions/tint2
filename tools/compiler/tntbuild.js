@@ -56,6 +56,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 		onStart:onStart,
 		tasks:[],
 		data:[],
+		packageheader:[],
 		windowsicon:[],
 		macosxicon:[],
 		checkdata:function () {
@@ -122,16 +123,20 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			};
 			return obj;
 		},
-		reset:function() { this.tasks=[]; },
+		reset:function() { this.tasks=[]; this.packageheader=[]; },
 		tick:function(e) { if(e) this.onProgress(e); if(this.tasks.length){var task=this.tasks.shift(); setTimeout(function(){try{task.bind(this)();}catch(e){return this.onError(e);}}.bind(this),10);}},
 		play:function() { this.onStart(this.tasks.length); this.tick(); },
 		stop:function() { this.tasks = [function(e){this.onError('build was stopped.');}.bind(this)]; },
 		running:function() { return this.tasks.length !== 0; },
 		prepclean:function() {
 			try {
+				this.packageheader = [];
 				this.checkdata();
 				this.conf = this.config();
-				var packclean = function(b){this.tasks.push(function(){$tint.remove(b.absout+'.jsz'); this.tick("cleaning files "+b.absout+'.jsz');}.bind(this));};
+				var packclean = function(b){this.tasks.push(function(){
+					$tint.remove(b.absout+'.o');
+					this.tick("cleaning files "+b.absout+'.o');
+				}.bind(this));};
 				this.conf.topackage.forEach(packclean.bind(this));
 				this.tasks=this.tasks.concat([
 					function(){ $tint.remove(this.conf.macapp); this.tick("cleaning macosx application"); }.bind(this),
@@ -155,14 +160,16 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					this.tasks.push(function() {
 						// If the input file is newer, or larger, rebuild. 
 						var fin = $tint.minfo(b.absin);
-						var fout = ($tint.exists(b.absout+'.jsz')) ? $tint.minfo(b.absout+'.jsz') : null;
+						var fout = ($tint.exists(b.absout+'.o')) ? $tint.minfo(b.absout+'.o') : null;
 						if(fout === null || (fin.mtime.getTime() > fout.mtime.getTime())) {
-							$tint.remove(b.absout+'.jsz');
-							$tint.compress(b.absin,b.absout+'.jsz',
+							$tint.remove(b.absout+'.o');
+							$tint.compress(b.absin,b.absout+'.o',
 								function(){
 									this.tick("packaging "+b.relin);
 								}.bind(this),
-								function(e){this.onError(e);}.bind(this)
+								function(e){
+									this.onError(e);
+								}.bind(this)
 							);
 						} else 
 							this.tick("skipped packing "+b.relin+ " (no changes)");
@@ -171,7 +178,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				var packfunc = function(b){
 					this.tasks.push(function(){
 						this.onProgress("linking "+b.relname); 
-						$tint.appendpkg(b.absout+'.jsz', b.relname, this.conf.pkgmid); 
+						this.packageheader.push($tint.appendpkg(b.absout+'.o', b.relname, this.conf.pkgmid, this.packageExecSize)); 
 						this.tick();
 					}.bind(this));
 				};
@@ -189,31 +196,46 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					//$tint.remove(this.conf.manifest); 
 				//	function(){ this.tick("cleaning up"); }.bind(this)
 				//]);
-			} catch (e) { this.onError(e); return false; }
+			} catch (e) { 
+				this.onError(e); 
+				return false; 
+			}
 			return true;
 		},
 		prepwin:function() {
+			var winExec = new Buffer(tintExecutableWindows, 'base64');
+			this.packageExecSize = winExec.length;
 			try {
 			this.tasks=this.tasks.concat([
 				function(){ this.pngdata=$tint.read(this.data.icon.windows[0]);this.tick("reading windows icon");}.bind(this),
 				function(){ $tint.parsepng(this.pngdata,function(e){this.onError(e);}.bind(this),function(e){this.windowsiconlrg=e;this.tick("creating icon data"); }.bind(this));}.bind(this),
 				function(){ 
 					this.onProgress("creating windows application");
-					var winExec = new Buffer(tintExecutableWindows, 'base64');
 					fs.writeFileSync(this.conf.winapp,winExec);
 					this.tick();
 					//$tint.copy(this.conf.runtime+'.exe',this.conf.winapp); this.tick("Creating Windows Application"); 
 				}.bind(this),
-				function(){ $tint.append(this.conf.winapp, this.conf.pkgmid); this.tick("finalizing windows"); }.bind(this),
+				function(){
+					// Append package header.
+					var pkg = new Buffer(JSON.stringify(this.packageheader));
+					fs.appendFileSync(this.conf.pkgmid, pkg);
+					var buf = new Buffer(8); //[this.packageExecSize, 0xbeefbeef]
+					buf.writeUInt32LE(this.packageExecSize,0);
+					buf.writeUInt32LE(0xdeadbeef,4);
+					fs.appendFileSync(this.conf.pkgmid, buf);
+					// copy the package.
+					$tint.append(this.conf.winapp, this.conf.pkgmid); 
+					this.tick("finalizing windows");
+				}.bind(this),
 				function(){
 					this.onProgress("writing icon for windows");
-					if(typeof(this.windowsicon)=='undefined'||this.windowsicon==null)this.windowsicon=new Array();
-					if(typeof(this.windowsicon[16])=='undefined')this.windowsicon[16]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 16);
-					if(typeof(this.windowsicon[32])=='undefined')this.windowsicon[32]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 32);
-					if(typeof(this.windowsicon[48])=='undefined')this.windowsicon[48]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 48);
-					if(typeof(this.windowsicon[64])=='undefined')this.windowsicon[64]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 64);
-					if(typeof(this.windowsicon[128])=='undefined')this.windowsicon[128]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 128);
-					if(typeof(this.windowsicon[256])=='undefined')this.windowsicon[256]=$tint.resizeicon(this.windowsiconlrg, 512, 512, 256);
+					if(typeof(this.windowsicon)=='undefined'||this.windowsicon==null)
+						this.windowsicon=new Array();
+					var sizes = [16,32,48,64,128,256];
+					sizes.forEach(function(size) {
+						if(typeof(this.windowsicon[size])=='undefined')
+							this.windowsicon[size]=$tint.resizeicon(this.windowsiconlrg, 512, 512, size);
+					}.bind(this));
 					try {
 						$tint.stampwindows(this.windowsicon, this.conf.winapp);
 					} catch (e) {
@@ -235,13 +257,14 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			return true;
 		},
 		prepmac:function() {
+			var macExec = new Buffer(tintExecutableOSX, 'base64');
+			this.packageExecSize = 0;//macExec.length;
 			try {
 			this.tasks=this.tasks.concat([
 				function(){ this.macosxicon=$tint.read(this.data.icon.osx[0]);this.tick("reading macosx icon");}.bind(this),
 				function(){ 
 					this.onProgress("creating macosx application");
-					//$tint.copy(this.conf.runtime+'.app',this.conf.macapp); 
-					var macExec = new Buffer(tintExecutableOSX, 'base64');
+					//$tint.copy(this.conf.runtime+'.app',this.conf.macapp);
 					$tint.makedir(this.conf.macapp);
 					$tint.makedir($tint.path([this.conf.macapp,'Contents']));
 					$tint.makedir($tint.path([this.conf.macapp,'Contents','Resources']));
@@ -250,8 +273,25 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					fs.writeFileSync($tint.path([this.conf.macapp, 'Contents','MacOS','Runtime']), macExec);
 					this.tick();
 				}.bind(this),
-				function(){ $tint.copy(this.conf.pkgmid, $tint.makepath($tint.dotdot(this.conf.macpkgdst))); this.tick("finalizing macosx"); }.bind(this),
-				function(){ $tint.write(this.conf.macinfo, $tint.manifest(this.data)); this.tick("stamping macosx"); }.bind(this),
+				function(){
+					this.onProgress("finalizing macosx");
+					// Append package header.
+					var pos = fs.statSync(this.conf.pkgmid).size;
+					var pkg = new Buffer(JSON.stringify(this.packageheader));
+					fs.appendFileSync(this.conf.pkgmid, pkg);
+					var buf = new Buffer(8); //[this.packageExecSize, 0xbeefbeef]
+					buf.writeUInt32LE(pos,0);
+					buf.writeUInt32LE(0xdeadbeef,4);
+					fs.appendFileSync(this.conf.pkgmid, buf);
+					// copy the package.
+					$tint.copy(this.conf.pkgmid, $tint.makepath($tint.dotdot(this.conf.macpkgdst))); 
+					this.tick();
+				}.bind(this),
+				function(){ 
+					this.onProgress("stamping macosx");
+					$tint.write(this.conf.macinfo, $tint.manifest(this.data)); 
+					this.tick(); 
+				}.bind(this),
 				function(){ if(os.platform()=='darwin') { this.conf.perms.forEach(function(e){ fs.chmodSync(e,'755'); }.bind(this)); } this.tick("fixing permissions"); }.bind(this),
 				function(){ $tint.stampmacosx(this.macosxicon, this.conf.macicon); this.tick("writing icon for macosx"); }.bind(this)
 			]);
@@ -320,7 +360,10 @@ $tint.write=function(__file,_data) {
 	fs.writeFileSync(__file,_data);
 }
 $tint.copy=function(src,dst) {
-	var filetodir=function(src,dst) { var paths=src.split(pa.sep); return filetofile(src,pa.join(dst,paths[paths.length-1])); };
+	var filetodir=function(src,dst) {
+		var paths=src.split(pa.sep);
+		return filetofile(src,pa.join(dst,paths[paths.length-1]));
+	};
 	var filetofile=function(src,dst) {
 		var bytes=1,buf=new Buffer(64*1024),fdr=fs.openSync(src,'r'),fdw=fs.openSync(dst,'w');
 		while(fs.writeSync(fdw,buf,0,fs.readSync(fdr,buf,0,buf.length,null)));
@@ -346,16 +389,23 @@ $tint.filesize=function(d) {
 }
 $tint.append=function(dst,src) {
 	$tint.makepath($tint.dotdot(dst));
-	var bytes=1,buf=new Buffer(64*1024),fdr=fs.openSync(src,'r'),fdw=fs.openSync(dst,'a+');
-	while(fs.writeSync(fdw,buf,0,fs.readSync(fdr,buf,0,buf.length,null)));
-	fs.closeSync(fdr); fs.closeSync(fdw);
+	var bytes=1,
+		buf=new Buffer(64*1024),
+		fdr=fs.openSync(src,'r'),
+		fdw=fs.openSync(dst,'a+');
+	while(fs.writeSync(fdw,buf,0,fs.readSync(fdr,buf,0,buf.length,null)))
+		;
+	fs.closeSync(fdr); 
+	fs.closeSync(fdw);
 }
 $tint.getfiles = function(dir) {
 	var isdir=function(e){return fs.statSync(e).isDirectory();}, isfile=function(e){return !isdir(e);};
 	var v=[], f=[dir];
 	while(f.length) {
 		var target=f.shift();
-		var d=fs.readdirSync(target).map(function(e){return pa.join(target,e)});
+		var d=fs.readdirSync(target).map(function(e){
+			return pa.join(target,e);
+		});
 		f = d.filter(isdir).concat(f);
 		v = d.filter(isfile).concat(v);
 	}
@@ -453,14 +503,20 @@ $tint.compress = function(src,dst,succ,err) {
 	inp.on('end',function(e){ succ(); }.bind(this)).on('error',function(e){ err(e); }.bind(this));
 	inp.pipe(gzip).pipe(out);
 }
-$tint.appendpkg=function(file__,name__,pkgfile__) {
-	var keybf = new Buffer('\x20\x01\x77\x55\x66\x31'+name__+'\x20\x01\x77\x55\x66\x31');
-	var sizebf = new Buffer(8);
+$tint.appendpkg=function(file__,name__,pkgfile__,base) {
+	base = base || 0;
+	//var keybf = new Buffer('\x20\x01\x77\x55\x66\x31'+name__+'\x20\x01\x77\x55\x66\x31');
+	//var sizebf = new Buffer(8);
 	var size = $tint.info(file__).fileinfo.size;
-	sizebf.writeUInt32LE(size,0);
-	sizebf.writeUInt32LE(0,4);
-	fs.appendFileSync(pkgfile__,Buffer.concat([keybf,sizebf]));
+	var offset = base;
+	if(fs.existsSync(pkgfile__))
+		offset += $tint.info(pkgfile__).fileinfo.size;
+	//sizebf.writeUInt32LE(size,0);
+	//sizebf.writeUInt32LE(0,4);
+	//fs.appendFileSync(pkgfile__,Buffer.concat([keybf,sizebf]));
 	$tint.append(pkgfile__,file__);
+	//console.log({packagefile:pkgfile__,name:name__,size:size,offset:offset});
+	return {name:name__,size:size,offset:offset};
 }
 $tint.dirdiff = function(srcdir,dstdir,regfilt) {
 	if(regfilt=='') regfilt=null;
@@ -479,11 +535,11 @@ $tint.dirdiff = function(srcdir,dstdir,regfilt) {
 	if(!srcfiles.length) return false;
 	return compare(srcfiles,dstfiles,srcdir,dstdir);
 }
-$tint.writepkg = function(files,base,pkgfile) {
-	$tint.remove(pkgfile);
-	while(file=files.shift())
-		$tint.appendpkg($tint.absolute(file,base)+'.o',$tint.relative(file,base),pkgfile);
-}
+//$tint.writepkg = function(files,base,pkgfile) {
+//	$tint.remove(pkgfile);
+//	while(file=files.shift())
+//		$tint.appendpkg($tint.absolute(file,base)+'.o',$tint.relative(file,base),pkgfile);
+//}
 $tint.stampwindows = function(imgdata, dst) {
 	var fd = fs.openSync(dst,'r+');
 	var w = new WindowsExeFile(fd);

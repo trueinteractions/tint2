@@ -72,7 +72,11 @@
      *              parameter is the name of the event, the second parameter is the function
      *              to call when the event happens (e.g., a callback).
      */
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
+    this.addEventListener = function(event, func) { 
+      if(!events[event]) 
+        events[event] = []; 
+      events[event].push(func); 
+    }
 
     /**
      * @method removeEventListener
@@ -83,7 +87,12 @@
      *              parameter is the name of the event, the second parameter is the function
      *              that was originally given as the callback for addEventListener.
      */
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+    this.removeEventListener = function(event, func) { 
+      if(events[event] && events[event].indexOf(func) != -1) 
+        events[event].splice(events[event].indexOf(func), 1); 
+    }
+
+    // unused, stub to help move us a bit closer to a standard spec
     this.launch = function() { fireEvent('launch'); }.bind(this);
     this.uninstall = function() { console.warn('unimplemented'); }
 
@@ -154,6 +163,7 @@
       }
     });
 
+    // Unsupported on Windows, TOOD: Remove or figure out a way to support this on Win?
     Object.defineProperty(this, 'badge', {
       get:function() { return badgeText; },
       set:function(e) { 
@@ -162,6 +172,7 @@
       }
     });
 
+    // Unsupported on Windows, TOOD: Remove or figure out a way to support this on Win?
     Object.defineProperty(this, 'dockmenu', {
       get:function() { return dockmenu; },
       set:function(e) { dockmenu = e; }
@@ -200,6 +211,7 @@
       set:function(e) { terminateWhenLastWindowClosed = e ? $.YES : $.NO; }
     });
 
+    // Get access to the native NSApplication.
     Object.defineProperty(this, 'native', { get:function() { return $app; } });
 
     this.hideAllOtherApplications = function() { $app('hideOtherApplications', $app); }
