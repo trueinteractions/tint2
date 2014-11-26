@@ -1,0 +1,228 @@
+diff --git a/build/common.gypi b/build/common.gypi
+index 7bb20db..bdecc25 100644
+--- a/build/common.gypi
++++ b/build/common.gypi
+@@ -231,7 +231,8 @@
+             '-stdlib=libc++'                        # added for Tint
+           ],
+           'OTHER_LDFLAGS':[
+-            '-framework Carbon', '-framework AppKit'# added for Tint
++            '-framework Carbon', '-framework AppKit', # added for Tint
++            '-lstdc++','-lc++'
+           ],
+           'WARNING_CFLAGS': [
+             '-Wall',
+diff --git a/modules/Runtime/Main_mac.mm b/modules/Runtime/Main_mac.mm
+index b247f32..568af0c 100644
+--- a/modules/Runtime/Main_mac.mm
++++ b/modules/Runtime/Main_mac.mm
+@@ -9,6 +9,60 @@
+ #include <sys/types.h>
+ #include <sys/event.h>
+ #include <sys/time.h>
++#include "zlib.h"
++#include <node_buffer.h>
++
++NSData *gzipInflate(NSData* data)
++{
++    if ([data length] == 0) return data;
++
++    unsigned full_length = [data length];
++    unsigned half_length = [data length] / 2;
++
++    NSMutableData *decompressed = [NSMutableData dataWithLength: full_length + half_length];
++    BOOL done = NO;
++    int status;
++
++    z_stream strm;
++    strm.next_in = (Bytef *)[data bytes];
++    strm.avail_in = [data length];
++    strm.total_out = 0;
++    strm.zalloc = Z_NULL;
++    strm.zfree = Z_NULL;
++
++    if (inflateInit2(&strm, (15+32)) != Z_OK) return nil;
++    while (!done)
++    {
++        // Make sure we have enough room and reset the lengths.
++        if (strm.total_out >= [decompressed length])
++            [decompressed increaseLengthBy: half_length];
++        strm.next_out = (unsigned char *)((uint64_t)[decompressed mutableBytes] + strm.total_out);
++        strm.avail_out = [decompressed length] - strm.total_out;
++
++        // Inflate another chunk.
++        status = inflate (&strm, Z_SYNC_FLUSH);
++        if (status == Z_STREAM_END) done = YES;
++        else if (status != Z_OK) break;
++    }
++    if (inflateEnd (&strm) != Z_OK) return nil;
++
++    // Set real length.
++    if (done)
++    {
++        [decompressed setLength: strm.total_out];
++        return [NSData dataWithData: decompressed];
++    }
++    else return nil;
++}
++
++namespace Tint {
++    class Package;
++}
++extern "C" Tint::Package* create_package();
++extern "C" char * get_resource(Tint::Package *p, char *name);
++extern "C" char * get_executable(Tint::Package *p);
++extern "C" bool get_packaged(Tint::Package *p);
++extern "C" size_t get_size(Tint::Package *p, char *name);
+ 
+ namespace node {
+     extern v8::Persistent<v8::String> process_symbol;
+@@ -17,7 +71,7 @@ namespace node {
+     extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, 
+       v8::Handle<v8::Value> filename);
+ }
+-
++static Tint::Package* package;
+ static int embed_closed;
+ static uv_sem_t embed_sem;
+ static uv_thread_t embed_thread;
+@@ -36,6 +90,21 @@ namespace FFI {
+ 
+ v8::Handle<v8::Object> process_l;
+ 
++void resource_deletion(char *data, void *hint) {
++    delete data;
++}
++v8::Handle<v8::Value> GetResource(const v8::Arguments& args) {
++    v8::HandleScope scope;
++    v8::String::Utf8Value utf8text(args[0]->ToString());
++    // Potential memory leak!
++    NSData* data = [NSData dataWithBytesNoCopy:get_resource(package, *utf8text) length:utf8text.length() freeWhenDone:YES];
++    data = gzipInflate(data);
++    return scope.Close((node::Buffer::New((char *)[data bytes], [data length], resource_deletion, NULL))->handle_);
++}
++v8::Handle<v8::Value> IsPackaged(const v8::Arguments& args) {
++    v8::HandleScope scope;
++    return scope.Close(v8::Boolean::New(get_packaged(package)));
++}
+ v8::Handle<v8::Value> InitBridge(const v8::Arguments& args) {
+     v8::HandleScope scope;
+     v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
+@@ -103,6 +172,8 @@ static void uv_event(void *info) {
+ 
+     // Resgiter the initial bridge objective-c protocols
+     NODE_SET_METHOD(process_l, "initbridge", InitBridge);
++    NODE_SET_METHOD(process_l, "packaged", IsPackaged);
++    NODE_SET_METHOD(process_l, "resource", GetResource);
+ 
+     // Load node and begin processing.
+     node::Load(process_l);
+@@ -156,13 +227,62 @@ static char **copy_argv(int argc, char **argv) {
+     return argv_copy;
+ }
+ 
++char ** cArrayFromNSArray (NSArray* array) {
++   int i, count = array.count;
++   char **cargs = (char**) malloc(sizeof(char*) * (count + 1));
++   for(i = 0; i < count; i++) {        //cargs is a pointer to 4 pointers to char
++      NSString *s      = array[i];     //get a NSString
++      const char *cstr = s.UTF8String; //get cstring
++      int          len = strlen(cstr); //get its length
++      char  *cstr_copy = (char*) malloc(sizeof(char) * (len + 1));//allocate memory, + 1 for ending '\0'
++      strcpy(cstr_copy, cstr);         //make a copy
++      cargs[i] = cstr_copy;            //put the point in cargs
++  }
++  cargs[i] = NULL;
++  return cargs;
++}
++
+ int main(int argc, char * argv[]) {
+     NSApplication *app = [NSApplication sharedApplication];
+     AppDelegate *delegate = [[AppDelegate alloc] init];
+     argv = uv_setup_args(argc, argv);
+ 
+-    init_argc = argc;
+-    init_argv = copy_argv(argc, argv);
++    package = create_package();
++    if(get_packaged(package)) {
++        // We are currently loading all of our input from a packaged set. 
++        // Override the argv, argc values.
++        // POTENTIAL MEMORY LEAK
++        void *pdata = (void *)get_resource(package, "package.json");
++        size_t psize = get_size(package, "package.json");
++        // POTENTIAL MEMORY LEAK
++        NSData* data = [NSData dataWithBytesNoCopy:pdata length:psize freeWhenDone:YES];
++        // POTENTIAL MEMORY LEAK
++        data = gzipInflate(data);
++        // POTENTIAL MEMORY LEAK
++        NSDictionary *p = [NSJSONSerialization 
++            JSONObjectWithData:data 
++            options:NSJSONReadingMutableContainers 
++            error:nil];
++
++        // POTENTIAL MEMORY LEAK
++        NSMutableArray *dst = [[NSMutableArray alloc] init];
++        [dst addObject:[[NSString alloc]
++            initWithCString:get_executable(package) 
++            encoding:NSASCIIStringEncoding]];
++
++        // POTENTIAL MEMORY LEAK
++        for(NSString *key in p) {
++            if([key isEqualToString:@"main"])
++                [dst addObject:[p valueForKey:key]];
++        }
++
++        // POTENTIAL MEMORY LEAK
++        argc = init_argc = [dst count];
++        argv = init_argv = cArrayFromNSArray(dst);
++    } else {
++        init_argc = argc;
++        init_argv = copy_argv(argc, argv);
++    }
+ 
+     // This needs to run *before* V8::Initialize()
+     node::Init(init_argc, init_argv);
+diff --git a/modules/Window/Window_mac.js b/modules/Window/Window_mac.js
+index c61d0de..15144c4 100644
+--- a/modules/Window/Window_mac.js
++++ b/modules/Window/Window_mac.js
+@@ -527,7 +527,7 @@ module.exports = (function() {
+    *  require('Common');
+    *  var win = new Window();
+    *  win.visible = true; // Show the window.
+-   *  win.vsibile = false; // Hide the window.
++   *  win.visible = false; // Hide the window.
+    */
+   Object.defineProperty(Window.prototype, 'visible', {
+     get:function() { return this.native('isVisible') ? true : false; },
+@@ -759,7 +759,8 @@ module.exports = (function() {
+    * require('Common');
+    * var win = new Window(); // Create a new window.
+    * win.visible = true; // make sure the window is shown.
+-   * win.bringToFront(); // the window is pulled in front of all others (with the exception if a windows that are "alwaysOnTop")
++   * win.bringToFront(); // the window is pulled in front of all others 
++   *                     // (with the exception if a windows that are "alwaysOnTop")
+    */
+   Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
+ 
+diff --git a/tint.gyp b/tint.gyp
+index 5c34150..6a1a490 100644
+--- a/tint.gyp
++++ b/tint.gyp
+@@ -379,7 +379,7 @@
+             'modules/AppSchema/AppSchema_mac.mm',
+             'modules/Runtime/Main_mac.mm',
+           ],
+-          'libraries': [ '-framework Carbon' ],
++          'libraries+': [ '-lstdc++','-lc++','-framework Carbon' ],
+           'defines!': [
+             'PLATFORM="mac"',
+           ],
+@@ -661,6 +661,7 @@
+       'type': 'static_library',
+       'sources': [
+           'modules/Bridge/ffi.cc',
++          'modules/Runtime/Package.cc',
+       ],
+       'include_dirs': [
+         'libraries/node/deps/uv/include',
