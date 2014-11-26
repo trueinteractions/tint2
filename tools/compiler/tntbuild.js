@@ -10,6 +10,7 @@ var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
 	baseDirectory = process.cwd(),
 	outputDirectory = baseDirectory+'/'+'build',
+	resourceDirectory = outputDirectory + '/'+'Resources',
 	sourceDirectory = null,
 	pa = require('path'),
 	fs = require('fs'),
@@ -63,6 +64,9 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			if (!$tint.exists(outputDirectory, false)) {
 				$tint.makedir(outputDirectory);
 			}
+			if (!$tint.exists(resourceDirectory, false)) {
+				$tint.makedir(resourceDirectory);
+			}
 			if (this.data.name.trim() === "") throw new Error("The bundle name must be a valid file name without an extension or special characters.");
 			if (!this.data.version) throw new Error("The version number does not exist.");
 			if (!this.data.sources) throw new Error("A source directory has not been selected.");
@@ -102,7 +106,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			obj.toprepare=obj.topackage=files
 				.filter(function (e) { return !e.match(obj.srcex); })
 				.map(function(e){
-					return $tint.getpaths(e,outputDirectory,sourceDirectory); 
+					return $tint.getpaths(e,resourceDirectory,sourceDirectory); 
 				});
 				//   filter out excemptions.
 				//
@@ -134,8 +138,10 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				this.checkdata();
 				this.conf = this.config();
 				var packclean = function(b){this.tasks.push(function(){
-					$tint.remove(b.absout+'.o');
-					this.tick("cleaning files "+b.absout+'.o');
+					//$tint.remove(b.absout+'.o');
+					//this.tick("cleaning files "+b.absout+'.o');
+					$tint.remove(b.absout);
+					this.tick("cleaning files "+b.absout);
 				}.bind(this));};
 				this.conf.topackage.forEach(packclean.bind(this));
 				this.tasks=this.tasks.concat([
@@ -160,17 +166,23 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					this.tasks.push(function() {
 						// If the input file is newer, or larger, rebuild. 
 						var fin = $tint.minfo(b.absin);
-						var fout = ($tint.exists(b.absout+'.o')) ? $tint.minfo(b.absout+'.o') : null;
+						//var fout = ($tint.exists(b.absout+'.o')) ? $tint.minfo(b.absout+'.o') : null;
+						var fout = ($tint.exists(b.absout)) ? $tint.minfo(b.absout) : null;
 						if(fout === null || (fin.mtime.getTime() > fout.mtime.getTime())) {
-							$tint.remove(b.absout+'.o');
-							$tint.compress(b.absin,b.absout+'.o',
-								function(){
-									this.tick("packaging "+b.relin);
-								}.bind(this),
-								function(e){
-									this.onError(e);
-								}.bind(this)
-							);
+							//$tint.remove(b.absout+'.o');
+							$tint.remove(b.absout);
+							$tint.makepath($tint.dotdot(b.absout));
+							$tint.copy(b.absin,b.absout);
+							//$tint.compress(b.absin,b.absout+'.o',
+							//$tint.compress(b.absin,b.absout,
+							//	function(){
+							//		this.tick("packaging "+b.relin);
+							//	}.bind(this),
+							//	function(e){
+							//		this.onError(e);
+							//	}.bind(this)
+							//);
+							this.tick("packaging "+b.relin);
 						} else 
 							this.tick("skipped packing "+b.relin+ " (no changes)");
 					}.bind(this));
@@ -178,15 +190,34 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				var packfunc = function(b){
 					this.tasks.push(function(){
 						this.onProgress("linking "+b.relname); 
-						this.packageheader.push($tint.appendpkg(b.absout+'.o', b.relname, this.conf.pkgmid, this.packageExecSize)); 
+						//this.packageheader.push($tint.appendpkg(b.absout+'.o', b.relname, this.conf.pkgmid, this.packageExecSize)); 
+						//this.packageheader.push($tint.appendpkg(b.absout, b.relname, this.conf.pkgmid, this.packageExecSize)); 
 						this.tick();
 					}.bind(this));
 				};
 				// Pre-package, read in data, write out temporary files, perform pre-checks to ensure a safe build.
-				this.conf.prechecks.remove.forEach(function(e){this.tasks.push(function(){this.onProgress("validating to remove ["+e+"]"); $tint.remove(e);this.tick();}.bind(this));}.bind(this));
+				this.conf.prechecks.remove.forEach(function(e){
+					this.tasks.push(function(){
+						this.onProgress("validating to remove ["+e+"]");
+						$tint.remove(e);
+						this.tick();
+					}.bind(this));
+				}.bind(this));
 				//this.tasks.push(function(){$tint.copy(this.conf.manifest,$tint.packagejson(this.data));this.tick("Writing Manifest");}.bind(this));
-				this.conf.prechecks.dirs.forEach(function(e){this.tasks.push(function(){this.onProgress("validating directory ["+e+"]"); $tint.exists(e,false,"Directory does not exist: %s");this.tick();}.bind(this));}.bind(this));
-				this.conf.prechecks.files.forEach(function(e){this.tasks.push(function(){this.onProgress("validating file ["+e.absin+"]"); $tint.exists(e.absin,true,"File does not exist: %s");this.tick();}.bind(this));}.bind(this));
+				this.conf.prechecks.dirs.forEach(function(e){
+					this.tasks.push(function(){
+						this.onProgress("validating directory ["+e+"]"); 
+						$tint.exists(e,false,"Directory does not exist: %s");
+						this.tick();
+					}.bind(this));
+				}.bind(this));
+				this.conf.prechecks.files.forEach(function(e){
+					this.tasks.push(function(){
+						this.onProgress("validating file ["+e.absin+"]");
+						$tint.exists(e.absin,true,"File does not exist: %s");
+						this.tick();
+					}.bind(this));
+				}.bind(this));
 				// Compress or 'prepare' the objects to the destination folder.
 				this.conf.toprepare.forEach(prepfunc.bind(this));
 				// Package these by appending them to a package location with the stamped magic key/file size.
@@ -217,14 +248,14 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				}.bind(this),
 				function(){
 					// Append package header.
-					var pkg = new Buffer(JSON.stringify(this.packageheader));
-					fs.appendFileSync(this.conf.pkgmid, pkg);
-					var buf = new Buffer(8); //[this.packageExecSize, 0xbeefbeef]
-					buf.writeUInt32LE(this.packageExecSize,0);
-					buf.writeUInt32LE(0xdeadbeef,4);
-					fs.appendFileSync(this.conf.pkgmid, buf);
+					//var pkg = new Buffer(JSON.stringify(this.packageheader));
+					//fs.appendFileSync(this.conf.pkgmid, pkg);
+					//var buf = new Buffer(8); //[this.packageExecSize, 0xbeefbeef]
+					//buf.writeUInt32LE(this.packageExecSize,0);
+					//buf.writeUInt32LE(0xdeadbeef,4);
+					//fs.appendFileSync(this.conf.pkgmid, buf);
 					// copy the package.
-					$tint.append(this.conf.winapp, this.conf.pkgmid); 
+					//$tint.append(this.conf.winapp, this.conf.pkgmid); 
 					this.tick("finalizing windows");
 				}.bind(this),
 				function(){
@@ -267,7 +298,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					//$tint.copy(this.conf.runtime+'.app',this.conf.macapp);
 					$tint.makedir(this.conf.macapp);
 					$tint.makedir($tint.path([this.conf.macapp,'Contents']));
-					$tint.makedir($tint.path([this.conf.macapp,'Contents','Resources']));
+					//$tint.makedir($tint.path([this.conf.macapp,'Contents','Resources']));
 					$tint.makedir($tint.path([this.conf.macapp,'Contents','MacOS']));
 					$tint.makedir($tint.path([this.conf.macapp,'Contents','Frameworks']));
 					fs.writeFileSync($tint.path([this.conf.macapp, 'Contents','MacOS','Runtime']), macExec);
@@ -275,16 +306,17 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				}.bind(this),
 				function(){
 					this.onProgress("finalizing macosx");
+					$tint.copy(resourceDirectory,$tint.path([this.conf.macapp,'Contents','Resources']));
 					// Append package header.
-					var pos = fs.statSync(this.conf.pkgmid).size;
-					var pkg = new Buffer(JSON.stringify(this.packageheader));
-					fs.appendFileSync(this.conf.pkgmid, pkg);
-					var buf = new Buffer(8); //[this.packageExecSize, 0xbeefbeef]
-					buf.writeUInt32LE(pos,0);
-					buf.writeUInt32LE(0xdeadbeef,4);
-					fs.appendFileSync(this.conf.pkgmid, buf);
+					//var pos = fs.statSync(this.conf.pkgmid).size;
+					//var pkg = new Buffer(JSON.stringify(this.packageheader));
+					//fs.appendFileSync(this.conf.pkgmid, pkg);
+					//var buf = new Buffer(8); //[this.packageExecSize, 0xbeefbeef]
+					//buf.writeUInt32LE(pos,0);
+					//buf.writeUInt32LE(0xdeadbeef,4);
+					//fs.appendFileSync(this.conf.pkgmid, buf);
 					// copy the package.
-					$tint.copy(this.conf.pkgmid, $tint.makepath($tint.dotdot(this.conf.macpkgdst))); 
+					//$tint.copy(this.conf.pkgmid, $tint.makepath($tint.dotdot(this.conf.macpkgdst))); 
 					this.tick();
 				}.bind(this),
 				function(){ 
@@ -504,6 +536,7 @@ $tint.compress = function(src,dst,succ,err) {
 	inp.pipe(gzip).pipe(out);
 }
 $tint.appendpkg=function(file__,name__,pkgfile__,base) {
+	throw new Error("currently incompatible");
 	base = base || 0;
 	//var keybf = new Buffer('\x20\x01\x77\x55\x66\x31'+name__+'\x20\x01\x77\x55\x66\x31');
 	//var sizebf = new Buffer(8);

@@ -159,10 +159,50 @@ static char **copy_argv(int argc, char **argv) {
 int main(int argc, char * argv[]) {
     NSApplication *app = [NSApplication sharedApplication];
     AppDelegate *delegate = [[AppDelegate alloc] init];
-    argv = uv_setup_args(argc, argv);
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *package = [bundle pathForResource:@"package" ofType:@"json"];
 
-    init_argc = argc;
-    init_argv = copy_argv(argc, argv);
+    if(package) {
+        NSString *executable = [bundle executablePath];
+        NSDictionary *p = [NSJSONSerialization 
+                    JSONObjectWithData:[NSData dataWithContentsOfFile:package] 
+                    options:NSJSONReadingMutableContainers 
+                    error:nil];
+
+        NSString *main = nil;
+        for(NSString *key in p) {
+            if([key isEqualToString:@"main"]) {
+                main =[p valueForKey:key];
+                break;
+            }
+        }
+
+        if(main == nil) {
+            fprintf(stderr, "Cannot find package.json file.\n");
+            exit(1);
+        }
+
+        main = [[[bundle resourcePath] stringByAppendingString:@"/"] stringByAppendingString:main];
+
+        const char *exec = [executable cStringUsingEncoding:NSASCIIStringEncoding];
+        const char *pack = [main cStringUsingEncoding:NSASCIIStringEncoding];
+        unsigned int exec_len = strlen(exec) + 1;
+        unsigned int pack_len = strlen(pack) + 1;
+        unsigned int buf_len = sizeof(char *) * 2;
+        char **p_argv = (char **)malloc(exec_len + pack_len + buf_len);
+        char *base = (char *)p_argv;
+        p_argv[0] = (char *)(base + buf_len);
+        p_argv[1] = (char *)(base + buf_len + exec_len); // dont add argv.
+        strncpy(p_argv[0], exec, exec_len);
+        strncpy(p_argv[1], pack, pack_len);
+        init_argc = argc = 2;
+        init_argv = copy_argv(argc, p_argv);
+        argv = uv_setup_args(argc, p_argv);
+    } else {
+        init_argc = argc;
+        init_argv = copy_argv(argc, argv);
+        argv = uv_setup_args(argc, argv);
+    }
 
     // This needs to run *before* V8::Initialize()
     node::Init(init_argc, init_argv);
