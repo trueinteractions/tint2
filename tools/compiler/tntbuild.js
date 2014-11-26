@@ -10,7 +10,7 @@ var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
 	tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
 	baseDirectory = process.cwd(),
 	outputDirectory = baseDirectory+'/'+'build',
-	resourceDirectory = outputDirectory + '/'+'Resources',
+	resourceDirectory = outputDirectory + '/'+'tmp',
 	sourceDirectory = null,
 	pa = require('path'),
 	fs = require('fs'),
@@ -90,8 +90,8 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 			obj.srcdir=$tint.path([sourceDirectory,this.data.sources.directory]);
 			obj.pkgmid=$tint.path([obj.dstdir, 'Package']);
 			obj.runtime=$tint.path([obj.rescdir, 'Runtime']);
-			obj.macapp=$tint.path([outputDirectory, this.data.name + '.app']);
-			obj.winapp=$tint.path([outputDirectory, this.data.name + '.exe']);
+			obj.macapp=$tint.path([outputDirectory, 'MacOS X', this.data.name + '.app']);
+			obj.winapp=$tint.path([outputDirectory, 'Windows', this.data.name + '.exe']);
 			obj.main=$tint.path([this.data.sources.directory,this.data.main]);
 			var maccontents = $tint.path([obj.macapp,'Contents']);
 			var macresources = $tint.path([maccontents,'Resources']);
@@ -242,6 +242,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				function(){ $tint.parsepng(this.pngdata,function(e){this.onError(e);}.bind(this),function(e){this.windowsiconlrg=e;this.tick("creating icon data"); }.bind(this));}.bind(this),
 				function(){ 
 					this.onProgress("creating windows application");
+					$tint.makedir($tint.dotdot(this.conf.winapp));
 					fs.writeFileSync(this.conf.winapp,winExec);
 					this.tick();
 					//$tint.copy(this.conf.runtime+'.exe',this.conf.winapp); this.tick("Creating Windows Application"); 
@@ -272,6 +273,8 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					} catch (e) {
 						this.onWarning('Failed to stamp windows icon.');
 					}
+
+					$tint.copy(resourceDirectory,$tint.path([outputDirectory,'Windows','Resources']));
 					// Icon reset and cache is currently disabled.
 					//$tint.iconcache(this.onWarning); 
 					// Writing the manifest information is disabled and not, especiially functional..
@@ -296,6 +299,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 				function(){ 
 					this.onProgress("creating macosx application");
 					//$tint.copy(this.conf.runtime+'.app',this.conf.macapp);
+					$tint.makedir($tint.dotdot(this.conf.macapp));
 					$tint.makedir(this.conf.macapp);
 					$tint.makedir($tint.path([this.conf.macapp,'Contents']));
 					//$tint.makedir($tint.path([this.conf.macapp,'Contents','Resources']));
