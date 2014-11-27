@@ -462,6 +462,10 @@ $tint.makepath=function(path) {
 	return $tint.makedir(dr+pa.join(p,paths.shift()));
 }
 $tint.getpaths=function(file,dstdir,srcdir) {
+	file = pa.normalize(file);
+	dstdir = pa.normalize(dstdir);
+	srcdir = pa.normalize(srcdir);
+	console.log('getpaths file:'+file+' dstdir: '+dstdir+' srcdir: '+srcdir);
 	return {
 		absin:$tint.absolute(file,srcdir), 
 		absout:$tint.absolute($tint.relative(file, srcdir), dstdir),
