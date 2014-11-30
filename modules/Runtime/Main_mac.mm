@@ -68,6 +68,8 @@ static void uv_event(void *info) {
     while (!embed_closed) {
         int fd = uv_backend_fd(loop);
         timeout = uv_backend_timeout(loop);
+        if(timeout < 0) timeout = 16;
+        if(timeout > 250) timeout = 250;
 
         do {
             struct timespec ts;

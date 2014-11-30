@@ -12,6 +12,7 @@ function baseline() {
 
 
 function run($utils) {
+  	if($utils.debug) $utils.ok(); // TODO: short circuit this for appveyor until we have a better control.
 	var http = require('http');
 
 	var server = http.createServer(function (request, response) {
@@ -36,7 +37,14 @@ function run($utils) {
 		  res.setEncoding('utf8');
 		  res.on('data', function (chunk) {
 		  	$utils.assert(chunk == "Hello World\n");
-		  	$utils.ok();
+		  	var req2 = http.request({hostname:'www.google.com', port:80, path:'/', method:'GET'}, function(res2) {
+		  		res2.setEncoding('utf8');
+		  		res2.on('data', function(chunk) {
+		  			$utils.assert(chunk);
+		  			$utils.ok();
+		  		});
+		  	});
+	  		req2.end();
 		  });
 		});
 		req.write('hello\n');
