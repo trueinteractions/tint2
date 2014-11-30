@@ -35,6 +35,7 @@ set noetw_msi_arg=1
 set noperfctr=1
 set noperfctr_arg=1
 set noperfctr_msi_arg=1
+set subsystem=console
 
 :next-arg
 if "%1"=="" goto args-done
@@ -62,6 +63,7 @@ if /i "%1"=="test"          set test=test&goto arg-ok
 if /i "%1"=="msi"           set msi=1&set licensertf=1&goto arg-ok
 if /i "%1"=="upload"        set upload=1&goto arg-ok
 if /i "%1"=="jslint"        set jslint=1&goto arg-ok
+if /i "%1"=="gui"			set subsystem=windows&goto arg-ok
 
 echo Warning: ignoring invalid command line option `%1`.
 
@@ -89,7 +91,7 @@ if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 @rem Generate the VS project.
 SETLOCAL
   if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-  python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --dest-cpu=%target_arch% --tag=%TAG% > nul
+  python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
   if errorlevel 1 goto create-msvs-files-failed
   if not exist build\msvs\tint.sln goto create-msvs-files-failed
 ENDLOCAL
@@ -122,6 +124,8 @@ goto run
 copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
 msbuild build\msvs\tint.sln /maxcpucount:3 /t:%target% /p:Configuration=%config%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
 if errorlevel 1 goto exit
+
+copy /Y build\msvs\%config%\tint.exe build\msvs\%config%\tint_%subsystem%.exe
 
 :sign
 @rem Skip signing if the `nosign` option was specified.

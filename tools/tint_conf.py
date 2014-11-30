@@ -21,6 +21,12 @@ parser.add_option("--debug",
     dest="debug",
     help="Also build debug build")
 
+
+parser.add_option("--subsystem",
+    action="store",
+    dest="subsystem",
+    help="The subsystemf or windows to use, either console or windows.")
+
 parser.add_option("--prefix",
     action="store",
     dest="prefix",
@@ -649,7 +655,7 @@ if (options.dest_os):
 flavor = GetFlavor(flavor_params);
 
 output = {
-  'variables': { 'python': sys.executable },
+  'variables': { 'python': sys.executable, 'win_subsystem': options.subsystem },
   'include_dirs': [],
   'libraries': [],
   'defines': [],
