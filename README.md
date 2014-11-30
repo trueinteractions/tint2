@@ -33,7 +33,7 @@ $ tntbuild somedir/package.json
 
 <h2>Get Started</h2>
 
-* Download the release candidate: https://github.com/trueinteractions/tint2/releases/ or at https://www.trueinteractions.com/tint-2.0-rc1.zip
+* Download the release candidate: https://github.com/trueinteractions/tint2/releases/ or at https://www.trueinteractions.com/tint-2.0-rc2.zip
 * Browse initial (unstable) API documentation: https://www.trueinteractions.com/tint2/docs/
 * Ask questions, get help, and search for answers: https://groups.google.com/forum/#!categories/trueinteractions
 * Need commercial support? https://www.trueinteractions.com
