@@ -1,5 +1,7 @@
 #!/bin/sh
 
+git apply build/node.diff 2> /dev/null
+
 if [ $CC ]; then
   echo "Warning using a pre-set compiler $CC"
 fi

@@ -263,11 +263,11 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 						if(typeof(this.windowsicon[size])=='undefined')
 							this.windowsicon[size]=$tint.resizeicon(this.windowsiconlrg, 512, 512, size);
 					}.bind(this));
-					try {
+					//try {
 						$tint.stampwindows(this.windowsicon, this.conf.winapp);
-					} catch (e) {
-						this.onWarning('Failed to stamp windows icon.');
-					}
+					//} catch (e) {
+					//	this.onWarning('Failed to stamp windows icon.');
+					//}
 
 					$tint.copy(resourceDirectory,$tint.path([outputDirectory,'Windows','Resources']));
 					// Icon reset and cache is currently disabled.
@@ -465,7 +465,6 @@ $tint.getpaths=function(file,dstdir,srcdir) {
 	file = pa.normalize(file);
 	dstdir = pa.normalize(dstdir);
 	srcdir = pa.normalize(srcdir);
-	console.log('getpaths file:'+file+' dstdir: '+dstdir+' srcdir: '+srcdir);
 	return {
 		absin:$tint.absolute(file,srcdir), 
 		absout:$tint.absolute($tint.relative(file, srcdir), dstdir),
@@ -580,7 +579,11 @@ $tint.stampwindows = function(imgdata, dst) {
 	var fd = fs.openSync(dst,'r+');
 	var w = new WindowsExeFile(fd);
 	w.WindowsExeRead();
+	//var bf = new Buffer(4);
+	//bf.writeUInt32LE(WindowsConst.SUBSYSTEM['WINDOWS_GUI'], 0);
+	//fs.writeSync(fd, bf, 0, 4, w.SubsystemPosition);
 	fs.closeSync(fd);
+
 	var iconDb = w.Resources.Entries[0].Directory.Entries;
 	for(var z=0; z < iconDb.length; z++) {
 		var fd = fs.openSync(dst,'r+');
@@ -735,7 +738,6 @@ $tint.convtoucs2 = function(str) {
 }
 
 function recurseManifest(point, target, values) {
-	//console.log(container);
 	//for(var cont=0; cont < container.length; cont++) {
 	//	var point = container[cont].Children;
 		for(var i=0; i < point.length ; i++) {
@@ -1567,6 +1569,12 @@ WindowsConst.WINDOWS_VERSIONS = [
 	{Name:'Windows XP', MajorOperatingSystemVersion:5, MinorOperatingSystemVersion:1 },
 	{Name:'Windows 2000', MajorOperatingSystemVersion:5, MinorOperatingSystemVersion:0 }
 ];
+WindowsConst.SUBSYSTEM = {};
+WindowsConst.SUBSYSTEM['NATIVE'] = 1;		// dll or driver.
+WindowsConst.SUBSYSTEM['WINDOWS_GUI'] = 2; // Follow symbol resolution for windows gui app (no console wWinMain).
+WindowsConst.SUBSYSTEM['WINDOWS_CUI'] = 3; // Open a console window and run main.
+WindowsConst.SUBSYSTEM['OS2_GUI'] = 5; 	// OS2 symbol conventions, unknown.
+WindowsConst.SUBSYSTEM['POSIX_CUI'] = 7; 	// Follow posix conventions, aligned argv mem, and run main.
 
 
 /** Helper Functions **/
@@ -1927,6 +1935,7 @@ WindowsExeFile.prototype.OptionalHeaderRead = function() {
     obj.SizeOfImage = this.ULONG();
     obj.SizeOfHeaders = this.ULONG();
     obj.CheckSum = this.ULONG();
+    this.SubsystemPosition = this.Position;
     obj.Subsystem = this.USHORT();
     obj.DllCharacteristics = this.USHORT();
     if(obj.Magic == 0x10b) {

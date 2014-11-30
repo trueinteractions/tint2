@@ -1,10 +1,10 @@
-
 #include <node.h>
 #include <node_javascript.h>
 #include <node_string.h>
 #include <stdlib.h>
 #include <windows.h>
-
+#include <io.h>
+#include <fcntl.h>
 #include "v8_typed_array.h"
 
 //TODO: Find a better way of doing this instead of "trusting"
@@ -122,10 +122,7 @@ void uv_event(void *info) {
 }
 
 void node_load() {
-  //TODO: Register the app:// protocol.
-  //http://msdn.microsoft.com/en-us/library/1f6c88af(v=vs.110).aspx
-  //http://msdn.microsoft.com/en-us/library/system.net.webrequest.registerprefix(v=vs.110).aspx
-  //http://msdn.microsoft.com/en-us/library/system.uri(v=vs.110).aspx
+  // Register the app:// schema.
   InitAppRequest();
 
   // Register the initial bridge: C++/C/C# (CLR) dotnet
@@ -224,10 +221,14 @@ void win_msg_loop() {
   exit(0);
 }
 
+// This is the general entry point for everything when /subsystem:console, 
+// when executed its possible we came in through WinMain and it called us
+// after initializing the arguments.
 int main(int argc, char *argv[]) {
   argv = uv_setup_args(argc, argv);
   init_argc = argc;
   init_argv = copy_argv(argc, argv);
+
   mainThreadId = GetCurrentThreadId();
 
   // This needs to run *before* V8::Initialize()
@@ -256,4 +257,122 @@ int main(int argc, char *argv[]) {
   v8::V8::Dispose();
 #endif
 }
+
+
+// This entry point assumes that we're a GUI application and not being executed from
+// the command prompt.  In this case we'll assign the argc, argv values to the built
+// in package and let the main() entry point load as if its being executed normally.
+int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+  // TODO: Clean this up, it works but is really ugly and may have unnecessary computations
+  //       and memory hits.
+  char cwBuffer[2048] = { 0 };
+  char cwBase[2048] = { 0 };
+  LPSTR package = cwBuffer;
+  LPSTR basePath = cwBase;
+  DWORD dwMaxChars = _countof(cwBuffer);
+  DWORD dwLength = ::GetModuleFileName(NULL, package, dwMaxChars);
+  unsigned i = dwLength;
+
+  while(package[i] != '\\')
+    i--;
+
+  package[i++] = '\\';
+  package[i++] = 'R';
+  package[i++] = 'e';
+  package[i++] = 's';
+  package[i++] = 'o';
+  package[i++] = 'u';
+  package[i++] = 'r';
+  package[i++] = 'c';
+  package[i++] = 'e';
+  package[i++] = 's';
+  package[i++] = '\\';
+  package[i++] = 'p';
+  package[i++] = 'a';
+  package[i++] = 'c';
+  package[i++] = 'k';
+  package[i++] = 'a';
+  package[i++] = 'g';
+  package[i++] = 'e';
+  package[i++] = '.';
+  package[i++] = 'j';
+  package[i++] = 's';
+  package[i++] = 'o';
+  package[i++] = 'n';
+  package[i] = NULL;
+
+  DWORD h = GetFileAttributesA(package);
+
+  // If we cannot find the package.json file relative to the
+  // executable error out.
+  if(h == INVALID_FILE_ATTRIBUTES) {
+    // Don't bother printing an error, we don't have a
+    // console to error to anyway.
+    exit(1);
+  }
+
+  strcpy(basePath, package);
+  i = strlen(package);
+  while(basePath[i] != '\\')
+    i--;
+  basePath[i] = '\\';
+  basePath[i+1] = NULL;
+
+  char buffer[2048] = {0};
+  char mainPackage[1024] = {0};
+  int j=0;
+  DWORD lpNumberOfBytesRead = 2048;
+
+  FILE* handle = fopen(package, "r");
+  lpNumberOfBytesRead = fread(buffer, sizeof(char), lpNumberOfBytesRead, handle);
+  fclose(handle);
+
+  // Search for main entry in package.json, note that we do not have a compotent 
+  // JSON deserializer in Windows, and unfortunately cannot use V8's as its internal.
+  while(i < lpNumberOfBytesRead && buffer[i] != NULL &&
+    strncmp("\"main\"", &buffer[i], 6) != 0 &&
+    strncmp("'main'", &buffer[i], 6) != 0) 
+      i++;
+
+  // If we cannot find the main entry in package.json, error out.
+  if(i == lpNumberOfBytesRead-1) {
+    // Don't bother printing an error, we don't have a
+    // console to error to anyway.
+    exit(2);
+  }
+
+  i = i + 6;
+
+  while(i < lpNumberOfBytesRead && 
+    (buffer[i] != '\'' && buffer[i] != '\"'))
+      i++;
+
+  i++;
+
+  while(i < lpNumberOfBytesRead && j < 1024 && 
+    (buffer[i] != '\'' && buffer[i] != '\"' )) 
+  {
+    if(buffer[i] == '/') mainPackage[j] = '\\';
+    else mainPackage[j] = buffer[i];
+    j++;
+    i++;
+  }
+  mainPackage[j] = NULL;
+
+  dwLength = ::GetModuleFileName(NULL, package, dwMaxChars);
+  strcat(basePath, mainPackage);
+
+  unsigned int exec_len = strlen(package) + 1;
+  unsigned int main_len = strlen(basePath) + 1;
+  unsigned int buf_len = sizeof(char *) * 2;
+  char **p_argv = (char **)malloc(exec_len + main_len + buf_len);
+  char *base = (char *)p_argv;
+  p_argv[0] = (char *)(base + buf_len);
+  p_argv[1] = (char *)(base + buf_len + exec_len);
+  strncpy(p_argv[0], package, exec_len);
+  strncpy(p_argv[1], basePath, main_len);
+  return main(2, p_argv);
+}
+
+
 

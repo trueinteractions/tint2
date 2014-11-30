@@ -16,6 +16,7 @@
     'node_use_openssl%': 'true',
     'node_use_systemtap%': 'false',
     'node_shared_openssl%': 'false',
+    'win_subsystem%': 'console',
     'mac_library_files': [
       'modules/Bridge/class.js',
       'modules/Bridge/core.js',
@@ -421,14 +422,19 @@
           ],
         },
         'VCLinkerTool': {
-          'SubSystem': 1, # /subsystem:console
-          'AdditionalDependencies':[
-          ],
+          'SubSystem': 1,
+          'AdditionalDependencies':[ ],
           'AdditionalOptions': [
             '/IGNORE:4098',
             '/CLRTHREADATTRIBUTE:STA',
           ],
           'conditions': [
+            ['win_subsystem=="console"', {
+              'AdditionalOptions':[ '/SUBSYSTEM:CONSOLE' ]
+            }],
+            ['win_subsystem=="windows"', {
+              'AdditionalOptions':[ '/SUBSYSTEM:WINDOWS' ]
+            }],
             ['target_arch=="x64"', {
               'AdditionalLibraryDirectories':[
                 # '$(WINDOWSSDKDIR)lib\\x64'
