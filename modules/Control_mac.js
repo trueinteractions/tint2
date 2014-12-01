@@ -123,7 +123,7 @@ module.exports = (function() {
    *              from 0 to 1 (where 1 = completely visible, 0 = completely hidden).
    * @example
    *  require('Common'); // include defaults, creates application context.
-   *  var window = new Window(); // create a new window.
+   *  var win = new Window(); // create a new window.
    *  win.visible = true; // make the window visible.
    *  var dateWell = new DateWell();
    *  win.title = "Date well should be 0.5 alpha.";
@@ -147,7 +147,7 @@ module.exports = (function() {
    * @description Gets or sets whether the control is visible or not.
    * @example
    *  require('Common'); // include defaults, creates application context.
-   *  var window = new Window(); // create a new window.
+   *  var win = new Window(); // create a new window.
    *  win.visible = true; // make the window visible.
    *  var dateWell = new DateWell();
    *  win.title = "Date well should be 0.5 alpha.";
@@ -183,7 +183,7 @@ module.exports = (function() {
    *              this throws an error.
    * @example
    *  require('Common'); // include defaults, creates application context.
-   *  var window = new Window(); // create a new window.
+   *  var win = new Window(); // create a new window.
    *  win.visible = true; // make the window visible.
    *  var bounds = win.boundsOnScreen;
    *  console.log('Windows content area is '+bounds.x+' from the left.');
@@ -221,7 +221,7 @@ module.exports = (function() {
    *              500 + (the native windows titlebar height) + 20.  If the control is not on a window this throws an error.
    * @example
    *  require('Common'); // include defaults, creates application context.
-   *  var window = new Window(); // create a new window.
+   *  var win = new Window(); // create a new window.
    *  win.visible = true; // make the window visible.
    *
    *  var bounds = win.boundsOnWindow;
@@ -388,6 +388,7 @@ module.exports = (function() {
    *              is translated as positioning the top at fifty percent of the parents height. If a control is set to the top the top
    *              is translated as placing it right below the assigned control element.
    * @example
+   * require('Common');
    * var win = new Window();
    * win.visible = true;
    * var buttonSecond = new Button();

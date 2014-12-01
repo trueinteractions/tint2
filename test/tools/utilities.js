@@ -222,32 +222,35 @@ if (ismac) {
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, convertBoundsToCGPoint(point), 0));
     }
     ex.writeImage = function writeImage(image, path) {
-      var url = $.NSURL('fileURLWithPath',$(path));
+      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
+      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
+      var base64String = imageData('base64EncodedStringWithOptions',0);
+      var bf = new Buffer(base64String.toString(), 'base64');
+      var fs = require('fs');
+      fs.writeFileSync(path,bf);
+      /*var url = $.NSURL('fileURLWithPath',$(path));
       var pathcf = $.CFStringCreateWithCString($.kCFAllocatorDefault,"public.png",$.kCFStringEncodingASCII);
         var destination = $.CGImageDestinationCreateWithURL(url, pathcf, 1, null);
         $.CGImageDestinationAddImage(destination, image, null);
         if (!$.CGImageDestinationFinalize(destination)) {
             $.NSLog($("Failed to write image to %@"), $(path));
-        }
+        }*/
     }
     ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
-      var cgimage = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
-      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',cgimage);
-      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
-      var base64String = imageData('base64EncodedStringWithOptions',0);
-      return base64String;
+      var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
+      this.writeImage(image, path);
     }
     ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
       var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListExcludeDesktopElements, 1, $.kCGWindowImageDefault);
       this.writeImage(image, path);
     }
     ex.takeSnapshotOfWindowNumber = function takeSnapshotOfWindowNumber(windowNumber, path) {
-      var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListOptionIncludingWindow | ($.kCGWindowListOptionOnScreenAboveWindow ^ $.kCGWindowListExcludeDesktopElements), windowNumber, $.kCGWindowImageDefault);
+      var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListOptionIncludingWindow | $.kCGWindowListExcludeDesktopElements, windowNumber, $.kCGWindowImageDefault);
       this.writeImage(image, path);
     }
     ex.takeSnapshotOfCurrentWindow = function takeSnapshotOfCurrentWindow(path) {
       var currentWindow = $.NSApplication('sharedApplication')('mainWindow');
-      if(currentWindow == null) throw new Error('There is no current window.');
+      if(currentWindow == null) return;// throw new Error('There is no current window.');
       var windowNumber = currentWindow('windowNumber');
       this.takeSnapshotOfWindowNumber(windowNumber, path);
     } 

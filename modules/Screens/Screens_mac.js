@@ -42,6 +42,7 @@ module.exports = (function() {
      *              'visibleBounds' - an object with the properties 'width', 'height', 'x', and 'y' logical pixel values of the 
      *                              active screens workarea or visible area.
      * @example
+     *  require('Common');
      *  var Screens = require('Screens');
      *  var active = Screens.active;
      *  console.log('The active screens sharpness (scale factor) is:'+active.scaleFactor);
@@ -72,6 +73,7 @@ module.exports = (function() {
      *              visibleBounds - an object with the properties 'width', 'height', 'x', and 'y' logical pixel values of the 
      *                              active screens workarea or visible area. 
      * @example
+     *  require('Common');
      *  var Screens = require('Screens');
      *  var all = Screens.all;
      *  all.forEach(function(screen, i) {

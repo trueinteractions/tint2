@@ -28,7 +28,7 @@ module.exports = (function() {
     /**
      * @event message
      * @memberof WebView
-     * @description Fires when the top frame HTML document has executed window.postMessage().  The message is a string
+     * @description Fires when the top frame HTML document has executed window.postMessageToHost().  The message is a string
      *              passed into the callback provided as the first argument.
      */
     TintWebKitResponseDelegate.addMethod('postMessage','v@:@',
@@ -103,7 +103,7 @@ module.exports = (function() {
        */
       ['webView:didFinishLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { 
         try {
-          // Create the comm delegate and assign it to window.TintMessages, then override window.postMessage.
+          // Create the comm delegate and assign it to window.TintMessages, then override window.postMessageToHost.
           var frameWinObj = this.nativeView('windowScriptObject');
           if(frameWinObj) {
             frameWinObj('setValue',this.private.commDelegate,'forKey',$('TintMessages'));

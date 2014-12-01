@@ -381,13 +381,12 @@ module.exports = (function() {
    * @description Gets or sets the position from the top of the screen where the window is at.
    *              This does not account for the work area. Setting this to a value that impeeds
    *              on system areas (such as the menu bar on OSX or the task bar on Windows) resets
-   *              the value to as close as possible coordinate value. For example, setting y to
-   *              0 will reset its position to 22 on OSX to prevent it from overlapping the menubar.
+   *              the value to as close as possible coordinate value.
    * @example
    *  require('Common');
    *  var win = new Window();
+   *  win.visible = true; // show the window
    *  win.y = 0; // move the window to the top area of the screen.
-   *  console.log(y); // will equal 22, not 0 (or a close value to) on OSX
    */
   Object.defineProperty(Window.prototype, 'y', {
     get:function() { 
@@ -645,8 +644,9 @@ module.exports = (function() {
    * require('Common');
    * var win = new Window(); // Create a new window.
    * win.visible = true; // make sure the window is shown.
-   * win.resizable = false; // the window will not be able to be resized by the user, but can still be
-   *                        // resized programmatically with the width/height properties.
+   * win.resizable = false; // the window will not be able to be resized by the user,
+   *                        // but can still be resized programmatically with the 
+   *                        // width/height properties.
    */
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },
@@ -677,9 +677,15 @@ module.exports = (function() {
    *  var win = new Window();
    *  win.visible = true; // Show the window.
    *  win.backgroundColor = 'red'; // make the background red.
-   *  win.backgroundColor = 'transparent'; // change the background to be transluent 
+   *  win.x = 0; // move to 0 position.
+   *  var win2 = new Window();
+   *  win2.visible = true; // Show the window.
+   *  win2.backgroundColor = 'transparent'; // change the background to be transluent 
    *                                       // with the frame or windows behind it showing.
-   *  win.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
+   *  var win3 = new Window();
+   *  win3.visible = true; // Show the window.
+   *  win3.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
+   *  win3.x = 750;
    */
   Object.defineProperty(Window.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
@@ -759,7 +765,12 @@ module.exports = (function() {
    * require('Common');
    * var win = new Window(); // Create a new window.
    * win.visible = true; // make sure the window is shown.
-   * win.bringToFront(); // the window is pulled in front of all others (with the exception if a windows that are "alwaysOnTop")
+   * var win2 = new Window(); // Create a second new window.
+   * win2.visible = true; // make sure the window is shown.
+   * win2.x = win2.x - 30; // move left thirty pixels.
+   * win2.y = win2.y - 30; // move up thirty pixels.
+   * win.bringToFront(); // the window is pulled in front of all others 
+   *                     // (with the exception if a windows that are "alwaysOnTop")
    */
   Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
 
