@@ -209,6 +209,19 @@ module.exports = (function() {
    *              Textured windows use the native OS' texture to render the background, on OSX
    *              this is the metal or brushed look, on some Windows platforms this is a glass
    *              look on the frame elements. Setting this to false disables these.
+   * @example
+   *  require('Common');
+   *  var win = new Window();
+   *  win.visible = true; // make sure the window is shown.
+   *  win.textured = false;
+   *  win.title = "Non-textured window.";
+   *  win.x = 50;
+   *
+   *  var win = new Window();
+   *  win.visible = true; // make sure the window is shown.
+   *  win.textured = true;
+   *  win.title = "Textured window.";
+   *  win.x = 600;
    */
   Object.defineProperty(Window.prototype, 'textured', {
     get:function() { return this.native('styleMask') & $.NSTexturedBackgroundWindowMask; },

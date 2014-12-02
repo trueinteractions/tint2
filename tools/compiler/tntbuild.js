@@ -1609,6 +1609,7 @@ var WindowsExeFile = function(fd)
 	this.FileDescriptor = fd;
 	this.Position = 0;
 }
+// Yes, microsoft considers a "BOOL" to be 4 bytes. It's a typedef int.
 WindowsExeFile.prototype.BOOL = function() { return WindowsConst.READ(4, this).readUInt32LE(0); }
 WindowsExeFile.prototype.BOOLEAN = function() { return WindowsConst.READ(1, this).readUInt8(0); }
 WindowsExeFile.prototype.BYTE = function() { return WindowsConst.READ(1, this).readUInt8(0); };
@@ -1644,134 +1645,235 @@ WindowsExeFile.prototype.ResourceDataIconRead = function() {
 	return obj;
 };
 
-WindowsExeFile.prototype.DynamicTableRead = function() {
+WindowsExeFile.UTF16toJSString =function(str) {
+	var s = "";
+	str.forEach(function(e) { s += e[0]; });
+	return s;
+}
+
+WindowsExeFile.prototype.ReadUnicodeUTF16 = function() {
+	var str = [];
+	var data = this.WCHAR();
+	var key = "";
+	while(data != "\u0000\u0000") {
+		key += data[0];
+		str.push(data);
+		data = this.WCHAR();
+	}
+	return str;
+}
+
+WindowsExeFile.prototype.ReadPadding = function() {
+	// expect to be padded with 0's until we hit a 32 bit boundary.
+	// We must (by microsofts spec) read in 2 bytes, which is unusual,
+	// as it implies we will never end up on an odd boundary, and if we
+	// somehow do, we'll spin until the end of the file.
+	var beginPos = this.Position;
+	while(((this.Position) % 4) != 0)
+		console.assert(this.WORD() === 0, 
+			'Padding values should be 0, at position: ', this.Position, ' with ', (this.Position%4),' offset');
+	return this.Position - beginPos;
+}
+
+// Note this "String" does not mean what you think it does, String is a 
+// special term in the microsoft PE format, its a string in the PE version data, see:
+// http://msdn.microsoft.com/en-us/library/windows/desktop/ms646987(v=vs.85).aspx
+WindowsExeFile.prototype.StringRead = function() {
+	var obj = {};
+	obj.wLength = this.WORD();
+	obj.wValueLength = this.WORD();
+	obj.wType = this.WORD();
+	obj.szKey = this.ReadUnicodeUTF16();
+	var paddingSize = this.ReadPadding();
+	obj.ValuePosition = this.Position;
+	obj.Value = this.ReadUnicodeUTF16();
+
+	var key = WindowsExeFile.UTF16toJSString(obj.szKey);
+
+	// Supported values, see the url above.
+	switch(key) {
+		case 'Comments':
+		case 'CompanyName':
+		case 'FileDescription':
+		case 'FileVersion':
+		case 'InternalName':
+		case 'LegalCopyright':
+		case 'LegalTrademarks':
+		case 'OriginalFilename':
+		case 'PrivateBuild':
+		case 'ProductName':
+		case 'ProductVersion':
+		case 'SpecialBuild':
+			// TODO: Add .. something.. position and value to .. something.
+			if(!this.VersionInfo) this.VersionInfo = {};
+			this.VersionInfo[key] = WindowsExeFile.UTF16toJSString(obj.Value);
+			this.VersionInfo[key+'Position'] = obj.ValuePosition;
+			break;
+		default:
+			console.warn('Unknown version string: '+key+', hoepfully well be ok.');
+	}
+	return obj;
+}
+
+WindowsExeFile.prototype.StringTableRead = function() {
 	var obj = {}
 	obj.wLength = this.WORD();
 	obj.wValueLength = this.WORD();
 	obj.wType = this.WORD();
-	obj.szKey = [];
-	var count = 3;
-	var data = this.WCHAR();
-	count++;
-	while(data != "\u0000\u0000") {
-		obj.szKey.push(data);
-		data = this.WCHAR();
-		count++;
-	}
-	// obj.Padding
-	for(var i=0; i < count % 2; i++)
-		console.assert(this.WORD() === 0);
+	obj.Children = [];
+	// see http://msdn.microsoft.com/en-us/library/windows/desktop/ms646992(v=vs.85).aspx
+	// Microsoft doesn't seem to tell us what these are, other than they are an 8 digit 
+	// hexadecimal string encoded as a unicode string.
+	obj.szKey = this.ReadUnicodeUTF16();
+	var key = WindowsExeFile.UTF16toJSString(obj.szKey);
+	
+	console.assert(obj.wValueLength == 0, 'The value length was not equal to 0, it should be for StringTableRead');
+	console.assert(obj.wType === 1 || obj.wType === 0, 'The String Table type was not 1 or 0, it was: ', obj.wType);
+	console.assert(key.length == 8, 'The String Table key should be an 8 digit hexidecimal as unicode string, it was: ', key.length);
 
-	this.Position = obj.PaddingPosition = this.Position - 2;
+	var paddingSize = this.ReadPadding();
+	var lengthOfChildren = obj.wLength - 6 - ((key.length)*2) - paddingSize;
+	while(lengthOfChildren != 0) {
+		var tmp = this.StringRead();
+		obj.Children.push(tmp);
+		lengthOfChildren = lengthOfChildren - tmp.wLength;
+		// This is not documented, but mentioned by a user that padding is necessary
+		// after or inbetween each child array member, it turns out they're right.
+		paddingSize = this.ReadPadding();
+		lengthOfChildren = lengthOfChildren - paddingSize;
+	}
 	return obj;
+
 }
-WindowsExeFile.prototype.ValueRead = function(strlength) {
-	var obj = [];
-	for(var i=0; i < strlength; i++)
-		obj.push(this.WORD());
+
+// See: http://msdn.microsoft.com/en-us/library/windows/desktop/ms646994(v=vs.85).aspx
+WindowsExeFile.prototype.VarRead = function() {
+	var obj = {}
+	obj.wLength = this.WORD();
+	obj.wValueLength = this.WORD();
+	obj.wType = this.WORD();
+	obj.Children = [];
+	console.assert(obj.wType === 1 || obj.wType === 0, 'The String Table type was not 1 or 0, it was: ', obj.wType);
+
+	// see http://msdn.microsoft.com/en-us/library/windows/desktop/ms646992(v=vs.85).aspx
+	// Microsoft doesn't seem to tell us what these are, other than they are an 8 digit 
+	// hexadecimal string encoded as a unicode string.
+	obj.szKey = this.ReadUnicodeUTF16();
+	
+	var key = WindowsExeFile.UTF16toJSString(obj.szKey);
+	console.assert(key == "Translation", 'The Var key did not match expected value Translation, instead it was: ', key);
+
+	var paddingSize = this.ReadPadding();
+	var lengthOfChildren = obj.wValueLength;
+	while(lengthOfChildren != 0) {
+		obj.Children.push(this.DWORD()); // low order word is MS language id, high order word is  IBM code page.
+		lengthOfChildren = lengthOfChildren - 4;
+	}
 	return obj;
+
 }
-WindowsExeFile.prototype.StringRead = function() {
-	var obj = this.DynamicTableRead();
-	obj.ValuePosition = this.Position;
-	obj.Value = this.ValueRead(obj.wValueLength);
-	return obj;
-}
-WindowsExeFile.prototype.StringTableRead = function() {
-	var obj = this.DynamicTableRead();
+
+// This is either VarFileInfo or StringFileInfo structure, we wont know until we check the
+// szKey value, at that point we'll diverge. See:
+//   VarFileInfo: http://msdn.microsoft.com/en-us/library/windows/desktop/ms646995(v=vs.85).aspx
+//   StringFileInfo: http://msdn.microsoft.com/en-us/library/windows/desktop/ms646989(v=vs.85).aspx
+WindowsExeFile.prototype.VarFileOrStringFileInfoRead = function() {
+	var obj = {}
+	obj.wLength = this.WORD();
+	obj.wValueLength = this.WORD();
+	console.assert(obj.wValueLength == 0, 'The value length was not equal to 0, it should be for VarFileInfo or StringFileInfo');
+	obj.wType = this.WORD();
+	obj.szKey = this.ReadUnicodeUTF16();
+
+	var key = WindowsExeFile.UTF16toJSString(obj.szKey);
+
+	var paddingSize = this.ReadPadding();
 
 	obj.Children = [];
 
-	var SavePositionStringTableRead = this.Position;
-	var PotentialChild = this.WORD();
-	/* According to the spec this will either have 0 or 1 StringFileInfo
-	 * structure, this is not a standard C structure, thanks MS, rewind and read in the
-	 * data type of we end up having anything other than 0. */
-	while(PotentialChild != 0) {
-		this.Position = SavePositionStringTableRead;
-		obj.Children.push(this.StringRead());
-		SavePositionStringTableRead = this.Position;
-		PotentialChild = this.WORD();
-	}
-	return obj;
-}
-WindowsExeFile.prototype.VarFileInfo = function() {
-	return {}; 
-}
-WindowsExeFile.prototype.StringFileInfo = function() {
-	var obj = this.DynamicTableRead();
-
-	obj.Children = [];
-
-	var SavePositionStringFileInfo = this.Position;
-	var PotentialChild = this.WORD();
-	/* According to the spec this will either have 0 or 1 StringFileInfo
-	 * structure, this is not a standard C structure, thanks MS, rewind and read in the
-	 * data type of we end up having anything other than 0. */
-	while(PotentialChild != 0) {
-		this.Position = SavePositionStringFileInfo;
-		obj.Children.push(this.StringTableRead());
-		SavePositionStringFileInfo = this.Position;
-		PotentialChild = this.WORD();
-	}
+	if(key == "VarFileInfo") {
+		// children are of type "Var", a strange localization structure.
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms646994(v=vs.85).aspx
+		obj.Children.push(this.VarRead());
+	} else if (key == "StringFileInfo") {
+		// Children are of type "StringTable", the array is determined by the remaining
+		// bytes available. We loop into StringTableRead and if everything works out we
+		// should return with a wLength that is valid.
+		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms646992(v=vs.85).aspx
+		var lengthOfChildren = obj.wLength - ((key.length+1)*2) - 6 - paddingSize;
+		while(lengthOfChildren != 0) {
+			var tmp = this.StringTableRead();
+			obj.Children.push(tmp);
+			lengthOfChildren = lengthOfChildren - tmp.wLength;
+			// This is not documented, but mentioned by a user that padding is necessary
+			// after or inbetween each child array member, it turns out they're right.
+			paddingSize = this.ReadPadding();
+			lengthOfChildren = lengthOfChildren - paddingSize;
+		}
+	} else
+		console.assert(false, 'Invalid child key found: ', key);
 	return obj;
 }
 
+// Read in the Resource Data VS_VERSIONINFO Structure
+// See: http://msdn.microsoft.com/en-us/library/windows/desktop/ms647001(v=vs.85).aspx
 WindowsExeFile.prototype.ResourceDataVersionRead = function() {
 	var obj = {};
 	obj.wLength 		= this.WORD();
 	obj.wValueLength	= this.WORD();
 	obj.wType			= this.WORD();
-	obj.szKey			= [];
-	var count = 3
-
-	var key = new String("VS_VERSION_INFO");
-
-	for(var i=0; i < key.length ; i++) {
-		obj.szKey.push(this.WCHAR());
-		count++;
-	}
-
-	// obj.Padding1
-	for(var i=0; i < count % 2; i++)
-		console.assert(this.WORD() === 0);
-
-	this.Position = obj.Padding1Position = this.Position;
-	obj.ValuePosition = this.Position;
-	obj.Value = {
-		dwSignature:this.DWORD(),
-		dwStrucVersion:this.DWORD(),
-		dwFileVersionMS:this.DWORD(),
-		dwFileVersionLS:this.DWORD(),
-		dwProductVersionMS:this.DWORD(),
-		dwProductVersionLS:this.DWORD(),
-		dwFileFlagsMask:this.DWORD(),
-		dwFileFlags:this.DWORD(),
-		dwFileOS:this.DWORD(),
-		dwFileType:this.DWORD(),
-		dwFileSubtype:this.DWORD(),
-		dwFileDateMS:this.DWORD(),
-		dwFileDateLS:this.DWORD(),
-	};
-
-	// obj.Padding2
-	while(this.WORD() === 0)
-		;
-
-	this.Position = obj.Padding2Position = this.Position - 2;
+	obj.szKey			= this.ReadUnicodeUTF16();
 	
-	obj.Children = {};
+	var key = WindowsExeFile.UTF16toJSString(obj.szKey);
+	// Ensure we match the key expected.
+	console.assert(key == "VS_VERSION_INFO", 'Expected VS_VERSION_INFO got ', key);
 
-	var SavePosition = this.Position;
-	var PotentialChild = this.WORD();
-	/* According to the spec this will either have 0 or 1 StringFileInfo
-	 * structure, this is not a standard C structure, thanks MS, rewind and read in the
-	 * data type of we end up having anything other than 0. */
-	if(PotentialChild != 0) {
-		this.Position = SavePosition;
-		obj.Children.StringFileInfo = this.StringFileInfo();
+	var paddingSize = this.ReadPadding();
+
+	obj.ValuePosition = this.Position;
+	if(obj.wValueLength != 0) {
+		obj.Value = {
+			dwSignature:this.DWORD(),
+			dwStrucVersion:this.DWORD(),
+			dwFileVersionMS:this.DWORD(),
+			dwFileVersionLS:this.DWORD(),
+			dwProductVersionMS:this.DWORD(),
+			dwProductVersionLS:this.DWORD(),
+			dwFileFlagsMask:this.DWORD(),
+			dwFileFlags:this.DWORD(),
+			dwFileOS:this.DWORD(),
+			dwFileType:this.DWORD(),
+			dwFileSubtype:this.DWORD(),
+			dwFileDateMS:this.DWORD(),
+			dwFileDateLS:this.DWORD(),
+		};
+		
+		// It's always good to expect certain things to be true,
+		// keeps our program honest.
+		console.assert((this.Position - obj.ValuePosition) === obj.wValueLength, 
+			'VSVERSION_INFO.Value structure was ',(this.Position - obj.ValuePosition),' size, but size expected ', obj.wValueLength);
+		console.assert(obj.Value.dwSignature == 0xFEEF04BD, 
+			'VSVERSION_INFO.dwSignature should have been 0xFEEF04BD, instead we got', obj.Value.dwSignature.toString(16));
 	}
 
+	paddingSize = paddingSize + this.ReadPadding();
+
+	obj.Children = [];
+
+	var lengthOfChildren = obj.wLength - 6 - ((key.length+1)*2) - paddingSize - obj.wValueLength;
+	// Note if you refer to the microsoft documentation it notes Children as a type word at the end.
+	// it's unclear what this value is, but it seems to be the amount of children that can be seeked
+	// to based on the wLength, either way we break with 2 bytes (the size of a WORD) rather than 0.
+	while(lengthOfChildren != 2) {
+		var tmp = this.VarFileOrStringFileInfoRead();
+		obj.Children.push(tmp);
+		lengthOfChildren = lengthOfChildren - tmp.wLength;
+		// This is not documented, but mentioned by a user that padding is necessary
+		// after or inbetween each child array member, it turns out they're right.
+		paddingSize = this.ReadPadding();
+		lengthOfChildren = lengthOfChildren - paddingSize;
+	}
+	obj.ChildrenItem = this.WORD();
 	return obj;
 }
 WindowsExeFile.prototype.ResourceDataGroupIconRead = function() {
@@ -1812,14 +1914,27 @@ WindowsExeFile.prototype.ResourceDataRead = function(p) {
 
 		switch(obj.ResourceType.value) {
 			case RT_ICON.value:
+				if(!this.Icon) this.Icon = [];
 				obj.Icon = this.ResourceDataIconRead();
+				this.Icon.push(obj.Icon);
 				break;
 			case RT_GROUP_ICON.value:
+				if(!this.GroupIcon) this.GroupIcon = [];
 				obj.GroupIcon = this.ResourceDataGroupIconRead();
+				this.GroupIcon.push(obj.GroupIcon);
 				break;
 			case RT_VERSION.value:
+				if(!this.VersionInfo) this.VersionInfo = [];
 				obj.VersionInfo = this.ResourceDataVersionRead();
+				this.VersionInfo.push(obj.VersionInfo);
 				break;
+			// TOOD: Manifest?
+			//case RT_MANIFEST.value:
+			//	if(!this.Manifest) this.Manifest = [];
+			//	obj.Manifest = this.ResourceManifestRead();
+			//	this.Manifest.push(obj.Manifest);
+			default:
+				console.log('unknown resource type: ',obj.ResourceType.value);
 		}
 		
 		this.Position = SavePosition;

@@ -267,6 +267,19 @@ module.exports = (function() {
    *              where the coordinates start from the top (y) and left (x) of the parent. If the control is not on 
    *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window) 
    *              this throws an error.
+   * @example
+   *  require('Common'); // include defaults, creates application context.
+   *  var win = new Window(); // create a new window.
+   *  win.visible = true; // make the window visible.
+   *  var buttonNormal = new Button();
+   *  buttonNormal.title = "Hello"; // set its text label.
+   *  win.appendChild(buttonNormal); // add button to window.
+   *  buttonNormal.left = buttonNormal.top = 0; // position top left.
+   *  var bounds = win.bounds;
+   *  console.log('Button is '+bounds.x+' from the left.');
+   *  console.log('Button is '+bounds.y+' from the top.');
+   *  console.log('Button is '+bounds.width+' wide.');
+   *  console.log('Button is '+bounds.height+' tall.');
    */
   Object.defineProperty(Control.prototype,'bounds',{
     get:function() {
@@ -308,6 +321,20 @@ module.exports = (function() {
    * @description Adds an event listener for various control level events. The first
    *              parameter is the name of the event, the second parameter is the function
    *              to call when the event happens (e.g., a callback).
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Hello";
+   * buttonNormal.middle = '100%'; // Vertically centered to window.
+   * buttonNormal.center = '100%'; // Horizontally centered to window.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   * win.appendChild(buttonNormal);
+   *
+   * buttonNormal.addEventListener('mousedown', function() {
+   *   console.log('mouse is down over button!');
+   * });
    */
   Control.prototype.addEventListener = function(event, func) {
     event = event.toLowerCase();
@@ -330,6 +357,24 @@ module.exports = (function() {
    * @description Removes an event listener for various control level events. The first
    *              parameter is the name of the event, the second parameter is the function
    *              that was originally given as the callback for addEventListener.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Hello";
+   * buttonNormal.middle = '100%'; // Vertically centered to window.
+   * buttonNormal.center = '100%'; // Horizontally centered to window.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   * win.appendChild(buttonNormal);
+   *
+   * var mouseDown = function() {
+   *   console.log('mouse is down over button!');
+   * }
+   * // Listen to event.
+   * buttonNormal.addEventListener('mousedown', mouseDown);
+   * // Stop listening to event.
+   * buttonNormal.removeEventListener('mousedown', mouseDown);
    */
   Control.prototype.removeEventListener = function(event, func) {
     event = event.toLowerCase();
@@ -411,7 +456,7 @@ module.exports = (function() {
    *                      // with the left of the window.
    *
    * // Add the buttons to the window.
-   * win.appendChild(buttonSecond); 
+   * win.appendChild(buttonSecond);
    * win.appendChild(buttonNormal);
    * win.appendChild(buttonThird);
    */
@@ -424,6 +469,33 @@ module.exports = (function() {
    *              of pixels the bottom of the control should be to the bottom of the parent control.  If a percentage represented 
    *              as a string (E.g., '50%') is passed in, this is translated as positioning the bottom of the control at fifty percent of the parents height. 
    *              If a control is passed in, this is translated as positioning the bottom it to the top of the passed in control.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonSecond = new Button();
+   * var buttonThird = new Button();
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Aligned to bottom";
+   * buttonNormal.bottom = '0'; // Vertically aligned to bottom
+   * buttonNormal.center = '100%'; // Horizontally centered to window.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   * // buttonNormal uses the default height requested by button.
+   *
+   * buttonSecond.title = "20px from bottom";
+   * buttonSecond.bottom = '20px'; // Position it 20 pixels from the bottom
+   * buttonSecond.right = 0; // "Right align" or make this button flush
+   *                         // with the right of the window.
+   *
+   * buttonThird.title = "Third";
+   * buttonThird.left = 0; // Position to the left of the window
+   * buttonThird.bottom = '-20%'; // align it 20% of the parent height
+   *                             // from the bottom.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonSecond); 
+   * win.appendChild(buttonNormal);
+   * win.appendChild(buttonThird);
    */
   utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
   /**
@@ -434,6 +506,31 @@ module.exports = (function() {
    *              of pixels to the right the control should be to the left of the parent control.  If a percentage represented 
    *              as a string (E.g., '50%') is passed in, this is translated as positioning the left of the control at fifty percent of the parents width. 
    *              If a control is passed in, this is translated as positioning the left of the control to the right of the passed in control.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonSecond = new Button();
+   * var buttonThird = new Button();
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Aligned to top-left";
+   * buttonNormal.left = '0'; // align to left
+   * buttonNormal.top = '0'; // Horizontally centered to window.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   *
+   * buttonSecond.title = "20px from left";
+   * buttonSecond.left = '20px'; // Position it 20 pixels from the left
+   * buttonSecond.top = '200px'; // Align it to the top by 200 pixels.
+   *
+   * buttonThird.title = "Third";
+   * buttonThird.left = '50%'; // Position it 50% from the left.
+   * buttonThird.bottom = '-20%'; // align it 20% of the parent height
+   *                             // from the bottom.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonSecond); 
+   * win.appendChild(buttonNormal);
+   * win.appendChild(buttonThird);
    */
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
   /**
@@ -444,6 +541,31 @@ module.exports = (function() {
    *              of pixels to the left of the parent's right the control should be.  If a percentage represented 
    *              as a string (E.g., '50%') is passed in, this is translated as positioning the right of the control at fifty percent of the parents width. 
    *              If a control is passed in, this is translated as positioning the right of the control to the left of the passed in control.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonSecond = new Button();
+   * var buttonThird = new Button();
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Aligned to top-right";
+   * buttonNormal.right = '0'; // align to right
+   * buttonNormal.top = '0'; // Horizontally centered to window.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   *
+   * buttonSecond.title = "20px from right";
+   * buttonSecond.right = '20px'; // Position it 20 pixels from the right
+   * buttonSecond.top = '200px'; // Align it to the top by 200 pixels.
+   *
+   * buttonThird.title = "Third";
+   * buttonThird.right = '50%'; // Position it 50% from the right.
+   * buttonThird.bottom = '20px'; // align it 20px of the parent height
+   *                              // from the bottom.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonSecond); 
+   * win.appendChild(buttonNormal);
+   * win.appendChild(buttonThird);
    */
   utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.negate, ['left','width']);
   /**
@@ -464,6 +586,34 @@ module.exports = (function() {
    *              that the control should have.  If the value is a string representing a percentage (e.g., '50%') then the width is
    *              set to 50% of the parents width.  Note that width cannot be calculated if both left and right are set (as the width
    *              is implicitly set in that circumstance).
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonSecond = new Button();
+   * var buttonThird = new Button();
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "width 200px";
+   * buttonNormal.left = '0'; // align to left
+   * buttonNormal.top = '0'; // align to top
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   *
+   * buttonSecond.title = "20px from right";
+   * buttonSecond.left = '0px'; // align to left
+   * buttonSecond.top = '30px'; // align to top by 30px
+   * buttonSecond.width = '50%'; // 50% of the width of parent.
+   *
+   * buttonThird.title = "Third";
+   * buttonThird.left = '0'; // Position it left
+   * buttonThird.top = '100px'; // align it 100px of the parent height
+   *                            // from the bottom.
+   * buttonThird.width = buttonSecond; // make the width equal to buttonSecond.
+   *                                   // or 50% of the width.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonSecond); 
+   * win.appendChild(buttonNormal);
+   * win.appendChild(buttonThird);
    */
   utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
   /**
@@ -476,6 +626,18 @@ module.exports = (function() {
    *              positioned to the parents middle + the parents height/2 times the percentage. For example, to ensure the control is
    *              positioned at the half-of-middle of the parents control (or in the first 1/4 of the height), use 50%. If a control
    *              is set as the value the middle of this controls is aligned to the middle of the assigned control.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Aligned to middle";
+   * buttonNormal.middle = '0'; // align to middle of parent.
+   * buttonNormal.left = '0'; // align to left.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonNormal);
    */
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
   /**
@@ -488,6 +650,18 @@ module.exports = (function() {
    *              positioned to the parents center + the parents width/2 times the percentage. For example, to ensure the control is
    *              positioned at half-of-center of the parents control (or in the first 1/4 of the width), use 50%. If a control
    *              is set as the value the center of this controls is aligned to the center of the assigned control.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var buttonNormal = new Button();
+   * buttonNormal.title = "Aligned to center";
+   * buttonNormal.center = '0'; // align to center of parent.
+   * buttonNormal.top = '0'; // align to top.
+   * buttonNormal.width = '200px'; // 200 logical pixels wide.
+   *
+   * // Add the buttons to the window.
+   * win.appendChild(buttonNormal);
    */
   utils.createLayoutProperty(Control.prototype, 'center', 'center', utils.identity, 'center', utils.identity, null);
 
