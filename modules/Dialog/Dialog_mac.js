@@ -165,6 +165,13 @@ module.exports = (function() {
         w = w.native ? w.native : w;
         var comp = $(function(self,e) {
           try {
+           /**
+            * @event click
+            * @memberof Dialog
+            * @description Fires when the user clicks either the auxillary button or main button
+            *              'aux' is passed in to the callback when the auxillary button is pressed.
+            *               'main' is passed in to the callback when the main button is pressed.
+            */
             if(e == $.NSAlertFirstButtonReturn) this.fireEvent('click',['main']);
             else this.fireEvent('click',['aux']);
           } catch(e) {

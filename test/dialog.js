@@ -60,7 +60,6 @@ function run($utils) {
   /* @hidden */                              // find a better way of doing this :/
   /* @hidden */   else
   /* @hidden */     $utils.clickAt((scn.bounds.width/2)+175,(scn.bounds.height/2)+40); // click main
-  /* @hidden */   //$utils.takeSnapshotOfCurrentWindow('assets/dialog_mac.png');
   /* @hidden */ },100);
 }
 

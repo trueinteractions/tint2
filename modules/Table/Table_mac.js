@@ -295,18 +295,14 @@ module.exports = (function() {
     get:function() { return this.nativeView('allowsColumnSelection') == $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsColumnSelection', e ? $.YES : $.NO); }
   });
-/* Unable to get this working in Yosemite, doesn't seem to work.
-  Object.defineProperty(Table.prototype, 'backgroundColor', {
-    get:function() { return new Color(this.nativeView('backgroundColor')); },
-    set:function(e) { this.nativeView('setBackgroundColor',e.native); }
-  });
- */
-/* Unable to get this working in Yosemite, doesn't seem to work.
-  Object.defineProperty(Table.prototype, 'borderColor', {
-    get:function() { return new Color(this.nativeView('gridColor')); },
-    set:function(e) { this.nativeView('setGridColor',e.native); }
-  });
-*/
+
+  /**
+   * @member spaceX
+   * @type {number}
+   * @memberof Table
+   * @description Gets or sets the horizontal intercell spacing between cells in logical pixels.
+   *              The default value depends on the native OS defaults.
+   */
   Object.defineProperty(Table.prototype, 'spaceX', {
     get:function() { return this.nativeView('intercellSpacing').width; },
     set:function(e) { 
@@ -316,6 +312,13 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member spaceY
+   * @type {number}
+   * @memberof Table
+   * @description Gets or sets the vertical intercell spacing between cells in logical pixels.
+   *              The default value depends on the native OS defaults.
+   */
   Object.defineProperty(Table.prototype, 'spaceY', {
     get:function() { return this.nativeView('intercellSpacing').height; },
     set:function(e) { 
@@ -339,13 +342,6 @@ module.exports = (function() {
       this.nativeView('setNeedsDisplay', $.YES);
     }
   });
-
-/* Retired in Yosemite
-  Object.defineProperty(Table.prototype, 'focusedColumn', {
-    get:function() { return this.nativeView('focusedColumn'); },
-    set:function(e) { this.nativeView('setFocusedColumn', e); }
-  });
-*/
 
   /**
    * @member numberOfColumns
@@ -408,6 +404,13 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member alternatingColors
+   * @type {boolean}
+   * @memberof Table
+   * @description Gets or sets whether a table will have alternating colors or not.
+   *              The alternating colors default to system values.
+   */
   Object.defineProperty(Table.prototype, 'alternatingColors', {
     get:function() { return this.nativeView('usesAlternatingRowBackgroundColors') == $.YES ? true : false; },
     set:function(e) { 

@@ -43,6 +43,8 @@ module.exports = (function() {
     this.private.allowEmptySelection = true;
     this.private.isTrackingSelects = false;
     this.private.alternatingColors = true;
+    this.private.spaceX = 1;
+    this.private.spaceY = 1;
   }
 
   Table.prototype = Object.create(Container.prototype);
@@ -105,7 +107,7 @@ module.exports = (function() {
     }
 
     var s = new $.System.Windows.Controls.Border();
-    s.BorderThickness = new $.System.Windows.Thickness(1);
+    s.BorderThickness = new $.System.Windows.Thickness(this.private.spaceX/2,this.private.spaceY/2,this.private.spaceX/2,this.private.spaceY/2);
     if(rowNdx % 2 == 1 && this.private.alternatingColors) {
       s.BorderBrush = oddColor;
       s.Background = oddColor;
@@ -162,9 +164,7 @@ module.exports = (function() {
   }
 
   Table.prototype.addRow = function(ndx) {
-    this.private.rows.push({
-      definition:(new $.System.Windows.Controls.RowDefinition())
-    });
+    this.private.rows.push({ definition:(new $.System.Windows.Controls.RowDefinition()) });
     var ndx = this.private.rows.length - 1;
     this.private.rows[ndx].definition.Height = new $.System.Windows.GridLength(this.private.rowHeight, $.System.Windows.GridLength.Pixel);
     this.nativeView.RowDefinitions.Add(this.private.rows[ndx].definition);
@@ -274,46 +274,56 @@ module.exports = (function() {
   });
 
   // TODO: Implement me.  User interface to move columns.
-  Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
-    get:function() { },
-    set:function(e) { }
-  });
+  //Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
+  //  get:function() { },
+  //  set:function(e) { }
+  //});
 
   // TODO: Implement me.  User interface to resize columns.
-  Object.defineProperty(Table.prototype, 'columnsCanBeResized', {
-    get:function() { },
-    set:function(e) { }
-  });
+  //Object.defineProperty(Table.prototype, 'columnsCanBeResized', {
+  //  get:function() { },
+  //  set:function(e) { }
+  //});
 
   // TODO: Implement me.
-  Object.defineProperty(Table.prototype, 'columnsCanBeSelected', {
-    get:function() { return this.private.columnsSelectable; },
-    set:function(e) { this.private.columnsSelectable = e ? true : false; }
-  });
+  //Object.defineProperty(Table.prototype, 'columnsCanBeSelected', {
+  //  get:function() { return this.private.columnsSelectable; },
+  //  set:function(e) { this.private.columnsSelectable = e ? true : false; }
+  //});
 
-  /* Not implemeneted, OSX doesn't seem to obey this.
-  Object.defineProperty(Table.prototype, 'backgroundColor', {
-    get:function() { return new Color(this.native.Background.Color); },
-    set:function(e) { this.native.Background = new $.System.Windows.Media.SolidColorBrush((new Color(e)).native); }
-  });
-  */
-  /* Not implemeneted, OSX doesn't seem to obey this.
-  Object.defineProperty(Table.prototype, 'borderColor', {
-    get:function() {  },
-    set:function(e) {  }
-  });
-  */
-
-  // TODO: implement me.
   Object.defineProperty(Table.prototype, 'spaceX', {
-    get:function() { },
-    set:function(e) { }
+    get:function() { return this.private.spaceX; },
+    set:function(e) {
+      if(e !== null && e && e != this.private.spaceX && e > 0) {
+        this.private.spaceX = e;
+        var conts = this.private.containers;
+        if(conts.length < 1) return;
+        for(var rowNdx = 0; rowNdx < conts[0].length; rowNdx++) {
+          for(var colNdx = 0; colNdx < conts.length; colNdx++) {
+            conts[colNdx][rowNdx].BorderThickness.Left = (this.private.spaceX / 2);
+            conts[colNdx][rowNdx].BorderThickness.Right = (this.private.spaceX / 2);
+          }
+        }
+      }
+    }
   });
 
-  // TODO: implement me.
   Object.defineProperty(Table.prototype, 'spaceY', {
-    get:function() { },
-    set:function(e) { }
+    get:function() { return this.private.spaceY; },
+    set:function(e) {
+      if(e !== null && e && e != this.private.spaceY && e > 0) {
+        this.private.spaceY = e;
+        for(var i=0; i < this.private.rows.length; i++)
+          this.private.rows[i].definition.Height = new $.System.Windows.GridLength(this.private.rowHeight + this.private.spaceY, 
+            $.System.Windows.GridLength.Pixel);
+        for(var i=0; i < this.private.containers.length ; i++) {
+          var col = this.private.containers[i];
+          for(var j=0; j < col.length; j++) {
+            this.private.containers[i][j].Height = this.private.rowHeight + this.private.spaceY;
+          }
+        }
+      }
+    }
   });
 
   Object.defineProperty(Table.prototype, 'rowHeight', {
@@ -321,23 +331,22 @@ module.exports = (function() {
     set:function(e) { 
       this.private.rowHeight = e;
       for(var i=0; i < this.private.rows.length; i++)
-        this.private.rows[i].definition.Height = new $.System.Windows.GridLength(this.private.rowHeight, $.System.Windows.GridLength.Pixel);
+        this.private.rows[i].definition.Height = new $.System.Windows.GridLength(this.private.rowHeight + this.private.spaceY, 
+          $.System.Windows.GridLength.Pixel);
       for(var i=0; i < this.private.containers.length ; i++) {
         var col = this.private.containers[i];
         for(var j=0; j < col.length; j++) {
           this.private.containers[i][j].Height = this.private.rowHeight;
         }
-      } 
+      }
     }
   });
 
   // TODO: implement me
-  Object.defineProperty(Table.prototype, 'selectedColumns', {
-    get:function() {
-    },
-    set:function(e) {
-    }
-  });
+  //Object.defineProperty(Table.prototype, 'selectedColumns', {
+  //  get:function() { },
+  //  set:function(e) { }
+  //});
 
   Object.defineProperty(Table.prototype, 'selectedRows', {
     get:function() {
@@ -369,7 +378,6 @@ module.exports = (function() {
     get:function() { return this.private.rows.length; }
   });
 
-  // TODO: Implement me.
   Object.defineProperty(Table.prototype, 'alternatingColors', {
     get:function() { return this.private.alternatingColors; },
     set:function(e) { 
