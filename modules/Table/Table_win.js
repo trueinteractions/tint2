@@ -4,6 +4,10 @@ module.exports = (function() {
   var TextInput = require('TextInput');
   var Color = require('Color');
 
+  var oddColor = $.System.Windows.SystemColors.ControlBrush;
+  var evenColor = $.System.Windows.SystemColors.ControlLightLightBrush;
+  var highlightColor = $.System.Windows.SystemColors.HighlightBrush;
+
   function Table(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 
@@ -50,8 +54,8 @@ module.exports = (function() {
       var item = this.private.containers[colIndex][rowIndex];
       if(state == "selected") {
         item.itemSelected = true;
-        item.BorderBrush = $.System.Windows.SystemColors.HighlightBrush;
-        item.Background = $.System.Windows.SystemColors.HighlightBrush;
+        item.BorderBrush = highlightColor;
+        item.Background = highlightColor;
       } else {
         item.itemSelected = false;
         item.BorderBrush = item.OriginalBorderBrush;
@@ -102,12 +106,12 @@ module.exports = (function() {
 
     var s = new $.System.Windows.Controls.Border();
     s.BorderThickness = new $.System.Windows.Thickness(1);
-    if(rowNdx % 2 == 1) {
-      s.BorderBrush = $.System.Windows.SystemColors.ControlBrush;
-      s.Background = $.System.Windows.SystemColors.ControlBrush;
+    if(rowNdx % 2 == 1 && this.private.alternatingColors) {
+      s.BorderBrush = oddColor;
+      s.Background = oddColor;
     } else {
-      s.BorderBrush = $.System.Windows.SystemColors.ControlLightLightBrush;
-      s.Background = $.System.Windows.SystemColors.ControlLightLightBrush;
+      s.BorderBrush = evenColor;
+      s.Background = evenColor;
     }
     s.OriginalBorderBrush = s.BorderBrush;
     s.OriginalBackground = s.Background;
@@ -368,7 +372,28 @@ module.exports = (function() {
   // TODO: Implement me.
   Object.defineProperty(Table.prototype, 'alternatingColors', {
     get:function() { return this.private.alternatingColors; },
-    set:function(e) { this.private.alternatingColors = e ? true : false; }
+    set:function(e) { 
+      this.private.alternatingColors = e ? true : false; 
+      var conts = this.private.containers;
+      if(conts.length < 1) return;
+      if(e) {
+        for(var rowNdx = 0; rowNdx < conts[0].length; rowNdx++) {
+          for(var colNdx = 0; colNdx < conts.length; colNdx++) {
+            if(!conts[colNdx][rowNdx].itemSelected)
+              conts[colNdx][rowNdx].BorderBrush = conts[colNdx][rowNdx].Background = (rowNdx % 2) == 1 ? oddColor : evenColor;
+            conts[colNdx][rowNdx].OriginalBorderBrush = conts[colNdx][rowNdx].OriginalBackground = (rowNdx % 2) == 1 ? oddColor : evenColor;
+          }
+        }
+      } else {
+        for(var rowNdx = 0; rowNdx < conts[0].length; rowNdx++) {
+          for(var colNdx = 0; colNdx < conts.length; colNdx++) {
+            if(!conts[colNdx][rowNdx].itemSelected)
+              conts[colNdx][rowNdx].BorderBrush = conts[colNdx][rowNdx].Background = evenColor;
+            conts[colNdx][rowNdx].OriginalBorderBrush = conts[colNdx][rowNdx].OriginalBackground = evenColor;
+          }
+        }
+      }
+    }
   });
 
 
