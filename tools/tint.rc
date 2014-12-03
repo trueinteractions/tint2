@@ -50,14 +50,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "True Interactions, Inc"
-            VALUE "ProductName", "Tint"
-            VALUE "FileDescription", "Native Applications in Javascript"
-            VALUE "FileVersion", NODE_VERSION_STRING
-            VALUE "ProductVersion", NODE_VERSION_STRING
-            VALUE "OriginalFilename", "tint.exe"
-            VALUE "InternalName", "tint"
-            VALUE "LegalCopyright", "Copyright True Interacitons, Inc. MIT license."
+            VALUE "CompanyName",        "True Interactions, Inc                            "
+            VALUE "ProductName",        "Tint                                              "
+            VALUE "FileDescription",    "Native Applications in Javascript                 "
+            VALUE "FileVersion",        "0.10.21.0                                         "
+            VALUE "ProductVersion",     "0.10.21.0                                         "
+            VALUE "OriginalFilename",   "tint.exe                                          "
+            VALUE "InternalName",       "tint                                              "
+            VALUE "LegalCopyright",     "Copyright True Interacitons, Inc. MIT license.    "
         END
     END
     BLOCK "VarFileInfo"

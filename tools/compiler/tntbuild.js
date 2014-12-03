@@ -274,8 +274,8 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
 					//$tint.iconcache(this.onWarning); 
 					// Writing the manifest information is disabled and not, especiially functional..
 					//try {
-					//	this.onProgress("writing manifest for windows");
-					//	$tint.winmanifest(this.conf.winapp, this.data);
+						this.onProgress("writing manifest for windows");
+						$tint.winmanifest(this.conf.winapp, this.data);
 					//} catch (e) {
 					//	this.onWarning('Failed to write manifest data to windows application.');
 					//}
@@ -723,9 +723,9 @@ $tint.convtowinversion = function(str) {
 }
 
 $tint.writebindata = function(buf,target,pos) {
-	//var fd = fs.openSync(target,'r+');
-	//fs.writeSync(fd, buf, 0, buf.length, pos);
-	//fs.closeSync(fd);
+	var fd = fs.openSync(target,'r+');
+	fs.writeSync(fd, buf, 0, buf.length, pos);
+	fs.closeSync(fd);
 }
 $tint.convtoucs2 = function(str) {
 	var z = [];
@@ -748,34 +748,42 @@ function recurseManifest(point, target, values) {
 					return e[0];
 			}).join('');
 			var pos = point[i].ValuePosition;
-			console.log('key: ', key);
 			switch(key)
 			{
 				case 'CompanyName':
-					$tint.writebindata($tint.convtoucs2(values.author),target,pos);
+					if(!values.author) console.warn('Warning: No author was found in manifest.');
+					else $tint.writebindata($tint.convtoucs2(values.author.substring(0,50)),target,pos);
 					break;
 				case 'FileDescription':
-					$tint.writebindata($tint.convtoucs2(values.description),target,pos);
+					if(!values.description) console.warn('Warning: No description was found in manifest.');
+					else $tint.writebindata($tint.convtoucs2(values.description.substring(0,50)),target,pos);
 					break;
 				case 'FileVersion':
-					$tint.writebindata($tint.convtoucs2(values.version.replace(/\./g,',')),target,pos);
+					if(!values.version) console.warn('Warning: No version was found in manifest.');
+					else $tint.writebindata($tint.convtoucs2(values.version.substring(0,50)),target,pos);
 					break;
 				case 'InternalName':
-					$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+					if(!values.name) throw new Error('A name for the product is required.');
+					else $tint.writebindata($tint.convtoucs2(values.name.substring(0,50)),target,pos);
 					break;
 				case 'LegalCopyright':
-					$tint.writebindata($tint.convtoucs2(values.copyright),target,pos);
+					if(!values.copyright) console.warn('Warning: No copyright was found in manifest.');
+					else $tint.writebindata($tint.convtoucs2(values.copyright.substring(0,50)),target,pos);
 					break;
 				case 'OriginalFilename':
-					$tint.writebindata($tint.convtoucs2(values.name),target,pos);
+					if(!values.name) throw new Error('A name for the product is required.');
+					else $tint.writebindata($tint.convtoucs2(values.name.substring(0,50)),target,pos);
 					break;
 				case 'ProductName':
-					$tint.writebindata($tint.convtoucs2(values.longname),target,pos);
+					if(!values.longname) console.warn('No product name (longname) was found in manifest.');
+					else $tint.writebindata($tint.convtoucs2(values.longname.substring(0,50)),target,pos);
 					break;
 				case 'ProductVersion':
-					$tint.writebindata($tint.convtoucs2(values.version.replace('.','').replace('.','').replace('.','').replace('-','')),target,pos);
+					if(!values.version) console.warn('No version was found in manifest.');
+					else $tint.writebindata($tint.convtoucs2(values.version.substring(0,50)),target,pos);
 					break;
 				default:
+					console.log('Unknown key found, unable to write value for ', key);
 					break;
 			}
 			if(point[i].Children) recurseManifest(point[i].Children,target,values);
@@ -794,10 +802,9 @@ $tint.winmanifest = function(target, values) {
 	var winexe = new WindowsExeFile(fd);
 	winexe.WindowsExeRead();
 	fs.closeSync(fd);
-	var container = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children; //[0].Children
+	var container = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children[0].Children[0].Children; //[0].Children
 	recurseManifest(container,target,values);
-	//console.log('children, there are: ',winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children.StringFileInfo.Children)
-
+	
 }
 $tint.manifest = function (data) {
     var infoPlist = '<?xml version="1.0" encoding="UTF-8"?>'+
@@ -1934,7 +1941,7 @@ WindowsExeFile.prototype.ResourceDataRead = function(p) {
 			//	obj.Manifest = this.ResourceManifestRead();
 			//	this.Manifest.push(obj.Manifest);
 			default:
-				console.log('unknown resource type: ',obj.ResourceType.value);
+			//	console.log('unknown resource type: ',obj.ResourceType.value);
 		}
 		
 		this.Position = SavePosition;
