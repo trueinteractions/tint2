@@ -28,6 +28,7 @@ module.exports = (function() {
         var propertyName = name;
         var p = this.private;
 
+        if(value === null) value = 0;
         if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null)
           throw new Error('A '+name+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
 
