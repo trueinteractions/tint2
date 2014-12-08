@@ -238,7 +238,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
         function(){ 
           this.onProgress("creating windows application");
           $tint.makedir($tint.dotdot(this.conf.winapp));
-          fs.writeFileSync(this.conf.winapp,winExec);
+          fs.writeFileSync(this.conf.winapp, winExec);
           this.tick();
           //$tint.copy(this.conf.runtime+'.exe',this.conf.winapp); this.tick("Creating Windows Application"); 
         }.bind(this),
@@ -798,93 +798,93 @@ $tint.winmanifest = function(target, values) {
   
 }
 $tint.manifest = function (data) {
-    var infoPlist = '<?xml version="1.0" encoding="UTF-8"?>'+
-    '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'+
-    '<plist version="1.0">'+
-    '<dict>'+
-    ' <key>CFBundleDevelopmentRegion</key>'+
-    ' <string>en</string>'+
-    ' <key>CFBundleDocumentTypes</key>'+
-    ' <array>'+
-    '   <dict>'+
-    '     <key>CFBundleTypeExtensions</key>'+
-    '     <array>'+
-    '       <string>{{extension}}</string>'+
-    '     </array>'+
-    '     <key>CFBundleTypeIconFile</key>'+
-    '     <string>app.icns</string>'+
-    '     <key>CFBundleTypeName</key>'+
-    '     <string>{{displayname}} Document</string>'+
-    '     <key>CFBundleTypeRole</key>'+
-    '     <string>Viewer</string>'+
-    '     <key>LSHandlerRank</key>'+
-    '     <string>Owner</string>'+
-    '   </dict>'+
-    ' </array>'+
-    ' <key>CFBundleExecutable</key>'+
-    ' <string>Runtime</string>'+
-    ' <key>CFBundleGetInfoString</key>'+
-    ' <string>{{displayversion}} ({{buildnumber}})</string>'+
-    ' <key>CFBundleIconFile</key>'+
-    ' <string>app.icns</string>'+
-    ' <key>CFBundleIdentifier</key>'+
-    ' <string>{{namespace}}</string>'+
-    ' <key>CFBundleInfoDictionaryVersion</key>'+
-    ' <string>6.0</string>'+
-    ' <key>CFBundleName</key>'+
-    ' <string>{{bundlename}}</string>'+
-    ' <key>CFBundlePackageType</key>'+
-    ' <string>APPL</string>'+
-    ' <key>CFBundleShortVersionString</key>'+
-    ' <string>{{displayversion}}</string>'+
-    ' <key>CFBundleVersion</key>'+
-    ' <string>{{buildnumber}}</string>'+
-    ' <key>LSMinimumSystemVersion</key>'+
-    ' <string>10.6.0</string>'+
-    ' <key>NSAppleScriptEnabled</key>'+
-    ' <string>YES</string>'+
-    ' <key>NSHumanReadableCopyright</key>'+
-    ' <string>{{copyright}}</string>'+
-  ' <key>NSMainNibFile</key>'+
-  ' <string>MainMenu</string>'+ 
-    // '  <key>LSUIElement</key>\n' +
-  // '  <string>' + ((data.Dockless==true) ? '1' : '0') + '</string>\n' +
-  ' <key>LSMultipleInstancesProhibited</key>\n' +
-  ((data['single-instance']==true) ? '\t<true/>\n' : '\t<false/>\n') +
-  ' <key>NSPrincipalClass</key>'+
-  ' <string>NSApplication</string>'+
-    ' <key>UTExportedTypeDeclarations</key>'+
-    ' <array>'+
-    '   <dict>'+
-    '     <key>UTTypeConformsTo</key>'+
-    '     <array>'+
-    '       <string>public.data</string>'+
-    '       <string>public.item</string>'+
-    '       <string>{{namespace}}</string>'+
-    '     </array>'+
-    '     <key>UTTypeDescription</key>'+
-    '     <string>{{displayname}} Document</string>'+
-    '     <key>UTTypeIconFile</key>'+
-    '     <string>app.icns</string>'+
-    '     <key>UTTypeIdentifier</key>'+
-    '     <string>{{namespace}}</string>'+
-    '     <key>UTTypeReferenceURL</key>'+
-    '     <string>{{website}}</string>'+
-    '     <key>UTTypeTagSpecification</key>'+
-    '     <dict>'+
-    '       <key>com.apple.ostype</key>'+
-    '       <string>{{extension-upper}}</string>'+
-    '       <key>public.filename-extension</key>'+
-    '       <array>'+
-    '         <string>{{extension}}</string>'+
-    '       </array>'+
-    '       <key>public.mime-type</key>'+
-    '       <string>application/x-{{extension}}</string>'+
-    '     </dict>'+
-    '   </dict>'+
-    ' </array>'+
-    '</dict>'+
-    '</plist>';
+  var infoPlist = '<?xml version="1.0" encoding="UTF-8"?>'+
+      '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'+
+      '<plist version="1.0">'+
+      '<dict>'+
+      ' <key>CFBundleDevelopmentRegion</key>'+
+      ' <string>en</string>'+
+      ' <key>CFBundleDocumentTypes</key>'+
+      ' <array>'+
+      '   <dict>'+
+      '     <key>CFBundleTypeExtensions</key>'+
+      '     <array>'+
+      '       <string>{{extension}}</string>'+
+      '     </array>'+
+      '     <key>CFBundleTypeIconFile</key>'+
+      '     <string>app.icns</string>'+
+      '     <key>CFBundleTypeName</key>'+
+      '     <string>{{displayname}} Document</string>'+
+      '     <key>CFBundleTypeRole</key>'+
+      '     <string>Viewer</string>'+
+      '     <key>LSHandlerRank</key>'+
+      '     <string>Owner</string>'+
+      '   </dict>'+
+      ' </array>'+
+      ' <key>CFBundleExecutable</key>'+
+      ' <string>Runtime</string>'+
+      ' <key>CFBundleGetInfoString</key>'+
+      ' <string>{{displayversion}} ({{buildnumber}})</string>'+
+      ' <key>CFBundleIconFile</key>'+
+      ' <string>app.icns</string>'+
+      ' <key>CFBundleIdentifier</key>'+
+      ' <string>{{namespace}}</string>'+
+      ' <key>CFBundleInfoDictionaryVersion</key>'+
+      ' <string>6.0</string>'+
+      ' <key>CFBundleName</key>'+
+      ' <string>{{bundlename}}</string>'+
+      ' <key>CFBundlePackageType</key>'+
+      ' <string>APPL</string>'+
+      ' <key>CFBundleShortVersionString</key>'+
+      ' <string>{{displayversion}}</string>'+
+      ' <key>CFBundleVersion</key>'+
+      ' <string>{{buildnumber}}</string>'+
+      ' <key>LSMinimumSystemVersion</key>'+
+      ' <string>10.6.0</string>'+
+      ' <key>NSAppleScriptEnabled</key>'+
+      ' <string>YES</string>'+
+      ' <key>NSHumanReadableCopyright</key>'+
+      ' <string>{{copyright}}</string>'+
+    ' <key>NSMainNibFile</key>'+
+    ' <string>MainMenu</string>'+ 
+      // '  <key>LSUIElement</key>\n' +
+    // '  <string>' + ((data.Dockless==true) ? '1' : '0') + '</string>\n' +
+    ' <key>LSMultipleInstancesProhibited</key>\n' +
+    ((data['single-instance']==true) ? '\t<true/>\n' : '\t<false/>\n') +
+    ' <key>NSPrincipalClass</key>'+
+    ' <string>NSApplication</string>'+
+      ' <key>UTExportedTypeDeclarations</key>'+
+      ' <array>'+
+      '   <dict>'+
+      '     <key>UTTypeConformsTo</key>'+
+      '     <array>'+
+      '       <string>public.data</string>'+
+      '       <string>public.item</string>'+
+      '       <string>{{namespace}}</string>'+
+      '     </array>'+
+      '     <key>UTTypeDescription</key>'+
+      '     <string>{{displayname}} Document</string>'+
+      '     <key>UTTypeIconFile</key>'+
+      '     <string>app.icns</string>'+
+      '     <key>UTTypeIdentifier</key>'+
+      '     <string>{{namespace}}</string>'+
+      '     <key>UTTypeReferenceURL</key>'+
+      '     <string>{{website}}</string>'+
+      '     <key>UTTypeTagSpecification</key>'+
+      '     <dict>'+
+      '       <key>com.apple.ostype</key>'+
+      '       <string>{{extension-upper}}</string>'+
+      '       <key>public.filename-extension</key>'+
+      '       <array>'+
+      '         <string>{{extension}}</string>'+
+      '       </array>'+
+      '       <key>public.mime-type</key>'+
+      '       <string>application/x-{{extension}}</string>'+
+      '     </dict>'+
+      '   </dict>'+
+      ' </array>'+
+      '</dict>'+
+      '</plist>';
 
     infoPlist=infoPlist.replace(/{{extension}}/g,data.extensions);
     infoPlist=infoPlist.replace(/{{namespace}}/g,data.namespace);
@@ -896,7 +896,6 @@ $tint.manifest = function (data) {
     infoPlist=infoPlist.replace(/{{buildnumber}}/g,data.version.replace('.','').replace('.','').replace('.','').replace('-',''));
     if(data.extensions)
       infoPlist=infoPlist.replace(/{{extension-upper}}/g,data.extensions.toUpperCase());
-    
     return infoPlist;
 }
 $tint.resources = [];
@@ -929,53 +928,53 @@ var ChunkStream = function() {
 };
 util.inherits(ChunkStream, Stream);
 ChunkStream.prototype.read = function(length, callback) {
-    this._reads.push({
-        length: Math.abs(length),  // if length < 0 then at most this length
-        allowLess: length < 0,
-        func: callback
-    });
-    this._process();
-    if (this._paused && this._reads.length > 0) {
-        this._paused = false;
-        this.emit('drain');
-    }
+  this._reads.push({
+    length: Math.abs(length),  // if length < 0 then at most this length
+    allowLess: length < 0,
+    func: callback
+  });
+  this._process();
+  if (this._paused && this._reads.length > 0) {
+    this._paused = false;
+    this.emit('drain');
+  }
 };
 ChunkStream.prototype.write = function(data, encoding) {
-    if (!this.writable) {
-        this.emit('error', new Error('Stream not writable'));
-        return false;
-    }
-    if (!Buffer.isBuffer(data)) data = new Buffer(data, encoding || this._encoding);
-    this._buffers.push(data);
-    this._buffered += data.length;
-    this._process();
-    if (this._reads && this._reads.length == 0)
-        this._paused = true;
-    return this.writable && !this._paused;
+  if (!this.writable) {
+    this.emit('error', new Error('Stream not writable'));
+    return false;
+  }
+  if (!Buffer.isBuffer(data)) data = new Buffer(data, encoding || this._encoding);
+  this._buffers.push(data);
+  this._buffered += data.length;
+  this._process();
+  if (this._reads && this._reads.length == 0)
+    this._paused = true;
+  return this.writable && !this._paused;
 };
 ChunkStream.prototype.end = function(data, encoding) {
-    if (data) this.write(data, encoding);
-    this.writable = false;
-    if (!this._buffers) return;
-    if (this._buffers.length == 0) {
-        this._end();
-    } else {
-        this._buffers.push(null);
-        this._process();
-    }
+  if (data) this.write(data, encoding);
+  this.writable = false;
+  if (!this._buffers) return;
+  if (this._buffers.length == 0) {
+    this._end();
+  } else {
+    this._buffers.push(null);
+    this._process();
+  }
 };
 ChunkStream.prototype.destroySoon = ChunkStream.prototype.end;
 ChunkStream.prototype._end = function() {
-    if (this._reads.length > 0)
-        this.emit('error',  new Error('There are some read requests waitng on finished stream'));
-    this.destroy();
+  if (this._reads.length > 0)
+    this.emit('error',  new Error('There are some read requests waitng on finished stream'));
+  this.destroy();
 };
 ChunkStream.prototype.destroy = function() {
-    if (!this._buffers) return;
-    this.writable = false;
-    this._reads = null;
-    this._buffers = null;
-    this.emit('close');
+  if (!this._buffers) return;
+  this.writable = false;
+  this._reads = null;
+  this._buffers = null;
+  this.emit('close');
 };
 ChunkStream.prototype._process = function() {
   while (this._buffered > 0 && this._reads && this._reads.length > 0) {
@@ -1236,173 +1235,173 @@ var Packer = function(options) {
 };
 util.inherits(Packer, Stream);
 Packer.prototype.pack = function(data, width, height) {
-    this.emit('data', new Buffer(PngConsts.PNG_SIGNATURE));
-    this.emit('data', this._packIHDR(width, height));
-    var filter = new Filter(width, height, 4, data, this._options);
-    var data = filter.filter();
-    var deflate = zlib.createDeflate({
-            chunkSize: this._options.deflateChunkSize,
-            level: this._options.deflateLevel,
-            strategy: this._options.deflateStrategy
-        });
-    deflate.on('error', this.emit.bind(this, 'error'));
-    deflate.on('data', function(data) { this.emit('data', this._packIDAT(data)); }.bind(this));
-    deflate.on('end', function() { this.emit('data', this._packIEND());  this.emit('end');}.bind(this));
-    deflate.end(data);
+  this.emit('data', new Buffer(PngConsts.PNG_SIGNATURE));
+  this.emit('data', this._packIHDR(width, height));
+  var filter = new Filter(width, height, 4, data, this._options);
+  var data = filter.filter();
+  var deflate = zlib.createDeflate({
+      chunkSize: this._options.deflateChunkSize,
+      level: this._options.deflateLevel,
+      strategy: this._options.deflateStrategy
+    });
+  deflate.on('error', this.emit.bind(this, 'error'));
+  deflate.on('data', function(data) { this.emit('data', this._packIDAT(data)); }.bind(this));
+  deflate.on('end', function() { this.emit('data', this._packIEND());  this.emit('end');}.bind(this));
+  deflate.end(data);
 };
 Packer.prototype._packChunk = function(type, data) {
-    var len = (data ? data.length : 0), buf = new Buffer(len + 12);
-    buf.writeUInt32BE(len, 0);
-    buf.writeUInt32BE(type, 4);
-    if (data) data.copy(buf, 8);
-    buf.writeInt32BE(CrcStream.crc32(buf.slice(4, buf.length - 4)), buf.length - 4);
-    return buf;
+  var len = (data ? data.length : 0), buf = new Buffer(len + 12);
+  buf.writeUInt32BE(len, 0);
+  buf.writeUInt32BE(type, 4);
+  if (data) data.copy(buf, 8);
+  buf.writeInt32BE(CrcStream.crc32(buf.slice(4, buf.length - 4)), buf.length - 4);
+  return buf;
 };
 Packer.prototype._packIHDR = function(width, height) {
-    var buf = new Buffer(13);
-    buf.writeUInt32BE(width, 0);
-    buf.writeUInt32BE(height, 4);
-    buf[8] = 8;
-    buf[9] = 6; // colorType
-    buf[10] = 0; // compression
-    buf[11] = 0; // filter
-    buf[12] = 0; // interlace
-    return this._packChunk(PngConsts.TYPE_IHDR, buf);
+  var buf = new Buffer(13);
+  buf.writeUInt32BE(width, 0);
+  buf.writeUInt32BE(height, 4);
+  buf[8] = 8;
+  buf[9] = 6; // colorType
+  buf[10] = 0; // compression
+  buf[11] = 0; // filter
+  buf[12] = 0; // interlace
+  return this._packChunk(PngConsts.TYPE_IHDR, buf);
 };
 Packer.prototype._packIDAT = function(data) { return this._packChunk(PngConsts.TYPE_IDAT, data); };
 Packer.prototype._packIEND = function() { return this._packChunk(PngConsts.TYPE_IEND, null); };
 var Parser = function(options) {
-    ChunkStream.call(this);
-    this._options = options;
-    options.checkCRC = options.checkCRC !== false;
-    this._hasIHDR = false;
-    this._hasIEND = false;
-    this._inflate = null;
-    this._filter = null;
-    this._crc = null;
-    this._palette = [];
-    this._colorType = 0;
-    this._chunks = {};
-    this._chunks[PngConsts.TYPE_IHDR] = this._handleIHDR.bind(this);
-    this._chunks[PngConsts.TYPE_IEND] = this._handleIEND.bind(this);
-    this._chunks[PngConsts.TYPE_IDAT] = this._handleIDAT.bind(this);
-    this._chunks[PngConsts.TYPE_PLTE] = this._handlePLTE.bind(this);
-    this._chunks[PngConsts.TYPE_tRNS] = this._handleTRNS.bind(this);
-    this._chunks[PngConsts.TYPE_gAMA] = this._handleGAMA.bind(this);
-    this.writable = true;
-    this.on('error', this._handleError.bind(this));
-    this._handleSignature();
+  ChunkStream.call(this);
+  this._options = options;
+  options.checkCRC = options.checkCRC !== false;
+  this._hasIHDR = false;
+  this._hasIEND = false;
+  this._inflate = null;
+  this._filter = null;
+  this._crc = null;
+  this._palette = [];
+  this._colorType = 0;
+  this._chunks = {};
+  this._chunks[PngConsts.TYPE_IHDR] = this._handleIHDR.bind(this);
+  this._chunks[PngConsts.TYPE_IEND] = this._handleIEND.bind(this);
+  this._chunks[PngConsts.TYPE_IDAT] = this._handleIDAT.bind(this);
+  this._chunks[PngConsts.TYPE_PLTE] = this._handlePLTE.bind(this);
+  this._chunks[PngConsts.TYPE_tRNS] = this._handleTRNS.bind(this);
+  this._chunks[PngConsts.TYPE_gAMA] = this._handleGAMA.bind(this);
+  this.writable = true;
+  this.on('error', this._handleError.bind(this));
+  this._handleSignature();
 };
 util.inherits(Parser, ChunkStream);
 Parser.prototype._handleError = function() {
-    this.writable = false;
-    this.destroy();
-    if (this._inflate) this._inflate.destroy();
+  this.writable = false;
+  this.destroy();
+  if (this._inflate) this._inflate.destroy();
 };
 Parser.prototype._handleSignature = function() { this.read(PngConsts.PNG_SIGNATURE.length, this._parseSignature.bind(this));};
 Parser.prototype._parseSignature = function(data) {
-    var signature = PngConsts.PNG_SIGNATURE;
-    for (var i = 0; i < signature.length; i++) {
-        if (data[i] != signature[i]) {
-            this.emit('error', new Error('Invalid file signature'));
-            return;
-        }
+  var signature = PngConsts.PNG_SIGNATURE;
+  for (var i = 0; i < signature.length; i++) {
+    if (data[i] != signature[i]) {
+      this.emit('error', new Error('Invalid file signature'));
+      return;
     }
-    this.read(8, this._parseChunkBegin.bind(this));
+  }
+  this.read(8, this._parseChunkBegin.bind(this));
 };
 Parser.prototype._parseChunkBegin = function(data) {
-    var length = data.readUInt32BE(0);
-    var type = data.readUInt32BE(4), name = '';
-    for (var i = 4; i < 8; i++) name += String.fromCharCode(data[i]);
-    var ancillary = !!(data[4] & 0x20), priv= !!(data[5] & 0x20), safeToCopy = !!(data[7] & 0x20);
-    if (!this._hasIHDR && type != PngConsts.TYPE_IHDR) {
-        this.emit('error', new Error('Expected IHDR on beggining'));
-        return;
-    }
-    this._crc = new CrcStream();
-    this._crc.write(new Buffer(name));
-    if (this._chunks[type]) return this._chunks[type](length);
+  var length = data.readUInt32BE(0);
+  var type = data.readUInt32BE(4), name = '';
+  for (var i = 4; i < 8; i++) name += String.fromCharCode(data[i]);
+  var ancillary = !!(data[4] & 0x20), priv= !!(data[5] & 0x20), safeToCopy = !!(data[7] & 0x20);
+  if (!this._hasIHDR && type != PngConsts.TYPE_IHDR) {
+      this.emit('error', new Error('Expected IHDR on beggining'));
+      return;
+  }
+  this._crc = new CrcStream();
+  this._crc.write(new Buffer(name));
+  if (this._chunks[type]) return this._chunks[type](length);
   else if (!ancillary) this.emit('error', new Error('Unsupported critical chunk type ' + name));
-    else this.read(length + 4, this._skipChunk.bind(this));
+  else this.read(length + 4, this._skipChunk.bind(this));
 };
 Parser.prototype._skipChunk = function(data) {this.read(8, this._parseChunkBegin.bind(this));};
 Parser.prototype._handleChunkEnd = function() { this.read(4, this._parseChunkEnd.bind(this));};
 Parser.prototype._parseChunkEnd = function(data) {
-    var fileCrc = data.readInt32BE(0), calcCrc = this._crc.crc32();
-    if (this._options.checkCRC && calcCrc != fileCrc) {
-        this.emit('error', new Error('Crc error'));
-        return;
-    }
-    if (this._hasIEND) this.destroySoon();
+  var fileCrc = data.readInt32BE(0), calcCrc = this._crc.crc32();
+  if (this._options.checkCRC && calcCrc != fileCrc) {
+      this.emit('error', new Error('Crc error'));
+      return;
+  }
+  if (this._hasIEND) this.destroySoon();
   else this.read(8, this._parseChunkBegin.bind(this));
 };
 Parser.prototype._handleIHDR = function(length) { this.read(length, this._parseIHDR.bind(this));};
 Parser.prototype._parseIHDR = function(data) {
-    this._crc.write(data);
-    var width = data.readUInt32BE(0), height = data.readUInt32BE(4), depth = data[8],
-        colorType = data[9], compr = data[10], filter = data[11], interlace = data[12];
-    if (depth != 8) {
-        this.emit('error', new Error('Unsupported bit depth ' + depth));
-        return;
-    }
-    if (!(colorType in colorTypeToBppMap)) {
-        this.emit('error', new Error('Unsupported color type'));
-        return;
-    }
-    if (compr != 0) {
-        this.emit('error', new Error('Unsupported compression method'));
-        return;
-    }
-    if (filter != 0) {
-        this.emit('error', new Error('Unsupported filter method'));
-        return;
-    }
-    if (interlace != 0) {
-        this.emit('error', new Error('Unsupported interlace method'));
-        return;
-    }
-    this._colorType = colorType;
-    this._data = new Buffer(width * height * 4);
-    this._filter = new Filter(
-        width, height,
-        colorTypeToBppMap[this._colorType],
-        this._data,
-        this._options
-    );
-    this._hasIHDR = true;
-    this.emit('metadata', {
-        width: width,
-        height: height,
-        palette: !!(colorType & PngConsts.COLOR_PALETTE),
-        color: !!(colorType & PngConsts.COLOR_COLOR),
-        alpha: !!(colorType & PngConsts.COLOR_ALPHA),
-        data: this._data
-    });
-    this._handleChunkEnd();
+  this._crc.write(data);
+  var width = data.readUInt32BE(0), height = data.readUInt32BE(4), depth = data[8],
+    colorType = data[9], compr = data[10], filter = data[11], interlace = data[12];
+  if (depth != 8) {
+    this.emit('error', new Error('Unsupported bit depth ' + depth));
+    return;
+  }
+  if (!(colorType in colorTypeToBppMap)) {
+    this.emit('error', new Error('Unsupported color type'));
+    return;
+  }
+  if (compr != 0) {
+    this.emit('error', new Error('Unsupported compression method'));
+    return;
+  }
+  if (filter != 0) {
+    this.emit('error', new Error('Unsupported filter method'));
+    return;
+  }
+  if (interlace != 0) {
+    this.emit('error', new Error('Unsupported interlace method'));
+    return;
+  }
+  this._colorType = colorType;
+  this._data = new Buffer(width * height * 4);
+  this._filter = new Filter(
+    width, height,
+    colorTypeToBppMap[this._colorType],
+    this._data,
+    this._options
+  );
+  this._hasIHDR = true;
+  this.emit('metadata', {
+    width: width,
+    height: height,
+    palette: !!(colorType & PngConsts.COLOR_PALETTE),
+    color: !!(colorType & PngConsts.COLOR_COLOR),
+    alpha: !!(colorType & PngConsts.COLOR_ALPHA),
+    data: this._data
+  });
+  this._handleChunkEnd();
 };
 Parser.prototype._handlePLTE = function(length) { this.read(length, this._parsePLTE.bind(this)); };
 Parser.prototype._parsePLTE = function(data) {
-    this._crc.write(data);
-    var entries = Math.floor(data.length / 3);
-    for (var i = 0; i < entries; i++)
-        this._palette.push([ data.readUInt8(i * 3), data.readUInt8(i * 3 + 1), data.readUInt8(i * 3 + 2 ), 0xff]);
-    this._handleChunkEnd();
+  this._crc.write(data);
+  var entries = Math.floor(data.length / 3);
+  for (var i = 0; i < entries; i++)
+    this._palette.push([ data.readUInt8(i * 3), data.readUInt8(i * 3 + 1), data.readUInt8(i * 3 + 2 ), 0xff]);
+  this._handleChunkEnd();
 };
 Parser.prototype._handleTRNS = function(length) { this.read(length, this._parseTRNS.bind(this)); };
 Parser.prototype._parseTRNS = function(data) {
-    this._crc.write(data);
-    if (this._colorType == 3) {
-        if (this._palette.length == 0) {
-            this.emit('error', new Error('Transparency chunk must be after palette'));
-            return;
-        }
-        if (data.length > this._palette.length) {
-            this.emit('error', new Error('More transparent colors than palette size'));
-            return;
-        }
-        for (var i = 0; i < this._palette.length; i++) { this._palette[i][3] = i < data.length ? data.readUInt8(i) : 0xff; }
+  this._crc.write(data);
+  if (this._colorType == 3) {
+    if (this._palette.length == 0) {
+      this.emit('error', new Error('Transparency chunk must be after palette'));
+      return;
     }
-    this._handleChunkEnd();
+    if (data.length > this._palette.length) {
+      this.emit('error', new Error('More transparent colors than palette size'));
+      return;
+    }
+    for (var i = 0; i < this._palette.length; i++) { this._palette[i][3] = i < data.length ? data.readUInt8(i) : 0xff; }
+  }
+  this._handleChunkEnd();
 };
 Parser.prototype._handleGAMA = function(length) { this.read(length, this._parseGAMA.bind(this)); };
 Parser.prototype._parseGAMA = function(data) {
@@ -2754,7 +2753,7 @@ var argv = optimist
 
 if(!argv._[0]) {
   console.log(
-    'usage: '+process.argv[0]+' [options] package.json\n' + 
+    'usage: tntbuild [options] package.json\n' + 
     '\t[--clean]\n'+
     '\t[--no-windows-build]\n'+
     '\t[--no-osx-build]\n'+
@@ -2765,7 +2764,12 @@ if(!argv._[0]) {
 }
 
 function readToBase64(e) {
-  return fs.readFileSync(e).toString('base64');
+  try {
+    return fs.readFileSync(e).toString('base64');
+  } catch (err) {
+    console.error('Cannot open (or find) file '+e+'.');
+    process.exit(1);
+  }
 }
 
 var build = $tint.loadbuilder(
