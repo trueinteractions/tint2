@@ -8,7 +8,7 @@ module.exports = (function() {
   {
     var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
         soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "",
-        timeoutHandle = null;
+        timeoutHandle = null, callbacks = [];
 
     function fireEvent(event, args) {
       if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
@@ -69,12 +69,14 @@ module.exports = (function() {
           w.Close();
         },1000);
       }
-      w.Content.addEventListener('PreviewMouseDown', function() {
+      var mouseDown = function() {
         clearTimeout(timeoutHandle);
         fireEvent('click',['contents']);
         animateOut();
-      }.bind(this));
+      }.bind(this);
 
+      w.Content.addEventListener('PreviewMouseDown', mouseDown);
+      callbacks.push(mouseDown);
 
       //var bgcolor = new Color('transparent');
       var bgcolor = new Color('#f7f7f7');
@@ -91,11 +93,13 @@ module.exports = (function() {
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', img, 'Left', 1.0, 0);
       w.Content.AddLayoutConstraint(img, 'Right', '=', img, 'Left', 1.0, 50);
 
-      var btn = new $.System.Windows.Controls.Button();
-      btn.addEventListener('PreviewMouseDown', function() {
+      var mouseDownSecond = function() {
         fireEvent('click',['button']);
         animateOut();
-      }.bind(this));
+      }.bind(this);
+      var btn = new $.System.Windows.Controls.Button();
+      btn.addEventListener('PreviewMouseDown', mouseDownSecond);
+      callbacks.push(mouseDownSecond);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
       label.Content = actionbuttontitle == "" ? "Dismiss" : actionbuttontitle;

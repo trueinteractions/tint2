@@ -536,7 +536,8 @@ function notok(code) {
 }
 
 ex.log = function(e) { log(e); }
-if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
+
+if(process.argv[1] && process.argv[2] && process.argv[1].indexOf('utilities') > -1 && process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
   tintexec = process.argv[2];
   var argv = args(process.argv.slice(3));
   if(argv.baseline == "true") createBaseline = true;

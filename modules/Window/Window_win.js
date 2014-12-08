@@ -17,12 +17,12 @@ module.exports = (function() {
 
     this.native.Content = this.nativeView;
 
-    this.native.addEventListener('Closing', function() { this.fireEvent('close'); }.bind(this));
-    this.native.addEventListener('Closed', function() { this.fireEvent('closed'); }.bind(this));
-    this.native.addEventListener('SizeChanged', function() { this.fireEvent('resize'); }.bind(this));
-    this.native.addEventListener('Deactivated', function() { this.fireEvent('blur'); }.bind(this));
-    this.native.addEventListener('Activated', function() { this.fireEvent('focus'); }.bind(this));
-    this.native.addEventListener('StateChanged', function() {
+    var closing = function() { this.fireEvent('close'); }.bind(this);
+    var closed = function() { this.fireEvent('closed'); }.bind(this);
+    var sizeChanged = function() { this.fireEvent('resize'); }.bind(this);
+    var deactivated = function() { this.fireEvent('blur'); }.bind(this);
+    var activated = function() { this.fireEvent('focus'); }.bind(this);
+    var stateChanged = function() {
       if(this.native.WindowState == $.System.Windows.WindowState.Maximized
           && this.native.WindowStyle == $.System.Windows.WindowStyle.None && 
           this.private.fullscreen == false) 
@@ -39,7 +39,21 @@ module.exports = (function() {
       if(this.native.WindowState == $.System.Windows.WindowState.Maximized) this.fireEvent('maximize');
       else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) this.fireEvent('minimize');
       else this.fireEvent('restore');
-    }.bind(this));
+    }.bind(this);
+
+    this.native.addEventListener('Closing', closing);
+    this.native.addEventListener('Closed', closed);
+    this.native.addEventListener('SizeChanged', sizeChanged);
+    this.native.addEventListener('Deactivated', deactivated);
+    this.native.addEventListener('Activated', activated);
+    this.native.addEventListener('StateChanged', stateChanged);
+
+    this.private.callbacks.push(closing);
+    this.private.callbacks.push(closed);
+    this.private.callbacks.push(sizeChanged);
+    this.private.callbacks.push(deactivated);
+    this.private.callbacks.push(activated);
+    this.private.callbacks.push(stateChanged);
 
     this.private.previousStyle='';
     this.private.previousState='';

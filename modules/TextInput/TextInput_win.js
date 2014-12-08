@@ -13,27 +13,35 @@ module.exports = (function() {
       options.initViewOnly = true;
       Container.call(this, $.System.Windows.Controls.TextBox, $.System.Windows.Controls.TextBox, options);
 
-      this.native.addEventListener('KeyUp', function() {
+      this.addEventListener('keyup',function() { 
         if(first) {
           this.fireEvent('inputstart');
           first = false;
         }
       }.bind(this));
 
-      this.native.addEventListener('GotFocus', function() { 
-        sfirst = true;
-      }.bind(this));
-      this.native.addEventListener('LostFocus', function() { 
+      var keyUp = function() {
+        if(first) {
+          this.fireEvent('inputstart');
+          first = false;
+        }
+      }.bind(this);
+      var focus = function() { first = true; }.bind(this);
+      var lostFocus = function() { 
         this.fireEvent('inputend');
         first = false;
-      }.bind(this));
-      this.native.addEventListener('TextChanged', function() { 
+      }.bind(this);
+      var textChanged = function() { 
         setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
-      }.bind(this));
-      //this.native.addEventListener('PreviewKeyUp', function(e,args) {
-        //if(args.Key == $.System.Windows.Input.Enter || args.Key == $.System.Windows.Input.Return)
-          //this.fireEvent('inputend');
-      //}.bind(this));
+      }.bind(this);
+      this.native.addEventListener('GotFocus', focus);
+      this.native.addEventListener('LostFocus', lostFocus);
+      this.native.addEventListener('TextChanged', textChanged);
+      this.native.addEventListener('KeyUp', keyUp);
+      this.private.callbacks.push(focus);
+      this.private.callbacks.push(lostFocus);
+      this.private.callbacks.push(textChanged);
+      this.private.callbacks.push(keyUp);
     }
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;

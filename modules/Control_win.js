@@ -17,52 +17,72 @@ module.exports = (function() {
 
     this.nativeClassView = NativeViewClass;
     this.nativeClass = NativeObjectClass;
-    
+  
     this.nativeView = new NativeViewClass();
     if(options.initViewOnly)
       this.native = this.nativeView;
     else
       this.native = new NativeObjectClass();
 
-    var addNativeEventHandlers = function() {
-      if(options.nonStandardEvents) return;
-      this.native.addEventListener('MouseRightButtonUp', function() { this.fireEvent('rightmouseup'); }.bind(this));
-      this.native.addEventListener('MouseRightButtonDown', function() { this.fireEvent('rightmousedown'); }.bind(this));
-      this.native.addEventListener('MouseLeftButtonDown', function() { this.fireEvent('leftmousedown'); }.bind(this));
-      this.native.addEventListener('MouseLeftButtonUp', function() {
-        this.fireEvent('leftmouseup');
-      }.bind(this));
-      this.native.addEventListener('PreviewMouseUp', function() {
-        // State changes don't happen until after the events have processed,
-        // delay until the next cycle.
-        setTimeout(function() {
-          this.fireEvent('mouseup');
-          this.fireEvent('click');
-        }.bind(this),0);
-      }.bind(this));
-      this.native.addEventListener('PreviewMouseDown', function() { 
-        this.fireEvent('private-pre-mousedown');
-        this.fireEvent('mousedown'); 
-      }.bind(this));
-      this.native.addEventListener('MouseMove', function() { this.fireEvent('mousemove'); }.bind(this));
-      this.native.addEventListener('MouseEnter', function() { this.fireEvent('mouseenter'); }.bind(this));
-      this.native.addEventListener('MouseLeave', function() { this.fireEvent('mouseexit'); }.bind(this));
-      this.native.addEventListener('KeyDown', function() { 
-        setTimeout(function() { this.fireEvent('keydown'); }.bind(this),0);
-      }.bind(this));
-      this.native.addEventListener('KeyUp', function() { 
-        setTimeout(function() { this.fireEvent('keyup'); }.bind(this),0);
-      }.bind(this));
-    }.bind(this);
-
-    addNativeEventHandlers();
-
     this.private = {
       events:{}, layoutConstraints:[], parent:null, trackingArea:null, needsMouseTracking:0,
       user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
       constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      states:{}
+      states:{}, callbacks:[]
     };
+
+    var addNativeEventHandlers = function() {
+      if(options.nonStandardEvents) return;
+      var rightMouseUp = function() { this.fireEvent('rightmouseup'); }.bind(this);
+      var rightMouseDown = function() { this.fireEvent('rightmousedown'); }.bind(this);
+      var leftMouseDown =  function() { this.fireEvent('leftmousedown'); }.bind(this);
+      var leftMouseUp = function() { this.fireEvent('leftmouseup'); }.bind(this);
+      var mouseUp = function() {
+        setTimeout(function() {
+          this.fireEvent('mouseup');
+          this.fireEvent('click');
+        }.bind(this),0);
+      }.bind(this);
+      var mouseDown = function() { 
+        this.fireEvent('private-pre-mousedown');
+        this.fireEvent('mousedown'); 
+      }.bind(this);
+      var mouseMove = function() { this.fireEvent('mousemove'); }.bind(this);
+      var mouseEnter = function() { this.fireEvent('mouseenter'); }.bind(this);
+      var mouseLeave = function() { this.fireEvent('mouseexit'); }.bind(this);
+      var keyDown = function() { 
+        setTimeout(function() { this.fireEvent('keydown'); }.bind(this),0);
+      }.bind(this);
+      var keyUp = function() { 
+        setTimeout(function() { this.fireEvent('keyup'); }.bind(this),0);
+      }.bind(this);
+
+      this.native.addEventListener('MouseRightButtonUp', rightMouseUp);
+      this.native.addEventListener('MouseRightButtonDown', rightMouseDown);
+      this.native.addEventListener('MouseLeftButtonDown', leftMouseDown);
+      this.native.addEventListener('MouseLeftButtonUp', leftMouseUp);
+      this.native.addEventListener('PreviewMouseUp', mouseUp);
+      this.native.addEventListener('PreviewMouseDown', mouseDown);
+      this.native.addEventListener('MouseMove', mouseMove);
+      this.native.addEventListener('MouseEnter', mouseEnter);
+      this.native.addEventListener('MouseLeave', mouseLeave);
+      this.native.addEventListener('KeyDown', keyDown);
+      this.native.addEventListener('KeyUp', keyUp);
+
+      this.private.callbacks.push(rightMouseUp);
+      this.private.callbacks.push(rightMouseDown);
+      this.private.callbacks.push(leftMouseDown);
+      this.private.callbacks.push(leftMouseUp);
+      this.private.callbacks.push(mouseUp);
+      this.private.callbacks.push(mouseDown);
+      this.private.callbacks.push(mouseMove);
+      this.private.callbacks.push(mouseEnter);
+      this.private.callbacks.push(mouseLeave);
+      this.private.callbacks.push(keyDown);
+      this.private.callbacks.push(keyUp);
+    }.bind(this);
+
+    addNativeEventHandlers();
 
     // Incase the base native type needs to be remapped we need to re-apply all of the 
     // subsequent settings back to "normal".
@@ -124,7 +144,7 @@ module.exports = (function() {
     }
   });
 
-  Object.defineProperty(Control.prototype,'bounds',{
+  Object.defineProperty(Control.prototype,'bounds', {
     get:function() {
       var target = this.nativeView.Parent;
       if(this.native.GetType().Equals($.System.Windows.Window)) {

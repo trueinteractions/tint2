@@ -51,25 +51,25 @@ namespace TintInterop {
   public ref class Wpf32Window : System::Windows::Forms::IWin32Window
   {
   public:
-      property System::IntPtr Handle {
-        virtual System::IntPtr get() { return _handle; };
-        void set(IntPtr h) { _handle = h; };
-      }
+    property System::IntPtr Handle {
+      virtual System::IntPtr get() { return _handle; };
+      void set(IntPtr h) { _handle = h; };
+    }
 
-      Wpf32Window(System::Windows::Window^ wpfWindow)
-      {
-          this->Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfWindow))->Handle;
-      }
-    private:
-      IntPtr _handle;
+    Wpf32Window(System::Windows::Window^ wpfWindow)
+    {
+        this->Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfWindow))->Handle;
+    }
+  private:
+    IntPtr _handle;
   };
   public ref class CommonDialogExtensions
   {
   public:
-      static System::Windows::Forms::DialogResult^ ShowDialog(System::Windows::Forms::CommonDialog^ dialog, System::Windows::Window^ parent)
-      {
-          return dialog->ShowDialog(gcnew Wpf32Window(parent));
-      }
+    static System::Windows::Forms::DialogResult^ ShowDialog(System::Windows::Forms::CommonDialog^ dialog, System::Windows::Window^ parent)
+    {
+        return dialog->ShowDialog(gcnew Wpf32Window(parent));
+    }
   };
 
   public ref class AsyncEventDelegate {
@@ -192,9 +192,6 @@ namespace IEWebBrowserFix {
 }
 
 
-
-
-
 /**
  ** Begin CLR Bridge Code
  **/
@@ -259,20 +256,20 @@ Handle<v8::String> stringCLR2V8(System::String^ text)
 
 System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
 {
-    HandleScope scope;
-    if (exception->IsObject())
-    {
-        Handle<Value> stack = exception->ToObject()->Get(v8::String::NewSymbol("stack"));
-        if (stack->IsString())
-            return gcnew System::String(stringV82CLR(stack->ToString()));
-    }
-    return gcnew System::String(stringV82CLR(Handle<v8::String>::Cast(exception)));
+  HandleScope scope;
+  if (exception->IsObject())
+  {
+    Handle<Value> stack = exception->ToObject()->Get(v8::String::NewSymbol("stack"));
+    if (stack->IsString())
+      return gcnew System::String(stringV82CLR(stack->ToString()));
+  }
+  return gcnew System::String(stringV82CLR(Handle<v8::String>::Cast(exception)));
 }
 
 Handle<Value> throwV8Exception(Handle<Value> exception)
 {
-    HandleScope scope;
-    return scope.Close(ThrowException(exception));
+  HandleScope scope;
+  return scope.Close(ThrowException(exception));
 }
 
 Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
@@ -424,47 +421,49 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
 
 Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
 {
-    HandleScope scope;
-    Handle<v8::Object> result;
-    Handle<v8::String> message;
-    Handle<v8::String> name;
+  HandleScope scope;
+  Handle<v8::Object> result;
+  Handle<v8::String> message;
+  Handle<v8::String> name;
 
-    if (exception == nullptr)
+  if (exception == nullptr)
+  {
+    result = v8::Object::New();
+    message = v8::String::New("Unrecognized exception thrown by CLR.");
+    name = v8::String::New("InternalException");
+  }
+  else
+  {
+    // Remove AggregateException wrapper from around singleton InnerExceptions
+    if (System::AggregateException::typeid->IsAssignableFrom(exception->GetType()))
     {
-        result = v8::Object::New();
-        message = v8::String::New("Unrecognized exception thrown by CLR.");
-        name = v8::String::New("InternalException");
+        System::AggregateException^ aggregate = (System::AggregateException^)exception;
+        if (aggregate->InnerExceptions->Count == 1)
+            exception = aggregate->InnerExceptions[0];
     }
-    else
+    else if (System::Reflection::TargetInvocationException::typeid->IsAssignableFrom(exception->GetType())
+        && exception->InnerException != nullptr)
     {
-        // Remove AggregateException wrapper from around singleton InnerExceptions
-        if (System::AggregateException::typeid->IsAssignableFrom(exception->GetType()))
-        {
-            System::AggregateException^ aggregate = (System::AggregateException^)exception;
-            if (aggregate->InnerExceptions->Count == 1)
-                exception = aggregate->InnerExceptions[0];
-        }
-        else if (System::Reflection::TargetInvocationException::typeid->IsAssignableFrom(exception->GetType())
-            && exception->InnerException != nullptr)
-        {
-            exception = exception->InnerException;
-        }
+        exception = exception->InnerException;
+    }
 
-        result = MarshalCLRObjectToV8(exception);
-        message = stringCLR2V8(exception->GetType()->FullName + " " + exception->Message + "\n" + exception->StackTrace);
-        name = stringCLR2V8(exception->GetType()->FullName);
-    }   
-        
-    // Construct an error that is just used for the prototype - not verify efficient
-    // but 'typeof Error' should work in JavaScript
-    result->SetPrototype(v8::Exception::Error( message));
-    result->Set(v8::String::NewSymbol("message"), message);
-    
-    // Recording the actual type - 'name' seems to be the common used property
-    result->Set(v8::String::NewSymbol("name"), name);
+    result = MarshalCLRObjectToV8(exception);
+    message = stringCLR2V8(exception->GetType()->FullName + " " + exception->Message + "\n" + exception->StackTrace);
+    name = stringCLR2V8(exception->GetType()->FullName);
+  }   
+      
+  // Construct an error that is just used for the prototype - not verify efficient
+  // but 'typeof Error' should work in JavaScript
+  result->SetPrototype(v8::Exception::Error( message));
+  result->Set(v8::String::NewSymbol("message"), message);
+  
+  // Recording the actual type - 'name' seems to be the common used property
+  result->Set(v8::String::NewSymbol("name"), name);
 
-    return scope.Close(result);
+  return scope.Close(result);
 }
+
+static int countFound = 0;
 
 public ref class CLREventHandler {
 public:
@@ -472,6 +471,8 @@ public:
   CLREventHandler() : callback(NULL) {
     // line below causes a seg fault.
     cppobject = new gcroot<CLREventHandler ^>(this);
+    countFound = countFound + 12;
+    id = (gcnew System::Random())->Next(countFound);
   }
   ~CLREventHandler() {
     Delete();
@@ -492,7 +493,7 @@ public:
     for(int i=0; i < args->Length; i++) 
       argv.push_back(MarshalCLRToV8(args[i]));
 
-    if (this->callback->function.IsEmpty()) {
+    if (this->callback == NULL || this->callback->function.IsEmpty()) {
       ThrowException(v8::Exception::Error(v8::String::New("CLR fatal: Callback has been garbage collected.")));
       exit(1);
     } else {
@@ -512,6 +513,7 @@ public:
       delete this;
     }
   }
+
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
     v8::HandleScope scope;
     v8::Handle<v8::Value> argv[2];
@@ -521,7 +523,7 @@ public:
 
     v8::TryCatch try_catch;
 
-    if (this->callback->function.IsEmpty()) {
+    if (this->callback == NULL || this->callback->function.IsEmpty()) {
       throw gcnew System::Exception("CLR Fatal: Callback has been garbage collected.");
       exit(1);
     } else {
@@ -533,9 +535,13 @@ public:
       exit(1);
     }
   }
+  int Name() {
+    return id;
+  }
 private:
   wrapv8obj *callback;
   gcroot<CLREventHandler ^> * cppobject;
+  int id;
 };
 
 void CLREventHandleCleanupJS(Persistent<Value> object, void *parameter) {
@@ -945,12 +951,11 @@ public:
     System::String^ event = stringV82CLR(args[1]->ToString());
     v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
 
-
     CLREventHandler ^handle = gcnew CLREventHandler();
     Persistent<Function> js_callback = Persistent<Function>::New(callback);
     handle->SetCallback(js_callback);
-    js_callback.MakeWeak(handle->GetReference(),CLREventHandleCleanupJS);
-    
+    js_callback.MakeWeak(handle->GetReference(), CLREventHandleCleanupJS);
+
     System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
     System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
 
