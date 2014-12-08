@@ -62,7 +62,7 @@ module.exports = (function() {
 
     // We need to force a HWND creatio otherwise setting any
     // properties on the WPF Windows object will fail. 
-    this.private.hwnd = new $.System.Windows.Interop.WindowInteropHelper(this.native).EnsureHandle();
+    this.private.hwnd = (new $.System.Windows.Interop.WindowInteropHelper(this.native)).EnsureHandle();
     // Force directx to not re-draw the background, we already do it anyway.
     var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
     mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.Transparent;

@@ -4,6 +4,8 @@ module.exports = (function() {
   var $color = $.System.Windows.Media.Color;
   var $colors = $.System.Windows.Media.Colors;
 
+  // System colors are at: System.Drawing::SystemColors
+
   function Color(type, c1, c2, c3, c4, c5) {
     if(type instanceof Color) this.native = type.native;
     else if(type.pointer) this.native = type;
@@ -56,6 +58,3 @@ module.exports = (function() {
 
   return Color;
 })();
-
-//System.Drawing::SystemColors
-

@@ -479,58 +479,58 @@ else
 } // END WINDOWS SPECIFIC CODE
 
 ex.assert = function assert(condition,value) {
-	if(!condition) {
-		var msg;
-		try { throw new Error(value ? value : ''); } catch(e) { msg = e; };
-		log('assertion failed.');
-		log(msg.message);
-		log(msg.stack);
-		exit(1);
-	}
+  if(!condition) {
+    var msg;
+    try { throw new Error(value ? value : ''); } catch(e) { msg = e; };
+    log('assertion failed.');
+    log(msg.message);
+    log(msg.stack);
+    exit(1);
+  }
 }
 function spawnAndPump(cmd, cb, err, options) {
-	var cmds = cmd.split(' ');
-	var child = spawn(cmds[0], cmds.slice(1), { stdio: 'inherit' }).on('exit',function(code, signal) {
-		if(code !== 0) {
-			log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
-			if(err) err(code,signal);
-		} else {
-			if(cb) cb();
-		}
-	});
-	return child;
+  var cmds = cmd.split(' ');
+  var child = spawn(cmds[0], cmds.slice(1), { stdio: 'inherit' }).on('exit',function(code, signal) {
+    if(code !== 0) {
+      log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
+      if(err) err(code,signal);
+    } else {
+      if(cb) cb();
+    }
+  });
+  return child;
 }
 function execAndPump(cmd, cb, err, options) {
-	var child =exec(cmd, options, function(error,stdout,stderr) { 
-		if(error || stderr) {
-			log('got error'+nl);
-			if(error) log('\t'+error+nl);
-			if(stderr) log('\t'+stderr+nl);
-		} else if(stdout)
-			log(stdout);
-	}).on('exit',function(code, signal) {
-		if(code != 0) {
-			log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
-			if(err) err(code,signal);
-		} else {
-			if(cb) cb();
-		}
-	});
-	return child;
+  var child =exec(cmd, options, function(error,stdout,stderr) { 
+    if(error || stderr) {
+      log('got error'+nl);
+      if(error) log('\t'+error+nl);
+      if(stderr) log('\t'+stderr+nl);
+    } else if(stdout)
+      log(stdout);
+  }).on('exit',function(code, signal) {
+    if(code != 0) {
+      log(brightRedBegin+failureMark+colorEnd+' ["'+cmd.replace(new RegExp('\n','g'),'')+'"]'+nl+'\texited abnormally: '+code+' signal: '+signal);
+      if(err) err(code,signal);
+    } else {
+      if(cb) cb();
+    }
+  });
+  return child;
 }
 ex.ok = function ok() {
-	if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
-	log(brightBlueBegin + successMark + colorEnd +nl);
+  if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
+  log(brightBlueBegin + successMark + colorEnd +nl);
   exit(0);
 }
 ex.fail = function fail() {
-	log('explicit fail thrown'+nl);
+  log('explicit fail thrown'+nl);
   exit(1);
 }
 function notok(code) {
-	if(currentTest.shell && ismac) {
-		ex.shutdownShell(currentTest.name, function() { exit(1); });
-	}
+  if(currentTest.shell && ismac) {
+    ex.shutdownShell(currentTest.name, function() { exit(1); });
+  }
   log(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
   exit(1);
 }
@@ -547,20 +547,20 @@ if(process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
 ex.debug = debug;
 
 function test(item) {
-	currentTest = require('../'+item);
-	log(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
+  currentTest = require('../'+item);
+  log(grayedOutBegin + ' ' + currentTest.name + ' ' + colorEnd);
 
-	if(currentTest.shell && ismac) {
-		ex.setupShell(currentTest.name,function() {
-			if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
-			else ex.runShell(currentTest.name,ex.ok,notok,currentTest.shell_options); 
-		},notok);
-	} else {
-		try {
+  if(currentTest.shell && ismac) {
+    ex.setupShell(currentTest.name,function() {
+      if(createBaseline) ex.runBaseline(currentTest.name,ex.ok,notok,currentTest.shell_options); 
+      else ex.runShell(currentTest.name,ex.ok,notok,currentTest.shell_options); 
+    },notok);
+  } else {
+    try {
       ex.debug = debug;
-			currentTest.setup();
-			currentTest.run(ex);
-			currentTest.shutdown();
+      currentTest.setup();
+      currentTest.run(ex);
+      currentTest.shutdown();
       if(currentTest.timeout) {
         setTimeout(function() {
           log('timeout exceeded.'+nl);
@@ -568,10 +568,12 @@ function test(item) {
           exit(1);
         }, 50000);
       }
-		} catch(e) {
-			notok(e.message);
-		}
-	}
+    } catch(e) {
+      log(e.message);
+      log(e.stack + '\n');
+      notok(e.message);
+    }
+  }
 }
 module.exports = ex;
 

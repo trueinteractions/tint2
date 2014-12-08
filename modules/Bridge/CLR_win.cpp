@@ -8,7 +8,7 @@
 #include <msclr/marshal.h>
 #include "../AutoLayoutPanel.cpp"
 //#include <Dwmapi.h>
-#using <system.dll>
+#using <System.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
 #using <WPF/PresentationCore.dll>
@@ -35,6 +35,18 @@ namespace v8 {
 }
 Persistent<Function> bufferConstructor;
 
+struct wrapv8obj {
+  v8::Persistent<v8::Function> function;
+};
+
+Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
+System::String^ exceptionV82stringCLR(Handle<v8::Value> exception);
+
+
+/**
+ ** Supporting WPF / Windows Functions, Methods and Classes
+ **/
+
 namespace TintInterop {
   public ref class Wpf32Window : System::Windows::Forms::IWin32Window
   {
@@ -51,21 +63,6 @@ namespace TintInterop {
     private:
       IntPtr _handle;
   };
-/*
-  public ref class CommonWindowExtensions
-  {
-  public:
-    static void DwmExtendClientArea(System::Windows::Window^ wpfwin, int left, int top, int right, int bottom) {
-      System::IntPtr Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfwin))->Handle;
-      MARGINS margins = {left,right,top,bottom};
-      DwmExtendFrameIntoClientArea((HWND)Handle.ToPointer(), &margins);
-    }
-    static void AllowNonClientAreaPaint(System::Windows::Window^ wpfwin, bool onoff) {
-      System::IntPtr Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfwin))->Handle;
-      DwmSetWindowAttribute((HWND)Handle.ToPointer(),DWMWA_ALLOW_NCPAINT, &onoff, sizeof(onoff));
-    }
-  };
-*/
   public ref class CommonDialogExtensions
   {
   public:
@@ -77,10 +74,7 @@ namespace TintInterop {
 
   public ref class AsyncEventDelegate {
   public:
-    AsyncEventDelegate(
-      System::Object^ target,
-      MethodInfo^ method,
-      array<System::Object^>^ cshargs)
+    AsyncEventDelegate(System::Object^ target, MethodInfo^ method, array<System::Object^>^ cshargs)
     {
       this->target = target;
       this->method = method;
@@ -103,6 +97,115 @@ namespace TintInterop {
   };
 }
 
+
+namespace IEWebBrowserFix {
+  public ref class ScriptInterface
+  {
+  public:
+    ScriptInterface(v8::Persistent<v8::Function> cb) {
+      callback = new wrapv8obj();
+      callback->function = cb;
+    }
+    
+    [System::Runtime::InteropServices::ComVisibleAttribute(true)]
+    void postMessageBack(System::String^ str)
+    {
+      v8::HandleScope scope;
+      v8::Handle<v8::Value> argv[1];
+
+      argv[0] = MarshalCLRToV8(str);
+
+      v8::TryCatch try_catch;
+
+      if (this->callback->function.IsEmpty()) {
+        throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
+        abort();
+      } else {
+        // invoke the registered callback function
+        this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
+      }
+      if (try_catch.HasCaught()) {
+        throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
+        exit(1);
+      }
+    }
+
+  private:
+    wrapv8obj *callback;
+
+  };
+  
+  static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
+    HandleScope scope;
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
+    return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
+  }
+  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
+    HKEY key;
+    bool success = true;
+    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
+    wstring path(featuresPath + feature);
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
+      success = false;
+    else {
+      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
+      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
+    } 
+    return success;
+  }
+
+  static void SetBrowserFeatureControl() {
+    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
+    System::String^ pName = process->Modules[0]->FileName;
+    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
+    delim[0]='\\';
+    array<System::String^>^ path = pName->Split(delim);
+    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
+    const wchar_t *fileName = fileNameP;
+
+    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
+    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
+    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
+    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
+    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
+    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
+    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+    SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
+    SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
+    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
+    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
+    SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
+  }
+}
+
+
+
+
+
+/**
+ ** Begin CLR Bridge Code
+ **/
+
+// The CPP Class is responsible for holding on to a .NET CLR type and handing
+// the pointer as a C++ void * to v8. The callback CppClassCleanUp is called
+// when V8 determines the CPP class is no longer needed, all memory is then
+// collected when CPPClassCleanUp deletes the CppClass and executes its destructor.
+// The destructor of CppClass returns the object back into the .NET managed memory
+// pool, at which point .NET is then responsible for determining its referential 
+// needs and either reclaiming the .NET memory, or holding on to it. 
 class CppClass {
   public:
     gcroot<System::Object ^> * obj;
@@ -115,29 +218,29 @@ class CppClass {
       delete obj;
     }
 };
-
-void wrap_cb(char *data, void *hint) {
-  // called for items passed from .NET to JS, we don't
-  // recollect these.
-}
 void CppClassCleanUp(char *data, void *hint) {
   CppClass *n = (CppClass *)data;
   delete n;
 }
+
+// This does not seem to be executed but is the call back for when we have .NET objects,
+// when have properties that are pointers, that those pointers are passed back to JS (for example)
+// WPF Window .NET CLR object has a property called HWND which is the native win32
+// void * pointer to the HWND. We need to both recollect HWND, the WPF Window object (handled
+// by CppClass), and the V8 reference to all of it (handled by V8.), we'll hope that the 
+// pointer property was not allocated but is a persistant memory need and leave it up to 
+// .NET to determine if it needs to be collected.  In otherwords, do nothing.
+void wrap_cb(char *data, void *hint) { }
+
 
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
     HandleScope scope;
     v8::String::Utf8Value utf8text(text);
     if (*utf8text)
-    {
-        return gcnew System::String(
-            *utf8text, 0, utf8text.length(), System::Text::Encoding::UTF8);
-    }
+        return gcnew System::String(*utf8text, 0, utf8text.length(), System::Text::Encoding::UTF8);
     else
-    {
         return System::String::Empty;
-    }
 }
 
 Handle<v8::String> stringCLR2V8(System::String^ text)
@@ -145,14 +248,13 @@ Handle<v8::String> stringCLR2V8(System::String^ text)
     HandleScope scope;
     if (text->Length > 0)
     {
-        array<unsigned char>^ utf8 = System::Text::Encoding::UTF8->GetBytes(text);
-        pin_ptr<unsigned char> ch = &utf8[0];
-        return scope.Close(v8::String::New((char*)ch));
+      const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
+      v8::Handle<v8::String> v8str = v8::String::New(str);
+      Marshal::FreeHGlobal(IntPtr((void *)str));
+      return scope.Close(v8str);
     }
     else
-    {
-        return scope.Close(v8::String::Empty());
-    }
+      return scope.Close(v8::String::Empty());
 }
 
 System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
@@ -162,11 +264,8 @@ System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
     {
         Handle<Value> stack = exception->ToObject()->Get(v8::String::NewSymbol("stack"));
         if (stack->IsString())
-        {
             return gcnew System::String(stringV82CLR(stack->ToString()));
-        }
     }
-
     return gcnew System::String(stringV82CLR(Handle<v8::String>::Cast(exception)));
 }
 
@@ -176,7 +275,64 @@ Handle<Value> throwV8Exception(Handle<Value> exception)
     return scope.Close(ThrowException(exception));
 }
 
-Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
+Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
+{
+  HandleScope scope;
+  Handle<v8::Value> jsdata;
+
+  if (netdata == nullptr)
+      return scope.Close(Null());
+
+  System::Type^ type = netdata->GetType();
+  if (type == System::String::typeid)         jsdata = stringCLR2V8((System::String^)netdata);
+  else if (type == System::Char::typeid)      jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
+  else if (type == bool::typeid)              jsdata = v8::Boolean::New((bool)netdata);
+  else if (type == System::Guid::typeid)      jsdata = stringCLR2V8(netdata->ToString());
+  else if (type == System::DateTime::typeid)
+  {
+    System::DateTime ^dt = (System::DateTime^)netdata;
+    if (dt->Kind == System::DateTimeKind::Local)
+        dt = dt->ToUniversalTime();
+    else if (dt->Kind == System::DateTimeKind::Unspecified)
+        dt = gcnew System::DateTime(dt->Ticks, System::DateTimeKind::Utc);
+    long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
+    long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
+    jsdata = v8::Date::New((double)value);
+  }
+  else if (type == System::DateTimeOffset::typeid)  jsdata = stringCLR2V8(netdata->ToString());
+  else if (type == int::typeid)                     jsdata = v8::Integer::New((int)netdata);
+  else if (type == System::Int64::typeid)           jsdata = v8::Number::New(((System::IConvertible^)netdata)->ToDouble(nullptr));
+  else if (type == double::typeid)                  jsdata = v8::Number::New((double)netdata);
+  else if (type == float::typeid)                   jsdata = v8::Number::New((float)netdata);
+  else if (type == cli::array<byte>::typeid)
+  {
+    cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
+    node::Buffer* slowBuffer = node::Buffer::New(buffer->Length);
+    if (buffer->Length > 0)
+    {
+      pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
+      memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
+    }
+    Handle<v8::Value> args[] = { slowBuffer->handle_, v8::Integer::New(buffer->Length), v8::Integer::New(0) };
+    jsdata = bufferConstructor->NewInstance(3, args);
+    (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("array"), v8::Boolean::New(true));
+  }
+  else
+  {
+    CppClass *n = new CppClass();
+    *(n->obj) = netdata;
+    void *user_data = NULL;
+    size_t sz = sizeof(CppClass *);
+    node::Buffer *buf = node::Buffer::New((char *)n, sz, CppClassCleanUp, user_data);
+    jsdata = buf->handle_;
+    if(type == System::IntPtr::typeid) {
+      void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
+      node::Buffer *bufptr = node::Buffer::New((char *)ptr, sizeof(ptr), wrap_cb, user_data);
+      (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
+    }
+  }
+  return scope.Close(jsdata);
+}
 
 Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
 {
@@ -184,30 +340,86 @@ Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
     Handle<v8::Object> result = v8::Object::New();
     System::Type^ type = netdata->GetType();
 
-    if (0 == System::String::Compare(type->FullName, "System.Reflection.RuntimeMethodInfo")) {
-        // Avoid stack overflow due to self-referencing reflection elements
+    // Avoid stack overflow due to self-referencing reflection elements
+    if (0 == System::String::Compare(type->FullName, "System.Reflection.RuntimeMethodInfo"))
         return scope.Close(result);
-    }
 
     for each (FieldInfo^ field in type->GetFields(BindingFlags::Public | BindingFlags::Instance))
-    {
-        result->Set(
-            stringCLR2V8(field->Name), 
-            MarshalCLRToV8(field->GetValue(netdata)));
-    }
+        result->Set(stringCLR2V8(field->Name), MarshalCLRToV8(field->GetValue(netdata)));
 
     for each (PropertyInfo^ property in type->GetProperties(BindingFlags::GetProperty | BindingFlags::Public | BindingFlags::Instance))
     {
         MethodInfo^ getMethod = property->GetGetMethod();
         if (getMethod != nullptr && getMethod->GetParameters()->Length <= 0)
-        {
-            result->Set(
-                stringCLR2V8(property->Name), 
-                MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
-        }
+            result->Set(stringCLR2V8(property->Name), MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
     }
-
     return scope.Close(result);
+}
+
+System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
+{
+    HandleScope scope;
+    if (jsdata->IsArray())
+    {
+      Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
+      cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
+      for (unsigned int i = 0; i < jsarray->Length(); i++)
+          netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
+      return netarray;
+    }
+    else if (jsdata->IsDate())
+    {
+      Handle<v8::Date> jsdate = Handle<v8::Date>::Cast(jsdata);
+      long long  ticks = (long long)jsdate->NumberValue();
+      long long MinDateTimeTicks = 621355968000000000;// (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
+      System::DateTime ^netobject = gcnew System::DateTime(ticks * 10000 + MinDateTimeTicks, System::DateTimeKind::Utc);
+      return netobject;
+    }
+    else if (jsdata->IsString())      return stringV82CLR(Handle<v8::String>::Cast(jsdata));
+    else if (jsdata->IsBoolean())     return jsdata->BooleanValue();
+    else if (jsdata->IsInt32())       return jsdata->Int32Value();
+    else if (jsdata->IsUint32())      return jsdata->Uint32Value();
+    else if (jsdata->IsNumber())      return jsdata->NumberValue();
+    else if (jsdata->IsUndefined() || 
+      jsdata->IsNull())               return nullptr;
+    else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(v8::String::NewSymbol("array"))->BooleanValue()) {
+      Handle<v8::Object> jsbuffer = jsdata->ToObject();
+      cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
+      if (netbuffer->Length > 0) 
+      {
+        pin_ptr<byte> pinnedNetbuffer = &netbuffer[0];
+        memcpy(pinnedNetbuffer, node::Buffer::Data(jsbuffer), netbuffer->Length);
+      }
+      return netbuffer;
+    }
+    else if (node::Buffer::HasInstance(jsdata)) 
+    {
+      // This is fine, it may seem tempting to remove the old object (or buffer) but we need to
+      // reply on V8 to callback to our clean up method to know when its actually unusable, do not
+      // remove the object or the CppClass here otherwise if a user is just passing the object into
+      // a function and intends to use it again they're will be a segmentation fault the next time
+      // the user attempts to pass it in.
+      CppClass *data = (CppClass *)node::Buffer::Data(jsdata.As<v8::Object>());
+      System::Object ^obj = (*(data->obj));
+      return obj;
+    }
+    else if (jsdata->IsObject()) 
+    {
+      System::Collections::Generic::IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
+      Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
+      Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
+      for (unsigned int i = 0; i < propertyNames->Length(); i++)
+      {
+          Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
+          v8::String::Utf8Value utf8name(name);
+          System::String^ netname = gcnew System::String(*utf8name);
+          System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
+          netobject->Add(netname, netvalue);
+      }
+      return netobject;
+    }
+    else
+      throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
 }
 
 Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
@@ -254,162 +466,24 @@ Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
     return scope.Close(result);
 }
 
-Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata) {
-  HandleScope scope;
-  Handle<v8::Value> jsdata;
-
-  if (netdata == nullptr)
-      return scope.Close(Null());
-
-  System::Type^ type = netdata->GetType();
-  if (type == System::String::typeid)
-    jsdata = stringCLR2V8((System::String^)netdata);
-  else if (type == System::Char::typeid)
-    jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
-  else if (type == bool::typeid)
-    jsdata = v8::Boolean::New((bool)netdata);
-  else if (type == System::Guid::typeid)
-    jsdata = stringCLR2V8(netdata->ToString());
-  else if (type == System::DateTime::typeid)
-  {
-    System::DateTime ^dt = (System::DateTime^)netdata;
-    if (dt->Kind == System::DateTimeKind::Local)
-        dt = dt->ToUniversalTime();
-    else if (dt->Kind == System::DateTimeKind::Unspecified)
-        dt = gcnew System::DateTime(dt->Ticks, System::DateTimeKind::Utc);
-    long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
-    long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
-    jsdata = v8::Date::New((double)value);
-  }
-  else if (type == System::DateTimeOffset::typeid)
-    jsdata = stringCLR2V8(netdata->ToString());
-  else if (type == int::typeid)
-    jsdata = v8::Integer::New((int)netdata);
-  else if (type == System::Int64::typeid)
-    jsdata = v8::Number::New(((System::IConvertible^)netdata)->ToDouble(nullptr));
-  else if (type == double::typeid)
-    jsdata = v8::Number::New((double)netdata);
-  else if (type == float::typeid)
-    jsdata = v8::Number::New((float)netdata);
-  else if (type == cli::array<byte>::typeid)
-  {
-    cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
-    node::Buffer* slowBuffer = node::Buffer::New(buffer->Length);
-    if (buffer->Length > 0)
-    {
-        pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
-        memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
-    }
-    Handle<v8::Value> args[] = { 
-        slowBuffer->handle_, 
-        v8::Integer::New(buffer->Length), 
-        v8::Integer::New(0) 
-    };
-    jsdata = bufferConstructor->NewInstance(3, args);
-    (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("array"), v8::Boolean::New(true));
-  }
-  else
-  {
-    try {
-      System::Type^ type = netdata->GetType();
-      CppClass *n = new CppClass();
-      *(n->obj) = netdata;
-      void *user_data = NULL;
-      size_t sz = sizeof(CppClass *);
-      node::Buffer *buf = node::Buffer::New((char *)n, sz, CppClassCleanUp, user_data);
-      jsdata = buf->handle_;
-      if(type == System::IntPtr::typeid) {
-        void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
-        node::Buffer *bufptr = node::Buffer::New((char *)ptr, sizeof(ptr), wrap_cb, user_data);
-        (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
-      }
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-  return scope.Close(jsdata);
-}
-
-System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
-{
-    HandleScope scope;
-    if (jsdata->IsArray())
-    {
-      Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
-      cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
-      for (unsigned int i = 0; i < jsarray->Length(); i++)
-          netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
-      return netarray;
-    }
-    else if (jsdata->IsDate())
-    {
-      Handle<v8::Date> jsdate = Handle<v8::Date>::Cast(jsdata);
-      long long  ticks = (long long)jsdate->NumberValue();
-      long long MinDateTimeTicks = 621355968000000000;// (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
-      System::DateTime ^netobject = gcnew System::DateTime(ticks * 10000 + MinDateTimeTicks, System::DateTimeKind::Utc);
-      return netobject;
-    }
-    else if (jsdata->IsString())
-      return stringV82CLR(Handle<v8::String>::Cast(jsdata));
-    else if (jsdata->IsBoolean())
-      return jsdata->BooleanValue();
-    else if (jsdata->IsInt32())
-      return jsdata->Int32Value();
-    else if (jsdata->IsUint32()) 
-      return jsdata->Uint32Value();
-    else if (jsdata->IsNumber()) 
-      return jsdata->NumberValue();
-    else if (jsdata->IsUndefined() || jsdata->IsNull())
-      return nullptr;
-    else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(v8::String::NewSymbol("array"))->BooleanValue()) {
-      Handle<v8::Object> jsbuffer = jsdata->ToObject();
-      cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
-      if (netbuffer->Length > 0) 
-      {
-          pin_ptr<byte> pinnedNetbuffer = &netbuffer[0];
-          memcpy(pinnedNetbuffer, node::Buffer::Data(jsbuffer), netbuffer->Length);
-      }
-
-      return netbuffer;
-    }
-    else if (node::Buffer::HasInstance(jsdata)) 
-    {
-      CppClass *data = (CppClass *)node::Buffer::Data(jsdata.As<v8::Object>());
-      System::Object ^obj = (*(data->obj));
-      return obj;
-    }
-    else if (jsdata->IsObject()) 
-    {
-      System::Collections::Generic::IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
-      Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
-      Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
-      for (unsigned int i = 0; i < propertyNames->Length(); i++)
-      {
-          Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
-          v8::String::Utf8Value utf8name(name);
-          System::String^ netname = gcnew System::String(*utf8name);
-          System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
-          netobject->Add(netname, netvalue);
-      }
-      return netobject;
-    }
-    else
-      throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
-}
-
-struct wrapv8obj {
-  v8::Persistent<v8::Function> function;
-};
-
 public ref class CLREventHandler {
-  public:
+public:
   
-  CLREventHandler(v8::Persistent<v8::Function> cb) {
+  CLREventHandler() : callback(NULL) {
+    // line below causes a seg fault.
+    cppobject = new gcroot<CLREventHandler ^>(this);
+  }
+  ~CLREventHandler() {
+    Delete();
+    delete cppobject;
+  }
+  void SetCallback(v8::Persistent<v8::Function> cb) {
     callback = new wrapv8obj();
     callback->function = cb;
-
   }
-  ~CLREventHandler() {}
+  void *GetReference() {
+    return cppobject;
+  }
   void PassThru(... cli::array<System::Object^>^ args) {
     v8::HandleScope scope;
     std::vector<v8::Handle<v8::Value>> argv;
@@ -419,8 +493,7 @@ public ref class CLREventHandler {
       argv.push_back(MarshalCLRToV8(args[i]));
 
     if (this->callback->function.IsEmpty()) {
-      ThrowException(v8::Exception::Error(
-            v8::String::New("CLR fatal: Callback has been garbage collected.")));
+      ThrowException(v8::Exception::Error(v8::String::New("CLR fatal: Callback has been garbage collected.")));
       exit(1);
     } else {
       // invoke the registered callback function
@@ -428,6 +501,16 @@ public ref class CLREventHandler {
     }
     if (try_catch.HasCaught())
       try_catch.ReThrow();
+  }
+
+  void Delete() {
+    if(callback) {
+      callback->function.Dispose();
+      callback->function.Clear();
+      delete callback;
+      callback = NULL;
+      delete this;
+    }
   }
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
     v8::HandleScope scope;
@@ -451,217 +534,20 @@ public ref class CLREventHandler {
     }
   }
 private:
-
   wrapv8obj *callback;
+  gcroot<CLREventHandler ^> * cppobject;
 };
+
+void CLREventHandleCleanupJS(Persistent<Value> object, void *parameter) {
+  CLREventHandler ^n = *((gcroot<CLREventHandler ^> *)parameter);
+  n->Delete();
+}
 
 class CLR {
   CLR() { }
 
 public:
-
-  /** Creation of Classes **/
-  static Handle<v8::Value> CreateClass(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      System::String^ name = stringV82CLR(args[0]->ToString());
-      System::Type^ base = (System::Type ^)MarshalV8ToCLR(args[1]);
-      cli::array<System::Object^>^ interfaces = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[2]);
-      cli::array<System::Object^>^ abstracts = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[3]);
-
-      System::AppDomain^ domain = System::AppDomain::CurrentDomain;
-      AssemblyName^ aName = gcnew AssemblyName(name);
-      AssemblyBuilder^ ab = domain->DefineDynamicAssembly(aName, AssemblyBuilderAccess::RunAndSave);
-      ModuleBuilder^ mb = ab->DefineDynamicModule(aName->Name, aName->Name + ".dll");
-      TypeBuilder^ tb = mb->DefineType(name, TypeAttributes::Public | TypeAttributes::Class, base);
-      return scope.Close(MarshalCLRToV8(tb));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-  static Handle<v8::Value> AddConstructor(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ accessibility = stringV82CLR(args[1]->ToString());
-      bool defaultConst = ((System::Boolean ^)MarshalV8ToCLR(args[2]))->CompareTo(true);
-      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(args[3]);
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[4]);
-
-      CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
-
-      MethodAttributes attr = MethodAttributes::Public;
-      if(accessibility == "private") attr = MethodAttributes::Private;
-      //else if(accessibility == "private") attr = MethodAttributes::Protected;
-
-      ConstructorBuilder^ ctor0;
-
-      if(types->Length == 0)
-        ctor0 = tb->DefineConstructor(attr, CallingConventions::Standard, System::Type::EmptyTypes);
-      else
-        ctor0 = tb->DefineConstructor(attr, CallingConventions::Standard, (cli::array<System::Type^>^)types);
-
-      ILGenerator ^il = ctor0->GetILGenerator();
-      
-      // Push args
-      for(unsigned short i=0; i < types->Length; i++)
-        il->Emit(OpCodes::Ldarg_S, i);
-
-      // Call method CLREventHandler->PassThru
-      il->EmitCall(OpCodes::Call,
-        handle->GetType()->GetMethod("PassThru"),
-        types);
-
-      // Return back.
-      il->Emit(OpCodes::Ret);
-
-      return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-  static Handle<v8::Value> AddMethodToClass(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ name = stringV82CLR(args[1]->ToString());
-      System::String^ accessibility = stringV82CLR(args[2]->ToString());
-      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
-      bool overrideDef = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
-      System::Type^ rettype = (System::Type ^)MarshalV8ToCLR(args[5]);
-      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(args[6]);
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[7]);
-
-      CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
-
-      MethodAttributes attr = MethodAttributes::Public;
-      if(accessibility == "private") attr = MethodAttributes::Private;
-
-      if(staticDef) attr = attr | MethodAttributes::Static;
-
-      MethodBuilder^ m0;
-
-      if(types->Length == 0) m0 = tb->DefineMethod(name, attr, rettype, System::Type::EmptyTypes);
-      else m0 = tb->DefineMethod(name, attr, rettype, (cli::array<System::Type^>^)types);
-
-      ILGenerator ^il = m0->GetILGenerator();
-      
-      // Push args
-      for(unsigned short i=0; i < types->Length; i++)
-        il->Emit(OpCodes::Ldarg_S,i);
-
-      // Call method CLREventHandler->PassThru
-      il->EmitCall(OpCodes::Call,
-        handle->GetType()->GetMethod("PassThru"),
-        types);
-
-      // Return back.
-      il->Emit(OpCodes::Ret);
-
-      // If we'd like to override the method in the process.
-      if(overrideDef) tb->DefineMethodOverride(m0,tb->BaseType->GetMethod(name));
-
-      return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-  static Handle<v8::Value> AddPropertyToClass(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ name = stringV82CLR(args[1]->ToString());
-      System::String^ accessibility = stringV82CLR(args[2]->ToString());
-      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
-      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
-      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
-      System::Object ^value = MarshalV8ToCLR(args[6]);
-
-      FieldBuilder^ fieldBuilder = tb->DefineField("_" + name, propType, FieldAttributes::Private);
-
-      MethodAttributes attr = MethodAttributes::Public;
-      if(accessibility == "private") attr = MethodAttributes::Private;
-      //else if(accessibility == "protected") attr = MethodAttributes::Protected;
-
-      if(staticDef) attr = attr | MethodAttributes::Static;
-      attr = attr | MethodAttributes::SpecialName | MethodAttributes::HideBySig;
-
-      PropertyBuilder^ propertyBuilder = tb->DefineProperty(name, PropertyAttributes::HasDefault, propType, nullptr);
-      MethodBuilder^ getPropMthdBldr = tb->DefineMethod("get_" + name, attr, propType, System::Type::EmptyTypes);
-      ILGenerator^ getIl = getPropMthdBldr->GetILGenerator();
-
-      getIl->Emit(OpCodes::Ldarg_0);
-      getIl->Emit(OpCodes::Ldfld, fieldBuilder);
-      getIl->Emit(OpCodes::Ret);
-       
-      cli::array<System::Type ^>^ props = gcnew cli::array<System::Type ^>(1);
-      props[0] = propType;
-      MethodBuilder^ setPropMthdBldr = tb->DefineMethod("set_" + name,
-        MethodAttributes::Public | MethodAttributes::SpecialName | MethodAttributes::HideBySig,
-        nullptr, props);
-
-      ILGenerator^ setIl = setPropMthdBldr->GetILGenerator();
-      Label modifyProperty = setIl->DefineLabel();
-      Label exitSet = setIl->DefineLabel();
-
-      setIl->MarkLabel(modifyProperty);
-      setIl->Emit(OpCodes::Ldarg_0);
-      setIl->Emit(OpCodes::Ldarg_1);
-      setIl->Emit(OpCodes::Stfld, fieldBuilder);
-      setIl->Emit(OpCodes::Nop);
-      setIl->MarkLabel(exitSet);
-      setIl->Emit(OpCodes::Ret);
-
-      propertyBuilder->SetGetMethod(getPropMthdBldr);
-      propertyBuilder->SetSetMethod(setPropMthdBldr);
-
-      return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-  static Handle<v8::Value> AddFieldToClass(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ name = stringV82CLR(args[1]->ToString());
-      System::String^ accessibility = stringV82CLR(args[2]->ToString());
-      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
-      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
-      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
-      System::Object ^value = MarshalV8ToCLR(args[6]);
-
-      FieldAttributes attr = FieldAttributes::Public;
-      if(accessibility == "private") attr = FieldAttributes::Private;
-      //else if(accessibility == "protected") attr = FieldAttributes::Protected;
-      
-      if(staticDef) attr = attr | FieldAttributes::Static;
-      FieldBuilder^ fieldBuilder = tb->DefineField(name, propType, attr);
-      
-      return scope.Close(Undefined());
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-  static Handle<v8::Value> RegisterClass(const v8::Arguments& args) {
-    HandleScope scope;
-    try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::Type^ t = tb->CreateType();
-      return scope.Close(MarshalCLRToV8(t));
-    } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
-    }
-  }
-
-
   /** Load an Execution of DOTNET CLR **/
-
   static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
     HandleScope scope;
     try {
@@ -802,23 +688,7 @@ public:
     }
   }
 
-  static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
-    HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::String^ event = stringV82CLR(args[1]->ToString());
-    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
-    CLREventHandler ^handle = gcnew CLREventHandler(Persistent<Function>::New(callback));
-    
-    System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
-    System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
-
-    System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
-    eInfo->AddEventHandler(target, d);
-
-    return scope.Close(Undefined());
-  }
-
- static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
+  static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
     HandleScope scope;
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
@@ -1068,203 +938,32 @@ public:
     if(msg.message == WM_APP+1)
       uv_run_nowait();
   }
+
+  static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
+    HandleScope scope;
+    System::Object^ target = MarshalV8ToCLR(args[0]);
+    System::String^ event = stringV82CLR(args[1]->ToString());
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
+
+
+    CLREventHandler ^handle = gcnew CLREventHandler();
+    Persistent<Function> js_callback = Persistent<Function>::New(callback);
+    handle->SetCallback(js_callback);
+    js_callback.MakeWeak(handle->GetReference(),CLREventHandleCleanupJS);
+    
+    System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
+    System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
+
+    System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
+    eInfo->AddEventHandler(target, d);
+
+    return scope.Close(Undefined());
+  }
+
 };
 
 
-/*
-struct FLASHWINFO
-{
-    unsigned cbSize; //The size of the structure in bytes.
-    void * hwnd; //A Handle to the Window to be Flashed. The window can be either opened or minimized.
-    unsigned dwFlags; //The Flash Status.
-    unsigned uCount; // number of times to flash the window
-    unsigned dwTimeout; //The rate at which the Window is to be flashed, in milliseconds. If Zero, the function uses the default cursor blink rate.
-};*/
-
-//static extern bool FlashWindowEx(const FLASHWINFO& pwfi);
-namespace FlashWPFWindow {
-    public ref class WindowExtensions
-    {
-      public:
-      static void FlashWindow(System::Windows::Window^ win, unsigned count)
-      {
-          //Don't flash if the window is active
-          if (win->IsActive) return;
-
-          System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
-
-          FLASHWINFO info;
-          info.hwnd = (HWND)h->Handle.ToPointer();
-          info.dwFlags = 3 | 4;
-          info.uCount = count;
-          info.dwTimeout = 0;
-          info.cbSize = sizeof(info);
-          FlashWindowEx(&info);
-      }
-
-      static void StopFlashingWindow(System::Windows::Window^ win)
-      {
-          System::Windows::Interop::WindowInteropHelper^ h = gcnew System::Windows::Interop::WindowInteropHelper(win);
-          FLASHWINFO info;
-          info.hwnd = (HWND)h->Handle.ToPointer();
-          info.cbSize = sizeof(info);
-          info.dwFlags = 0;
-          info.uCount = 0xffffffff;
-          info.dwTimeout = 0;
-          FlashWindowEx(&info);
-      }
-    };
-  }
-
-  namespace IEWebBrowserFix {
-    public ref class ScriptInterface
-    {
-    public:
-      ScriptInterface(v8::Persistent<v8::Function> cb) {
-        callback = new wrapv8obj();
-        callback->function = cb;
-      }
-      
-      [System::Runtime::InteropServices::ComVisibleAttribute(true)]
-      void postMessageBack(System::String^ str)
-      {
-        v8::HandleScope scope;
-        v8::Handle<v8::Value> argv[1];
-
-        argv[0] = MarshalCLRToV8(str);
-
-        v8::TryCatch try_catch;
-
-        if (this->callback->function.IsEmpty()) {
-          throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
-          abort();
-        } else {
-          // invoke the registered callback function
-          this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
-        }
-        if (try_catch.HasCaught()) {
-          throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
-          exit(1);
-        }
-      }
-
-    private:
-      wrapv8obj *callback;
-
-    };
-    
-    static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
-      HandleScope scope;
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
-      return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
-    }
-    static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
-      HKEY key;
-      bool success = true;
-      wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
-      wstring path(featuresPath + feature);
-      if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
-        success = false;
-      else {
-        if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
-        if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
-      } 
-      return success;
-    }
-
-    static void SetBrowserFeatureControl() {
-      System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
-      System::String^ pName = process->Modules[0]->FileName;
-      array<wchar_t>^ delim = gcnew array<wchar_t>(1);
-      delim[0]='\\';
-      array<System::String^>^ path = pName->Split(delim);
-      pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
-      const wchar_t *fileName = fileNameP;
-
-      SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
-      SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
-      SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
-      SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
-      SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
-      SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
-      SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
-      SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
-      SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
-      SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
-      SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
-      SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
-      SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
-      SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
-      SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
-      SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
-      SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
-      SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
-      SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
-    }
-    
-  }
-/*
-namespace TintInterop {
-  public ref class ColorControl : System::Windows::Interop::HwndHost {
-    public:
-      ColorControl() {}
-
-      property System::Windows::Media::Color^ Color {
-        System::Windows::Media::Color^ get() {
-          System::Drawing::Color color = colorDialog->Color;
-          return System::Windows::Media::Color::FromArgb(color.A, color.R, color.G, color.B);
-        }
-        void set(System::Windows::Media::Color^ color) {
-          colorDialog->Color = System::Drawing::Color::FromArgb(color->A, color->R, color->G, color->B);
-        }
-      }
-
-      property bool FullOpen {
-        bool get() { return colorDialog->FullOpen; }
-        void set(bool value) { colorDialog->FullOpen = value; }
-      }
-
-      property bool SolidColorOnly {
-        bool get() { return colorDialog->SolidColorOnly; }
-        void set(bool value) { colorDialog->SolidColorOnly = value; }
-      }
-      
-    protected:
-      virtual System::Runtime::InteropServices::HandleRef BuildWindowCore(HandleRef hwnd) override {
-        colorDialog = gcnew System::Windows::Forms::ColorDialog();
-        System::Type^ type = colorDialog->GetType();
-        //array<System::Object^>^ cshargs = gcnew array<System::Object^>(1);
-        //cshargs[0] = hwnd.Handle;
-        //type->InvokeMember("RunDialog",
-        //  BindingFlags::NonPublic | BindingFlags::Instance| BindingFlags::InvokeMethod,
-        //  nullptr,
-        //  colorDialog,
-        //  cshargs);
-
-        
-        PropertyInfo^ prop = type->GetProperty("Instance", BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
-        System::Object^ rtn = prop->GetValue(colorDialog);
-        SetParent((HWND)((IntPtr)rtn).ToPointer(), (HWND)hwnd.Handle.ToPointer());
-        return System::Runtime::InteropServices::HandleRef(colorDialog, (IntPtr)rtn);
-      }
-
-      virtual void DestroyWindowCore(HandleRef hwnd) override {
-        //colorDialog->Dispose();
-      };
-
-    private:
-      System::Windows::Forms::ColorDialog^ colorDialog;
-  };
-}*/
-
 extern "C" void CLR_Init(Handle<v8::Object> target) {
-  
   // Fix registry and "FEATURE" controls, these help align IE with a normal behavior
   // expected (on a per app registry setting basis).  This does not set global registry
   // values for anything outside of our application.
@@ -1291,14 +990,6 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
   NODE_SET_METHOD(target, "getCLRType", CLR::GetCLRType);
 
-  // create classes
-  NODE_SET_METHOD(target, "classCreate", CLR::CreateClass);
-  NODE_SET_METHOD(target, "classAddConstructor", CLR::AddConstructor);
-  NODE_SET_METHOD(target, "classAddMethod", CLR::AddMethodToClass);
-  NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
-  NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
-  NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
-
   // 2nd gen optimized execution
   NODE_SET_METHOD(target, "getStaticPropertyObject", CLR::ExecGetStaticPropertyObject);
   NODE_SET_METHOD(target, "getPropertyObject", CLR::ExecGetPropertyObject);
@@ -1316,3 +1007,4 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
       gcnew System::Windows::Interop::ThreadMessageEventHandler(CLR::HandleMessageLoop);
 }
+

@@ -53,3 +53,4 @@ win32ref.js
 bench.js
 Thumbs.db
 *Thumbs.db*
+test/memtests/*

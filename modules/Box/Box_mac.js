@@ -25,6 +25,7 @@ module.exports = (function() {
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setTitlePosition', $.NSAtTop);
+    this.nativeView('setTitle', $(''));
   }
 
   Box.prototype = Object.create(Container.prototype);
