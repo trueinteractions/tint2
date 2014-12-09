@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
+#include <tint_version.h>
 
 namespace node {
     extern v8::Persistent<v8::String> process_symbol;
@@ -99,6 +100,10 @@ static void uv_event(void *info) {
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     [[NSThread currentThread] setName:@"Tint EventLoop"];
+
+    // Set Version Information
+    process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"),
+        v8::String::NewSymbol(TINT_VERSION));
 
     // Register the app:// protocol.
     [NSURLProtocol registerClass:[AppSchema class]];

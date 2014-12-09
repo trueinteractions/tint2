@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "Tint" ?>
+  <?define ProductDescription = "Create Native Javascript Applications" ?>
+  <?define ProductAuthor = "True Interactions" ?>
+
+  <?define RegistryKeyPath = "SOFTWARE\Tint" ?>
+
+  <?define RepoDir="$(var.ProjectDir)..\..\" ?>
+  <?define SourceDir="$(var.RepoDir)\build\dist\tint\" ?>
+	<Product Id="*" Name="$(var.ProductName)" Language="1033" Version="$(var.ProductVersion)" Manufacturer="$(var.ProductAuthor)" UpgradeCode="b3e84eff-f41e-4a86-b0f6-143186d3863a">
+		<Package InstallerVersion="200" Compressed="yes" />
+    <Media Id="1" Cabinet="media1.cab" EmbedCab="yes"/>
+    <Icon Id="TintIcon" SourceFile="$(var.RepoDir)tools\tint.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="TintIcon"/>
+    <Property Id="ApplicationFolderName" Value="Tint"/>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Feature Id="TintRuntime" Level="1" Title="Tint Runtime" Description="Install the core Tint runtime (tint.exe)." Absent="disallow">
+      <ComponentRef Id="TintExecutable"/>
+      <ComponentRef Id="TintStartMenuAndRegistryEntries"/>
+    </Feature>
+    <Feature Id="TintBuilder" Level="1" Title="Tint Builder" Description="Install the tntbuild to compile OSX and Windows applications." Absent="disallow">
+      <ComponentRef Id="TintBuildExecutable"/>
+      <ComponentRef Id="TintBuildCommand"/>
+    </Feature>
+    <Feature Id="TintEnvironment" Level="1" Title="Environment Variables" Description="Update system path variables to use tint.">
+      <ComponentRef Id="EnvironmentPathTint"/>
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Tint"/>
+      </Directory>
+      <Directory Id="$(var.ProgramFilesFolderId)">
+        <Directory Id="INSTALLDIR" Name="Tint">
+        </Directory>
+      </Directory>
+    </Directory>
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="TintExecutable">
+        <File Id="tint.exe" KeyPath="yes" Source="$(var.SourceDir)tint.exe"/>
+      </Component>
+      <Component Id="TintBuildExecutable">
+        <File Id="tntbuild.js" KeyPath="yes" Source="$(var.SourceDir)tntbuild.js"/>
+      </Component>
+      <Component Id="TintBuildCommand">
+        <File Id="tntbuild.cmd" KeyPath="yes" Source="$(var.SourceDir)tntbuild.cmd"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="TintStartMenuAndRegistryEntries">
+        <RegistryValue Root="HKCU" Key="$(var.RegistryKeyPath)" Name="InstallPath" Type="string" Value="[INSTALLDIR]" KeyPath="yes"/>
+        <RegistryValue Root="HKCU" Key="$(var.RegistryKeyPath)" Name="Version" Type="string" Value="$(var.ProductVersion)"/>
+        <Shortcut Id="TintExecutableShortcut" Name="Tint" Target="[INSTALLDIR]tint.exe" WorkingDirectory="INSTALLDIR"/>
+        <Shortcut Id="UninstallProduct" Name="Uninstall Tint" Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]"/>
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall"/>
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="EnvironmentPathTint">
+        <RegistryValue Root="HKLM" Key="$(var.RegistryKeyPath)\Components" Name="EnvironmentPathTint" Type="integer" Value="1" KeyPath="yes"/>
+        <Environment Id="EnvironmentPathTint1" Action="set" Name="PATH" Part="last" System="yes" Value="[INSTALLDIR]"/>
+        <Environment Id="EnvironmentPathTint2" Action="set" Name="PATH" Part="last" System="yes" Value="[INSTALLDIR]"/>
+      </Component>
+    </DirectoryRef>
+
+    <UI Id="TintInstallUI">
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12"/>
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes"/>
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal"/>
+      <Property Id="WixUI_Mode" Value="FeatureTree"/>
+
+      <DialogRef Id="ErrorDlg"/>
+      <DialogRef Id="FatalError"/>
+      <DialogRef Id="FilesInUse"/>
+      <DialogRef Id="MsiRMFilesInUse"/>
+      <DialogRef Id="PrepareDlg"/>
+      <DialogRef Id="ProgressDlg"/>
+      <DialogRef Id="ResumeDlg"/>
+      <DialogRef Id="UserExit"/>
+      <DialogRef Id="WelcomeDlg"/>
+      <DialogRef Id="LicenseAgreementDlg"/>
+      <DialogRef Id="InstallDirDlg"/>
+      <DialogRef Id="BrowseDlg"/>
+      <DialogRef Id="InvalidDirDlg"/>
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">LicenseAccepted = "1"</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Order="20">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="10">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="10">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="20">1</Publish>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1">NOT Installed OR WixUI_InstallMode = "Change"</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3">Installed AND PATCH</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="CustomizeDlg">1</Publish>
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1">Installed</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="2">NOT Installed</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+
+      <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Tint has been successfully installed."/>
+    </UI>
+
+    <UIRef Id="WixUI_Common"/>
+    <WixVariable Id="WixUIBannerBmp" Value="tint-dg.bmp"/>
+    <WixVariable Id="WixUIDialogBmp" Value="tint-bg.bmp"/>
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.RepoDir)build\dist\license.rtf"/>
+	</Product>
+
+</Wix>

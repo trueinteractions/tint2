@@ -7,6 +7,7 @@ rm -rf ./build/Release/
 rm -rf ./build/Debug/
 rm -rf ./build/out/
 rm -rf ./build/tint.build
+rm -rf ./build/dist/tint
 # rm -rf ./build/*.mk
 # rm -rf ./build/gyp-mac-tool
 # rm -rf ./build/libraries

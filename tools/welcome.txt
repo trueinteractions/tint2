@@ -1,0 +1,1 @@
+This package will install tint, a command line tool for building javascript applications into /usr/local/bin, it will also install tntbuild, a command line tool for packaging (and compiling) javascript applications for native distribution into /usr/local/bin.

@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProductVersion>3.9</ProductVersion>
+    <ProjectGuid>{567538fa-242d-48f3-97ef-2321e31fa051}</ProjectGuid>
+    <TintVersion Condition=" '$(TintVersion)' == '' ">0.0.0.0</TintVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>tint-$(TintVersion)-$(Platform)</OutputName>
+    <OutputType>Package</OutputType>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>..\..\build\dist\</OutputPath>
+    <IntermediateOutputPath>..\..\build\msvs\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>ProgramFilesFolderId=ProgramFiles64Folder;ProductVersion=$(TintVersion)</DefineConstants>
+    <WixVariables>
+    </WixVariables>
+    <SuppressPdbOutput>True</SuppressPdbOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>..\..\build\dist\</OutputPath>
+    <IntermediateOutputPath>..\..\build\msvs$(Configuration)\</IntermediateOutputPath>
+    <WixVariables>
+    </WixVariables>
+    <DefineConstants>ProgramFilesFolderId=ProgramFilesFolder;ProductVersion=$(TintVersion)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+</Project>

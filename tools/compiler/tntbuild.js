@@ -1,13 +1,14 @@
-#!/usr/local/bin/node
+#!/usr/local/bin/tint
 
-var tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
+var tintVersion = '@@@TINT_VERSION@@@', 
+  tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
   tintExecutableOSX = '@@@TINT_OSX_EXECUTABLE@@@',
   tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
   baseDirectory = process.cwd(),
-  outputDirectory = baseDirectory+'/'+'build',
-  resourceDirectory = outputDirectory + '/'+'tmp',
-  sourceDirectory = null,
   pa = require('path'),
+  outputDirectory = baseDirectory+pa.sep+'build',
+  resourceDirectory = outputDirectory+pa.sep+'tmp',
+  sourceDirectory = null,
   fs = require('fs'),
   os = require('os'),
   zlib = require('zlib'),
@@ -35,8 +36,7 @@ $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) 
   }
   b.data=$tint.mergeobjs(b.data,packagejson);
   b.data.sources.directory=$tint.absolute(b.data.sources.directory,'.');
-  sourceDirectory = baseDirectory + '/' + $tint.absolute($tint.dotdot(path),b.data.sources.directory);
-  // outputDirectory=$tint.absolute(outputDirectory,pathDir); 
+  sourceDirectory = $tint.absolute($tint.absolute($tint.dotdot(path),b.data.sources.directory),baseDirectory);
   b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
   b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],sourceDirectory);
   b.manifest = path;
@@ -66,13 +66,27 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       if (!this.data.version) throw new Error("The version number does not exist.");
       if (!this.data.sources) throw new Error("A source directory has not been selected.");
       if (this.data.longname.trim() === "") throw new Error("The long name is invalid");
-      if ($tint.ndef(this.data.icon.osx) || !$tint.file(this.data.icon.osx[0]) || this.data.icon.osx[0].indexOf(".png") == -1)
-          throw new Error("Select an icon (as a PNG image) to build an application.");
-        if ($tint.ndef(this.data.icon.windows) || !$tint.file(this.data.icon.windows[0]) || this.data.icon.windows[0].indexOf(".png") == -1)
-          throw new Error("Select an icon (as a PNG image) to build an application.");
-        if (this.data.namespace.trim() == "") throw new Error("The namespace field is required.");
-        if (!$tint.exists($tint.path([sourceDirectory,this.data.sources.directory.trim(),this.data.main.trim()]))) throw new Error("A main.js file is required n the root of your source directory.");
-        },
+      if ($tint.ndef(this.data.icon.osx))
+        throw new Error("The key icon->osx was not found in package.json.");
+      if ($tint.ndef(this.data.icon.osx[0]))
+        throw new Error("No icon for OSX was specified in icon->osx[] in the package.json.");
+      if (!$tint.file(this.data.icon.osx[0]))
+        throw new Error("The specified icon for OSX is not a file or could not be read. ["+this.data.icon.osx[0]+"]");
+      if (this.data.icon.osx[0].indexOf(".png") == -1)
+        throw new Error("The specified icon for OSX is not a png file. ["+this.data.icon.osx[0]+"]");
+      if ($tint.ndef(this.data.icon.windows))
+        throw new Error("The key icon->windows was not found in package.json.");
+      if ($tint.ndef(this.data.icon.windows[0]))
+        throw new Error("No icon for Windows was specified in icon->windows[] in the package.json.");
+      if (!$tint.file(this.data.icon.windows[0]))
+        throw new Error("The specified icon for windows is not a file or could not be read. ["+this.data.icon.windows[0]+"]");
+      if (this.data.icon.windows[0].indexOf(".png") == -1)
+        throw new Error("The specified icon for windows is not a png file. ["+this.data.icon.windows[0]+"]");
+      if (!this.data.namespace || this.data.namespace.trim() == "")
+        throw new Error("The value for namespace was not found in package.json.");
+      if (!$tint.exists($tint.path([sourceDirectory,this.data.sources.directory.trim(),this.data.main.trim()])))
+        throw new Error("The value for main in package.json was not found or does not exist. ["+this.data.main+"]");
+    },
     config:function() {
       var obj = {};
       // Determine from our process where the resources directory may be, 
@@ -2753,6 +2767,7 @@ var argv = optimist
 
 if(!argv._[0]) {
   console.log(
+    'Tint Build Tool ('+tintVersion+')\n'+
     'usage: tntbuild [options] package.json\n' + 
     '\t[--clean]\n'+
     '\t[--no-windows-build]\n'+

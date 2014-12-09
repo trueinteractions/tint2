@@ -7,6 +7,7 @@ rmdir /S /Q .\build\Release\ >nul 2>&1
 rmdir /S /Q .\build\Debug\ >nul 2>&1
 rmdir /S /Q .\build\out\ >nul 2>&1
 rmdir /S /Q .\build\tint.build >nul 2>&1
+rmdir /S /Q .\build\dist\tint >nul 2>&1
 :: rmdir /S /Q .\Debug >nul 2>&1
 :: rmdir /S /Q .\Release >nul 2>&1
 :: rmdir /S /Q .\libraries\dlfcn-win32\Debug >nul 2>&1

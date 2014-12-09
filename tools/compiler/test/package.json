@@ -9,8 +9,8 @@
     "directory":"."
   },
   "icon": {
-    "osx":["tintruntime.png"],
-    "windows":["tintruntime.png"]
+    "osx":["./tintruntime.png"],
+    "windows":["./tintruntime.png"]
   },
   "main": "lib/foo.js",
   "repository": {

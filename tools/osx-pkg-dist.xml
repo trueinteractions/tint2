@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="2">
+    <background file="tint.png" mime-type="image/png" alignment="topleft" scaling="fit" />
+    <license file="license.txt"/>
+    <welcome file="welcome_tmp.txt"/>
+    <title>Tint</title>
+    <pkg-ref id="com.trueinteractions.tint"/>
+    <options customize="never" require-scripts="false"/>
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="10.7"/>
+        </allowed-os-versions>
+    </volume-check>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.trueinteractions.tint"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.trueinteractions.tint" visible="false">
+        <pkg-ref id="com.trueinteractions.tint"/>
+    </choice>
+    <pkg-ref id="com.trueinteractions.tint" version="0" onConclusion="none">tint.pkg</pkg-ref>
+</installer-gui-script>

@@ -188,6 +188,7 @@
         'libraries/node/deps/v8/include/',
         'libraries/node/deps/uv/include/',
         'libraries/node/deps/uv/src/',
+        'tools/',
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
 

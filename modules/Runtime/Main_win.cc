@@ -6,6 +6,7 @@
 #include <io.h>
 #include <fcntl.h>
 #include "v8_typed_array.h"
+#include <tint_version.h>
 
 //TODO: Find a better way of doing this instead of "trusting"
 //that this private interface signature will remain the same.
@@ -89,7 +90,7 @@ void uv_event(void *info) {
       // when timeout == -1 with PostQueuedCompletionStatus (without libuv
       // segfaulting, maybe faking a TCP request?)
       if(timeout < 0) timeout = 16;
-      if(timeout > 250) timeout = 250;
+      if(timeout > 50) timeout = 50;
       GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
 
       // Give the event back so libuv can deal with it.
@@ -122,6 +123,10 @@ void uv_event(void *info) {
 }
 
 void node_load() {
+  // Set Version Information
+  process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"),
+      v8::String::NewSymbol(TINT_VERSION));
+
   // Register the app:// schema.
   InitAppRequest();
 

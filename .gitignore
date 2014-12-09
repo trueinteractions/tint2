@@ -3,7 +3,6 @@ modules/Bridge/Debug
 modules/Bridge/Release
 modules/Runtime/Debug
 modules/Runtime/Release
-release.sh
 *.xcodeproj
 build/Release/
 build/Debug/
