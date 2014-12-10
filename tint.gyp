@@ -572,6 +572,7 @@
           'AdditionalOptions': [ '/CLRTHREADATTRIBUTE:STA' ],
         },
         'VCCLCompilerTool': {
+          'RuntimeTypeInfo': 'true',
           'ExceptionHandling': 0,
           'AdditionalOptions': [ '/CLR', '/EHa' ],
         },

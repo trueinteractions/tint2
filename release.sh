@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ ! -f "./build/xcode/Release/tint" ]; then
+  echo "An OSX build is required for release"
+  exit 1;
+fi
+
 gcc -DBUILD_AS_TOOL -x c tools/tint_version.h -o ./build/xcode/Release/tint_version
 export TINT_VERSION=`./build/xcode/Release/tint_version`
 

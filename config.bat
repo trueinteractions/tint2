@@ -52,4 +52,4 @@ if NOT exist .\libraries\node\node.gyp (
   git submodule update
 )
 
-call build.bat release nobuild nosign %arch%
+call build.bat config nobuild nosign %arch%

@@ -92,17 +92,16 @@
             'ldflags': [ '-Wl,-z,allextract' ]
           }],
         ],
-        'msvs_settings%': {
+        'msvs_settings': {
           'VCCLCompilerTool': {
             'RuntimeLibrary': 2, # static release 
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
-            ## 'WholeProgramOptimization': 'true', # Do not use, slows down build (/GL)
+            'WholeProgramOptimization': 'true',
             'OmitFramePointers': 'true',
             'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
-            'RuntimeTypeInfo': 'false',
             'ExceptionHandling': 0,
             'AdditionalOptions': [
               '/MP', # compile across multiple CPUs
@@ -125,6 +124,7 @@
     },
     'msvs_settings%': {
       'VCCLCompilerTool': {
+        'RuntimeTypeInfo': 'false',
         'StringPooling': 'true', # pool string literals
         'DebugInformationFormat': 3, # Generate a PDB
         'WarningLevel': 3,

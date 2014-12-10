@@ -18,7 +18,7 @@ set target=Build
 set target_arch=x64
 set debug_arg=
 set nosnapshot_arg=
-set noprojgen=
+set gyp=
 set nobuild=
 set nosign=
 set nosnapshot=1
@@ -45,7 +45,7 @@ if /i "%1"=="clean"         set target=Clean&goto arg-ok
 if /i "%1"=="ia32"          set target_arch=ia32&goto arg-ok
 if /i "%1"=="x86"           set target_arch=ia32&goto arg-ok
 if /i "%1"=="x64"           set target_arch=x64&goto arg-ok
-if /i "%1"=="noprojgen"     set noprojgen=1&goto arg-ok
+if /i "%1"=="config" 	    set gyp=1&goto arg-ok
 if /i "%1"=="nobuild"       set nobuild=1&goto arg-ok
 if /i "%1"=="nosign"        set nosign=1&goto arg-ok
 if /i "%1"=="nosnapshot"    set nosnapshot=1&goto arg-ok
@@ -84,17 +84,28 @@ if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=
 
 :project-gen
 @rem Skip project generation if requested.
-if defined noprojgen goto msbuild
+if defined gyp (
+	if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 
-if defined NIGHTLY set TAG=nightly-%NIGHTLY%
+	@rem Generate the VS project.
+	SETLOCAL
+  		if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+  		python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
+  		if errorlevel 1 goto create-msvs-files-failed
+  		if not exist build\msvs\tint.sln goto create-msvs-files-failed
+	ENDLOCAL
+)
+if defined subsystem (
+	if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 
-@rem Generate the VS project.
-SETLOCAL
-  if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-  python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
-  if errorlevel 1 goto create-msvs-files-failed
-  if not exist build\msvs\tint.sln goto create-msvs-files-failed
-ENDLOCAL
+	@rem Generate the VS project.
+	SETLOCAL
+  		if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+  		python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
+  		if errorlevel 1 goto create-msvs-files-failed
+  		if not exist build\msvs\tint.sln goto create-msvs-files-failed
+	ENDLOCAL
+)
 
 :msbuild
 @rem Skip project generation if requested.
@@ -210,7 +221,7 @@ set PYTHONPATH=tools/closure_linter/
 goto exit
 
 :help
-echo build.bat [debug/release] [noprojgen] [nobuild] [x86/x64]
+echo build.bat [debug/release] [config] [nobuild] [x86/x64]
 goto exit
 
 :exit
