@@ -13,7 +13,8 @@
 extern "C" DWORD uv_get_poll_timeout(uv_loop_t* loop);
 #define uv__has_active_reqs(loop) (ngx_queue_empty(&(loop)->active_reqs) == 0)
 
-static int embed_closed;
+static bool packaged = false;
+static int embed_closed = 0;
 static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
@@ -126,6 +127,7 @@ void node_load() {
   // Set Version Information
   process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"),
       v8::String::NewSymbol(TINT_VERSION));
+  process_l->Set(v8::String::NewSymbol("packaged"), v8::Boolean::New(packaged));
 
   // Register the app:// schema.
   InitAppRequest();
@@ -376,6 +378,9 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
   p_argv[1] = (char *)(base + buf_len + exec_len);
   strncpy(p_argv[0], package, exec_len);
   strncpy(p_argv[1], basePath, main_len);
+
+  packaged = true;
+
   return main(2, p_argv);
 }
 

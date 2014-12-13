@@ -19,7 +19,8 @@ namespace node {
       v8::Handle<v8::Value> filename);
 }
 
-static int embed_closed;
+static bool packaged = false;
+static int embed_closed = 0;
 static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
@@ -104,6 +105,7 @@ static void uv_event(void *info) {
     // Set Version Information
     process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"),
         v8::String::NewSymbol(TINT_VERSION));
+    process_l->Set(v8::String::NewSymbol("packaged"), v8::Boolean::New(packaged));
 
     // Register the app:// protocol.
     [NSURLProtocol registerClass:[AppSchema class]];
@@ -205,6 +207,7 @@ int main(int argc, char * argv[]) {
         init_argc = argc = 2;
         init_argv = copy_argv(argc, p_argv);
         argv = uv_setup_args(argc, p_argv);
+        packaged = true;
     } else {
         init_argc = argc;
         init_argv = copy_argv(argc, argv);

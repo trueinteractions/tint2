@@ -64,8 +64,8 @@
   function Application() {
     var events = {}, mainMenu = null, 
         name = "", badgeText = "", 
-        dockmenu = null, icon = "", 
-        _windows = [];
+        dockmenu = null, icon = "";//, 
+        //_windows = [];
 
     this.native = $.System.Windows.Application.Current;
     if(this.native == null)
@@ -85,9 +85,10 @@
 
     this.private = {};
     this.private.appSchemaPort = port;
+    this.private.windowCount = 0;
     //TODO: implement this.
     Object.defineProperty(this, 'packaged', {
-      get:function() { return false; }
+      get:function() { return process.packaged; }
     });
 
     this.resource = function(path) {
@@ -104,9 +105,9 @@
       }
     }
 
-    Object.defineProperty(this, 'windows', {
-      get:function() { return _windows; }
-    });
+//    Object.defineProperty(this, 'windows', {
+//      get:function() { return _windows; }
+//    });
 
     Object.defineProperty(this, 'name', {
       get:function() { return name || process.cwd(); },

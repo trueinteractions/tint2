@@ -149,12 +149,11 @@ module.exports = (function() {
     get:function() { return this.private.url; },
     set:function(url) { 
       this.private.url = url;
-      //TODO: Fix this to support res as well.  Long term look for a better solution?
       // Win8 adds (or seemingly adds) new support for URI schemas, investigate url monikers
       // as well, asyncronous pluggable protocols wont work since they're system wide and
       // not app dependent.
-      if(url.indexOf("app:") > -1 && !application.packaged)
-        url = url.replace("app:/","http://127.0.0.1:"+application.private.appSchemaPort+"/"); //file:///"+process.cwd().replace(/\\/g,'/'));
+      if(url.indexOf("app:") > -1)// && !application.packaged)
+        url = url.replace("app:/","http://127.0.0.1:"+application.private.appSchemaPort+"/");
       this.nativeView.Navigate(new $.System.Uri(url));
     }
   });

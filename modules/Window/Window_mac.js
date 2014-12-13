@@ -148,7 +148,7 @@ module.exports = (function() {
     // reclaim the window.  Second is if the object is lost and garbage collected
     // it will be closed and collected by Objective-C, so we must hold on to it
     // somewhere, always (until destroyed). 
-    application.windows.push(this);
+    //application.windows.push(this);
 
     // This is simply to ensure if we remove our content view we properly adhere
     // to OSX/objective-c behavior. OSX/ObjC requires we notify its removal for
@@ -761,10 +761,10 @@ module.exports = (function() {
    * win.destroy(); // the window is no longer visible, AND the memory is released.
    */
   Window.prototype.destroy = function() {
-    application.windows.forEach(function(item,ndx,arr) { 
-      if(item == this)
-        delete arr[ndx];
-    });
+    //application.windows.forEach(function(item,ndx,arr) { 
+    //  if(item == this)
+    //    delete arr[ndx];
+    //});
     this.native('close');
   }
 

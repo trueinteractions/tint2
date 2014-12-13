@@ -36,8 +36,8 @@
   function Application() {
     var events = {}, 
         name = "", badgeText = "", 
-        dockmenu = null, icon = "", nswindows = [],
-        terminateWhenLastWindowClosed = $.NO;
+        dockmenu = null, icon = ""; //, nswindows = [],
+        terminateWhenLastWindowClosed = $.YES;
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
@@ -105,7 +105,7 @@
      * @see Window
      */
     Object.defineProperty(this, 'packaged', {
-      get:function() { return false; }
+      get:function() { return process.packaged; }
     });
 
     /**
@@ -129,19 +129,19 @@
         return null;
       }
     }
-    /**
-     * @member windows
-     * @type {array}
-     * @memberof Application
-     * @description Gets an array of windows that the application has ownership of. 
-     *              If you loose your window object or a new one is created by a seperate
-     *              module you can access any window that the application owns from this.
-     *              Note: When you create or remove a window this is automatically updated.
-     *              and subsequently should only be read from, the array should not be changed.
-     */
-    Object.defineProperty(this, 'windows', {
-      get:function() { return nswindows; }
-    });
+    //
+    // @member windows
+    // @type {array}
+    // @memberof Application
+    // @description Gets an array of windows that the application has ownership of. 
+    //              If you loose your window object or a new one is created by a seperate
+    //              module you can access any window that the application owns from this.
+    //              Note: When you create or remove a window this is automatically updated.
+    //              and subsequently should only be read from, the array should not be changed.
+    //
+    //Object.defineProperty(this, 'windows', {
+    //  get:function() { return nswindows; }
+    //});
     
     /**
      * @member name
@@ -203,7 +203,9 @@
      * @memberof Application
      * @description Gets or sets if the application should quit (or exit returning 0) when the
      *              last remaining window is closed (Note: hidden windows still count as open
-     *              windows and will prevent applications from closing).
+     *              windows and will prevent applications from closing). The default for this is
+     *              true. 
+     * @default true
      * @see Window
      */
     Object.defineProperty(this, 'exitAfterWindowsClose', {

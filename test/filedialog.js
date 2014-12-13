@@ -18,6 +18,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  application.exitAfterWindowsClose = false;
   /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
   var win = new Window();
   win.visible = true;

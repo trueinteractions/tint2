@@ -66,7 +66,7 @@ module.exports = (function() {
    * @method removeEventListener
    * @param {string} eventName The name of the event to stop listening to.
    * @param {function} callback The function that would have been called.
-   * @memberof FontPanel
+   * @memberof MenuItem
    * @description Removes an event listener for various application level events. The first
    *              parameter is the name of the event, the second parameter is the function
    *              that was originally given as the callback for addEventListener.

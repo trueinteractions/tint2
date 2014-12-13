@@ -14,6 +14,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  application.exitAfterWindowsClose = false;
   var mainWindow = new Window(), alpha = 1;
   mainWindow.visible = true;
   var webview = new WebView();

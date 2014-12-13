@@ -14,6 +14,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  application.exitAfterWindowsClose = false;
   var w = new Window();
   w.visible = true;
   w.maximizeButton = true;

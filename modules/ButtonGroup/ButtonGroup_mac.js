@@ -9,6 +9,12 @@ module.exports = (function() {
    * @description Creates a set of buttons that can represent various states and
    *              similar to a toggle button can be toggled between modes.
    * @see Button
+   * @extends Container
+   */
+  /**
+   * @new
+   * @memberof ButtonGroup
+   * @description Creates a collection that buttons can be added to.
    */
   function ButtonGroup(NativeObjectClass, NativeViewClass, options) {
     options = options || {};

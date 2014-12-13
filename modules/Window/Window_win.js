@@ -9,6 +9,8 @@ module.exports = (function() {
     options = options || {};
     options.width = options.width || 500;
     options.height = options.height || 500;
+    
+    application.private.windowCount++;
 
     if(NativeObjectClass)
       Container.call(this, NativeObjectClass, NativeViewClass, options);
@@ -18,7 +20,13 @@ module.exports = (function() {
     this.native.Content = this.nativeView;
 
     var closing = function() { this.fireEvent('close'); }.bind(this);
-    var closed = function() { this.fireEvent('closed'); }.bind(this);
+    var closed = function() {
+      application.private.windowCount--;
+      this.fireEvent('closed'); 
+      if(application.exitAfterWindowsClose && application.private.windowCount === 0) {
+        process.exit(0);
+      }
+    }.bind(this);
     var sizeChanged = function() { this.fireEvent('resize'); }.bind(this);
     var deactivated = function() { this.fireEvent('blur'); }.bind(this);
     var activated = function() { this.fireEvent('focus'); }.bind(this);
@@ -95,7 +103,7 @@ module.exports = (function() {
     // Lets just set our background to white 
     this.backgroundColor = "rgba(255,255,255,1)";
 
-    application.windows.push(this);
+    //application.windows.push(this);
   }
 
   Window.prototype = Object.create(Container.prototype);
@@ -389,10 +397,10 @@ module.exports = (function() {
   });
 
   Window.prototype.destroy = function() {
-    application.windows.forEach(function(item,ndx,arr) { 
-      if(item == this)
-        delete arr[ndx];
-    });
+    //application.windows.forEach(function(item,ndx,arr) { 
+    //  if(item == this)
+    //    delete arr[ndx];
+    //});
     this.native.Close();
   }
 

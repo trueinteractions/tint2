@@ -16,6 +16,7 @@ function baseline() {
  */
 function run($utils) {
   /* @hidden */ count = 0;
+  application.exitAfterWindowsClose = false;
   var win = new Window();
   win.visible = true;
   var buttonNormal = new Button();

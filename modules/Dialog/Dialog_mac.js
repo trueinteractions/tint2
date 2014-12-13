@@ -13,7 +13,9 @@ module.exports = (function() {
    *              to indicate the pressed button on the dialog.
    * @extends Control
    */
-  /* @new
+
+  /**
+   * @new
    * @memberof Dialog
    * @description Creates a new Dialog window hidden by default.
    */
