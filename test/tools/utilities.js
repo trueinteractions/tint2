@@ -228,13 +228,6 @@ if (ismac) {
       var bf = new Buffer(base64String.toString(), 'base64');
       var fs = require('fs');
       fs.writeFileSync(path,bf);
-      /*var url = $.NSURL('fileURLWithPath',$(path));
-      var pathcf = $.CFStringCreateWithCString($.kCFAllocatorDefault,"public.png",$.kCFStringEncodingASCII);
-        var destination = $.CGImageDestinationCreateWithURL(url, pathcf, 1, null);
-        $.CGImageDestinationAddImage(destination, image, null);
-        if (!$.CGImageDestinationFinalize(destination)) {
-            $.NSLog($("Failed to write image to %@"), $(path));
-        }*/
     }
     ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
       var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
@@ -468,9 +461,16 @@ else
     var s = $.System.Convert.ToBase64String(data.ToArray());
     return s;
   }
-  ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) { }
-  ex.takeSnapshotOfWindowNumber = function takeSnapshotOfWindowNumber(windowNumber, path) { }
-  ex.takeSnapshotOfCurrentWindow = function takeSnapshotOfCurrentWindow(path) { }
+  ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
+    //$.System.Windows.Media.Imaging.RenderTargetBitmap
+  }
+  ex.takeSnapshotOfWindowNumber = function takeSnapshotOfWindowNumber(windowNumber, path) {
+
+  }
+  ex.takeSnapshotOfCurrentWindow = function takeSnapshotOfCurrentWindow(path) {
+    //$.System.Windows.Application.Current.Windows 
+    //$.System.Windows.Media.Imaging.RenderTargetBitmap
+  }
   function setupShell(name, cmd) { /* Do nothing */ }
   function runShell(name, cb, err, options) { spawnAndPump(tintexec + " "+" name.js", cb, err, options); }
   function runBaseline(name, cb, err, options) { /* Do nothing */ }

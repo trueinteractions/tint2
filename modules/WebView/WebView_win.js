@@ -15,6 +15,9 @@ module.exports = (function() {
     var firstLoad = true;
     this.private.previousTitle = "";
     this.private.loading = false;
+    this.private.useragent = "";
+
+    this.nativeView.Navigate(new $.System.Uri("about:blank"));
 
     this.private.checkForNewTitle = function() {
       var currentTitle = this.nativeView.InvokeScript("eval",['document.title']);
@@ -158,10 +161,18 @@ module.exports = (function() {
     }
   });
 
-  //TODO: Enable support for this?
   Object.defineProperty(WebView.prototype, "useragent", {
-    get:function() { return "MSIE -- Option not supported yet."; },
-    set:function(e) { throw new Error('Warning: Support is not enabled yet for user agent customization.'); }
+    get:function() {
+      var userAgent = this.private.useragent;
+      if(!userAgent)
+        userAgent = this.nativeView.InvokeScript("eval",['navigator.userAgent']);
+      return userAgent; 
+    },
+    set:function(e) { 
+      if(application.warn)
+        console.error('User agent is not yet supported on IE/Windows.');
+      this.private.useragent = e;
+    }
   });
 
   Object.defineProperty(WebView.prototype, 'loading', { 

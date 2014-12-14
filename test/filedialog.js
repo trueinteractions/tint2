@@ -51,7 +51,6 @@ function run($utils) {
   /* @hidden */ $utils.assert(dialog.filename == "somefile.png");
   /* @hidden */ $utils.assert(dialog.type == "open");
   /* @hidden */ setTimeout(function() {
-  /* @hidden */   //$utils.takeSnapshotOfCurrentWindow('assets/dialog_mac.png');
   /* @hidden */   dialog.cancel();
   /* @hidden */ },2000);
 }

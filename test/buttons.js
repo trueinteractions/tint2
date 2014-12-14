@@ -70,7 +70,6 @@ function run($utils) {
 
   buttonRadio1.addEventListener('mousedown', function() {
     /* @hidden */ count++;
-    /* @hidden */ //$utils.takeSnapshotOfCurrentWindow('assets/buttons_mac.png');
     /* @hidden */ $utils.assert(buttonRadio.title == "Radio Box 1");
     /* @hidden */ $utils.assert(buttonRadio.type == "radio");
     /* @hidden */ $utils.assert(buttonRadio.state == true, 'buttonRadio.state should equal true, instead: ',buttonRadio.state);

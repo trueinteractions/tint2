@@ -315,7 +315,12 @@ TODO:
    * @description Gets or sets the user agent string used.
    */
   Object.defineProperty(WebView.prototype, "useragent", {
-    get:function() { return this.nativeView('customUserAgent')('UTF8String'); },
+    get:function() { 
+      var userAgent = this.nativeView('customUserAgent');
+      if(!userAgent)
+        userAgent = this.nativeView('userAgentForURL', this.nativeView('mainFrameURL'))
+      return userAgent;
+    },
     set:function(e) { this.nativeView('setCustomUserAgent',$(e)); }
   });
 

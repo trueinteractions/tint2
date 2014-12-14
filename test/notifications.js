@@ -8,23 +8,6 @@ function setup() {
 }
 
 function baseline() {
-  $utils = require('../../../../tools/utilities.js');
-  Notification.requestPermission(function(result) {
-    if(result) {
-      var notify = new Notification();
-      notify.title = "Title";
-      notify.subtitle = "Sub-Title";
-      notify.text = "Main text for the notify";
-      notify.sound = true;
-      notify.mainButtonLabel = "Main";
-      notify.auxillaryButtonLabel = "Aux";
-      notify.dispatch();
-      setTimeout(function() {
-        $utils.takeSnapshotOfTopWindow('assets/notifications_mac.png');
-        process.exit(0);
-      },1500)
-    }
-  });
 }
 
 /**
