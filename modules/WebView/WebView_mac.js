@@ -49,6 +49,7 @@ module.exports = (function() {
      * @description Creates a new webview control.
      */
   function WebView(NativeObjectClass, NativeViewClass, options) {
+    var previousUrl = null;
     options = options || {};
     options.delegates = options.delegates || [];
     options.nonStandardEvents = true;
@@ -109,6 +110,10 @@ module.exports = (function() {
             frameWinObj('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
             this.nativeView('stringByEvaluatingJavaScriptFromString', $("window.postMessageToHost = function(e) { window.TintMessages.postMessage(e); }"));
           }
+          if(previousUrl != this.location) {
+            this.fireEvent('locationchange');
+            previousUrl = this.location;
+          }
           this.fireEvent('load');
         } catch(e) {
           console.error(e.message);
@@ -133,7 +138,7 @@ module.exports = (function() {
        * @memberof WebView
        * @description Fires when a change in location occurs (E.g., a new URL has been requested)
        */
-      ['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { this.fireEvent('locationchange'); }.bind(this)],
+      //['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { }.bind(this)],
       ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', 
         function(self, _cmd, sender,url,seconds,date,frame) { this.fireEvent('redirect'); }.bind(this)]
     ]);
