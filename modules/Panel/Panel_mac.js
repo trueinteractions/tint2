@@ -2,6 +2,11 @@ module.exports = (function() {
   var Window = require('Window');
   var $ = process.bridge.objc;
 
+  var inspectorStyle =  ( $.NSHUDWindowMask | $.NSUtilityWindowMask | $.NSTitledWindowMask | 
+                                              $.NSClosableWindowMask | $.NSResizableWindowMask );
+  var utilityStyle =  ( $.NSUtilityWindowMask | $.NSTitledWindowMask | 
+                        $.NSClosableWindowMask | $.NSResizableWindowMask );
+
   /**
    * @class Panel
    * @description A Panel is similar to a window although it should be viewed as either a utility or tool window.
@@ -21,8 +26,10 @@ module.exports = (function() {
    */
   function Panel(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
-    options.styleMask = options.styleMask || ($.NSHUDWindowMask | $.NSTitledWindowMask | $.NSUtilityWindowMask | 
-                                    $.NSClosableWindowMask | $.NSResizableWindowMask | $.NSMiniaturizableWindowMask );
+    if(Panel.initialStyle == "utility")
+      options.styleMask = options.styleMask || utilityStyle;
+    else
+      options.styleMask = options.styleMask || inspectorStyle;
     options.width = options.width || 200;
     options.height = options.height || 250;
 
@@ -33,9 +40,9 @@ module.exports = (function() {
 
     this.native('setFloatingPanel', $.YES);
   }
-
   Panel.prototype = Object.create(Window.prototype);
   Panel.prototype.constructor = Panel;
+  Panel.initialStyle = "utility";
 
   /**
    * @member style
@@ -55,8 +62,8 @@ module.exports = (function() {
     },
     set:function(e) {
       var mask = this.native('styleMask');
-      if(e == "utility") this.native('setStyleMask', (mask & ~$.NSHUDWindowMask) | $.NSMiniaturizableWindowMask );
-      else if(e == "inspector") this.native('setStyleMask', (mask & ~$.NSMiniaturizableWindowMask) | $.NSHUDWindowMask);
+      if(e == "utility") this.native('setStyleMask', utilityStyle);
+      else if(e == "inspector") this.native('setStyleMask', inspectorStyle);
     }
   });
 
