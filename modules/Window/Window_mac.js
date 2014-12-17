@@ -142,14 +142,6 @@ module.exports = (function() {
     this.native('setExcludedFromWindowsMenu', $.NO);
     this.native('center');
 
-    // Incase the user loooses control of the object, ensure we hold 
-    // on to it via the application.windows array. This has two benefits,
-    // one if the user isn't interested in paying attention they can loose and
-    // reclaim the window.  Second is if the object is lost and garbage collected
-    // it will be closed and collected by Objective-C, so we must hold on to it
-    // somewhere, always (until destroyed). 
-    //application.windows.push(this);
-
     // This is simply to ensure if we remove our content view we properly adhere
     // to OSX/objective-c behavior. OSX/ObjC requires we notify its removal for
     // consistant behavior of events being thrown from the underlying delegate.

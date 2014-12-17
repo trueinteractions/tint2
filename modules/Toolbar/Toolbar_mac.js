@@ -64,9 +64,9 @@ module.exports = (function() {
 
           var intrinsicSize = child.native('intrinsicContentSize');
           if(intrinsicSize.width == -1 && intrinsicSize.height > 0)
-            toolbarItem('setMaxSize', $.NSMakeSize(10000,intrinsicSize.height));
+            toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
           if(intrinsicSize.height == -1 && intrinsicSize.width > 0)
-            toolbarItem('setMaxSize', $.NSMakeSize(intrinsicSize.height,10000));
+            toolbarItem('setMaxSize', $.NSMakeSize(intrinsicSize.height,1000));
 
           toolbarItem('setMinSize', intrinsicSize);
           toolbarItem('setView',child.native);
