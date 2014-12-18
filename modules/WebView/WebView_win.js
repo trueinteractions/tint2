@@ -17,8 +17,6 @@ module.exports = (function() {
     this.private.loading = false;
     this.private.useragent = "";
 
-    this.nativeView.Navigate(new $.System.Uri("about:blank"));
-
     this.private.checkForNewTitle = function() {
       var currentTitle = this.nativeView.InvokeScript("eval",['document.title']);
       if(this.private.previousTitle != currentTitle) {
