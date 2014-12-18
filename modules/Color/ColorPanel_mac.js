@@ -12,6 +12,7 @@ module.exports = (function() {
     * @new
     * @memberof ColorPanel
     * @description Creates a new ColorPanel window that's hidden by default.
+    * @extends Panel
     */
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
     options = options || {};

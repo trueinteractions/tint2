@@ -15,17 +15,28 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  //TODO: Add more thorough unit tests for this.
   var win = new Window();
   win.visible = true;
   var box = new Box();
-
+  box.borderWidth = 2;
+  box.borderColor = 'red';
+  box.backgroundColor = 'rgba(0,255,0,1)';
+  box.borderRadius = 13;
   win.appendChild(box);
-  box.left = box.right = box.top = box.bottom = 20;
-  box.title = "My Box";
-  $utils.assert(box.title == "My Box", "Expected 'My Box' got "+box.title);
-  $utils.assert(box.titlePosition == "top", "Expected 'top', but got "+box.titlePosition);
-  $utils.ok();
+  box.left = box.right = box.top = box.bottom = 50;
+
+  var text = new TextInput();
+  text.value = "Visual check: lime green bg, 2px red border, 13px corner radius.";
+  box.appendChild(text);
+  text.left = '20px';
+  text.top = '150px'
+  text.width = 300;
+  text.readonly = true;
+  setTimeout(function() {
+    $utils.assert(box.borderRadius == 13);
+    $utils.assert(box.borderWidth == 2);
+    $utils.ok();
+  },2000);
 }
 
 /**

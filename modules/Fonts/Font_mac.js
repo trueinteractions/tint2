@@ -13,6 +13,7 @@ module.exports = (function() {
    * @param {string} name The name of the font, for example Arial.
    * @param {size} number The size of the font.
    * @description Gets a system font and creates a font object for it.
+   * @extends Panel
    */
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');

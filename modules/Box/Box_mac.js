@@ -24,20 +24,20 @@ module.exports = (function() {
 
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
-    this.native('setTitlePosition', $.NSAtTop);
-    this.nativeView('setTitle', $(''));
+    this.nativeView('setBorderType', $.NSLineBorder);
+    this.nativeView('setTitle', $(""));
   }
 
   Box.prototype = Object.create(Container.prototype);
   Box.prototype.constructor = Box;
 
-  /**
-   * @member title
-   * @type {string}
-   * @memberof Box
-   * @description Gets or sets the title displayed at the top of the box. 
-   * @default ""
-   */
+  // NO LONGER SUPPORTED.
+  // @ member title
+  // @ type {string}
+  // @ memberof Box
+  // @ description Gets or sets the title displayed at the top of the box. 
+  // @ default ""
+  ///
   Object.defineProperty(Box.prototype, 'title', {
     get:function() { return this.nativeView('title').toString(); },
     set:function(e) { this.nativeView('setTitle', $(e.toString())); }
@@ -70,14 +70,14 @@ module.exports = (function() {
     }
   });
 
-  /**
-   * @member borderType
-   * @type {string}
-   * @memberof Box
-   * @description Gets or sets the type of border, the values for this can be
-   *              "none" or "line". 
-   * @default "none"
-   */
+  //
+  // @ member borderType
+  // @ type {string}
+  // @ memberof Box
+  // @ description Gets or sets the type of border, the values for this can be
+  //              "none" or "line". 
+  // @ default "none"
+  //
   Object.defineProperty(Box.prototype, 'borderType', {
     get:function() { 
       var type = this.nativeView('borderType');
@@ -105,7 +105,10 @@ module.exports = (function() {
    */
   Object.defineProperty(Box.prototype, 'borderColor', {
     get:function() { return new Color(this.nativeView('borderColor')); },
-    set:function(e) { this.nativeView('setBorderColor',e.native); }
+    set:function(e) {
+      this.nativeView('setBoxType', $.NSBoxCustom);
+      this.nativeView('setBorderColor', (new Color(e)).native); 
+    }
   });
 
   /**
@@ -117,7 +120,10 @@ module.exports = (function() {
    */
   Object.defineProperty(Box.prototype, 'borderWidth', {
     get:function() { return this.nativeView('borderWidth'); },
-    set:function(e) { this.nativeView('setBorderWidth',e); }
+    set:function(e) { 
+      this.nativeView('setBoxType', $.NSBoxCustom);
+      this.nativeView('setBorderWidth',e);
+    }
   });
 
   /**
@@ -129,7 +135,10 @@ module.exports = (function() {
    */
   Object.defineProperty(Box.prototype, 'borderRadius', {
     get:function() { return this.nativeView('cornerRadius'); },
-    set:function(e) { this.nativeView('setCornerRadius',e); }
+    set:function(e) {    
+      this.nativeView('setBoxType', $.NSBoxCustom);
+      this.nativeView('setCornerRadius',e); 
+    }
   });
 
   /**
@@ -143,7 +152,10 @@ module.exports = (function() {
    */
   Object.defineProperty(Box.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('fillColor')); },
-    set:function(e) { this.nativeView('setFillColor',e.native); }
+    set:function(e) {
+      this.nativeView('setBoxType', $.NSBoxCustom);
+      this.nativeView('setFillColor',(new Color(e)).native);
+    }
   });
 
   // TODO: Unsupported on Windows, what do we do?

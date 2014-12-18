@@ -519,7 +519,7 @@ function execAndPump(cmd, cb, err, options) {
   return child;
 }
 ex.ok = function ok() {
-  if(currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
+  if(currentTest && currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
   log(brightBlueBegin + successMark + colorEnd +nl);
   exit(0);
 }
