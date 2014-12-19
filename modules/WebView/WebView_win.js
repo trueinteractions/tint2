@@ -36,7 +36,7 @@ module.exports = (function() {
           this.fireEvent('title');
           this.fireEvent('load');
         }
-      }.bind(this),5);
+      }.bind(this),105);
     }.bind(this));
     this.nativeView.addEventListener('Navigated', function() { this.fireEvent('loading'); }.bind(this));
     this.nativeView.addEventListener('Navigating', function() {
@@ -55,17 +55,23 @@ module.exports = (function() {
       this.private.loading = true;
       this.fireEvent('locationchange');
     }.bind(this));
-  
+
     // Callback class for IE to call postMessage;
     function callbackHandle(str) {
       this.fireEvent('message',[str]);
     }
     var scriptInterface = process.bridge.createScriptInterface(callbackHandle.bind(this));
     this.nativeView.ObjectForScripting = scriptInterface;
-    
+
     // TODO: Support events
     // redirect
     // icon
+
+    // If we don't have a document loaded IE will throw an error if anything
+    // other than a location is set, so we'll set an intiial location to prevent this.
+    this.nativeView.Navigate(new $.System.Uri("http://127.0.0.1:" + 
+                              application.private.appSchemaPort + 
+                              "/this-is-a-blank-page-for-ie-fix.html"));
   }
 
   WebView.prototype = Object.create(Container.prototype);
@@ -76,13 +82,19 @@ module.exports = (function() {
   WebView.prototype.reload = function() { this.nativeView.Refresh(); }
   WebView.prototype.stop = function() { 
     this.private.loading = false;
-    this.private.comObject.GetType().InvokeMember("Stop", $.System.Reflection.BindingFlags.InvokeMember, null, this.private.comObject, null, null, null, null);
+    this.private.comObject.GetType().InvokeMember("Stop", 
+      $.System.Reflection.BindingFlags.InvokeMember,
+      null,
+      this.private.comObject,
+      null, null, null, null);
     this.fireEvent('cancel');
   }
 
   WebView.prototype.postMessage = function(e) {
     var msg = "var msg=document.createEvent('MessageEvent');\n";
-    msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'")+"','*',0,window);\n";
+    msg += "msg.initMessageEvent('message',true,true,'" + 
+      e.toString().replace(/'/g,"\\'") + 
+      "','*',0,window);\n";
     msg += "window.dispatchEvent(msg);\n";
     this.execute(msg);
     this.private.checkForNewTitle();

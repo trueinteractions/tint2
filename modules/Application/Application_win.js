@@ -38,12 +38,18 @@
     var path = request.url;
     var data = "";
     var ext = path.substring(path.lastIndexOf('.')+1);
-    try {
-      var url = new $.System.Uri("app:/"+path);
-      var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
-      var reader = new $.System.IO.StreamReader(stream);
-      data = reader.ReadToEnd();
-    } catch (e) {
+    // We need to serve a blank page to IE when it loads (not about:blank)
+    // 
+    if(path === "//this-is-a-blank-page-for-ie-fix.html") {
+      data = Buffer("<!doctype html>\n<html>\n<body>\n</body>\n</html>\n","utf8");
+    } else {
+      try {
+        var url = new $.System.Uri("app:/"+path);
+        var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
+        var reader = new $.System.IO.StreamReader(stream);
+        data = reader.ReadToEnd();
+      } catch (e) {
+      }
     }
     var mimeTypeFromExt = mimetype[ext];
     if(!mimeTypeFromExt) mimeTypeFromExt = 'text/plain';
@@ -86,13 +92,16 @@
     this.private = {};
     this.private.appSchemaPort = port;
     this.private.windowCount = 0;
-    //TODO: implement this.
+
     Object.defineProperty(this, 'packaged', {
       get:function() { return process.packaged; }
     });
 
     this.resource = function(path) {
       if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
+      if(path === "app:///this-is-a-blank-page-for-ie-fix.html") {
+        return new Buffer("<!doctype html>\n<html>\n<body></body></html>","utf8");
+      }
       try {
         var url = new $.System.Uri(path);
         var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
@@ -104,10 +113,6 @@
         return null;
       }
     }
-
-//    Object.defineProperty(this, 'windows', {
-//      get:function() { return _windows; }
-//    });
 
     Object.defineProperty(this, 'name', {
       get:function() { return name || process.cwd(); },

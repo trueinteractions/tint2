@@ -12,8 +12,8 @@ module.exports = (function() {
       Container.call(this, $.System.Windows.Controls.Border, $.System.Windows.Controls.Border, options);
     }
     this.native.CornerRadius = new $.System.Windows.CornerRadius(5);
-    var targetColor =  $.System.Windows.SystemColors.ControlLightBrush;
-    targetColor.A = 128;
+    var targetColor = $.System.Windows.SystemColors.ControlLightBrush.Clone();
+    targetColor.Opacity = 0.4;
     this.native.Background = targetColor;
     this.native.Padding = new $.System.Windows.Thickness(0);
     this.native.Margin = new $.System.Windows.Thickness(0);
