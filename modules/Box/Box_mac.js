@@ -6,6 +6,11 @@ module.exports = (function() {
    * @class Box
    * @description Creates a generic control that conatins other controls thats stylized. 
    *              The box control can group elements, set background colors, borders, radius, etc.
+   *              This control is useful if a group of elements needs a styled wrapper around it.
+   *              The default style is determined by the OS, setting any property resets all the
+   *              properties from the default OS style to a custom style (e.g., the border radius
+   *              resets to 0, background color sets to transparent, border width to 0, border
+   *              color to transparent).
    * @extends Container
    */
    /**
@@ -31,69 +36,6 @@ module.exports = (function() {
   Box.prototype = Object.create(Container.prototype);
   Box.prototype.constructor = Box;
 
-  // NO LONGER SUPPORTED.
-  // @ member title
-  // @ type {string}
-  // @ memberof Box
-  // @ description Gets or sets the title displayed at the top of the box. 
-  // @ default ""
-  ///
-  Object.defineProperty(Box.prototype, 'title', {
-    get:function() { return this.nativeView('title').toString(); },
-    set:function(e) { this.nativeView('setTitle', $(e.toString())); }
-  });
-
-  // TODO: removed on windows, supported on OSX?
-  Object.defineProperty(Box.prototype, 'transparent', {
-    get:function() { return this.nativeView('transparent') == $.YES ? true : false; },
-    set:function(e) { this.nativeView('setTransparent', e ? $.YES : $.NO ); }
-  });
-
-  // TODO: removed on windows, supported on OSX?
-  Object.defineProperty(Box.prototype, 'titlePosition', {
-    get:function() { 
-      var position = this.nativeView('titlePosition');
-      if(position == $.NSAboveTop) return "above-top";
-      else if (position == $.NSAtTop) return "top";
-      else if (position == $.NSBelowTop) return "below-top";
-      else if (position == $.NSAboveBottom) return "above-bottom";
-      else if (position == $.NSAtBottom) return "bottom";
-      else return "below-bottom";
-    },
-    set:function(e) {
-      if(e == "above-top") this.nativeView('setTitlePosition', $.NSAboveTop);
-      else if(e == "top") this.nativeView('setTitlePosition', $.NSAtTop);
-      else if(e == "below-top") this.nativeView('setTitlePosition', $.NSBelowTop);
-      else if(e == "above-bottom") this.nativeView('setTitlePosition', $.NSAboveBottom);
-      else if(e == "bottom") this.nativeView('setTitlePosition', $.NSAtBottom);
-      else if(e == "below-bottom") this.nativeView('setTitlePosition', $.NSBelowBottom);
-    }
-  });
-
-  //
-  // @ member borderType
-  // @ type {string}
-  // @ memberof Box
-  // @ description Gets or sets the type of border, the values for this can be
-  //              "none" or "line". 
-  // @ default "none"
-  //
-  Object.defineProperty(Box.prototype, 'borderType', {
-    get:function() { 
-      var type = this.nativeView('borderType');
-      if(type == $.NSNoBorder) return "none";
-      else if (type == $.NSLineBorder) return "line";
-      else if (type == $.NSBezelBorder) return "bezel";
-      else if (type == $.NSGrooveBorder) return "groove";
-    },
-    set:function(e) {
-      if(e == "none") this.nativeView('setBorderType', $.NSNoBorder);
-      else if(e == "line") this.nativeView('setBorderType', $.NSLineBorder);
-      else if(e == "bezel") this.nativeView('setBorderType', $.NSBezelBorder);
-      else if(e == "groove") this.nativeView('setBorderType', $.NSGrooveBorder);
-    }
-  });
-
   /**
    * @member borderColor
    * @type {Color}
@@ -101,6 +43,17 @@ module.exports = (function() {
    * @description Gets or sets the color of the border, this should be a CSS-style
    *              color attribute, such as rgba(0-255,0-255,0-255,0-1) or named color
    *              such as "red" or a Color object.
+   * @example
+   * require('Common'); // include common controls and application context.
+   * var win = new Window();
+   * win.visible = true;
+   * var box = new Box();
+   * box.borderWidth = 2;
+   * box.borderColor = 'red';  // Make the border red, this can also be a rgba() color.
+   * box.backgroundColor = 'rgba(0,255,0,1)';
+   * box.borderRadius = 13;
+   * win.appendChild(box);
+   * box.left = box.right = box.top = box.bottom = 50;
    * @see Color
    */
   Object.defineProperty(Box.prototype, 'borderColor', {
@@ -117,6 +70,14 @@ module.exports = (function() {
    * @memberof Box
    * @description Gets or sets the width of the border in logical pixels
    * @default 0
+   * @example
+   * require('Common'); // include common controls and application context.
+   * var win = new Window();
+   * win.visible = true;
+   * var box = new Box();
+   * box.borderWidth = 5; // 5 Logical pixels wide.
+   * box.borderColor = 'rgba(0,0,0,0.8)'; // 80% opacity, black border color.
+   * @see Color
    */
   Object.defineProperty(Box.prototype, 'borderWidth', {
     get:function() { return this.nativeView('borderWidth'); },
@@ -132,6 +93,16 @@ module.exports = (function() {
    * @memberof Box
    * @description Gets or sets the radius of the corners of the border.
    * @default 0
+   * @example
+   * require('Common'); // include common controls and application context.
+   * var win = new Window();
+   * win.visible = true;
+   * var box = new Box();
+   * box.borderWidth = 1; 
+   * box.borderColor = 'blue';
+   * box.borderRadius = 10; // the curve on all corners is set to 10
+   *                        // pixel radius.
+   * @see Color
    */
   Object.defineProperty(Box.prototype, 'borderRadius', {
     get:function() { return this.nativeView('cornerRadius'); },
@@ -149,31 +120,18 @@ module.exports = (function() {
    *              color attribute, such as rgba(0-255,0-255,0-255,0-1) or named color
    *              such as "red" or a Color object.
    * @see Color
+   * @example
+   * require('Common'); // include common controls and application context.
+   * var win = new Window();
+   * win.visible = true;
+   * var box = new Box();
+   * box.backgroundColor = 'blue';
    */
   Object.defineProperty(Box.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('fillColor')); },
     set:function(e) {
       this.nativeView('setBoxType', $.NSBoxCustom);
       this.nativeView('setFillColor',(new Color(e)).native);
-    }
-  });
-
-  // TODO: Unsupported on Windows, what do we do?
-  Object.defineProperty(Box.prototype, 'style', {
-    get:function() {
-      var type = this.nativeView('boxType');
-      if(type == $.NSBoxPrimary) return "primary";
-      else if (type == $.NSBoxSecondary) return "secondary";
-      else if (type == $.NSBoxSeparator) return "separator";
-      else if (type == $.NSBoxOldStyle) return "old";
-      else return "custom";
-    },
-    set:function(e) {
-      if(e == "primary") this.nativeView('setBoxType', $.NSBoxPrimary);
-      else if(e == "secondary") this.nativeView('setBoxType', $.NSBoxSecondary);
-      else if(e == "old") this.nativeView('setBoxType', $.NSBoxOldStyle);
-      else if(e == "separator") this.nativeView('setBoxType', $.NSBoxSeparator);
-      else if(e == "custom") this.nativeView('setBoxType', $.NSBoxCustom);
     }
   });
 
