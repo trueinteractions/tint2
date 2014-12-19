@@ -190,7 +190,14 @@ module.exports = (function() {
   }
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
-    // incase we're added to a panel that isn't auto-layout, go ahead and ignore.
+
+    // WPF has an awkward inheritence schema. If we want a border on an element we have to wrap that element
+    // in a Border control (rather than border being properties on the control inherited).  This means when we
+    // do layout we have to determine which is hte "actual" child that's the target we're adding to (always, almost
+    // always, a AutoLayoutPanel as the target).  In addition we have to carefully determine what the items are,
+    // we do this by looking for a defined "Child" attribute. "wrapping" controls such as Border use this to set
+    // the single (and only) child element.  The Child will contain the panel that we need to use for our target and
+    // first/second item.  This detects for it and silently returns if it doesn't find any target.
     var target = null;
     if(this.private.parent.nativeView.Child && this.private.parent.nativeView.Child.AddLayoutConstraint) {
       target = this.private.parent.nativeView.Child;
@@ -199,11 +206,15 @@ module.exports = (function() {
     } else
       return;
 
+    var firstItem = (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView);
+    var secondItem = (layoutObject.secondItem ? layoutObject.secondItem.nativeView : null);
+    secondItem = secondItem ? (secondItem.Child ? secondItem.Child : secondItem) : null;
+
     var constraint = target.AddLayoutConstraint(
-        (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
+        firstItem,
         utils.capitalize(layoutObject.firstAttribute),
         layoutObject.relationship,
-        (layoutObject.secondItem ? layoutObject.secondItem.nativeView : null),
+        secondItem,
         (layoutObject.secondAttribute ? utils.capitalize(layoutObject.secondAttribute) : null),
         (layoutObject.multiplier ? layoutObject.multiplier : 0), 
         (layoutObject.constant ? layoutObject.constant : 0) );
