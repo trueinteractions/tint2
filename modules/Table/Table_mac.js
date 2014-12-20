@@ -17,45 +17,6 @@ module.exports = (function() {
     options.keyDownBlocks = true;
     options.delegates = options.delegates || [];
 
-    /**
-     * @event row-added
-     * @memberof Table
-     * @description Fires when a new row is added to the table by the user or programmatically.
-     */
-
-    /**
-     * @event row-removed
-     * @memberof Table
-     * @description Fires when a row is removed form the table by the user or programmatically.
-     */
-
-    /**
-     * @event select
-     * @memberof Table
-     * @description Fires when the selected rows change by the user or programmatically. This fires 
-     *              prior to the selection actually changing.
-     */
-
-    /**
-     * @event selected
-     * @memberof Table
-     * @description Fires when the selected rows change by the user or programmatically. This fires
-     *              after the selection has changed.
-     */
-
-    /**
-     * @event column-clicked
-     * @memberof Table
-     * @param {string} columnName The name of the column that was clicked.
-     * @description Fires when the user clicks a column (e.g., after any processing has occured).
-     */
-
-    /**
-     * @event column-mousedown
-     * @memberof Table
-     * @param {string} columnName The name of the column that was clicked.
-     * @description Fires when the user begins to click a column but prior to any processing.
-     */
     options.delegates = options.delegates.concat([
       ['tableView:viewForTableColumn:row:','@@:@@l', function(self,cmd,table,column,rowIndex) {
         var identifier = column('identifier').toString();
@@ -64,7 +25,17 @@ module.exports = (function() {
           return this.private.views[identifier][rowIndex].native;
         return null;
       }.bind(this)],
+      /**
+       * @event row-added
+       * @memberof Table
+       * @description Fires when a new row is added to the table by the user or programmatically.
+       */
       ['tableView:didAddRowView:forRow:','v@:@@l', function(self,cmd,table,row,rowIndex) { this.fireEvent('row-added',[rowIndex]); }.bind(this)],
+      /**
+       * @event row-removed
+       * @memberof Table
+       * @description Fires when a row is removed form the table by the user or programmatically.
+       */
       ['tableView:didRemoveRowView:forRow:','v@:@@l', function(self,cmd,table,row,rowIndex) { this.fireEvent('row-removed',[rowIndex]); }.bind(this)],
       ['tableView:shouldEditTableColumn:row:','B@:@l', function(self,cmd,table,column,rowIndex) { return $.NO; }.bind(this)],
       ['tableView:heightOfRow:','d@:@l', function(self,cmd,table,rowIndex) { return this.nativeView('rowHeight'); }.bind(this)],
@@ -73,14 +44,38 @@ module.exports = (function() {
       ['tableView:shouldSelectRow:','B@:@l', function(self,cmd,table,rowIndex) { return $.YES; }.bind(this)],
       ['tableView:selectionIndexesForProposedSelection:','@@:@@', function(self,cmd,table,indexSet) { return indexSet; }.bind(this)],
       ['tableView:shouldSelectTableColumn:','B@:@@', function(self,cmd,table,column) { return $.YES; }.bind(this)],
+      /**
+       * @event select
+       * @memberof Table
+       * @description Fires when the selected rows change by the user or programmatically. This fires 
+       *              prior to the selection actually changing.
+       */
       ['tableViewSelectionIsChanging:','v@:@', function(self,cmd,notif) { this.fireEvent('select'); }.bind(this)],
+      /**
+       * @event selected
+       * @memberof Table
+       * @description Fires when the selected rows change by the user or programmatically. This fires
+       *              after the selection has changed.
+       */
       ['tableViewSelectionDidChange:','v@:@', function(self,cmd,notif) { this.fireEvent('selected'); }.bind(this)],
       ['tableView:shouldTypeSelectForEvent:withCurrentSearchString:','B@:@@@', function(self,cmd,table,eventnotif,searchString) { return $.YES; }.bind(this)],
       ['tableView:shouldReorderColumn:toColumn:','B@:@ll', function(self,cmd,table,fromColumnIndex,toColumnIndex) { return $.YES; }.bind(this)],
       ['tableView:didDragTableColumn:','v@:@@', function(self,cmd,table,column) { this.fireEvent('column-move',[column('identifier').toString()]); }.bind(this)],
       ['tableViewColumnDidMove:','v@:@', function(self,cmd,notif) { this.fireEvent('column-moved'); }.bind(this)],
       ['tableViewColumnDidResize:','v@:@', function(self,cmd,notif) { this.fireEvent('column-resized'); }.bind(this)],
+      /**
+       * @event column-clicked
+       * @memberof Table
+       * @param {string} columnName The name of the column that was clicked.
+       * @description Fires when the user clicks a column (e.g., after any processing has occured).
+       */
       ['tableView:didClickTableColumn:','v@:@@', function(self,cmd,table,column) { this.fireEvent('column-clicked',[column('identifier').toString()]); }.bind(this)],
+      /**
+       * @event column-mousedown
+       * @memberof Table
+       * @param {string} columnName The name of the column that was clicked.
+       * @description Fires when the user begins to click a column but prior to any processing.
+       */
       ['tableView:mouseDownInHeaderOfTableColumn:','v@:@@', function(self,cmd,table,column) { this.fireEvent('column-mousedown', [column('identifier').toString()]); }.bind(this)],
       ['tableView:shouldTrackCell:forTableColumn:row:','B@:@@l', function(self,cmd,table,cell,column,rowIndex) { return $.YES; }.bind(this)],
       ['numberOfRowsInTableView:','l@:@', function(self,cmd,table) { return this.nativeView('numberOfRows'); }.bind(this)] 
@@ -223,6 +218,11 @@ module.exports = (function() {
    *              string.
    */
   Table.prototype.setValueAt = function(columnId,row,value) {
+    if(typeof(value) == "string" || typeof(value) == "number") {
+      var v = value;
+      value = new TextInput();
+      value.value = v.toString();
+    }
     this.private.views[columnId][row] = value;
     this.nativeView('reloadDataForRowIndexes', $.NSIndexSet('indexSetWithIndex',row),
                     'columnIndexes',$.NSIndexSet('indexSetWithIndex', this.nativeView('columnWithIdentifier',$(columnId))));

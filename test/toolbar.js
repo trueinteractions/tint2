@@ -50,7 +50,9 @@ function run($utils) {
 
   webView.top = webView.bottom = webView.left = webView.right = 0;
   webView.location = "https://www.google.com";
-  $utils.ok(); // TODO: add more unit tests.
+  setTimeout(function() {
+    $utils.ok();
+  }, 500);
 }
 
 /**
