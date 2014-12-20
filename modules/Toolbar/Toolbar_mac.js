@@ -62,12 +62,18 @@ module.exports = (function() {
           var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',identifier);
           var child = children[parseInt(identifier)-1];
 
+          // This is necessary, even though it would seem we're adding toolbar items with fixed height/width Auto Layout
+          // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
+          // masks is necessary.
+          child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
+
           var intrinsicSize = child.native('intrinsicContentSize');
           if(intrinsicSize.width == -1 && intrinsicSize.height > 0)
             toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
-          if(intrinsicSize.height == -1 && intrinsicSize.width > 0)
+          else if(intrinsicSize.height == -1 && intrinsicSize.width > 0)
             toolbarItem('setMaxSize', $.NSMakeSize(intrinsicSize.height,1000));
-
+          else
+            toolbarItem('setMaxSize', intrinsicSize);
           toolbarItem('setMinSize', intrinsicSize);
           toolbarItem('setView',child.native);
           toolbarCache[parseInt(identifier)] = toolbarItem;

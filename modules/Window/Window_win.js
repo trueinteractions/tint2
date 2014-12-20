@@ -87,17 +87,17 @@ module.exports = (function() {
     this.private.hwnd = (new $.System.Windows.Interop.WindowInteropHelper(this.native)).EnsureHandle();
     // Force directx to not re-draw the background, we already do it anyway.
     var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
-    mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.Transparent;
+    mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.White;
     // Just as above, tell WPF not to redraw the background, The Desktop Window Manager (DWM) will do it 
     // anyway as long as the style isn't set to "None"
-    this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+    this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.White);
 
     // We're happy to draw or own client region, tell DWM to not bother.
-    var margin = new $$.win32.structs.MARGINS;
-    margin.cxLeftWidth = -1;
-    margin.cxRightWidth = -1;
-    margin.cyTopHeight = -1;
-    margin.cyBottomHeight = -1;
+    //var margin = new $$.win32.structs.MARGINS;
+    //margin.cxLeftWidth = -1;
+    //margin.cxRightWidth = -1;
+    //margin.cyTopHeight = -1;
+    //margin.cyBottomHeight = -1;
     //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(this.private.hwnd.pointer.rawpointer,margin);
 
     // Lets just set our background to white 
@@ -173,10 +173,17 @@ module.exports = (function() {
       }
       if(e) {
         this.private.toolbar = e;
-        this.native.Content = new $.System.Windows.Controls.StackPanel();
-        this.native.Content.Orientation = $.System.Windows.Controls.Orientation.Vertical;
+        this.native.Content = new $.System.Windows.Controls.Grid();
         this.native.Content.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
         this.native.Content.VerticalAlignment = $.System.Windows.VerticalAlignment.Stretch;
+        var r1 = new $.System.Windows.Controls.RowDefinition();
+        r1.Height = new $.System.Windows.GridLength(1, $.System.Windows.GridUnitType.Auto);
+        var r2 = new $.System.Windows.Controls.RowDefinition();
+        r2.Height = new $.System.Windows.GridLength(1, $.System.Windows.GridUnitType.Star);
+        this.native.Content.RowDefinitions.Add(r1);
+        this.native.Content.RowDefinitions.Add(r2);
+        this.private.toolbar.native.SetValue($.System.Windows.Controls.Grid.RowProperty, 0);
+        this.nativeView.SetValue($.System.Windows.Controls.Grid.RowProperty, 1);
         this.native.Content.InternalChildren.Add(this.private.toolbar.native);
         this.native.Content.InternalChildren.Add(this.nativeView);
       } else if(this.private.toolbar) {

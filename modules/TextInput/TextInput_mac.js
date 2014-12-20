@@ -68,7 +68,7 @@ module.exports = (function() {
     else
       Container.call(this, $.NSTextField, $.NSTextField, options);
 
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
+    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setDelegate', this.nativeView);
   }
