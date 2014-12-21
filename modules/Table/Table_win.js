@@ -2,7 +2,7 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var TextInput = require('TextInput');
-  var Color = require('Color');
+  if(!Color) Color = require('Color');
 
   var oddColor = $.System.Windows.SystemColors.ControlBrush;
   var evenColor = $.System.Windows.SystemColors.ControlLightLightBrush;
@@ -245,6 +245,7 @@ module.exports = (function() {
       var v = value;
       value = new TextInput();
       value.value = v.toString();
+      value.readonly = true;
     }
     this.private.containers[this.private.findColumn(columnId)][row].Child = value.native;
   }

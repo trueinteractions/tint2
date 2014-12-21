@@ -4,7 +4,7 @@
  * @ignore
  */
 function setup() {
-  require('Common');
+  require('Application');
 }
 
 function baseline() {
@@ -15,6 +15,10 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  var Window = require('Window');
+  var Box = require('Box');
+  var TextInput = require('TextInput');
+
   var win = new Window();
   win.visible = true;
   var box = new Box();

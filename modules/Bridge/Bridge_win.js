@@ -190,8 +190,8 @@ function createClass(typeNative, typeName) {
   }
 
   // These must be available on both the static and instance of the class/object.
-  cls.prototype.toString = cls.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + typeName + ''; }
-  cls.prototype.inspect = cls.inspect = function() { return '\033[33m CLR ' + this.toString() + '\033[39m'; }
+  //cls.prototype.toString = cls.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + typeName + ''; }
+  //cls.prototype.inspect = cls.inspect = function() { return '\033[33m CLR ' + this.toString() + '\033[39m'; }
   cls.prototype.addEventListener = cls.addEventListener = function(event, callback) { dotnet.execAddEvent(this.pointer,event,callback); };
   cls.prototype.classPointer = cls.classPointer = typeNative;
   cls.prototype.className = cls.className = typeName;

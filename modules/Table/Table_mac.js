@@ -222,6 +222,7 @@ module.exports = (function() {
       var v = value;
       value = new TextInput();
       value.value = v.toString();
+      value.readonly = true;
     }
     this.private.views[columnId][row] = value;
     this.nativeView('reloadDataForRowIndexes', $.NSIndexSet('indexSetWithIndex',row),

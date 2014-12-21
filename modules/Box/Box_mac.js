@@ -1,5 +1,6 @@
 module.exports = (function() {
   var Container = require('Container');
+  if(!Color) var Color = require('Color');
   var $ = process.bridge.objc;
 
   /**
