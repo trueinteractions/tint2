@@ -37,12 +37,9 @@ module.exports = (function() {
        * @description Fires when a row is removed form the table by the user or programmatically.
        */
       ['tableView:didRemoveRowView:forRow:','v@:@@l', function(self,cmd,table,row,rowIndex) { this.fireEvent('row-removed',[rowIndex]); }.bind(this)],
-      ['tableView:shouldEditTableColumn:row:','B@:@l', function(self,cmd,table,column,rowIndex) { return $.NO; }.bind(this)],
       ['tableView:heightOfRow:','d@:@l', function(self,cmd,table,rowIndex) { return this.nativeView('rowHeight'); }.bind(this)],
-      ['tableView:sizeToFitWidthOfColumn:','d@:@', function(self,cmd,table,columnIndex) { return this.private.columnWidth[columnIndex]; }.bind(this)],
       ['selectionShouldChangeInTableView:','B@:@', function(self,cmd,table) { return $.YES; }.bind(this)],
       ['tableView:shouldSelectRow:','B@:@l', function(self,cmd,table,rowIndex) { return $.YES; }.bind(this)],
-      ['tableView:selectionIndexesForProposedSelection:','@@:@@', function(self,cmd,table,indexSet) { return indexSet; }.bind(this)],
       ['tableView:shouldSelectTableColumn:','B@:@@', function(self,cmd,table,column) { return $.YES; }.bind(this)],
       /**
        * @event select
@@ -89,6 +86,7 @@ module.exports = (function() {
     this.private.views = {};
     this.private.columns = [];
     this.private.selectable = true;
+    this.private.columnWidth = {};
 
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
