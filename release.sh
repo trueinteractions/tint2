@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ ! $1 ]; then
+  echo "Release must be executed with a valid OSX signing id."
+  security find-identity -v
+fi
+
 if [ ! -f "./build/xcode/Release/tint" ]; then
   echo "An OSX build is required for release"
   exit 1;
@@ -46,6 +51,7 @@ else
 fi
 
 cp -a ./build/xcode/Release/tint ./build/dist/tint/
+codesign -s $1 ./build/dist/tint/tint
 cp -a ./build/msvs/Release/tint_console.exe ./build/dist/tint/tint.exe
 mkdir ./build/dist/tint/test
 cp -a ./test/*.js ./build/dist/tint/test
@@ -84,6 +90,7 @@ mkdir ./build/.osx-pkg-dist/usr/
 mkdir ./build/.osx-pkg-dist/usr/local/
 mkdir ./build/.osx-pkg-dist/usr/local/bin/
 cp -a ./build/xcode/Release/tint ./build/.osx-pkg-dist/usr/local/bin/
+codesign -s $1 ./build/.osx-pkg-dist/usr/local/bin/tint
 cp -a ./build/dist/tint/tntbuild ./build/.osx-pkg-dist/usr/local/bin/
 rm tools/welcome_tmp.txt
 
@@ -93,8 +100,8 @@ fi
 echo "Tint $TINT_VERSION" > tools/welcome_tmp.txt
 echo "" >> tools/welcome_tmp.txt
 cat tools/welcome.txt >> tools/welcome_tmp.txt
-pkgbuild --root ./build/.osx-pkg-dist/ --identifier com.trueinteractions.tint --install-location=/ ./build/dist/tint.pkg
-productbuild --product tools/osx-pkg-reqs.xml --package-path ./build/dist/ --distribution tools/osx-pkg-dist.xml --resources tools --identifier com.trueinteractions.tint ./build/dist/tint-$TINT_VERSION.pkg
+pkgbuild --root ./build/.osx-pkg-dist/ --identifier com.trueinteractions.tint --install-location=/ --sign=$1 ./build/dist/tint.pkg
+productbuild --product tools/osx-pkg-reqs.xml --package-path ./build/dist/ --distribution tools/osx-pkg-dist.xml --sign=$1 --resources tools --identifier com.trueinteractions.tint ./build/dist/tint-$TINT_VERSION.pkg
 
 rm ./build/dist/tint.pkg
 rm -rf ./build/.osx-pkg-dist/
