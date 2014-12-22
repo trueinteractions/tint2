@@ -21,56 +21,16 @@ module.exports = (function() {
    * @see Container
    * @see Box
    */
-  /**
-   * @event mousedown
-   * @memberof Control
-   * @description Fires when a user presses the left mouse button down and before it's released.
-   */
-  /**
-   * @event mouseup
-   * @memberof Control
-   * @description Fires when a user releases the left mouse button and after the mousedown event.
-   */
-  /**
-   * @event rightmousedown
-   * @memberof Control
-   * @description Fires when a user presses the right mouse button down and before it's released.
-   */
-  /**
-   * @event rightmouseup
-   * @memberof Control
-   * @description Fires when a user releases the right mouse button and after the rightmousedown event.
-   */
-  /**
-   * @event keydown
-   * @memberof Control
-   * @description Fires when a keyboard key is down but before its released.
-   */
-  /**
-   * @event keyup
-   * @memberof Control
-   * @description Fires when a keyboard key is up and after the keydown event.
-   */
-  /**
-   * @event mouseenter
-   * @memberof Control
-   * @description Fires when the mouse cursor enters the visible bounds of the control.
-   */
-  /**
-   * @event mouseexit
-   * @memberof Control
-   * @description Fires when the mouse cursor leaves the visible bounds of the control.
-   */
-  /**
-   * @event mousemove
-   * @memberof Control
-   * @description Fires when the mouse moves, and only when its moving over the control.
-   */
   function Control(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
     options.delegates = options.delegates || [];
     if(!options.nonStandardEvents) {
       options.delegates = options.delegates.concat([
+        /**
+         * @event mousedown
+         * @memberof Control
+         * @description Fires when a user presses the left mouse button down and before it's released.
+         */
         ['mouseDown:','v@:@', function(self, cmd, events) {
             this.fireEvent('mousedown');
             self.super('mouseDown',events);
@@ -79,17 +39,57 @@ module.exports = (function() {
               this.fireEvent('click');
             }
         }.bind(this)],
+        /**
+         * @event mouseup
+         * @memberof Control
+         * @description Fires when a user releases the left mouse button and after the mousedown event.
+         */
         ['mouseUp:','v@:@', function(self, cmd, events) { 
           this.fireEvent('mouseup'); 
           this.fireEvent('click');
           self.super('mouseUp',events); 
         }.bind(this)],
+        /**
+         * @event rightmousedown
+         * @memberof Control
+         * @description Fires when a user presses the right mouse button down and before it's released.
+         */
         ['rightMouseDown:','v@:@', function(self, cmd, events) { this.fireEvent('rightmousedown'); self.super('rightMouseDown',events); }.bind(this)],
+        /**
+         * @event rightmouseup
+         * @memberof Control
+         * @description Fires when a user releases the right mouse button and after the rightmousedown event.
+         */
         ['rightMouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('rightmouseup'); self.super('rightMouseUp',events); }.bind(this)],
+        /**
+         * @event keydown
+         * @memberof Control
+         * @description Fires when a keyboard key is down but before its released.
+         */
         ['keyDown:','v@:@', function(self, cmd, events) { this.fireEvent('keydown'); self.super('keyDown',events); }.bind(this)],
+        /**
+         * @event keyup
+         * @memberof Control
+         * @description Fires when a keyboard key is up and after the keydown event.
+         */
         ['keyUp:','v@:@', function(self, cmd, events) { this.fireEvent('keyup'); self.super('keyUp',events); }.bind(this)],
+        /**
+         * @event mouseenter
+         * @memberof Control
+         * @description Fires when the mouse cursor enters the visible bounds of the control.
+         */
         ['mouseEntered:','v@:@', function(self, cmd, events) { this.fireEvent('mouseenter'); self.super('mouseEntered',events); }.bind(this)],
+        /**
+         * @event mouseexit
+         * @memberof Control
+         * @description Fires when the mouse cursor leaves the visible bounds of the control.
+         */
         ['mouseExited:','v@:@', function(self, cmd, events) { this.fireEvent('mouseexit'); self.super('mouseExited',events); }.bind(this)],
+        /**
+         * @event mousemove
+         * @memberof Control
+         * @description Fires when the mouse moves, and only when its moving over the control.
+         */
         ['mouseMoved:','v@:@', function(self, cmd, events) { this.fireEvent('mousemove'); self.super('mouseMoved',events); }.bind(this)]
       ]);
     }
@@ -133,6 +133,8 @@ module.exports = (function() {
    *  dateWell.left = dateWell.top = 0;
    *  dateWell.width = '300px';
    *  dateWell.alpha = 0.5; // Set our newly added component to 50% visible.
+   * @screenshot-window {win}
+   * @screenshot-control {dateWell}
    */
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
@@ -150,13 +152,13 @@ module.exports = (function() {
    *  var win = new Window(); // create a new window.
    *  win.visible = true; // make the window visible.
    *  var dateWell = new DateWell();
-   *  win.title = "Date well should be 0.5 alpha.";
    *  dateWell.style = "clock";
    *  dateWell.range = true;
    *  win.appendChild(dateWell);
    *  dateWell.left = dateWell.top = 0;
    *  dateWell.width = '300px';
    *  dateWell.visible = false; // Make our date picker hidden.
+   * @screenshot-window {win}
    */
   Object.defineProperty(Control.prototype, 'visible', {
     configurable:true,
@@ -181,6 +183,7 @@ module.exports = (function() {
    *              where the coordinates start from the top (y) and left (x) of the screen. If the control is not on 
    *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window) 
    *              this throws an error.
+   * @noscreenshot
    * @example
    *  require('Common'); // include defaults, creates application context.
    *  var win = new Window(); // create a new window.
@@ -219,6 +222,7 @@ module.exports = (function() {
    *              this takes into account non-content area of the window such as frame.  E.g., if your window is at 500 pixels
    *              from the top, and your control is placed at 20 pixels from the top of the window the boundsOnWindow will return
    *              500 + (the native windows titlebar height) + 20.  If the control is not on a window this throws an error.
+   * @noscreenshot
    * @example
    *  require('Common'); // include defaults, creates application context.
    *  var win = new Window(); // create a new window.
@@ -265,8 +269,9 @@ module.exports = (function() {
    * @description Gets an object with the properties width, height, x, and y that represent the position of the
    *              control from its parent control (in logical pixels or adjusted for the monitors DPI or scalefactor)
    *              where the coordinates start from the top (y) and left (x) of the parent. If the control is not on 
-   *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window) 
+   *              a window (e.g., Note it can still in the UI, such as a status bar but not on a Tint window)
    *              this throws an error.
+   * @noscreenshot
    * @example
    *  require('Common'); // include defaults, creates application context.
    *  var win = new Window(); // create a new window.
@@ -321,6 +326,7 @@ module.exports = (function() {
    * @description Adds an event listener for various control level events. The first
    *              parameter is the name of the event, the second parameter is the function
    *              to call when the event happens (e.g., a callback).
+   * @noscreenshot
    * @example
    * require('Common');
    * var win = new Window();
@@ -357,6 +363,7 @@ module.exports = (function() {
    * @description Removes an event listener for various control level events. The first
    *              parameter is the name of the event, the second parameter is the function
    *              that was originally given as the callback for addEventListener.
+   * @noscreenshot
    * @example
    * require('Common');
    * var win = new Window();
@@ -421,10 +428,7 @@ module.exports = (function() {
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');
   }
-  //TODO: Figure out if these mappings are really equal to
-  // the mappings on Windows
-  //TODO: Figure out a way of invaliding intrinsic content size, buttons cannot have
-  // explicit heights in auto layout!!
+
   /**
    * @member top
    * @type {various}
@@ -460,8 +464,10 @@ module.exports = (function() {
    * win.appendChild(buttonSecond);
    * win.appendChild(buttonNormal);
    * win.appendChild(buttonThird);
+   * @screenshot-window {win}
    */
   utils.createLayoutProperty(Control.prototype, 'top', 'top', utils.identity, 'top', utils.identity, ['bottom','height']);
+
   /**
    * @member bottom
    * @type {various}
@@ -497,8 +503,10 @@ module.exports = (function() {
    * win.appendChild(buttonSecond); 
    * win.appendChild(buttonNormal);
    * win.appendChild(buttonThird);
+   * @screenshot-window {win}
    */
   utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
+
   /**
    * @member left
    * @type {various}
@@ -532,7 +540,9 @@ module.exports = (function() {
    * win.appendChild(buttonSecond); 
    * win.appendChild(buttonNormal);
    * win.appendChild(buttonThird);
+   * @screenshot-window {win}
    */
+
   utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
   /**
    * @member right
@@ -567,7 +577,9 @@ module.exports = (function() {
    * win.appendChild(buttonSecond); 
    * win.appendChild(buttonNormal);
    * win.appendChild(buttonThird);
+   * @screenshot-window {win}
    */
+
   utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.negate, ['left','width']);
   /**
    * @member height
@@ -577,7 +589,17 @@ module.exports = (function() {
    *              that the control should have.  If the value is a string representing a percentage (e.g., '50%') then the height is
    *              set to 50% of the parents height.  Note that height cannot be calculated if both top and bottom are set (as the height
    *              is implicitly set in that circumstance).
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var box = new Box();
+   * box.left=box.right=0;
+   * box.height='150px';
+   * win.appendChild(box);
+   * @screenshot-window {win}
    */
+
   utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
   /**
    * @member width
@@ -615,6 +637,7 @@ module.exports = (function() {
    * win.appendChild(buttonSecond); 
    * win.appendChild(buttonNormal);
    * win.appendChild(buttonThird);
+   * @screenshot-window {win}
    */
   utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
   /**
@@ -639,6 +662,7 @@ module.exports = (function() {
    *
    * // Add the buttons to the window.
    * win.appendChild(buttonNormal);
+   * @screenshot-window {win}
    */
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
   /**
@@ -663,6 +687,7 @@ module.exports = (function() {
    *
    * // Add the buttons to the window.
    * win.appendChild(buttonNormal);
+   * @screenshot-window {win}
    */
   utils.createLayoutProperty(Control.prototype, 'center', 'center', utils.identity, 'center', utils.identity, null);
 

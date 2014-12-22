@@ -209,11 +209,13 @@ module.exports = (function() {
    *  win.title = "Non-textured window.";
    *  win.x = 50;
    *
-   *  var win = new Window();
-   *  win.visible = true; // make sure the window is shown.
-   *  win.textured = true;
-   *  win.title = "Textured window.";
-   *  win.x = 600;
+   *  var win2 = new Window();
+   *  win2.visible = true; // make sure the window is shown.
+   *  win2.textured = true;
+   *  win2.title = "Textured window.";
+   *  win2.x = 600;
+   * @screenshot-window {win}
+   * @screenshot-window {win2}
    */
   Object.defineProperty(Window.prototype, 'textured', {
     get:function() { return this.native('styleMask') & $.NSTexturedBackgroundWindowMask; },
@@ -258,6 +260,27 @@ module.exports = (function() {
    *              a consistant panel of controls regardless of how the content or child elements
    *              behave. Both OSX and Windows render these at the top (underneath the Menu) as
    *              part of the client area.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var urlLocation = new TextInput();
+   * var toolbar = new Toolbar();
+   * var backButton = new Button();
+   * var forwardButton = new Button();
+   * 
+   * backButton.image = 'back'; // named system icon
+   * forwardButton.image = 'forward'; // named system icon
+   *
+   * // Use 'space' for a OS-determined variable length space between items.
+   * toolbar.appendChild([backButton, forwardButton, 'space', urlLocation, 'space']);
+   * win.toolbar = toolbar;
+   * 
+   * urlLocation.alignment = 'center';
+   * urlLocation.linewrap = false;
+   * urlLocation.scrollable = true;
+   * urlLocation.value = 'A text input field';
+   * @screenshot-window {win}
    * @see Toolbar
    */
   Object.defineProperty(Window.prototype, 'toolbar', {
@@ -287,6 +310,7 @@ module.exports = (function() {
    *              operating systems is to default to fullscreen when maximized.  This determines whether
    *              the Window will go into fullscreen on maximize or if it can when the OS requests so.
    *              The default value is false.
+   * @noscreenshot
    * @example
    *  require('Common');
    *  var win = new Window();
@@ -318,7 +342,7 @@ module.exports = (function() {
    * @description Gets or sets the state of the window.  The options are "fullscreen", "maximized", "minimized",
    *              "fullscreen" or "normal". Note: If the window's property 'canbeFullScreen' is not set to true
    *              setting "fullscreen" will have no effect.
-   *
+   * @noscreenshot
    * @example
    *  require('Common');
    *  var win = new Window();
@@ -376,6 +400,7 @@ module.exports = (function() {
    *  win.visible = true;
    *  // Set the title bar caption to "hello"
    *  win.title = "hello";
+   * @screenshot-window {win}
    */
   (utilities.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
 
@@ -392,6 +417,7 @@ module.exports = (function() {
    *  var win = new Window();
    *  win.visible = true; // show the window
    *  win.y = 0; // move the window to the top area of the screen.
+   * @screenshot-screen
    */
   Object.defineProperty(Window.prototype, 'y', {
     get:function() { 
@@ -434,6 +460,7 @@ module.exports = (function() {
    *    if(xLoc > 400)          // If the x location is greater than 400, exit the program.
    *      process.exit();
    *  }, 16);                   // execute this every 16 milliseconds.
+   * @screenshot-screen
    */
   Object.defineProperty(Window.prototype, 'x', {
     get:function() { return this.native('frame').origin.x; },
@@ -463,6 +490,7 @@ module.exports = (function() {
    *                    // this happens before the window is shown so there isnt a
    *                    // noticable flicker when the application loads.
    *  win.visible = true; // Show the window.
+   * @screenshot-window {win}
    */
   Object.defineProperty(Window.prototype, 'width', {
     get:function() { return this.native('frame').size.width; },
@@ -489,6 +517,7 @@ module.exports = (function() {
    *                    // this happens before the window is shown so there isnt a
    *                    // noticable flicker when the application loads.
    *  win.visible = true; // Show the window.
+   * @screenshot-window {win}
    */
   Object.defineProperty(Window.prototype, 'height', {
     get:function() { return this.native('frame').size.height; },
@@ -527,6 +556,7 @@ module.exports = (function() {
    *              minimized, maximized or fullscreen.  By default the windows visibility
    *              is set to false so windows can have specific styling set prior to being
    *              shown.
+   * @noscreenshot
    * @example
    *  require('Common');
    *  var win = new Window();
@@ -556,6 +586,7 @@ module.exports = (function() {
    *  win.visible = true; // Show the window.
    *  win.maximizeButton = false; // The window will not have a maximize button, or on some OS'
    *                              // the maximize button is grayed out or disabled.
+   * @screenshot-window {win}
    */
   // only works on Window, not Panel derived classes (NSPanel doesnt support standardWindowButton)
   Object.defineProperty(Window.prototype, 'maximizeButton', {
@@ -585,6 +616,7 @@ module.exports = (function() {
    *  win.visible = true; // Show the window.
    *  win.minimizeButton = false; // The window will not have a minimize button, or on some OS'
    *                              // the minimize button is grayed out or disabled.
+   * @screenshot-window {win}
    */
   // only works on Window, not Panel derived classes
   Object.defineProperty(Window.prototype, 'minimizeButton', {
@@ -614,6 +646,7 @@ module.exports = (function() {
    *  win.visible = true; // Show the window.
    *  win.closeButton = false; // The window will not have a close button, or on some OS'
    *                           // the close button is grayed out or disabled.
+   * @screenshot-window {win}
    */
   Object.defineProperty(Window.prototype, 'closeButton', {
     get:function() { 
@@ -652,6 +685,7 @@ module.exports = (function() {
    * win.resizable = false; // the window will not be able to be resized by the user,
    *                        // but can still be resized programmatically with the 
    *                        // width/height properties.
+   * @screenshot-window {win}
    */
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },
@@ -691,6 +725,9 @@ module.exports = (function() {
    *  win3.visible = true; // Show the window.
    *  win3.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
    *  win3.x = 750;
+   * @screenshot-window {win}
+   * @screenshot-window {win3}
+   * @screenshot-screen
    */
   Object.defineProperty(Window.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
@@ -725,7 +762,7 @@ module.exports = (function() {
    *              that if not focused still stays on top of other windows. By default this is
    *              false. Note that two windows that are both set to alwaysOnTop will be swap
    *              ordering if the windows loose and gain focus.
-   *
+   * @noscreenshot
    * @example
    * require('Common');
    * var win = new Window(); // Create a new window.
@@ -745,7 +782,7 @@ module.exports = (function() {
    * @memberof Window
    * @description Destroys the window along with its resources.  This method will remove the
    *              window entirely and its memory.
-   *
+   * @noscreenshot
    * @example
    * require('Common');
    * var win = new Window(); // Create a new window.
@@ -776,6 +813,7 @@ module.exports = (function() {
    * win2.y = win2.y - 30; // move up thirty pixels.
    * win.bringToFront(); // the window is pulled in front of all others 
    *                     // (with the exception if a windows that are "alwaysOnTop")
+   * @screenshot-screen
    */
   Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
 

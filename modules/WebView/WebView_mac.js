@@ -47,6 +47,15 @@ module.exports = (function() {
      * @new 
      * @memberof WebView
      * @description Creates a new webview control.
+     * @example
+     * require('Common');
+     * var win = new Window();
+     * win.visible = true;
+     * var webView = new WebView();
+     * win.appendChild(webView);
+     * webView.left=webView.top=webView.right=webView.bottom=0;
+     * webView.location = "https://www.google.com";
+     * @screenshot-window {win}
      */
   function WebView(NativeObjectClass, NativeViewClass, options) {
     var previousUrl = null;
@@ -171,6 +180,15 @@ module.exports = (function() {
    * @method back
    * @memberof WebView
    * @description Moves to the previously rendered page.  If no previously rendered page is available this takes no action.
+   * @noscreenshot
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setTimeout(function() { webView.location = "https://www.bing.com"; }, 1000);
+   * setTimeout(function() { webView.back() }, 2000);
    */
   WebView.prototype.back = function() { this.nativeView('goBack',this.nativeView); }
 
@@ -178,6 +196,21 @@ module.exports = (function() {
    * @method forward
    * @memberof WebView
    * @description Moves to the history forward to the next rendered page.  If no "next" rendered page is available this takes no action.
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setTimeout(function() { webView.location = "https://www.bing.com"; }, 1000);
+   * setTimeout(function() { webView.location = "https://www.reddit.com"; }, 2000);
+   * setTimeout(function() { webView.location = "https://www.slashdot.org"; }, 3000);
+   * setTimeout(function() { webView.back(); }, 4000);
+   * setTimeout(function() { webView.back(); }, 5000);
+   * setTimeout(function() { console.log(webView.location); }, 6000);
    */
   WebView.prototype.forward = function() { this.nativeView('goForward',this.nativeView); }
 
@@ -185,6 +218,16 @@ module.exports = (function() {
    * @method reload
    * @memberof WebView
    * @description Reloads the current page.
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setTimeout(function() { webView.reload(); }, 1000);
    */
   WebView.prototype.reload = function() { this.nativeView('reload',this.nativeView); }
 
@@ -192,6 +235,16 @@ module.exports = (function() {
    * @method stop
    * @memberof WebView
    * @description Stops loading the current page, if nothing is currently loading this takes no action.
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setTimeout(function() { webView.stop(); }, 1000);
    */
   WebView.prototype.stop = function() { this.loading = false; }
 
@@ -299,6 +352,16 @@ TODO:
    * @memberof WebView
    * @description Gets the progress of loading all resources (if the page is currently loading).  Note this will return
    *              -1 when the progress is indeterminate (e.g., the page is not loading or the progress could not be determined).
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setInterval(function() { console.log(webView.progress); }, 10);
    */
   Object.defineProperty(WebView.prototype, 'progress', {
     get:function() { return this.nativeView('estimatedProgress')*100; }
@@ -308,6 +371,15 @@ TODO:
    * @type {string}
    * @memberof WebView
    * @description Gets or sets the URL location of the HTML document rendered in the WebView.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * @screenshot-window {win}
    */
   Object.defineProperty(WebView.prototype, 'location', {
     get:function() { return this.nativeView('mainFrameURL')('UTF8String'); },
@@ -319,6 +391,16 @@ TODO:
    * @memberof WebView
    * @description Gets or sets the user agent string used.
    * @important There are inconsistencies on Windows which may result in the user agent not being set; getting the value is guaranteed.
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setTimeout(function() { console.log(webView.useragent); }, 2000);
    */
   Object.defineProperty(WebView.prototype, "useragent", {
     get:function() { 
@@ -360,6 +442,16 @@ TODO:
    * @memberof WebView
    * @description Gets the title of the HTML document loaded in the webview.  If nothing is loaded or is in the process of loading
    *              this will throw an error.  LIsten to the 'title' event to know when the title of the HTML docuemnt is available.
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "https://www.google.com";
+   * setTimeout(function() { console.log(webView.title); }, 4000);
    */
   Object.defineProperty(WebView.prototype, 'title', { 
     get:function() {  return this.nativeView('mainFrameTitle')('UTF8String'); }

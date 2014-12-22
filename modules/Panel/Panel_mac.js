@@ -12,11 +12,11 @@ module.exports = (function() {
    * @description A Panel is similar to a window although it should be viewed as either a utility or tool window.
    *              It differs from a regular Window in that: It uses a smaller title bar, and does not have minimize
    *              or maximize capabilities.  It uses slightly different styles than a normal window. It disappears
-   *              automatically if the application looses focus and reappears when it regains it.  Panels may also 
-   *              "Dock" their content into another window.  Panels are useful as "Tool" windows.  They can contain
-   *              a set of buttons that perhaps changes the behavior of something.  For example, in Photoshop the 
-   *              floating set of buttons to select the current action (select, bucket, fill, etc) would be a panel.
-   *              Panels inherit all of the capabilities (minus Window.state) of the regular Window class.
+   *              automatically if the application looses focus and reappears when it regains it. Panels are useful as 
+   *              "Tool" windows.  For example, in Photoshop the floating set of buttons to select the current action 
+   *              (select, bucket, fill, etc) would be a panel.
+   *              Panels inherit all of the capabilities with the exception of window state capabilities (maximize, minimize
+   *              and fullscreen).
    * @extends Window
    */
   /**

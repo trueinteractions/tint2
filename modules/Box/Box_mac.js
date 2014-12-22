@@ -55,6 +55,8 @@ module.exports = (function() {
    * box.borderRadius = 13;
    * win.appendChild(box);
    * box.left = box.right = box.top = box.bottom = 50;
+   * @screenshot-window {win}
+   * @screenshot-control {box}
    * @see Color
    */
   Object.defineProperty(Box.prototype, 'borderColor', {
@@ -78,6 +80,10 @@ module.exports = (function() {
    * var box = new Box();
    * box.borderWidth = 5; // 5 Logical pixels wide.
    * box.borderColor = 'rgba(0,0,0,0.8)'; // 80% opacity, black border color.
+   * win.appendChild(box);
+   * box.left=box.right=box.top=box.bottom=50; // 50px margin.
+   * @screenshot-window {win}
+   * @screenshot-control {box}
    * @see Color
    */
   Object.defineProperty(Box.prototype, 'borderWidth', {
@@ -103,6 +109,10 @@ module.exports = (function() {
    * box.borderColor = 'blue';
    * box.borderRadius = 10; // the curve on all corners is set to 10
    *                        // pixel radius.
+   * win.appendChild(box);
+   * box.left=box.right=box.top=box.bottom=50; // 50px margin.
+   * @screenshot-window {win}
+   * @screenshot-control {box}
    * @see Color
    */
   Object.defineProperty(Box.prototype, 'borderRadius', {
@@ -127,6 +137,10 @@ module.exports = (function() {
    * win.visible = true;
    * var box = new Box();
    * box.backgroundColor = 'blue';
+   * win.appendChild(box);
+   * box.left=box.right=box.top=box.bottom=50; // 50px margin.
+   * @screenshot-window {win}
+   * @screenshot-control {box}
    */
   Object.defineProperty(Box.prototype, 'backgroundColor', {
     get:function() { return new Color(this.nativeView('fillColor')); },

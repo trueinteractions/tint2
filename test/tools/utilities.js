@@ -246,7 +246,20 @@ if (ismac) {
       if(currentWindow == null) return;// throw new Error('There is no current window.');
       var windowNumber = currentWindow('windowNumber');
       this.takeSnapshotOfWindowNumber(windowNumber, path);
-    } 
+    }
+    ex.takeSnapshotOfWindow = function(windowObj, path) {
+      var windowNumber = windowObj.native('windowNumber');
+      this.takeSnapshotOfWindowNumber(windowNumber, path);
+    }
+    ex.takeSnapshotOfControl = function(c, path) {
+      var img = $.NSImage('alloc')('initWithData', c.nativeView('dataWithPDFInsideRect',c.nativeView('bounds')));
+      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithData',img('TIFFRepresentation'));
+      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
+      var base64String = imageData('base64EncodedStringWithOptions',0);
+      var bf = new Buffer(base64String.toString(), 'base64');
+      var fs = require('fs');
+      fs.writeFileSync(path,bf);
+    }
     ex.setupShell = function setupShell(name, cmd) {
       execAndPump("mkdir "+name+"-test", function() {
         execAndPump("cp -a -p tools/Shell.app "+name+"-test", function() {
