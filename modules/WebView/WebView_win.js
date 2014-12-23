@@ -66,6 +66,7 @@ module.exports = (function() {
     // TODO: Support events
     // redirect
     // icon
+    // new-window
 
     // If we don't have a document loaded IE will throw an error if anything
     // other than a location is set, so we'll set an intiial location to prevent this.

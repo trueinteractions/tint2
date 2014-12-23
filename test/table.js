@@ -42,6 +42,7 @@ function run($utils) {
   table.addRow();
   table.addRow();
   table.setValueAt('First Column',0,textInput);
+  table.setColumnWidth('First Column', 300);
 
   setTimeout(function() { // @{hidden}
     $utils.assert(count == 3); // @{hidden}

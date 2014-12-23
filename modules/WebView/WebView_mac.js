@@ -149,7 +149,55 @@ module.exports = (function() {
        */
       //['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { }.bind(this)],
       ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', 
-        function(self, _cmd, sender,url,seconds,date,frame) { this.fireEvent('redirect'); }.bind(this)]
+        function(self, _cmd, sender,url,seconds,date,frame) { this.fireEvent('redirect'); }.bind(this)],
+
+       /**
+        * @event new-window
+        * @memberof WebView
+        * @description When a new window is requested, this event is fired. The callback function
+        *              must return either a new WebView to use for rendering the content or can
+        *              return the current WebView to simply re-use the context. Note that these 
+        *              requests are not requests called from non-event-based javascript, meaning
+        *              this only fires when a user clicks or interacts with elements causing a new
+        *              window to be created. Note that the callback must either return null (or undefined)
+        *              or a WebView object.  Anything else is ignored.
+        * @noscreenshot
+        * @example
+        * require('Common');
+        * var win = new Window();
+        * var webView = new WebView();
+        * win.appendChild(webView);
+        * webView.left=webView.right=webView.top=webView.bottom=0;
+        * win.visible = true;
+        * webView.location = "https://www.google.com";
+        * webView.addEventListener('new-window', function() {
+        *   // Create a new window for the "new-window" event. Alternatively we could
+        *   // create a new tab or simply add another webview to the current window.
+        *   // the webview does not necessarily need to be onscreen. The webview can be
+        *   // held offscreen until the load event occurs to check its url and then dispose
+        *   // or attach it to a visible UI window/panel/etc.
+        *   var newWin = new Window();
+        *   var newWebView = new WebView();
+        *   newWin.appendChild(newWebView);
+        *   newWebView.left=newWebView.right=newWebView.top=newWebView.bottom=0;
+        *   newWin.visible = true;
+        *   return newWebView; // This is important, the request is then routed to the new 
+        *                      // webview control. Without this, the page will not be loaded.
+        * });
+        */
+       ['webView:createWebViewWithRequest:', '@@:@@', function(self, _cmd, webview, request) {
+          try {
+            var target = this.fireEvent('new-window');
+            if(target && target instanceof WebView && target.nativeView)
+              return target.nativeView;
+            else
+              return null;
+          } catch (e) {
+            console.error(e.message);
+            console.error(e.stack);
+            process.exit(1);
+          }
+       }.bind(this)]
     ]);
 
     if(NativeObjectClass && NativeObjectClass.type == '#')
@@ -171,6 +219,7 @@ module.exports = (function() {
     this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.nativeView('setShouldUpdateWhileOffscreen',$.YES);
     this.nativeView('setFrameLoadDelegate', this.nativeView);
+    this.nativeView('setUIDelegate', this.nativeView);
   }
 
   WebView.prototype = Object.create(Container.prototype);
