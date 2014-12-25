@@ -112,6 +112,10 @@ codesign -s "$1" ./build/dist/tint-$TINT_VERSION.pkg
 
 read -p "Run tools/msi.bat on Windows... "
 
+spctl --assess -vvvv ./build/dist/tint-$TINT_VERSION.pkg
+
+echo "If you do not see an accepted above, an issue with signing occured."
+
 # See if we should post these.
 # if [ "$TINT_HOST" = "" -o "$TINT_PATH" = "" -o "$TINT_USER" = ""]; then
 #	echo "Not uploading to server, could not find destination information."

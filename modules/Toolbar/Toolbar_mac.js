@@ -14,6 +14,27 @@ module.exports = (function() {
    * @new 
    * @memberof Toolbar
    * @description Creates a new toolbar.
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var urlLocation = new TextInput();
+   * var toolbar = new Toolbar();
+   * var backButton = new Button();
+   * var forwardButton = new Button();
+   * 
+   * backButton.image = 'back'; // named system icon
+   * forwardButton.image = 'forward'; // named system icon
+   *
+   * // Use 'space' for a OS-determined variable length space between items.
+   * toolbar.appendChild([backButton, forwardButton, 'space', urlLocation, 'space']);
+   * win.toolbar = toolbar;
+   * 
+   * urlLocation.alignment = 'center';
+   * urlLocation.linewrap = false;
+   * urlLocation.scrollable = true;
+   * urlLocation.value = 'A text input field';
+   * @screenshot-window {win}
    */
   function Toolbar() {
     var $ = process.bridge.objc;

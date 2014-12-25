@@ -92,18 +92,8 @@ module.exports = (function() {
     // anyway as long as the style isn't set to "None"
     this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.White);
 
-    // We're happy to draw or own client region, tell DWM to not bother.
-    //var margin = new $$.win32.structs.MARGINS;
-    //margin.cxLeftWidth = -1;
-    //margin.cxRightWidth = -1;
-    //margin.cyTopHeight = -1;
-    //margin.cyBottomHeight = -1;
-    //$$.win32.dwmapi.DwmExtendFrameIntoClientArea(this.private.hwnd.pointer.rawpointer,margin);
-
     // Lets just set our background to white 
     this.backgroundColor = "rgba(255,255,255,1)";
-
-    //application.windows.push(this);
   }
 
   Window.prototype = Object.create(Container.prototype);
@@ -195,7 +185,6 @@ module.exports = (function() {
     }
   });
 
-  //TODO: Implement me
   Object.defineProperty(Window.prototype, 'canBeFullscreen', {
     get:function() { return this.private.canBeFullscreen; },
     set:function(e) { this.private.canBeFullscreen = e ? true : false; }
@@ -297,7 +286,7 @@ module.exports = (function() {
     set:function(e) { /* TODO ? */ }
   });
 
-  // Override from Control.
+  // Override Control's definition of visible to a window context.
   Object.defineProperty(Window.prototype, 'visible', {
     get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
     set:function(e) {
@@ -388,7 +377,6 @@ module.exports = (function() {
     set:function(e) {
       if(e == 'auto') {
         this.private.background = 'auto';
-        //this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
       } else {
         this.private.background = e;
@@ -404,15 +392,14 @@ module.exports = (function() {
   });
 
   Window.prototype.destroy = function() {
-    //application.windows.forEach(function(item,ndx,arr) { 
-    //  if(item == this)
-    //    delete arr[ndx];
-    //});
     this.native.Close();
   }
 
   Window.prototype.bringToFront = function() { 
     this.native.Activate();
+    this.native.Topmost = true;
+    this.native.Topmost = false;
+    this.native.Focus();
   }
 
   return Window;

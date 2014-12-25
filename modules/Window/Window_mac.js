@@ -716,18 +716,7 @@ module.exports = (function() {
    *  var win = new Window();
    *  win.visible = true; // Show the window.
    *  win.backgroundColor = 'red'; // make the background red.
-   *  win.x = 0; // move to 0 position.
-   *  var win2 = new Window();
-   *  win2.visible = true; // Show the window.
-   *  win2.backgroundColor = 'transparent'; // change the background to be transluent 
-   *                                       // with the frame or windows behind it showing.
-   *  var win3 = new Window();
-   *  win3.visible = true; // Show the window.
-   *  win3.backgroundColor = 'rgba(0,255,0,0.5)'; // Green with half translucency.
-   *  win3.x = 750;
    * @screenshot-window {win}
-   * @screenshot-window {win3}
-   * @screenshot-screen
    */
   Object.defineProperty(Window.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
