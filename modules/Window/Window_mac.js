@@ -1,6 +1,6 @@
 module.exports = (function() {
   var Container = require('Container');
-  var utilities = require('Utilities');
+  var util = require('Utilities');
   var Delegate = require('Bridge');
   var Color = require('Color');
   var $ = process.bridge.objc;
@@ -166,8 +166,8 @@ module.exports = (function() {
    *              windows. By default this is true.
    * @default true
    */
-  Object.defineProperty(Window.prototype, 'frame', {
-    get:function() { 
+  util.def(Window.prototype, 'frame', 
+    function() { 
       var os = require('os');
       var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
       if(version > 13)
@@ -179,7 +179,7 @@ module.exports = (function() {
       else
         return this.minimizeButton || this.maximizeButton || this.closeButton || this.resizable;
     },
-    set:function(e) {
+    function(e) {
       this.minimizeButton = e;
       this.maximizeButton = e;
       this.closeButton = e;
@@ -191,7 +191,7 @@ module.exports = (function() {
         else this.native('setStyleMask', 0);
       }
     }
-  });
+  );
 
   /**
    * @member textured
@@ -217,9 +217,9 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @screenshot-window {win2}
    */
-  Object.defineProperty(Window.prototype, 'textured', {
-    get:function() { return this.native('styleMask') & $.NSTexturedBackgroundWindowMask; },
-    set:function(e) { 
+  util.def(Window.prototype, 'textured',
+    function() { return this.native('styleMask') & $.NSTexturedBackgroundWindowMask; },
+    function(e) { 
       if(e) this.native('setStyleMask', this.native('styleMask') | $.NSTexturedBackgroundWindowMask);
       else this.native('setStyleMask', this.native('styleMask') & ~$.NSTexturedBackgroundWindowMask);
       setTimeout(function() {
@@ -228,12 +228,12 @@ module.exports = (function() {
         this.native('flushWindow');
       }.bind(this),10);
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'shadow', {
-    get:function() { return this.native('hasShadow') == $.YES ? true : false; },
-    set:function(e) { this.native('setHasShadow', e ? $.YES : $.NO); }
-  });
+  util.def(Window.prototype, 'shadow', 
+    function() { return this.native('hasShadow') == $.YES ? true : false; },
+    function(e) { this.native('setHasShadow', e ? $.YES : $.NO); }
+  );
 
   /**
    * @member menu
@@ -244,13 +244,13 @@ module.exports = (function() {
    *              the menu is rendered at the top of the window as part of its frame.
    * @see Menu
    */
-  Object.defineProperty(Window.prototype, 'menu', {
-    get:function() { return this.private.menu; },
-    set:function(e) {
+  util.def(Window.prototype, 'menu',
+    function() { return this.private.menu; },
+    function(e) {
       this.private.menu = e;
       global.application.native('setMainMenu',this.private.menu.native);
     }
-  });
+  );
 
   /**
    * @member toolbar
@@ -283,9 +283,9 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @see Toolbar
    */
-  Object.defineProperty(Window.prototype, 'toolbar', {
-    get:function() { return this.private.toolbar; },
-    set:function(e) {
+  util.def(Window.prototype, 'toolbar',
+    function() { return this.private.toolbar; },
+    function(e) {
       if(this.frame == false && e) {
         if(application.warn) console.warn('Cannot add a toolbar to a window that has Window.frame = false;');
         return;
@@ -300,7 +300,7 @@ module.exports = (function() {
       }
       
     }
-  });
+  );
 
   /**
    * @member canBeFullscreen
@@ -322,9 +322,9 @@ module.exports = (function() {
    *  win.canBeFullscreen = true;  // allow the window to be fullscreen, renable any buttons.
    *  win.state = "fullscreen";    // the window will now be fullscreen.
    */
-  Object.defineProperty(Window.prototype, 'canBeFullscreen', {
-    get:function() { return this.native('collectionBehavior') && $.NSWindowCollectionBehaviorFullScreenPrimary ? true : false; },
-    set:function(e) {
+  util.def(Window.prototype, 'canBeFullscreen',
+    function() { return this.native('collectionBehavior') && $.NSWindowCollectionBehaviorFullScreenPrimary ? true : false; },
+    function(e) {
       e = e ? true : false;
       if(e) this.native('setCollectionBehavior', this.native('collectionBehavior') | $.NSWindowCollectionBehaviorFullScreenPrimary);
       else this.native('setCollectionBehavior', this.native('collectionBehavior') ^ $.NSWindowCollectionBehaviorFullScreenPrimary);
@@ -333,7 +333,7 @@ module.exports = (function() {
       if(this.native('standardWindowButton',$.NSWindowFullScreenButton))
         this.native('standardWindowButton',$.NSWindowFullScreenButton)('setHidden',!e);
     }
-  });
+  );
 
   /**
    * @member state
@@ -357,14 +357,14 @@ module.exports = (function() {
    *                               //   this enables any native buttons.
    *  win.state = "fullscreen";    // the window will now be fullscreen.
    */
-  Object.defineProperty(Window.prototype, 'state', {
-    get:function() { 
+  util.def(Window.prototype, 'state',
+    function() { 
       if(this.private.fullscreen) return "fullscreen";
       else if(this.native('isZoomed')) return "maximized";
       else if(this.native('isMiniaturized')) return "minimized";
       else return "normal";
     },
-    set:function(e) { 
+    function(e) { 
       if(e == 'maximized' || e == 'normal') {
         if(this.private.fullscreen) {
           this.native('toggleFullScreen',this.native);
@@ -385,7 +385,7 @@ module.exports = (function() {
         }
       }
     }
-  });
+  );
 
   /**
    * @member title
@@ -402,7 +402,7 @@ module.exports = (function() {
    *  win.title = "hello";
    * @screenshot-window {win}
    */
-  (utilities.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
+  (util.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
 
   /**
    * @member y
@@ -419,16 +419,16 @@ module.exports = (function() {
    *  win.y = 0; // move the window to the top area of the screen.
    * @screenshot-screen
    */
-  Object.defineProperty(Window.prototype, 'y', {
-    get:function() { 
+  util.def(Window.prototype, 'y',
+    function() { 
       var height = $.NSScreen('mainScreen')('frame').size.height;
       var rect = this.native('frame');
       return  (height - rect.origin.y) - rect.size.height;
     },
-    set:function(e) {
+    function(e) {
       if(e == 'center') this.native('center');
       else {
-        e = utilities.parseUnits(e);
+        e = util.parseUnits(e);
         var height = $.NSScreen('mainScreen')('frame').size.height;
         var rect = this.native('frame');
         rect.origin.y = (height - e) - rect.size.height;
@@ -437,7 +437,7 @@ module.exports = (function() {
                     'animate', this.preferences.animateOnPositionChange ? $.YES : $.NO);
       }
     }
-  });
+  );
 
   /**
    * @member x
@@ -462,12 +462,12 @@ module.exports = (function() {
    *  }, 16);                   // execute this every 16 milliseconds.
    * @screenshot-screen
    */
-  Object.defineProperty(Window.prototype, 'x', {
-    get:function() { return this.native('frame').origin.x; },
-    set:function(e) {
+  util.def(Window.prototype, 'x',
+    function() { return this.native('frame').origin.x; },
+    function(e) {
       if(e == 'center') this.native('center');
       else {
-        e = utilities.parseUnits(e);
+        e = util.parseUnits(e);
         var rect = this.native('frame');
         rect.origin.x = e;
         this.native('setFrame', rect, 
@@ -475,7 +475,7 @@ module.exports = (function() {
                     'animate', this.preferences.animateOnPositionChange ? $.YES : $.NO);
       }
     }
-  });
+  );
 
   /**
    * @member width
@@ -492,17 +492,17 @@ module.exports = (function() {
    *  win.visible = true; // Show the window.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Window.prototype, 'width', {
-    get:function() { return this.native('frame').size.width; },
-    set:function(e) {
-        e = utilities.parseUnits(e);
+  util.def(Window.prototype, 'width',
+    function() { return this.native('frame').size.width; },
+    function(e) {
+        e = util.parseUnits(e);
         var rect = this.native('frame');
         rect.size.width = e;
         this.native('setFrame', rect, 
                     'display', $.YES, 
                     'animate', this.preferences.animateOnSizeChange ? $.YES : $.NO);
     }
-  });
+  );
 
   /**
    * @member height
@@ -519,33 +519,33 @@ module.exports = (function() {
    *  win.visible = true; // Show the window.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Window.prototype, 'height', {
-    get:function() { return this.native('frame').size.height; },
-    set:function(e) {
-        e = utilities.parseUnits(e);
+  util.def(Window.prototype, 'height',
+    function() { return this.native('frame').size.height; },
+    function(e) {
+        e = util.parseUnits(e);
         var rect = this.native('frame');
         rect.size.height = e;
         this.native('setFrame', rect, 
                     'display', $.YES, 
                     'animate', this.preferences.animateOnSizeChange ? $.YES : $.NO);
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'titleVisible', {
-    get:function() { 
+  util.def(Window.prototype, 'titleVisible',
+    function() { 
       var os = require('os');
       var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
       if(version < 14)
         return true;
       return this.native('titleVisibility') == $.NSWindowTitleHidden ? false : true; 
     },
-    set:function(e) { 
+    function(e) { 
       var os = require('os');
       var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
       if(version < 14) return;
       this.native('setTitleVisibility', e ? $.NSWindowTitleVisible : $.NSWindowTitleHidden ); 
     }
-  });
+  );
 
   /**
    * @member visible
@@ -563,13 +563,13 @@ module.exports = (function() {
    *  win.visible = true; // Show the window.
    *  win.vsibile = false; // Hide the window.
    */
-  Object.defineProperty(Window.prototype, 'visible', {
-    get:function() { return this.native('isVisible') ? true : false; },
-    set:function(e) {
+  util.def(Window.prototype, 'visible',
+    function() { return this.native('isVisible') ? true : false; },
+    function(e) {
       if(e) this.native('makeKeyAndOrderFront',this.native);
       else this.native('orderOut',this.native);
     }
-  });
+  );
 
   /**
    * @member maximizeButton
@@ -589,17 +589,17 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
   // only works on Window, not Panel derived classes (NSPanel doesnt support standardWindowButton)
-  Object.defineProperty(Window.prototype, 'maximizeButton', {
-    get:function() { 
+  util.def(Window.prototype, 'maximizeButton',
+    function() { 
       if(this.native('standardWindowButton',$.NSWindowZoomButton))
         return this.native('standardWindowButton',$.NSWindowZoomButton)('isHidden'); 
       else return true;
     },
-    set:function(e) { 
+    function(e) { 
       if(this.native('standardWindowButton',$.NSWindowZoomButton))
         this.native('standardWindowButton',$.NSWindowZoomButton)('setHidden',!e); 
     }
-  });
+  );
 
   /**
    * @member minimizeButton
@@ -619,17 +619,17 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
   // only works on Window, not Panel derived classes
-  Object.defineProperty(Window.prototype, 'minimizeButton', {
-    get:function() {
+  util.def(Window.prototype, 'minimizeButton',
+    function() {
       if(this.native('standardWindowButton',$.NSWindowMiniaturizeButton))
         return this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('isHidden'); 
       else return true;
     },
-    set:function(e) { 
+    function(e) { 
       if(this.native('standardWindowButton',$.NSWindowMiniaturizeButton))
         this.native('standardWindowButton',$.NSWindowMiniaturizeButton)('setHidden',!e); 
     }
-  });
+  );
 
   /**
    * @member closeButton
@@ -648,16 +648,16 @@ module.exports = (function() {
    *                           // the close button is grayed out or disabled.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Window.prototype, 'closeButton', {
-    get:function() { 
+  util.def(Window.prototype, 'closeButton',
+    function() { 
       if(this.native('standardWindowButton',$.NSWindowCloseButton))
         return this.native('standardWindowButton',$.NSWindowCloseButton)('isHidden'); 
     },
-    set:function(e) { 
+    function(e) { 
       if(this.native('standardWindowButton',$.NSWindowCloseButton))
         this.native('standardWindowButton',$.NSWindowCloseButton)('setHidden',!e); 
     }
-  });
+  );
 
   // Deprecated, retired in Mavericks.
   //Object.defineProperty(Window.prototype, 'fullscreenButton', {
@@ -687,9 +687,9 @@ module.exports = (function() {
    *                        // width/height properties.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Window.prototype, 'resizable', {
-    get:function() { return this.native('styleMask') & $.NSResizableWindowMask; },
-    set:function(e) {
+  util.def(Window.prototype, 'resizable',
+    function() { return this.native('styleMask') & $.NSResizableWindowMask; },
+    function(e) {
       if (e) {
         if(this.native('standardWindowButton',$.NSWindowZoomButton))
           this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
@@ -700,7 +700,7 @@ module.exports = (function() {
         this.native('setStyleMask',this.native('styleMask') & ~$.NSResizableWindowMask);
       }
     }
-  });
+  );
 
   /**
    * @member backgroundColor
@@ -718,9 +718,9 @@ module.exports = (function() {
    *  win.backgroundColor = 'red'; // make the background red.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Window.prototype, 'backgroundColor', {
-    get:function() { return this.private.background; },
-    set:function(e) {
+  util.def(Window.prototype, 'backgroundColor',
+    function() { return this.private.background; },
+    function(e) {
       if(e == 'auto') {
         this.private.background = 'auto';
         this.native('setOpaque', $.YES);
@@ -738,7 +738,7 @@ module.exports = (function() {
         this.native('setAlphaValue', this.private.backgroundObj.alpha);
       }
     }
-  });
+  );
 
   /**
    * @member alwaysOnTop
@@ -758,13 +758,13 @@ module.exports = (function() {
    * win.visible = true; // make sure the window is shown.
    * win.alwaysOnTop = true; // the window will now remain on top of all others.
    */
-  Object.defineProperty(Window.prototype, "alwaysOnTop", {
-    get:function() { return this.native('level') == $.NSFloatingWindowLevel ? true : false; },
-    set:function(e) { 
+  util.def(Window.prototype, "alwaysOnTop",
+    function() { return this.native('level') == $.NSFloatingWindowLevel ? true : false; },
+    function(e) { 
       if(e) this.native('setLevel', $.NSFloatingWindowLevel); 
       else this.native('setLevel', $.NSNormalWindowLevel); 
     }
-  });
+  );
 
   /**
    * @method destroy
@@ -778,13 +778,7 @@ module.exports = (function() {
    * win.visible = true; // make sure the window is shown.
    * win.destroy(); // the window is no longer visible, AND the memory is released.
    */
-  Window.prototype.destroy = function() {
-    //application.windows.forEach(function(item,ndx,arr) { 
-    //  if(item == this)
-    //    delete arr[ndx];
-    //});
-    this.native('close');
-  }
+  Window.prototype.destroy = function() { this.native('close'); }
 
   /**
    * @method bringToFront

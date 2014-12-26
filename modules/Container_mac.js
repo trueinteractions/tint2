@@ -1,8 +1,8 @@
 module.exports = (function() {
   var Control = require('Control');
-  var utilities = require('Utilities');
+  var util = require('Utilities');
   var $ = process.bridge.objc;
-  var parseValue = utilities.parseUnits;
+  var parseValue = util.parseUnits;
 
   /**
    * @class Container
@@ -29,7 +29,7 @@ module.exports = (function() {
   Container.prototype = Object.create(Control.prototype);
   Container.prototype.constructor = Container;
 
-  Object.defineProperty(Container.prototype, 'children', { get:function() { return this.private.children; } });
+  util.def(Container.prototype, 'children', function() { return this.private.children; });
 
   /**
    * @method appendChild

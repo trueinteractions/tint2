@@ -3,7 +3,7 @@ module.exports = (function() {
   console.assert(process.bridge.objc, 'Failure to establish objective-c bridge.');
   
   var $ = process.bridge.objc;
-  var utils = require('Utilities_base');
+  var util = require('Utilities');
 
   function addTrackingArea() {
     var bounds = this.nativeView('bounds');
@@ -94,12 +94,16 @@ module.exports = (function() {
       ]);
     }
 
-    this.private = {
-      events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
-      user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      states:{}
-    };
+    Object.defineProperty(this, 'private', {
+      configurable:false,
+      enumerable:false,
+      value:{
+        events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
+        user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        states:{}
+      }
+    });
 
     this.nativeClass = NativeObjectClass;
     this.native = this.nativeView = null;
@@ -136,11 +140,10 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @screenshot-control {dateWell}
    */
-  Object.defineProperty(Control.prototype, 'alpha', {
-    configurable:true,
-    get:function() { return this.nativeView('alphaValue'); },
-    set:function(e) { return this.nativeView('setAlphaValue', e); }
-  });
+  util.def(Control.prototype, 'alpha', 
+    function() { return this.nativeView('alphaValue'); },
+    function(e) { return this.nativeView('setAlphaValue', e); }
+  );
 
   /**
    * @member visible
@@ -160,11 +163,10 @@ module.exports = (function() {
    *  dateWell.visible = false; // Make our date picker hidden.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Control.prototype, 'visible', {
-    configurable:true,
-    get:function() { return !this.nativeView('isHidden'); },
-    set:function(e) { return this.nativeView('setHidden', !e); }
-  });
+  util.def(Control.prototype, 'visible',
+    function() { return !this.nativeView('isHidden'); },
+    function(e) { return this.nativeView('setHidden', !e); }
+  );
 
   // Helper function to convert OSX coordinate spaces to 
   // top-left.
@@ -194,8 +196,8 @@ module.exports = (function() {
    *  console.log('Windows content area is '+bounds.width+' wide.');
    *  console.log('Windows content area is '+bounds.height+' tall.');
    */
-  Object.defineProperty(Control.prototype,'boundsOnScreen', {
-    get:function() {
+  util.def(Control.prototype, 'boundsOnScreen',
+    function() {
       if(!this.nativeView('superview')) return null;
       var b = this.nativeView('window')('convertRectToScreen',this.nativeView('convertRect',this.nativeView('bounds'),'toView',null));
       var bnds = convY(b,$.NSScreen('mainScreen')('frame'));
@@ -209,7 +211,7 @@ module.exports = (function() {
         height:Math.round(bnds.size.height)
       };
     }
-  });
+  );
 
   /**
    * @member boundsOnWindow
@@ -245,8 +247,8 @@ module.exports = (function() {
    *  console.log('The button is '+bounds.width+' wide.');
    *  console.log('The button is '+bounds.height+' tall.');
    */
-  Object.defineProperty(Control.prototype,'boundsOnWindow', {
-    get:function() {
+  util.def(Control.prototype, 'boundsOnWindow',
+    function() {
       if(!this.nativeView('superview')) return null;
       var bnds = convY(this.nativeView('frame'), this.nativeView('window')('frame'));
       var offsetY = 0;
@@ -259,7 +261,7 @@ module.exports = (function() {
         height:Math.round(bnds.size.height)
       };
     }
-  });
+  );
 
   /**
    * @member bounds
@@ -286,8 +288,8 @@ module.exports = (function() {
    *  console.log('Button is '+bounds.width+' wide.');
    *  console.log('Button is '+bounds.height+' tall.');
    */
-  Object.defineProperty(Control.prototype,'bounds',{
-    get:function() {
+  util.def(Control.prototype, 'bounds',
+    function() {
       if(!this.nativeView('superview')) return null;
       var bnds = convY(this.nativeView('frame'), this.nativeView('superview')('frame'));
       var offsetY = 0;
@@ -301,7 +303,7 @@ module.exports = (function() {
         height:Math.round(bnds.size.height)
       };
     }
-  });
+  );
 
   // TODO? private, move as a function in closure?
   Control.prototype.fireEvent = function(event, args) {
@@ -466,7 +468,7 @@ module.exports = (function() {
    * win.appendChild(buttonThird);
    * @screenshot-window {win}
    */
-  utils.createLayoutProperty(Control.prototype, 'top', 'top', utils.identity, 'top', utils.identity, ['bottom','height']);
+  util.createLayoutProperty(Control.prototype, 'top', 'top', util.identity, 'top', util.identity, ['bottom','height']);
 
   /**
    * @member bottom
@@ -505,7 +507,7 @@ module.exports = (function() {
    * win.appendChild(buttonThird);
    * @screenshot-window {win}
    */
-  utils.createLayoutProperty(Control.prototype, 'bottom', 'bottom', utils.negate, 'bottom', utils.negate, ['top','height']);
+  util.createLayoutProperty(Control.prototype, 'bottom', 'bottom', util.negate, 'bottom', util.negate, ['top','height']);
 
   /**
    * @member left
@@ -543,7 +545,7 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
 
-  utils.createLayoutProperty(Control.prototype, 'left', 'left', utils.identity, 'left', utils.identity, ['right','width']);
+  util.createLayoutProperty(Control.prototype, 'left', 'left', util.identity, 'left', util.identity, ['right','width']);
   /**
    * @member right
    * @type {various}
@@ -580,7 +582,7 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
 
-  utils.createLayoutProperty(Control.prototype, 'right', 'right', utils.identity, 'right', utils.negate, ['left','width']);
+  util.createLayoutProperty(Control.prototype, 'right', 'right', util.identity, 'right', util.negate, ['left','width']);
   /**
    * @member height
    * @type {various}
@@ -600,7 +602,7 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
 
-  utils.createLayoutProperty(Control.prototype, 'height', 'height', utils.identity, null, utils.identity, ['top','bottom']);
+  util.createLayoutProperty(Control.prototype, 'height', 'height', util.identity, null, util.identity, ['top','bottom']);
   /**
    * @member width
    * @type {various}
@@ -639,7 +641,7 @@ module.exports = (function() {
    * win.appendChild(buttonThird);
    * @screenshot-window {win}
    */
-  utils.createLayoutProperty(Control.prototype, 'width', 'width', utils.identity, null, utils.identity, ['left','right']);
+  util.createLayoutProperty(Control.prototype, 'width', 'width', util.identity, null, util.identity, ['left','right']);
   /**
    * @member middle
    * @type {various}
@@ -664,7 +666,7 @@ module.exports = (function() {
    * win.appendChild(buttonNormal);
    * @screenshot-window {win}
    */
-  utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
+  util.createLayoutProperty(Control.prototype, 'middle', 'middle', util.identity, 'middle', util.identity, null);
   /**
    * @member center
    * @type {various}
@@ -689,7 +691,7 @@ module.exports = (function() {
    * win.appendChild(buttonNormal);
    * @screenshot-window {win}
    */
-  utils.createLayoutProperty(Control.prototype, 'center', 'center', utils.identity, 'center', utils.identity, null);
+  util.createLayoutProperty(Control.prototype, 'center', 'center', util.identity, 'center', util.identity, null);
 
   return Control;
 })();

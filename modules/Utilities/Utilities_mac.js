@@ -226,19 +226,18 @@ module.exports = (function() {
     return wrap;
   }
 
-  return {
-    //attachSizeProperties:attachSizeProperties,
-    getImageFromString:getImageFromString,
-    parseUnits:baseUtilities.parseUnits,
-    parseColor:baseUtilities.parseColor,
-    nsDictionaryToObject:nsDictionaryToObject,
-    nsArrayToArray:nsArrayToArray,
-    makePropertyBoolType:makePropertyBoolType,
-    makePropertyStringType:makePropertyStringType,
-    makeNSImage:makeNSImage,
-    errorwrap:errorwrap,
-    arrayToNSArray:arrayToNSArray,
-    makeURIFromNSImage:makeURIFromNSImage
-  }
+  baseUtilities.getImageFromString = getImageFromString;
+  baseUtilities.parseUnits = baseUtilities.parseUnits;
+  baseUtilities.parseColor = baseUtilities.parseColor;
+  baseUtilities.nsDictionaryToObject = nsDictionaryToObject;
+  baseUtilities.nsArrayToArray = nsArrayToArray;
+  baseUtilities.makePropertyBoolType = makePropertyBoolType;
+  baseUtilities.makePropertyStringType = makePropertyStringType;
+  baseUtilities.makeNSImage = makeNSImage;
+  baseUtilities.errorwrap = errorwrap;
+  baseUtilities.arrayToNSArray = arrayToNSArray;
+  baseUtilities.makeURIFromNSImage = makeURIFromNSImage;
+  
+  return baseUtilities;
 })();
 

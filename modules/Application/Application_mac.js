@@ -1,7 +1,8 @@
 (function() {
   if(global.application) return global.application;
   require('Bridge');
-  var utilities = require('Utilities');
+  var $ = process.bridge.objc;
+  var util = require('Utilities');
   process.bridge.objc.import('Foundation',0);
   process.bridge.objc.import('Cocoa',0);
   process.bridge.objc.import('AppKit',0);
@@ -21,7 +22,6 @@
   // Register our font factory, this is a "boot" step for any app using fonts.
   require('FontInternals');
 
-  var $ = process.bridge.objc;
 
   /**
    * @class Application
@@ -57,7 +57,9 @@
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
     $app('setDelegate',delegate);
-    this.private = {};
+
+    Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
+
     function fireEvent(event, args) {
       if(events[event])
         (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
@@ -104,9 +106,7 @@
      *              or is being ran as a script.
      * @see Window
      */
-    Object.defineProperty(this, 'packaged', {
-      get:function() { return process.packaged; }
-    });
+    util.def(this, 'packaged', function() { return process.packaged; });
 
     /**
      * @method resource
@@ -151,32 +151,27 @@
      *              manager, or when the application is shown.  Note that the packaged
      *              application name should match this name.
      */
-    Object.defineProperty(this, 'name', {
-      get:function() { 
+    util.def(this, 'name', function() { 
         if(!name || name == "") return process.cwd();
         return name; 
       },
-      set:function(e) { 
+      function(e) { 
         name = e;
         $.NSProcessInfo('processInfo')('setProcessName',$(name));
         setTimeout(function() { $.NSProcessInfo('processInfo')('setProcessName',$(name)); },1000);
       }
-    });
+    );
 
     // Unsupported on Windows, TOOD: Remove or figure out a way to support this on Win?
-    Object.defineProperty(this, 'badge', {
-      get:function() { return badgeText; },
-      set:function(e) { 
+    util.def(this, 'badge', function() { return badgeText; },
+      function(e) { 
         badgeText = e;
         $app('dockTile')('setBadgeLabel',$(badgeText.toString()));
       }
-    });
+    );
 
     // Unsupported on Windows, TOOD: Remove or figure out a way to support this on Win?
-    Object.defineProperty(this, 'dockmenu', {
-      get:function() { return dockmenu; },
-      set:function(e) { dockmenu = e; }
-    });
+    util.def(this, 'dockmenu', function() { return dockmenu; }, function(e) { dockmenu = e; });
     
     /**
      * @member icon
@@ -188,14 +183,13 @@
      *              on the file system or application resource (For best results use 512x512 
      *              PNG image).
      */
-    Object.defineProperty(this, 'icon', {
-      get:function() { return icon; },
-      set:function(e) {
+    util.def(this, 'icon', function() { return icon; },
+      function(e) {
         icon = e;
-        e = utilities.makeNSImage(e);
+        e = util.makeNSImage(e);
         if(e) $app('setApplicationIconImage', e);
       }
-    });
+    );
 
     /**
      * @member exitAfterWindowsClose
@@ -208,13 +202,13 @@
      * @default true
      * @see Window
      */
-    Object.defineProperty(this, 'exitAfterWindowsClose', {
-      get:function() { return terminateWhenLastWindowClosed == $.YES ? true : false; },
-      set:function(e) { terminateWhenLastWindowClosed = e ? $.YES : $.NO; }
-    });
+    util.def(this, 'exitAfterWindowsClose',
+      function() { return terminateWhenLastWindowClosed == $.YES ? true : false; },
+      function(e) { terminateWhenLastWindowClosed = e ? $.YES : $.NO; }
+    );
 
     // Get access to the native NSApplication.
-    Object.defineProperty(this, 'native', { get:function() { return $app; } });
+    util.def(this, 'native', function() { return $app; });
 
     this.hideAllOtherApplications = function() { $app('hideOtherApplications', $app); }
     this.unhideAllOtherApplications = function() { $app('unhideAllApplications', $app); }
@@ -228,10 +222,10 @@
      *              may not be hidden, such as modal dialogs, or indicator icons in the taskbar.
      * @see Window
      */
-    Object.defineProperty(this, 'visible', {
-      get:function() { return $app('isHidden') == $.NO ? true : false; },
-      set:function(e) { if(e) $app('unhide',$app); else $app('hide', $app); }
-    });
+    util.def(this, 'visible',
+      function() { return $app('isHidden') == $.NO ? true : false; },
+      function(e) { if(e) $app('unhide',$app); else $app('hide', $app); }
+    );
 
     /**
      * @method attention

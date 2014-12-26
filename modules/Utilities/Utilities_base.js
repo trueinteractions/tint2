@@ -1,5 +1,14 @@
 module.exports = (function() {
-    
+
+    function defineProperty(target, name, getter, setter) {
+        Object.defineProperty(target, name, {
+            configurable:true,
+            enumerable:true,
+            get:getter,
+            set:setter
+        });
+    }
+
     // Layout Common Elements
 
     function parseUnits(e) {
@@ -1840,6 +1849,7 @@ module.exports = (function() {
     identity:identity,
     negate:negate,
     inverse:inverse,
+    def:defineProperty,
 
     rgb2hsl: rgb2hsl,
     rgb2hsv: rgb2hsv,

@@ -1,6 +1,6 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
-  var utilities = require('Utilities');
+  var util = require('Utilities');
   var Container = require('Container');
   
   if(!$.TintWebKitResponseDelegate) {
@@ -11,17 +11,17 @@ module.exports = (function() {
     // strings can be passed back-forth. For now, only post message is used.
     var TintWebKitResponseDelegate = $.NSObject.extend('TintWebKitResponseDelegate');
     TintWebKitResponseDelegate.addMethod('initWithJavascriptObject:', ['@',[TintWebKitResponseDelegate,$.selector,'@']], 
-      utilities.errorwrap(function(self, cmd, id) {
+      util.errorwrap(function(self, cmd, id) {
         self.callback = process.bridge.objc.delegates[id.toString()];
         process.bridge.objc.delegates[id.toString()] = null;
         return self;
     }));
     TintWebKitResponseDelegate.addClassMethod('webScriptNameForSelector:','@@::', 
-      utilities.errorwrap(function(self,_cmd,sel) { 
+      util.errorwrap(function(self,_cmd,sel) { 
         return $("postMessage");
     }));
     TintWebKitResponseDelegate.addClassMethod('isSelectorExcludedFromWebScript:','B@::', 
-      utilities.errorwrap(function(self,_cmd,sel) { 
+      util.errorwrap(function(self,_cmd,sel) { 
         if(sel == "postMessage") return $.NO;
         else return $.YES
     }));
@@ -32,7 +32,7 @@ module.exports = (function() {
      *              passed into the callback provided as the first argument.
      */
     TintWebKitResponseDelegate.addMethod('postMessage','v@:@',
-        utilities.errorwrap(function(self, cmd, message) { self.callback.fireEvent('message', [message.toString()]); }));
+        util.errorwrap(function(self, cmd, message) { self.callback.fireEvent('message', [message.toString()]); }));
     TintWebKitResponseDelegate.register();
 
   }
@@ -355,14 +355,14 @@ TODO:
    * @description Gets the URL of the icon resource for the HTML page.  Note if this is not available an error will occur.
    *              Listen to the 'icon' event to know when an icon is available and its safe to access.
    */
-  Object.defineProperty(WebView.prototype, 'icon', {
-    get:function() {
+  util.def(WebView.prototype, 'icon', 
+    function() {
       var ico = this.nativeView('mainFrameIcon');
-      if(ico) return utilities.makeURIFromNSImage(ico);
+      if(ico) return util.makeURIFromNSImage(ico);
       return null;
     }
-  })
-
+  );
+/*
   Object.defineProperty(WebView.prototype, 'allowAnimatedImages', {
     get:function() { return this.private.preferences('allowsAnimatedImages') == $.YES ? true : false; },
     set:function(e) { this.private.preferences('setAllowsAnimatedImages', e ? $.YES : $.NO); }
@@ -388,13 +388,12 @@ TODO:
     set:function(e) { this.private.preferences('setPlugInsEnabled', e ? $.YES : $.NO); }
   });
 
-  // Doesnot work on OSX, not supported on Win, commenting out.
-  //Object.defineProperty(WebView.prototype, 'privateBrowsing', {
-  //  get:function() { return this.private.preferences('privateBrowsingEnabled') == $.YES ? true : false; },
-  //  set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', (e ? $.YES : $.NO)); }
-  //});
+  Object.defineProperty(WebView.prototype, 'privateBrowsing', {
+    get:function() { return this.private.preferences('privateBrowsingEnabled') == $.YES ? true : false; },
+    set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', (e ? $.YES : $.NO)); }
+  });
+*/
 
-  // Returns -1 for indeterminate
   /**
    * @member progress
    * @type {number}
@@ -412,9 +411,9 @@ TODO:
    * webView.location = "https://www.google.com";
    * setInterval(function() { console.log(webView.progress); }, 10);
    */
-  Object.defineProperty(WebView.prototype, 'progress', {
-    get:function() { return this.nativeView('estimatedProgress')*100; }
-  });
+  util.def(WebView.prototype, 'progress', 
+    function() { return this.nativeView('estimatedProgress')*100; }
+  );
   /**
    * @member location
    * @type {string}
@@ -430,10 +429,10 @@ TODO:
    * webView.location = "https://www.google.com";
    * @screenshot-window {win}
    */
-  Object.defineProperty(WebView.prototype, 'location', {
-    get:function() { return this.nativeView('mainFrameURL')('UTF8String'); },
-    set:function(url) { this.nativeView('setMainFrameURL',$(url)); }
-  });
+  util.def(WebView.prototype, 'location',
+    function() { return this.nativeView('mainFrameURL')('UTF8String'); },
+    function(url) { this.nativeView('setMainFrameURL',$(url)); }
+  );
   /**
    * @member useragent
    * @type {string}
@@ -451,15 +450,15 @@ TODO:
    * webView.location = "https://www.google.com";
    * setTimeout(function() { console.log(webView.useragent); }, 2000);
    */
-  Object.defineProperty(WebView.prototype, "useragent", {
-    get:function() { 
+  util.def(WebView.prototype, "useragent",
+    function() { 
       var userAgent = this.nativeView('customUserAgent');
       if(!userAgent)
         userAgent = this.nativeView('userAgentForURL', this.nativeView('mainFrameURL'))
       return userAgent;
     },
-    set:function(e) { this.nativeView('setCustomUserAgent',$(e)); }
-  });
+    function(e) { this.nativeView('setCustomUserAgent',$(e)); }
+  );
 
   /**
    * @member loading
@@ -468,16 +467,16 @@ TODO:
    * @description Gets or sets whether the page is loading. If set to true (when false) it reloads the current page, when
    *              set to false (when true) it stops loading the current page.
    */
-  Object.defineProperty(WebView.prototype, 'loading', { 
-    get:function() { return this.nativeView('isLoading'); },
-    set:function(e) { if(!e) this.nativeView('stopLoading',$.YES); }
-  });
+  util.def(WebView.prototype, 'loading', 
+    function() { return this.nativeView('isLoading'); },
+    function(e) { if(!e) this.nativeView('stopLoading',$.YES); }
+  );
 
   //TODO: Unsupported on Windows.
-  Object.defineProperty(WebView.prototype, 'transparent', {
-    get:function() { return this.nativeView('drawsBackground') ? false : true; },
-    set:function(e) { this.nativeView('setDrawsBackground', !e ? $.YES : $.NO ); }
-  });
+  util.def(WebView.prototype, 'transparent',
+    function() { return this.nativeView('drawsBackground') ? false : true; },
+    function(e) { this.nativeView('setDrawsBackground', !e ? $.YES : $.NO ); }
+  );
 
   // Broken on OSX not working either on Windows.
   //Object.defineProperty(WebView.prototype, 'textScale', {
@@ -502,9 +501,9 @@ TODO:
    * webView.location = "https://www.google.com";
    * setTimeout(function() { console.log(webView.title); }, 4000);
    */
-  Object.defineProperty(WebView.prototype, 'title', { 
-    get:function() {  return this.nativeView('mainFrameTitle')('UTF8String'); }
-  });
+  util.def(WebView.prototype, 'title', 
+    function() {  return this.nativeView('mainFrameTitle')('UTF8String'); }
+  );
 
   return WebView;
 })();
