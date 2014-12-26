@@ -137,12 +137,12 @@ module.exports = (function() {
       case 'look':
         imageRef = "NSQuickLookTemplate";
         break;
-      //case 'trash':
-      //  imageRef = "NSTrashEmpty";
-      //  break;
-      //case 'trash-full':
-      //  imageRef = "NSTrashFull";
-      //  break;
+      case 'trash':
+        imageRef = "NSTrashEmpty";
+        break;
+      case 'trash-full':
+        imageRef = "NSTrashFull";
+        break;
       case 'bookmarks':
         imageRef = "NSBookmarksTemplate";
         break;

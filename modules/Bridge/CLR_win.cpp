@@ -196,6 +196,30 @@ namespace TintInterop {
   public ref class Shell
   {
   public:
+
+    static System::String^ GetIconFromFile(System::String^ file, int index) {
+      HICON hIcon;
+      UINT n = ExtractIconEx((const char*)(void*)Marshal::StringToHGlobalAnsi(file), index, &(hIcon), NULL, 1);
+      if(n == 0) n = ExtractIconEx((const char*)(void*)Marshal::StringToHGlobalAnsi(file), index, NULL, &(hIcon), 1);
+      if(n != 0) {
+        System::Drawing::Icon^ icon = System::Drawing::Icon::FromHandle(System::IntPtr((void *)hIcon));
+        System::Windows::Media::Imaging::BitmapSource^ source = System::Windows::Interop::Imaging::CreateBitmapSourceFromHIcon(
+          icon->Handle,
+          System::Windows::Int32Rect(0,0,icon->Width,icon->Height),
+          System::Windows::Media::Imaging::BitmapSizeOptions::FromEmptyOptions()
+        );
+        
+        System::Windows::Media::Imaging::PngBitmapEncoder^ encoder = gcnew System::Windows::Media::Imaging::PngBitmapEncoder();
+        encoder->Frames->Add( System::Windows::Media::Imaging::BitmapFrame::Create(source) );
+
+        System::IO::MemoryStream^ stream = gcnew System::IO::MemoryStream();
+        encoder->Save(stream);
+        return System::Convert::ToBase64String(stream->ToArray());
+      } else {
+        return nullptr;
+      }
+    }
+
     static System::String^ GetSystemIcon(int Id) 
     {
       SHSTOCKICONINFO stock = {0};
