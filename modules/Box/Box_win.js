@@ -6,8 +6,9 @@ module.exports = (function() {
   function Box(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 
-    if(NativeObjectClass)
+    if(NativeObjectClass) {
       Container.call(this, NativeObjectClass, NativeViewClass, options);
+    }
     else {
       options.initViewOnly = true;
       Container.call(this, $.System.Windows.Controls.Border, $.System.Windows.Controls.Border, options);
@@ -33,13 +34,16 @@ module.exports = (function() {
   Object.defineProperty(Box.prototype, 'borderType', {
     get:function() { 
       var type = this.nativeView.BorderThickness;
-      if(type.Top == 0) return "none";
-      else return "line";
+      if(type.Top === 0) {
+        return "none";
+      } else {
+        return "line";
+      }
     },
     set:function(e) {
       this.custom = true;
-      if(e == "none") this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
-      else if (e == "line") this.nativeView.BorderThickness = new $.System.Windows.Thickness(1);
+      if(e === "none") this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
+      else if (e === "line") this.nativeView.BorderThickness = new $.System.Windows.Thickness(1);
     }
   });
 
@@ -62,7 +66,7 @@ module.exports = (function() {
   Object.defineProperty(Box.prototype, 'borderRadius', {
     get:function() { return this.nativeView.CornerRadius.TopLeft; },
     set:function(e) {
-      if(typeof(e) != 'number') e = 0;
+      if(typeof(e) !== 'number') e = 0;
       this.custom = true;
       this.nativeView.CornerRadius = new $.System.Windows.CornerRadius(e); 
     }
@@ -70,7 +74,7 @@ module.exports = (function() {
 
   Object.defineProperty(Box.prototype, 'custom', {
     set:function(e) {
-      if(e == true && this.private.custom === false) {
+      if(e === true && this.private.custom === false) {
         this.private.custom = true;
         this.nativeView.BorderBrush = new $.System.Windows.Media.SolidColorBrush((new Color('transparent')).native);
         this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);

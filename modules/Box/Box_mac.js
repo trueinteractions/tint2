@@ -23,10 +23,12 @@ module.exports = (function() {
     options = options || {};
     options.delegates = options.delegates || [];
 
-    if(NativeObjectClass && NativeObjectClass.type == '#')
+    if(NativeObjectClass && NativeObjectClass.type == '#') {
       Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
+    }
+    else {
       Container.call(this, $.NSBox, $.NSBox, options);
+    }
 
     this.native = this.nativeView = this.nativeViewClass('alloc')('init');
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
