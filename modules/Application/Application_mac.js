@@ -1,5 +1,9 @@
 (function() {
-  if(global.application) return global.application;
+
+  if(global.application) {
+    return global.application;
+  }
+
   require('Bridge');
   var $ = process.bridge.objc;
   var util = require('Utilities');
@@ -46,8 +50,11 @@
     });
     delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
       try {
-        if(dockmenu == null) return null;
-        else return dockmenu.native;
+        if(dockmenu === null) {
+          return null;
+        } else {
+          return dockmenu.native;
+        }
       } catch(e) {
         console.log(e.message);
         console.log(e.stack);
@@ -61,8 +68,11 @@
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
 
     function fireEvent(event, args) {
-      if(events[event])
-        (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+      if(events[event]) {
+        (events[event]).forEach(function(item,index,arr) { 
+          item.apply(null,args); 
+        });
+      }
     }
 
     /**
@@ -75,8 +85,9 @@
      *              to call when the event happens (e.g., a callback).
      */
     this.addEventListener = function(event, func) { 
-      if(!events[event]) 
+      if(!events[event]) {
         events[event] = []; 
+      }
       events[event].push(func); 
     }
 
@@ -90,8 +101,9 @@
      *              that was originally given as the callback for addEventListener.
      */
     this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) != -1) 
+      if(events[event] && events[event].indexOf(func) !== -1) {
         events[event].splice(events[event].indexOf(func), 1); 
+      }
     }
 
     // unused, stub to help move us a bit closer to a standard spec
@@ -119,12 +131,12 @@
      * @see Window
      */
     this.resource = function(path) {
-      if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
+      if(path.indexOf('app:///') === -1) path = 'app:///' + path.replace("app://","");
       var url = $.NSURL('URLWithString',$(path.toString()));
       var data = $.NSData('dataWithContentsOfURL',url);
-      if(data)
+      if(data) {
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
-      else {
+      } else {
         if(application.warn) console.warn('Cannot find resource at: ', path);
         return null;
       }
@@ -152,8 +164,11 @@
      *              application name should match this name.
      */
     util.def(this, 'name', function() { 
-        if(!name || name == "") return process.cwd();
-        return name; 
+        if(!name || name === "") {
+          return process.cwd();
+        } else {
+          return name;
+        }
       },
       function(e) { 
         name = e;
@@ -203,7 +218,7 @@
      * @see Window
      */
     util.def(this, 'exitAfterWindowsClose',
-      function() { return terminateWhenLastWindowClosed == $.YES ? true : false; },
+      function() { return terminateWhenLastWindowClosed === $.YES ? true : false; },
       function(e) { terminateWhenLastWindowClosed = e ? $.YES : $.NO; }
     );
 
@@ -223,7 +238,7 @@
      * @see Window
      */
     util.def(this, 'visible',
-      function() { return $app('isHidden') == $.NO ? true : false; },
+      function() { return $app('isHidden') === $.NO ? true : false; },
       function(e) { if(e) $app('unhide',$app); else $app('hide', $app); }
     );
 
