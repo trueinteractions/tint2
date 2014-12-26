@@ -34,6 +34,7 @@ global.SelectInput = require('SelectInput');
 global.Slider = require('Slider');
 global.Split = require('Split');
 global.StatusBar = require('StatusBar');
+global.System = require('System');
 global.Table = require('Table');
 global.TextInput = require('TextInput');
 global.Toolbar = require('Toolbar');
