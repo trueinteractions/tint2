@@ -6,8 +6,9 @@ module.exports = (function() {
   function ColorWell(NativeObjectClass, NativeViewClass, options) {
     options = options || {};
 
-    if(NativeObjectClass)
+    if(NativeObjectClass) {
       Container.call(this, NativeObjectClass, NativeViewClass, options);
+    }
     else {
       options.initViewOnly = true;
       Container.call(this, $.System.Windows.Controls.Border, $.System.Windows.Controls.Border, options);
