@@ -2,6 +2,7 @@ module.exports = (function() {
   if(global.__TINT.Box) {
     return global.__TINT.Box;
   }
+  var util = require('Utilities');
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.objc;
@@ -26,7 +27,7 @@ module.exports = (function() {
     options = options || {};
     options.delegates = options.delegates || [];
 
-    if(NativeObjectClass && NativeObjectClass.type == '#') {
+    if(NativeObjectClass && NativeObjectClass.type === '#') {
       Container.call(this, NativeObjectClass, NativeViewClass, options);
     }
     else {
@@ -63,13 +64,13 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @see Color
    */
-  Object.defineProperty(Box.prototype, 'borderColor', {
-    get:function() { return new Color(this.nativeView('borderColor')); },
-    set:function(e) {
+  util.def(Box.prototype, 'borderColor',
+    function() { return new Color(this.nativeView('borderColor')); },
+    function(e) {
       this.nativeView('setBoxType', $.NSBoxCustom);
       this.nativeView('setBorderColor', (new Color(e)).native); 
     }
-  });
+  );
 
   /**
    * @member borderWidth
@@ -89,13 +90,13 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @see Color
    */
-  Object.defineProperty(Box.prototype, 'borderWidth', {
-    get:function() { return this.nativeView('borderWidth'); },
-    set:function(e) { 
+  util.def(Box.prototype, 'borderWidth',
+    function() { return this.nativeView('borderWidth'); },
+    function(e) { 
       this.nativeView('setBoxType', $.NSBoxCustom);
       this.nativeView('setBorderWidth',e);
     }
-  });
+  );
 
   /**
    * @member borderRadius
@@ -117,13 +118,13 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @see Color
    */
-  Object.defineProperty(Box.prototype, 'borderRadius', {
-    get:function() { return this.nativeView('cornerRadius'); },
-    set:function(e) {    
+  util.def(Box.prototype, 'borderRadius',
+    function() { return this.nativeView('cornerRadius'); },
+    function(e) {    
       this.nativeView('setBoxType', $.NSBoxCustom);
       this.nativeView('setCornerRadius',e); 
     }
-  });
+  );
 
   /**
    * @member backgroundColor
@@ -143,13 +144,13 @@ module.exports = (function() {
    * box.left=box.right=box.top=box.bottom=50; // 50px margin.
    * @screenshot-window {win}
    */
-  Object.defineProperty(Box.prototype, 'backgroundColor', {
-    get:function() { return new Color(this.nativeView('fillColor')); },
-    set:function(e) {
+  util.def(Box.prototype, 'backgroundColor', 
+    function() { return new Color(this.nativeView('fillColor')); },
+    function(e) {
       this.nativeView('setBoxType', $.NSBoxCustom);
       this.nativeView('setFillColor',(new Color(e)).native);
     }
-  });
+  );
 
   global.__TINT.Box = Box;
   return Box;
