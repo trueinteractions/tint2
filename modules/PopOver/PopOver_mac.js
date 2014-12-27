@@ -2,7 +2,7 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
 
-  function PopOver(NativeObjectClass, NativeViewClass, options) {
+  function PopOver(options) {
     var options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
@@ -10,15 +10,11 @@ module.exports = (function() {
       ['popoverDidShow:', 'v@:@@', function(self, cmd, notif) { this.fireEvent('opened'); }.bind(this)],
       ['popoverWillShow:', 'v@:@@', function(self, cmd, notif) { this.fireEvent('open'); }.bind(this)],
     ]);
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSPopover, $.NSView, options);
+    this.nativeClass = this.nativeClass || $.NSPopover;
+    this.nativeViewClass = this.nativeViewClass || $.NSView;
+    Container.call(this, options);
     
-    this.native = this.nativeClass('alloc')('init'); 
     this.native('retain');
-    this.nativeView = this.nativeViewClass('alloc')('init');
     this.nativeView('retain');
     this.native('setBehavior', $.NSPopoverBehaviorSemitransient);
     this.native('setAppearance', $.NSPopoverAppearanceMinimal);

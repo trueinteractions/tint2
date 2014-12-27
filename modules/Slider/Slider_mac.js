@@ -15,9 +15,10 @@ module.exports = (function() {
    * @description Creates a new slider control.
    */
   function Slider(options) {
-    Container.call(this, $.NSSlider, $.NSSlider, {});
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    options = options || {};
+    this.nativeClass = this.nativeClass || $.NSSlider;
+    this.nativeViewClass = this.nativeViewClass || $.NSSlider;
+    Container.call(this, options);
     this.native('setMinValue', 0);
     this.native('setMaxValue', 1);
     this.native('setDoubleValue', 0);

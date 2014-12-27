@@ -57,11 +57,12 @@ module.exports = (function() {
      * webView.location = "https://www.google.com";
      * @screenshot-window {win}
      */
-  function WebView(NativeObjectClass, NativeViewClass, options) {
+  function WebView(options) {
     var previousUrl = null;
     options = options || {};
     options.delegates = options.delegates || [];
     options.nonStandardEvents = true;
+    options.doNotInitialize = true;
     options.delegates = options.delegates.concat([
       /**
        * @event cancel
@@ -199,12 +200,9 @@ module.exports = (function() {
           }
        }.bind(this)]
     ]);
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.WebView, $.WebView, options);
-
+    this.nativeClass = this.nativeClass || $.WebView;
+    this.nativeViewClass = this.nativeViewClass || $.WebView;
+    Container.call(this, options);
     this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
     
     this.private.preferences = $.WebPreferences('alloc')('initWithIdentifier', $(application.name));

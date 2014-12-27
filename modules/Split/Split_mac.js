@@ -15,7 +15,7 @@ module.exports = (function() {
    * @memberof Split
    * @description Creates a new split view
    */
-  function Split(NativeObjectClass, NativeViewClass, options) {
+  function Split(options) {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
@@ -28,15 +28,9 @@ module.exports = (function() {
       ['splitViewDidResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resized'); }.bind(this)],
       ['splitViewWillResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resize'); }.bind(this)]
     ]);
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSSplitView, $.NSSplitView, options);
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
-
+    this.nativeClass = this.nativeClass || $.NSSplitView;
+    this.nativeViewClass = this.nativeViewClass || $.NSSplitView;
+    Container.call(this, options);
     this.private.backupAppend = Container.prototype.appendChild;
     this.private.backupRemove = Container.prototype.removeChild;
     this.private.lockedSubviewIndexes = [];

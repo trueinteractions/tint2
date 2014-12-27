@@ -11,7 +11,7 @@ module.exports = (function() {
    *              move items up or down. 
    * @extends Container
    */
-  function Table(NativeObjectClass, NativeViewClass, options) {
+  function Table(options) {
     options = options || {};
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
@@ -78,18 +78,13 @@ module.exports = (function() {
       ['numberOfRowsInTableView:','l@:@', function(self,cmd,table) { return this.nativeView('numberOfRows'); }.bind(this)] 
     ]);
 
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSTableView, $.NSTableView, options);
-
+    this.nativeClass = this.nativeClass || $.NSTableView;
+    this.nativeViewClass = this.nativeViewClass || $.NSTableView;
+    Container.call(this, options);
     this.private.views = {};
     this.private.columns = [];
     this.private.selectable = true;
     this.private.columnWidth = {};
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');    
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setDelegate', this.nativeView);
     this.native('setDataSource', this.nativeView);    
     this.native('setRowSizeStyle', $.NSTableViewRowSizeStyleMedium);

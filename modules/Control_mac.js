@@ -25,7 +25,7 @@ module.exports = (function() {
    * @see Container
    * @see Box
    */
-  function Control(NativeObjectClass, NativeViewClass, options) {
+  function Control(options) {
     options = options || {};
     options.delegates = options.delegates || [];
     if(!options.nonStandardEvents) {
@@ -109,18 +109,25 @@ module.exports = (function() {
       }
     });
 
-    this.nativeClass = NativeObjectClass;
-    this.native = this.nativeView = null;
-
-    this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
-    this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
-
-    var nativeViewExtended = NativeViewClass.extend(NativeViewClass.getName()+Math.round(Math.random()*10000000));
+    var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
     options.delegates.forEach(function(item) {
       nativeViewExtended.addMethod(item[0],item[1],item[2]);
     });
     nativeViewExtended.register();
+
+    if(!options.doNotInitialize) {
+      if(this.nativeClass === this.nativeViewClass) {
+        this.native = this.nativeView = nativeViewExtended('alloc')('init');
+      } else {
+        this.native = this.nativeClass('alloc')('init');
+        this.nativeView = nativeViewExtended('alloc')('init');
+      }
+      this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    }
+
     this.nativeViewClass = nativeViewExtended;
+    this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
+    this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
   }
 
   /**

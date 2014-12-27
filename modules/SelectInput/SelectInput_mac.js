@@ -15,17 +15,15 @@ module.exports = (function() {
    * @memberof SelectInput
    * @description Creates a new SelectInput control.
    */
-  function SelectInput(NativeObjectClass, NativeViewClass, options) {
+  function SelectInput(options) {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
       ['comboBoxSelectionDidChange:','v@:@', function(self,_cmd,frame) { this.fireEvent('change');  }.bind(this)]
     ]);
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      TextInput.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      TextInput.call(this, $.NSComboBox, $.NSComboBox, options);
+    this.nativeClass = this.nativeClass || $.NSComboBox;
+    this.nativeViewClass = this.nativeViewClass || $.NSComboBox;
+    TextInput.call(this, options);
   }
 
   SelectInput.prototype = Object.create(TextInput.prototype);

@@ -15,16 +15,13 @@ module.exports = (function() {
    * @memberof Scroll
    * @description Creates a new scroll container.
    */
-  function Scroll(NativeObjectClass, NativeViewClass, options) {
+  function Scroll(options) {
     options = options || {};
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSScrollView, $.NSScrollView, options);
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,500));
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    options.delegates = options.delegates || [];
+    this.nativeClass = this.nativeClass || $.NSScrollView;
+    this.nativeViewClass = this.nativeViewClass || $.NSScrollView;
+    Container.call(this, options);
+    this.native('setFrame', $.NSMakeRect(0,0,500,500));
     this.native('setDrawsBackground',$.NO);
     this.native('setHasVerticalScroller',$.YES);
     this.native('setHasHorizontalScroller',$.YES);

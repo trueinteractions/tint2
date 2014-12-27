@@ -18,14 +18,10 @@ module.exports = (function() {
    *              combining the two into a new control using the container is a good way of reusing controls.
    * @extends Control
    */
-  function Container(NativeObjectClass, NativeViewClass, options) {
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Control.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      Control.call(this, $.NSView, $.NSView, options);
-      this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-      this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
-    }
+  function Container(options) {
+    this.nativeClass = this.nativeClass || $.NSView;
+    this.nativeViewClass = this.nativeViewClass || $.NSView;
+    Control.call(this, options);
     this.private.children = [];
   }
 

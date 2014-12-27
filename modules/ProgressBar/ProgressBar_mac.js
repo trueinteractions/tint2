@@ -14,10 +14,12 @@ module.exports = (function() {
    * @memberof ProgressBar
    * @description Creates a new progress bar control.
    */
-  function ProgressBar() {
-    Container.call(this, $.NSProgressIndicator, $.NSProgressIndicator, {});
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+  function ProgressBar(options) {
+    options = options || {};
+    options.delegates = options.delegates || [];
+    this.nativeClass = this.nativeClass || $.NSProgressIndicator;
+    this.nativeViewClass = this.nativeViewClass || $.NSProgressIndicator;
+    Container.call(this, options);
     this.native('setUsesThreadedAnimation',$.YES);
     this.native('startAnimation',this.native);
     this.native('setMinValue', 0);

@@ -14,17 +14,11 @@ module.exports = (function() {
     * @memberof DateWell
     * @description Creates a new DateWell control.
     */
-  function DateWell(NativeObjectClass, NativeViewClass, options) {
+  function DateWell(options) {
     options = options || {};
     options.delegates = options.delegates || [];
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSDatePicker, $.NSDatePicker, options);
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    this.nativeClass = this.nativeViewClass = (this.nativeViewClass || $.NSDatePicker);
+    Container.call(this, options);
     this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
     this.nativeView('setBordered', $.NO);
     this.nativeView('setDateValue', $.NSDate('date'));

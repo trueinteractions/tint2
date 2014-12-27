@@ -15,7 +15,7 @@ module.exports = (function() {
    * @memberof TextInput
    * @description Creates a new TextInput control.
    */
-  function TextInput(NativeObjectClass, NativeViewClass, options) {
+  function TextInput(options) {
     options = options || {};
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
@@ -62,14 +62,9 @@ module.exports = (function() {
        */
       ['controlTextDidEndEditing:','v@:@', function() { this.fireEvent('inputend'); }.bind(this)]
     ]);
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSTextField, $.NSTextField, options);
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    this.nativeClass = this.nativeClass || $.NSTextField;
+    this.nativeViewClass = this.nativeViewClass || $.NSTextField;
+    Container.call(this, options);
     this.native('setDelegate', this.nativeView);
   }
 

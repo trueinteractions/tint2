@@ -13,17 +13,13 @@ module.exports = (function() {
    * @memberof FontPanel
    * @description Creates a new font panel window that is initially hidden.
    */
-  function FontPanel(NativeObjectClass, NativeViewClass, options) {
+  function FontPanel(options) {
     var fontManager = $.NSFontManager('sharedFontManager');
     options = options || {};
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Panel.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.nativeObject = options.nativeObject || fontManager('fontPanel', $.YES);
-      Panel.call(this, $.TintFontPanel, $.NSView, options);
-    }
-
+    this.nativeClass = this.nativeClass || $.TintFontPanel;
+    this.nativeViewClass = this.nativeViewClass || $.NSView;
+    options.nativeObject = options.nativeObject || fontManager('fontPanel', $.YES);
+    Panel.call(this, options);
     fontManager('setDelegate',this.native);
     fontManager('setTarget', this.native);
     $.TintFontPanel.panel.fireEvent = this.fireEvent.bind(this);

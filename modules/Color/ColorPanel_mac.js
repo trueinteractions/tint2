@@ -14,7 +14,7 @@ module.exports = (function() {
     * @description Creates a new ColorPanel window that's hidden by default.
     * @extends Panel
     */
-  function ColorPanel(NativeObjectClass, NativeViewClass, options) {
+  function ColorPanel(options) {
     options = options || {};
     options.delegates = options.delegates || [];
     /**
@@ -23,13 +23,10 @@ module.exports = (function() {
      * @description Fires when the user selects a new color in the panel.
      */
     options.delegates = options.delegates.concat([['changeColor:', 'v@:@', function(self, cmd, notif) { this.fireEvent('colorchange'); }.bind(this)]]);
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Panel.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.nativeObject = options.nativeObject || $.NSColorPanel('sharedColorPanel');
-      Panel.call(this, $.NSColorPanel, $.NSView, options);
-    }
+    options.nativeObject = options.nativeObject || $.NSColorPanel('sharedColorPanel');
+    this.nativeClass = this.nativeClass || $.NSColorPanel;
+    this.nativeViewClass = this.nativeViewClass || $.NSView;
+    Panel.call(this, options);
   }
 
   ColorPanel.prototype = Object.create(Panel.prototype);

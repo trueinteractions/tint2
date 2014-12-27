@@ -18,19 +18,12 @@ module.exports = (function() {
     * @memberof ColorWell
     * @description Creates a new ColorWell control.
     */
-  function ColorWell(NativeObjectClass, NativeViewClass, options) {
+  function ColorWell(options) {
     options = options || {};
     options.delegates = options.delegates || [];
-
-    if(NativeObjectClass && NativeObjectClass.type === '#') {
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    }
-    else {
-      Container.call(this, $.NSColorWell, $.NSColorWell, options);
-    }
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    this.nativeClass = this.nativeClass || $.NSColorWell;
+    this.nativeViewClass = this.nativeViewClass || $.NSColorWell;
+    Container.call(this, options);
   }
 
   ColorWell.prototype = Object.create(Container.prototype);

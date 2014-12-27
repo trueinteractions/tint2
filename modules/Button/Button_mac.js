@@ -16,22 +16,15 @@ module.exports = (function() {
     * @memberof Button
     * @description Creates a new Button control.
     */
-  function Button(NativeObjectClass, NativeViewClass, options) {
+  function Button(options) {
     options = options || {};
     options.mouseDownBlocks = true;
-
-    if(NativeObjectClass && NativeObjectClass.type === '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSButton, $.NSButton, options);
-
+    this.nativeClass = this.nativeClass || $.NSButton;
+    this.nativeViewClass = this.nativeViewClass || $.NSButton;
+    Container.call(this, options);
     this.private.img = null;
-    this.private.buttonType = "normal";
-    this.private.buttonStyle = "normal";
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
+    this.private.buttonStyle = this.private.buttonType = "normal";
     this.native('setButtonType',$.NSMomentaryLightButton);
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
     this.native('cell')('setWraps',$.NO);
     this.native('setTitle', $(""));
@@ -74,8 +67,8 @@ module.exports = (function() {
    * @description Gets or sets the text label on the button.
    */
   util.def(Button.prototype, 'title',
-    get:function() { return this.nativeView('title').toString(); },
-    set:function(e) {
+    function() { return this.nativeView('title').toString(); },
+    function(e) {
       // Private event, do not rely on it.
       this.fireEvent('property-change', ['title', e]);
       return this.nativeView('setTitle', $(e));

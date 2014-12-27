@@ -16,19 +16,13 @@ module.exports = (function() {
    * @memberof ButtonGroup
    * @description Creates a collection that buttons can be added to.
    */
-  function ButtonGroup(NativeObjectClass, NativeViewClass, options) {
+  function ButtonGroup(options) {
     options = options || {};
     options.mouseDownBlocks = true;
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSSegmentedControl, $.NSSegmentedControl, options);
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    this.nativeClass = this.nativeClass || $.NSSegmentedControl;
+    this.nativeViewClass = this.nativeViewClass || $.NSSegmentedControl;
+    Container.call(this, options);
     this.native('setSegmentStyle',$.NSSegmentStyleRounded);
-
     this.private.segmentedButtons = [];
 
     // Create proxy for click event.

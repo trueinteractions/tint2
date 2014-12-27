@@ -23,19 +23,12 @@ module.exports = (function() {
     * @memberof Box
     * @description Creates a new Box generic control.
     */
-  function Box(NativeObjectClass, NativeViewClass, options) {
+  function Box(options) {
     options = options || {};
     options.delegates = options.delegates || [];
-
-    if(NativeObjectClass && NativeObjectClass.type === '#') {
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    }
-    else {
-      Container.call(this, $.NSBox, $.NSBox, options);
-    }
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+    this.nativeClass = this.nativeClass || $.NSBox;
+    this.nativeViewClass = this.nativeViewClass || $.NSBox;
+    Container.call(this, options);
     this.nativeView('setBorderType', $.NSLineBorder);
     this.nativeView('setTitle', $(""));
   }

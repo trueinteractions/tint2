@@ -4,17 +4,14 @@ module.exports = (function() {
   var Control = require('Control');
   var TextInput = require('TextInput');
 
-  function SearchInput(NativeObjectClass, NativeViewClass, options)  {
+  function SearchInput(options) {
     options = options || {};
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      TextInput.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      TextInput.call(this, $.NSSearchField, $.NSSearchField, options);
-
+    options.delegates = options.delegates || [];
+    this.nativeClass = this.nativeClass || $.NSSearchField;
+    this.nativeViewClass = this.nativeViewClass || $.NSSearchField;
+    TextInput.call(this, options);
     this.private.searchButton = null;
     this.private.cancelButton = null;
-
     this.native('setRecentsAutosaveName',$(application.name));
   }
 

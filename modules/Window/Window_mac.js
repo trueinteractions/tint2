@@ -21,9 +21,9 @@ module.exports = (function() {
    * @memberof Window
    * @description Creates a new window that is initially hidden.
    */
-  function Window(NativeObjectClass, NativeViewClass, options) {
+  function Window(options) {
     options = options || {};
-
+    options.doNotInitialize = true;
     // Set defaults that must be set prior to instantiation.
     options.width = options.width || 500;
     options.height = options.height || 500;
@@ -100,21 +100,14 @@ module.exports = (function() {
        */
       ['windowDidClose:', 'v@:@@', function(self,cmd,notification) { this.fireEvent('closed'); }.bind(this)]
     ]);
-
-    // We detect whether this already has a class passed in so that we can properly use
-    // inheritence. If a native object isn't passed in we default to using NSWindow.
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSWindow, $.NSView, options);
-
+    this.nativeClass = this.nativeClass || $.NSWindow;
+    this.nativeViewClass = this.nativeViewClass || $.NSView;
+    Container.call(this, options);
     // We'll need to first detect if we have an object already initialized, if not we'll do it.
     // this is a work around to support inheritence in JS.
     if(!options.nativeObject) {
-      this.native = this.nativeClass('alloc')('initWithContentRect', $.NSMakeRect(0,0,options.width,options.height), 
-                          'styleMask', options.styleMask,
-                          'backing', $.NSBackingStoreBuffered, 
-                          'defer', $.YES);
+      this.native = this.nativeClass('alloc')('initWithContentRect', $.NSMakeRect(0, 0, options.width, options.height), 
+                          'styleMask', options.styleMask, 'backing', $.NSBackingStoreBuffered,'defer', $.YES);
       this.nativeView = this.nativeViewClass('alloc')('init');
       this.native('setContentView',this.nativeView);
     } else {

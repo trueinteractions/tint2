@@ -12,20 +12,15 @@ module.exports = (function() {
    * @memberof ImageWell
    * @description Creates a new imagewell object.
    */
-  function ImageWell(NativeObjectClass, NativeViewClass, options) {
+  function ImageWell(options) {
     options = options || {};
     options.delegates = options.delegates || [];
+    this.nativeClass = this.nativeClass || $.NSImageView;
+    this.nativeViewClass = this.nativeViewClass || $.NSImageView;
+    Container.call(this, options);
+    this.native('setImageAlignment',$.NSImageAlignCenter);
     this.animates = false;
     this.alignment = "center";
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.NSImageView, $.NSImageView, options);
-
-    this.native = this.nativeView = this.nativeViewClass('alloc')('init');
-    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
-    this.native('setImageAlignment',$.NSImageAlignCenter);
   }
 
   ImageWell.prototype = Object.create(Container.prototype);

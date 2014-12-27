@@ -19,10 +19,13 @@ module.exports = (function() {
    * @memberof Dialog
    * @description Creates a new Dialog window hidden by default.
    */
-  function Dialog() {
-    Control.call(this, $.NSAlert, $.NSView, {});
+  function Dialog(options) {
     var img = null, buttonsSet = false, mainButton = null, auxButton = null; events = {};
-    this.nativeView = this.native = $.NSAlert('alloc')('init');
+    options = options || {};
+    options.delegates = options.delegates || [];
+    this.nativeClass = this.nativeClass || $.NSAlert;
+    this.nativeViewClass = this.nativeViewClass || $.NSDatePicker;
+    Control.call(this, options);
 
    /**
     * @member title
