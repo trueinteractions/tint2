@@ -1,5 +1,4 @@
 module.exports = function(basepath) {
-    var $ = process.bridge.objc;
     var workingdir = process.cwd();
     if(workingdir[workingdir.length-1] !== '/') {
       workingdir += '/';
@@ -13,7 +12,7 @@ module.exports = function(basepath) {
       }
       var possible = workingdir + n;
       if(fs.existsSync(possible)) {
-        requireNode(possible);
+        global.requireNode(possible);
       } else {
         return global.requireNode.apply(null,arguments);
       }
