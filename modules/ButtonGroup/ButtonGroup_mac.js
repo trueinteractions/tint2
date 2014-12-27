@@ -35,7 +35,7 @@ module.exports = (function() {
       this.private.segmentedButtons[ndx].fireEvent('mouseup');
       this.fireEvent('click');
     }.bind(this));
-  };
+  }
 
   ButtonGroup.prototype = Object.create(Container.prototype);
   ButtonGroup.prototype.constructor = ButtonGroup;

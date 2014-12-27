@@ -16,6 +16,6 @@ module.exports = function(basepath) {
       } else {
         return global.requireNode.apply(null,arguments);
       }
-    }
+    };
     global.require.__proto__ = global.requireNode;
 };
