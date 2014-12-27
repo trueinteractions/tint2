@@ -1,6 +1,9 @@
 module.exports = (function() {
+  if(global.__TINT.Box) {
+    return global.__TINT.Box;
+  }
   var Container = require('Container');
-  if(!Color) Color = require('Color');
+  var Color = require('Color');
   var $ = process.bridge.objc;
 
   /**
@@ -148,5 +151,6 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Box = Box;
   return Box;
 })();

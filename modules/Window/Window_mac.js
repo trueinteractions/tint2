@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Window) {
+    return global.__TINT.Window;
+  }
   var Container = require('Container');
   var util = require('Utilities');
   var Delegate = require('Bridge');
@@ -800,5 +803,6 @@ module.exports = (function() {
    */
   Window.prototype.bringToFront = function() { this.native('makeKeyAndOrderFront',this.native); }
 
+  global.__TINT.Window = Window;
   return Window;
 })();

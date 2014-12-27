@@ -1,5 +1,7 @@
 (function() {
-
+  if(typeof(global.__TINT) === 'undefined') {
+    global.__TINT = {};
+  }
   if(global.application) {
     return global.application;
   }

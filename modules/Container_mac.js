@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Container) {
+    return global.__TINT.Container;
+  }
   var Control = require('Control');
   var util = require('Utilities');
   var $ = process.bridge.objc;
@@ -78,5 +81,6 @@ module.exports = (function() {
     this.nativeView('scrollPoint', $.NSMakePoint(x,b.height - y));
   }
 
+  global.__TINT.Container = Container;
   return Container;
 })();

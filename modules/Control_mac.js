@@ -1,7 +1,11 @@
 module.exports = (function() {
   console.assert(typeof application !== "undefined", 'You must use require(\'Application\') prior to using any GUI components.');
   console.assert(process.bridge.objc, 'Failure to establish objective-c bridge.');
-  
+
+  if(global.__TINT.Control) {
+    return global.__TINT.Control;
+  }
+
   var $ = process.bridge.objc;
   var util = require('Utilities');
 
@@ -693,5 +697,6 @@ module.exports = (function() {
    */
   util.createLayoutProperty(Control.prototype, 'center', 'center', util.identity, 'center', util.identity, null);
 
+  global.__TINT.Control = Control;
   return Control;
 })();

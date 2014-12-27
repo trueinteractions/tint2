@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.ColorWell) {
+    return global.__TINT.ColorWell;
+  }
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.objc;
@@ -45,5 +48,6 @@ module.exports = (function() {
     set:function(e) { this.nativeView('setColor',(new Color(e)).native); }
   });
 
+  global.__TINT.ColorWell = ColorWell;
   return ColorWell;
 })();
