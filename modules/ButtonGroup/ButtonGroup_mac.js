@@ -4,7 +4,6 @@ module.exports = (function() {
   }
   var utilities = require('Utilities');
   var Container = require('Container');
-  var Button = require('Button');
   var $ = process.bridge.objc;
 
   /**
