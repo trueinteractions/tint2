@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.ButtonGroup) {
+    return global.__TINT.ButtonGroup;
+  }
   var utilities = require('Utilities');
   var Container = require('Container');
   var Button = require('Button');
@@ -42,22 +45,50 @@ module.exports = (function() {
   Object.defineProperty(ButtonGroup.prototype, 'style', {
     get:function() { 
       var buttonStyle = this.nativeView('segmentStyle');
-      if (buttonStyle == $.NSSegmentStyleRounded) return "rounded";
-      else if (buttonStyle == $.NSSegmentStyleTexturedRounded) return "textured";
-      else if (buttonStyle == $.NSSegmentStyleRoundRect) return "roundrect";
-      else if (buttonStyle == $.NSSegmentStyleTexturedSquare) return "square";
-      else if (buttonStyle == $.NSSegmentStyleCapsule) return "capsule";
-      else if (buttonStyle == $.NSSegmentStyleSmallSquare) return "smallsquare";
-      else return "default";
+      if (buttonStyle === $.NSSegmentStyleRounded) {
+        return "rounded";
+      }
+      else if (buttonStyle === $.NSSegmentStyleTexturedRounded) {
+        return "textured";
+      }
+      else if (buttonStyle === $.NSSegmentStyleRoundRect) {
+        return "roundrect";
+      }
+      else if (buttonStyle === $.NSSegmentStyleTexturedSquare) {
+        return "square";
+      }
+      else if (buttonStyle === $.NSSegmentStyleCapsule) {
+        return "capsule";
+      }
+      else if (buttonStyle === $.NSSegmentStyleSmallSquare) {
+        return "smallsquare";
+      }
+      else {
+        return "default";
+      }
     },
     set:function(type) {
-      if (type == "rounded") this.nativeView('setSegmentStyle',$.NSSegmentStyleRounded);
-      else if (type == "textured") this.nativeView('setSegmentStyle',$.NSSegmentStyleTexturedRounded);
-      else if (type == "roundrect") this.nativeView('setSegmentStyle', $.NSSegmentStyleRoundRect);
-      else if (type == "capsule") this.nativeView('setSegmentStyle', $.NSSegmentStyleCapsule);
-      else if (type == "smallsquare") this.nativeView('setSegmentStyle', $.NSSegmentStyleSmallSquare);
-      else if (type == "square") this.nativeView('setSegmentStyle', $.NSSegmentStyleTexturedSquare);
-      else this.native('setSegmentStyle', $.NSSegmentStyleAutomatic);
+      if (type === "rounded") {
+        this.nativeView('setSegmentStyle',$.NSSegmentStyleRounded);
+      }
+      else if (type === "textured") {
+        this.nativeView('setSegmentStyle',$.NSSegmentStyleTexturedRounded);
+      }
+      else if (type === "roundrect") {
+        this.nativeView('setSegmentStyle', $.NSSegmentStyleRoundRect);
+      }
+      else if (type === "capsule") {
+        this.nativeView('setSegmentStyle', $.NSSegmentStyleCapsule);
+      }
+      else if (type === "smallsquare") {
+        this.nativeView('setSegmentStyle', $.NSSegmentStyleSmallSquare);
+      }
+      else if (type === "square") {
+        this.nativeView('setSegmentStyle', $.NSSegmentStyleTexturedSquare);
+      }
+      else {
+        this.native('setSegmentStyle', $.NSSegmentStyleAutomatic);
+      }
     }
   });
 
@@ -88,19 +119,24 @@ module.exports = (function() {
     this.nativeView('setSegmentCount',ndx+1);
 
     button.private.outOfBoundsListener = function(property, value) {
-      if(property == 'image')
+      if(property === 'image') {
         this.nativeView('setImage',utilities.makeNSImage(value),'forSegment',ndx);
-      else if (property == 'title')
+      }
+      else if (property === 'title') {
         this.nativeView('setLabel',$(value),'forSegment',ndx);
-      else if (property == 'enabled')
+      }
+      else if (property === 'enabled') {
         this.nativeView('setEnabled',(value ? $.YES : $.NO),'forSegment',ndx);
+      }
     }.bind(this);
     button.addEventListener('property-change',button.private.outOfBoundsListener);
 
-    if(button.image != null && button.image) 
+    if(button.image != null && button.image) {
       this.nativeView('setImage',utilities.makeNSImage(button.image),'forSegment',ndx);
-    if(button.title != null && button.title)
+    }
+    if(button.title != null && button.title) {
       this.nativeView('setLabel',$(button.title),'forSegment',ndx);
+    }
 
     this.nativeView('setEnabled',button.enabled ? $.YES : $.NO);
     this.nativeView('setImageScaling',$.NSImageScaleProportionallyDown,'forSegment',ndx);
@@ -121,6 +157,7 @@ module.exports = (function() {
     this.nativeView('setSegmentCount',this.private.segmentedButtons.length);
   }
 
+  global.__TINT.ButtonGroup = ButtonGroup;
   return ButtonGroup;
 
 })();

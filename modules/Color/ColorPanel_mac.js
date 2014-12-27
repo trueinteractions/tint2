@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.ColorPanel) {
+    return global.__TINT.ColorPanel;
+  }
   var Panel = require('Panel');
   var Color = require('Color');
   var $ = process.bridge.objc;
@@ -85,5 +88,7 @@ module.exports = (function() {
    * @memberof ColorPanel
    * @description Gets or sets whether the color panel is visible or hidden.
    */
+
+  global.__TINT.ColorPanel = ColorPanel;
   return ColorPanel;
 })();
