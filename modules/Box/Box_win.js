@@ -1,6 +1,6 @@
 module.exports = (function() {
   var Container = require('Container');
-  if(!Color) Color = require('Color');
+  var Color = require('Color');
   var $ = process.bridge.dotnet;
 
   function Box(NativeObjectClass, NativeViewClass, options) {

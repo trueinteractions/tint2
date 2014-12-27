@@ -4,6 +4,7 @@ module.exports = function(basepath) {
     if(workingdir[workingdir.length-1] !== '/') {
       workingdir += '/';
     }
+    var fs = require('fs');
     global.requireNode = global.require;
     global.require = function() {
       var n = arguments[0];
