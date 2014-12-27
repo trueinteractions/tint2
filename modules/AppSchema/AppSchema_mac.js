@@ -18,4 +18,4 @@ module.exports = function(basepath) {
       }
     }
     global.require.__proto__ = global.requireNode;
-}
+};

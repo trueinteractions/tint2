@@ -2,7 +2,7 @@ module.exports = (function() {
   if(global.__TINT.ButtonGroup) {
     return global.__TINT.ButtonGroup;
   }
-  var utilities = require('Utilities');
+  var util = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.objc;
 
@@ -35,14 +35,14 @@ module.exports = (function() {
       this.private.segmentedButtons[ndx].fireEvent('mouseup');
       this.fireEvent('click');
     }.bind(this));
-  }
+  };
 
   ButtonGroup.prototype = Object.create(Container.prototype);
   ButtonGroup.prototype.constructor = ButtonGroup;
 
   // TODO: Not supported in OSX, standardize?
-  Object.defineProperty(ButtonGroup.prototype, 'style', {
-    get:function() { 
+  util.def(ButtonGroup.prototype, 'style',
+    function() { 
       var buttonStyle = this.nativeView('segmentStyle');
       if (buttonStyle === $.NSSegmentStyleRounded) {
         return "rounded";
@@ -66,7 +66,7 @@ module.exports = (function() {
         return "default";
       }
     },
-    set:function(type) {
+    function(type) {
       if (type === "rounded") {
         this.nativeView('setSegmentStyle',$.NSSegmentStyleRounded);
       }
@@ -89,7 +89,7 @@ module.exports = (function() {
         this.native('setSegmentStyle', $.NSSegmentStyleAutomatic);
       }
     }
-  });
+  );
 
   /**
    * @member selected
@@ -99,10 +99,10 @@ module.exports = (function() {
    *              from 0 to the amount of buttons in the group.  This returns null if no item
    *              is selected.
    */
-  Object.defineProperty(ButtonGroup.prototype, 'selected', {
-    get:function() { return this.nativeView('selectedSegment'); },
-    set:function(e) { this.nativeView('setSelectedSegment', e); }
-  });
+  util.def(ButtonGroup.prototype, 'selected',
+    function() { return this.nativeView('selectedSegment'); },
+    function(e) { this.nativeView('setSelectedSegment', e); }
+  );
 
 
   /**
@@ -119,7 +119,7 @@ module.exports = (function() {
 
     button.private.outOfBoundsListener = function(property, value) {
       if(property === 'image') {
-        this.nativeView('setImage',utilities.makeNSImage(value),'forSegment',ndx);
+        this.nativeView('setImage',util.makeNSImage(value),'forSegment',ndx);
       }
       else if (property === 'title') {
         this.nativeView('setLabel',$(value),'forSegment',ndx);
@@ -130,16 +130,16 @@ module.exports = (function() {
     }.bind(this);
     button.addEventListener('property-change',button.private.outOfBoundsListener);
 
-    if(button.image != null && button.image) {
-      this.nativeView('setImage',utilities.makeNSImage(button.image),'forSegment',ndx);
+    if(button.image !== null && button.image) {
+      this.nativeView('setImage',util.makeNSImage(button.image),'forSegment',ndx);
     }
-    if(button.title != null && button.title) {
+    if(button.title !== null && button.title) {
       this.nativeView('setLabel',$(button.title),'forSegment',ndx);
     }
 
-    this.nativeView('setEnabled',button.enabled ? $.YES : $.NO);
+    this.nativeView('setEnabled', button.enabled ? $.YES : $.NO);
     this.nativeView('setImageScaling',$.NSImageScaleProportionallyDown,'forSegment',ndx);
-  }
+  };
 
   /**
    * @method removeChild
@@ -154,7 +154,7 @@ module.exports = (function() {
     button.private.outOfBoundsListener = null;
     this.private.segmentedButtons.splice(this.private.segmentedButtons.indexOf(button), 1);
     this.nativeView('setSegmentCount',this.private.segmentedButtons.length);
-  }
+  };
 
   global.__TINT.ButtonGroup = ButtonGroup;
   return ButtonGroup;
