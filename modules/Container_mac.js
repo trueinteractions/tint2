@@ -5,7 +5,6 @@ module.exports = (function() {
   var Control = require('Control');
   var util = require('Utilities');
   var $ = process.bridge.objc;
-  var parseValue = util.parseUnits;
 
   /**
    * @class Container
@@ -45,9 +44,11 @@ module.exports = (function() {
    * @see removeChild
    */
   Container.prototype.appendChild = function(control) {
-    if(Array.isArray(control))
-      for(var i=0; i < control.length; i++) this.appendChild(control[i]);
-    else {
+    if(Array.isArray(control)) {
+      for(var i=0; i < control.length; i++) {
+        this.appendChild(control[i]);
+      }
+    } else {
       this.private.children.push(control);
       this.nativeView('addSubview',control.nativeView);
       control.fireEvent('parent-attached', [this]);
@@ -63,9 +64,9 @@ module.exports = (function() {
    */
   Container.prototype.removeChild = function(control) {
     this.fireEvent('remove', element);
-    if(this.private.children.indexOf(control) != -1) 
+    if(this.private.children.indexOf(control) !== -1) {
       this.private.children.splice(children.indexOf(control),1);
-
+    }
     control.nativeView('removeFromSuperview');
     control.fireEvent('parent-dettached', [this]);
     this.fireEvent('child-dettached', [control]);

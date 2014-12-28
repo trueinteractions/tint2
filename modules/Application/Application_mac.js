@@ -20,7 +20,7 @@
   // object, when the node::Buffer object is reclaimed by v8, it calls a release
   // to decremenet the number of handles.  Once no handle exists, objc decides
   // whether it should be reclaimed natively.
-  var pool = process.bridge.objc.NSAutoreleasePool('alloc')('init');
+  process.bridge.objc.NSAutoreleasePool('alloc')('init');
 
   // Include the app schema. app:// registers on NSURL and for node require().
   require('AppSchema')(process.cwd());
@@ -42,7 +42,7 @@
   function Application() {
     var events = {}, 
         name = "", badgeText = "", 
-        dockmenu = null, icon = ""; //, nswindows = [],
+        dockmenu = null, icon = "",
         terminateWhenLastWindowClosed = $.YES;
 
     var $app = $.NSApplication('sharedApplication');
@@ -133,13 +133,17 @@
      * @see Window
      */
     this.resource = function(path) {
-      if(path.indexOf('app:///') === -1) path = 'app:///' + path.replace("app://","");
+      if(path.indexOf('app:///') === -1) {
+        path = 'app:///' + path.replace("app://","");
+      }
       var url = $.NSURL('URLWithString',$(path.toString()));
       var data = $.NSData('dataWithContentsOfURL',url);
       if(data) {
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
       } else {
-        if(application.warn) console.warn('Cannot find resource at: ', path);
+        if(application.warn) {
+          console.warn('Cannot find resource at: ', path);
+        }
         return null;
       }
     }
@@ -204,7 +208,9 @@
       function(e) {
         icon = e;
         e = util.makeNSImage(e);
-        if(e) $app('setApplicationIconImage', e);
+        if(e) {
+          $app('setApplicationIconImage', e);
+        }
       }
     );
 
@@ -241,7 +247,13 @@
      */
     util.def(this, 'visible',
       function() { return $app('isHidden') === $.NO ? true : false; },
-      function(e) { if(e) $app('unhide',$app); else $app('hide', $app); }
+      function(e) { 
+        if(e) {
+          $app('unhide',$app); 
+        } else  {
+          $app('hide', $app);
+        } 
+      }
     );
 
     /**

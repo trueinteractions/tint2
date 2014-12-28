@@ -102,31 +102,6 @@ module.exports = (function() {
   );
 
   // TODO: Not supported on Win, perhaps investigate differences in behavior and replicate?
-  util.def(Button.prototype, 'style',
-    function() { return this.private.buttonStyle; },
-    function(type) {
-      this.private.buttonStyle = type;
-      if(type === "normal") {
-        this.nativeView('setBezelStyle',$.NSTexturedRoundedBezelStyle);
-      } else if (type === "rounded") {
-        this.nativeView('setBezelStyle',$.NSRoundedBezelStyle);
-      } else if (type === "square") {
-        this.nativeView('setBezelStyle',$.NSThickSquareBezelStyle);
-      } else if (type === "disclosure") {
-        this.nativeView('setBezelStyle', $.NSDisclosureBezelStyle);
-      } else if (type === "shadowless") {
-        this.nativeView('setBezelStyle', $.NSShadowlessSquareBezelStyle);
-      } else if (type === "circular") {
-        this.nativeView('setBezelStyle', $.NSCircularBezelStyle);
-      } else if (type === "recessed") {
-        this.nativeView('setBezelStyle', $.NSRecessedBezelStyle);
-      } else if (type === "help") { 
-        this.nativeView('setBezelStyle', $.NSHelpButtonBezelStyle);
-      }
-    }
-  );
-
-  // TODO: Not supported on Win, perhaps investigate differences in behavior and replicate?
   util.def(Button.prototype, 'showBorderOnHover',
     function() { return this.nativeView('showsBorderOnlyWhileMouseInside') ? true : false; },
     function(e) { this.nativeView('setShowsBorderOnlyWhileMouseInside', e ? true : false ); }
@@ -164,7 +139,9 @@ module.exports = (function() {
       this.fireEvent('property-change', ['image', e]);
       this.private.img = e;
       e = util.makeNSImage(e);
-      if(e) this.nativeView('setImage', e);
+      if(e) {
+        this.nativeView('setImage', e);
+      }
     }
   );
 
