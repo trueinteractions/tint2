@@ -157,8 +157,13 @@ module.exports = (function() {
     }
 
     this.nativeViewClass = nativeViewExtended;
-    this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
-    this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
+
+    this.addEventListener('parent-attached', function(p) { 
+      this.private.parent = p; 
+    }.bind(this));
+    this.addEventListener('parent-dettached', function() { 
+      this.private.parent = null; 
+    }.bind(this));
   }
 
   /**
@@ -343,8 +348,7 @@ module.exports = (function() {
       }
       var bnds = convY(this.nativeView('frame'), this.nativeView('superview')('frame'));
       var offsetY = 0;
-      if(this.nativeView('superview')('isEqual',this.nativeView('window')('contentView'))
-          && bnds.origin.y === -1) {
+      if(this.nativeView('superview')('isEqual',this.nativeView('window')('contentView')) && bnds.origin.y === -1) {
         offsetY = 1;
       }
         
@@ -447,7 +451,7 @@ module.exports = (function() {
    */
   Control.prototype.removeEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(event == "mouseenter" ||   event == "mouseexit" || event == "mousemove") {
+    if(event === "mouseenter" ||   event === "mouseexit" || event === "mousemove") {
       this.private.needsMouseTracking--;
       if(this.private.needsMouseTracking === 0) {
         this.nativeView('removeTrackingArea',this.private.trackingArea);
