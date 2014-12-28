@@ -109,7 +109,7 @@ module.exports = (function() {
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
     get:function() { return this.nativeView.Opacity; },
-    set:function(e) { this.nativeView.Opacity = e ? true : false; }
+    set:function(e) { this.nativeView.Opacity = e; }
   });
 
    Object.defineProperty(Control.prototype, 'visible', {
