@@ -1467,7 +1467,7 @@ module.exports = (function() {
         wh = hwb[1] / 100,
         bl = hwb[2] / 100,
         ratio = wh + bl;
-    var i, v, f, n, r, b;
+    var i, v, f, n, r, b, g;
 
     // wh + bl cant be > 1
     if (ratio > 1) {

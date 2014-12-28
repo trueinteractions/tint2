@@ -4,7 +4,6 @@ module.exports = (function() {
   }
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
-  var utilities = require('Utilities');
   var utils = require('Utilities');
   var Color = require('Color');
 
@@ -21,11 +20,11 @@ module.exports = (function() {
 
     function fireEvent(event, args) {
       if(events[event]) {
-        (events[event]).forEach(function(item,index,arr) { 
+        (events[event]).forEach(function(item) { 
           item.apply(null,args);
         });
       }
-    }
+    };
 
     this.addEventListener = function(event, func) { 
       if(!events[event]) {
@@ -35,18 +34,18 @@ module.exports = (function() {
     };
 
     this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) != -1) {
+      if(events[event] && events[event].indexOf(func) !== -1) {
         events[event].splice(events[event].indexOf(func), 1); 
       }
     };
 
     Object.defineProperty(this, "title", {
       get:function() { return title; },
-      set:function(e) { title = e }
+      set:function(e) { title = e; }
     });
 
     Object.defineProperty(this, "message", {
-      get:function() { return message },
+      get:function() { return message; },
       set:function(e) { message = e; }
     });
 

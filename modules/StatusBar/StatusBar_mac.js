@@ -147,7 +147,7 @@ module.exports = (function() {
 
   // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'highlight', {
-    get:function() { return this.native('highlightMode') == $.YES ? true : false; },
+    get:function() { return this.native('highlightMode') === $.YES ? true : false; },
     set:function(e) { this.native('setHighlightMode', e ? $.YES : $.NO); }
   });
 
@@ -196,15 +196,12 @@ module.exports = (function() {
   Object.defineProperty(StatusBar.prototype, 'custom', {
     get:function() { return this.private.custom; },
     set:function(e) {
-      if(e instanceof Container) {
-        this.private.custom = e;
-        this.nativeView = e.nativeView;
-        if(this.length === -1) {
-          this.length = 22; // set a default.
-        }
-        return this.native('setView',e.nativeView);
+      this.private.custom = e;
+      this.nativeView = e.nativeView;
+      if(this.length === -1) {
+        this.length = 22; // set a default.
       }
-      else throw new Error("The passed in object was not a valid container or control.");
+      return this.native('setView',e.nativeView);
     }
   });
 
