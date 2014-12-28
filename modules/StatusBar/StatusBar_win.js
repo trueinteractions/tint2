@@ -34,24 +34,24 @@ module.exports = (function() {
         item.apply(null,args);
       });
     }
-  }
+  };
 
   StatusBar.prototype.addEventListener = function(event, func) { 
     if(!this.private.events[event]) {
       this.private.events[event] = []; 
     }
     this.private.events[event].push(func); 
-  }
+  };
 
   StatusBar.prototype.removeEventListener = function(event, func) { 
     if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) {
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
     }
-  }
+  };
 
   StatusBar.prototype.close = function() { 
     this.native.Dispose();
-  }
+  };
 
   // TODO: Remove this, its deprecated in OSX and unsupported in Windows.
   Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
@@ -72,7 +72,7 @@ module.exports = (function() {
   // TODO: Remove this, its deprecated in OSX and unsupported in Windows.
   Object.defineProperty(StatusBar.prototype, 'length', {
     get:function() { return 22; },
-    set:function(e) { }
+    set:function() { }
   });
 
   // TODO: Better more native way of handling this then converting to context menu
@@ -104,8 +104,8 @@ module.exports = (function() {
   });
 
   Object.defineProperty(StatusBar.prototype, 'title', {
-    get:function() { this.private.title = e; },
-    set:function(e) { return this.private.title; }
+    get:function() { return this.private.title; },
+    set:function(e) { this.private.title = e; }
   });
 
   Object.defineProperty(StatusBar.prototype, 'enabled', {
@@ -126,10 +126,10 @@ module.exports = (function() {
   });
 
   // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
-  Object.defineProperty(StatusBar.prototype, 'custommenu', {
-    get:function() { },
-    set:function(e) { }
-  });
+  //Object.defineProperty(StatusBar.prototype, 'custommenu', {
+  //  get:function() { },
+  //  set:function(e) { }
+  //});
 
   global.__TINT.StatusBar = StatusBar;
   return StatusBar;

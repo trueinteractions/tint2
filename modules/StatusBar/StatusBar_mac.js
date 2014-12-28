@@ -1,7 +1,6 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
-  var Container = require('Container');
   var Menu = require('Menu');
 
   if(!$.TintStatusBarDelegate) {
@@ -35,7 +34,6 @@ module.exports = (function() {
    */
   function StatusBar() {
     this.private = {events:{},submenu:null,imgOn:null,img:null,custom:null,custommenu:null};
-
     var id = (Math.random()*100000).toString();
     process.bridge.objc.delegates[id] = this;
     var delegate = tintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
