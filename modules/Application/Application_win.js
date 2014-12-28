@@ -91,10 +91,11 @@
     }
 
     function fireEvent(event, args) {
-      if(events[event])
+      if(events[event]) {
         (events[event]).forEach(function(item) {
           item.apply(null,args);
         });
+      }
     }
 
     this.addEventListener = function(event, func) { 
@@ -191,7 +192,7 @@
         var coll = this.native.Windows.GetEnumerator();
         while (coll.MoveNext()) {
           var _win = coll.Current;
-          if(_win.Visibility == $.System.Windows.Visibility.Visible) {
+          if(_win.Visibility === $.System.Windows.Visibility.Visible) {
             visible = true;
           }
         }
@@ -208,9 +209,9 @@
           }
         }
       }
-    )
+    );
 
-    this.attention = function(critical) {
+    this.attention = function() {
       var coll = this.native.Windows.GetEnumerator();
       while (coll.MoveNext()) {
         var _win = coll.Current;
@@ -229,7 +230,7 @@
       };
     };
 
-    function GetActiveWindow() {
+    function getActiveWindow() {
       var coll = this.native.Windows.GetEnumerator();
       while (coll.MoveNext()) {
         var _win = coll.Current;
@@ -242,44 +243,44 @@
     }
 
     this.paste = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.Paste.Execute(null,_win);
       }
     };
     this.copy = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.Copy.Execute(null,_win);
       }
     };
     this.cut = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.Cut.Execute(null,_win);
       }
     };
     this.undo = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.Undo.Execute(null,_win);
       }
     };
     this.redo = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.Redo.Execute(null,_win);
       }
     };
     this.delete = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.Delete.Execute(null,_win);
       }
     };
     this.selectAll = function() {
-      var _win = GetActiveWindow();
-      if(_win != null) {
+      var _win = getActiveWindow();
+      if(_win !== null) {
         $.System.Windows.Input.ApplicationCommands.SelectAll.Execute(null,_win);
       }
     };

@@ -33,10 +33,16 @@ module.exports = (function() {
     var textChanged = function() { 
       setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
     }.bind(this);
+
     this.native.addEventListener('GotFocus', focus);
     this.native.addEventListener('LostFocus', lostFocus);
-    this.native.addEventListener('TextChanged', textChanged);
+    if(this.nativeClass === $.System.Windows.Controls.TextBox) {
+      this.native.addEventListener('TextChanged', textChanged);
+    } else {
+      this.native.addEventListener('TextInput', textChanged);
+    }
     this.native.addEventListener('KeyUp', keyUp);
+
     this.private.callbacks.push(focus);
     this.private.callbacks.push(lostFocus);
     this.private.callbacks.push(textChanged);

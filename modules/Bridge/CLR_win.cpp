@@ -1150,22 +1150,23 @@ public:
 
   static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    System::String^ event = stringV82CLR(args[1]->ToString());
-    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::String^ event = stringV82CLR(args[1]->ToString());
+      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
+      CLREventHandler ^handle = gcnew CLREventHandler();
+      Persistent<Function> js_callback = Persistent<Function>::New(callback);
+      handle->SetCallback(js_callback);
+      js_callback.MakeWeak(handle->GetReference(), CLREventHandleCleanupJS);
+      System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
+      System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
+      eInfo->AddEventHandler(target, d);
 
-    CLREventHandler ^handle = gcnew CLREventHandler();
-    Persistent<Function> js_callback = Persistent<Function>::New(callback);
-    handle->SetCallback(js_callback);
-    js_callback.MakeWeak(handle->GetReference(), CLREventHandleCleanupJS);
-
-    System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
-    System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
-
-    System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
-    eInfo->AddEventHandler(target, d);
-
-    return scope.Close(Undefined());
+      return scope.Close(Undefined());
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
   }
 
 };

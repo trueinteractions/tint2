@@ -15,8 +15,9 @@ module.exports = (function() {
     TextInput.call(this, options);
 
     this.native.addEventListener('PreviewMouseDown', function() {
-      if(this.private.contextMenu)
+      if(this.private.contextMenu) {
         this.private.contextMenu.IsOpen = !this.private.contextMenu.IsOpen;
+      }
     }.bind(this));
     this.private.menu = null;
     this.private.contextMenu = null;
