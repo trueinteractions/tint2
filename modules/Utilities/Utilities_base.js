@@ -1279,8 +1279,8 @@ module.exports = (function() {
 
   function rgb2hwb(rgb) {
     var r = rgb[0], g = rgb[1], b = rgb[2];
-        var h = rgb2hsl(rgb)[0],
-        var w = 1/255 * Math.min(r, Math.min(g, b)),
+        var h = rgb2hsl(rgb)[0];
+        var w = 1/255 * Math.min(r, Math.min(g, b));
         b = 1 - 1/255 * Math.max(r, Math.max(g, b));
     return [h, w * 100, b * 100];
   }

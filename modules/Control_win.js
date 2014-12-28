@@ -38,7 +38,9 @@ module.exports = (function() {
     });
 
     var addNativeEventHandlers = function() {
-      if(options.nonStandardEvents) return;
+      if(options.nonStandardEvents) {
+        return;
+      }
       var rightMouseUp = function() { this.fireEvent('rightmouseup'); }.bind(this);
       var rightMouseDown = function() { this.fireEvent('rightmousedown'); }.bind(this);
       var leftMouseDown =  function() { this.fireEvent('leftmousedown'); }.bind(this);
@@ -92,22 +94,23 @@ module.exports = (function() {
 
     // Incase the base native type needs to be remapped we need to re-apply all of the 
     // subsequent settings back to "normal".
-    this.private.remapStates = function(oldNative) {
+    this.private.remapStates = function() {
       var keys = Object.keys(this.private.states);
-      for(var i=0; i < keys.length; i++)
+      for(var i=0; i < keys.length; i++) {
         this[keys[i]] = this.private.states[keys[i]];
+      }
       addNativeEventHandlers();
     }.bind(this);
 
     this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
-    this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
+    this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
   }
 
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
     get:function() { return this.nativeView.Opacity; },
     set:function(e) { 
-      this.private.states['alpha'] = e;
+      this.private.states.alpha = e;
       return this.nativeView.Opacity = e; 
     }
   });
@@ -115,9 +118,12 @@ module.exports = (function() {
    Object.defineProperty(Control.prototype, 'visible', {
       get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
       set:function(e) {
-        this.private.states['visible'] = e;
-        if(e) this.native.Visibility = $.System.Windows.Visibility.Visible;
-        else this.native.Visibility = $.System.Windows.Visibility.Hidden;
+        this.private.states.visible = e;
+        if(e) {
+          this.native.Visibility = $.System.Windows.Visibility.Visible;
+        } else {
+          this.native.Visibility = $.System.Windows.Visibility.Hidden;
+        }
       }
     });
 
@@ -138,15 +144,11 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnWindow', {
     get:function() {
-      if(this.native.GetType().Equals($.System.Windows.Window)) {
-        target = this.native;
-      } else {
-        if(!this.private.parent) {
-          return null;
-        }
+      if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
+        return null;
       }
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
-      if(target == null) {
+      if(target === null) {
         return null;
       }
       var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
@@ -174,7 +176,7 @@ module.exports = (function() {
   Control.prototype.fireEvent = function(event, args) {
     try {
       event = event.toLowerCase();
-      var returnvalue = undefined;
+      var returnvalue;
       if(!this.private.events[event]) {
         this.private.events[event] = [];
       }
