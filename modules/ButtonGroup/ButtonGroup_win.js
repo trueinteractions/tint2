@@ -2,7 +2,7 @@ module.exports = (function() {
   if(global.__TINT.ButtonGroup) {
     return global.__TINT.ButtonGroup;
   }
-  var utilities = require('Utilities');
+
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
