@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.DateWell) {
+    return global.__TINT.DateWell;
+  }
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.objc;
@@ -17,7 +20,8 @@ module.exports = (function() {
   function DateWell(options) {
     options = options || {};
     options.delegates = options.delegates || [];
-    this.nativeClass = this.nativeViewClass = (this.nativeViewClass || $.NSDatePicker);
+    this.nativeClass = this.nativeClass || $.NSDatePicker);
+    this.nativeViewClass = this.nativeViewClass || $.NSDatePicker;
     Container.call(this, options);
     this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
     this.nativeView('setBordered', $.NO);
@@ -41,7 +45,7 @@ module.exports = (function() {
 
   // TODO: Not supported on win, what do we do?
   Object.defineProperty(DateWell.prototype, 'transparent', {
-    get:function() { return this.nativeView('drawsBackground') == $.YES ? true : false; },
+    get:function() { return this.nativeView('drawsBackground') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setDrawsBackground',e ? $.YES : $.NO); }
   });
 
@@ -53,21 +57,29 @@ module.exports = (function() {
 
   // TODO: Not supported on win, what do we do?
   Object.defineProperty(DateWell.prototype, 'border', {
-    get:function() { return this.nativeView('isBordered') == $.YES ? true : false; },
+    get:function() { return this.nativeView('isBordered') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setBordered',e ? $.YES : $.NO); }
   });
   // TODO: Not supported on win, what do we do?
   Object.defineProperty(DateWell.prototype, 'style', {
     get:function() {
       var nsstyle = this.nativeView('datePickerStyle');
-      if(nsstyle == $.NSTextFieldAndStepperDatePickerStyle) return "step";
-      else if (nsstyle == $.NSClockAndCalendarDatePickerStyle) return "clock";
-      else return "default";
+      if(nsstyle === $.NSTextFieldAndStepperDatePickerStyle) {
+        return "step";
+      } else if (nsstyle === $.NSClockAndCalendarDatePickerStyle) {
+        return "clock";
+      } else {
+        return "default";
+      }
     },
     set:function(e) {
-      if(e == "step") this.nativeView('setDatePickerStyle', $.NSTextFieldAndStepperDatePickerStyle);
-      else if (e == "clock") this.nativeView('setDatePickerStyle', $.NSClockAndCalendarDatePickerStyle);
-      else if (e == "default") this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
+      if(e === "step") {
+        this.nativeView('setDatePickerStyle', $.NSTextFieldAndStepperDatePickerStyle);
+      } else if (e === "clock") { 
+        this.nativeView('setDatePickerStyle', $.NSClockAndCalendarDatePickerStyle);
+      } else if (e === "default") {
+        this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
+      }
     }
   });
 
@@ -80,7 +92,7 @@ module.exports = (function() {
    * @default false
    */
   Object.defineProperty(DateWell.prototype, 'range', {
-    get:function() { return this.nativeView('datePickerMode') == $.NSRangeDateMode ? true : false; },
+    get:function() { return this.nativeView('datePickerMode') === $.NSRangeDateMode ? true : false; },
     set:function(e) { this.nativeView('setDatePickerMode', e ? $.NSRangeDateMode : $.NSSingleDateMode); }
   });
 
@@ -94,12 +106,10 @@ module.exports = (function() {
    */
   Object.defineProperty(DateWell.prototype, 'value', {
     get:function() { return new Date(this.nativeView('dateValue')('timeIntervalSince1970')*1000); },
-    set:function(e) {
-      var d = new Date(e);
-      this.nativeView('setDateValue',$(d));
-    }
+    set:function(e) { this.nativeView('setDateValue',$(new Date(e))); }
   });
 
+  global.__TINT.DateWell = DateWell;
   return DateWell;
 })();
 

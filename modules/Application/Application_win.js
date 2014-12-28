@@ -167,7 +167,7 @@
           }
         }
       }
-    });
+    );
 
     util.def(this, 'exitAfterWindowsClose',
       function() { return this.native.ShutdownMode === $.System.Windows.ShutdownMode.OnLastWindowClose; },

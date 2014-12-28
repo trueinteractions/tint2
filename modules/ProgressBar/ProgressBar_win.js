@@ -2,7 +2,6 @@ module.exports = (function() {
   if(global.__TINT.ProgressBar) {
     return global.__TINT.ProgressBar;
   }
-  var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
@@ -46,14 +45,22 @@ module.exports = (function() {
   Object.defineProperty(ProgressBar.prototype, 'size', {
     get:function() { 
       var s = this.native.Height;
-      if (s == 5) return "small";
-      else if (s == 20) return "large";
-      else return "normal";
+      if (s === 5) {
+        return "small";
+      } else if (s === 20) {
+        return "large";
+      } else {
+        return "normal";
+      }
     },
     set:function(e) { 
-      if (e == "small") this.native.Height = 5;
-      else if (e == "large") this.native.Height = 20;
-      else this.native.Height = 10;
+      if (e === "small") {
+        this.native.Height = 5;
+      } else if (e === "large") {
+        this.native.Height = 20;
+      } else {
+        this.native.Height = 10;
+      }
     }
   });
 /*
