@@ -19,7 +19,7 @@ module.exports = (function() {
   function mouseDown(self, cmd, events) {
     this.fireEvent('mousedown');
     self.super('mouseDown',events);
-    if(options.mouseDownBlocks) {
+    if(this.private.options.mouseDownBlocks) {
       this.fireEvent('mouseup');
       this.fireEvent('click');
     }
@@ -69,6 +69,18 @@ module.exports = (function() {
   function Control(options) {
     options = options || {};
     options.delegates = options.delegates || [];
+
+    Object.defineProperty(this, 'private', {
+      configurable:false,
+      enumerable:false,
+      value:{
+        events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
+        user:{width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        states:{}, options:options
+      }
+    });
+
     if(!options.nonStandardEvents) {
       options.delegates = options.delegates.concat([
         /**
@@ -127,17 +139,6 @@ module.exports = (function() {
         ['mouseMoved:','v@:@', mouseMoved.bind(this)]
       ]);
     }
-
-    Object.defineProperty(this, 'private', {
-      configurable:false,
-      enumerable:false,
-      value:{
-        events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
-        user:{width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-        constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-        states:{}
-      }
-    });
 
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
     options.delegates.forEach(function(item) {
