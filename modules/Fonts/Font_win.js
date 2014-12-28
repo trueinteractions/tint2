@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Font) {
+    return global.__TINT.Font;
+  }
   var $ = process.bridge.dotnet;
   var $utilities = require('Utilities');
 
@@ -22,27 +25,39 @@ module.exports = (function() {
 
     function rebuildNativeFont(obj, useFamily) {
       var family = new $.System.Windows.Media.FontFamily(useFamily ? obj.private.family : obj.private.face);
-
       var style = $.System.Windows.FontStyles.Normal;
-      if(obj.private.italic) style = $.System.Windows.FontStyles.Italic;
+      if(obj.private.italic) {
+        style = $.System.Windows.FontStyles.Italic;
+      }
 
       var weights = $.System.Windows.FontWeights;
       var weight = obj.private.weight;
 
-      if(weight < 100) weight = weights.Thin;
-      else if (weight < 200) weight = weights.UltraLight;
-      else if (weight < 300) weight = weights.Light;
-      else if (weight < 400) weight = weights.Regular;
-      else if (weight < 500) weight = weights.Medium;
-      else if (weight < 600) weight = weights.SemiBold;
-      else if (weight < 700) weight = weights.Bold;
-      else if (weight < 800) weight = weights.UltraBold;
-      else if (weight < 900) weight = weights.Heavy;
-      else if (weight < 999) weight = weights.UltraBlack;
-      else weight = weights.Regular;
+      if(weight < 100) {
+        weight = weights.Thin;
+      } else if (weight < 200) {
+        weight = weights.UltraLight;
+      } else if (weight < 300) {
+        weight = weights.Light;
+      } else if (weight < 400) {
+        weight = weights.Regular;
+      } else if (weight < 500) {
+        weight = weights.Medium;
+      } else if (weight < 600) {
+        weight = weights.SemiBold;
+      } else if (weight < 700) {
+        weight = weights.Bold;
+      } else if (weight < 800) {
+        weight = weights.UltraBold;
+      } else if (weight < 900) {
+        weight = weights.Heavy;
+      } else if (weight < 999) {
+        weight = weights.UltraBlack;
+      } else {
+        weight = weights.Regular;
+      }
 
       var stretch = obj.private.expanded ? $.System.Windows.FontStretches.Expanded : $.System.Windows.FontStretches.Medium;
-
       var fallback = new $.System.Windows.Media.FontFamily('Arial');
 
       obj.native = new $.System.Windows.Media.Typeface(family,style,weight,stretch,fallback);
@@ -52,12 +67,10 @@ module.exports = (function() {
       en.MoveNext();
       obj.private.family = en.Current;
 
-
       var faceNames = obj.native.FaceNames;
       var en2 = faceNames.Values.GetEnumerator();
       en2.MoveNext();
       obj.private.face = obj.private.family + " " + en2.Current;
-
     }
 
     rebuildNativeFont(this);
@@ -176,5 +189,7 @@ module.exports = (function() {
   //  get:function() { }
   //});
   //Font.fontsInFamily = function(family) { }
+
+  global.__TINT.Font = Font;
   return Font;
 })();

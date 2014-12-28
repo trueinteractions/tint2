@@ -8,17 +8,16 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
 
-  function Window(NativeObjectClass, NativeViewClass, options) {
+  function Window(options) {
     options = options || {};
     options.width = options.width || 500;
     options.height = options.height || 500;
     
-    application.private.windowCount++;
+    global.application.private.windowCount++;
 
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Container.call(this, $.System.Windows.Window, $.AutoLayout.AutoLayoutPanel, options);
+    this.nativeClass = this.nativeClass || $.System.Windows.Window;
+    this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
+    Container.call(this, options);
 
     this.native.Content = this.nativeView;
 

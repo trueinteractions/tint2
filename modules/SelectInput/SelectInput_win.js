@@ -1,24 +1,15 @@
 module.exports = (function() {
+  if(global.__TINT.SelectInput) {
+    return global.__TINT.SelectInput;
+  }
   var $ = process.bridge.dotnet;
   var TextInput = require('TextInput');
 
-  function SelectInput(NativeObjectClass, NativeViewClass, options) {
+  function SelectInput(options) {
     options = options || {};
-
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      TextInput.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      TextInput.call(this, $.System.Windows.Controls.ComboBox, $.System.Windows.Controls.ComboBox, options);
-
-      this.native.addEventListener('GotFocus', function() { 
-        setTimeout(function() { this.fireEvent('inputstart'); }.bind(this),5);
-      }.bind(this));
-      this.native.addEventListener('LostFocus', function() { this.fireEvent('inputend'); }.bind(this));
-      this.native.addEventListener('TextInput', function() { 
-        setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
-      }.bind(this));
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
+    TextInput.call(this, options);
     this.native.IsEditable = true;
     this.native.addEventListener('SelectionChanged', function() {
       this.fireEvent('change');
@@ -58,5 +49,6 @@ module.exports = (function() {
     return this.native.Items.GetItemAt(index);
   }
 
+  global.__TINT.SelectInput = SelectInput;
   return SelectInput;
 })();

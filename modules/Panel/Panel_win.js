@@ -1,16 +1,17 @@
 module.exports = (function() {
+  if(global.__TINT.Panel) {
+    return global.__TINT.Panel;
+  }
   var Window = require('Window');
   var $ = process.bridge.dotnet;
 
-  function Panel(NativeObjectClass, NativeViewClass, options) {
+  function Panel(options) {
     options = options || {};
     options.width = options.width || 200;
     options.height = options.height || 250;
-
-    if(NativeObjectClass)
-      Window.call(this, NativeObjectClass, NativeViewClass, options);
-    else
-      Window.call(this, $.System.Windows.Window, $.AutoLayout.AutoLayoutPanel, options);
+    this.nativeClass = this.nativeClass || $.System.Windows.Window;
+    this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
+    Window.call(this, options);
 
     this.native.WindowStyle = $.System.Windows.WindowStyle.ToolWindow;
 
@@ -46,5 +47,6 @@ module.exports = (function() {
     set:function(e) { }
   });*/
 
+  global.__TINT.Panel = Panel;
   return Panel;
 })();

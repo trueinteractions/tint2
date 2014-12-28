@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.StatusBar) {
+    return global.__TINT.StatusBar;
+  }
   var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
   var Container = require('Container');
@@ -22,23 +25,28 @@ module.exports = (function() {
 
     this.private.showContextMenu = function() {
       this.private.contextMenu.IsOpen = true;
-    }
+    };
   }
 
   StatusBar.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) 
-      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+    if(this.private.events[event]) {
+      (this.private.events[event]).forEach(function(item) { 
+        item.apply(null,args);
+      });
+    }
   }
 
   StatusBar.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) 
+    if(!this.private.events[event]) {
       this.private.events[event] = []; 
+    }
     this.private.events[event].push(func); 
   }
 
   StatusBar.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) {
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
+    }
   }
 
   StatusBar.prototype.close = function() { 
@@ -78,11 +86,14 @@ module.exports = (function() {
         this.private.submenu = e;
         this.private.contextMenu = new $.System.Windows.Controls.ContextMenu();
 
-        for(var i=0; i < e.children.length ; i++)
+        for(var i=0; i < e.children.length ; i++) {
           this.private.contextMenu.Items.Add(e.children[i].native);
+        }
 
         this.native.addEventListener('MouseDown',this.private.showContextMenu.bind(this));
-      } else throw new Error("The passed in object was not a valid menu object.");
+      } else {
+        throw new Error("The passed in object was not a valid menu object.");
+      }
     }
   });
 
@@ -119,6 +130,8 @@ module.exports = (function() {
     get:function() { },
     set:function(e) { }
   });
+
+  global.__TINT.StatusBar = StatusBar;
   return StatusBar;
 
 })();

@@ -1,22 +1,22 @@
 module.exports = (function() {
+  if(global.__TINT.Table) {
+    return global.__TINT.Table;
+  }
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var TextInput = require('TextInput');
-  if(!Color) Color = require('Color');
+  var Color = require('Color');
 
   var oddColor = $.System.Windows.SystemColors.ControlBrush;
   var evenColor = $.System.Windows.SystemColors.ControlLightLightBrush;
   var highlightColor = $.System.Windows.SystemColors.HighlightBrush;
 
-  function Table(NativeObjectClass, NativeViewClass, options) {
+  function Table(options) {
     options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Grid;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Grid;
+    Container.call(this, options);
 
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Grid, $.System.Windows.Controls.Grid, options);
-    }
     this.private.findColumn = function(name) {
       var column = null;
       var ndx = -1;
@@ -405,6 +405,6 @@ module.exports = (function() {
     }
   });
 
-
+  global.__TINT.Table = Table;
   return Table;
 })();

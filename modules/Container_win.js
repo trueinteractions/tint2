@@ -1,18 +1,17 @@
 module.exports = (function() {
+  if(global.__TINT.Container) {
+    return global.__TINT.Container;
+  }
   var Control = require('Control');
   var utilities = require('Utilities');
   var $ = process.bridge.dotnet;
   var parseValue = utilities.parseUnits;
 
-  function Container(NativeObjectClass, NativeViewClass, options) {
+  function Container(options) {
     options = options || {};
-
-    if(NativeObjectClass)
-      Control.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Control.call(this, $.AutoLayout.AutoLayoutPanel, $.AutoLayout.AutoLayoutPanel, options);
-    }
+    this.nativeClass = this.nativeClass || $.AutoLayout.AutoLayoutPanel;
+    this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
+    Container.call(this, options);
     this.private.children = [];
   }
 
@@ -22,9 +21,11 @@ module.exports = (function() {
   Object.defineProperty(Container.prototype, 'children', { get:function() { return this.private.children; } });
 
   Container.prototype.appendChild = function(control) {
-    if(Array.isArray(control))
-      for(var i=0; i < control.length; i++) this.appendChild(control[i]);
-    else {
+    if(Array.isArray(control)) {
+      for(var i=0; i < control.length; i++) {
+        this.appendChild(control[i]);
+      }
+    } else {
       this.private.children.push(control);
       this.nativeView.InternalChildren.Add(control.native);
       control.fireEvent('parent-attached', [this]);
@@ -34,8 +35,9 @@ module.exports = (function() {
 
   Container.prototype.removeChild = function(control) {
     this.fireEvent('remove', element);
-    if(this.private.children.indexOf(control) != -1) 
+    if(this.private.children.indexOf(control) !== -1) {
       this.private.children.splice(children.indexOf(control),1);
+    }
     this.nativeView.InternalChildren.Remove(control.native);
     control.fireEvent('parent-dettached', [this]);
     this.fireEvent('child-dettached', [control]);
@@ -50,6 +52,6 @@ module.exports = (function() {
       this.private.parent.native.ScrollToHorizontalOffset(x);
     }
   }
-
+  global.__TINT.Container;
   return Container;
 })();

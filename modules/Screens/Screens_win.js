@@ -1,8 +1,9 @@
 module.exports = (function() {
+  if(global.__TINT.Screens) {
+    return global.__TINT.Screens;
+  }
   var $ = process.bridge.dotnet;
   $.import('System.Windows.Forms.dll');
-
-  var $utilities = require('Utilities');
 
   function Screens() {
     var scaleFactor = $.System.Windows.SystemParameters.Dpi/96;
@@ -17,14 +18,14 @@ module.exports = (function() {
         bounds:{
           x:Math.round(frame.X/scaleFactor),
           y:Math.round(frame.Y/scaleFactor),
-          width:Math.round(frame.Width/scaleFactor -5),
-          height:Math.round(frame.Height/scaleFactor -5)
+          width:Math.round(frame.Width/scaleFactor - 5),
+          height:Math.round(frame.Height/scaleFactor - 5)
         },
         visibleBounds:{
           x:Math.round(visibleFrame.X/scaleFactor),
           y:Math.round(visibleFrame.Y/scaleFactor),
-          width:Math.round(visibleFrame.Width/scaleFactor -5),
-          height:Math.round(visibleFrame.Height/scaleFactor -5)
+          width:Math.round(visibleFrame.Width/scaleFactor - 5),
+          height:Math.round(visibleFrame.Height/scaleFactor - 5)
         }
       };
       return obj;
@@ -47,6 +48,7 @@ module.exports = (function() {
     });
   }
 
-  return new Screens();
+  global.__TINT.Screens = new Screens();
+  return global.__TINT.Screens;
 
 })();

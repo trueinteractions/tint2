@@ -1,12 +1,17 @@
 module.exports = (function() {
+  if(global.__TINT.Toolbar) {
+    return global.__TINT.Toolbar;
+  }
   var Container = require('Container');
   var $ = process.bridge.dotnet;
   process.bridge.dotnet.import('System.Xaml.dll');
 
-  function Toolbar() {
-    var options = {};
-    options.initViewOnly = true;
-    Container.call(this, $.System.Windows.Controls.DockPanel, $.System.Windows.Controls.DockPanel, options);
+  function Toolbar(options) {
+    options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.DockPanel;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.DockPanel;
+    Container.call(this, options);
+    
     this.private.toolbar = $.System.Xaml.XamlServices.Parse("<ToolBar xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"><ToolBar.Resources><Style TargetType=\"{x:Type ToolBarPanel}\"><Setter Property=\"Orientation\" Value=\"Vertical\"/></Style></ToolBar.Resources></ToolBar>");
     this.nativeView.InternalChildren.Add(this.private.toolbar);
     this.private.grid = new $.System.Windows.Controls.Grid();
@@ -81,5 +86,6 @@ module.exports = (function() {
     set:function(e) { }
   });
 
+  global.__TINT.Toolbar = Toolbar;
   return Toolbar;
 })();

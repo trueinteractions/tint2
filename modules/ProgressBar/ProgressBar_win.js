@@ -1,17 +1,17 @@
 module.exports = (function() {
+  if(global.__TINT.ProgressBar) {
+    return global.__TINT.ProgressBar;
+  }
   var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
-  function ProgressBar(NativeObjectClass, NativeViewClass, options) {
+  function ProgressBar(options) {
     options = options || {};
 
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.ProgressBar, $.System.Windows.Controls.ProgressBar, options);
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.ProgressBar;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ProgressBar;
+    Container.call(this, options);
 
     this.native.Maximum = 1.0;
     this.native.Minimum = 0.0;
@@ -69,6 +69,7 @@ module.exports = (function() {
     }
   });
 */
+  global.__TINT.ProgressBar = ProgressBar;
   return ProgressBar;
 
 })();

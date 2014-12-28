@@ -1,17 +1,18 @@
 module.exports = (function() {
+  if(global.__TINT.Button) {
+    return global.__TINT.Button;
+  }
+
   var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
-  function Button(NativeObjectClass, NativeViewClass, options) {
+  function Button(options) {
     options = options || {};
-
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Button, $.System.Windows.Controls.Button, options);
-    }
+  
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Button;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Button;
+    Container.call(this, options);
 
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
@@ -162,6 +163,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Button = Button;
   return Button;
 
 })();

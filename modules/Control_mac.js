@@ -147,11 +147,11 @@ module.exports = (function() {
     nativeViewExtended.register();
 
     if(!options.doNotInitialize) {
+      this.nativeView = nativeViewExtended('alloc')('init');
       if(this.nativeClass === this.nativeViewClass) {
-        this.native = this.nativeView = nativeViewExtended('alloc')('init');
+        this.native = this.nativeView;
       } else {
         this.native = this.nativeClass('alloc')('init');
-        this.nativeView = nativeViewExtended('alloc')('init');
       }
       this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     }

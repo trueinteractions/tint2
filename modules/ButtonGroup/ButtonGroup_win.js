@@ -1,18 +1,19 @@
 module.exports = (function() {
+  if(global.__TINT.ButtonGroup) {
+    return global.__TINT.ButtonGroup;
+  }
   var utilities = require('Utilities');
   var Container = require('Container');
   var Button = require('Button');
   var $ = process.bridge.dotnet;
 
-  function ButtonGroup(NativeObjectClass, NativeViewClass, options) {
+  function ButtonGroup(options) {
     options = options || {};
 
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.StackPanel, $.System.Windows.Controls.StackPanel, options);
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.StackPanel;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.StackPanel;
+    Container.call(this, options);
+
     //TODO: Switch to ToggleButton in WPF for more common capability.
     this.native.Orientation = $.System.Windows.Controls.Horizontal;
     this.native.BorderBrush = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.DarkGray);
@@ -82,6 +83,7 @@ module.exports = (function() {
     this.native.Children.Remove(button.native);
   }
 
+  global.__TINT.ButtonGroup = ButtonGroup;
   return ButtonGroup;
 
 })();

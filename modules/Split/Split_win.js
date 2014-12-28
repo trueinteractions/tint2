@@ -1,4 +1,8 @@
 module.exports = (function() {
+  if(global.__TINT.Split) {
+    return global.__TINT.Split;
+  }
+
   var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
@@ -40,15 +44,12 @@ module.exports = (function() {
     }
   }
 
-  function Split(NativeObjectClass, NativeViewClass, options) {
+  function Split(options) {
     options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Grid;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Grid;
+    Container.call(this, options);
 
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Grid, $.System.Windows.Controls.Grid, options);
-    }
     this.private.orientation = "vertical";
     this.private.backupAppend = Container.prototype.appendChild;
     this.private.backupRemove = Container.prototype.removeChild;
@@ -282,6 +283,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Split = Split;
   return Split;
 
 })();

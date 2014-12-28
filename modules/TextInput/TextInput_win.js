@@ -1,48 +1,46 @@
 module.exports = (function() {
+  if(global.__TINT.TextInput) {
+    return global.__TINT.TextInput;
+  }
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var Color = require('Color');
 
-  function TextInput(NativeObjectClass, NativeViewClass, options) {
+  function TextInput(options) {
     options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.TextBox;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.TextBox;
+    Container.call(this, options);
+
     var first = true;
-
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.TextBox, $.System.Windows.Controls.TextBox, options);
-
-      this.addEventListener('keyup',function() { 
-        if(first) {
-          this.fireEvent('inputstart');
-          first = false;
-        }
-      }.bind(this));
-
-      var keyUp = function() {
-        if(first) {
-          this.fireEvent('inputstart');
-          first = false;
-        }
-      }.bind(this);
-      var focus = function() { first = true; }.bind(this);
-      var lostFocus = function() { 
-        this.fireEvent('inputend');
+    this.addEventListener('keyup',function() { 
+      if(first) {
+        this.fireEvent('inputstart');
         first = false;
-      }.bind(this);
-      var textChanged = function() { 
-        setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
-      }.bind(this);
-      this.native.addEventListener('GotFocus', focus);
-      this.native.addEventListener('LostFocus', lostFocus);
-      this.native.addEventListener('TextChanged', textChanged);
-      this.native.addEventListener('KeyUp', keyUp);
-      this.private.callbacks.push(focus);
-      this.private.callbacks.push(lostFocus);
-      this.private.callbacks.push(textChanged);
-      this.private.callbacks.push(keyUp);
-    }
+      }
+    }.bind(this));
+    var keyUp = function() {
+      if(first) {
+        this.fireEvent('inputstart');
+        first = false;
+      }
+    }.bind(this);
+    var focus = function() { first = true; }.bind(this);
+    var lostFocus = function() { 
+      this.fireEvent('inputend');
+      first = false;
+    }.bind(this);
+    var textChanged = function() { 
+      setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
+    }.bind(this);
+    this.native.addEventListener('GotFocus', focus);
+    this.native.addEventListener('LostFocus', lostFocus);
+    this.native.addEventListener('TextChanged', textChanged);
+    this.native.addEventListener('KeyUp', keyUp);
+    this.private.callbacks.push(focus);
+    this.private.callbacks.push(lostFocus);
+    this.private.callbacks.push(textChanged);
+    this.private.callbacks.push(keyUp);
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;
     this.private.previousBorder = this.native.BorderBrush;
@@ -139,5 +137,6 @@ module.exports = (function() {
     set:function(e) { this.nativeView.VerticalScrollBarVisibility = e ?  $.System.Windows.Controls.ScrollBarVisibility.Auto :  $.System.Windows.Controls.ScrollBarVisibility.Hidden; }
   });
 
+  global.__TINT.TextInput = TextInput;
   return TextInput;
 })();

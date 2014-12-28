@@ -1,4 +1,8 @@
 module.exports = (function() {
+  if(global.__TINT.Notification) {
+    return global.__TINT.Notification;
+  }
+
   var Color = require('Color');
   var utils = require('Utilities');
   var $$ = process.bridge;
@@ -11,12 +15,25 @@ module.exports = (function() {
         timeoutHandle = null, callbacks = [];
 
     function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+      if(events[event]) {
+        (events[event]).forEach(function(item) { 
+          item.apply(null,args); 
+        });
+      }
     }
 
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
-    
+    this.addEventListener = function(event, func) { 
+      if(!events[event]) {
+        events[event] = [];
+      }
+      events[event].push(func); 
+    };
+
+    this.removeEventListener = function(event, func) { 
+      if(events[event] && events[event].indexOf(func) != -1) {
+        events[event].splice(events[event].indexOf(func), 1); 
+      }
+    };
 
     Object.defineProperty(this, 'title', {
       get:function() { return titlestring; },
@@ -44,8 +61,12 @@ module.exports = (function() {
     });
 
     this.dispatch = function() {
-      if(!titlestring || titlestring == "") return false;
-      if(!textstring || textstring == "") return false;
+      if(!titlestring || titlestring === "") {
+        return false;
+      }
+      if(!textstring || textstring === "") {
+        return false;
+      }
 
       var w = new $.System.Windows.Window();
       w.Width = 350;
@@ -78,12 +99,14 @@ module.exports = (function() {
       w.Content.addEventListener('PreviewMouseDown', mouseDown);
       callbacks.push(mouseDown);
 
-      //var bgcolor = new Color('transparent');
       var bgcolor = new Color('#f7f7f7');
 
       var img;
-      if(application.icon) img = utils.makeImage(application.icon);
-      else img = utils.makeImage('info');
+      if(global.application.icon) {
+        img = utils.makeImage(application.icon);
+      } else {
+        img = utils.makeImage('info');
+      }
       img.Stretch = $.System.Windows.Media.Stretch.UniformToFill;
       img.Width = 50;
       img.Height = 50;
@@ -97,6 +120,7 @@ module.exports = (function() {
         fireEvent('click',['button']);
         animateOut();
       }.bind(this);
+
       var btn = new $.System.Windows.Controls.Button();
       btn.addEventListener('PreviewMouseDown', mouseDownSecond);
       callbacks.push(mouseDownSecond);
@@ -160,9 +184,12 @@ module.exports = (function() {
   }
   
   Notification.requestPermission = function(callback){
-    if(callback) callback({handleEvent:function() { return true; }});
+    if(callback) {
+      callback({handleEvent:function() { return true; }});
+    }
     return true;
   }
 
+  global.__TINT.Notification = Notification;
   return Notification;
 })();

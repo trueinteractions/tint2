@@ -1,20 +1,9 @@
 module.exports = (function() {
   var $ = process.bridge.dotnet;
-  var utilities = require('Utilities');
-  var Control = require('Control');
   var TextInput = require('TextInput');
 
-  function SearchInput(NativeObjectClass, NativeViewClass, options)  {
-    options = options || {};
-
-    if(NativeObjectClass)
-      TextInput.call(this, NativeObjectClass, NativeViewClass, options);
-    //else
-    //  TextInput.call(this, $.NSSearchField, $.NSSearchField, options);
-
-    this.private.searchButton = null;
-    this.private.cancelButton = null;
-
+  function SearchInput(options)  {
+    throw new Error('Not implemented.');
   }
 
   SearchInput.prototype = Object.create(TextInput.prototype);

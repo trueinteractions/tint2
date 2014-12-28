@@ -1,17 +1,19 @@
 module.exports = (function() {
+  if(global.__TINT.DropDown) {
+    return global.__TINT.DropDown;
+  }
+
   var TextInput = require('TextInput');
   var utils = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function DropDown(NativeObjectClass, NativeViewClass, options) {
+  function DropDown(options) {
     options = options || {};
 
-    if(NativeObjectClass)
-      TextInput.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      TextInput.call(this, $.System.Windows.Controls.ComboBox, $.System.Windows.Controls.ComboBox, options);
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
+    TextInput.call(this, options);
+
     this.native.addEventListener('PreviewMouseDown', function() {
       if(this.private.contextMenu)
         this.private.contextMenu.IsOpen = !this.private.contextMenu.IsOpen;
@@ -65,5 +67,6 @@ module.exports = (function() {
     set:function(e) { this.native.SelectionBoxItem = e.toString(); }
   });
 
+  global.__TINT.DropDown = DropDown;
   return DropDown;
 })();

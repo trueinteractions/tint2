@@ -1,35 +1,41 @@
 module.exports = (function() {
   console.assert(typeof application !== "undefined", 'You must use require(\'Application\') prior to using any GUI components.');
   console.assert(process.bridge.dotnet, 'Failure to establish dotnet bridge, use require(\'Application\') prior to using window components.');
-  
+
+  if(global.__TINT.Control) {
+    return global.__TINT.Control;
+  }
+
   var $ = process.bridge.dotnet;
-  var utils = require('Utilities_base');
+  var utils = require('Utilities');
 
   function wpfDeviceToLogicalPx(w,p) {
     var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
     return t.Transform(p);
   }
 
-  /* Control Class */
-  function Control(NativeObjectClass, NativeViewClass, options) {
+  function Control(options) {
     options = options || {};
     options.delegates = options.delegates || [];
 
-    this.nativeClassView = NativeViewClass;
-    this.nativeClass = NativeObjectClass;
   
-    this.nativeView = new NativeViewClass();
-    if(options.initViewOnly)
+    this.nativeView = new this.nativeViewClass();
+    if(this.nativeClass === this.nativeViewClass) {
       this.native = this.nativeView;
-    else
-      this.native = new NativeObjectClass();
+    } else {
+      this.native = new this.nativeClass();
+    }
 
-    this.private = {
-      events:{}, layoutConstraints:[], parent:null, trackingArea:null, needsMouseTracking:0,
-      user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-      states:{}, callbacks:[]
-    };
+    Object.defineProperty(this,'private', {
+      enumerable:false,
+      configurable:false,
+      value:{
+        events:{}, layoutConstraints:[], parent:null, trackingArea:null, needsMouseTracking:0,
+        user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        states:{}, callbacks:[]
+      }
+    });
 
     var addNativeEventHandlers = function() {
       if(options.nonStandardEvents) return;
@@ -117,12 +123,14 @@ module.exports = (function() {
 
   Object.defineProperty(Control.prototype,'boundsOnScreen', {
     get:function() {
-      if(!this.native.GetType().Equals($.System.Windows.Window) 
-        && !this.private.parent) return null;
+      if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
+        return null;
+      }
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
-      if(target == null) return null;
-      var bounds = this.nativeView.TransformToVisual(target)
-                    .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      if(target == null) {
+        return null;
+      }
+      var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
       var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
    }
@@ -133,12 +141,15 @@ module.exports = (function() {
       if(this.native.GetType().Equals($.System.Windows.Window)) {
         target = this.native;
       } else {
-        if(!this.private.parent) return null;
+        if(!this.private.parent) {
+          return null;
+        }
       }
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
-      if(target == null) return null;
-      var bounds = this.nativeView.TransformToVisual(target)
-                    .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      if(target == null) {
+        return null;
+      }
+      var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
       var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X - target.Left), y:Math.round(p.Y - target.Top), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
@@ -150,10 +161,11 @@ module.exports = (function() {
       if(this.native.GetType().Equals($.System.Windows.Window)) {
         return this.boundsOnWindow;
       } else {
-        if(!this.private.parent) return null;
+        if(!this.private.parent) {
+          return null;
+        }
       }
-      var bounds = this.nativeView.TransformToVisual(target)
-                    .TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
+      var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
       var p = this.nativeView.TransformToAncestor(target).Transform(new $.System.Windows.Point(0,0));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
@@ -163,8 +175,10 @@ module.exports = (function() {
     try {
       event = event.toLowerCase();
       var returnvalue = undefined;
-      if(!this.private.events[event]) this.private.events[event] = [];
-      (this.private.events[event]).forEach(function(item,index,arr) { 
+      if(!this.private.events[event]) {
+        this.private.events[event] = [];
+      }
+      (this.private.events[event]).forEach(function(item) { 
         returnvalue = item.apply(null, args) || returnvalue; 
       });
       return returnvalue;
@@ -173,21 +187,22 @@ module.exports = (function() {
       console.error(e.stack);
       process.exit(1);
     }
-  }
+  };
 
   Control.prototype.addEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(!this.private.events[event])
+    if(!this.private.events[event]) {
       this.private.events[event] = []; 
+    }
     this.private.events[event].push(func);
-  }
+  };
 
   Control.prototype.removeEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(this.private.events[event] && 
-        this.private.events[event].indexOf(func) != -1) 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) {
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
-  }
+    }
+  };
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
 
@@ -203,8 +218,9 @@ module.exports = (function() {
       target = this.private.parent.nativeView.Child;
     } else if (this.private.parent.nativeView.AddLayoutConstraint) {
       target = this.private.parent.nativeView;
-    } else
+    } else {
       return;
+    }
 
     var firstItem = (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView);
     var secondItem = (layoutObject.secondItem ? layoutObject.secondItem.nativeView : null);
@@ -220,12 +236,12 @@ module.exports = (function() {
         (layoutObject.constant ? layoutObject.constant : 0) );
     this.private.layoutConstraints.push(layoutObject);
     return constraint;
-  }
+  };
 
   Control.prototype.removeLayoutConstraint = function(n) {
     this.private.parent.nativeView.RemoveLayoutConstraint(n);
     this.private.layoutConstraints.splice(this.private.layoutConstraints.indexOf(n),1);
-  }
+  };
 
   // control, name, percentName, percentFunc, scalarName, scalarFunc, notallowed
   utils.createLayoutProperty(Control.prototype, 'top', 'bottom', utils.identity, 'top', utils.identity, ['bottom','height']);
@@ -237,5 +253,6 @@ module.exports = (function() {
   utils.createLayoutProperty(Control.prototype, 'middle', 'middle', utils.identity, 'middle', utils.identity, null);
   utils.createLayoutProperty(Control.prototype, 'center', 'center', utils.identity, 'center', utils.identity, null);
 
+  global.__TINT.Control = Control;
   return Control;
 })();

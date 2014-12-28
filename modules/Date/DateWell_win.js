@@ -1,17 +1,19 @@
 module.exports = (function() {
+  if(global.__TINT.DateWell) {
+    return global.__TINT.DateWell;
+  }
+
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
 
-  function DateWell(NativeObjectClass, NativeViewClass, options) {
+  function DateWell(options) {
     options = options || {};
 
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Calendar, $.System.Windows.Controls.Calendar, options);
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Calendar;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Calendar;
+    Container.call(this, options);
+
     this.native.SelectedDate = new Date();
     this.nativeView.SelectionMode = $.System.Windows.Controls.CalendarSelectionMode.SingleDate;
   }
@@ -73,6 +75,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.DateWell = DateWell;
   return DateWell;
 })();
 

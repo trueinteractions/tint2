@@ -1,18 +1,18 @@
 module.exports = (function() {
+  if(global.__TINT.Scroll) {
+    return global.__TINT.Scroll;
+  }
   var utilities = require('Utilities');
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
 
-  function Scroll(NativeObjectClass, NativeViewClass, options) {
+  function Scroll(options) {
     options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.ScrollViewer;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ScrollViewer;
+    Container.call(this, options);
 
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.ScrollViewer, $.System.Windows.Controls.ScrollViewer, options);
-    }
     this.native.HorizontalContentAlignment = $.System.Windows.HorizontalAlignment.Left;
     this.native.VerticalAlignment = $.System.Windows.HorizontalAlignment.Top;
     this.private.border = null;
@@ -77,6 +77,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Scroll = Scroll;
   return Scroll;
 
 })();

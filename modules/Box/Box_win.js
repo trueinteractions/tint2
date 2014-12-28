@@ -1,18 +1,19 @@
 module.exports = (function() {
+  if(global.__TINT.Box) {
+    return global.__TINT.Box;
+  }
+
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
 
-  function Box(NativeObjectClass, NativeViewClass, options) {
+  function Box(options) {
     options = options || {};
 
-    if(NativeObjectClass) {
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    }
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Border, $.System.Windows.Controls.Border, options);
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Border;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Border;
+    Container.call(this, options);
+
     this.native.CornerRadius = new $.System.Windows.CornerRadius(5);
     var targetColor = $.System.Windows.SystemColors.ControlLightBrush.Clone();
     targetColor.Opacity = 0.4;
@@ -92,5 +93,6 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Box = Box;
   return Box;
 })();

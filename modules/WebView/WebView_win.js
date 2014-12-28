@@ -1,16 +1,17 @@
 module.exports = (function() {
+  if(global.__TINT.WebView) {
+    return global.__TINT.WebView;
+  }
+
   var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
-  function WebView(NativeObjectClass, NativeViewClass, options) {
+  function WebView(options) {
     options = options || {};
-    if(NativeObjectClass && NativeObjectClass.type == '#')
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.WebBrowser, $.System.Windows.Controls.WebBrowser, options);
-    }
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.WebBrowser;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.WebBrowser;
+    Container.call(this, options);
 
     var firstLoad = true;
     this.private.previousTitle = "";
@@ -19,7 +20,7 @@ module.exports = (function() {
 
     this.private.checkForNewTitle = function() {
       var currentTitle = this.nativeView.InvokeScript("eval",['document.title']);
-      if(this.private.previousTitle != currentTitle) {
+      if(this.private.previousTitle !== currentTitle) {
         this.private.previousTitle = currentTitle;
         this.fireEvent('title');
       }
@@ -28,10 +29,9 @@ module.exports = (function() {
     this.nativeView.addEventListener('LoadCompleted', function() { 
       this.private.loading = false;
       setTimeout(function() {
-        if(!this.nativeView.Source)
+        if(!this.nativeView.Source) {
           this.fireEvent('error');
-        else
-        {
+        } else {
           this.nativeView.InvokeScript("eval",['window.postMessageToHost = function(e) { window.external.postMessageBack(e); };']);
           this.fireEvent('title');
           this.fireEvent('load');
@@ -43,10 +43,8 @@ module.exports = (function() {
       if(firstLoad) {
         // establish the activex instance, store a ref for later.
         this.private.comObject = this.native._axIWebBrowser2;
-
         // Use the activeX object to silent error messages.
         this.private.comObject.GetType().InvokeMember("Silent", $.System.Reflection.BindingFlags.SetProperty, null, this.private.comObject, [ true ], null, null, null);
-        
         firstLoad = false;
       } else {
         this.fireEvent('unload');
@@ -70,9 +68,7 @@ module.exports = (function() {
 
     // If we don't have a document loaded IE will throw an error if anything
     // other than a location is set, so we'll set an intiial location to prevent this.
-    this.nativeView.Navigate(new $.System.Uri("http://127.0.0.1:" + 
-                              application.private.appSchemaPort + 
-                              "/this-is-a-blank-page-for-ie-fix.html"));
+    this.nativeView.Navigate(new $.System.Uri("http://127.0.0.1:" + application.private.appSchemaPort + "/this-is-a-blank-page-for-ie-fix.html"));
   }
 
   WebView.prototype = Object.create(Container.prototype);
@@ -83,11 +79,7 @@ module.exports = (function() {
   WebView.prototype.reload = function() { this.nativeView.Refresh(); }
   WebView.prototype.stop = function() { 
     this.private.loading = false;
-    this.private.comObject.GetType().InvokeMember("Stop", 
-      $.System.Reflection.BindingFlags.InvokeMember,
-      null,
-      this.private.comObject,
-      null, null, null, null);
+    this.private.comObject.GetType().InvokeMember("Stop", $.System.Reflection.BindingFlags.InvokeMember, null, this.private.comObject, null, null, null, null);
     this.fireEvent('cancel');
   }
 
@@ -115,44 +107,9 @@ module.exports = (function() {
         "      favicon = nodeList[i].getAttribute('href');\n"+
         "return favicon; }()";
       return this.execute(exeCmd);**/
+      return null;
     }
   });
-
-  // TODO: Support
-  Object.defineProperty(WebView.prototype, 'allowAnimatedImages', {
-    get:function() { },
-    set:function(e) { }
-  });
-
-  // TODO: Support
-  Object.defineProperty(WebView.prototype, 'allowAnimatedImagesToLoop', {
-    get:function() { },
-    set:function(e) { }
-  });
-
-  // TODO: Support
-  Object.defineProperty(WebView.prototype, 'allowJava', {
-    get:function() { },
-    set:function(e) { }
-  });
-
-  // TODO: Support
-  Object.defineProperty(WebView.prototype, 'allowJavascript', {
-    get:function() { },
-    set:function(e) { }
-  });
-
-  // TODO: Support
-  Object.defineProperty(WebView.prototype, 'allowPlugins', {
-    get:function() { },
-    set:function(e) { }
-  });
-
-  // Doesnt work on OSX, no path to support on IE.
-  //Object.defineProperty(WebView.prototype, 'privateBrowsing', {
-  //  get:function() {  },
-  //  set:function(e) {  }
-  //});
 
   // Indeterminate on windows.
   Object.defineProperty(WebView.prototype, 'progress', {
@@ -191,23 +148,11 @@ module.exports = (function() {
     set:function(e) { if(e == false) this.stop(); }
   });
 
-  //TODO: Enable support for this?  This requires bouncing IE's HWND
-  // to a directX surface and potentially cleaning out the 'transparent'
-  // color base then presenting it to a D3Dimage, more work required.
-  Object.defineProperty(WebView.prototype, 'transparent', {
-    get:function() { },
-    set:function(e) { }
-  });
-
-  // Broken on OSX, not working on Windows.
-  //Object.defineProperty(WebView.prototype, 'textScale', {
-  //  get:function() {  },
-  //  set:function(e) {  }
-  //});
 
   Object.defineProperty(WebView.prototype, 'title', { 
     get:function() { return this.execute("document.title"); }
   });
 
+  global.__TINT.WebView = WebView;
   return WebView;
 })();

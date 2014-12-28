@@ -1,19 +1,20 @@
 module.exports = (function() {
+  if(global.__TINT.ImageWell) {
+    return global.__TINT.ImageWell;
+  }
+
   var Container = require('Container');
   var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
 
-  function ImageWell(NativeObjectClass, NativeViewClass, options) {
+  function ImageWell(options) {
     options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Image;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Image;
+    Container.call(this, options);
+
     this.animates = false;
     this.alignment = "center";
-
-    if(NativeObjectClass)
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Image, $.System.Windows.Controls.Image, options);
-    }
     this.scale = "constrain";
   }
 
@@ -67,7 +68,8 @@ module.exports = (function() {
       else if(e == "none") this.nativeView.Stretch = $.System.Windows.Media.None;
     }
   });
-  
+
+  global.__TINT.ImageWell = ImageWell;
   return ImageWell;
 })();
 

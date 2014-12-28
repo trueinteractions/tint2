@@ -1,11 +1,16 @@
 module.exports = (function() {
+  if(global.__TINT.Slider) {
+    return global.__TINT.Slider;
+  }
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
   function Slider(options) {
     options = options || {};
-    options.initViewOnly = true;
-    Container.call(this, $.System.Windows.Controls.Slider, $.System.Windows.Controls.Slider, options);
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Slider;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Slider;
+    Container.call(this, options);
+
     this.native.Minimum = 0;
     this.native.Maximum = 1;
     this.native.Value = 0;
@@ -26,6 +31,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Slider = Slider;
   return Slider;
 
 })();
