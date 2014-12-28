@@ -48,7 +48,7 @@ module.exports = (function() {
       {
         this.private.fullscreen = true;
          this.fireEvent('enter-fullscreen');
-      } else if(this.private.fullscreen == true && 
+      } else if(this.private.fullscreen === true && 
                 (this.native.WindowState != $.System.Windows.WindowState.Maximized || 
                   this.native.WindowStyle != $.System.Windows.WindowStyle.None)) 
       {
@@ -121,7 +121,7 @@ module.exports = (function() {
   };
 
   Object.defineProperty(Window.prototype, 'frame', {
-    get:function() { return this.native.WindowStyle == $.System.Windows.WindowStyle.SingleBorderWindow; },
+    get:function() { return this.native.WindowStyle === $.System.Windows.WindowStyle.SingleBorderWindow; },
     set:function(e) {
       if(e) this.native.WindowStyle = $.System.Windows.WindowStyle.SingleBorderWindow;
       else this.native.WindowStyle = $.System.Windows.WindowStyle.None;
@@ -173,7 +173,7 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'toolbar', {
     get:function() { return this.private.toolbar; },
     set:function(e) {
-      if(this.frame == false && e) {
+      if(this.frame === false && e) {
         if(application.warn) console.warn('Cannot add a toolbar to a window that has Window.frame = false;');
         return;
       }
@@ -208,32 +208,46 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'state', {
     get:function() { 
-      if(this.private.fullscreen) return "fullscreen";
-      else if(this.native.WindowState == $.System.Windows.WindowState.Maximized) return "maximized";
-      else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) return "minimized";
-      else return "normal";
+      if(this.private.fullscreen) {
+        return "fullscreen";
+      } else if(this.native.WindowState === $.System.Windows.WindowState.Maximized) {
+        return "maximized";
+      } else if(this.native.WindowState === $.System.Windows.WindowState.Minimized) {
+        return "minimized";
+      } else {
+        return "normal";
+      }
     },
     set:function(e) {
-      if(e != "fullscreen" && this.private.fullscreen) {
-        if(this.private.previousStyle != "") this.native.WindowStyle = this.private.previousStyle;
-        else this.native.WindowStyle = $.System.Windows.WindowStyle.SingleBorderWindow;
+      if(e !== "fullscreen" && this.private.fullscreen) {
+        if(this.private.previousStyle !== "") {
+          this.native.WindowStyle = this.private.previousStyle;
+        } else {
+          this.native.WindowStyle = $.System.Windows.WindowStyle.SingleBorderWindow;
+        }
 
-        if(this.private.previousState != "") this.native.WindowState = this.private.previousState;
-        else this.native.WindowState = $.System.Windows.WindowState.Normal;
+        if(this.private.previousState !== "") {
+          this.native.WindowState = this.private.previousState;
+        } else {
+          this.native.WindowState = $.System.Windows.WindowState.Normal;
+        }
 
-        if(this.private.previousResize != "") this.native.ResizeMode = this.private.previousResize;
-        else this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
+        if(this.private.previousResize !== "") {
+          this.native.ResizeMode = this.private.previousResize;
+        } else {
+          this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
+        }
 
         this.private.fullscreen = false;
       } 
       
-      if(e == 'maximized')
+      if(e === 'maximized') {
         this.native.WindowState = $.System.Windows.WindowState.Maximized;
-      else if (e == 'normal')
+      } else if (e === 'normal') {
         this.native.WindowState = $.System.Windows.WindowState.Normal;
-      else if (e == 'minimized')
+      } else if (e === 'minimized') {
         this.native.WindowState = $.System.Windows.WindowState.Minimized;
-      else if (e == 'fullscreen' && !this.private.fullscreen) {
+      } else if (e === 'fullscreen' && !this.private.fullscreen) {
         this.native.previousStyle = this.native.WindowStyle;
         this.native.previousState = this.native.WindowState;
         this.native.previousResize = this.native.ResizeMode;
@@ -254,7 +268,7 @@ module.exports = (function() {
     get:function() { return Math.round(this.native.Top); },
     set:function(e) {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
-      if(e == 'center') {
+      if(e === 'center') {
         this.native.Left = workingArea.width/2 - this.native.Width/2;
         this.native.Top = workingArea.height/2 - this.native.Height/2;
       } else {
@@ -268,7 +282,7 @@ module.exports = (function() {
     get:function() { return Math.round(this.native.Left); },
     set:function(e) {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
-      if(e == 'center') {
+      if(e === 'center') {
         this.native.Left = workingArea.width/2 - this.native.Width/2;
         this.native.Top = workingArea.height/2 - this.native.Height/2;
       } else {
@@ -280,18 +294,12 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'width', {
     get:function() { return Math.round(this.native.ActualWidth); },
-    set:function(e) {
-        e = utilities.parseUnits(e);
-        this.native.Width = e;
-    }
+    set:function(e) { this.native.Width = utilities.parseUnits(e); }
   });
 
   Object.defineProperty(Window.prototype, 'height', {
     get:function() { return Math.round(this.native.ActualHeight); },
-    set:function(e) {
-        e = utilities.parseUnits(e);
-        this.native.Height = e;
-    }
+    set:function(e) { this.native.Height = utilities.parseUnits(e); }
   });
 
   //TODO: Implement me
@@ -386,7 +394,7 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
     set:function(e) {
-      if(e == 'auto') {
+      if(e === 'auto') {
         this.private.background = 'auto';
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
       } else {
