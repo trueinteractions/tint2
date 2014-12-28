@@ -369,7 +369,7 @@ module.exports = (function() {
       if(!this.private.events[event]) {
         this.private.events[event] = [];
       }
-      (this.private.events[event]).forEach(function(item,index,arr) { 
+      (this.private.events[event]).forEach(function(item) { 
         returnvalue = item.apply(null, args) || returnvalue; 
       });
       return returnvalue;
@@ -406,7 +406,7 @@ module.exports = (function() {
    */
   Control.prototype.addEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(event == "mouseenter" || event == "mouseexit" || event == "mousemove") {
+    if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
       this.private.needsMouseTracking++;
       if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
         addTrackingArea.apply(this,null);
