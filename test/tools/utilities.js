@@ -3,11 +3,15 @@ require('Application');
 var os = require('os');
 var fs = require('fs');
 var ismac = os.platform().toLowerCase() == "darwin";
-var log = null;
-var exit = null;
+var log = function(e) { process.stdout.write(e); };
+var exit = function(code) { process.exit(code); };
 var isappveyor = process.env['APPVEYOR'] ? true : false;
 var debugappveyor = true;
 var debug = debugappveyor && isappveyor;
+var successMark = 'Pass';
+var failureMark = 'Fail';
+var $;
+var nl = '\r\n';
 
 if(ismac) {
   process.bridge.objc.import('Foundation');
@@ -15,18 +19,13 @@ if(ismac) {
   process.bridge.objc.import('Cocoa');
   process.bridge.objc.import('AppKit');
   process.bridge.objc.import('CoreGraphics');
-  var $ = process.bridge.objc;
-  var successMark = '✓';
-  var failureMark = '✕';
-  var nl = '\n';
-  log = function(e) { process.stdout.write(e); };
-  exit = function(code) { process.exit(code); };
+  $ = process.bridge.objc;
+  successMark = '✓';
+  failureMark = '✕';
+  nl = '\n';
 } else {
-  var $ = process.bridge.dotnet;
-  var successMark = 'Pass';
-  var failureMark = 'Fail';
+  $ = process.bridge.dotnet;
   var $w32 = process.bridge.win32;
-  var nl = '\r\n';
   log = function(e) {
     e = e.toString();
     while(e.length > 512) {
@@ -38,8 +37,6 @@ if(ismac) {
   exit = function(code) {
     if(debug) fs.writeSync(1, 'process.exit'); // fix for appveyor
     if(debug) fs.writeSync(2, 'code '+code);  // fix for appveyor
-    //fs.fsyncSync(1);
-    //fs.fsyncSync(2);
     process.exit(code);
   }
 }

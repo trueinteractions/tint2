@@ -17,11 +17,9 @@ module.exports = (function() {
    * @param {string} value A string representing the color (css type values)
    */
   function Color(type) {
-
     if(type instanceof Color) {
       this.native = type.native;
-    }
-    else if(type.type == '@') {
+    } else if(type.type === '@') {
       this.native = type;
     } else {
       var rgba = utilities.parseColor(type);

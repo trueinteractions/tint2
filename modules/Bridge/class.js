@@ -42,8 +42,8 @@ module.exports = (function() {
     var ptrFromClassName = core.objc_getClass(className);
     console.assert(ptrFromClassName !== null && ptrFromClassName.address() !== 0,
       'Class.getClass cannot identify the unidentified class: ',ptrFromClassName, ' pointer:',ptrFromClassName.address());
-    if (!rtn) rtn = core.wrapValue(ptrFromClassName, '#');
-    if (onto) rtn.onto = onto;
+    rtn = rtn || core.wrapValue(ptrFromClassName, '#');
+    rtn.onto = onto || rtn.onto;
     return rtn;
   }
 
@@ -55,7 +55,9 @@ module.exports = (function() {
    */
   Class.prototype.extend = function(className, extraBytes) {
     var c = core.objc_allocateClassPair(this.classPointer, className, extraBytes || 0);
-    if (c.isNull()) throw new Error('New Class could not be allocated: ' + className);
+    if (c.isNull()) {
+      throw new Error('New Class could not be allocated: ' + className);
+    }
     var rtn = core.wrapValue(c, '#');
     rtn.onto = this.onto;
     return rtn;
@@ -93,8 +95,9 @@ module.exports = (function() {
 
     // flatten the type
     var typeStr = parsed[0] + parsed[1].join('');
-    if (!core.class_addMethod(ptr, selRef, funcPtr, typeStr))
+    if (!core.class_addMethod(ptr, selRef, funcPtr, typeStr)) {
       throw new Error('method "' + sel + '" was NOT sucessfully added to Class: ' + this.getName());
+    }
 
     // Added to prevent garbage collection, the class is discarded the added methods will be.
     // if these do not exist the the new method will error on execution due to lost callbacks.
@@ -179,8 +182,9 @@ module.exports = (function() {
       types[1].unshift('?');
       args.unshift(struct.ref());
       funcptr = supre ? core.objc_msgSendSuper_stret : core.objc_msgSend_stret;
-    } else
+    } else {
       struct = null;
+    }
 
     sel += funcptr.address();
     this.msgCache[sel] = this.msgCache[sel] || core.createUnwrapperFunction(funcptr,types);
@@ -189,7 +193,9 @@ module.exports = (function() {
       sel = (this.msgCache[sel]).apply(null, args);
       return struct || sel;
     } catch (e) {
-      if (!e.hasOwnProperty('stack')) throw exception(e);
+      if (!e.hasOwnProperty('stack')) {
+        throw exception(e);
+      }
       else throw e;
     }
   }
@@ -225,9 +231,10 @@ module.exports = (function() {
     }
     // Also set the alignment when needed. This formula is from Apple's docs:
     //   For variables of any pointer type, pass log2(sizeof(pointer_type)).
-    if (!alignment) alignment = Math.log(size) / Math.log(2);
-    if (!core.class_addIvar(this.classPointer, name, size, alignment, type))
+    alignment = alignment || ( Math.log(size) / Math.log(2) );
+    if (!core.class_addIvar(this.classPointer, name, size, alignment, type)) {
       throw new Error('ivar "' + name + '" was NOT sucessfully added to Class: ' + this.getName());
+    }
     return this;
   }
 
@@ -273,7 +280,9 @@ module.exports = (function() {
    */
   Class.prototype.getSuperclass = function() {
     var superclassPointer = core.class_getSuperclass(this.classPointer);
-    if (superclassPointer.isNull()) return null;
+    if (superclassPointer.isNull()) {
+      return null;
+    }
     return core.wrapValue(superclassPointer,'#');
   }
 
@@ -286,8 +295,13 @@ module.exports = (function() {
     var rtn=[], c=this, md=maxDepth || 1, depth=0;
     while (c && depth++ < md) {
       console.assert(c.classPointer, 'class pointer is undefined. ',c.classPointer);
-      var ms=core.copyMethodList(c.classPointer); i=ms.length;
-      while (i--) if (!~rtn.indexOf(ms[i])) rtn.push(ms[i]);
+      var ms=core.copyMethodList(c.classPointer); 
+      var i=ms.length;
+      while (i--) {
+        if (!~rtn.indexOf(ms[i])) {
+          rtn.push(ms[i]);
+        }
+      }
       c = c.getSuperclass();
     }
     return sort === false ? rtn : rtn.sort();

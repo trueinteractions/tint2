@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Dialog) {
+    return global.__TINT.Dialog;
+  }
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
   var utilities = require('Utilities');
@@ -12,18 +15,32 @@ module.exports = (function() {
       mainButton = null, 
       auxButton = null,
       suppression = null,
-      suppressionChecked = false;
+      suppressionChecked = false,
       events = {},
       type = "information",
       title = "",
       message = "";
 
     function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+      if(events[event]) {
+        (events[event]).forEach(function(item,index,arr) { 
+          item.apply(null,args);
+        });
+      }
     }
 
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+    this.addEventListener = function(event, func) { 
+      if(!events[event]) {
+        events[event] = []; 
+      }
+      events[event].push(func);
+    };
+
+    this.removeEventListener = function(event, func) { 
+      if(events[event] && events[event].indexOf(func) != -1) {
+        events[event].splice(events[event].indexOf(func), 1); 
+      }
+    };
 
     Object.defineProperty(this, "title", {
       get:function() { return title; },
@@ -63,9 +80,13 @@ module.exports = (function() {
     Object.defineProperty(this, "type", {
       get:function() { return type; },
       set:function(e) {
-        if(e == "warning") type = "warning";
-        else if(e == "critical") type = "critical";
-        else type = "alert";
+        if(e === "warning") {
+          type = "warning";
+        } else if(e === "critical") {
+          type = "critical";
+        } else {
+          type = "alert";
+        }
       }
     });
 
@@ -100,21 +121,20 @@ module.exports = (function() {
       var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
       var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
+      $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
       $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
-
-      var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
-      var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
-      var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
       $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
-
-      var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
       $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
 
 
       var nimg;
-      if(!img && application.icon) nimg = utils.makeImage(application.icon);
-      else if(!img) nimg = utils.makeImage('info');
-      else nimg = utils.makeImage(img);
+      if(!img && application.icon) {
+        nimg = utils.makeImage(application.icon);
+      } else if(!img) {
+        nimg = utils.makeImage('info');
+      } else {
+        nimg = utils.makeImage(img);
+      }
       this.native.image = nimg;
       nimg.Stretch = $.System.Windows.Media.Stretch.UniformToFill;
       nimg.Width = 50;
@@ -199,9 +219,10 @@ module.exports = (function() {
       w.Show();
     }.bind(this);
   }
+
   //Dialog.prototype = Object.create(Control.prototype);
   //Dialog.prototype.constructor = Dialog;
 
-
+  global.__TINT.Dialog = Dialog;
   return Dialog;
 })();

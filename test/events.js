@@ -11,11 +11,9 @@ function baseline() {
 }
 
 /**
- * @see {Notification}
  * @example
  */
 function run($utils) {
-  /* @hidden */ var count = 0;
   var mainWindow = new Window();
   mainWindow.visible = true;
   var buttonNormal = new Button();
