@@ -25,9 +25,9 @@ module.exports = (function() {
       this.fireEvent('close'); 
     }.bind(this);
     var closed = function() {
-      application.private.windowCount--;
+      global.application.private.windowCount--;
       this.fireEvent('closed'); 
-      if(application.exitAfterWindowsClose && application.private.windowCount === 0) {
+      if(global.application.exitAfterWindowsClose && global.application.private.windowCount === 0) {
         process.exit(0);
       }
     }.bind(this);
@@ -173,7 +173,9 @@ module.exports = (function() {
     get:function() { return this.private.toolbar; },
     set:function(e) {
       if(this.frame === false && e) {
-        if(application.warn) console.warn('Cannot add a toolbar to a window that has Window.frame = false;');
+        if(global.application.warn) {
+          console.warn('Cannot add a toolbar to a window that has Window.frame = false;');
+        }
         return;
       }
       if(e) {
