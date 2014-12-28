@@ -16,6 +16,47 @@ module.exports = (function() {
     this.nativeView('addTrackingArea',this.private.trackingArea);
   }
 
+  function mouseDown(self, cmd, events) {
+    this.fireEvent('mousedown');
+    self.super('mouseDown',events);
+    if(options.mouseDownBlocks) {
+      this.fireEvent('mouseup');
+      this.fireEvent('click');
+    }
+  }
+  function mouseUp(self, cmd, events) { 
+    this.fireEvent('mouseup'); 
+    this.fireEvent('click');
+    self.super('mouseUp',events); 
+  }
+  function rightMouseDown(self, cmd, events) { 
+    this.fireEvent('rightmousedown');
+    self.super('rightMouseDown',events); 
+  }
+  function rightMouseUp(self, cmd, events) {
+    this.fireEvent('rightmouseup');
+    self.super('rightMouseUp',events);
+  }
+  function keyDown(self, cmd, events) { 
+    this.fireEvent('keydown');
+    self.super('keyDown',events);
+  }
+  function keyUp(self, cmd, events) { 
+    this.fireEvent('keyup'); 
+    self.super('keyUp',events);
+  }
+  function mouseEntered(self, cmd, events) { 
+    this.fireEvent('mouseenter');
+    self.super('mouseEntered',events);
+  }
+  function mouseExited(self, cmd, events) { 
+    this.fireEvent('mouseexit'); 
+    self.super('mouseExited',events); 
+  }
+  function mouseMoved(self, cmd, events) { 
+    this.fireEvent('mousemove'); 
+    self.super('mouseMoved',events);
+  }
   /**
    * @class Control
    * @description The control class is the base class that provides all common methods used
@@ -35,66 +76,55 @@ module.exports = (function() {
          * @memberof Control
          * @description Fires when a user presses the left mouse button down and before it's released.
          */
-        ['mouseDown:','v@:@', function(self, cmd, events) {
-            this.fireEvent('mousedown');
-            self.super('mouseDown',events);
-            if(options.mouseDownBlocks) {
-              this.fireEvent('mouseup');
-              this.fireEvent('click');
-            }
-        }.bind(this)],
+        ['mouseDown:','v@:@', mouseDown.bind(this)],
         /**
          * @event mouseup
          * @memberof Control
          * @description Fires when a user releases the left mouse button and after the mousedown event.
          */
-        ['mouseUp:','v@:@', function(self, cmd, events) { 
-          this.fireEvent('mouseup'); 
-          this.fireEvent('click');
-          self.super('mouseUp',events); 
-        }.bind(this)],
+        ['mouseUp:','v@:@', mouseUp.bind(this)],
         /**
          * @event rightmousedown
          * @memberof Control
          * @description Fires when a user presses the right mouse button down and before it's released.
          */
-        ['rightMouseDown:','v@:@', function(self, cmd, events) { this.fireEvent('rightmousedown'); self.super('rightMouseDown',events); }.bind(this)],
+        ['rightMouseDown:','v@:@', rightMouseDown.bind(this)],
         /**
          * @event rightmouseup
          * @memberof Control
          * @description Fires when a user releases the right mouse button and after the rightmousedown event.
          */
-        ['rightMouseUp:','v@:@', function(self, cmd, events) { this.fireEvent('rightmouseup'); self.super('rightMouseUp',events); }.bind(this)],
+        ['rightMouseUp:','v@:@', rightMouseUp.bind(this)],
         /**
          * @event keydown
          * @memberof Control
          * @description Fires when a keyboard key is down but before its released.
          */
-        ['keyDown:','v@:@', function(self, cmd, events) { this.fireEvent('keydown'); self.super('keyDown',events); }.bind(this)],
+        ['keyDown:','v@:@', keyDown.bind(this)],
         /**
          * @event keyup
          * @memberof Control
          * @description Fires when a keyboard key is up and after the keydown event.
          */
-        ['keyUp:','v@:@', function(self, cmd, events) { this.fireEvent('keyup'); self.super('keyUp',events); }.bind(this)],
+        ['keyUp:','v@:@', keyUp.bind(this)],
         /**
          * @event mouseenter
          * @memberof Control
          * @description Fires when the mouse cursor enters the visible bounds of the control.
          */
-        ['mouseEntered:','v@:@', function(self, cmd, events) { this.fireEvent('mouseenter'); self.super('mouseEntered',events); }.bind(this)],
+        ['mouseEntered:','v@:@', mouseEntered.bind(this)],
         /**
          * @event mouseexit
          * @memberof Control
          * @description Fires when the mouse cursor leaves the visible bounds of the control.
          */
-        ['mouseExited:','v@:@', function(self, cmd, events) { this.fireEvent('mouseexit'); self.super('mouseExited',events); }.bind(this)],
+        ['mouseExited:','v@:@', mouseExited.bind(this)],
         /**
          * @event mousemove
          * @memberof Control
          * @description Fires when the mouse moves, and only when its moving over the control.
          */
-        ['mouseMoved:','v@:@', function(self, cmd, events) { this.fireEvent('mousemove'); self.super('mouseMoved',events); }.bind(this)]
+        ['mouseMoved:','v@:@', mouseMoved.bind(this)]
       ]);
     }
 
@@ -103,7 +133,7 @@ module.exports = (function() {
       enumerable:false,
       value:{
         events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
-        user:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
+        user:{width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
         constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
         states:{}
       }
@@ -127,7 +157,7 @@ module.exports = (function() {
 
     this.nativeViewClass = nativeViewExtended;
     this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
-    this.addEventListener('parent-dettached', function(p) { this.private.parent = null; }.bind(this));
+    this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
   }
 
   /**
@@ -209,12 +239,15 @@ module.exports = (function() {
    */
   util.def(Control.prototype, 'boundsOnScreen',
     function() {
-      if(!this.nativeView('superview')) return null;
+      if(!this.nativeView('superview')) {
+        return null;
+      }
       var b = this.nativeView('window')('convertRectToScreen',this.nativeView('convertRect',this.nativeView('bounds'),'toView',null));
       var bnds = convY(b,$.NSScreen('mainScreen')('frame'));
       var offsetY = 0;
-      if(!this.nativeView('isEqual',this.nativeView('window')('contentView')))
+      if(!this.nativeView('isEqual',this.nativeView('window')('contentView'))) {
         offsetY = 1;
+      }
       return {
         x:Math.round(bnds.origin.x), 
         y:Math.round(bnds.origin.y) + offsetY, 
@@ -260,11 +293,14 @@ module.exports = (function() {
    */
   util.def(Control.prototype, 'boundsOnWindow',
     function() {
-      if(!this.nativeView('superview')) return null;
+      if(!this.nativeView('superview')) {
+        return null;
+      }
       var bnds = convY(this.nativeView('frame'), this.nativeView('window')('frame'));
       var offsetY = 0;
-      if(!this.nativeView('isEqual',this.nativeView('window')('contentView')))
+      if(!this.nativeView('isEqual',this.nativeView('window')('contentView'))) {
         offsetY = 1;
+      }
       return {
         x:Math.round(bnds.origin.x), 
         y:Math.round(bnds.origin.y) + offsetY, 
@@ -301,12 +337,16 @@ module.exports = (function() {
    */
   util.def(Control.prototype, 'bounds',
     function() {
-      if(!this.nativeView('superview')) return null;
+      if(!this.nativeView('superview')) {
+        return null;
+      }
       var bnds = convY(this.nativeView('frame'), this.nativeView('superview')('frame'));
       var offsetY = 0;
       if(this.nativeView('superview')('isEqual',this.nativeView('window')('contentView'))
-          && bnds.origin.y == -1)
+          && bnds.origin.y === -1) {
         offsetY = 1;
+      }
+        
       return {
         x:Math.round(bnds.origin.x), 
         y:Math.round(bnds.origin.y) + offsetY, 
@@ -320,16 +360,20 @@ module.exports = (function() {
   Control.prototype.fireEvent = function(event, args) {
     try {
       event = event.toLowerCase();
-      var returnvalue = undefined;
-      if(!this.private.events[event]) this.private.events[event] = [];
-      (this.private.events[event]).forEach(function(item,index,arr) { returnvalue = item.apply(null, args) || returnvalue; });
+      var returnvalue;
+      if(!this.private.events[event]) {
+        this.private.events[event] = [];
+      }
+      (this.private.events[event]).forEach(function(item,index,arr) { 
+        returnvalue = item.apply(null, args) || returnvalue; 
+      });
       return returnvalue;
     } catch(e) {
       console.error(e.message);
       console.error(e.stack);
       process.exit(1);
     }
-  }
+  };
 
   /**
    * @method addEventListener
@@ -359,14 +403,18 @@ module.exports = (function() {
     event = event.toLowerCase();
     if(event == "mouseenter" || event == "mouseexit" || event == "mousemove") {
       this.private.needsMouseTracking++;
-      if(this.private.needsMouseTracking == 1 && this.nativeView('window')) 
+      if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
         addTrackingArea.apply(this,null);
-      else if (this.private.needsMouseTracking == 1)
+      }
+      else if (this.private.needsMouseTracking === 1) {
         this.addEventListener('parent-attached', addTrackingArea.bind(this));
+      }
     }
-    if(!this.private.events[event]) this.private.events[event] = []; 
+    if(!this.private.events[event]) {
+      this.private.events[event] = []; 
+    }
     this.private.events[event].push(func);
-  }
+  };
 
   /**
    * @method removeEventListener
@@ -400,15 +448,16 @@ module.exports = (function() {
     event = event.toLowerCase();
     if(event == "mouseenter" ||   event == "mouseexit" || event == "mousemove") {
       this.private.needsMouseTracking--;
-      if(this.private.needsMouseTracking == 0) {
+      if(this.private.needsMouseTracking === 0) {
         this.nativeView('removeTrackingArea',this.private.trackingArea);
         this.private.trackingArea('release');
         this.private.trackingArea = null;
       }
     }
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
-  }
+    }
+  };
 
   var attributeMap = { 'left':$.NSLayoutAttributeLeft, 'right':$.NSLayoutAttributeRight, 'top':$.NSLayoutAttributeTop,
                        'bottom':$.NSLayoutAttributeBottom, 'leading':$.NSLayoutAttributeLeading, 'trailing':$.NSLayoutAttributeTrailing,
@@ -434,13 +483,13 @@ module.exports = (function() {
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');
     return constraint;
-  }
+  };
 
   Control.prototype.removeLayoutConstraint = function(obj) {
     this.private.parent.nativeView('removeConstraint',obj);
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');
-  }
+  };
 
   /**
    * @member top
