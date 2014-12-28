@@ -1,11 +1,13 @@
 module.exports = (function() {
+  if(global.__TINT.Panel) {
+    return global.__TINT.Panel;
+  }
+  var util = require('Utilities');
   var Window = require('Window');
   var $ = process.bridge.objc;
 
-  var inspectorStyle =  ( $.NSHUDWindowMask | $.NSUtilityWindowMask | $.NSTitledWindowMask | 
-                                              $.NSClosableWindowMask | $.NSResizableWindowMask );
-  var utilityStyle =  ( $.NSUtilityWindowMask | $.NSTitledWindowMask | 
-                        $.NSClosableWindowMask | $.NSResizableWindowMask );
+  var inspectorStyle =  ( $.NSHUDWindowMask | $.NSUtilityWindowMask | $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSResizableWindowMask );
+  var utilityStyle =  ( $.NSUtilityWindowMask | $.NSTitledWindowMask | $.NSClosableWindowMask | $.NSResizableWindowMask );
 
   /**
    * @class Panel
@@ -48,19 +50,26 @@ module.exports = (function() {
    *              resembles a native utility window (or panel).  The default is "window".
    * @default "window"
    */
-  Object.defineProperty(Panel.prototype, 'style', {
-    get:function() { 
+  util.def(Panel.prototype, 'style',
+    function() { 
       var mask = this.native('styleMask');
-      if(($.NSHUDWindowMask & mask) == $.NSHUDWindowMask) return "inspector";
-      else if(($.NSUtilityWindowMask & mask) == $.NSUtilityWindowMask) return "utility";
-      else return "window";
+      if( ($.NSHUDWindowMask & mask) === $.NSHUDWindowMask ) {
+        return "inspector";
+      } else if( ($.NSUtilityWindowMask & mask) === $.NSUtilityWindowMask ) {
+        return "utility";
+      } else {
+        return "window";
+      }
     },
-    set:function(e) {
+    function(e) {
       var mask = this.native('styleMask');
-      if(e == "utility") this.native('setStyleMask', utilityStyle);
-      else if(e == "inspector") this.native('setStyleMask', inspectorStyle);
+      if(e == "utility") {
+        this.native('setStyleMask', utilityStyle);
+      } else if(e == "inspector") {
+        this.native('setStyleMask', inspectorStyle);
+      }
     }
-  });
+  );
 
   /**
    * @member floating
@@ -69,15 +78,12 @@ module.exports = (function() {
    * @description Gets or sets if the panel is currently floating or docked.
    * @default "window"
    */
-  Object.defineProperty(Panel.prototype, 'floating', {
-    get:function() { return this.native('isFloatingPanel') == $.YES ? true : false; },
-    set:function(e) { this.native('setFloatingPanel', e ? $.YES : $.NO); }
-  });
+  util.def(Panel.prototype, 'floating',
+    function() { return this.native('isFloatingPanel') === $.YES ? true : false; },
+    function(e) { this.native('setFloatingPanel', e ? $.YES : $.NO); }
+  );
 
-  Object.defineProperty(Panel.prototype, 'toolbar', {
-    get:function() { return undefined; },
-    set:function(e) { }
-  });
+  global.__TINT.Panel = Panel;
 
   return Panel;
 })();

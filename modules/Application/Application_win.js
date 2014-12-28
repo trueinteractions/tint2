@@ -1,7 +1,12 @@
 (function() {
-  if(global.application) return global.application;
+  if(typeof(global.__TINT) === 'undefined') {
+    global.__TINT = {};
+  }
+  if(global.application) {
+    return global.application;
+  }
   require('Bridge');
-  var utilities = require('Utilities');
+  var util = require('Utilities');
   process.bridge.dotnet.import('mscorlib');
   process.bridge.dotnet.import('System.dll'); 
   process.bridge.dotnet.import('WPF\\WindowsBase.dll');
@@ -68,14 +73,21 @@
   var $ = process.bridge.dotnet;
 
   function Application() {
-    var events = {}, mainMenu = null, 
-        name = "", badgeText = "", 
-        dockmenu = null, icon = "";//, 
-        //_windows = [];
+    var events = {}, 
+        mainMenu = null, 
+        name = "", 
+        badgeText = "", 
+        dockmenu = null, 
+        icon = "";
 
+    this.private = {};
+    this.private.appSchemaPort = port;
+    this.private.windowCount = 0;
     this.native = $.System.Windows.Application.Current;
-    if(this.native == null)
+
+    if(this.native == null) {
       this.native = new $.System.Windows.Application();
+    }
 
     function fireEvent(event, args) {
       if(events[event])
@@ -84,21 +96,29 @@
         });
     }
 
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
-    this.launch = function() { fireEvent('launch'); }.bind(this);
-    this.uninstall = function() { console.warn('unimplemented'); }
+    this.addEventListener = function(event, func) { 
+      if(!events[event]) { 
+        events[event] = [];
+      } 
+      events[event].push(func); 
+    };
+    this.removeEventListener = function(event, func) { 
+      if(events[event] && events[event].indexOf(func) !== -1) {
+        events[event].splice(events[event].indexOf(func), 1); 
+      }
+    };
+    this.launch = function() { fireEvent('launch'); };
+    this.uninstall = function() { console.warn('unimplemented'); };
 
-    this.private = {};
-    this.private.appSchemaPort = port;
-    this.private.windowCount = 0;
 
-    Object.defineProperty(this, 'packaged', {
-      get:function() { return process.packaged; }
-    });
+    util.def(this, 'packaged',
+      function() { return process.packaged; }
+    );
 
     this.resource = function(path) {
-      if(path.indexOf('app:///') == -1) path = 'app:///' + path.replace("app://","");
+      if(path.indexOf('app:///') === -1) {
+        path = 'app:///' + path.replace("app://","");
+      }
       if(path === "app:///this-is-a-blank-page-for-ie-fix.html") {
         return new Buffer("<!doctype html>\n<html>\n<body></body></html>","utf8");
       }
@@ -109,34 +129,36 @@
         var data = reader.ReadToEnd();
         return data;
       } catch (e) { 
-        if(application.warn) console.warn('Cannot find resource at: ', path);
+        if(application.warn) {
+          console.warn('Cannot find resource at: ', path);
+        }
         return null;
       }
-    }
+    };
 
-    Object.defineProperty(this, 'name', {
-      get:function() { return name || process.cwd(); },
-      set:function(e) { name = e; }
-    });
+    util.def(this, 'name',
+      function() { return name || process.cwd(); },
+      function(e) { name = e; }
+    );
 
     //TODO: IMPLEMENT THIS: There is no complement in windows to this.  Custom?
-    Object.defineProperty(this, 'badge', {
-      get:function() { return badgeText; },
-      set:function(e) {  badgeText = e; }
+    util.def(this, 'badge',
+      function() { return badgeText; },
+      function(e) {  badgeText = e; }
     });
 
     //TODO: IMPLEMENT THIS: There are jump lists in Windows however they do not
     // behave to dock menu's behavior in OSX, figure out a way of mapping these.
-    Object.defineProperty(this, 'dockmenu', {
-      get:function() { return dockmenu; },
-      set:function(e) { dockmenu = e; }
-    });
+    util.def(this, 'dockmenu',
+      function() { return dockmenu; },
+      function(e) { dockmenu = e; }
+    );
 
-    Object.defineProperty(this, 'icon', {
-      get:function() { return icon; },
-      set:function(e) {
+    util.def(this, 'icon',
+      function() { return icon; },
+      function(e) {
         icon = e;
-        e = utilities.makeImage(e);
+        e = util.makeImage(e);
         if(e) {
           var coll = this.native.Windows.GetEnumerator();
           while(coll.MoveNext()) {
@@ -147,46 +169,53 @@
       }
     });
 
-    Object.defineProperty(this, 'exitAfterWindowsClose', {
-      get:function() { return this.native.ShutdownMode == $.System.Windows.ShutdownMode.OnLastWindowClose; },
-      set:function(e) { 
-        if(e)
+    util.def(this, 'exitAfterWindowsClose',
+      function() { return this.native.ShutdownMode === $.System.Windows.ShutdownMode.OnLastWindowClose; },
+      function(e) { 
+        if(e) {
           this.native.ShutdownMode = $.System.Windows.ShutdownMode.OnLastWindowClose;
-        else
+        } else {
           this.native.ShutdownMode = $.System.Windows.ShutdownMode.OnExplicitShutdown;
+        }
       }
-    });
+    );
 
     //TODO: No mapping for Windows!
-    this.hideAllOtherApplications = function() { }
-    this.unhideAllOtherApplications = function() { }
+    this.hideAllOtherApplications = function() { };
+    this.unhideAllOtherApplications = function() { };
 
-    Object.defineProperty(this, 'visible', {
-      get:function() {
+    util.def(this, 'visible',
+      function() {
         var visible = false;
         var coll = this.native.Windows.GetEnumerator();
         while (coll.MoveNext()) {
           var _win = coll.Current;
-          if(_win.Visibility == $.System.Windows.Visibility.Visible)
+          if(_win.Visibility == $.System.Windows.Visibility.Visible) {
             visible = true;
+          }
         }
         return visible;
       },
-      set:function(e) { 
+      function(e) { 
         var coll = this.native.Windows.GetEnumerator();
         while (coll.MoveNext()) {
           var _win = coll.Current;
-          if(e) _win.Visibility = $.System.Windows.Visibility.Visible;
-          else _win.Visibility = $.System.Windows.Visibility.Hidden;
+          if(e) { 
+            _win.Visibility = $.System.Windows.Visibility.Visible;
+          } else {
+            _win.Visibility = $.System.Windows.Visibility.Hidden;
+          }
         }
       }
-    })
+    )
 
     this.attention = function(critical) {
       var coll = this.native.Windows.GetEnumerator();
       while (coll.MoveNext()) {
         var _win = coll.Current;
-        if(!_win.TaskbarItemInfo) _win.TaskbarItemInfo = new $.System.Windows.Shell.TaskbarItemInfo();
+        if(!_win.TaskbarItemInfo) {
+          _win.TaskbarItemInfo = new $.System.Windows.Shell.TaskbarItemInfo();
+        }
         _win.TaskbarItemInfo.ProgressState = $.System.Windows.Shell.TaskbarItemProgressState.Indeterminate;
       }
       return {
@@ -197,13 +226,15 @@
           }
         }.bind(this)
       };
-    }
+    };
 
     function GetActiveWindow() {
       var coll = this.native.Windows.GetEnumerator();
       while (coll.MoveNext()) {
         var _win = coll.Current;
-        if(_win.IsActive) return _win;
+        if(_win.IsActive) {
+          return _win;
+        }
         $.FlashWPFWindow.WindowExtensions.FlashWindow(_win,20);
       }
       return null;
@@ -211,39 +242,46 @@
 
     this.paste = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.Paste.Execute(null,_win);
-    }
+      }
+    };
     this.copy = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.Copy.Execute(null,_win);
-    }
+      }
+    };
     this.cut = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.Cut.Execute(null,_win);
-    }
+      }
+    };
     this.undo = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.Undo.Execute(null,_win);
-    }
+      }
+    };
     this.redo = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.Redo.Execute(null,_win);
-    }
+      }
+    };
     this.delete = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.Delete.Execute(null,_win);
-    }
+      }
+    };
     this.selectAll = function() {
       var _win = GetActiveWindow();
-      if(_win != null)
+      if(_win != null) {
         $.System.Windows.Input.ApplicationCommands.SelectAll.Execute(null,_win);
-    }
+      }
+    };
   }
 
   global.application = new Application();

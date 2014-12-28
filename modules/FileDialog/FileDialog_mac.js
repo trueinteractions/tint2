@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.FileDialog) {
+    return global.__TINT.FileDialog;
+  }
   var $ = process.bridge.objc;
 
    /**
@@ -214,6 +217,10 @@ module.exports = (function() {
     this.cancel = function() {
       $dialog('cancel',$dialog);
     }
-  }
+  };
+
+  global.__TINT.FileDialog = FileDialog;
+
   return FileDialog;
+
 })();
