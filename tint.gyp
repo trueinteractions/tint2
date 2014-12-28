@@ -27,7 +27,6 @@
       'modules/Bridge/ivar.js',
       'modules/Bridge/method.js',
       'modules/Application/Application_mac.js',
-      'modules/AppSchema/AppSchema_mac.js',
       'modules/Box/Box_mac.js',
       'modules/Button/Button_mac.js',
       'modules/ButtonGroup/ButtonGroup_mac.js',
@@ -71,7 +70,6 @@
       'modules/Bridge/win32.js',
       'modules/Bridge/Bridge_win.js',
       'modules/Application/Application_win.js',
-      'modules/AppSchema/AppSchema_win.js',
       'modules/Box/Box_win.js',
       'modules/Button/Button_win.js',
       'modules/ButtonGroup/ButtonGroup_win.js',
@@ -111,6 +109,7 @@
       'modules/Window/Window_win.js',
     ],
     'library_files': [
+      'modules/AppSchema/AppSchema.js',
       'libraries/node/src/node.js',
       'libraries/node/lib/_debugger.js',
       'libraries/node/lib/_linklist.js',
