@@ -19,7 +19,7 @@ function run($utils) {
   var buttonNormal = new Button();
   var input = new TextInput();
 
-  var mouseDown = false, mouseUp = false, rightMouseDown = false, mouseEnter = false, mouseExit = false, mouseMove = false;
+  var mouseDown = false, mouseUp = false, rightMouseDown = false, rightMouseUp = false, mouseEnter = false, mouseExit = false, mouseMove = false;
   var mouseDown2 = false, mouseUp2 = false, rightMouseDown2 = false, mouseEnter2 = false, mouseExit2 = false, mouseMove2 = false;
   var inputEv = false, keyUp = false, keyDown = false;
 

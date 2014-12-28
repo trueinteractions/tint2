@@ -573,7 +573,11 @@ else
 ex.assert = function assert(condition,value) {
   if(!condition) {
     var msg;
-    try { throw new Error(value ? value : ''); } catch(e) { msg = e; };
+    try {
+      throw new Error(value ? value : '');
+    } catch(e) {
+      msg = e;
+    };
     log('assertion failed.');
     log(msg.message);
     log(msg.stack);

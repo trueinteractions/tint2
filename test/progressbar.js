@@ -15,7 +15,6 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ count = 0;
   var win = new Window();
   win.visible = true;
   var progress = new ProgressBar();

@@ -22,7 +22,7 @@ function run($utils) {
     var utildebug = 0;
     setInterval(function() { $utils.log('utildebug: '+(utildebug++)+'\n'); },500);
   }
-  /* @hidden */ countMouseDown = 0, countMouseUp = 0, done = false;
+  /* @hidden */ var countMouseDown = 0, countMouseUp = 0, done = false;
   /* @hidden */ var bounds = win.boundsOnScreen;
   var buttonGroup = new ButtonGroup();
 

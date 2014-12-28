@@ -22,19 +22,36 @@ module.exports = (function() {
         soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "";
 
     function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+      if(events[event]) {
+        (events[event]).forEach(function(item) {
+          item.apply(null,args);
+        });
+      }
     }
 
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+    this.addEventListener = function(event, func) {
+      if(!events[event]) {
+        events[event] = [];
+      }
+      events[event].push(func);
+    }
+    this.removeEventListener = function(event, func) {
+      if(events[event] && events[event].indexOf(func) !== -1) {
+        events[event].splice(events[event].indexOf(func), 1);
+      }
+    }
     
     var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
     NSUserNotificationCenterDelegate.addMethod('init:', '@@:', function(self) { return self; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { return $.YES; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didActivateNotification:','v@:@@', function(self,_cmd,center,notify) {
-      if(notify('activationType') == $.NSUserNotificationActivationTypeContentsClicked) fireEvent('click',['contents']);
-      else if(notify('activationType') == $.NSUserNotificationActivationTypeActionButtonClicked) fireEvent('click',['button']);
-      else fireEvent('click', ['unknown']);
+      if(notify('activationType') === $.NSUserNotificationActivationTypeContentsClicked) {
+        fireEvent('click',['contents']);
+      } else if(notify('activationType') === $.NSUserNotificationActivationTypeActionButtonClicked) {
+        fireEvent('click',['button']);
+      } else {
+        fireEvent('click', ['unknown']);
+      }
     });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didDeliverNotification:','v@:@@', function(self,_cmd,center,notify) { fireEvent('fired'); });
     NSUserNotificationCenterDelegate.register();
@@ -115,15 +132,15 @@ module.exports = (function() {
      */
     this.dispatch = function() {
 
-      $notify = $.NSUserNotification('alloc')('init');
+      var $notify = $.NSUserNotification('alloc')('init');
       // Get the default notification center
       if(center == null) {
         console.warn('Attempted to deliver notification, but only packaged apps may use notifcations.');
         return false;
       }
 
-      if(!titlestring || titlestring == "") return false;
-      if(!textstring || textstring == "") return false;
+      if(!titlestring || titlestring === "") return false;
+      if(!textstring || textstring === "") return false;
 
       // Set the title of the notification
       $notify('setTitle',$(titlestring));
@@ -134,13 +151,16 @@ module.exports = (function() {
       // Set the sound, this can be either nil for no sound, 
       // NSUserNotificationDefaultSoundName for the default sound (tri-tone) 
       // and a string of a .caf file that is in the bundle (filname and extension)
-      if(soundEnabled) $notify('setSoundName',$.NSUserNotificationDefaultSoundName);
-      else $notify('setSoundName',null);
+      if(soundEnabled) {
+        $notify('setSoundName',$.NSUserNotificationDefaultSoundName);
+      } else {
+        $notify('setSoundName',null);
+      }
 
-      if(otherbuttontitle != "" && otherbuttontitle && (!actionbuttontitle || actionbuttontitle == "")) {
+      if(otherbuttontitle !== "" && otherbuttontitle && (!actionbuttontitle || actionbuttontitle === "")) {
         console.warn('The auxillary button was set to a value, but the main button was not, neither will be used.');
       } 
-      else if(actionbuttontitle && actionbuttontitle != "")
+      else if(actionbuttontitle && actionbuttontitle !== "")
       {
         $notify('setActionButtonTitle',$(actionbuttontitle));
         if(otherbuttontitle && otherbuttontitle != "")
@@ -165,7 +185,9 @@ module.exports = (function() {
    *              to creating a notification.
    */
   Notification.requestPermission = function(callback){
-    if(callback) callback({handleEvent:function() { return center ? true : false; }});
+    if(callback) {
+      callback({handleEvent:function() { return center ? true : false; }});
+    }
     return center ? true : false;
   }
 

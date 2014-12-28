@@ -15,7 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ count = 0;
+  /* @hidden */ var count = 0;
   application.exitAfterWindowsClose = false;
   var win = new Window();
   win.visible = true;

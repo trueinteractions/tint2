@@ -20,7 +20,7 @@ module.exports = (function() {
    * @description Creates a new Dialog window hidden by default.
    */
   function Dialog(options) {
-    var img = null, buttonsSet = false, mainButton = null, auxButton = null; events = {};
+    var img = null, buttonsSet = false, mainButton = null, auxButton = null, events = {};
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSAlert;
