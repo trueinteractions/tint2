@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Window) {
+    return global.__TINT.Window;
+  }
   var Container = require('Container');
   var utilities = require('Utilities');
   var Color = require('Color');
@@ -19,7 +22,9 @@ module.exports = (function() {
 
     this.native.Content = this.nativeView;
 
-    var closing = function() { this.fireEvent('close'); }.bind(this);
+    var closing = function() { 
+      this.fireEvent('close'); 
+    }.bind(this);
     var closed = function() {
       application.private.windowCount--;
       this.fireEvent('closed'); 
@@ -27,26 +32,37 @@ module.exports = (function() {
         process.exit(0);
       }
     }.bind(this);
-    var sizeChanged = function() { this.fireEvent('resize'); }.bind(this);
-    var deactivated = function() { this.fireEvent('blur'); }.bind(this);
-    var activated = function() { this.fireEvent('focus'); }.bind(this);
+    var sizeChanged = function() { 
+      this.fireEvent('resize'); 
+    }.bind(this);
+    var deactivated = function() { 
+      this.fireEvent('blur'); 
+    }.bind(this);
+    var activated = function() { 
+      this.fireEvent('focus'); 
+    }.bind(this);
     var stateChanged = function() {
-      if(this.native.WindowState == $.System.Windows.WindowState.Maximized
-          && this.native.WindowStyle == $.System.Windows.WindowStyle.None && 
-          this.private.fullscreen == false) 
+      if(this.native.WindowState === $.System.Windows.WindowState.Maximized && 
+          this.native.WindowStyle === $.System.Windows.WindowStyle.None && 
+          this.private.fullscreen === false) 
       {
         this.private.fullscreen = true;
          this.fireEvent('enter-fullscreen');
-      } else if(this.private.fullscreen == true 
-          && (this.native.WindowState != $.System.Windows.WindowState.Maximized
-              || this.native.WindowStyle != $.System.Windows.WindowStyle.None)) 
+      } else if(this.private.fullscreen == true && 
+                (this.native.WindowState != $.System.Windows.WindowState.Maximized || 
+                  this.native.WindowStyle != $.System.Windows.WindowStyle.None)) 
       {
-         this.fireEvent('exit-fullscreen');
+        this.fireEvent('exit-fullscreen');
         this.private.fullscreen = false;
       }
-      if(this.native.WindowState == $.System.Windows.WindowState.Maximized) this.fireEvent('maximize');
-      else if(this.native.WindowState == $.System.Windows.WindowState.Minimized) this.fireEvent('minimize');
-      else this.fireEvent('restore');
+
+      if(this.native.WindowState === $.System.Windows.WindowState.Maximized) {
+        this.fireEvent('maximize');
+      } else if(this.native.WindowState === $.System.Windows.WindowState.Minimized) {
+        this.fireEvent('minimize');
+      } else {
+        this.fireEvent('restore');
+      }
     }.bind(this);
 
     this.native.addEventListener('Closing', closing);
@@ -102,7 +118,7 @@ module.exports = (function() {
   Window.prototype.preferences = {
     animateOnSizeChange:false,
     animateOnPositionChange:false
-  }
+  };
 
   Object.defineProperty(Window.prototype, 'frame', {
     get:function() { return this.native.WindowStyle == $.System.Windows.WindowStyle.SingleBorderWindow; },
@@ -286,7 +302,7 @@ module.exports = (function() {
 
   // Override Control's definition of visible to a window context.
   Object.defineProperty(Window.prototype, 'visible', {
-    get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
+    get:function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
     set:function(e) {
       if(e) {
         this.native.Show();
@@ -305,17 +321,15 @@ module.exports = (function() {
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
     },
     set:function(e) {
+      var hwnd = this.private.hwnd;
+      var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
+      var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
+
       if(e) {
-        var hwnd = this.private.hwnd;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
-        var hwnd = this.private.hwnd;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
@@ -361,8 +375,11 @@ module.exports = (function() {
         this.native.ResizeMode != $.System.Windows.ResizeMode.CanMinimize;
     },
     set:function(e) {
-      if(e) this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
-      else this.native.ResizeMode = $.System.Windows.ResizeMode.CanMinimize;
+      if(e) {
+        this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
+      } else { 
+        this.native.ResizeMode = $.System.Windows.ResizeMode.CanMinimize;
+      }
     }
   });
 
@@ -387,14 +404,15 @@ module.exports = (function() {
 
   Window.prototype.destroy = function() {
     this.native.Close();
-  }
+  };
 
   Window.prototype.bringToFront = function() { 
     this.native.Activate();
     this.native.Topmost = true;
     this.native.Topmost = false;
     this.native.Focus();
-  }
+  };
 
+  global.__TINT.Window = Window;
   return Window;
 })();

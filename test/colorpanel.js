@@ -33,7 +33,6 @@ function run($utils) {
     /* @hidden */ $utils.assert(selected.green <= 1 && selected.green >= 0, 'selected.green['+selected.green+'] === 1');
     /* @hidden */ $utils.assert(selected.blue <= 1 && selected.blue >= 0, 'selected.blue['+selected.blue+'] < 0.96 && selected.blue['+selected.blue+'] > 0.93');
     /* @hidden */ $utils.assert(selected.alpha === 1, 'selected.alpha['+selected.alpha+'] === 1');
-    /* @hidden */ $utils.assert(selected.colorspace === "rgb", 'colorspace should be rgb, was '+selected.colorspace);
     /* @hidden */ $utils.ok();
   });
   /* @hidden */ if(ismac) {

@@ -20,7 +20,8 @@ function run($utils) {
   var colorWell = new ColorWell();
 
   win.appendChild(colorWell);
-  colorWell.color = new Color('rgba',255,0,0,1);
+  colorWell.color = new Color('rgba(255,0,0,1)');
+  colorWell.color = 'rgba(255,0,0,1)';
   colorWell.left = colorWell.top = 10;
   colorWell.width = 40;
   colorWell.height = 20;
