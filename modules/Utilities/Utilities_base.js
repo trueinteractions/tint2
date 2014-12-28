@@ -1466,8 +1466,8 @@ module.exports = (function() {
     var h = hwb[0] / 360,
         wh = hwb[1] / 100,
         bl = hwb[2] / 100,
-        ratio = wh + bl,
-        i, v, f, n, r, b;
+        ratio = wh + bl;
+    var i, v, f, n, r, b;
 
     // wh + bl cant be > 1
     if (ratio > 1) {
@@ -1486,12 +1486,36 @@ module.exports = (function() {
     switch (i) {
       default:
       case 6:
-      case 0: r = v; g = n; b = wh; break;
-      case 1: r = n; g = v; b = wh; break;
-      case 2: r = wh; g = v; b = n; break;
-      case 3: r = wh; g = n; b = v; break;
-      case 4: r = n; g = wh; b = v; break;
-      case 5: r = v; g = wh; b = n; break;
+      case 0: 
+        r = v; 
+        g = n; 
+        b = wh; 
+        break;
+      case 1: 
+        r = n; 
+        g = v; 
+        b = wh; 
+        break;
+      case 2: 
+        r = wh; 
+        g = v; 
+        b = n; 
+        break;
+      case 3: 
+        r = wh; 
+        g = n; 
+        b = v; 
+        break;
+      case 4: 
+        r = n; 
+        g = wh; 
+        b = v; 
+        break;
+      case 5: 
+        r = v; 
+        g = wh; 
+        b = n; 
+        break;
     }
 
     return [r * 255, g * 255, b * 255];
