@@ -2,7 +2,6 @@ module.exports = (function() {
   if(global.__TINT.Scroll) {
     return global.__TINT.Scroll;
   }
-  var utilities = require('Utilities');
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
@@ -41,23 +40,25 @@ module.exports = (function() {
 
   //VerticalScrollBarVisibility
   Object.defineProperty(Scroll.prototype, 'vertical', {
-    get:function() { return this.nativeView.VerticalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Auto; },
+    get:function() { return this.nativeView.VerticalScrollBarVisibility === $.System.Windows.Controls.ScrollBarVisibility.Auto; },
     set:function(e) {
-      if(e)
-        this.nativeView.VerticalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Auto;
-      else
-        this.nativeView.VerticalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Hidden;
+      if(e) {
+        this.nativeView.VerticalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Auto;
+      } else {
+        this.nativeView.VerticalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Hidden;
+      }
     }
   });
 
   //HorizontalScrollBarVisibility
   Object.defineProperty(Scroll.prototype, 'horizontal', {
-    get:function() { return this.nativeView.HorizontalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Auto; },
+    get:function() { return this.nativeView.HorizontalScrollBarVisibility === $.System.Windows.Controls.ScrollBarVisibility.Auto; },
     set:function(e) {
-      if(e)
-        this.nativeView.HorizontalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Auto;
-      else
-        this.nativeView.HorizontalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Hidden;
+      if(e) {
+        this.nativeView.HorizontalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Auto;
+      } else {
+        this.nativeView.HorizontalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Hidden;
+      }
     }
   });
 

@@ -1,11 +1,10 @@
 module.exports = (function() {
   var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
-  var Container = require('Container');
 
   function MenuItem(titlestring,keystring,keymodifiers) {
-    if(typeof(keystring)=='undefined') keystring = "";
-    if(typeof(keymodifiers)=='undefined') keymodifiers = "";
+    keystring = keystring || "";
+    keymodifiers = keymodifiers || "";
 
     this.private = {events:{},submenu:null,key:"",modifiers:"",imgOn:null,imgOff:null,img:null,custom:null,state:false};
     this.native = new $.System.Windows.Controls.MenuItem();

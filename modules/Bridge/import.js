@@ -20,11 +20,9 @@ module.exports = (function() {
    */
   var fs = require('fs')
     , read = require('fs').readFileSync
-    , assert = require('assert')
     , path = require('path')
     , core = require('core')
     , Class = require('class')
-    , ID = require('id')
     , join = path.join
     , basename = path.basename
     , exists = fs.existsSync || path.existsSync
@@ -199,8 +197,8 @@ module.exports = (function() {
           onto[node.attrib.original] = onto[node.attrib.name];
           return;
         }
-        var isInline = node.attrib.inline === 'true' ? true : false
-          , isVariadic = node.attrib.variadic === 'true' ? true : false
+        //var isInline = node.attrib.inline === 'true' ? true : false
+        var isVariadic = node.attrib.variadic === 'true' ? true : false
           , passedTypes = {args:[],name:name};
 
         node.children.forEach(function (n, i) {

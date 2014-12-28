@@ -1,5 +1,7 @@
 module.exports = (function() {
-  var utilities = require('Utilities');
+  if(global.__TINT.ProgressBar) {
+    return global.__TINT.ProgressBar;
+  }
   var Container = require('Container');
   var $ = process.bridge.objc;
 
@@ -109,6 +111,8 @@ module.exports = (function() {
     }
   });
 */
+
+  global.__TINT.ProgressBar = ProgressBar;
   return ProgressBar;
 
 })();

@@ -2,7 +2,6 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var Container = require('Container');
   var TextInput = require('TextInput');
-  var Color = require('Color');
 
   /**
    * @class Table

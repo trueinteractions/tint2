@@ -5,13 +5,11 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
   var utilities = require('Utilities');
-  var Control = require('Control');
   var utils = require('Utilities');
   var Color = require('Color');
 
   function Dialog() {
     var img = null, 
-      buttonsSet = false, 
       mainButton = null, 
       auxButton = null,
       suppression = null,
@@ -119,7 +117,7 @@ module.exports = (function() {
       w.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
 
       var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
-      var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
+      $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
       $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
       $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);

@@ -1,5 +1,4 @@
 module.exports = (function() {
-  var $ = process.bridge.dotnet;
   var TextInput = require('TextInput');
 
   function SearchInput(options)  {

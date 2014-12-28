@@ -2,7 +2,6 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var utils = require('Utilities');
 
-
   /**
    * @class System
    * @description The system class contains methods for getting OS standard file system icons,

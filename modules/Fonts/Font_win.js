@@ -2,8 +2,8 @@ module.exports = (function() {
   if(global.__TINT.Font) {
     return global.__TINT.Font;
   }
+
   var $ = process.bridge.dotnet;
-  var $utilities = require('Utilities');
 
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');

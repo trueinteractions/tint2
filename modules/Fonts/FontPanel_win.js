@@ -1,6 +1,5 @@
 module.exports = (function() {
   var Panel = require('Panel');
-  var utilities = require('Utilities');
   var Font = require('Font');
   var $ = process.bridge.dotnet;
 

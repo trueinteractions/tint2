@@ -1,5 +1,4 @@
 module.exports = (function() {
-  var utilities = require('Utilities');
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.objc;

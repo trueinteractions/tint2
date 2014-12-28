@@ -4,7 +4,6 @@ module.exports = (function() {
   }
   var $ = process.bridge.dotnet;
   var utilities = require('Utilities');
-  var Container = require('Container');
   var Menu = require('Menu');
 
   function StatusBar() {

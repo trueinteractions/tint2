@@ -5,7 +5,6 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var TextInput = require('TextInput');
-  var Color = require('Color');
 
   var oddColor = $.System.Windows.SystemColors.ControlBrush;
   var evenColor = $.System.Windows.SystemColors.ControlLightLightBrush;

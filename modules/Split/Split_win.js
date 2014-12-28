@@ -3,7 +3,6 @@ module.exports = (function() {
     return global.__TINT.Split;
   }
 
-  var utilities = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 

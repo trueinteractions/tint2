@@ -4,7 +4,7 @@ module.exports = (function() {
 	function System() {}
 
 	System.getIconForFile = function(e) {
-		return "data:image/png;base64," + $$.TintInterop.Shell.GetIconForFile(e);
+		return "data:image/png;base64," + $.TintInterop.Shell.GetIconForFile(e);
 	}
 	return System;
 })();

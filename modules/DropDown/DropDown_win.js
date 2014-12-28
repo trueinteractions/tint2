@@ -4,7 +4,6 @@ module.exports = (function() {
   }
 
   var TextInput = require('TextInput');
-  var utils = require('Utilities');
   var $ = process.bridge.dotnet;
 
   function DropDown(options) {

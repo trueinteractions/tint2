@@ -4,9 +4,9 @@
  */
 
 if(!process.bridge) process.initbridge();
-var ref = require('ref')
-var assert = require('assert')
-var Struct = require('struct')
+
+var ref = require('ref');
+var assert = require('assert');
 var bindings = process.bridge;
 
 

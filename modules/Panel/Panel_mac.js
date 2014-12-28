@@ -62,7 +62,6 @@ module.exports = (function() {
       }
     },
     function(e) {
-      var mask = this.native('styleMask');
       if(e == "utility") {
         this.native('setStyleMask', utilityStyle);
       } else if(e == "inspector") {

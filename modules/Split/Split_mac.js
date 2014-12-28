@@ -1,5 +1,7 @@
 module.exports = (function() {
-  var utilities = require('Utilities');
+  if(global.__TINT.Split) {
+    return global.__TINT.Split;
+  }
   var Container = require('Container');
   var $ = process.bridge.objc;
   /**
@@ -128,6 +130,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Split = Split;
   return Split;
 
 })();

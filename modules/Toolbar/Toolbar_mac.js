@@ -186,13 +186,17 @@ module.exports = (function() {
      */
     this.appendChild = function(child) {
       if(Array.isArray(child)) {
-        for(var i=0; i < child.length; i++) this.appendChild(child[i]);
+        for(var i=0; i < child.length; i++) {
+          this.appendChild(child[i]);
+        }
       } else {
-        var identifier;
-        if(child == "space") child = {native:$("NSToolbarFlexibleSpaceItem"), identifier:$("NSToolbarFlexibleSpaceItem")};
-        else if (!(child instanceof Control)) 
+        if(child === "space") {
+          child = {native:$("NSToolbarFlexibleSpaceItem"), identifier:$("NSToolbarFlexibleSpaceItem")};
+        } else if (!(child instanceof Control)) {
           throw new Error('The passed in object to append as a child wasnt a control. ['+child+']');
-        else child.identifier = $((children.length+1).toString());
+        } else {
+          child.identifier = $((children.length+1).toString());
+        }
         children.push(child);
         $toolbar('insertItemWithItemIdentifier',child.identifier,'atIndex',children.length-1);
       }
@@ -206,7 +210,7 @@ module.exports = (function() {
      */
     this.removeChild = function(child) {
       var index = children.indexOf(child);
-      if(index != -1) {
+      if(index !== -1) {
         children.splice(index,1);
         $toolbar('removeItemAtIndex',index);
       }

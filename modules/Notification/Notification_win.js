@@ -5,13 +5,12 @@ module.exports = (function() {
 
   var Color = require('Color');
   var utils = require('Utilities');
-  var $$ = process.bridge;
   var $ = process.bridge.dotnet;
 
   function Notification()
   {
     var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
-        soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "",
+        soundEnabled = false, actionbuttontitle = "",
         timeoutHandle = null, callbacks = [];
 
     function fireEvent(event, args) {
