@@ -1,4 +1,4 @@
-module.exports = function(basepath) {
+module.exports = function() {
     var workingdir = process.cwd();
     if(workingdir[workingdir.length-1] !== '/') {
       workingdir += '/';
