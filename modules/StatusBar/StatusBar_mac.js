@@ -8,7 +8,7 @@ module.exports = (function() {
       process.bridge.objc.delegates = {};
     }
     var tintStatusBarDelegate = $.NSObject.extend('TintStatusBarDelegate');
-    tintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[TintStatusBarDelegate,$.selector,'@']], 
+    tintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[tintStatusBarDelegate,$.selector,'@']], 
       utilities.errorwrap(function(self, cmd, id) {
         self.callback = process.bridge.objc.delegates[id.toString()];
         process.bridge.objc.delegates[id.toString()] = null;
