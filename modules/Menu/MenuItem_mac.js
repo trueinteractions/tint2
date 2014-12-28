@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.MenuItem) {
+    return global.__TINT.MenuItem;
+  }
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
   var Container = require('Container');
@@ -19,9 +22,8 @@ module.exports = (function() {
    * @description Creates a new menuitem object.
    */
   function MenuItem(titlestring,keystring,keymodifiers) {
-    if(typeof(keystring)=='undefined') keystring = "";
-    if(typeof(keymodifiers)=='undefined') keymodifiers = "";
-
+    keystring = keystring || "";
+    keymodifiers = keymodifiers || "";
     this.private = {events:{},submenu:null,modifiers:"",imgOn:null,imgOff:null,img:null,custom:null,state:false};
     
     var TintMenuItemDelegate = $.NSObject.extend('TintMenuItemDelegate'+Math.round(Math.random()*100000));
@@ -39,14 +41,23 @@ module.exports = (function() {
   	this.native = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
     this.native('setTarget',menuDelegate);
     this.native('setAction','click:');
-    if(titlestring) this.title = titlestring;
-    if(keystring) this.key = keystring;
-    if(keymodifiers) this.modifiers = keymodifiers;
+    if(titlestring) {
+      this.title = titlestring;
+    }
+    if(keystring) {
+      this.key = keystring;
+    }
+    if(keymodifiers) {
+      this.modifiers = keymodifiers;
+    }
   }
 
   MenuItem.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) 
-      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
+    if(this.private.events[event]) {
+      (this.private.events[event]).forEach(function(item) { 
+        item.apply(null,args);
+      });
+    }
   }
   /**
    * @method addEventListener
@@ -58,8 +69,9 @@ module.exports = (function() {
    *              to call when the event happens (e.g., a callback).
    */
   MenuItem.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) 
-      this.private.events[event] = []; 
+    if(!this.private.events[event]) {
+      this.private.events[event] = [];
+    }
     this.private.events[event].push(func); 
   }
   /**
@@ -72,7 +84,7 @@ module.exports = (function() {
    *              that was originally given as the callback for addEventListener.
    */
   MenuItem.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) 
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
   }
 /*
@@ -111,7 +123,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.img = e;
       e = utilities.makeNSImage(e);
-      if(e) this.native('setImage', e);
+      if(e) {
+        this.native('setImage', e);
+      }
     }
   });
 
@@ -220,24 +234,36 @@ module.exports = (function() {
     get:function() {
       var modifiersFlags = this.native('keyEquivalentModifierMask');
       var modifiersString = "";
-      if(modifierFlags & $.NSShiftKeyMask)
+      if(modifierFlags & $.NSShiftKeyMask) {
         modifiersString += ",shift";
-      if(modifierFlags & $.NSAlternateKeyMask)
+      }
+      if(modifierFlags & $.NSAlternateKeyMask) {
         modifiersString += ",alt";
-      if(modifiersFlags & $.NSCommandKeyMask)
+      }
+      if(modifiersFlags & $.NSCommandKeyMask) {
         modifiersString += ",cmd";
-      if(modifiersFlags & $.NSControlKeyMask)
+      }
+      if(modifiersFlags & $.NSControlKeyMask) {
         modifiersString += ",ctrl";
+      }
       return modifiersString.length > 0 ? modifiersString.substring(1) : "";
     },
     set:function(e) { 
       var modifiers = e.split(',');
       var modifierFlags = 0;
-      modifiers.forEach(function(item,index,arr) {
-        if(item=='shift') modifierFlags = modifierFlags | $.NSShiftKeyMask;
-        if(item=='alt') modifierFlags = modifierFlags | $.NSAlternateKeyMask;
-        if(item=='cmd') modifierFlags = modifierFlags | $.NSCommandKeyMask;
-        if(item=='ctrl') modifierFlags = modifierFlags | $.NSControlKeyMask;
+      modifiers.forEach(function(item) {
+        if(item==='shift') {
+          modifierFlags = modifierFlags | $.NSShiftKeyMask;
+        }
+        if(item==='alt') {
+          modifierFlags = modifierFlags | $.NSAlternateKeyMask;
+        }
+        if(item==='cmd') {
+          modifierFlags = modifierFlags | $.NSCommandKeyMask;
+        }
+        if(item==='ctrl') {
+          modifierFlags = modifierFlags | $.NSControlKeyMask;
+        }
       });
       this.native('setKeyEquivalentModifierMask',modifierFlags);
     }
@@ -275,10 +301,13 @@ module.exports = (function() {
         this.private.custom = e;
         this.nativeView = e.nativeView;
         return this.native('setView',e.nativeView);
+      } else {
+        throw new Error("The passed in object was not a valid container or control.");
       }
-      else throw new Error("The passed in object was not a valid container or control.");
     }
   });
+
+  global.__TINT.MenuItem = MenuItem;
   return MenuItem;
 
 })();

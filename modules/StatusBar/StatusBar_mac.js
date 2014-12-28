@@ -5,19 +5,21 @@ module.exports = (function() {
   var Menu = require('Menu');
 
   if(!$.TintStatusBarDelegate) {
-    if(!process.bridge.objc.delegates) process.bridge.objc.delegates = {};
-    var TintStatusBarDelegate = $.NSObject.extend('TintStatusBarDelegate');
-    TintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[TintStatusBarDelegate,$.selector,'@']], 
+    if(!process.bridge.objc.delegates) {
+      process.bridge.objc.delegates = {};
+    }
+    var tintStatusBarDelegate = $.NSObject.extend('TintStatusBarDelegate');
+    tintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[TintStatusBarDelegate,$.selector,'@']], 
       utilities.errorwrap(function(self, cmd, id) {
         self.callback = process.bridge.objc.delegates[id.toString()];
         process.bridge.objc.delegates[id.toString()] = null;
         return self;
     }));
-    TintStatusBarDelegate.addMethod('click:','v@:@', 
+    tintStatusBarDelegate.addMethod('click:','v@:@', 
       utilities.errorwrap(function(self,_cmd,frame) { 
         self.callback.fireEvent('click');
     }));
-    TintStatusBarDelegate.register();
+    tintStatusBarDelegate.register();
   }
 
   /**
@@ -36,7 +38,7 @@ module.exports = (function() {
 
     var id = (Math.random()*100000).toString();
     process.bridge.objc.delegates[id] = this;
-    var delegate = TintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
+    var delegate = tintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
     this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
     this.native('retain'); // required else we'll find it GC'd 
     this.native('setTarget',delegate);
@@ -44,9 +46,12 @@ module.exports = (function() {
   }
 
   StatusBar.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) 
-      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-  }
+    if(this.private.events[event]) {
+      (this.private.events[event]).forEach(function(item) { 
+        item.apply(null,args);
+      });
+    }
+  };
 
   /**
    * @method addEventListener
@@ -58,10 +63,11 @@ module.exports = (function() {
    *              to call when the event happens (e.g., a callback).
    */
   StatusBar.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) 
-      this.private.events[event] = []; 
+    if(!this.private.events[event]) { 
+      this.private.events[event] = [];
+    } 
     this.private.events[event].push(func); 
-  }
+  };
 
   /**
    * @method removeEventListener
@@ -73,9 +79,10 @@ module.exports = (function() {
    *              that was originally given as the callback for addEventListener.
    */
   StatusBar.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
+    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
-  }
+    }
+  };
   /**
    * @method close
    * @memberof StatusBar
@@ -83,7 +90,7 @@ module.exports = (function() {
    */
   StatusBar.prototype.close = function() { 
     this.native('release');
-  }
+  };
 
   // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
   Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
@@ -91,7 +98,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.imgOn = e; 
       e = utilities.makeNSImage(e);
-      if(e) this.native('setAlternateImage', e);
+      if(e) {
+        this.native('setAlternateImage', e);
+      }
     }
   });
 
@@ -108,7 +117,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.img = e;
       e = utilities.makeNSImage(e);
-      if(e) this.native('setImage', e);
+      if(e) {
+        this.native('setImage', e);
+      }
     }
   });
 
@@ -130,7 +141,9 @@ module.exports = (function() {
       if(e instanceof Menu) {
         this.private.submenu = e;
         this.native('setMenu',e.native);
-      } else throw new Error("The passed in object was not a valid menu object.");
+      } else {
+        throw new Error("The passed in object was not a valid menu object.");
+      }
     }
   });
 
@@ -188,7 +201,9 @@ module.exports = (function() {
       if(e instanceof Container) {
         this.private.custom = e;
         this.nativeView = e.nativeView;
-        if(this.length == -1) this.length = 22; // set a default.
+        if(this.length === -1) {
+          this.length = 22; // set a default.
+        }
         return this.native('setView',e.nativeView);
       }
       else throw new Error("The passed in object was not a valid container or control.");
@@ -202,7 +217,9 @@ module.exports = (function() {
       if(e instanceof Menu) {
         this.private.custommenu = e;
         return this.native('popUpStatusItemMenu',e.native);
-      } else throw new Error("The passed in object was not a valid menu object.");
+      } else {
+        throw new Error("The passed in object was not a valid menu object.");
+      }
     }
   });
   return StatusBar;

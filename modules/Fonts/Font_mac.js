@@ -17,10 +17,11 @@ module.exports = (function() {
    */
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');
-    if(name.type == '@')
+    if(name.type === '@') {
       this.native = name;
-    else
+    } else {
       this.native = $.NSFont('fontWithName',$(name),'size', size);
+    }
 
     /**
      * @member face
@@ -151,16 +152,12 @@ module.exports = (function() {
       set:function(e) {
         var weight = e;
         var traits = fontManager('traitsOfFont', this.native);
-        if(weight <= 500 && (traits & $.NSBoldFontMask) == $.NSBoldFontMask)
+        if(weight <= 500 && (traits & $.NSBoldFontMask) === $.NSBoldFontMask) {
           traits = traits ^ $.NSBoldFontMask;
-        else if (weight > 500 && (traits & $.NSBoldFontMask) != $.NSBoldFontMask)
+        } else if (weight > 500 && (traits & $.NSBoldFontMask) !== $.NSBoldFontMask) {
           traits = traits | $.NSBoldFontMask;
-
-        this.native = fontManager('fontWithFamily', this.native('familyName'), 
-                                  'traits', traits, 
-                                  'weight', (weight/100), 
-                                  'size', this.native('pointSize')
-                                  );
+        }
+        this.native = fontManager('fontWithFamily', this.native('familyName'), 'traits', traits, 'weight', (weight/100), 'size', this.native('pointSize'));
       }
     });
   }
@@ -185,8 +182,9 @@ module.exports = (function() {
   Object.defineProperty(Font, 'fontFamilies', {
     get:function() { 
       var fonts = $utilities.nsArrayToArray(fontManager('availableFontFamilies'));
-      for(var i=0; i < fonts.length ; i++)
+      for(var i=0; i < fonts.length ; i++) {
         fonts[i] = fonts[i].toString();
+      }
       return fonts;
     }
   });

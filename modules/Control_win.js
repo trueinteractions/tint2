@@ -109,14 +109,11 @@ module.exports = (function() {
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
     get:function() { return this.nativeView.Opacity; },
-    set:function(e) { 
-      this.private.states.alpha = e;
-      return this.nativeView.Opacity = e; 
-    }
+    set:function(e) { this.nativeView.Opacity = e ? true : false; }
   });
 
    Object.defineProperty(Control.prototype, 'visible', {
-      get:function() { return this.native.Visibility == $.System.Windows.Visibility.Visible; },
+      get:function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
       set:function(e) {
         this.private.states.visible = e;
         if(e) {
@@ -133,7 +130,7 @@ module.exports = (function() {
         return null;
       }
       var target = $.System.Windows.Window.GetWindow(this.nativeView);
-      if(target == null) {
+      if(target === null) {
         return null;
       }
       var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
@@ -201,7 +198,7 @@ module.exports = (function() {
 
   Control.prototype.removeEventListener = function(event, func) {
     event = event.toLowerCase();
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) {
+    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
       this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
     }
   };

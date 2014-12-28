@@ -122,8 +122,11 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'frame', {
     get:function() { return this.native.WindowStyle === $.System.Windows.WindowStyle.SingleBorderWindow; },
     set:function(e) {
-      if(e) this.native.WindowStyle = $.System.Windows.WindowStyle.SingleBorderWindow;
-      else this.native.WindowStyle = $.System.Windows.WindowStyle.None;
+      if(e) {
+        this.native.WindowStyle = $.System.Windows.WindowStyle.SingleBorderWindow;
+      } else {
+        this.native.WindowStyle = $.System.Windows.WindowStyle.None;
+      }
     }
   });
 
@@ -338,7 +341,7 @@ module.exports = (function() {
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MAXIMIZEBOX));
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
-        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MAXIMIZEBOX));
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & (~$$.win32.user32.WS_MAXIMIZEBOX)));
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
@@ -358,7 +361,7 @@ module.exports = (function() {
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
-        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
+        var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & (~$$.win32.user32.WS_MINIMIZEBOX)));
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
