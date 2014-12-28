@@ -91,7 +91,7 @@
         events[event] = []; 
       }
       events[event].push(func); 
-    }
+    };
 
     /**
      * @method removeEventListener
@@ -106,11 +106,11 @@
       if(events[event] && events[event].indexOf(func) !== -1) {
         events[event].splice(events[event].indexOf(func), 1); 
       }
-    }
+    };
 
     // unused, stub to help move us a bit closer to a standard spec
-    this.launch = function() { fireEvent('launch'); }.bind(this);
-    this.uninstall = function() { console.warn('unimplemented'); }
+    this.launch = function() { fireEvent('launch'); };
+    this.uninstall = function() { console.warn('unimplemented'); };
 
     /**
      * @member packaged
@@ -146,7 +146,8 @@
         }
         return null;
       }
-    }
+    };
+
     //
     // @member windows
     // @type {array}
@@ -233,8 +234,8 @@
     // Get access to the native NSApplication.
     util.def(this, 'native', function() { return $app; });
 
-    this.hideAllOtherApplications = function() { $app('hideOtherApplications', $app); }
-    this.unhideAllOtherApplications = function() { $app('unhideAllApplications', $app); }
+    this.hideAllOtherApplications = function() { $app('hideOtherApplications', $app); };
+    this.unhideAllOtherApplications = function() { $app('unhideAllApplications', $app); };
 
     /**
      * @member visible
@@ -270,7 +271,7 @@
     this.attention = function(critical) {
       $app('requestUserAttention', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) );
       return {cancel:function() { $app('cancelUserAttentionRequest', (critical ? $.NSCriticalRequest : $.NSInformationalRequest) ); }.bind(this)};
-    }
+    };
     
     /**
      * @method paste
@@ -278,7 +279,7 @@
      * @description Invokes a paste operation, this takes whatever is currently in the clipboard
      *              and sends a paste operation to the focused window and control.
      */
-    this.paste = function() { $app('sendAction', 'paste:', 'to', null, 'from', $app); }
+    this.paste = function() { $app('sendAction', 'paste:', 'to', null, 'from', $app); };
 
     /**
      * @method copy
@@ -286,7 +287,7 @@
      * @description Invokes a copy operation, this takes whatever is currently selected in the
      *              focused window and control and places it into the clipboard.
      */
-    this.copy = function() { $app('sendAction', 'copy:', 'to', null, 'from', $app); }
+    this.copy = function() { $app('sendAction', 'copy:', 'to', null, 'from', $app); };
 
     /**
      * @method cut
@@ -295,7 +296,7 @@
      *              focused window and control and places it into the clipboard and removes the
      *              selected element from the application (usually text or images)
      */
-    this.cut = function() { $app('sendAction', 'cut:', 'to', null, 'from', $app); }
+    this.cut = function() { $app('sendAction', 'cut:', 'to', null, 'from', $app); };
 
     /**
      * @method undo
@@ -303,7 +304,7 @@
      * @description This rewinds a controls value (e.g., perhaps text in a textbox) for the
      *              currently focused window and control.
      */
-    this.undo = function() { $app('sendAction', 'undo:', 'to', null, 'from', $app); }
+    this.undo = function() { $app('sendAction', 'undo:', 'to', null, 'from', $app); };
 
     /**
      * @method redo
@@ -311,7 +312,7 @@
      * @description This repeats the last rewound value of the currently focused window and
      *              control. 
      */
-    this.redo = function() { $app('sendAction', 'redo:', 'to', null, 'from', $app); }
+    this.redo = function() { $app('sendAction', 'redo:', 'to', null, 'from', $app); };
 
     /**
      * @method delete
@@ -319,7 +320,7 @@
      * @description Deletes the currently selected value for the currently focused window
      *              and control.
      */
-    this.delete = function() { $app('sendAction', 'delete:',' to', null, 'from', $app); }
+    this.delete = function() { $app('sendAction', 'delete:',' to', null, 'from', $app); };
 
     /**
      * @method selectAll
@@ -327,7 +328,7 @@
      * @description Selects all the values in the UI of the currently focused window and
      *              control.
      */
-    this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); }
+    this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
 
     $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
