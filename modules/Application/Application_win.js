@@ -145,7 +145,7 @@
     util.def(this, 'badge',
       function() { return badgeText; },
       function(e) {  badgeText = e; }
-    });
+    );
 
     //TODO: IMPLEMENT THIS: There are jump lists in Windows however they do not
     // behave to dock menu's behavior in OSX, figure out a way of mapping these.

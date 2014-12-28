@@ -48,8 +48,8 @@ module.exports = (function() {
         this.private.fullscreen = true;
          this.fireEvent('enter-fullscreen');
       } else if(this.private.fullscreen === true && 
-                (this.native.WindowState != $.System.Windows.WindowState.Maximized || 
-                  this.native.WindowStyle != $.System.Windows.WindowStyle.None)) 
+                (this.native.WindowState !== $.System.Windows.WindowState.Maximized || 
+                  this.native.WindowStyle !== $.System.Windows.WindowStyle.None)) 
       {
         this.fireEvent('exit-fullscreen');
         this.private.fullscreen = false;
@@ -128,23 +128,23 @@ module.exports = (function() {
   });
 
   //TODO: Implement me
-  Object.defineProperty(Window.prototype, 'textured', {
-    get:function() { },
-    set:function(e) { }
-  });
+  //Object.defineProperty(Window.prototype, 'textured', {
+  //  get:function() { },
+  //  set:function(e) { }
+  //});
 
   //TODO: Implement me
-  Object.defineProperty(Window.prototype, 'shadow', {
-    get:function() { },
-    set:function(e) { }
-  });
+  //Object.defineProperty(Window.prototype, 'shadow', {
+  //  get:function() { },
+  //  set:function(e) { }
+  //});
 
   Object.defineProperty(Window.prototype, 'menu', {
     get:function() { 
       return this.private.menu; 
     },
     set:function(e) {
-      if(this.private.menu != null) {
+      if(this.private.menu !== null) {
         this.nativeView.RemoveLayoutConstraint(this.private.menuConst1);
         this.nativeView.RemoveLayoutConstraint(this.private.menuConst2);
         this.nativeView.RemoveLayoutConstraint(this.private.menuConst3);
@@ -302,10 +302,10 @@ module.exports = (function() {
   });
 
   //TODO: Implement me
-  Object.defineProperty(Window.prototype, 'titleVisible', {
-    get:function() { return true; },
-    set:function(e) { /* TODO ? */ }
-  });
+  //Object.defineProperty(Window.prototype, 'titleVisible', {
+  //  get:function() { return true; },
+  //  set:function(e) { /* TODO ? */ }
+  //});
 
   // Override Control's definition of visible to a window context.
   Object.defineProperty(Window.prototype, 'visible', {
@@ -378,8 +378,8 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'resizable', {
     get:function() { 
-      return this.native.ResizeMode != $.System.Windows.ResizeMode.NoResize && 
-        this.native.ResizeMode != $.System.Windows.ResizeMode.CanMinimize;
+      return this.native.ResizeMode !== $.System.Windows.ResizeMode.NoResize && 
+        this.native.ResizeMode !== $.System.Windows.ResizeMode.CanMinimize;
     },
     set:function(e) {
       if(e) {

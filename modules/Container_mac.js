@@ -54,7 +54,8 @@ module.exports = (function() {
       control.fireEvent('parent-attached', [this]);
       this.fireEvent('child-attached', [control]);
     }
-  }
+  };
+
   /**
    * @method removeChild
    * @memberof Container
@@ -63,20 +64,20 @@ module.exports = (function() {
    * @see removeChild
    */
   Container.prototype.removeChild = function(control) {
-    this.fireEvent('remove', element);
+    this.fireEvent('remove', [control]);
     if(this.private.children.indexOf(control) !== -1) {
-      this.private.children.splice(children.indexOf(control),1);
+      this.private.children.splice(this.private.children.indexOf(control),1);
     }
     control.nativeView('removeFromSuperview');
     control.fireEvent('parent-dettached', [this]);
     this.fireEvent('child-dettached', [control]);
-  }
+  };
 
   //TODO: Remove this? Inconsistant with windows version.
   Container.prototype.scrollTo = function(x, y) {
     var b = this.bounds;
     this.nativeView('scrollPoint', $.NSMakePoint(x,b.height - y));
-  }
+  };
 
   global.__TINT.Container = Container;
   return Container;

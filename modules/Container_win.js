@@ -5,7 +5,6 @@ module.exports = (function() {
   var Control = require('Control');
   var utilities = require('Utilities');
   var $ = process.bridge.dotnet;
-  var parseValue = utilities.parseUnits;
 
   function Container(options) {
     options = options || {};
@@ -31,17 +30,17 @@ module.exports = (function() {
       control.fireEvent('parent-attached', [this]);
       this.fireEvent('child-attached', [control]);
     }
-  }
+  };
 
   Container.prototype.removeChild = function(control) {
-    this.fireEvent('remove', element);
+    this.fireEvent('remove', [control]);
     if(this.private.children.indexOf(control) !== -1) {
-      this.private.children.splice(children.indexOf(control),1);
+      this.private.children.splice(this.private.children.indexOf(control),1);
     }
     this.nativeView.InternalChildren.Remove(control.native);
     control.fireEvent('parent-dettached', [this]);
     this.fireEvent('child-dettached', [control]);
-  }
+  };
 
   Container.prototype.scrollTo = function(x, y) {
     if(this.native.ScrollToVerticalOffset) {
@@ -51,7 +50,8 @@ module.exports = (function() {
       this.private.parent.native.ScrollToVerticalOffset(y);
       this.private.parent.native.ScrollToHorizontalOffset(x);
     }
-  }
-  global.__TINT.Container;
+  };
+
+  global.__TINT.Container = Container;
   return Container;
 })();
