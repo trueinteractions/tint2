@@ -10,7 +10,7 @@ module.exports = (function() {
     options = options || {};
     this.nativeClass = this.nativeClass || $.AutoLayout.AutoLayoutPanel;
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
-    Container.call(this, options);
+    Control.call(this, options);
     this.private.children = [];
   }
 

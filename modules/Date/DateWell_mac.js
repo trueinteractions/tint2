@@ -20,7 +20,7 @@ module.exports = (function() {
   function DateWell(options) {
     options = options || {};
     options.delegates = options.delegates || [];
-    this.nativeClass = this.nativeClass || $.NSDatePicker);
+    this.nativeClass = this.nativeClass || $.NSDatePicker;
     this.nativeViewClass = this.nativeViewClass || $.NSDatePicker;
     Container.call(this, options);
     this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);

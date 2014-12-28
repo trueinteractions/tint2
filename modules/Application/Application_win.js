@@ -17,27 +17,27 @@
   // Load the http module to create an http server.
   var http = require('http');
   var mimetype = {};
-  mimetype['gz'] = 'application/gzip';
-  mimetype['zip'] = 'application/zip';
-  mimetype['pdf'] = 'application/pdf';
-  mimetype['json'] = 'application/json';
-  mimetype['js'] = 'application/javascript';
-  mimetype['mp3'] = 'audio/mp3';
-  mimetype['gif'] = 'image/gif';
-  mimetype['jpg'] = mimetype['jpeg'] = 'image/jpeg';
-  mimetype['png'] = 'image/png';
-  mimetype['svg'] = 'image/svg+xml';
-  mimetype['txt'] = 'text/plain';
-  mimetype['html'] = mimetype['htm'] = 'text/html';
-  mimetype['css'] = 'text/css';
-  mimetype['xml'] = 'text/xml';
-  mimetype['avi'] = 'video/avi';
-  mimetype['mpeg'] = mimetype['mpg'] = 'video/mpeg';
-  mimetype['mp4'] = 'video/mp4';
-  mimetype['ogg'] = 'video/ogg';
-  mimetype['webm'] = 'video/webm';
-  mimetype['flv'] = 'video/x-flv';
-  mimetype['mkv'] = 'video/x-matroska';
+  mimetype.gz = 'application/gzip';
+  mimetype.zip = 'application/zip';
+  mimetype.pdf = 'application/pdf';
+  mimetype.json = 'application/json';
+  mimetype.js = 'application/javascript';
+  mimetype.mp3 = 'audio/mp3';
+  mimetype.gif = 'image/gif';
+  mimetype.jpg = mimetype.jpeg = 'image/jpeg';
+  mimetype.png = 'image/png';
+  mimetype.svg = 'image/svg+xml';
+  mimetype.txt = 'text/plain';
+  mimetype.html = mimetype.htm = 'text/html';
+  mimetype.css = 'text/css';
+  mimetype.xml = 'text/xml';
+  mimetype.avi = 'video/avi';
+  mimetype.mpeg = mimetype.mpg = 'video/mpeg';
+  mimetype.mp4 = 'video/mp4';
+  mimetype.ogg = 'video/ogg';
+  mimetype.webm = 'video/webm';
+  mimetype.flv = 'video/x-flv';
+  mimetype.mkv = 'video/x-matroska';
   // Part of the application schema (app://)
   var server = http.createServer(function (request, response) {
     var path = request.url;
@@ -46,7 +46,7 @@
     // We need to serve a blank page to IE when it loads (not about:blank)
     // 
     if(path === "//this-is-a-blank-page-for-ie-fix.html") {
-      data = Buffer("<!doctype html>\n<html>\n<body>\n</body>\n</html>\n","utf8");
+      data = new Buffer("<!doctype html>\n<html>\n<body>\n</body>\n</html>\n","utf8");
     } else {
       try {
         var url = new $.System.Uri("app:/"+path);
@@ -57,7 +57,9 @@
       }
     }
     var mimeTypeFromExt = mimetype[ext];
-    if(!mimeTypeFromExt) mimeTypeFromExt = 'text/plain';
+    if(!mimeTypeFromExt) {
+      mimeTypeFromExt = 'text/plain';
+    }
     response.writeHead(200, {"Content-Type": mimeTypeFromExt});
     response.write(data);
     response.end("");
@@ -73,8 +75,7 @@
   var $ = process.bridge.dotnet;
 
   function Application() {
-    var events = {}, 
-        mainMenu = null, 
+    var events = {},
         name = "", 
         badgeText = "", 
         dockmenu = null, 
@@ -85,13 +86,13 @@
     this.private.windowCount = 0;
     this.native = $.System.Windows.Application.Current;
 
-    if(this.native == null) {
+    if(this.native === null) {
       this.native = new $.System.Windows.Application();
     }
 
     function fireEvent(event, args) {
       if(events[event])
-        (events[event]).forEach(function(item,index,arr) {
+        (events[event]).forEach(function(item) {
           item.apply(null,args);
         });
     }
@@ -129,7 +130,7 @@
         var data = reader.ReadToEnd();
         return data;
       } catch (e) { 
-        if(application.warn) {
+        if(this.warn) {
           console.warn('Cannot find resource at: ', path);
         }
         return null;

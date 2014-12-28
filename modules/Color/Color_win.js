@@ -1,11 +1,14 @@
 module.exports = (function() {
+  if(global.__TINT.Color) {
+    return global.__TINT.Color;
+  }
   var $ = process.bridge.dotnet;
   var util = require('Utilities');
 
   function Color(type) {
     if(type instanceof Color) { 
       this.native = type.native;
-    } else if(type.pointer) 
+    } else if(type.pointer) {
       this.native = type;
     } else {
       var rgba = util.parseColor(type);
@@ -23,5 +26,6 @@ module.exports = (function() {
   Object.defineProperty(Color.prototype, 'green', { get:function() { return parseInt(this.native.G.ToString())/255; }});
   Object.defineProperty(Color.prototype, 'alpha', { get:function() { return parseInt(this.native.A.ToString())/255; }});
 
+  global.__TINT.Color = Color;
   return Color;
 })();
