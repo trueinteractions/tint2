@@ -273,7 +273,7 @@ module.exports = (function() {
     var unwrapper;
 
     if(isVariadic) {
-      var func = ffi.VariadicForeignFunction(funcPtr, types.map(rtnType), types.mapArray(argTypes));
+      var varFunc = ffi.VariadicForeignFunction(funcPtr, types.map(rtnType), types.mapArray(argTypes));
       unwrapper = function() {
         var newtypes = [];
         // Detect the types coming in, make sure to ignore previously defined baseTypes,
@@ -289,15 +289,15 @@ module.exports = (function() {
           else if(typeof arguments[i] == 'number') newtypes.push('d');
           else newtypes.push('?');
         }
-        return wrapValue(func
+        return wrapValue(varFunc
                           .apply(null, types.mapArray(newtypes))
                           .apply(null, unwrapValues(arguments,argTypes.concat(newtypes))),
                         rtnType);
       };
     } else {
-      var func = ffi.ForeignFunction(funcPtr, types.map(rtnType), types.mapArray(argTypes));
+      var tmpFunc = ffi.ForeignFunction(funcPtr, types.map(rtnType), types.mapArray(argTypes));
       unwrapper = function() {
-        return wrapValue(func.apply(null, unwrapValues(arguments, argTypes)), rtnType);
+        return wrapValue(tmpFunc.apply(null, unwrapValues(arguments, argTypes)), rtnType);
       }
     }
     unwrapper.retval = rtnType;

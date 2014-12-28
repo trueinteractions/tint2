@@ -237,12 +237,11 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'y', {
     get:function() { return Math.round(this.native.Top); },
     set:function(e) {
+      var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e == 'center') {
-        var workingArea = $.System.Windows.SystemParameters.WorkArea;
         this.native.Left = workingArea.width/2 - this.native.Width/2;
         this.native.Top = workingArea.height/2 - this.native.Height/2;
       } else {
-        var workingArea = $.System.Windows.SystemParameters.WorkArea;
         e = utilities.parseUnits(e);
         this.native.Top = e + workingArea.Y;
       }
@@ -252,12 +251,11 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'x', {
     get:function() { return Math.round(this.native.Left); },
     set:function(e) {
+      var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e == 'center') {
-        var workingArea = $.System.Windows.SystemParameters.WorkArea;
         this.native.Left = workingArea.width/2 - this.native.Width/2;
         this.native.Top = workingArea.height/2 - this.native.Height/2;
       } else {
-        var workingArea = $.System.Windows.SystemParameters.WorkArea;
         e = utilities.parseUnits(e);
         this.native.Left = e + workingArea.X;
       }
@@ -329,17 +327,15 @@ module.exports = (function() {
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
     },
     set:function(e) {
+      var hwnd = this.private.hwnd;
+      var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
+      var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
+
       if(e) {
-        var hwnd = this.private.hwnd;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value | $$.win32.user32.WS_MINIMIZEBOX));
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
-        var hwnd = this.private.hwnd;
-        var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
         var result = $$.win32.user32.SetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE, (value & ~$$.win32.user32.WS_MINIMIZEBOX));
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
@@ -349,13 +345,11 @@ module.exports = (function() {
     get:function() { return this.private.closeButton; },
     set:function(e) {
       this.private.closeButton = e;
+      var hwnd = this.private.hwnd;
+      var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
       if(e) {
-        var hwnd = this.private.hwnd;
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_ENABLED);
       } else {
-        var hwnd = this.private.hwnd;
-        var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
