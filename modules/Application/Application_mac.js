@@ -47,10 +47,10 @@
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
-    delegateClass.addMethod('applicationShouldTerminateAfterLastWindowClosed:','B@:@',function(self,cmd,sender) {
+    delegateClass.addMethod('applicationShouldTerminateAfterLastWindowClosed:','B@:@',function() {
       return terminateWhenLastWindowClosed;
     });
-    delegateClass.addMethod('applicationDockMenu:','@@:@',function(self,cmd,sender) {
+    delegateClass.addMethod('applicationDockMenu:','@@:@',function() {
       try {
         if(dockmenu === null) {
           return null;
@@ -71,7 +71,7 @@
 
     function fireEvent(event, args) {
       if(events[event]) {
-        (events[event]).forEach(function(item,index,arr) { 
+        (events[event]).forEach(function(item) { 
           item.apply(null,args); 
         });
       }
@@ -141,7 +141,7 @@
       if(data) {
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
       } else {
-        if(application.warn) {
+        if(this.warn) {
           console.warn('Cannot find resource at: ', path);
         }
         return null;
