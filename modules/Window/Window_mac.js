@@ -4,7 +4,6 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var util = require('Utilities');
-  var Delegate = require('Bridge');
   var Color = require('Color');
   var $ = process.bridge.objc;
   var os = require('os');
@@ -471,7 +470,7 @@ module.exports = (function() {
   util.def(Window.prototype, 'x',
     function() { return this.native('frame').origin.x; },
     function(e) {
-      if(e == 'center') { 
+      if(e === 'center') { 
         this.native('center');
       } else {
         e = util.parseUnits(e);
@@ -736,7 +735,7 @@ module.exports = (function() {
   util.def(Window.prototype, 'backgroundColor',
     function() { return this.private.background; },
     function(e) {
-      if(e == 'auto') {
+      if(e === 'auto') {
         this.private.background = 'auto';
         this.native('setOpaque', $.YES);
         this.native('setBackgroundColor', $.NSColor('controlBackgroundColor'));
