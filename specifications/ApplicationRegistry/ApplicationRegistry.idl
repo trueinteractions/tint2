@@ -1,7 +1,0 @@
-interface ApplicationRegistry {
-    DOMRequest install (DOMString manifestUrl, [Optional] Object parameters);
-    DOMRequest getSelf ();
-    DOMRequest getInstalled ();
-    DOMRequest checkInstalled (DOMString manifestURL);
-                attribute ApplicationManagement management;
-};

@@ -1,6 +1,0 @@
-dictionary TCPServerOptions {
-    DOMString      localAddress;
-    unsigned short localPort;
-    boolean        addressReuse;
-    boolean        useSecureTransport;
-};
