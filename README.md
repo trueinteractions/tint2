@@ -2,64 +2,26 @@
 
 Create Desktop Javascript Applications.
 
-With Tint your options are no longer bound to browsers or emulators, use our SDK to build cross-compatible applications or directly interface with Objective-C frameworks or Windows DLL's to create OS-specific functionality.
+https://www.trueinteractions.com/tint2/docs/
 
-```javascript
-require('Application');
-Window = require('Window');
+This documentation is for contributors to Tint.  
 
-var mainWindow = new Window();
-mainWindow.visible = true;
-mainWindow.title = "I'm a native window built in node.";
-```
+<h2>Getting Started</h2>
 
-Run an application from a script
+* Download: https://github.com/trueinteractions/tint2/releases/
+* Documentation/Tutorials: https://www.trueinteractions.com/tint2/docs/
+* Questions: https://groups.google.com/forum/#!categories/trueinteractions
+* Commercial Support https://www.trueinteractions.com
 
-```bash
-$ tint some.js
-```
-
-Prototype functionality quickly in interactive mode
-
-```bash
-$ tint
-```
-
-Or create a standalone Windows or OSX executable
-
-```bash
-$ tntbuild somedir/package.json
-```
-
-<h2>Get Started</h2>
-
-* Download the release candidate: https://github.com/trueinteractions/tint2/releases/
-* Browse initial (unstable) API documentation: https://www.trueinteractions.com/tint2/docs/
-* Ask questions, get help, and search for answers: https://groups.google.com/forum/#!categories/trueinteractions
-* Need commercial support? https://www.trueinteractions.com
-
-<h2>Why is Tint different?</h2>
-There are many alternatives to creating javascript based applications, phonegap, tidekit, tidesdk, cordova based sets, node-webkit, appjs and a few others. Tint isn't a hybrid approach, it doesn't mask javascript as a native API.  Tint uses language bridges to natively represent (and allow you to use) real C++, C# and Objective-C objects directly in javascript safely.  
-
-With Tint you have options, you can use the SDK to create native applications or use Tint's language bridge to directly interface with Objective-C/C#/C++ or C directly in javascript. 
-
-If you don't want to learn (or deal with) native OS languages, you're in luck, there's a wide variety of cross-compatible widgets for javascript to choose from.
-
-<h2>Using .NET CLR & Objective-C in Tint</h2>
-See the wiki's language bridge page for more information on using C++, C# and Objective-C directly in Tint. https://github.com/trueinteractions/tint2/wiki/Tint's-Language-Bridge
-
-<h2>Status</h2>
+<h2>Status [![Codacy Badge](https://www.codacy.com/project/badge/6ea8c1d425af42cf9211a3ddf7a42240)](https://www.codacy.com/public/trevorlintongithub/tint2)</h2>
 
            | OSX        | Windows    | Linux      | iOS        | Android    
 ---------- | ---------- | ---------- | ---------- | ---------- | ----------
-Build | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
-Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | N/A | N/A
+Build | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | Yes | N/A
+Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | No (48% Pass) | N/A
 
-*This is intended as a preview release for Tint 2, currently only supported on OSX and Windows.*
 
-Preview releases for Linux (QT), iOS, and Android are in tests at the moment.
-
-<h2>Building Tint from Source</h2>
+<h2>Compiling Tint</h2>
 
 <h3>MacOS X</h3>
 Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
