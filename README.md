@@ -13,13 +13,14 @@ This documentation is for contributors to Tint.
 * Questions: https://groups.google.com/forum/#!categories/trueinteractions
 * Commercial Support https://www.trueinteractions.com
 
-<h2>Status [![Codacy Badge](https://www.codacy.com/project/badge/6ea8c1d425af42cf9211a3ddf7a42240)](https://www.codacy.com/public/trevorlintongithub/tint2)</h2>
+<h2>Status</h2>
 
            | OSX        | Windows    | Linux      | iOS        | Android    
 ---------- | ---------- | ---------- | ---------- | ---------- | ----------
 Build | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | Yes | N/A
 Unit Tests | [![Build Status](https://travis-ci.org/trueinteractions/tint2.svg?branch=master)](https://travis-ci.org/trueinteractions/tint2) | [![Build status](https://ci.appveyor.com/api/projects/status/8drwkx2kohd1wkdd/branch/master)](https://ci.appveyor.com/project/trevorlinton/tint2/branch/master) | N/A | No (48% Pass) | N/A
 
+Code Quality? [![Codacy Badge](https://www.codacy.com/project/badge/6ea8c1d425af42cf9211a3ddf7a42240)](https://www.codacy.com/public/trevorlintongithub/tint2)
 
 <h2>Compiling Tint</h2>
 
