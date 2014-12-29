@@ -10,7 +10,7 @@
 #include <Shellapi.h>
 #include <comdef.h>
 #include "../AutoLayoutPanel.cpp"
-//#include <Dwmapi.h>
+
 #using <System.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
@@ -27,6 +27,8 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
+
+// #define GC_DEBUG 1
 
 extern "C" void uv_run_nowait();
 
@@ -398,29 +400,15 @@ namespace IEWebBrowserFix {
 /**
  ** Begin CLR Bridge Code
  **/
-
-// The CPP Class is responsible for holding on to a .NET CLR type and handing
-// the pointer as a C++ void * to v8. The callback CppClassCleanUp is called
-// when V8 determines the CPP class is no longer needed, all memory is then
-// collected when CPPClassCleanUp deletes the CppClass and executes its destructor.
-// The destructor of CppClass returns the object back into the .NET managed memory
-// pool, at which point .NET is then responsible for determining its referential 
-// needs and either reclaiming the .NET memory, or holding on to it. 
-class CppClass {
-  public:
-    gcroot<System::Object ^> * obj;
-    GCHandle handle;
-    CppClass() : obj(new gcroot<System::Object ^>) {
-      handle = GCHandle::Alloc(*obj);
-    }
-    ~CppClass() {
-      handle.Free();
-      delete obj;
-    }
-};
-void CppClassCleanUp(char *data, void *hint) {
-  CppClass *n = (CppClass *)data;
-  delete n;
+#ifdef GC_DEBUG
+ static int CppClassCount = 0;
+#endif
+void gchandle_cleanup(char *data, void *hint) {
+#ifdef GC_DEBUG
+  CppClassCount--;
+#endif
+  GCHandle handle = GCHandle::FromIntPtr(IntPtr(data));
+  handle.Free();
 }
 
 // This does not seem to be executed but is the call back for when we have .NET objects,
@@ -516,18 +504,17 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
     Handle<v8::Value> args[] = { slowBuffer->handle_, v8::Integer::New(buffer->Length), v8::Integer::New(0) };
     jsdata = bufferConstructor->NewInstance(3, args);
     (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("array"), v8::Boolean::New(true));
-  }
-  else
-  {
-    CppClass *n = new CppClass();
-    *(n->obj) = netdata;
-    void *user_data = NULL;
-    size_t sz = sizeof(CppClass *);
-    node::Buffer *buf = node::Buffer::New((char *)n, sz, CppClassCleanUp, user_data);
+  } else {
+#ifdef GC_DEBUG
+  CppClassCount++;
+#endif
+    GCHandle handle = GCHandle::Alloc(netdata);
+    void *ptr = GCHandle::ToIntPtr(handle).ToPointer();
+    node::Buffer *buf = node::Buffer::New((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
     jsdata = buf->handle_;
     if(type == System::IntPtr::typeid) {
-      void *ptr = ((System::IntPtr ^)netdata)->ToPointer();
-      node::Buffer *bufptr = node::Buffer::New((char *)ptr, sizeof(ptr), wrap_cb, user_data);
+      void *rawptr = ((System::IntPtr ^)netdata)->ToPointer();
+      node::Buffer *bufptr = node::Buffer::New((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
       (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
     }
   }
@@ -594,14 +581,9 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
     }
     else if (node::Buffer::HasInstance(jsdata)) 
     {
-      // This is fine, it may seem tempting to remove the old object (or buffer) but we need to
-      // reply on V8 to callback to our clean up method to know when its actually unusable, do not
-      // remove the object or the CppClass here otherwise if a user is just passing the object into
-      // a function and intends to use it again they're will be a segmentation fault the next time
-      // the user attempts to pass it in.
-      CppClass *data = (CppClass *)node::Buffer::Data(jsdata.As<v8::Object>());
-      System::Object ^obj = (*(data->obj));
-      return obj;
+      void *data = (void *)node::Buffer::Data(jsdata.As<v8::Object>());
+      GCHandle handle = GCHandle::FromIntPtr(IntPtr(data));
+      return handle.Target;
     }
     else if (jsdata->IsObject()) 
     {
@@ -756,6 +738,45 @@ class CLR {
   CLR() { }
 
 public:
+
+#ifdef GC_DEBUG
+  static Handle<v8::Value> GetCppClassCount(const v8::Arguments& args) {
+    HandleScope scope;
+    return scope.Close(v8::Number::New(CppClassCount));
+  }
+#endif
+
+  static Handle<v8::Value> GetReferencedAssemblies(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      array<System::Reflection::AssemblyName^>^ assemblies = System::Reflection::Assembly::GetExecutingAssembly()->GetReferencedAssemblies();
+      return scope.Close(MarshalCLRToV8(assemblies));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> GetLoadedAssemblies(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
+      return scope.Close(MarshalCLRToV8(assemblies));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static Handle<v8::Value> LoadAssemblyFromMemory(const v8::Arguments& args) {
+    HandleScope scope;
+    try {
+      System::String^ assemblyName = stringV82CLR(args[0]->ToString());
+      System::Reflection::Assembly^ assembly = System::Reflection::Assembly::Load(assemblyName);
+      return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
   /** Load an Execution of DOTNET CLR **/
   static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
     HandleScope scope;
@@ -1194,6 +1215,9 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);
 
   // get programmatic information
+  NODE_SET_METHOD(target, "getReferencedAssemblies", CLR::GetReferencedAssemblies);
+  NODE_SET_METHOD(target, "getLoadedAssemblies", CLR::GetLoadedAssemblies);
+  NODE_SET_METHOD(target, "loadAssemblyFromMemory", CLR::LoadAssemblyFromMemory);
   NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
   NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
   NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
@@ -1211,6 +1235,10 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
 
   NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
   
+#ifdef GC_DEBUG
+  NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);
+#endif
+
   // Register the thread handle to communicate back to handle application
   // specific events when in WPF mode.
   System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
