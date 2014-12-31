@@ -3,7 +3,7 @@ module.exports = (function() {
     return global.__TINT.Window;
   }
   var Container = require('Container');
-  var utilities = require('Utilities');
+  var util = require('Utilities');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
@@ -273,11 +273,20 @@ module.exports = (function() {
     set:function(e) {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e === 'center') {
-        this.native.Left = workingArea.width/2 - this.native.Width/2;
-        this.native.Top = workingArea.height/2 - this.native.Height/2;
+        if(this.preferences.animateOnPositionChange) {
+          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, workingArea.width/2 - this.native.Width/2);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, workingArea.height/2 - this.native.Height/2);
+        } else {
+          this.native.Left = workingArea.width/2 - this.native.Width/2;
+          this.native.Top = workingArea.height/2 - this.native.Height/2;
+        }
       } else {
-        e = utilities.parseUnits(e);
-        this.native.Top = e + workingArea.Y;
+        e = util.parseUnits(e);
+        if(this.preferences.animateOnPositionChange) {
+          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, e + workingArea.Y);
+        } else {
+          this.native.Top = e + workingArea.Y;
+        }
       }
     }
   });
@@ -287,23 +296,46 @@ module.exports = (function() {
     set:function(e) {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e === 'center') {
-        this.native.Left = workingArea.width/2 - this.native.Width/2;
-        this.native.Top = workingArea.height/2 - this.native.Height/2;
+        if(this.preferences.animateOnPositionChange) {
+          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, workingArea.width/2 - this.native.Width/2);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, workingArea.height/2 - this.native.Height/2);
+        } else {
+          this.native.Left = workingArea.width/2 - this.native.Width/2;
+          this.native.Top = workingArea.height/2 - this.native.Height/2;
+        }
       } else {
-        e = utilities.parseUnits(e);
-        this.native.Left = e + workingArea.X;
+        e = util.parseUnits(e);
+        if(this.preferences.animateOnPositionChange) {
+          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, e + workingArea.X);
+        } else {
+          this.native.Left = e + workingArea.X;
+        }
       }
     }
   });
 
   Object.defineProperty(Window.prototype, 'width', {
     get:function() { return Math.round(this.native.ActualWidth); },
-    set:function(e) { this.native.Width = utilities.parseUnits(e); }
+    set:function(e) { 
+      e = util.parseUnits(e);
+      if(this.preferences.animateOnSizeChange) {
+        util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.WidthProperty, 250, this.native.Width, e);
+      } else {
+        this.native.Width = e; 
+      }
+    }
   });
 
   Object.defineProperty(Window.prototype, 'height', {
     get:function() { return Math.round(this.native.ActualHeight); },
-    set:function(e) { this.native.Height = utilities.parseUnits(e); }
+    set:function(e) { 
+      e = util.parseUnits(e);
+      if(this.preferences.animateOnSizeChange) {
+        util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.HeightProperty, 250, this.native.Height, e);
+      } else {
+        this.native.Height = e; 
+      }
+    }
   });
 
   //TODO: Implement me

@@ -106,6 +106,11 @@ module.exports = (function() {
     this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
   }
 
+  Control.prototype.preferences = {
+    animateOnSizeChange:false,
+    animateOnPositionChange:false
+  };
+
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,
     get:function() { return this.nativeView.Opacity; },
@@ -203,8 +208,7 @@ module.exports = (function() {
     }
   };
 
-  Control.prototype.addLayoutConstraint = function(layoutObject) {
-
+  function getConstraintSolver() {
     // WPF has an awkward inheritence schema. If we want a border on an element we have to wrap that element
     // in a Border control (rather than border being properties on the control inherited).  This means when we
     // do layout we have to determine which is hte "actual" child that's the target we're adding to (always, almost
@@ -212,12 +216,18 @@ module.exports = (function() {
     // we do this by looking for a defined "Child" attribute. "wrapping" controls such as Border use this to set
     // the single (and only) child element.  The Child will contain the panel that we need to use for our target and
     // first/second item.  This detects for it and silently returns if it doesn't find any target.
-    var target = null;
     if(this.private.parent.nativeView.Child && this.private.parent.nativeView.Child.AddLayoutConstraint) {
-      target = this.private.parent.nativeView.Child;
+      return this.private.parent.nativeView.Child;
     } else if (this.private.parent.nativeView.AddLayoutConstraint) {
-      target = this.private.parent.nativeView;
+      return this.private.parent.nativeView;
     } else {
+      return null;
+    }
+  }
+
+  Control.prototype.addLayoutConstraint = function(layoutObject) {
+    var target = (getConstraintSolver.bind(this))();
+    if(target === null) {
       return;
     }
 
@@ -236,6 +246,28 @@ module.exports = (function() {
     this.private.layoutConstraints.push(layoutObject);
     return constraint;
   };
+
+  Control.prototype.changeLayoutConstraint = function(previousConstraint, layoutObject) {
+    if(previousConstraint.multiplier !== layoutObject.multiplier ||
+        previousConstraint.controlSecond === null && layoutObject.secondItem !== null || 
+        previousConstraint.controlSecond !== null && layoutObject.secondItem === null || 
+        previousConstraint.controlFirst !== null && layoutObject.firstItem === null) 
+    {
+      this.removeLayoutConstraint(previousConstraint);
+      return this.addLayoutConstraint(layoutObject);
+    }
+    var target = (getConstraintSolver.bind(this))();
+    if(target === null) {
+      return;
+    }
+
+    if(this.preferences.animateOnSizeChange || this.preferences.animateOnPositionChange) {
+      target.AnimateConstant(previousConstraint, layoutObject.constant);
+    } else {
+      target.ChangeConstant(previousConstraint, layoutObject.constant);
+    }
+    return previousConstraint;
+  }
 
   Control.prototype.removeLayoutConstraint = function(n) {
     this.private.parent.nativeView.RemoveLayoutConstraint(n);

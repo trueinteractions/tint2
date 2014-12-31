@@ -179,6 +179,44 @@ System::String^ exceptionV82stringCLR(Handle<v8::Value> exception);
  **/
 
 namespace TintInterop {
+  public ref class WPFAnimator 
+  {
+  public:
+      WPFAnimator(UIElement^ element_, DependencyProperty^ property_, double from_, double to_, double duration_) {
+          this->element = element_;
+          this->property = property_;
+          this->from = from_;
+          this->to = to_;
+          this->duration = duration_;
+          this->passed = gcnew System::Diagnostics::Stopwatch();
+          this->passed->Start();
+      }
+      void RenderCallback(Object^ sender, EventArgs^ e) {
+          double diff = ((double)this->passed->ElapsedMilliseconds)/(this->duration);
+          if(diff >= 1) {
+              this->passed->Stop();
+              this->element->SetValue(this->property, this->to);
+              System::Windows::Media::CompositionTarget::Rendering -= this->selfRef;
+          } else {
+              double target = ((this->to - this->from) * diff ) + this->from;
+              this->element->SetValue(this->property, target);
+          }
+      }
+      static void Render(UIElement^ element_, DependencyProperty^ property_, double from_, double to_, double duration_) {
+        WPFAnimator^ an = gcnew WPFAnimator(element_, property_, from_, to_, duration_);
+        an->selfRef = gcnew EventHandler(an, &WPFAnimator::RenderCallback);
+        System::Windows::Media::CompositionTarget::Rendering += an->selfRef;
+      }
+      EventHandler ^selfRef;
+  private:
+      UIElement^ element;
+      DependencyProperty^ property;
+      double to;
+      double from;
+      double duration;
+      System::Diagnostics::Stopwatch^ passed;
+  };
+
   public ref class Wpf32Window : System::Windows::Forms::IWin32Window
   {
   public:

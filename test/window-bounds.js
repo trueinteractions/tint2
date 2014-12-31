@@ -20,12 +20,12 @@ function run($utils) {
   w.preferences.animateOnSizeChange = true;
   w.preferences.animateOnPositionChange = true;
   /* @hidden */ setTimeout(function(){ 
-  w.width = 400;
-  w.height = 400;
+                  w.width = 400;
+                  w.height = 400;
   /* @hidden */ }, 100);
   /* @hidden */ setTimeout(function(){
-  /* @hidden */   $utils.assert(w.width == 400, 'w.width should be 800, was: '+w.width);
-  /* @hidden */   $utils.assert(w.height == 400, 'w.height should be 800, was: '+w.height);
+  /* @hidden */   $utils.assert(w.width == 400, 'w.width should be 400, was: '+w.width);
+  /* @hidden */   $utils.assert(w.height == 400, 'w.height should be 400, was: '+w.height);
   /* @hidden */   //$utils.assert(w.bounds.width == 400, 'w.bounds.width should be 400, was: '+w.bounds.width);
   /* @hidden */   //$utils.assert(w.bounds.height == 378, 'w.bounds.height should be 400, was: '+w.bounds.height);
   /* @hidden */   w.width = 135;

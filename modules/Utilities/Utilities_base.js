@@ -36,18 +36,22 @@ module.exports = (function() {
       set: function(value) {
         var propertyName = name;
         var p = this.private;
+        var changeConstraint = null;
 
-        if(value === null) value = 0;
         if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null)
           throw new Error('A '+name+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
 
         this.private.states[propertyName] = value;
         p.user[propertyName] = value;
 
-        if(p.constraints[propertyName] !== null && p.constraints[propertyName])
+        if(p.constraints[propertyName] && value === null) {
           this.removeLayoutConstraint(p.constraints[propertyName]);
+          p.constraints[propertyName] = null;
+        } else if(p.constraints[propertyName] !== null && p.constraints[propertyName] && value !== null) {
+          changeConstraint = p.constraints[propertyName];
+        }
 
-        if(value == null)
+        if(value === null)
           return;
 
         this.addEventListener('parent-attached', function() {
@@ -81,8 +85,8 @@ module.exports = (function() {
           layoutObject.secondItem = value;
           layoutObject.multiplier = 1.0;
           layoutObject.constant = 0.0;
-          if((p.parent == value || this == value.private.parent) 
-                || propertyName == "middle" || propertyName == "center") 
+          if((p.parent == value || this == value.private.parent) || 
+                propertyName == "middle" || propertyName == "center") 
           {
             layoutObject.firstAttribute = layoutObject.secondAttribute = propertyName;
           }
@@ -100,8 +104,14 @@ module.exports = (function() {
             layoutObject.secondAttribute = "top";
           }
         } 
-        if(!layoutObject.secondAttribute) layoutObject.secondItem = null;
-        p.constraints[propertyName] = this.addLayoutConstraint(layoutObject);
+        if(!layoutObject.secondAttribute) {
+            layoutObject.secondItem = null;
+        }
+        if(changeConstraint !== null) {
+            p.constraints[propertyName] = this.changeLayoutConstraint(changeConstraint, layoutObject);
+        } else {
+            p.constraints[propertyName] = this.addLayoutConstraint(layoutObject);
+        }
       }
     });
     }

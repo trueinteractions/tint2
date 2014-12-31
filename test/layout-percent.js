@@ -20,10 +20,9 @@ function run($utils) {
     var buttonThird = new Button();
     buttonThird.title = "Third";
     buttonThird.left = 0;
-    buttonThird.bottom = '-20%';
+    buttonThird.bottom = '-80%';
     win.appendChild(buttonThird);
-
-    $utils.assert(buttonThird.bounds.y > 0, 'a negative percentage resulted in a negative y value.');
+    $utils.assert(buttonThird.bounds.y > 0, '\n\rResulting y bound was negative, should be positive: ' + buttonThird.bounds.y + '\n\r');
     $utils.ok();
 }
 

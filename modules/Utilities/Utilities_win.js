@@ -246,10 +246,26 @@ module.exports = (function() {
     return i;
   }
 
+  function animateWPFProperty(target, property, duration, from, to) {
+    var story = new $.System.Windows.Media.Animation.Storyboard();
+    var animation = new $.System.Windows.Media.Animation.DoubleAnimation();
+    animation.Duration = new $.System.Windows.Duration($.System.TimeSpan.FromMilliseconds(duration))
+    animation.From = (from + 0.0000000000001);
+    animation.To = (to + 0.000000000001);
+    animation.SetValue($.System.Windows.Media.Animation.Storyboard.TargetProperty, target);
+    animation.SetValue($.System.Windows.Media.Animation.Storyboard.TargetPropertyProperty, new $.System.Windows.PropertyPath(property));
+    animation.EasingFunction = new $.System.Windows.Media.Animation.QuadraticEase();
+    animation.EasingFunction.EaseMode = $.System.Windows.Media.Animation.EasingMode.EaseInOut;
+    story.Children.Add(animation);
+    story.Begin();
+
+  }
+
   baseUtilities.forEachItemInControl = forEachItemInControl;
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.makeImage = makeImage;
   baseUtilities.makeWinFormsIcon = makeWinFormsIcon;
+  baseUtilities.animateWPFProperty = animateWPFProperty;
 
   return baseUtilities;
 })();

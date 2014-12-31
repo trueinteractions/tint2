@@ -90,7 +90,7 @@ function run($utils) {
     //}
   }, 1000);
   win.appendChild(buttonGroup);
-  $utils.log('setup-end');
+  if($utils.debug) $utils.log('setup-end');
 }
 
 /**

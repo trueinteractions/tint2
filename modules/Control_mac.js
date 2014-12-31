@@ -166,6 +166,11 @@ module.exports = (function() {
     }.bind(this));
   }
 
+  Control.prototype.preferences = {
+    animateOnSizeChange:false,
+    animateOnPositionChange:false
+  };
+
   /**
    * @member alpha
    * @type {number}
@@ -484,11 +489,30 @@ module.exports = (function() {
     constraint('setPriority', 490); // NSLayoutPriorityDragThatCannotResizeWindow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 1); // NSLayoutPriorityDefaultLow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 0); // NSLayoutPriorityDefaultLow
-    this.private.parent.nativeView('addConstraint',constraint);
+
+    this.private.parent.nativeView('addConstraint', constraint);
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');
+
     return constraint;
   };
+
+  Control.prototype.changeLayoutConstraint = function(previousConstraint, layoutObject) {
+    if(previousConstraint('multiplier') !== layoutObject.multiplier  ||
+        previousConstraint('secondItem') === null && layoutObject.secondItem !== null || 
+        previousConstraint('secondItem') !== null && layoutObject.secondItem === null || 
+        previousConstraint('firstItem') !== null && layoutObject.firstItem === null ) 
+    {
+      this.removeLayoutConstraint(previousConstraint);
+      return this.addLayoutConstraint(layoutObject);
+    }
+    if(this.preferences.animateOnSizeChange || this.preferences.animateOnPositionChange) {
+      previousConstraint('animator')('setConstant', layoutObject.constant);
+    } else {
+      previousConstraint('setConstant', layoutObject.constant);
+    }
+    return previousConstraint;
+  }
 
   Control.prototype.removeLayoutConstraint = function(obj) {
     this.private.parent.nativeView('removeConstraint',obj);

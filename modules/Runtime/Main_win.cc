@@ -1,20 +1,33 @@
+// In order to use vista+ items within node and friends
+// we need to declare our intent to specifically (only)
+// support vista+, otherwise libcares and other libraries
+// will set this down to XP and we will not have common libs.
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
+
 #include <node.h>
-#include <node_javascript.h>
-#include <node_string.h>
 #include <stdlib.h>
-#include <windows.h>
 #include <io.h>
 #include <fcntl.h>
+#include <windows.h>
+#include <node_javascript.h>
+#include <node_string.h>
 #include "v8_typed_array.h"
+#if HAVE_OPENSSL
+# include "node_crypto.h"
+#endif
 #include <tint_version.h>
 
 //TODO: Find a better way of doing this instead of "trusting"
 //that this private interface signature will remain the same.
 extern "C" DWORD uv_get_poll_timeout(uv_loop_t* loop);
 #define uv__has_active_reqs(loop) (ngx_queue_empty(&(loop)->active_reqs) == 0)
+#include "win/req-inl.h"
 
 static bool packaged = false;
 static int embed_closed = 0;
+static bool uv_trip_safety = false;
 static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
@@ -22,21 +35,19 @@ static char **init_argv;
 
 v8::Handle<v8::Object> process_l;
 v8::Persistent<v8::Object> bridge;
+
 DWORD mainThreadId = 0;
-bool uv_trip_safety = false;
 
 extern "C" void InitAppRequest();
-
 namespace REF {
   extern void Init(v8::Handle<v8::Object> target);
 }
-
 class FFI {
   public:
     static void FFI::Init(v8::Handle<v8::Object> target);
 };
-
 extern "C" void CLR_Init(v8::Handle<v8::Object> target);
+
 void uv_noop(uv_async_t* handle, int status) {}
 
 v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
@@ -53,50 +64,45 @@ v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
 
 void uv_event(void *info) {
 
-  uv_loop_t* loop = uv_default_loop();
-
   while (!embed_closed) {
     // Unlike Unix, in which we can just rely on one backend fd to determine
     // whether we should iterate libuv loop, on Window, IOCP is just one part
     // of the libuv loop, we should also check whether we have other types of
     // events.
+    uv_loop_t* loop = uv_default_loop();
     bool block = loop->idle_handles == NULL &&
                  loop->pending_reqs_tail == NULL &&
                  loop->endgame_handles == NULL &&
                  !loop->stop_flag &&
-                 (loop->active_handles > 0 ||
-                  !uv__has_active_reqs(loop));
+                 (loop->active_handles > 0 || !uv__has_active_reqs(loop));
 
     // When there is no other types of events, we block on the IOCP.
+    // Until node 12 there is no successful way of polling for timeouts
+    // on a seperate thread, we'll reset to 15ms (safe for energy use)
+    // if we're blocking on the loop and an infinite wait is requested.
     if (block) {
-      DWORD bytes, timeout;
-      ULONG_PTR key;
-      OVERLAPPED* overlapped;
-      
-      // libuv needs an accurate time prior to asking for the timeout,
-      // it may be more efficient to check if there are timers prior
-      // to updating but the cost is so insignificant and not worth the
-      // maintenance issues of peaking inside the internals to see.
-      uv_update_time(loop);
-      timeout = uv_get_poll_timeout(loop);
+      OVERLAPPED_ENTRY overlappeds[128];
+      ULONG count;
 
-      // Negative one means infinite timeout here. Resetting to 16 should be fine
-      // for performance and energy effeciency (MS docs say it must be 
-      // above 15.6 for energy efficiency, oddly enough exactly 60 fps)
-      // Note that this is only needed for the transition between a setTimout
-      // or setInterval call that was invoked from a CLR/FFI callback, 
-      // afterwards a correct positive valued timeout happens.
-      //
-      // TODO: Inspect to see if theres a way to trip teh GetQueuedCompletionStatus
-      // when timeout == -1 with PostQueuedCompletionStatus (without libuv
-      // segfaulting, maybe faking a TCP request?)
-      if(timeout < 0) timeout = 16;
-      if(timeout > 50) timeout = 50;
-      GetQueuedCompletionStatus(loop->iocp, &bytes, &key, &overlapped, timeout);
+      DWORD timeout = uv_get_poll_timeout(loop);
+      if(timeout == INFINITE) {
+        timeout = 15;
+      } else if (timeout > 100) {
+        timeout = 100;
+      }
 
-      // Give the event back so libuv can deal with it.
-      if (overlapped != NULL)
-          PostQueuedCompletionStatus(loop->iocp, bytes, key, overlapped);
+      BOOL success = GetQueuedCompletionStatusEx (loop->iocp, overlappeds, ARRAY_SIZE(overlappeds), &count, timeout, FALSE);
+      if (success) {
+        for (ULONG i = 0; i < count; i++) {
+          /* Package was dequeued */
+          uv_req_t* req = uv_overlapped_to_req(overlappeds[i].lpOverlapped);
+          uv_insert_pending_req(loop, req);
+        }
+      } else if (GetLastError() != WAIT_TIMEOUT) {
+        /* Serious error */
+        fprintf(stderr,"GetQueuedCompletionStatusEx Error!\n");
+        abort();
+      }
     } 
 
     // This may seem obsurd to both broadcast a message and 
@@ -124,14 +130,12 @@ void uv_event(void *info) {
 }
 
 void node_load() {
-  // Set Version Information
-  process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"),
-      v8::String::NewSymbol(TINT_VERSION));
+  // Set version Information
+  process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"), v8::String::NewSymbol(TINT_VERSION));
+  // Set whether we're in a packaged or non-packaged environment.
   process_l->Set(v8::String::NewSymbol("packaged"), v8::Boolean::New(packaged));
-
   // Register the app:// schema.
   InitAppRequest();
-
   // Register the initial bridge: C++/C/C# (CLR) dotnet
   NODE_SET_METHOD(process_l, "initbridge", init_bridge);
 
@@ -206,17 +210,15 @@ void win_msg_loop() {
 
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
-    if(uv_trip_safety == true) {
+    if(uv_trip_safety == true || msg.message == WM_APP+1) {
       uv_run_nowait();
       uv_trip_safety = false;
     }
     if(bRet == -1) {
       fprintf(stderr, "FATAL ERROR: %i\n",bRet);
       exit(1);
-    } else if(msg.message == WM_APP+1) {
-      uv_run_nowait();
-      uv_trip_safety = false;
-      //TODO: if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
+    
+    //TODO: else if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
     } else {
        TranslateMessage(&msg);
        DispatchMessage(&msg);
@@ -242,6 +244,11 @@ int main(int argc, char *argv[]) {
   node::Init(init_argc, init_argv);
 
   v8::V8::Initialize();
+#if HAVE_OPENSSL
+  // V8 on Windows doesn't have a good source of entropy. Seed it from
+  // OpenSSL's pool.
+  v8::V8::SetEntropySource(node::crypto::EntropySource);
+#endif
   {
     v8::Locker locker;
     v8::HandleScope handle_scope;
