@@ -259,7 +259,7 @@ module.exports = (function() {
       return;
     }
 
-    if(this.preferences.animateOnSizeChange || this.preferences.animateOnPositionChange) {
+    if(this.animateOnSizeChange || this.animateOnPositionChange) {
       target.AnimateConstant(previousConstraint, layoutObject.constant);
     } else {
       target.ChangeConstant(previousConstraint, layoutObject.constant);

@@ -434,7 +434,7 @@ module.exports = (function() {
         var height = $.NSScreen('mainScreen')('frame').size.height;
         var rect = this.native('frame');
         rect.origin.y = (height - e) - rect.size.height;
-        this.native('setFrame', rect, 'display', $.YES, 'animate', this.preferences.animateOnPositionChange ? $.YES : $.NO);
+        this.native('setFrame', rect, 'display', $.YES, 'animate', this.animateOnPositionChange ? $.YES : $.NO);
       }
     }
   );
@@ -471,7 +471,7 @@ module.exports = (function() {
         e = util.parseUnits(e);
         var rect = this.native('frame');
         rect.origin.x = e;
-        this.native('setFrame', rect, 'display', $.YES, 'animate', this.preferences.animateOnPositionChange ? $.YES : $.NO);
+        this.native('setFrame', rect, 'display', $.YES, 'animate', this.animateOnPositionChange ? $.YES : $.NO);
       }
     }
   );

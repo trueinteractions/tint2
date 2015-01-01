@@ -268,7 +268,7 @@ module.exports = (function() {
     set:function(e) {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e === 'center') {
-        if(this.preferences.animateOnPositionChange) {
+        if(this.animateOnPositionChange) {
           util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, workingArea.width/2 - this.native.Width/2);
           util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, workingArea.height/2 - this.native.Height/2);
         } else {
@@ -277,7 +277,7 @@ module.exports = (function() {
         }
       } else {
         e = util.parseUnits(e);
-        if(this.preferences.animateOnPositionChange) {
+        if(this.animateOnPositionChange) {
           util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, e + workingArea.Y);
         } else {
           this.native.Top = e + workingArea.Y;
@@ -291,7 +291,7 @@ module.exports = (function() {
     set:function(e) {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e === 'center') {
-        if(this.preferences.animateOnPositionChange) {
+        if(this.animateOnPositionChange) {
           util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, workingArea.width/2 - this.native.Width/2);
           util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, workingArea.height/2 - this.native.Height/2);
         } else {
@@ -300,7 +300,7 @@ module.exports = (function() {
         }
       } else {
         e = util.parseUnits(e);
-        if(this.preferences.animateOnPositionChange) {
+        if(this.animateOnPositionChange) {
           util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, e + workingArea.X);
         } else {
           this.native.Left = e + workingArea.X;
