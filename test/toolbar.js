@@ -30,8 +30,8 @@ function run($utils) {
   mainWindow.toolbar = toolbar;
 
   mainWindow.titleVisible = false;
-  mainWindow.preferences.animateOnSizeChange = true;
-  mainWindow.preferences.animateOnPositionChange = true;
+  mainWindow.animateOnSizeChange = true;
+  mainWindow.animateOnPositionChange = true;
 
   urlLocation.alignment = 'center';
   urlLocation.linewrap = false;

@@ -247,7 +247,15 @@ module.exports = (function() {
   }
 
   function animateWPFProperty(target, property, duration, from, to) {
-    var story = new $.System.Windows.Media.Animation.Storyboard();
+    var story;
+    if(target.story) story = target.story;
+    else {
+      story = new $.System.Windows.Media.Animation.Storyboard();
+      setTimeout(function() {
+        story.Begin();
+        story = null; // release to CLR to do whatever it wants with it.
+      },50);
+    }
     var animation = new $.System.Windows.Media.Animation.DoubleAnimation();
     animation.Duration = new $.System.Windows.Duration($.System.TimeSpan.FromMilliseconds(duration))
     animation.From = (from + 0.0000000000001);
@@ -257,8 +265,6 @@ module.exports = (function() {
     animation.EasingFunction = new $.System.Windows.Media.Animation.QuadraticEase();
     animation.EasingFunction.EaseMode = $.System.Windows.Media.Animation.EasingMode.EaseInOut;
     story.Children.Add(animation);
-    story.Begin();
-
   }
 
   baseUtilities.forEachItemInControl = forEachItemInControl;

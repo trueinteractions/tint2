@@ -15,7 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  application.exitAfterWindowsClose = false;
+  global.application.exitAfterWindowsClose = false;
   var win = new Window();
   win.visible = true;
   var buttonNormal = new Button();
@@ -24,20 +24,7 @@ function run($utils) {
   buttonNormal.top = 0;
   buttonNormal.width = 200;
 
-  buttonNormal.preferences.animateOnSizeChange = true;
-  
-  /*var start = process.hrtime();
-  setTimeout(function() {
-    var interval = setInterval(function() {
-      if(buttonNormal.top === 300) {
-        var end = process.hrtime(start);
-        console.log(end);
-        clearInterval(interval);
-        $utils.ok();
-      }
-      buttonNormal.top++;
-    },5);
-  }, 1000);*/
+  buttonNormal.animateOnSizeChange = true;
   
   setTimeout(function() {
     buttonNormal.width = 300;

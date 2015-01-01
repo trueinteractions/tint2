@@ -17,8 +17,8 @@ function run($utils) {
   application.exitAfterWindowsClose = false;
   var w = new Window();
   w.visible = true;
-  w.preferences.animateOnSizeChange = true;
-  w.preferences.animateOnPositionChange = true;
+  w.animateOnSizeChange = true;
+  w.animateOnPositionChange = true;
   /* @hidden */ setTimeout(function(){ 
                   w.width = 400;
                   w.height = 400;

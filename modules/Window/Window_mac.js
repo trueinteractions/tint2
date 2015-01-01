@@ -147,11 +147,6 @@ module.exports = (function() {
   Window.prototype = Object.create(Container.prototype);
   Window.prototype.constructor = Window;
 
-  Window.prototype.preferences = {
-    animateOnSizeChange:false,
-    animateOnPositionChange:false
-  };
-
   /**
    * @member frame
    * @type {boolean}
@@ -502,7 +497,7 @@ module.exports = (function() {
       e = util.parseUnits(e);
       var rect = this.native('frame');
       rect.size.width = e;
-      this.native('setFrame', rect, 'display', $.YES, 'animate', this.preferences.animateOnSizeChange ? $.YES : $.NO);
+      this.native('setFrame', rect, 'display', $.YES, 'animate', this.animateOnSizeChange ? $.YES : $.NO);
     }
   );
 
@@ -527,7 +522,7 @@ module.exports = (function() {
       e = util.parseUnits(e);
       var rect = this.native('frame');
       rect.size.height = e;
-      this.native('setFrame', rect, 'display', $.YES, 'animate', this.preferences.animateOnSizeChange ? $.YES : $.NO);
+      this.native('setFrame', rect, 'display', $.YES, 'animate', this.animateOnSizeChange ? $.YES : $.NO);
     }
   );
 

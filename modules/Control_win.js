@@ -106,10 +106,8 @@ module.exports = (function() {
     this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
   }
 
-  Control.prototype.preferences = {
-    animateOnSizeChange:false,
-    animateOnPositionChange:false
-  };
+  Control.prototype.animateOnSizeChange = false;
+  Control.prototype.animateOnPositionChange = false;
 
   Object.defineProperty(Control.prototype, 'alpha', {
     configurable:true,

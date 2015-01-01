@@ -114,11 +114,6 @@ module.exports = (function() {
   Window.prototype = Object.create(Container.prototype);
   Window.prototype.constructor = Window;
 
-  Window.prototype.preferences = {
-    animateOnSizeChange:false,
-    animateOnPositionChange:false
-  };
-
   Object.defineProperty(Window.prototype, 'frame', {
     get:function() { return this.native.WindowStyle === $.System.Windows.WindowStyle.SingleBorderWindow; },
     set:function(e) {
@@ -318,7 +313,7 @@ module.exports = (function() {
     get:function() { return Math.round(this.native.ActualWidth); },
     set:function(e) { 
       e = util.parseUnits(e);
-      if(this.preferences.animateOnSizeChange) {
+      if(this.animateOnSizeChange) {
         util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.WidthProperty, 250, this.native.Width, e);
       } else {
         this.native.Width = e; 
@@ -330,7 +325,7 @@ module.exports = (function() {
     get:function() { return Math.round(this.native.ActualHeight); },
     set:function(e) { 
       e = util.parseUnits(e);
-      if(this.preferences.animateOnSizeChange) {
+      if(this.animateOnSizeChange) {
         util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.HeightProperty, 250, this.native.Height, e);
       } else {
         this.native.Height = e; 

@@ -166,10 +166,24 @@ module.exports = (function() {
     }.bind(this));
   }
 
-  Control.prototype.preferences = {
-    animateOnSizeChange:false,
-    animateOnPositionChange:false
-  };
+  /**
+   * @member animateOnSizeChange
+   * @type {boolean}
+   * @memberof Control
+   * @description This controls whether size changes to this Control (or Window) should animate when changed. 
+   *              The default operating system animation is used to animate different size changes.
+   * @default false
+   */
+  Control.prototype.animateOnSizeChange = false;
+  /**
+   * @member animateOnPositionChange
+   * @type {boolean}
+   * @memberof Control
+   * @description This controls whether position changes in this Control (or Window) should animate when changed.
+   *              The default operating system animation is used to animate different position changes.
+   * @default false
+   */
+  Control.prototype.animateOnPositionChange = false;
 
   /**
    * @member alpha
@@ -506,7 +520,7 @@ module.exports = (function() {
       this.removeLayoutConstraint(previousConstraint);
       return this.addLayoutConstraint(layoutObject);
     }
-    if(this.preferences.animateOnSizeChange || this.preferences.animateOnPositionChange) {
+    if(this.animateOnSizeChange || this.animateOnPositionChange) {
       previousConstraint('animator')('setConstant', layoutObject.constant);
     } else {
       previousConstraint('setConstant', layoutObject.constant);

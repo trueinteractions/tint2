@@ -218,6 +218,11 @@ if (ismac) {
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, convertBoundsToCGPoint(point), 0));
       $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, convertBoundsToCGPoint(point), 0));
     }
+    ex.writeImageToBase64 = function writeImageToBase64(image) {
+      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
+      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
+      return imageData('base64EncodedStringWithOptions',0);
+    }
     ex.writeImage = function writeImage(image, path) {
       var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
       var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
@@ -229,6 +234,10 @@ if (ismac) {
     ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
       var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
       this.writeImage(image, path);
+    }
+    ex.takeSnapshotOfActiveScreenToBase64 = function takeSnapshotOfActiveScreenToBase64() {
+      var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
+      return this.writeImageToBase64(image);
     }
     ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
       var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListExcludeDesktopElements, 1, $.kCGWindowImageDefault);
@@ -463,18 +472,8 @@ else
     $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
   }
 
-  ex.writeImage = function writeImage(image, path) { }
-
-  function CaptureScreen(x, y, width, height, path) {
-    var scaleFactor = $.System.Windows.SystemParameters.Dpi/96;
-    var ix = Math.round(x * scaleFactor);
-    var iy = Math.round(y * scaleFactor);
-    var iw = Math.round(width * scaleFactor);
-    var ih = Math.round(height * scaleFactor);
-    var image = new $.System.Drawing.Bitmap(iw, ih, $.System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-    var g = $.System.Drawing.Graphics.FromImage(image);
-    g.CopyFromScreen(ix, iy, ix, iy, new $.System.Drawing.Size(iw, ih), $.System.Drawing.CopyPixelOperation.SourceCopy);
-    image.Save(path, $.System.Drawing.Imaging.ImageFormat.Png);
+  ex.writeImage = function writeImage(image, path) {
+    // TODO
   }
 
   ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
@@ -487,6 +486,11 @@ else
     var g = $.System.Drawing.Graphics.FromImage(image);
     g.CopyFromScreen(ix, iy, ix, iy, new $.System.Drawing.Size(iw, ih), $.System.Drawing.CopyPixelOperation.SourceCopy);
     image.Save(path, $.System.Drawing.Imaging.ImageFormat.Png);
+  }
+
+  ex.takeSnapshotOfActiveScreenToBase64 = function takeSnapshotOfActiveScreenToBase64() {
+    // TODO;
+    return "TODO";
   }
 
   ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
@@ -661,7 +665,7 @@ function test(item) {
       if(currentTest.timeout) {
         setTimeout(function() {
           log('timeout exceeded.'+nl);
-          log(ex.takeSnapshotOfActiveScreen(''));
+          log(ex.takeSnapshotOfActiveScreenToBase64(''));
           exit(1);
         }, 50000);
       }
