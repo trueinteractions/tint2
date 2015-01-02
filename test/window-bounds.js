@@ -38,19 +38,19 @@ function run($utils) {
   /* @hidden */   //$utils.assert(w.bounds.height == 78, 'w.bounds.height should have been 100, was: '+w.bounds.height);
     w.x = 100;
     w.y = 150;
-  /* @hidden */ }, 3500);
+  /* @hidden */ }, 4000);
   /* @hidden */ setTimeout(function(){
     /* @hidden */ $utils.assert(w.x == 100, 'w.x should be 100, was: '+w.x);
     /* @hidden */ $utils.assert(w.y == 150, 'w.y should be 150, was: '+w.y);
     /* @hidden */   w.x = 400;
     /* @hidden */   w.y = 400;
-  /* @hidden */ }, 4500);
+  /* @hidden */ }, 5000);
   /* @hidden */ setTimeout(function(){ 
     /* @hidden */ $utils.assert(w.x == 400, 'w.x should be 400, was: '+w.x);
     /* @hidden */ $utils.assert(w.y == 400, 'w.y should be 400, was: '+w.y);
     /* @hidden */ w.destroy();
     /* @hidden */ $utils.ok(); 
-  /* @hidden */ }, 5500);
+  /* @hidden */ }, 6500);
 }
 
 /**

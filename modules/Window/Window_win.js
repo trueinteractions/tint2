@@ -269,8 +269,8 @@ module.exports = (function() {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e === 'center') {
         if(this.animateOnPositionChange) {
-          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, workingArea.width/2 - this.native.Width/2);
-          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, workingArea.height/2 - this.native.Height/2);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 225, this.native.Left, workingArea.width/2 - this.native.Width/2);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 225, this.native.Top, workingArea.height/2 - this.native.Height/2);
         } else {
           this.native.Left = workingArea.width/2 - this.native.Width/2;
           this.native.Top = workingArea.height/2 - this.native.Height/2;
@@ -278,7 +278,7 @@ module.exports = (function() {
       } else {
         e = util.parseUnits(e);
         if(this.animateOnPositionChange) {
-          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, e + workingArea.Y);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 225, this.native.Top, e + workingArea.Y);
         } else {
           this.native.Top = e + workingArea.Y;
         }
@@ -292,8 +292,8 @@ module.exports = (function() {
       var workingArea = $.System.Windows.SystemParameters.WorkArea;
       if(e === 'center') {
         if(this.animateOnPositionChange) {
-          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, workingArea.width/2 - this.native.Width/2);
-          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 250, this.native.Top, workingArea.height/2 - this.native.Height/2);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 225, this.native.Left, workingArea.width/2 - this.native.Width/2);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.TopProperty, 225, this.native.Top, workingArea.height/2 - this.native.Height/2);
         } else {
           this.native.Left = workingArea.width/2 - this.native.Width/2;
           this.native.Top = workingArea.height/2 - this.native.Height/2;
@@ -301,7 +301,7 @@ module.exports = (function() {
       } else {
         e = util.parseUnits(e);
         if(this.animateOnPositionChange) {
-          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 250, this.native.Left, e + workingArea.X);
+          util.animateWPFProperty(this.native, $.System.Windows.Window.LeftProperty, 225, this.native.Left, e + workingArea.X);
         } else {
           this.native.Left = e + workingArea.X;
         }
@@ -314,7 +314,7 @@ module.exports = (function() {
     set:function(e) { 
       e = util.parseUnits(e);
       if(this.animateOnSizeChange) {
-        util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.WidthProperty, 250, this.native.Width, e);
+        util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.WidthProperty, 225, this.native.Width, e);
       } else {
         this.native.Width = e; 
       }
@@ -323,14 +323,7 @@ module.exports = (function() {
 
   Object.defineProperty(Window.prototype, 'height', {
     get:function() { return Math.round(this.native.ActualHeight); },
-    set:function(e) { 
-      e = util.parseUnits(e);
-      if(this.animateOnSizeChange) {
-        util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.HeightProperty, 250, this.native.Height, e);
-      } else {
-        this.native.Height = e; 
-      }
-    }
+    set:function(e) { this.native.Height = util.parseUnits(e); }
   });
 
   //TODO: Implement me
