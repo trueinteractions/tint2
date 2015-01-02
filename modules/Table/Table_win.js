@@ -142,6 +142,7 @@ module.exports = (function() {
     });
     var ndx = this.private.columns.length - 1;
     view.Content = e.toString();
+    this.private.columns[ndx].definition.Width = new $.System.Windows.GridLength(1, $.System.Windows.GridUnitType.Auto);
     this.nativeView.ColumnDefinitions.Add(this.private.columns[ndx].definition);
     view.SetValue($.System.Windows.Controls.Grid.ColumnProperty, ndx);
     view.SetValue($.System.Windows.Controls.Grid.RowProperty, 0);
@@ -234,8 +235,11 @@ module.exports = (function() {
 
   Table.prototype.setColumnWidth = function(id,e) {
     var ndx = this.private.findColumn(id);
-    if(ndx == -1) throw new Error("Column named: " + e + " was not found.");
-    this.private.columns[ndx].definition.Width = new $.System.Windows.GridLength(e, $.System.Windows.GridLength.Pixel);
+    if(ndx == -1) {
+      throw new Error("Column named: " + e + " was not found.");
+    }
+    this.nativeView.UpdateLayout();
+    this.private.columns[ndx].definition.Width = new $.System.Windows.GridLength(e, $.System.Windows.GridUnitType.Pixel);
     this.fireEvent('column-resized');
   }
 
