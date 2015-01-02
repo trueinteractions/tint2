@@ -25,6 +25,8 @@ if __name__ == '__main__':
     output_dir = os.path.join(os.path.abspath(node_root), 'build', 'ninja')
   elif 'msvs' in args:
     output_dir = os.path.join(os.path.abspath(node_root), 'build', 'msvs')
+  elif '-Dios' in args:
+    output_dir = os.path.join(os.path.abspath(node_root), 'build', 'xcode-ios')
   elif 'xcode' in args:
     output_dir = os.path.join(os.path.abspath(node_root), 'build', 'xcode')
   elif 'make' in args:

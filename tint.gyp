@@ -258,6 +258,9 @@
         'NODE_TAG="<(node_tag)"',
       ],
       'conditions': [
+        [ 'OS=="mac" and target_arch=="arm"', {
+          'mac_bundle':1,
+        }],
         [ 'node_use_openssl=="true"', {
           'defines': [ 'HAVE_OPENSSL=1' ],
           'sources': [ 'libraries/node/src/node_crypto.cc' ],
@@ -690,11 +693,16 @@
         ['OS=="mac"', {
           'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-            'MACOSX_DEPLOYMENT_TARGET': '10.7',
+            #'MACOSX_DEPLOYMENT_TARGET': '10.7',
             'OTHER_CFLAGS': [
                 '-ObjC++'
             ]
           },
+        }],
+        ['OS=="mac" and target_arch=="arm"', {
+          'include_dirs': [
+            'libraries/libffi/ios/include'
+          ]
         }]
       ]
     },

@@ -1,15 +1,170 @@
-diff --git a/libraries/node/src/node.js b/libraries/node/src/node.js
-index e5833cb..6263c11 100644
---- a/libraries/node/src/node.js
-+++ b/libraries/node/src/node.js
-@@ -592,9 +592,16 @@
-         }
+diff --git a/deps/openssl/openssl.gyp b/deps/openssl/openssl.gyp
+index 5d7880a..25c5080 100644
+--- a/deps/openssl/openssl.gyp
++++ b/deps/openssl/openssl.gyp
+@@ -652,7 +652,7 @@
+         ['exclude', 'store/.*$']
+       ],
+       'conditions': [
+-        ['target_arch!="ia32" and target_arch!="x64" and target_arch!="arm" or openssl_no_asm!=0', {
++        ['target_arch!="ia32" and target_arch!="x64" and target_arch!="arm" or openssl_no_asm!=0 or (target_arch=="arm" and OS=="mac")', {
+           # Disable asm
+           'defines': [
+             'OPENSSL_NO_ASM'
+diff --git a/deps/v8/src/arm/cpu-arm.cc b/deps/v8/src/arm/cpu-arm.cc
+index 7b08ed8..9e5cb69 100644
+--- a/deps/v8/src/arm/cpu-arm.cc
++++ b/deps/v8/src/arm/cpu-arm.cc
+@@ -38,6 +38,10 @@
+ #include "macro-assembler.h"
+ #include "simulator.h"  // for cache flushing.
+ 
++#if defined(V8_TARGET_OS_IOS)
++#include <libkern/OSCacheControl.h>
++#endif
++
+ namespace v8 {
+ namespace internal {
+ 
+@@ -70,7 +74,9 @@ void CPU::FlushICache(void* start, size_t size) {
+   //           reinterpret_cast<intptr_t>(start) + size, 0);
+   // however, syscall(int, ...) is not supported on all platforms, especially
+   // not when using EABI, so we call the __ARM_NR_cacheflush syscall directly.
+-
++#if defined(V8_TARGET_OS_IOS)
++  sys_icache_invalidate(start, size);
++#else
+   register uint32_t beg asm("a1") = reinterpret_cast<uint32_t>(start);
+   register uint32_t end asm("a2") =
+       reinterpret_cast<uint32_t>(start) + size;
+@@ -103,6 +109,7 @@ void CPU::FlushICache(void* start, size_t size) {
+         : "0" (beg), "r" (end), "r" (flg), "r" (__ARM_NR_cacheflush)
+         : "r3");
+   #endif
++#endif // V8_TARGET_OS_IOS
+ #endif
+ }
+ 
+diff --git a/deps/v8/src/atomicops.h b/deps/v8/src/atomicops.h
+index 1f0c44a..67b4f81 100644
+--- a/deps/v8/src/atomicops.h
++++ b/deps/v8/src/atomicops.h
+@@ -54,7 +54,14 @@
+ namespace v8 {
+ namespace internal {
+ 
++
++
++#ifdef V8_TARGET_ARCH_ARM
++typedef long Atomic32;
++#else
+ typedef int32_t Atomic32;
++#endif
++
+ #ifdef V8_HOST_ARCH_64_BIT
+ // We need to be able to go between Atomic64 and AtomicWord implicitly.  This
+ // means Atomic64 and AtomicWord should be the same type on 64-bit.
+diff --git a/deps/v8/src/platform-macos.cc b/deps/v8/src/platform-macos.cc
+index a216f6e..740f3f7 100644
+--- a/deps/v8/src/platform-macos.cc
++++ b/deps/v8/src/platform-macos.cc
+@@ -178,7 +178,11 @@ void OS::Abort() {
+ 
+ 
+ void OS::DebugBreak() {
+-  asm("int $3");
++#ifdef V8_HOST_ARCH_ARM
++  asm("bkpt");
++#else
++   asm("int $3");
++#endif
+ }
+ 
+ 
+@@ -829,22 +833,31 @@ class SamplerThread : public Thread {
+     thread_state_flavor_t flavor = x86_THREAD_STATE64;
+     x86_thread_state64_t state;
+     mach_msg_type_number_t count = x86_THREAD_STATE64_COUNT;
+-#if __DARWIN_UNIX03
+-#define REGISTER_FIELD(name) __r ## name
+-#else
+-#define REGISTER_FIELD(name) r ## name
+-#endif  // __DARWIN_UNIX03
++# if __DARWIN_UNIX03
++#   define REGISTER_FIELD(name) __r ## name
++# else
++#   define REGISTER_FIELD(name) r ## name
++# endif  // __DARWIN_UNIX03
+ #elif V8_HOST_ARCH_IA32
+     thread_state_flavor_t flavor = i386_THREAD_STATE;
+     i386_thread_state_t state;
+     mach_msg_type_number_t count = i386_THREAD_STATE_COUNT;
+-#if __DARWIN_UNIX03
+-#define REGISTER_FIELD(name) __e ## name
+-#else
+-#define REGISTER_FIELD(name) e ## name
+-#endif  // __DARWIN_UNIX03
++# if __DARWIN_UNIX03
++#   define REGISTER_FIELD(name) __e ## name
++# else
++#   define REGISTER_FIELD(name) e ## name
++# endif  // __DARWIN_UNIX03
++#elif V8_HOST_ARCH_ARM
++    thread_state_flavor_t flavor = ARM_THREAD_STATE;
++    arm_thread_state_t state;
++    mach_msg_type_number_t count = ARM_THREAD_STATE_COUNT;
++# if __DARWIN_UNIX03
++#   define REGISTER_FIELD(name) __ ## name
++# else
++#   define REGISTER_FIELD(name) name
++# endif  // __DARWIN_UNIX03
+ #else
+-#error Unsupported Mac OS X host architecture.
++# error Unsupported Mac OS X host architecture.
+ #endif  // V8_HOST_ARCH
+ 
+     if (thread_get_state(profiled_thread,
+@@ -852,9 +865,15 @@ class SamplerThread : public Thread {
+                          reinterpret_cast<natural_t*>(&state),
+                          &count) == KERN_SUCCESS) {
+       sample->state = sampler->isolate()->current_vm_state();
++#if V8_HOST_ARCH_ARM
++      sample->pc = reinterpret_cast<Address>(state.REGISTER_FIELD(pc));
++      sample->sp = reinterpret_cast<Address>(state.REGISTER_FIELD(sp));
++      sample->fp = reinterpret_cast<Address>(state.REGISTER_FIELD(r[7]));
++#else
+       sample->pc = reinterpret_cast<Address>(state.REGISTER_FIELD(ip));
+       sample->sp = reinterpret_cast<Address>(state.REGISTER_FIELD(sp));
+       sample->fp = reinterpret_cast<Address>(state.REGISTER_FIELD(bp));
++#endif
+       sampler->SampleStack(sample);
+       sampler->Tick(sample);
+     }
+diff --git a/deps/v8/tools/js2c.py b/deps/v8/tools/js2c.py
+index d06cbe4..38ab243 100644
+--- a/deps/v8/tools/js2c.py
++++ b/deps/v8/tools/js2c.py
+@@ -387,8 +387,8 @@ def JS2C(source, target, env):
+ 
+ def main():
+   natives = sys.argv[1]
+-  type = sys.argv[2]
+-  compression = sys.argv[3]
++  type = sys.argv[2].replace('../','').replace('..\\','').replace('libraries\\','').replace('node\\','').replace('deps\\','').replace('v8\\','').replace('tools\\','').replace('gyp\\','')
++  compression = sys.argv[3].replace('../','').replace('..\\','').replace('libraries\\','').replace('node\\','').replace('deps\\','').replace('v8\\','').replace('tools\\','').replace('gyp\\','')
+   source_files = sys.argv[4:]
+   JS2C(source_files, [natives], { 'TYPE': type, 'COMPRESSION': compression })
+ 
+diff --git a/src/node.js b/src/node.js
+index e95a01f..f9372bd 100644
+--- a/src/node.js
++++ b/src/node.js
+@@ -620,8 +620,15 @@
          break;
  
--      default:
+       default:
 -        // Probably an error on in uv_guess_handle()
 -        throw new Error('Implement me. Unknown stream file type!');
-+      default:
 +        // See https://groups.google.com/forum/#!topic/nodejs/t1V8psq309w
 +        if(process.platform === 'win32' && (fd === 1 || fd === 2)) {
 +          var fs = NativeModule.require('fs');
@@ -22,14 +177,12 @@ index e5833cb..6263c11 100644
      }
  
      // For supporting legacy API we put the FD here.
-@@ -664,9 +671,15 @@
-           });
+@@ -692,8 +699,14 @@
            break;
  
--        default:
+         default:
 -          // Probably an error on in uv_guess_handle()
 -          throw new Error('Implement me. Unknown stdin file type!');
-+        default:
 +          // See https://groups.google.com/forum/#!topic/nodejs/t1V8psq309w
 +          if(process.platform === 'win32' && fd === 0) {
 +            var fs = NativeModule.require('fs');

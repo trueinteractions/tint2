@@ -239,6 +239,11 @@ parser.add_option("--dest-cpu",
     dest="dest_cpu",
     help="CPU architecture to build for. Valid values are: arm, ia32, x64")
 
+parser.add_option("--with-arm7",
+    action="store",
+    dest="usearm7",
+    help="Use arm7 if arm is enabled.")
+
 parser.add_option("--dest-os",
     action="store",
     dest="dest_os",
@@ -341,6 +346,8 @@ def cc_macros():
 
 
 def is_arch_armv7():
+  if options.usearm7:
+    return 1
   """Check for ARMv7 instructions"""
   cc_macros_cache = cc_macros()
   return ('__ARM_ARCH_7__' in cc_macros_cache or
@@ -703,6 +710,8 @@ write('../libraries/node/config.mk',
 
 if options.use_ninja:
   gyp_args = ['-f', 'ninja-' + flavor]
+elif options.use_xcode and options.usearm7:
+  gyp_args = ['-f', 'xcode', '-Dios']
 elif options.use_xcode:
   gyp_args = ['-f', 'xcode']
 elif flavor == 'win':

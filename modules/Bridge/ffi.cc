@@ -1,6 +1,6 @@
 #include <node_buffer.h>
 #include <node_version.h>
-#include "ffi.h"
+#include "ffi_local.h"
 #include <queue>
 #ifdef __APPLE__
 #include <sys/types.h>

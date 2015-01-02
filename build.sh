@@ -5,6 +5,11 @@ else
   CONFIG="Release"
 fi
 
+if [ "$2" == "ios" ]; then
+  xcodebuild -configuration $CONFIG -project build/xcode-ios/tint.xcodeproj build 
+  exit 0
+fi
+
 if [ "$(uname)" == "Darwin" ]; then
   if [ "$(which xcodebuild)" == "" ]; then
     if [ "$(which ninja)" == ""]; then
