@@ -62,16 +62,29 @@ test.bat
 
 <h3>iOS</h3>
 
-Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7) in addition to the iOS 7 SDK installed.
+Ensure you have Xcode 5, OSX Mountain Lion, git and Python 2.6 (or 2.7) in addition to the iOS 7 SDK installed.  In addition to build a non-simulator version (an actual iOS build) you'll need a provisioning profile and iOS Developer certificate from Apple.
+
+
+iOS 7 Build
 
 ```bash
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
 ./config.sh ios
-./build.sh ios
+./build.sh release ios
 ```
 
+iOS Simulator Build
+```bash
+mkdir tint
+cd tint
+git clone https://github.com/trueinteractions/tint2.git .
+./config.sh ios-simulator
+./build.sh release ios-simulator
+```
+
+Note: You can replace release with debug for all versions.
 
 <h3>Post-Build</h3>
 After building you'll find the binary in ``build/xcode/Release/tint`` or ``build\msvs\Release\tint.exe``. You can also use the Xcode project files or MSVS 2010 files in ``build\xcode`` and ``build\msvs``. Optionally you can use ninja build files that are generated in ``build/ninja/out/Release`` and ``build/ninja/out/Debug`` on posix (OSX only at the moment).
