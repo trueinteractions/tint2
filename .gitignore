@@ -4,6 +4,7 @@ modules/Bridge/Release
 modules/Runtime/Debug
 modules/Runtime/Release
 *.xcodeproj
+build/xcode-ios/
 build/Release/
 build/Debug/
 build/DerivedSources/
