@@ -5,6 +5,7 @@ modules/Runtime/Debug
 modules/Runtime/Release
 *.xcodeproj
 build/xcode-ios/
+build/xcode-ios-simulator/
 build/Release/
 build/Debug/
 build/DerivedSources/
