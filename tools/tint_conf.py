@@ -248,7 +248,7 @@ parser.add_option("--dest-os",
     action="store",
     dest="dest_os",
     help="Operating system to build for. Valid values are: "
-         "win, mac, solaris, freebsd, openbsd, linux")
+         "win, mac, solaris, freebsd, openbsd, linux, ios")
 
 parser.add_option("--no-ifaddrs",
     action="store_true",
@@ -710,8 +710,10 @@ write('../libraries/node/config.mk',
 
 if options.use_ninja:
   gyp_args = ['-f', 'ninja-' + flavor]
-elif options.use_xcode and options.usearm7:
-  gyp_args = ['-f', 'xcode', '-Dios']
+elif options.dest_os == "ios":
+  gyp_args = ['-f', 'xcode', '-Dtarget_ios']
+elif options.dest_os == "ios-simulator":
+  gyp_args = ['-f', 'xcode', '-Dtarget_ios_simulator']
 elif options.use_xcode:
   gyp_args = ['-f', 'xcode']
 elif flavor == 'win':

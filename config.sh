@@ -19,6 +19,8 @@ fi
 
 if [ "$1" == "ios" ]; then
 	$PYTHON ./tools/tint_conf.py --subsystem=console --with-arm7 --with-arm-float-abi=soft --without-snapshot --without-etw --without-perfctr --dest-cpu=arm --xcode --dest-os=ios --tag= 
+elif [ "$1" == "ios-simulator" ]; then
+	$PYTHON ./tools/tint_conf.py --subsystem=console  --without-snapshot --without-etw --without-perfctr --dest-cpu=ia32 --xcode --dest-os=ios-simulator --tag= 
 else
 	$PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --xcode --tag= > /dev/null
 fi

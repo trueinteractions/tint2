@@ -9,6 +9,10 @@ if [ "$2" == "ios" ]; then
   xcodebuild -configuration $CONFIG -project build/xcode-ios/tint.xcodeproj build 
   exit 0
 fi
+if [ "$2" == "ios-simulator" ]; then
+  xcodebuild -configuration $CONFIG -project build/xcode-ios-simulator/tint.xcodeproj build 
+  exit 0
+fi
 
 if [ "$(uname)" == "Darwin" ]; then
   if [ "$(which xcodebuild)" == "" ]; then

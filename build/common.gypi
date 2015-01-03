@@ -10,6 +10,8 @@
     'gcc_version%': 'unknown',
     'clang%': 1,
     'python%': 'python',
+    'target_ios%': 0,
+    'target_ios_simulator%': 0,
 
     # Turn on optimizations that may trigger compiler bugs.
     # Use at your own risk. Do *NOT* report bugs if this option is enabled.
@@ -201,7 +203,7 @@
           }],
         ],
       }],
-      ['OS=="mac" and target_arch=="mac"', {
+      ['OS=="mac" and target_arch=="mac" and target_ios_simulator!=1 and target_ios!=1', {
         'defines': ['_DARWIN_USE_64_BIT_INODE=1'],
         'xcode_settings': {
           'SDKROOT': '<!(xcrun --show-sdk-path)',   # added for Tint
@@ -256,7 +258,7 @@
           }],
         ],
       }],
-      ['OS=="mac" and target_arch=="arm"', {
+      ['target_ios==1', {
         'defines': [
           '_DARWIN_USE_64_BIT_INODE=1', 
           '__ARM_EABI__=1',
@@ -264,11 +266,63 @@
         ],
         'xcode_settings': {
           'mac_bundle':1,
-          'ARCHS': ['armv7'],
+          'ARCHS': ['arm64','armv7','armv7s'],
           'SDKROOT': '<!(xcrun --sdk iphoneos --show-sdk-path)',   # added for Tint
           'PROJECT_DIR': '<@(DEPTH)/build/xcode-ios/',  # added for Tint
           'SYMROOT': '<@(DEPTH)/build/xcode-ios/',      # added for Tint
           'OBJROOT': '<@(DEPTH)/build/xcode-ios/',      # added for Tint
+          'ALWAYS_SEARCH_USER_PATHS': 'NO',
+          'GCC_CW_ASM_SYNTAX': 'NO',                # No -fasm-blocks
+          'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic
+                                                    # (Equivalent to -fPIC)
+          'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',        # -fno-exceptions
+          'GCC_ENABLE_CPP_RTTI': 'NO',              # -fno-rtti
+          'GCC_ENABLE_PASCAL_STRINGS': 'NO',        # No -mpascal-strings
+          'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',       # added for Tint
+          'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',   # added for Tint
+          'GCC_THREADSAFE_STATICS': 'NO',           # -fno-threadsafe-statics
+          'PREBINDING': 'NO',                       # No -Wl,-prebind
+          'IPHONEOS_DEPLOYMENT_TARGET': '7.0',
+          'IOS_DEPLOYMENT_TARGET': '7.0',
+          'USE_HEADERMAP': 'NO',
+          'OTHER_CFLAGS': [
+            '-fno-strict-aliasing',
+            '-g',                                   # added for Tint
+            '-stdlib=libc++',                       # added for Tint
+          ],
+          'OTHER_CPLUSPLUSFLAGS': [
+            '-g',                                   # added for Tint
+            '-stdlib=libc++'                        # added for Tint
+          ],
+          'OTHER_LDFLAGS':[
+            '-framework Carbon', '-framework AppKit'# added for Tint
+          ],
+          'WARNING_CFLAGS': [
+            '-Wall',
+            '-Wendif-labels',
+            '-W',
+            '-Wno-unused-parameter',
+            '-fobjc-arc',                           # added for Tint, objc runtime
+            '-fobjc-runtime=ios',                # added for Tint, objc runtime
+          ],
+        },
+        'target_conditions': [
+          ['_type!="static_library"', {
+            'xcode_settings': {'OTHER_LDFLAGS': ['-Wl,-search_paths_first']},
+          }],
+        ],
+      }],
+      ['target_ios_simulator==1', {
+        'defines': [
+          '_DARWIN_USE_64_BIT_INODE=1',
+          'V8_TARGET_OS_IOS=1'
+        ],
+        'xcode_settings': {
+          'mac_bundle':1,
+          'SDKROOT': '<!(xcrun --sdk iphonesimulator --show-sdk-path)',   # added for Tint
+          'PROJECT_DIR': '<@(DEPTH)/build/xcode-ios-simulator/',  # added for Tint
+          'SYMROOT': '<@(DEPTH)/build/xcode-ios-simulator/',      # added for Tint
+          'OBJROOT': '<@(DEPTH)/build/xcode-ios-simulator/',      # added for Tint
           'ALWAYS_SEARCH_USER_PATHS': 'NO',
           'GCC_CW_ASM_SYNTAX': 'NO',                # No -fasm-blocks
           'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic

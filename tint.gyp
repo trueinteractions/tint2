@@ -258,7 +258,7 @@
         'NODE_TAG="<(node_tag)"',
       ],
       'conditions': [
-        [ 'OS=="mac" and target_arch=="arm"', {
+        [ 'target_ios_simulator==1 or target_ios==1', {
           'mac_bundle':1,
         }],
         [ 'node_use_openssl=="true"', {
@@ -699,9 +699,14 @@
             ]
           },
         }],
-        ['OS=="mac" and target_arch=="arm"', {
+        ['target_ios==1', {
           'include_dirs': [
             'libraries/libffi/ios/include'
+          ]
+        }], 
+        ['target_ios_simulator==1', {
+          'include_dirs': [
+            'libraries/libffi/config/mac/ia32'
           ]
         }]
       ]
