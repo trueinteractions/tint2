@@ -399,7 +399,10 @@ else
     };
   return keys[keyString];
   }
-
+  function wpfDeviceToLogicalPx(w,p) {
+    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
+    return t.Transform(p);
+  }
 
   ex.keyAtControl = function keyAtControl(input) {
     if(debug) log('-- keyAtControl: '+input+' ');
@@ -439,10 +442,26 @@ else
     var z = control.boundsOnScreen;
     ex.scrollAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2),upOrDown);
   }
+  ex.getBoundsOnScreenOfWPFItem = function getBoundsOnScreenOfWPFItem(control) {
+    var target = $.System.Windows.Window.GetWindow(control);
+    if(target === null) {
+      return null;
+    }
+    var bounds = control.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(control));
+    var p = wpfDeviceToLogicalPx(target,control.PointToScreen(new $.System.Windows.Point(0,0)));
+    return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
+  }
   ex.clickAtControl = function clickAtControl(control) {
     if(debug) log('-- clickAtControl\n');
-    var z = control.boundsOnScreen;
-    return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
+    var bounds;
+    // If we pass in a Tint control, get the bounding box.
+    if(control.native) {
+      bounds = control.boundsOnScreen;
+    // If we pass in a WPF control, get the bounding box.
+    } else {
+      bounds = this.getBoundsOnScreenOfWPFItem(control);
+    }
+    return ex.clickAt(Math.round(bounds.x + bounds.width/2) ,Math.round(bounds.y + bounds.height/2));
   }
   ex.clickAt = function clickAt(x,y) {
     if(debug) log('-- clickAt '+x+' '+y+' ');
