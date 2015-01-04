@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Table) {
+    return global.__TINT.Table;
+  }
   var $ = process.bridge.objc;
   var Container = require('Container');
   var TextInput = require('TextInput');
@@ -76,7 +79,6 @@ module.exports = (function() {
       ['tableView:shouldTrackCell:forTableColumn:row:','B@:@@l', function(self,cmd,table,cell,column,rowIndex) { return $.YES; }.bind(this)],
       ['numberOfRowsInTableView:','l@:@', function(self,cmd,table) { return this.nativeView('numberOfRows'); }.bind(this)] 
     ]);
-
     this.nativeClass = this.nativeClass || $.NSTableView;
     this.nativeViewClass = this.nativeViewClass || $.NSTableView;
     Container.call(this, options);
@@ -87,6 +89,7 @@ module.exports = (function() {
     this.native('setDelegate', this.nativeView);
     this.native('setDataSource', this.nativeView);    
     this.native('setRowSizeStyle', $.NSTableViewRowSizeStyleMedium);
+    this.columnsCanBeResized = true;
   }
 
   Table.prototype = Object.create(Container.prototype);
@@ -210,7 +213,7 @@ module.exports = (function() {
    *              string.
    */
   Table.prototype.setValueAt = function(columnId,row,value) {
-    if(typeof(value) == "string" || typeof(value) == "number") {
+    if(typeof(value) === "string" || typeof(value) === "number") {
       var v = value;
       value = new TextInput();
       value.value = v.toString();
@@ -233,27 +236,33 @@ module.exports = (function() {
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() { 
       var rowSize = this.nativeView('rowSizeStyle');
-      if(rowSize == $.NSTableViewRowSizeStyleDefault) return "default";
-      else if(rowSize == $.NSTableViewRowSizeStyleSmall) return "small";
-      else if(rowSize == $.NSTableViewRowSizeStyleMedium) return "medium";
-      else if(rowSize == $.NSTableViewRowSizeStyleLarge) return "large";
+      if(rowSize === $.NSTableViewRowSizeStyleDefault) return "default";
+      else if(rowSize === $.NSTableViewRowSizeStyleSmall) return "small";
+      else if(rowSize === $.NSTableViewRowSizeStyleMedium) return "medium";
+      else if(rowSize === $.NSTableViewRowSizeStyleLarge) return "large";
       else return "unknown";
     },
     set:function(e) { 
-      if(e == "default") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleDefault);
-      else if(e == "small") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleSmall);
-      else if(e == "medium") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
-      else if(e == "large") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
+      if(e === "default") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleDefault);
+      else if(e === "small") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleSmall);
+      else if(e === "medium") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
+      else if(e === "large") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
     }
   });
 
   Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
-    get:function() { return this.nativeView('allowsColumnRecording') == $.YES ? true : false; },
+    get:function() { return this.nativeView('allowsColumnRecording') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsColumnReordering', e ? $.YES : $.NO); }
   });
-
+  /**
+   * @member columnsCanBeResized
+   * @type {boolean}
+   * @memberof Table
+   * @description Gets or sets whether the columns can be resized by the user.
+   * @default true
+   */
   Object.defineProperty(Table.prototype, 'columnsCanBeResized', {
-    get:function() { return this.nativeView('allowsColumnResizing') == $.YES ? true : false; },
+    get:function() { return this.nativeView('allowsColumnResizing') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsColumnResizing', e ? $.YES : $.NO); }
   });
 
@@ -265,7 +274,7 @@ module.exports = (function() {
    *              true.
    */
   Object.defineProperty(Table.prototype, 'multipleSelection', {
-    get:function() { return this.nativeView('allowsMultipleSelection') == $.YES ? true : false; },
+    get:function() { return this.nativeView('allowsMultipleSelection') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsMultipleSelection', e ? $.YES : $.NO); }
   });
 
@@ -280,13 +289,8 @@ module.exports = (function() {
    *              it does not prevent no items from being selected.
    */
   Object.defineProperty(Table.prototype, 'emptySelection', {
-    get:function() { return this.nativeView('allowsEmptySelection') == $.YES ? true : false; },
+    get:function() { return this.nativeView('allowsEmptySelection') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setAllowsEmptySelection', e ? $.YES : $.NO); }
-  });
-
-  Object.defineProperty(Table.prototype, 'columnsCanBeSelected', {
-    get:function() { return this.nativeView('allowsColumnSelection') == $.YES ? true : false; },
-    set:function(e) { this.nativeView('setAllowsColumnSelection', e ? $.YES : $.NO); }
   });
 
   /**
@@ -356,23 +360,6 @@ module.exports = (function() {
     get:function() { return this.nativeView('numberOfRows'); }
   });
 
-  Object.defineProperty(Table.prototype, 'selectedColumns', {
-    get:function() {
-      var indexes = this.nativeView('selectedColumnIndexes');
-      var ind = [];
-      indexes('enumerateIndexesUsingBlock', function(self, index, boolStop) {
-        ind.push(index);
-      },['v',['?','@','I','B']]);
-      return ind;
-    },
-    set:function(e) {
-      var indexes = $.NSMutableIndexSet('indexSet');
-      for(var i=0; i < e.length; i++)
-        indexes('addIndex',e[i]);
-      this.nativeView('selectColumnIndexes',indexes,'byExtendingSelection',false);
-    }
-  });
-
   /**
    * @member selectedRows
    * @type {array}
@@ -412,10 +399,7 @@ module.exports = (function() {
     }
   });
 
-/* When placed in scroll view this is not necessary
-  Table.prototype.scrollToRow = function(ndx) { this.nativeView('scrollRowToVisible',ndx); }
+  global.__TINT.Table = Table;
 
-  Table.prototype.scrollToColumn = function(ndx) { this.nativeView('scrollColumnToVisible',ndx); }
-*/
   return Table;
 })();
