@@ -167,12 +167,13 @@ module.exports = (function() {
       }
     },
     function(e) {
+      this.private.savedMask = this.native('styleMask');
       this.minimizeButton = e;
       this.maximizeButton = e;
       this.closeButton = e;
       this.resizable = e;
       if(version > 13) {
-        this.native('setStyleMask', e ? this.private.defaultStyleMask : 0 );
+        this.native('setStyleMask', e ? this.private.savedMask : ($.NSBorderlessWindowMask) );
       }
     }
   );
@@ -526,6 +527,70 @@ module.exports = (function() {
     }
   );
 
+  util.def(Window.prototype, 'titleTransparent',
+    function() {
+      if(version < 14) {
+        return false;
+      } else {
+        return this.native('titlebarAppearsTransparent') === $.YES;
+      }
+    },
+    function(e) {
+      if(version < 14) {
+        console.log('Warning window.titleTransparent (a private property) is not available on this platform.');
+      } else {
+        this.native('setTitlebarAppearsTransparent', e ? $.YES : $.NO);
+      }
+    }
+  );
+
+  util.def(Window.prototype, 'appearance',
+    function() {
+      if(version < 14) {
+        return false;
+      } else {
+        // TODO: Replace this, except.. not sure how.
+        return this.native('appearance').toString();
+      }
+    },
+    function(e) {
+      if(version < 14) {
+        console.log('Warning window.appearance (a private property) is not available on this platform.');
+      } else {
+        var appearance = $("NSAppearanceNameVibrantLight");
+        if(e === "aqua") {
+          appearance = $("NSAppearanceNameAqua");
+        } else if (e === "light") {
+          appearance = $("NSAppearanceNameLightContent");
+        } else if (e === "dark") {
+          appearance = $("NSAppearanceNameVibrantDark");
+        }
+        this.native('setAppearance', $.NSAppearance('appearanceNamed', appearance));
+      }
+    }
+  );
+
+  util.def(Window.prototype, 'extendIntoTitle', 
+    function() {
+      if(version < 14) {
+        return false;
+      } else {
+        return (this.native('styleMask') & NSFullSizeContentViewWindowMask) === $.NSFullSizeContentViewWindowMask ? true : false;
+      }
+    },
+    function(e) {
+      if(version < 14) {
+        console.log('Warning window.extendIntoTitle (a private property) is not available on this platform.');
+      } else {
+        if(e) {
+          this.native('setStyleMask', this.native('styleMask') | $.NSFullSizeContentViewWindowMask);
+        } else {
+          this.native('setStyleMask', this.native('styleMask') & ~$.NSFullSizeContentViewWindowMask);
+        }
+      }
+    }
+  );
+
   util.def(Window.prototype, 'titleVisible',
     function() { 
       // Not yosemite
@@ -744,7 +809,7 @@ module.exports = (function() {
            this.native('setHasShadow', $.NO);
         }
         this.native('setBackgroundColor', this.private.backgroundObj.native);
-        this.native('setAlphaValue', this.private.backgroundObj.alpha);
+        //this.native('setAlphaValue', this.private.backgroundObj.alpha);
       }
     }
   );

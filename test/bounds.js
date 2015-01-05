@@ -61,7 +61,7 @@ function run($utils) {
 
     var bbb = btn.bounds;
     $utils.assert(bbb.x <= wbb.x, 'btn.bounds.x['+bbb.x+'] != win.bounds.x['+wbb.x+']');
-    $utils.assert(bbb.y == 0, 'btn.bounds.y['+bbb.y+'] != win.bounds.y['+wbb.y+']');
+    $utils.assert(bbb.y == 0, 'btn.bounds.y['+bbb.y+'] != 0');
     $utils.assert(bbb.width == 200, 'bounds width does not equal 200: '+bbb.width);
 
     var bbw = btn.boundsOnWindow;
