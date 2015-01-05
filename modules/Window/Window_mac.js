@@ -547,7 +547,7 @@ module.exports = (function() {
   util.def(Window.prototype, 'appearance',
     function() {
       if(version < 14) {
-        return "aqua";
+        return "normal";
       } else {
         return this.private.appearance ? this.private.appearance : "vibrant";
       }
@@ -557,7 +557,7 @@ module.exports = (function() {
         console.log('Warning window.appearance (a private property) is not available on this platform.');
       } else {
         var appearance = $("NSAppearanceNameVibrantLight");
-        if(e === "aqua") {
+        if(e === "normal") {
           appearance = $("NSAppearanceNameAqua");
         } else if (e === "light") {
           appearance = $("NSAppearanceNameLightContent");

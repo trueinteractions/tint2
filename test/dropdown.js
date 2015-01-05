@@ -61,7 +61,7 @@ function run($utils) {
     var b = dropdown.boundsOnScreen;
     setTimeout(function() {
       $utils.clickAt(b.x+25,b.y+25);
-    },200);
+    },1000);
   },1000);
 }
 
