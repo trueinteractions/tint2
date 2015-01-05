@@ -4,9 +4,9 @@
     # Turn off -Werror in V8
     # See http://codereview.chromium.org/8159015
     'werror': '',
-    'node_use_dtrace%': 'false',
-    'node_use_etw%': 'false',
-    'node_use_perfctr%': 'false',
+    'node_use_dtrace%': 'true',
+    'node_use_etw%': 'true',
+    'node_use_perfctr%': 'true',
     'node_has_winsdk%': 'false',
     'node_shared_v8%': 'false',
     'node_shared_zlib%': 'false',
