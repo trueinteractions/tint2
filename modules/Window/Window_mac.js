@@ -547,10 +547,9 @@ module.exports = (function() {
   util.def(Window.prototype, 'appearance',
     function() {
       if(version < 14) {
-        return false;
+        return "aqua";
       } else {
-        // TODO: Replace this, except.. not sure how.
-        return this.native('appearance').toString();
+        return this.private.appearance ? this.private.appearance : "vibrant";
       }
     },
     function(e) {
@@ -564,7 +563,10 @@ module.exports = (function() {
           appearance = $("NSAppearanceNameLightContent");
         } else if (e === "dark") {
           appearance = $("NSAppearanceNameVibrantDark");
+        } else {
+          e = "vibrant";
         }
+        this.private.appearance = e;
         this.native('setAppearance', $.NSAppearance('appearanceNamed', appearance));
       }
     }
