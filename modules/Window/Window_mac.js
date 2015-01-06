@@ -318,7 +318,7 @@ module.exports = (function() {
       if(e) {
         this.native('setCollectionBehavior', this.native('collectionBehavior') | $.NSWindowCollectionBehaviorFullScreenPrimary);
       } else { 
-        this.native('setCollectionBehavior', this.native('collectionBehavior') ^ $.NSWindowCollectionBehaviorFullScreenPrimary);
+        this.native('setCollectionBehavior', this.native('collectionBehavior') & ~$.NSWindowCollectionBehaviorFullScreenPrimary);
       }
       
       // enable the button (or disable the button on Mavericks/Lion)
