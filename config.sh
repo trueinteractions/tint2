@@ -17,4 +17,4 @@ if [ ! -f "./libraries/node/" ]; then
   git submodule update
 fi
 
-$PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --without-etw --without-perfctr --dest-cpu=x64 --xcode --tag= > /dev/null
+$PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --dest-cpu=x64 --xcode --tag= > /dev/null

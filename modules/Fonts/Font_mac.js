@@ -17,8 +17,11 @@ module.exports = (function() {
    */
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');
+    size = size || 12;
     if(name.type === '@') {
       this.native = name;
+    } else if(name.native) {
+      this.native = name.native;
     } else {
       this.native = $.NSFont('fontWithName',$(name),'size', size);
     }

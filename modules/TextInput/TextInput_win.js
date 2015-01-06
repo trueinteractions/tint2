@@ -42,7 +42,6 @@ module.exports = (function() {
       this.native.addEventListener('TextInput', textChanged);
     }
     this.native.addEventListener('KeyUp', keyUp);
-
     this.private.callbacks.push(focus);
     this.private.callbacks.push(lostFocus);
     this.private.callbacks.push(textChanged);
@@ -65,6 +64,18 @@ module.exports = (function() {
   Object.defineProperty(TextInput.prototype, 'enabled', {
     get:function() { return this.native.IsReadOnly; },
     set:function(e) { this.native.IsReadOnly = e ? true : false; }
+  });
+
+  Object.defineProperty(TextInput.prototype, 'font', {
+    get:function() { return Font.fromWPFObject(this.nativeView); },
+    set:function(e) {
+      var font = Font.parseFont(e);
+      this.nativeView.FontFamily = font.native.FontFamily;
+      this.nativeView.FontStyle = font.native.FontStyle;
+      this.nativeView.FontWeight = font.native.FontWeight;
+      this.nativeView.FontStretch = font.native.FontStretch;
+      this.nativeView.FontSize = font.size;
+    }
   });
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {

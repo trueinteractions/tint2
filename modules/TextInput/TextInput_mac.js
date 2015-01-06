@@ -2,6 +2,7 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var Container = require('Container');
   var Color = require('Color');
+  var Font = require('Font');
 
   /**
    * @class TextInput
@@ -104,6 +105,17 @@ module.exports = (function() {
   Object.defineProperty(TextInput.prototype, 'textcolor', {
     get:function() { return new Color(this.nativeView('textColor')); },
     set:function(e) { this.nativeView('setTextColor',(new Color(e)).native); }
+  });
+
+  /**
+   * @member font
+   * @type {Font}
+   * @memberof TextInput
+   * @description Gets or sets the font (family, size, weight, etc) of the text on the input or label.
+   */
+  Object.defineProperty(TextInput.prototype, 'font', {
+    get:function() { return new Font(this.nativeView('font')); },
+    set:function(e) { this.nativeView('setFont',(new Font(e)).native); }
   });
 
   /**
