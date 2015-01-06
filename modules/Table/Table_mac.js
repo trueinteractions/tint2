@@ -22,9 +22,11 @@ module.exports = (function() {
     options.delegates = options.delegates.concat([
       ['tableView:viewForTableColumn:row:','@@:@@l', function(self,cmd,table,column,rowIndex) {
         var identifier = column('identifier').toString();
-        if(this.private.views[identifier] && 
-            this.private.views[identifier][rowIndex])
-          return this.private.views[identifier][rowIndex].native;
+        if(this.private.views[identifier] && this.private.views[identifier][rowIndex])
+        {
+          var view = this.private.views[identifier][rowIndex].native;
+          return view;
+        }
         return null;
       }.bind(this)],
       /**
@@ -88,7 +90,7 @@ module.exports = (function() {
     this.private.columnWidth = {};
     this.native('setDelegate', this.nativeView);
     this.native('setDataSource', this.nativeView);    
-    this.native('setRowSizeStyle', $.NSTableViewRowSizeStyleMedium);
+    this.native('setRowSizeStyle', $.NSTableViewRowSizeStyleSmall);
     this.columnsCanBeResized = true;
   }
 
@@ -218,6 +220,7 @@ module.exports = (function() {
       value = new TextInput();
       value.value = v.toString();
       value.readonly = true;
+      value.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
     }
     this.private.views[columnId][row] = value;
     this.nativeView('reloadDataForRowIndexes', $.NSIndexSet('indexSetWithIndex',row),
