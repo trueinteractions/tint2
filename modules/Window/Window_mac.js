@@ -556,18 +556,22 @@ module.exports = (function() {
       if(version < 14) {
         console.log('Warning window.appearance (a private property) is not available on this platform.');
       } else {
-        var appearance = $("NSAppearanceNameVibrantLight");
-        if(e === "normal") {
+        var appearance = $("NSAppearanceNameAqua");
+        if(e === "vibrant") {
           appearance = $("NSAppearanceNameAqua");
         } else if (e === "light") {
           appearance = $("NSAppearanceNameLightContent");
         } else if (e === "dark") {
           appearance = $("NSAppearanceNameVibrantDark");
+          this.backgroundColor = '#232323';
         } else {
-          e = "vibrant";
+          appearance = $("NSAppearanceNameVibrantLight");
+          e = "normal";
         }
         this.private.appearance = e;
-        this.native('setAppearance', $.NSAppearance('appearanceNamed', appearance));
+        var a = $.NSAppearance('appearanceNamed', appearance);
+        $.NSAppearance('setCurrentAppearance', a);
+        this.native('setAppearance', a);
       }
     }
   );
