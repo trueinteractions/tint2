@@ -3,6 +3,7 @@ module.exports = (function() {
     return global.__TINT.WebView;
   }
 
+  var util = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
@@ -65,6 +66,8 @@ module.exports = (function() {
     // icon
     // new-window
 
+    // TODO: Support new-window event.
+    
     // If we don't have a document loaded IE will throw an error if anything
     // other than a location is set, so we'll set an intiial location to prevent this.
     this.nativeView.Navigate(new $.System.Uri("http://127.0.0.1:" + application.private.appSchemaPort + "/this-is-a-blank-page-for-ie-fix.html"));
@@ -96,8 +99,9 @@ module.exports = (function() {
     return this.nativeView.InvokeScript("eval",[e]);
   }
 
-  Object.defineProperty(WebView.prototype, 'icon', {
-    get:function() {
+  util.def(WebView.prototype, 'icon',
+    function() {
+      // TODO: Support icon.
       /**var exeCmd = "function(){\n"+
         "var favicon = undefined;\n"+
         "var nodeList = document.getElementsByTagName('link');\n"+
@@ -108,25 +112,26 @@ module.exports = (function() {
       return this.execute(exeCmd);**/
       return null;
     }
-  });
+  );
 
   // Indeterminate on windows.
-  Object.defineProperty(WebView.prototype, 'progress', {
-    get:function() { return -1; }
-  });
+  // TODO: Support progress
+  util.def(WebView.prototype, 'progress',
+    function() { return -1; }
+  );
 
-  Object.defineProperty(WebView.prototype, 'location', {
-    get:function() { return this.private.url; },
-    set:function(url) { 
+  util.def(WebView.prototype, 'location',
+    function() { return this.private.url; },
+    function(url) { 
       this.private.url = url;
       // Win8 adds (or seemingly adds) new support for URI schemas, investigate url monikers
       // as well, asyncronous pluggable protocols wont work since they're system wide and
-      // not app dependent.
+      // not app dependent. Eventually we'll find a way to not use this side-ways hack.
       if(url.indexOf("app:") > -1)// && !application.packaged)
         url = url.replace("app:/","http://127.0.0.1:"+application.private.appSchemaPort+"/");
       this.nativeView.Navigate(new $.System.Uri(url));
     }
-  });
+  );
 
   // TODO: change the UA string
   //[DllImport("urlmon.dll", CharSet = CharSet.Ansi)]
@@ -136,29 +141,29 @@ module.exports = (function() {
   //{
   //    UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, Agent, Agent.Length, 0);
   //}
-  Object.defineProperty(WebView.prototype, "useragent", {
-    get:function() {
+  util.def(WebView.prototype, "useragent",
+    function() {
       var userAgent = this.private.useragent;
       if(!userAgent)
         userAgent = this.nativeView.InvokeScript("eval",['navigator.userAgent']);
       return userAgent; 
     },
-    set:function(e) { 
+    function(e) { 
       if(application.warn)
         console.error('User agent is not yet supported on IE/Windows.');
       this.private.useragent = e;
     }
-  });
+  );
 
-  Object.defineProperty(WebView.prototype, 'loading', { 
-    get:function() { return this.private.loading; },
-    set:function(e) { if(e == false) this.stop(); }
-  });
+  util.def(WebView.prototype, 'loading', 
+    function() { return this.private.loading; },
+    function(e) { if(e == false) this.stop(); }
+  );
 
 
-  Object.defineProperty(WebView.prototype, 'title', { 
-    get:function() { return this.execute("document.title"); }
-  });
+  util.def(WebView.prototype, 'title', 
+    function() { return this.execute("document.title"); }
+  );
 
   global.__TINT.WebView = WebView;
   return WebView;
