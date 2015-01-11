@@ -85,16 +85,17 @@ if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=
 :project-gen
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 SETLOCAL
-	if defined VS110COMNTOOLS (
+	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2012
 		goto inner-config
 	)
-	if defined VS100COMNTOOLS (
+	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+		set GYP_MSVS_VERSION=2010
 		goto inner-config
 	)
-	echo "Cannot find visual studio VCVarsQueryRegistry.bat"
+	echo Cannot find visual studio VCVarsQueryRegistry.bat
 	goto exit
 
 :inner-config
@@ -107,16 +108,17 @@ ENDLOCAL
 @rem Skip project generation if requested.
 if defined nobuild goto sign
 
-if defined VS110COMNTOOLS (
+if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 	call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
 	set GYP_MSVS_VERSION=2012
 	goto msbuild-found
 )
-if defined VS100COMNTOOLS (
+if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 	call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+	set GYP_MSVS_VERSION=2010
 	goto msbuild-found
 )
-echo "Cannot find vcvarsall.bat for visual studio"
+echo Cannot find vcvarsall.bat for visual studio
 goto exit
 
 
