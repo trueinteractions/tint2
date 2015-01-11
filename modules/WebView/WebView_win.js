@@ -6,6 +6,7 @@ module.exports = (function() {
   var util = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
+  var $$ = process.bridge.win32;
 
   function WebView(options) {
     options = options || {};
@@ -61,10 +62,41 @@ module.exports = (function() {
     var scriptInterface = process.bridge.createScriptInterface(callbackHandle.bind(this));
     this.nativeView.ObjectForScripting = scriptInterface;
 
+    this.private.comObject.addEventListener('NewWindow', function(url, flags, targetFrame, postData, headers, processed) {
+      console.log('** new window **');
+      console.log('url: ', url);
+      console.log('flags: ', flags);
+      console.log('targetFrame: ', targetFrame);
+      console.log('postData: ', postData);
+      console.log('headers: ', headers);
+      console.log('processed: ', processed);
+    }.bind(this));
+
+    this.private.comObject.addEventListener('ProgressChange', function(progress, progress_max) {
+      console.log('** progress **');
+      console.log('progress: ', progress);
+      console.log('progress_max: ', progress_max);
+    }.bind(this));
+
+    this.private.comObject.addEventListener('DownloadBegin', function() {
+      console.log('** download **');
+      console.log(arguments);
+    }.bind(this));
+
+    this.private.comObject.addEventListener('FileDownLoad', function(pvbCancel) {
+      console.log('** file download **');
+      console.log(pvbCancel);
+    }.bind(this));
+
+    this.private.comObject.addEventListener('TitleChange', function(bstrTitleText) {
+      console.log('** title change **');
+      console.log(bstrTitleText);
+    }.bind(this));
+
+
     // TODO: Support events
     // redirect
     // icon
-    // new-window
 
     // TODO: Support new-window event.
     
@@ -133,14 +165,6 @@ module.exports = (function() {
     }
   );
 
-  // TODO: change the UA string
-  //[DllImport("urlmon.dll", CharSet = CharSet.Ansi)]
-  //private static extern int UrlMkSetSessionOption(int dwOption, string pBuffer, int dwBufferLength, int dwReserved);
-  //const int URLMON_OPTION_USERAGENT = 0x10000001;
-  //public void ChangeUserAgent(String Agent)
-  //{
-  //    UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, Agent, Agent.Length, 0);
-  //}
   util.def(WebView.prototype, "useragent",
     function() {
       var userAgent = this.private.useragent;
@@ -148,10 +172,9 @@ module.exports = (function() {
         userAgent = this.nativeView.InvokeScript("eval",['navigator.userAgent']);
       return userAgent; 
     },
-    function(e) { 
-      if(application.warn)
-        console.error('User agent is not yet supported on IE/Windows.');
+    function(e) {
       this.private.useragent = e;
+      $$.urlmon.UrlMkSetSessionOption($$.urlmon.URLMON_OPTION_USERAGENT, e, e.length, 0);
     }
   );
 

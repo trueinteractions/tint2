@@ -10,7 +10,6 @@ goto begin
 
 :32BIT
 set hostarch=x86
-
 :begin
 
 :: This must come before GetWindowsSdkDir as GetWindowsSdkDir tramples on 

@@ -436,7 +436,6 @@ TODO:
    * @type {string}
    * @memberof WebView
    * @description Gets or sets the user agent string used.
-   * @important There are inconsistencies on Windows which may result in the user agent not being set; getting the value is guaranteed.
    * @noscreenshot
    * @example
    * require('Common');

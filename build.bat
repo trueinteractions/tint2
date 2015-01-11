@@ -83,48 +83,42 @@ if defined noetw set noetw_arg=--without-etw& set noetw_msi_arg=/p:NoETW=1
 if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=/p:NoPerfCtr=1
 
 :project-gen
-@rem Skip project generation if requested.
-if defined gyp (
-	if defined NIGHTLY set TAG=nightly-%NIGHTLY%
+if defined NIGHTLY set TAG=nightly-%NIGHTLY%
+SETLOCAL
+	if defined VS110COMNTOOLS (
+		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
+		set GYP_MSVS_VERSION=2012
+		goto inner-config
+	)
+	if defined VS100COMNTOOLS (
+		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+		goto inner-config
+	)
+	echo "Cannot find visual studio VCVarsQueryRegistry.bat"
+	goto exit
 
-	@rem Generate the VS project.
-	SETLOCAL
-  		if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-  		python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
-  		if errorlevel 1 goto create-msvs-files-failed
-  		if not exist build\msvs\tint.sln goto create-msvs-files-failed
-	ENDLOCAL
-)
-if defined subsystem (
-	if defined NIGHTLY set TAG=nightly-%NIGHTLY%
-
-	@rem Generate the VS project.
-	SETLOCAL
-  		if defined VS100COMNTOOLS call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-  		python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
-  		if errorlevel 1 goto create-msvs-files-failed
-  		if not exist build\msvs\tint.sln goto create-msvs-files-failed
-	ENDLOCAL
-)
+:inner-config
+	python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
+	if errorlevel 1 goto create-msvs-files-failed
+	if not exist build\msvs\tint.sln goto create-msvs-files-failed
+ENDLOCAL
 
 :msbuild
 @rem Skip project generation if requested.
 if defined nobuild goto sign
 
-@rem Look for Visual Studio 2012
-if not defined VS110COMNTOOLS goto vc-set-2010
-if not exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" goto vc-set-2010
-if not defined VCINSTALLDIR call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-if not defined VCINSTALLDIR goto msbuild-not-found
-set GYP_MSVS_VERSION=2012
-goto msbuild-found
+if defined VS110COMNTOOLS (
+	call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
+	set GYP_MSVS_VERSION=2012
+	goto msbuild-found
+)
+if defined VS100COMNTOOLS (
+	call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+	goto msbuild-found
+)
+echo "Cannot find vcvarsall.bat for visual studio"
+goto exit
 
-:vc-set-2010
-if not defined VS100COMNTOOLS goto msbuild-not-found
-if not exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" goto msbuild-not-found
-if not defined VCINSTALLDIR call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
-if not defined VCINSTALLDIR goto msbuild-not-found
-goto msbuild-found
 
 :msbuild-not-found
 echo Build skipped. To build, this file needs to run from VS cmd prompt.
