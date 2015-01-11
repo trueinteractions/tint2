@@ -105,7 +105,6 @@ SETLOCAL
 ENDLOCAL
 
 :msbuild
-@rem Skip project generation if requested.
 if defined nobuild goto sign
 
 if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
@@ -121,11 +120,6 @@ if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 echo Cannot find vcvarsall.bat for visual studio
 goto exit
 
-
-:msbuild-not-found
-echo Build skipped. To build, this file needs to run from VS cmd prompt.
-goto run
-
 :msbuild-found
 @rem Build the sln with msbuild.
 copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
@@ -134,65 +128,15 @@ if errorlevel 1 goto exit
 
 copy /Y build\msvs\%config%\tint.exe build\msvs\%config%\tint_%subsystem%.exe
 
+:msbuild-not-found
 :sign
-@rem Skip signing if the `nosign` option was specified.
-if defined nosign goto licensertf
-
-:: signtool sign /a Release\node.exe
-
 :licensertf
-@rem Skip license.rtf generation if not requested.
-if not defined licensertf goto msi
-
-:: %config%\node tools\license2rtf.js < LICENSE > %config%\license.rtf
-:: if errorlevel 1 echo Failed to generate license.rtf&goto exit
-
 :msi
-@rem Skip msi generation if not requested
-if not defined msi goto run
-:: call :getnodeversion
-
-if not defined NIGHTLY goto msibuild
-set NODE_VERSION=%NODE_VERSION%.%NIGHTLY%
-
 :msibuild
-echo Building node-%NODE_VERSION%
-:: msbuild "%~dp0tools\msvs\msi\nodemsi.sln" /m /t:Clean,Build /p:Configuration=%config% /p:Platform=%msiplatform% /p:NodeVersion=%NODE_VERSION% %noetw_msi_arg% %noperfctr_msi_arg% /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
-:: if errorlevel 1 goto exit
-
-if defined nosign goto run
-:: signtool sign /a Release\node-v%NODE_VERSION%-%msiplatform%.msi
-
 :run
-@rem Run tests if requested.
-if "%test%"=="" goto exit
-
-if "%config%"=="Debug" set test_args=--mode=debug
-if "%config%"=="Release" set test_args=--mode=release
-
-if "%test%"=="test" set test_args=%test_args% simple message
-if "%test%"=="test-internet" set test_args=%test_args% internet
-if "%test%"=="test-pummel" set test_args=%test_args% pummel
-if "%test%"=="test-simple" set test_args=%test_args% simple
-if "%test%"=="test-message" set test_args=%test_args% message
-if "%test%"=="test-gc" set test_args=%test_args% gc
-if "%test%"=="test-all" set test_args=%test_args%
-
 :build-node-weak
-@rem Build node-weak if required
-:: if "%buildnodeweak%"=="" goto run-tests
-:: "%config%\node" deps\npm\node_modules\node-gyp\bin\node-gyp rebuild --directory="%~dp0test\gc\node_modules\weak" --nodedir="%~dp0."
-:: if errorlevel 1 goto build-node-weak-failed
-goto run-tests
-
 :build-node-weak-failed
-echo Failed to build node-weak.
-goto exit
-
 :run-tests
-echo running 'python tools/test.py %test_args%'
-:: python tools/test.py %test_args%
-if "%test%"=="test" goto jslint
 goto exit
 
 :create-msvs-files-failed
@@ -200,20 +144,9 @@ echo Failed to create vc project files.
 goto exit
 
 :upload
-echo uploading .exe .msi .pdb to nodejs.org
-:: call :getnodeversion
-@echo on
-:: ssh node@nodejs.org mkdir -p web/nodejs.org/dist/v%NODE_VERSION%
-:: scp Release\node.msi node@nodejs.org:~/web/nodejs.org/dist/v%NODE_VERSION%/node-v%NODE_VERSION%.msi
-:: scp Release\node.exe node@nodejs.org:~/web/nodejs.org/dist/v%NODE_VERSION%/node.exe
-:: scp Release\node.pdb node@nodejs.org:~/web/nodejs.org/dist/v%NODE_VERSION%/node.pdb
-@echo off
 goto exit
 
 :jslint
-echo running jslint
-set PYTHONPATH=tools/closure_linter/
-:: python tools/closure_linter/closure_linter/gjslint.py --unix_mode --strict --nojsdoc -r lib/ -r src/ --exclude_files lib/punycode.js
 goto exit
 
 :help
@@ -223,12 +156,5 @@ goto exit
 :exit
 goto :EOF
 
-rem ***************
-rem   Subroutines
-rem ***************
-
 :getnodeversion
-set NODE_VERSION=
-:: for /F "usebackq tokens=*" %%i in (`python "%~dp0tools\getnodeversion.py"`) do set NODE_VERSION=%%i
-if not defined NODE_VERSION echo Cannot determine current version of node.js & exit /b 1
 goto :EOF
