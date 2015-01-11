@@ -87,12 +87,14 @@ if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 SETLOCAL
 	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
+		echo Using Platform Toolset V110
 		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2012
 		set platformtoolset=v110
 		goto inner-config
 	)
 	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
+		echo Using Platform Toolset V100
 		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2010
 		set platformtoolset=v100
