@@ -36,6 +36,7 @@ set noperfctr=1
 set noperfctr_arg=1
 set noperfctr_msi_arg=1
 set subsystem=console
+set platformtoolset=v110
 
 :next-arg
 if "%1"=="" goto args-done
@@ -88,11 +89,13 @@ SETLOCAL
 	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2012
+		set platformtoolset=v110
 		goto inner-config
 	)
 	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2010
+		set platformtoolset=v100
 		goto inner-config
 	)
 	echo Cannot find visual studio VCVarsQueryRegistry.bat
@@ -106,25 +109,27 @@ ENDLOCAL
 
 :msbuild
 if defined nobuild goto sign
-
-if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-	call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-	set GYP_MSVS_VERSION=2012
-	goto msbuild-found
-)
-if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-	call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
-	set GYP_MSVS_VERSION=2010
-	goto msbuild-found
-)
-echo Cannot find vcvarsall.bat for visual studio
-goto exit
+SETLOCAL
+	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+		call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
+		set GYP_MSVS_VERSION=2012
+		set platformtoolset=v110
+		goto msbuild-found
+	)
+	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+		call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+		set GYP_MSVS_VERSION=2010
+		set platformtoolset=v100
+		goto msbuild-found
+	)
+	echo Cannot find vcvarsall.bat for visual studio
+	goto exit
 
 :msbuild-found
-@rem Build the sln with msbuild.
-copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
-msbuild build\msvs\tint.sln /maxcpucount:3 /t:%target% /p:Configuration=%config%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
-if errorlevel 1 goto exit
+	copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
+	msbuild build\msvs\tint.sln /maxcpucount:3 /t:%target% /p:Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+	if errorlevel 1 goto exit
+ENDLOCAL
 
 copy /Y build\msvs\%config%\tint.exe build\msvs\%config%\tint_%subsystem%.exe
 
