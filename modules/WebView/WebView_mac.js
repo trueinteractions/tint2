@@ -322,29 +322,6 @@ module.exports = (function() {
     return this.nativeView('stringByEvaluatingJavaScriptFromString',$(e.toString()))('UTF8String').toString();
   }
 
-/*
-If a specific property is allowed in js?
-+ (BOOL)isKeyExcludedFromWebScript:(const char *)property {}
-converts the selector to the JS name.
-
-TODO:
-  Object.defineProperty(WebView.prototype, 'defaultFontSize') //setDefaultFontSize
-  Object.defineProperty(WebView.prototype, 'defaultFixedFontSize') //setDefaultFixedFontSize
-  Object.defineProperty(WebView.prototype, 'defaultFontSizeMinimum') //setMinimumFontSize
-  Object.defineProperty(WebView.prototype, 'allowImages') //setLoadsImagesAutomatically
-  Object.defineProperty(WebView.prototype, 'userstylesheet') //setUserStyleSheetLocation && setUserStyleSheetEnabled
-  Object.defineProperty(WebView.prototype, 'cache') //setUsesPageCache
-  Object.defineProperty(WebView.prototype, 'media') //setMediaStyle
-  Object.defineProperty(WebView.prototype, 'icon') //mainFrameIcon. read only.
-
-  WebView.prototype.elementAt() // elementAtPoint:
-  WebView.prototype.find() // searchFor:direction:caseSensitive:wrap:
-  WebView.prototype.exception() // WebScriptObject setException:
-
-  WebFrames!
-  https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/DisplayWebContent/Concepts/WebKitDesign.html#//apple_ref/doc/uid/20002024-114390
-*/
-
   /**
    * @member icon
    * @type {string}
@@ -442,12 +419,6 @@ TODO:
     function() { return this.nativeView('drawsBackground') ? false : true; },
     function(e) { this.nativeView('setDrawsBackground', !e ? $.YES : $.NO ); }
   );
-
-  // Broken on OSX not working either on Windows.
-  //Object.defineProperty(WebView.prototype, 'textScale', {
-  //  get:function() { return this.nativeView('textSizeMultiplier') * 100; },
-  //  set:function(e) { this.nativeView('setTextSizeMultiplier', (e / 100)); }
-  //});
 
   /**
    * @member title
