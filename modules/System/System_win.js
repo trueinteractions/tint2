@@ -213,15 +213,13 @@ module.exports = (function() {
     var hwnd = $w32.user32.GetForegroundWindow();
     var topRect = new $w32.structs['RECT'];
     $w32.user32.GetWindowRect(hwnd,topRect.ref());
-    var ix = topRect.left;
-    var iy = topRect.top;
     var iw = Math.round(topRect.right - topRect.left);
     var ih = Math.round(topRect.bottom - topRect.top);
     var myImage = new $.System.Drawing.Bitmap(iw, ih);
     var gr1 = $.System.Drawing.Graphics.FromImage(myImage);
     var dc1 = gr1.GetHdc();
     var dc2 = $w32.user32.GetWindowDC(hwnd);
-    var result = $w32.gdi32.BitBlt(dc1.pointer.rawpointer, 0, 0, iw, ih, dc2, 0, 0, 0x00cc0020);
+    $w32.gdi32.BitBlt(dc1.pointer.rawpointer, 0, 0, iw, ih, dc2, 0, 0, 0x00cc0020);
     gr1.ReleaseHdc(dc1);
     var mem = new $.System.IO.MemoryStream();
     image.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
@@ -233,7 +231,7 @@ module.exports = (function() {
     var count = windows.Count;
     for(var i=0; i < count; i++) {
       var item = windows.Item(i);
-      if(i == windowNumber) {
+      if(i === windowNumber) {
         return this.takeSnapshotOfWindow(item, path);
       }
     }
@@ -244,8 +242,9 @@ module.exports = (function() {
     var count = windows.Count;
     for(var i=0; i < count; i++) {
       var item = windows.Item(i);
-      if(item.IsActive)
+      if(item.IsActive) {
         return this.takeSnapshotOfWindow(item, path);
+      }
     }
   }
 

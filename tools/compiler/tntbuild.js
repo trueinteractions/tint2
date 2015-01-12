@@ -2769,11 +2769,12 @@ if(!argv._[0]) {
   console.log(
     'Tint Build Tool ('+tintVersion+')\n'+
     'usage: tntbuild [options] package.json\n' + 
-    '\t[--clean]\n'+
-    '\t[--no-windows-build]\n'+
-    '\t[--no-osx-build]\n'+
-    '\t[--windows-runtime=tint.exe]\n'+
-    '\t[--osx-runtime=tint]'
+    '   [--out=directory]\t\t\tThe directory to write the output to instead of the default \'build\'\n'+
+    '   [--clean]\t\t\t\tClean the build directory, removing any application files before beginning.\n'+
+    '   [--no-windows-build]\t\t\tDo not compile a windows version of the application.\n'+
+    '   [--no-osx-build]\t\t\tDo not compile an OS X version of the application.\n'+
+    '   [--windows-runtime=tint.exe]\t\tThe runtime to use for Windows (instead of the built-in)\n'+
+    '   [--osx-runtime=tint]\t\t\tThe runtime to use for OS X (instead of the built-in)'
   );
   process.exit(0);
 }
@@ -2809,6 +2810,9 @@ if(argv['windows-runtime']) tintExecutableWindows = readToBase64(argv['windows-r
 if(argv['osx-runtime']) tintExecutableOSX = readToBase64(argv['osx-runtime']);
 if(!argv['no-windows-build']) build.prepwin();
 if(!argv['no-osx-build']) build.prepmac();
+if(argv['out']) {
+  outputDirectory = argv['out'];
+}
 build.postbuild();
 build.play();
 
