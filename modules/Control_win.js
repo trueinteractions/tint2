@@ -104,26 +104,25 @@ module.exports = (function() {
   Control.prototype.animateOnSizeChange = false;
   Control.prototype.animateOnPositionChange = false;
 
-  Object.defineProperty(Control.prototype, 'alpha', {
-    configurable:true,
-    get:function() { return this.nativeView.Opacity; },
-    set:function(e) { this.nativeView.Opacity = e; }
-  });
+  utils.def(Control.prototype, 'alpha',
+    function() { return this.nativeView.Opacity; },
+    function(e) { this.nativeView.Opacity = e; }
+  );
 
-   Object.defineProperty(Control.prototype, 'visible', {
-      get:function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
-      set:function(e) {
-        this.private.states.visible = e;
-        if(e) {
-          this.native.Visibility = $.System.Windows.Visibility.Visible;
-        } else {
-          this.native.Visibility = $.System.Windows.Visibility.Hidden;
-        }
+  utils.def(Control.prototype, 'visible',
+    function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
+    function(e) {
+      this.private.states.visible = e;
+      if(e) {
+        this.native.Visibility = $.System.Windows.Visibility.Visible;
+      } else {
+        this.native.Visibility = $.System.Windows.Visibility.Hidden;
       }
-    });
+    }
+  );
 
-  Object.defineProperty(Control.prototype,'boundsOnScreen', {
-    get:function() {
+  utils.def(Control.prototype, 'boundsOnScreen',
+    function() {
       if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
         return null;
       }
@@ -135,10 +134,10 @@ module.exports = (function() {
       var p = utils.wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
    }
-  });
+  );
 
-  Object.defineProperty(Control.prototype,'boundsOnWindow', {
-    get:function() {
+  utils.def(Control.prototype, 'boundsOnWindow',
+    function() {
       if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
         return null;
       }
@@ -150,10 +149,10 @@ module.exports = (function() {
       var p = utils.wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X - target.Left), y:Math.round(p.Y - target.Top), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
-  });
+  );
 
-  Object.defineProperty(Control.prototype,'bounds', {
-    get:function() {
+  utils.def(Control.prototype, 'bounds',
+    function() {
       var target = this.nativeView.Parent;
       if(this.native.GetType().Equals($.System.Windows.Window)) {
         return this.boundsOnWindow;
@@ -166,7 +165,7 @@ module.exports = (function() {
       var p = this.nativeView.TransformToAncestor(target).Transform(new $.System.Windows.Point(0,0));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
-  });
+  );
 
   Control.prototype.fireEvent = function(event, args) {
     try {
