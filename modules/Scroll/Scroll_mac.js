@@ -57,17 +57,28 @@ module.exports = (function() {
   Object.defineProperty(Scroll.prototype, 'border', {
     get:function() {
       var s = this.nativeView('borderType');
-      if(s == $.NSNoBorder) return "none";
-      else if (s == $.NSLineBorder) return "line";
-      else if (s == $.NSBezelBorder) return "normal";
-      else if (s == $.NSGrooveBorder) return "concave";
-      else return "unknown";
+      if(s === $.NSNoBorder) {
+        return "none";
+      } else if (s === $.NSLineBorder) {
+        return "line";
+      } else if (s === $.NSBezelBorder) {
+       return "normal";
+      } else if (s === $.NSGrooveBorder) {
+        return "concave";
+      } else {
+        return "unknown";
+      }
     },
     set:function(e) { 
-      if(e == "none") this.nativeView('setBorderType', $.NSNoBorder);
-      else if (e == "line") this.nativeView('setBorderType', $.NSLineBorder);
-      else if (e == "normal") this.nativeView('setBorderType', $.NSBezelBorder);
-      else if (e == "concave") this.nativeView('setBorderType', $.NSGrooveBorder);
+      if(e === "none") {
+        this.nativeView('setBorderType', $.NSNoBorder);
+      } else if (e === "line") {
+        this.nativeView('setBorderType', $.NSLineBorder);
+      } else if (e === "normal") {
+        this.nativeView('setBorderType', $.NSBezelBorder);
+      } else if (e === "concave") {
+        this.nativeView('setBorderType', $.NSGrooveBorder);
+      }
     }
   });
 
@@ -81,7 +92,7 @@ module.exports = (function() {
    * @default true
    */
   Object.defineProperty(Scroll.prototype, 'vertical', {
-    get:function() { return this.native('hasVerticalScroller') == $.YES ? true : false; },
+    get:function() { return this.native('hasVerticalScroller') === $.YES ? true : false; },
     set:function(e) { this.native('setHasVerticalScroller', e ? $.YES : $.NO); }
   });
 
@@ -94,7 +105,7 @@ module.exports = (function() {
    * @default true
    */
   Object.defineProperty(Scroll.prototype, 'horizontal', {
-    get:function() { return this.native('hasHorizontalScroller') == $.YES ? true : false; },
+    get:function() { return this.native('hasHorizontalScroller') === $.YES ? true : false; },
     set:function(e) { this.native('setHasHorizontalScroller', e ? $.YES : $.NO); }
   });
 
@@ -120,7 +131,7 @@ module.exports = (function() {
   Object.defineProperty(Scroll.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
     set:function(e) {
-      if(!e || e == "auto") {
+      if(!e || e === "auto") {
         this.private.background = null;
         this.native('setDrawsBackground', $.NO);
       } else {

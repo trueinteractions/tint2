@@ -1,9 +1,9 @@
-if(typeof(process.bridge) == 'undefined') process.initbridge();
-if(typeof(process.bridge.dotnet) == 'undefined') process.bridge.dotnet = {};
-if(typeof(process.bridge.ref) == 'undefined') process.bridge.ref = require('ref');
-if(typeof(process.bridge.struct) == 'undefined') process.bridge.struct = require('struct');
-if(typeof(process.bridge.ffi) == 'undefined') process.bridge.ffi = require('ffi');
-if(typeof(process.bridge.win32) == 'undefined') process.bridge.win32 = require('win32');
+if(typeof(process.bridge) === 'undefined') process.initbridge();
+if(typeof(process.bridge.dotnet) === 'undefined') process.bridge.dotnet = {};
+if(typeof(process.bridge.ref) === 'undefined') process.bridge.ref = require('ref');
+if(typeof(process.bridge.struct) === 'undefined') process.bridge.struct = require('struct');
+if(typeof(process.bridge.ffi) === 'undefined') process.bridge.ffi = require('ffi');
+if(typeof(process.bridge.win32) === 'undefined') process.bridge.win32 = require('win32');
 
 var dotnet = process.bridge;
 var assemblyImported = {};
@@ -167,11 +167,15 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
  */
 function createMember(target, typeNative, typeName, memberNative, memberName, static) {
   var type = dotnet.execMethod(dotnet.execGetProperty(memberNative, 'MemberType'), 'ToString');
-  if(type == "Field") createField(target, typeNative, typeName, memberNative, memberName, static);
-  else if(type == "Method") {
-    if(memberName.substring(0,4) != "get_")
+  if(type === "Field") {
+    createField(target, typeNative, typeName, memberNative, memberName, static);
+  } else if(type === "Method") {
+    if(memberName.substring(0,4) != "get_") {
       createMethod(target, typeNative, typeName, memberNative, memberName, static);
-  } else if(type == "Property") createProperty(target, typeNative, typeName, memberNative, memberName, static);
+    }
+  } else if(type === "Property") {
+    createProperty(target, typeNative, typeName, memberNative, memberName, static);
+  }
 }
 
 function createClass(typeNative, typeName) {
@@ -262,9 +266,9 @@ function createFromType(nativeType, onto) {
  * the classes, enums, fields, properties, etc onto the object passed in (onto)
  */
 function ImportOnto(assembly, onto) {
-  if(assembly.toLowerCase().indexOf('.dll') == -1 
-    && assembly.toLowerCase().indexOf('.exe') == -1) 
+  if(assembly.toLowerCase().indexOf('.dll') === -1 && assembly.toLowerCase().indexOf('.exe') === -1) {
     assembly += ".dll";
+  }
 
   var types = dotnet.loadAssembly(assembly);
   var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");

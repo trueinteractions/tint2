@@ -87,13 +87,13 @@ module.exports = (function() {
   Object.defineProperty(ProgressBar.prototype, 'size', {
     get:function() { 
       var s = this.native('controlSize');
-      if (s == $.NSMiniControlSize) return "small";
-      else if (s == $.NSRegularControlSize) return "large";
+      if (s === $.NSMiniControlSize) return "small";
+      else if (s === $.NSRegularControlSize) return "large";
       else return "normal";
     },
     set:function(e) { 
-      if (e == "small") this.native('setControlSize', $.NSMiniControlSize);
-      else if (e == "large") this.native('setControlSize', $.NSRegularControlSize);
+      if (e === "small") this.native('setControlSize', $.NSMiniControlSize);
+      else if (e === "large") this.native('setControlSize', $.NSRegularControlSize);
       else this.native('setControlSize', $.NSSmallControlSize);
     }
   });

@@ -36,7 +36,7 @@ module.exports = (function() {
    * @default false
    */
   Object.defineProperty(DropDown.prototype, 'pullsdown', {
-    get:function() { return this.nativeView('pullsDown') == $.YES ? true : false; },
+    get:function() { return this.nativeView('pullsDown') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setPullsDown', e ? $.YES : $.NO); }
   });
 

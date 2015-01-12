@@ -116,7 +116,7 @@ module.exports = (function() {
       set:function(e) {
         if(type === "save" && e) {
           throw new Error('Save dialogs cannot ask for multiple file paths.');
-        } else if(type == "save" && !e) {
+        } else if(type === "save" && !e) {
           return;
         }
         $dialog.Multiselect = e ? true : false;
