@@ -24,8 +24,8 @@ function run($utils) {
   webview.useragent = agent;
   webview.addEventListener('load', function() {
     var response = webview.execute("document.querySelector('h2.info').innerText");
-    $utils.assert(agent === response);
-    $utils.assert(agent === webview.useragent);
+    $utils.assert(agent === response, 'agent ['+agent+'] !== response [' + response +']');
+    $utils.assert(agent === webview.useragent, 'agent ['+agent+'] !== webview.useragent [' + webview.useragent +']');
     $utils.ok();
   });
   webview.location = 'http://whatsmyuseragent.com';

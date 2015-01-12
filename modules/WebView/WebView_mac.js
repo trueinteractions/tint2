@@ -420,7 +420,7 @@ TODO:
       var userAgent = this.nativeView('customUserAgent');
       if(!userAgent)
         userAgent = this.nativeView('userAgentForURL', this.nativeView('mainFrameURL'))
-      return userAgent;
+      return userAgent.toString();
     },
     function(e) { this.nativeView('setCustomUserAgent',$(e)); }
   );
