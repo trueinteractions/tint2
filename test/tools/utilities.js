@@ -35,8 +35,6 @@ if(ismac) {
     fs.writeSync(1, e);
   }
   exit = function(code) {
-    if(debug) fs.writeSync(1, 'process.exit'); // fix for appveyor
-    if(debug) fs.writeSync(2, 'code '+code);  // fix for appveyor
     process.exit(code);
   }
 }
