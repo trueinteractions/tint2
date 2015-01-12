@@ -526,7 +526,7 @@ module.exports = (function() {
       previousConstraint('setConstant', layoutObject.constant);
     }
     return previousConstraint;
-  }
+  };
 
   Control.prototype.removeLayoutConstraint = function(obj) {
     this.private.parent.nativeView('removeConstraint',obj);

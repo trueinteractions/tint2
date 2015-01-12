@@ -1,6 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.dotnet;
   var Screens = require('Screens');
+  var utils = require('Utilities');
   var $w32 = process.bridge.win32;
 
   function System() {}
@@ -115,18 +116,13 @@ module.exports = (function() {
     return keys[keyString];
   }
 
-  function wpfDeviceToLogicalPx(w,p) {
-    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
-    return t.Transform(p);
-  }
-
   function getBoundsOnScreenOfWPFItem(control) {
     var target = $.System.Windows.Window.GetWindow(control);
     if(target === null) {
       return null;
     }
     var bounds = control.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(control));
-    var p = wpfDeviceToLogicalPx(target,control.PointToScreen(new $.System.Windows.Point(0,0)));
+    var p = utils.wpfDeviceToLogicalPx(target,control.PointToScreen(new $.System.Windows.Point(0,0)));
     return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
   }
 

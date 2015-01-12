@@ -9,11 +9,6 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var utils = require('Utilities');
 
-  function wpfDeviceToLogicalPx(w,p) {
-    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
-    return t.Transform(p);
-  }
-
   function Control(options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -137,7 +132,7 @@ module.exports = (function() {
         return null;
       }
       var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      var p = utils.wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
    }
   });
@@ -152,7 +147,7 @@ module.exports = (function() {
         return null;
       }
       var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      var p = utils.wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X - target.Left), y:Math.round(p.Y - target.Top), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
   });
@@ -265,7 +260,7 @@ module.exports = (function() {
       target.ChangeConstant(previousConstraint, layoutObject.constant);
     }
     return previousConstraint;
-  }
+  };
 
   Control.prototype.removeLayoutConstraint = function(n) {
     this.private.parent.nativeView.RemoveLayoutConstraint(n);

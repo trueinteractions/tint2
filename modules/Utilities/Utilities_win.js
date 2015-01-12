@@ -3,6 +3,12 @@ module.exports = (function() {
   var $$ = process.bridge.win32;
   var baseUtilities = require('Utilities_base');
 
+
+  function wpfDeviceToLogicalPx(w,p) {
+    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
+    return t.Transform(p);
+  }
+
   function getImageFromString(e) {
     var imageRef = null;
     switch(e) {
@@ -263,6 +269,7 @@ module.exports = (function() {
   baseUtilities.makeImage = makeImage;
   baseUtilities.makeWinFormsIcon = makeWinFormsIcon;
   baseUtilities.animateWPFProperty = animateWPFProperty;
+  baseUtilities.wpfDeviceToLogicalPx = wpfDeviceToLogicalPx;
 
   return baseUtilities;
 })();
