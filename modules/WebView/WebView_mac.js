@@ -322,12 +322,10 @@ module.exports = (function() {
     return this.nativeView('stringByEvaluatingJavaScriptFromString',$(e.toString()))('UTF8String').toString();
   }
 
-
 /*
-  -- if a specific property is allowed in js?
+If a specific property is allowed in js?
 + (BOOL)isKeyExcludedFromWebScript:(const char *)property {}
-  -- converts the selector to the JS name.
-
+converts the selector to the JS name.
 
 TODO:
   Object.defineProperty(WebView.prototype, 'defaultFontSize') //setDefaultFontSize
@@ -346,6 +344,7 @@ TODO:
   WebFrames!
   https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/DisplayWebContent/Concepts/WebKitDesign.html#//apple_ref/doc/uid/20002024-114390
 */
+
   /**
    * @member icon
    * @type {string}
@@ -360,37 +359,6 @@ TODO:
       return null;
     }
   );
-/*
-  Object.defineProperty(WebView.prototype, 'allowAnimatedImages', {
-    get:function() { return this.private.preferences('allowsAnimatedImages') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setAllowsAnimatedImages', e ? $.YES : $.NO); }
-  });
-
-  Object.defineProperty(WebView.prototype, 'allowAnimatedImagesToLoop', {
-    get:function() { return this.private.preferences('allowsAnimatedImageLooping') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setAllowsAnimatedImageLooping', e ? $.YES : $.NO); }
-  });
-
-  Object.defineProperty(WebView.prototype, 'allowJava', {
-    get:function() { return this.private.preferences('isJavaEnabled') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setJavaEnabled', e ? $.YES : $.NO); }
-  });
-
-  Object.defineProperty(WebView.prototype, 'allowJavascript', {
-    get:function() { return this.private.preferences('isJavaScriptEnabled') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setJavaScriptEnabled', e ? $.YES : $.NO); }
-  });
-
-  Object.defineProperty(WebView.prototype, 'allowPlugins', {
-    get:function() { return this.private.preferences('arePlugInsEnabled') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setPlugInsEnabled', e ? $.YES : $.NO); }
-  });
-
-  Object.defineProperty(WebView.prototype, 'privateBrowsing', {
-    get:function() { return this.private.preferences('privateBrowsingEnabled') == $.YES ? true : false; },
-    set:function(e) { this.private.preferences('setPrivateBrowsingEnabled', (e ? $.YES : $.NO)); }
-  });
-*/
 
   /**
    * @member progress

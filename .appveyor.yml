@@ -1,0 +1,9 @@
+version: 1.0.{build}
+os: Unstable
+build_script:
+- config.bat x86
+- build.bat x86
+- cd test
+- run.bat
+test: off
+deploy: off

@@ -598,7 +598,7 @@ win32.kernel32.FILE_ATTRIBUTE_NORMAL = 0x80;
 win32.kernel32.FILE_ATTRIBUTE_SYSTEM = 0x4;
 
 win32.urlmon = new ffi.Library('urlmon.dll', {
-  UrlMkSetSessionOption: [ HRESULT, [DWORD, LPVOID, DWORD, DWORD] ]
+  UrlMkSetSessionOption: [ HRESULT, [DWORD, "string", DWORD, DWORD] ]
 });
 win32.urlmon.INTERNET_OPTION_PROXY = 38;
 win32.urlmon.INTERNET_OPTION_REFRESH = 37;
