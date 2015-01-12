@@ -49,10 +49,10 @@ module.exports = (function() {
       if(firstLoad) {
         this.private.progress = 0.1;
         // establish the activex instance, store a ref for later.
-        this.private.comObject = this.native._axIWebBrowser2;
         // Use the activeX object to silent error messages.
-        this.private.comObject.GetType().InvokeMember("Silent", 
-          $.System.Reflection.BindingFlags.SetProperty, null, this.private.comObject, [ true ], null, null, null);
+        this.private.comObject = this.native._axIWebBrowser2;
+        this.private.comObject.GetType().InvokeMember("Silent", $.System.Reflection.BindingFlags.SetProperty, 
+                                                                null, this.private.comObject, [ true ], null, null, null);
         firstLoad = false;
       } else {
         this.private.progress = -1;
@@ -70,7 +70,8 @@ module.exports = (function() {
 
     // If we don't have a document loaded IE will throw an error if anything
     // other than a location is set, so we'll set an intiial location to prevent this.
-    this.nativeView.Navigate(new $.System.Uri("http://127.0.0.1:" + application.private.appSchemaPort + "/this-is-a-blank-page-for-ie-fix.html"));
+    this.nativeView.Navigate(new $.System.Uri("http://127.0.0.1:" + 
+      application.private.appSchemaPort + "/this-is-a-blank-page-for-ie-fix.html"));
   }
 
   WebView.prototype = Object.create(Container.prototype);
@@ -82,8 +83,8 @@ module.exports = (function() {
   WebView.prototype.stop = function() {
     this.private.progress = 0;
     this.private.loading = false;
-    this.private.comObject.GetType().InvokeMember("Stop", 
-      $.System.Reflection.BindingFlags.InvokeMember, null, this.private.comObject, null, null, null, null);
+    this.private.comObject.GetType().InvokeMember("Stop", $.System.Reflection.BindingFlags.InvokeMember, 
+                                                          null, this.private.comObject, null, null, null, null);
     this.fireEvent('cancel');
   }
 
@@ -103,13 +104,12 @@ module.exports = (function() {
 
   util.def(WebView.prototype, 'icon',
     function() {
-      var exeCmd = "(function(){\n"+
-        "var favicon = undefined;\n"+
-        "var nodeList = document.getElementsByTagName('link');\n"+
-        "for (var i = 0; nodeList && (i < nodeList.length); i++)\n"+
-        "  if((nodeList[i].getAttribute('rel') == 'icon')||(nodeList[i].getAttribute('rel') == 'shortcut icon'))\n"+
-        "      favicon = nodeList[i].getAttribute('href');\n"+
-        "if(favicon && favicon[0]==='/') favicon = location.protocol + favicon;\n"+
+      var exeCmd = "(function(){\n" +
+        "var favicon = undefined, nodeList = document.getElementsByTagName('link');\n" +
+        "for (var i = 0; nodeList && (i < nodeList.length); i++)\n" +
+        "  if((nodeList[i].getAttribute('rel') == 'icon')||(nodeList[i].getAttribute('rel') == 'shortcut icon'))\n" +
+        "      favicon = nodeList[i].getAttribute('href');\n" +
+        "if(favicon && favicon[0]==='/') favicon = location.protocol + favicon;\n" +
         "return favicon; })();";
       return this.execute(exeCmd);
     }
@@ -142,6 +142,7 @@ module.exports = (function() {
     function(e) { 
       if(e === false) {
         this.stop();
+        this.private.loading = false;
       } 
     }
   );
