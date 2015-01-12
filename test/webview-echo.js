@@ -15,7 +15,6 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ var $ = process.bridge.objc;
   var themessage = "Hello "+Math.random();
   var mainWindow = new Window();
   mainWindow.visible = true;
