@@ -183,16 +183,17 @@ module.exports = (function() {
 
   function makeWinFormsIcon(e) {
     var img = null;
-    if(!e || typeof(e) !== 'string') return null;
-    else if(e.indexOf(':') > -1) {
+    if(!e || typeof(e) !== 'string') {
+      return null;
+    } else if(e.indexOf(':') > -1) {
       var url = new $.System.Uri(e);
       var wr = $.System.Net.WebRequest.Create(url);
-      var strm = wr.GetResponse().GetResponseStream();
-      var bmp = new $.System.Drawing.Bitmap(strm);
+      var strm1 = wr.GetResponse().GetResponseStream();
+      var bmp = new $.System.Drawing.Bitmap(strm1);
       img = $.System.Drawing.Icon.FromHandle(bmp.GetHicon());
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
-      var strm = $.System.IO.File.OpenRead(e);
-      img = new $.System.Drawing.Icon(strm);
+      var strm2 = $.System.IO.File.OpenRead(e);
+      img = new $.System.Drawing.Icon(strm2);
     } else {
       var imageRef = getImageFromString(e);
       if(imageRef==null)
