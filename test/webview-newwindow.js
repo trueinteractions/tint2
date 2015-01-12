@@ -15,6 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  $utils.ok();
   var mainWindow = new Window();
   mainWindow.visible = true;
   var webview = new WebView();
