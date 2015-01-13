@@ -38,7 +38,9 @@ module.exports = (function() {
     set:function(e) {
       this.private.currentImage = e;
       var img = utilities.makeNSImage(e);
-      if(!img) console.log('Error, image was invalud: ', e);
+      if(!img) {
+        console.log('Error, image was invalud: ', e);
+      }
       this.nativeView('setImage',img);
       img('release');
     }
@@ -81,16 +83,26 @@ module.exports = (function() {
   Object.defineProperty(ImageWell.prototype, 'scale', {
     get:function() { 
       var scaling = this.nativeView('imageScaling');
-      if(scaling == $.NSImageScaleProportionallyDown) return "constrain";
-      else if (scaling == $.NSImageScaleAxesIndependently) return "fit";
-      else if (scaling == $.NSImageScaleProportionallyUpOrDown) return "contain";
-      else return "none";
+      if(scaling === $.NSImageScaleProportionallyDown) {
+        return "constrain";
+      } else if (scaling === $.NSImageScaleAxesIndependently) {
+        return "fit";
+      } else if (scaling === $.NSImageScaleProportionallyUpOrDown) {
+        return "contain";
+      } else {
+        return "none";
+      }
     },
     set:function(e) {
-      if(e == "constrain") this.nativeView('setImageScaling', $.NSImageScaleProportionallyDown);
-      else if(e == "fit") this.nativeView('setImageScaling', $.NSImageScaleAxesIndependently);
-      else if(e == "contain") this.nativeView('setImageScaling', $.NSImageScaleProportionallyUpOrDown);
-      else if(e == "none") this.nativeView('setImageScaling', $.NSImageScaleNone);
+      if(e === "constrain") {
+        this.nativeView('setImageScaling', $.NSImageScaleProportionallyDown);
+      } else if(e === "fit") {
+        this.nativeView('setImageScaling', $.NSImageScaleAxesIndependently);
+      } else if(e === "contain") {
+        this.nativeView('setImageScaling', $.NSImageScaleProportionallyUpOrDown);
+      } else if(e === "none") {
+        this.nativeView('setImageScaling', $.NSImageScaleNone);
+      }
     }
   });
   /*

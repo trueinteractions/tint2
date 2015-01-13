@@ -229,7 +229,7 @@ module.exports = (function() {
           parent.private.spaceX/2, parent.private.spaceY/2,
           parent.private.spaceX/2, parent.private.spaceY/2);
         parent.nativeView.InternalChildren.Add(container);
-        if(row && row.index % 2 == 1 && parent.private.alternatingColors) {
+        if(row && row.index % 2 === 1 && parent.private.alternatingColors) {
           container.BorderBrush = oddColor;
           container.Background = oddColor;
         } else if (row && parent.private.alternatingColors) {
@@ -308,7 +308,6 @@ module.exports = (function() {
             e.selected = (e.row === this.row);
           }
         }.bind(this));
-
         parent.fireEvent('selected');
       }
     }.bind(this));
@@ -442,7 +441,7 @@ module.exports = (function() {
   }
 
   Table.prototype.setValueAt = function(columnId,rowIndex,value) {
-    if(typeof(value) == "string" || typeof(value) == "number") {
+    if(typeof(value) === "string" || typeof(value) === "number") {
       var v = value;
       value = new TextInput();
       value.value = v.toString();
@@ -470,12 +469,12 @@ module.exports = (function() {
 
   Object.defineProperty(Table.prototype, 'multipleSelection', {
     get:function() { return this.private.multiple; },
-    set:function(e) { this.private.multiple = e ? true : false; }
+    set:function(e) { this.private.multiple = (e ? true : false); }
   });
   
   Object.defineProperty(Table.prototype, 'emptySelection', {
     get:function() { return this.private.allowEmptySelection; },
-    set:function(e) { this.private.allowEmptySelection = e ? true : false; }
+    set:function(e) { this.private.allowEmptySelection = (e ? true : false); }
   });
 
   // TODO: Implement me.  User interface to move columns.

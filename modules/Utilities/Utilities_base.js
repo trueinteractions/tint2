@@ -12,7 +12,7 @@ module.exports = (function() {
     // Layout Common Elements
 
     function parseUnits(e) {
-        if(typeof e == 'number') return e;
+        if(typeof e === 'number') return e;
         if(e.indexOf('%') > -1) {
           e = e.replace('%','').trim();
           e = parseInt(e);
@@ -51,8 +51,9 @@ module.exports = (function() {
           changeConstraint = p.constraints[propertyName];
         }
 
-        if(value === null)
+        if(value === null) {
           return;
+        }
 
         this.addEventListener('parent-attached', function() {
           this[propertyName] = p.user[propertyName];
@@ -62,11 +63,13 @@ module.exports = (function() {
           this.removeLayoutConstraint(p.constraints[propertyName]);
         }.bind(this));
 
-        if(!p.parent) return;
+        if(!p.parent) {
+            return;
+        }
 
         var layoutObject = {priority:'required', firstItem:this, firstAttribute:propertyName, relationship:'=', secondItem:p.parent};
 
-        if ((typeof value == "string" || value instanceof String) 
+        if ((typeof value === "string" || value instanceof String) 
             && value.indexOf('%') > -1) 
         {
           var parsedValue = parseUnits(value);
@@ -74,8 +77,8 @@ module.exports = (function() {
           layoutObject.constant = 0.0;
           layoutObject.secondAttribute = percentName;
         } 
-        else if (typeof value == "number" || value instanceof Number || 
-                typeof value == "string" || value instanceof String) 
+        else if (typeof value === "number" || value instanceof Number || 
+                typeof value === "string" || value instanceof String) 
         {
           var parsedValue = parseUnits(value);
           layoutObject.multiplier = 1.0;
@@ -85,21 +88,21 @@ module.exports = (function() {
           layoutObject.secondItem = value;
           layoutObject.multiplier = 1.0;
           layoutObject.constant = 0.0;
-          if((p.parent == value || this == value.private.parent) || 
-                propertyName == "middle" || propertyName == "center") 
+          if((p.parent === value || this === value.private.parent) || 
+                propertyName === "middle" || propertyName === "center") 
           {
             layoutObject.firstAttribute = layoutObject.secondAttribute = propertyName;
           }
-          else if (propertyName == "left") {
+          else if (propertyName === "left") {
             layoutObject.firstAttribute = "left";
             layoutObject.secondAttribute = "right";
-          } else if (propertyName == "right") {
+          } else if (propertyName === "right") {
             layoutObject.firstAttribute = "right";
             layoutObject.secondAttribute = "left";
-          } else if (propertyName == "top") {
+          } else if (propertyName === "top") {
             layoutObject.firstAttribute = "top";
             layoutObject.secondAttribute = "bottom";
-          } else if (propertyName == "bottom") {
+          } else if (propertyName === "bottom") {
             layoutObject.firstAttribute = "bottom";
             layoutObject.secondAttribute = "top";
           }

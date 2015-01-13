@@ -239,17 +239,28 @@ module.exports = (function() {
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() { 
       var rowSize = this.nativeView('rowSizeStyle');
-      if(rowSize === $.NSTableViewRowSizeStyleDefault) return "default";
-      else if(rowSize === $.NSTableViewRowSizeStyleSmall) return "small";
-      else if(rowSize === $.NSTableViewRowSizeStyleMedium) return "medium";
-      else if(rowSize === $.NSTableViewRowSizeStyleLarge) return "large";
-      else return "unknown";
+      if(rowSize === $.NSTableViewRowSizeStyleDefault) {
+        return "default";
+      } else if(rowSize === $.NSTableViewRowSizeStyleSmall) {
+        return "small";
+      } else if(rowSize === $.NSTableViewRowSizeStyleMedium) {
+        return "medium";
+      } else if(rowSize === $.NSTableViewRowSizeStyleLarge) {
+        return "large";
+      } else {
+        return "unknown";
+      }
     },
     set:function(e) { 
-      if(e === "default") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleDefault);
-      else if(e === "small") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleSmall);
-      else if(e === "medium") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
-      else if(e === "large") this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
+      if(e === "default") { 
+        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleDefault);
+      } else if(e === "small") {
+        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleSmall);
+      } else if(e === "medium") {
+        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
+      } else if(e === "large") { 
+        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
+      }
     }
   });
 
