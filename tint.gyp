@@ -167,6 +167,7 @@
       'modules/Bridge/library.js',
       'modules/Bridge/type.js',
       'modules/Bridge/types.js',
+      'modules/Color/Color_base.js',
       'modules/Utilities/Utilities_base.js',
     ],
   },
