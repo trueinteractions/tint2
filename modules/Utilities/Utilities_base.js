@@ -135,7 +135,6 @@ module.exports = (function() {
     negate:negate,
     inverse:inverse,
     def:defineProperty,
-    parseUnits:parseUnits,
-    parseColor:parseColor
+    parseUnits:parseUnits
   };
 })();
