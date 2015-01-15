@@ -3,7 +3,7 @@ module.exports = (function() {
     return global.__TINT.Color;
   }
   var $ = process.bridge.dotnet;
-  var util = require('Utilities');
+  var util = require('Color_base');
 
   function Color(type) {
     if(type instanceof Color) { 

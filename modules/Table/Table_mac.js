@@ -406,7 +406,7 @@ module.exports = (function() {
    *              The alternating colors default to system values.
    */
   Object.defineProperty(Table.prototype, 'alternatingColors', {
-    get:function() { return this.nativeView('usesAlternatingRowBackgroundColors') == $.YES ? true : false; },
+    get:function() { return this.nativeView('usesAlternatingRowBackgroundColors') === $.YES ? true : false; },
     set:function(e) { 
       this.nativeView('setUsesAlternatingRowBackgroundColors',e ? $.YES : $.NO);
       this.nativeView('setNeedsDisplay', $.YES);

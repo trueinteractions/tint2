@@ -162,15 +162,22 @@ module.exports = (function() {
    */
   Object.defineProperty(TextInput.prototype, 'alignment', {
     get:function() {
-      if (this.nativeView('alignment') == 0) return "left";
-      else if (this.nativeView('alignment') == 1) return "right";
-      else if (this.nativeView('alignment') == 2) return "center";
-      else return "unknown";
+      if (this.nativeView('alignment') === 0) { 
+        return "left";
+      } else if (this.nativeView('alignment') === 1) {
+        return "right";
+      } else if (this.nativeView('alignment') === 2) {
+        return "center";
+      } else return "unknown";
     },
     set:function(e) {
-      if(e == 'left') this.nativeView('setAlignment', 0);
-      else if (e == 'right') this.nativeView('setAlignment', 1);
-      else if (e == 'center') this.nativeView('setAlignment', 2);
+      if(e === 'left') {
+        this.nativeView('setAlignment', 0);
+      } else if (e === 'right') {
+        this.nativeView('setAlignment', 1);
+      } else if (e === 'center') {
+        this.nativeView('setAlignment', 2);
+      }
     }
   });
 

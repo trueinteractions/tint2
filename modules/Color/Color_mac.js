@@ -1,6 +1,6 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
-  var utilities = require('Utilities');
+  var util = require('Color_base');
 
   /**
    * @class Color

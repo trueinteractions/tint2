@@ -455,15 +455,24 @@ module.exports = (function() {
 
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() {
-      if(this.rowHeight === 22) return "small";
-      else if (this.rowHeight === 24) return "medium";
-      else if (this.rowHeight === 36) return "large";
-      else return "unknown";
+      if(this.rowHeight === 22) {
+        return "small";
+      } else if (this.rowHeight === 24) {
+        return "medium";
+      } else if (this.rowHeight === 36) {
+        return "large";
+      } else {
+        return "unknown";
+      }
     },
     set:function(e) {
-      if(e === "small") this.rowHeight = 22;
-      else if (e === "medium") this.rowHeight = 24;
-      else if (e === "large") this.rowHeight = 36;
+      if(e === "small") {
+        this.rowHeight = 22;
+      } else if (e === "medium") {
+        this.rowHeight = 24;
+      } else if (e === "large") {
+        this.rowHeight = 36;
+      }
     }
   });
 
