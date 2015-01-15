@@ -125,7 +125,7 @@ module.exports = (function() {
   function identity(v) { return v; }
   function inverse(v) { return (1-v); }
   function negate(v) { return -1*v; }
-  function capitalize(s) { return s[0].toUpperCase() + s.toLowerCase()substr(1); }
+  function capitalize(s) { return s[0].toUpperCase() + s.toLowerCase().substr(1); }
 
   // Exports
   return {
