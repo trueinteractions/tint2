@@ -1,6 +1,6 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
-  var util = require('Color_base');
+  var TinyColor = require('Color_base');
 
   /**
    * @class Color
@@ -22,7 +22,7 @@ module.exports = (function() {
     } else if(type.type === '@') {
       this.native = type;
     } else {
-      var rgba = util.parseColor(type);
+      var rgba = (new TinyColor(type)).toRgb();
       if(rgba.r > 1) rgba.r = rgba.r / 255;
       if(rgba.g > 1) rgba.g = rgba.g / 255;
       if(rgba.b > 1) rgba.b = rgba.b / 255;
