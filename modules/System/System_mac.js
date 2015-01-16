@@ -297,9 +297,10 @@ module.exports = (function() {
    */
   System.takeSnapshotOfCurrentWindow = function() {
     var currentWindow = $.NSApplication('sharedApplication')('mainWindow');
-    if(currentWindow == null) return;// throw new Error('There is no current window.');
-    var windowNumber = currentWindow('windowNumber');
-    return takeSnapshotOfWindowNumber(windowNumber);
+    if(currentWindow) {
+      var windowNumber = currentWindow('windowNumber');
+      return takeSnapshotOfWindowNumber(windowNumber);
+    }
   }
   /**
    * @method takeSnapshotOfWindow

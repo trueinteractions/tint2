@@ -99,13 +99,14 @@ module.exports = (function() {
     set:function(e) {
       this.private.key = e;
       var mods = this.modifiers;
-      if(e == "" || e == null || mods == "" || mods == null) {
+      if(e === "" || e === null || mods === "" || mods === null) {
         this.native.InputGestureText = "";
         return;
       }
       mods = this.modifiers.split(',');
-      for(var i=0; i < mods.length; i++)
+      for(var i=0; i < mods.length; i++) {
         mods[i] = utilities.capitalize(mods[i]);
+      }
       mods = mods.join('+');
       this.native.InputGestureText = mods + '+' + e.toString().toUpperCase();
     }
@@ -116,13 +117,14 @@ module.exports = (function() {
     set:function(e) { 
       this.private.modifiers = e;
       var key = this.key;
-      if(e == "" || e == null || key == null || key == "") {
+      if(e === "" || e === null || key === null || key === "") {
         this.native.InputGestureText = "";
         return;
       }
       e = e.split(',');
-      for(var i=0; i < e.length; i++)
+      for(var i=0; i < e.length; i++) {
         e[i] = utilities.capitalize(e[i]);
+      }
       e=e.join('+');
       e = e + "+" + key.toUpperCase();
       this.native.InputGestureText = e;
@@ -137,8 +139,9 @@ module.exports = (function() {
   Object.defineProperty(MenuItem.prototype, 'custom', {
     get:function() { return this.private.custom; },
     set:function(e) {
-      if(this.private.custom != null)
+      if(this.private.custom !== null) {
         this.native.Items.Remove(this.private.custom.native);
+      }
       this.private.custom = e;
       this.native.Items.Add(e.native);
     }

@@ -31,7 +31,7 @@ module.exports = (function() {
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSPanel;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
-    options.styleMask = options.styleMask || ((Panel.initialStyle == "utility") ? utilityStyle : inspectorStyle);
+    options.styleMask = options.styleMask || ((Panel.initialStyle === "utility") ? utilityStyle : inspectorStyle);
     options.width = options.width || 200;
     options.height = options.height || 250;
     Window.call(this, options);

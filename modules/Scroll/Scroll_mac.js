@@ -44,7 +44,7 @@ module.exports = (function() {
     this.native('setDocumentView', control.nativeView);
     control.fireEvent('parent-attached', [this]);
     this.fireEvent('child-attached', [control]);
-  }
+  };
 
   /**
    * @member border

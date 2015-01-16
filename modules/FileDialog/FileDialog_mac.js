@@ -16,7 +16,7 @@ module.exports = (function() {
     * @description Creates a new FileDialog window that is not shown by default.
     */
   function FileDialog(type) {
-    var $dialog = (type == "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
+    var $dialog = (type === "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
     var allowedFileTypes = null, events = {};
 
     function fireEvent(event, args) {
@@ -137,12 +137,17 @@ module.exports = (function() {
      */
     Object.defineProperty(this, "allowMultiple", {
       get:function() {
-        if(type == "save") return false;
+        if(type === "save") {
+          return false;
+        }
         return $dialog('allowsMultipleSelection') ? true : false;
       },
       set:function(e) {
-        if(type == "save" && e) throw new Error('Save dialogs cannot ask for multiple file paths.');
-        else if(type == "save" && !e) return;
+        if(type === "save" && e) {
+          throw new Error('Save dialogs cannot ask for multiple file paths.');
+        } else if(type === "save" && !e) {
+          return;
+        }
         $dialog('setAllowsMultipleSelection',e); 
       }
     });
@@ -155,11 +160,15 @@ module.exports = (function() {
      */
     Object.defineProperty(this, "allowDirectories", {
       get:function() {
-        if(type == "save") return false;
+        if(type === "save") {
+          return false;
+        }
         return $dialog('canChooseDirectories') ? true : false;
       },
       set:function(e) {
-        if(type == "save") return;
+        if(type === "save") {
+          return;
+        }
         $dialog('setCanChooseDirectories', e ? true : false);
       }
     });
@@ -172,15 +181,17 @@ module.exports = (function() {
      */
     Object.defineProperty(this, "selection", {
       get:function() {
-        if(type == "open") {
+        if(type === "open") {
           var urls = $dialog('URLs');
           var count = urls('count');
           var result = [];
-          for(var i=0; i < count; i++) 
+          for(var i=0; i < count; i++) {
             result.push(urls('objectAtIndex',i)('absoluteString'));
+          }
           return result;
-        } else
+        } else {
           return $dialog('URL')('absoluteString');
+        }
       }
     });
 
@@ -202,14 +213,20 @@ module.exports = (function() {
       if(w) {
         w = w.native ? w.native : w;
         var comp = $(function(self,e) {
-          if(e == $.NSFileHandlingPanelOKButton) fireEvent('select');
-          else fireEvent('cancel');
+          if(e === $.NSFileHandlingPanelOKButton) {
+            fireEvent('select');
+          } else {
+            fireEvent('cancel');
+          }
         },[$.void,['?',$.long]]);
         $dialog('beginSheetModalForWindow',w,'completionHandler',comp);
       } else {
         var e = $dialog('runModal');
-        if(e == $.NSFileHandlingPanelOKButton) fireEvent('select');
-        else fireEvent('cancel');
+        if(e === $.NSFileHandlingPanelOKButton) {
+          fireEvent('select');
+        } else {
+          fireEvent('cancel');
+        }
       }
     }
 

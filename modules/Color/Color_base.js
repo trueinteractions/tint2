@@ -57,7 +57,7 @@ function TinyColor(color, opts) {
     }
 
     this._ok = rgb.ok;
-};
+}
 
 TinyColor.prototype = {
     isDark: function() { return this.getBrightness() < 128; },
@@ -152,8 +152,8 @@ TinyColor.prototype = {
 
         var formattedString = false;
         var hasAlpha = this._a < 1 && this._a >= 0;
-        var needsAlphaFormat = !formatSet && hasAlpha 
-          && (format === "hex" || format === "hex6" || format === "hex3" || format === "name");
+        var needsAlphaFormat = !formatSet && hasAlpha && 
+          (format === "hex" || format === "hex6" || format === "hex3" || format === "name");
 
         if (needsAlphaFormat) {
             // Special case for "transparent", all other non-alpha formats
@@ -252,15 +252,13 @@ function inputToRGB(color) {
             rgb = rgbToRgb(color.r, color.g, color.b);
             ok = true;
             format = String(color.r).substr(-1) === "%" ? "prgb" : "rgb";
-        }
-        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
+        } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
             color.s = convertToPercentage(color.s);
             color.v = convertToPercentage(color.v);
             rgb = hsvToRgb(color.h, color.s, color.v);
             ok = true;
             format = "hsv";
-        }
-        else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("l")) {
+        } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("l")) {
             color.s = convertToPercentage(color.s);
             color.l = convertToPercentage(color.l);
             rgb = hslToRgb(color.h, color.s, color.l);
@@ -442,9 +440,9 @@ function rgbToHex(r, g, b, allow3Char) {
     ];
 
     // Return a 3 character hex if possible
-    if (allow3Char && hex[0].charAt(0) === hex[0].charAt(1) 
-        && hex[1].charAt(0) === hex[1].charAt(1) 
-        && hex[2].charAt(0) === hex[2].charAt(1)) 
+    if (allow3Char && hex[0].charAt(0) === hex[0].charAt(1) && 
+      hex[1].charAt(0) === hex[1].charAt(1) && 
+      hex[2].charAt(0) === hex[2].charAt(1)) 
     {
         return hex[0].charAt(0) + hex[1].charAt(0) + hex[2].charAt(0);
     }
@@ -931,17 +929,17 @@ function parseIntFromHex(val) {
 // Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
 // <http://stackoverflow.com/questions/7422072/javascript-how-to-detect-number-as-a-decimal-including-1-0>
 function isOnePointZero(n) {
-    return typeof n === "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
+    return typeof n === "string" && n.indexOf('.') !== -1 && parseFloat(n) === 1;
 }
 
 // Check to see if string passed in is a percentage
 function isPercentage(n) {
-    return typeof n === "string" && n.indexOf('%') != -1;
+    return typeof n === "string" && n.indexOf('%') !== -1;
 }
 
 // Force a hex value to have 2 characters
 function pad2(c) {
-    return c.length == 1 ? '0' + c : '' + c;
+    return c.length === 1 ? '0' + c : '' + c;
 }
 
 // Replace a decimal with it's percentage value
@@ -1059,17 +1057,6 @@ function stringInputToObject(color) {
     return false;
 }
 
-// Node: Export function
-if (typeof module !== "undefined" && module.exports) {
-    module.exports = TinyColor;
-}
-// AMD/requirejs: Define the module
-else if (typeof define === 'function' && define.amd) {
-    define(function () {return TinyColor;});
-}
-// Browser: Expose to window
-else {
-    window.TinyColor = TinyColor;
-}
+module.exports = TinyColor;
 
 })();
