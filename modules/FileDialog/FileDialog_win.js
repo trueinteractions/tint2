@@ -8,7 +8,7 @@ module.exports = (function() {
   function FileDialog(type) {
     var $dialog;
 
-    if(type == "save") { 
+    if(type === "save") { 
       $dialog = new $.Microsoft.Win32.SaveFileDialog();
     } else {
       $dialog = new $.Microsoft.Win32.OpenFileDialog();

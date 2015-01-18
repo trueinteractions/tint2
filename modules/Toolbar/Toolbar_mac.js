@@ -89,9 +89,9 @@ module.exports = (function() {
           child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
 
           var intrinsicSize = child.native('intrinsicContentSize');
-          if(intrinsicSize.width == -1 && intrinsicSize.height > 0)
+          if(intrinsicSize.width === -1 && intrinsicSize.height > 0)
             toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
-          else if(intrinsicSize.height == -1 && intrinsicSize.width > 0)
+          else if(intrinsicSize.height === -1 && intrinsicSize.width > 0)
             toolbarItem('setMaxSize', $.NSMakeSize(intrinsicSize.height,1000));
           else
             toolbarItem('setMaxSize', intrinsicSize);
@@ -120,11 +120,11 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'state', {
       get:function() { 
-        if($toolbar('displayMode') == $.NSToolbarDisplayModeIconAndLabel) 
+        if($toolbar('displayMode') === $.NSToolbarDisplayModeIconAndLabel) 
           return "iconandlabel";
-        else if ($toolbar('displayMode') == $.NSToolbarDisplayModeIconOnly)
+        else if ($toolbar('displayMode') === $.NSToolbarDisplayModeIconOnly)
           return "icon";
-        else if ($toolbar('displayMode') == $.NSToolbarDisplayModeLabelOnly)
+        else if ($toolbar('displayMode') === $.NSToolbarDisplayModeLabelOnly)
           return "label";
         else
           return "default";
@@ -156,9 +156,9 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'size', {
       get:function() { 
-        if($toolbar('sizeMode') == $.NSToolbarSizeModeRegular) 
+        if($toolbar('sizeMode') === $.NSToolbarSizeModeRegular) 
           return "regular";
-        else if ($toolbar('sizeMode') == $.NSToolbarSizeModeSmall)
+        else if ($toolbar('sizeMode') === $.NSToolbarSizeModeSmall)
           return "small";
         else 
           return "default";

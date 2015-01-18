@@ -22,7 +22,7 @@ module.exports = (function() {
     }));
     TintWebKitResponseDelegate.addClassMethod('isSelectorExcludedFromWebScript:','B@::', 
       util.errorwrap(function(self,_cmd,sel) { 
-        if(sel == "postMessage") return $.NO;
+        if(sel === "postMessage") return $.NO;
         else return $.YES
     }));
     /**

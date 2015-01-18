@@ -16,7 +16,7 @@ module.exports = (function() {
     , ffi = require('ffi')
     , types = require('types')
     , struct = require('struct')
-    , uintptr_t = ref.sizeof.pointer == 8 ? 'uint64' : 'uint32' // 'uintptr_t' isn't natively supported by node-ffi
+    , uintptr_t = ref.sizeof.pointer === 8 ? 'uint64' : 'uint32' // 'uintptr_t' isn't natively supported by node-ffi
     , libc = new ffi.Library('libc', {
         malloc: [ 'void*', [ 'size_t' ] ]
       , free: [ 'void', [ 'void*' ] ]
@@ -179,13 +179,13 @@ module.exports = (function() {
    */
   function wrapValue (val, type) {
     var basetype = type.type ? type.type : type;
-    if(basetype == '@' || basetype == '#') return createObject(val, basetype);
-    else if (basetype == '@?') return createObject(createBlock(val, '@'));
-    else if (basetype == '^?') return createUnwrapperFunction(val, type);
-    else if (basetype == ':') return objc.sel_getName(val);
-    else if (basetype == 'B') return val ? true : false;
-    else if (basetype == 'c' && val === 1) return true;
-    else if (basetype == 'c' && val === 0) return false;
+    if(basetype === '@' || basetype === '#') return createObject(val, basetype);
+    else if (basetype === '@?') return createObject(createBlock(val, '@'));
+    else if (basetype === '^?') return createUnwrapperFunction(val, type);
+    else if (basetype === ':') return objc.sel_getName(val);
+    else if (basetype === 'B') return val ? true : false;
+    else if (basetype === 'c' && val === 1) return true;
+    else if (basetype === 'c' && val === 0) return false;
     else return val;
   }
 
@@ -204,13 +204,13 @@ module.exports = (function() {
    */
   function unwrapValue (val, type) {
     var basetype = type.type ? type.type : type;
-    if (basetype == '@?') return createBlock(val, basetype);
-    else if (basetype == '^?') return createWrapperPointer(val, type);
-    else if (basetype == '@' || basetype == '#') {
+    if (basetype === '@?') return createBlock(val, basetype);
+    else if (basetype === '^?') return createWrapperPointer(val, type);
+    else if (basetype === '@' || basetype === '#') {
       if(Buffer.isBuffer(val)) return val;
       return val ? val.pointer : null;
     }
-    else if (basetype == ':') return selCache[val] || (selCache[val] = objc.sel_registerName(val));
+    else if (basetype === ':') return selCache[val] || (selCache[val] = objc.sel_registerName(val));
     else if (val === true) return 1;
     else if (val === false) return 0;
     else return val;
@@ -284,9 +284,9 @@ module.exports = (function() {
         for(var i=argTypes.length; i < arguments.length; i++) {
           if(arguments[i].type) newtypes.push(arguments[i].type)
           else if(arguments[i].pointer) newtypes.push('@');
-          else if(typeof arguments[i] == 'function') newtypes.push('@?');
-          else if(typeof arguments[i] == 'string') newtypes.push('r*');
-          else if(typeof arguments[i] == 'number') newtypes.push('d');
+          else if(typeof arguments[i] === 'function') newtypes.push('@?');
+          else if(typeof arguments[i] === 'string') newtypes.push('r*');
+          else if(typeof arguments[i] === 'number') newtypes.push('d');
           else newtypes.push('?');
         }
         return wrapValue(varFunc
@@ -368,13 +368,13 @@ module.exports = (function() {
     var cache = objc.objc_getAssociatedObject(val, objc.objcStorageKey);
     if(!cache.isNull()) return cache.readObject(0);
 
-    var wrappedObj = (type == '@') ? new (require('id'))(val) 
+    var wrappedObj = (type === '@') ? new (require('id'))(val) 
                                    : new (require('class'))(val);
 
     var rtn = function() {  return wrappedObj.msgSend(arguments,false); }
     rtn.__proto__ = wrappedObj;
 
-    if(type == '#') {
+    if(type === '#') {
       var refn = new ref.alloc('Object');
       refn.free = false;
       refn.writeObject(rtn, 0);

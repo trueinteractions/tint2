@@ -39,7 +39,7 @@ module.exports = (function() {
   //});
   // TODO: See above
   //Object.defineProperty(DateWell.prototype, 'border', {
-  //  get:function() { return this.nativeView('isBordered') == $.YES ? true : false; },
+  //  get:function() { return this.nativeView('isBordered') === $.YES ? true : false; },
   //  set:function(e) { this.nativeView('setBordered',e ? $.YES : $.NO); }
   //});
 
@@ -48,19 +48,19 @@ module.exports = (function() {
   Object.defineProperty(DateWell.prototype, 'style', {
     get:function() {
       var nsstyle = this.nativeView('datePickerStyle');
-      if(nsstyle == $.NSTextFieldAndStepperDatePickerStyle) return "step";
-      else if (nsstyle == $.NSClockAndCalendarDatePickerStyle) return "clock";
+      if(nsstyle === $.NSTextFieldAndStepperDatePickerStyle) return "step";
+      else if (nsstyle === $.NSClockAndCalendarDatePickerStyle) return "clock";
       else return "default";
     },
     set:function(e) {
-      if(e == "step") this.nativeView('setDatePickerStyle', $.NSTextFieldAndStepperDatePickerStyle);
-      else if (e == "clock") this.nativeView('setDatePickerStyle', $.NSClockAndCalendarDatePickerStyle);
-      else if (e == "default") this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
+      if(e === "step") this.nativeView('setDatePickerStyle', $.NSTextFieldAndStepperDatePickerStyle);
+      else if (e === "clock") this.nativeView('setDatePickerStyle', $.NSClockAndCalendarDatePickerStyle);
+      else if (e === "default") this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
     }
   });*/
 
   Object.defineProperty(DateWell.prototype, 'range', {
-    get:function() { return this.nativeView.SelectionMode == $.System.Windows.Controls.CalendarSelectionMode.SingleDate ? true : false; },
+    get:function() { return this.nativeView.SelectionMode === $.System.Windows.Controls.CalendarSelectionMode.SingleDate ? true : false; },
     set:function(e) { 
       this.nativeView.SelectionMode =  e ? $.System.Windows.Controls.CalendarSelectionMode.SingleRange : 
         $.System.Windows.Controls.CalendarSelectionMode.SingleDate;

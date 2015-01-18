@@ -29,7 +29,7 @@ module.exports = (function() {
     };
 
     this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) != -1) {
+      if(events[event] && events[event].indexOf(func) !== -1) {
         events[event].splice(events[event].indexOf(func), 1); 
       }
     };
@@ -125,7 +125,7 @@ module.exports = (function() {
       callbacks.push(mouseDownSecond);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
-      label.Content = actionbuttontitle == "" ? "Dismiss" : actionbuttontitle;
+      label.Content = actionbuttontitle === "" ? "Dismiss" : actionbuttontitle;
       label.Width = 40;
 
       btn.Content.InternalChildren.Add(label);

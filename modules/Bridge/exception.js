@@ -23,7 +23,7 @@
  *       err('reason')
  *       // '*** -[__NSArrayM insertObject:atIndex:]: object cannot be nil'
  *
- *       err('reason') == err.message
+ *       err('reason') === err.message
  *       // true
  *
  *       err.stack

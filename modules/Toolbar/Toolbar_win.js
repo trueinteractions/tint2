@@ -21,7 +21,7 @@ module.exports = (function() {
 
     this.appendChild = function(control) {
       var isSpace = false;
-      if(control == 'space') {
+      if(control === 'space') {
         control = new $.System.Windows.Controls.Control();
         control.Width = 12;
         isSpace = true;
@@ -31,7 +31,7 @@ module.exports = (function() {
       else {
         var columnDef = new $.System.Windows.Controls.ColumnDefinition();
         // TODO Figure out a way to get whether its an indeterminate width.
-        if(control.nativeClass == $.System.Windows.Controls.TextBox)
+        if(control.nativeClass === $.System.Windows.Controls.TextBox)
           columnDef.Width = new $.System.Windows.GridLength(1,$.System.Windows.GridUnitType.Star);
         else
           columnDef.Width = new $.System.Windows.GridLength(1,$.System.Windows.GridUnitType.Auto);
@@ -54,7 +54,7 @@ module.exports = (function() {
     }
 
     this.removeChild = function(control) {
-      if(control == 'space') return;
+      if(control === 'space') return;
       this.fireEvent('remove', element);
       if(this.private.children.indexOf(control) != -1) 
         this.private.children.splice(children.indexOf(control),1);

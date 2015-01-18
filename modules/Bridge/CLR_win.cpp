@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <Shellapi.h>
 #include <comdef.h>
+#include <exdisp.h>
 #include "../AutoLayoutPanel.cpp"
 
 #using <System.dll>
@@ -340,99 +341,330 @@ namespace TintInterop {
   };
 }
 
+#define DISPID_BEFORENAVIGATE2              250           // hyperlink clicked on
+#define DISPID_NEWWINDOW2                   251
+#define DISPID_NAVIGATECOMPLETE2            252           // UIActivate new document
+#define DISPID_ONQUIT                       253
+#define DISPID_ONVISIBLE                    254           // sent when the window goes visible/hidden
+#define DISPID_ONTOOLBAR                    255           // sent when the toolbar should be shown/hidden
+#define DISPID_ONMENUBAR                    256           // sent when the menubar should be shown/hidden
+#define DISPID_ONSTATUSBAR                  257           // sent when the statusbar should be shown/hidden
+#define DISPID_ONFULLSCREEN                 258           // sent when kiosk mode should be on/off
+#define DISPID_DOCUMENTCOMPLETE             259           // new document goes ReadyState_Complete
+#define DISPID_ONTHEATERMODE                260           // sent when theater mode should be on/off
+#define DISPID_ONADDRESSBAR                 261           // sent when the address bar should be shown/hidden
+#define DISPID_WINDOWSETRESIZABLE           262           // sent to set the style of the host window frame
+#define DISPID_WINDOWCLOSING                263           // sent before script window.close closes the window 
+#define DISPID_WINDOWSETLEFT                264           // sent when the put_left method is called on the WebOC
+#define DISPID_WINDOWSETTOP                 265           // sent when the put_top method is called on the WebOC
+#define DISPID_WINDOWSETWIDTH               266           // sent when the put_width method is called on the WebOC
+#define DISPID_WINDOWSETHEIGHT              267           // sent when the put_height method is called on the WebOC 
+#define DISPID_CLIENTTOHOSTWINDOW           268           // sent during window.open to request conversion of dimensions
+#define DISPID_SETSECURELOCKICON            269           // sent to suggest the appropriate security icon to show
+#define DISPID_FILEDOWNLOAD                 270           // Fired to indicate the File Download dialog is opening
+#define DISPID_NAVIGATEERROR                271           // Fired to indicate the a binding error has occured
+#define DISPID_PRIVACYIMPACTEDSTATECHANGE   272           // Fired when the user's browsing experience is impacted
+#define DISPID_NEWWINDOW3                   273
+#define DISPID_VIEWUPDATE                   281           // Fired when the contents of a shell browser window change
+#define DISPID_SETPHISHINGFILTERSTATUS      282           // Fired by the Phishing Filter API to signal what state the analysis is in
+#define DISPID_WINDOWSTATECHANGED           283           // Fired to indicate that the browser window's visibility or enabled state has changed
 
-namespace IEWebBrowserFix {
-  public ref class ScriptInterface
-  {
-  public:
-    ScriptInterface(v8::Persistent<v8::Function> cb) {
-      callback = new wrapv8obj();
-      callback->function = cb;
-    }
-    
-    [System::Runtime::InteropServices::ComVisibleAttribute(true)]
-    void postMessageBack(System::String^ str)
-    {
-      v8::HandleScope scope;
-      v8::Handle<v8::Value> argv[1];
+class WebBrowserEventSink : DWebBrowserEvents2
+{
+public:
+    IWebBrowser2 *webBrowser;
+    IConnectionPointContainer *sink;
+    IConnectionPoint *conn;
+    DWORD cookie;
 
-      argv[0] = MarshalCLRToV8(str);
-
-      v8::TryCatch try_catch;
-
-      if (this->callback->function.IsEmpty()) {
-        throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
-        abort();
+    WebBrowserEventSink(IWebBrowser2 *_webBrowser) {
+      webBrowser = _webBrowser;
+      Console::WriteLine("1.");
+      if(webBrowser->QueryInterface(__uuidof(IConnectionPointContainer), (void **) &sink) != S_OK) {
+        Console::WriteLine("IConnectionPointContainer failed.");
       } else {
-        // invoke the registered callback function
-        this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
-      }
-      if (try_catch.HasCaught()) {
-        throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
-        exit(1);
+        if(sink->FindConnectionPoint(__uuidof(IConnectionPoint), &conn) != S_OK) {
+          Console::WriteLine("IConnectionPoint failed.");
+        } else {
+          if(conn->Advise(this, &cookie) != S_OK) {
+            Console::WriteLine("Advise failed.");
+          } else {
+            Console::WriteLine("Success.");
+          }
+        }
       }
     }
 
-  private:
-    wrapv8obj *callback;
+    ~WebBrowserEventSink() {
+    }
 
-  };
+    STDMETHODIMP_(ULONG) AddRef() { return 1; }
+    STDMETHODIMP_(ULONG) Release() { return 1; }
+    STDMETHODIMP QueryInterface(REFIID riid, void** ppv)
+    {
+        if(riid == IID_IUnknown) {
+            *ppv = (IUnknown*)this;
+        } else if(riid == IID_IDispatch) {
+            *ppv = (IDispatch*)this;
+        } else {
+            *ppv = NULL;
+            return E_NOINTERFACE;
+        }
+        return S_OK;
+    }
+    STDMETHODIMP GetTypeInfoCount(UINT* pCountTypeInfo)
+    {
+        return S_OK;
+    }
+    STDMETHODIMP GetTypeInfo(UINT iTypeInfo, LCID lcid, ITypeInfo** ppITypeInfo)
+    {
+        return S_OK;
+    }
+    STDMETHODIMP GetIDsOfNames(REFIID riid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId)
+    {
+        return S_OK;
+    }
+    STDMETHODIMP Invoke(DISPID dispidMember, REFIID riid, LCID lcid, WORD wFlags, ::DISPPARAMS* dispParams, VARIANT* pvarResult, ::EXCEPINFO* pExcepInfo, UINT* puArgErr)
+    {
+        switch(dispidMember) {
+          case DISPID_BEFORENAVIGATE2:
+          case DISPID_NEWWINDOW2:
+          case DISPID_NAVIGATECOMPLETE2:
+          case DISPID_ONQUIT:
+          case DISPID_ONVISIBLE:
+          case DISPID_ONTOOLBAR:
+          case DISPID_ONMENUBAR:
+          case DISPID_ONSTATUSBAR:
+          case DISPID_ONFULLSCREEN:
+          case DISPID_DOCUMENTCOMPLETE:
+          case DISPID_ONTHEATERMODE:
+          case DISPID_ONADDRESSBAR:
+          case DISPID_WINDOWSETRESIZABLE:
+          case DISPID_WINDOWCLOSING:
+          case DISPID_WINDOWSETLEFT:
+          case DISPID_WINDOWSETTOP:
+          case DISPID_WINDOWSETWIDTH:
+          case DISPID_WINDOWSETHEIGHT:
+          case DISPID_CLIENTTOHOSTWINDOW:
+          case DISPID_SETSECURELOCKICON:
+          case DISPID_FILEDOWNLOAD:
+          case DISPID_NAVIGATEERROR:
+          case DISPID_PRIVACYIMPACTEDSTATECHANGE:
+          case DISPID_NEWWINDOW3:
+          case DISPID_VIEWUPDATE:
+          case DISPID_SETPHISHINGFILTERSTATUS:
+          case DISPID_WINDOWSTATECHANGED:
+          default:
+            Console::WriteLine("Invoke "+dispidMember);
+            break;
+        }
+        return S_OK;
+    }
+    virtual void StatusTextChange(BSTR Text)
+    {
+      Console::WriteLine("WebBrowserEventSink::StatusTextChange");
+    }
 
-  static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
-    HandleScope scope;
-    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
-    return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
-  }
-  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
-    HKEY key;
-    bool success = true;
-    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
-    wstring path(featuresPath + feature);
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
-      success = false;
-    else {
-      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
-      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
-    } 
-    return success;
-  }
+    virtual void ProgressChange(int Progress, int ProgressMax)
+    {
+      Console::WriteLine("WebBrowserEventSink::ProgressChange");
+    }
 
-  static void SetBrowserFeatureControl() {
-    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
-    System::String^ pName = process->Modules[0]->FileName;
-    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
-    delim[0]='\\';
-    array<System::String^>^ path = pName->Split(delim);
-    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
-    const wchar_t *fileName = fileNameP;
+    virtual void CommandStateChange(int Command, bool Enable)
+    {
+      Console::WriteLine("WebBrowserEventSink::CommandStateChange");
+    }
 
-    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
-    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
-    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
-    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
-    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
-    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
-    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
-    SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
-    SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
-    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
-    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
-    SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
-  }
-}
+    virtual void DownloadBegin()
+    {
+      Console::WriteLine("WebBrowserEventSink::DownloadBegin");
+    }
+
+    virtual void DownloadComplete()
+    {
+      Console::WriteLine("WebBrowserEventSink::DownloadComplete");
+    }
+
+    virtual void TitleChange(BSTR Text)
+    {
+      Console::WriteLine("WebBrowserEventSink::TitleChange");
+    }
+
+    virtual void PropertyChange(BSTR szProperty)
+    {
+      Console::WriteLine("WebBrowserEventSink::PropertyChange");
+    }
+
+    virtual void BeforeNavigate2(IDispatch *pDisp, VARIANT *URL, VARIANT *Flags, VARIANT *TargetFrameName, VARIANT *PostData, VARIANT *Headers, bool *Cancel)
+    {
+      Console::WriteLine("WebBrowserEventSink::BeforeNavigate2");
+    }
+
+    virtual void NewWindow2(IDispatch **ppDisp, bool *Cancel)
+    {
+      Console::WriteLine("WebBrowserEventSink::NewWindow2");
+    }
+
+    virtual void NavigateComplete2(IDispatch *pDisp, VARIANT *URL)
+    {
+      Console::WriteLine("WebBrowserEventSink::NavigateComplete2");
+    }
+
+    virtual void DocumentComplete(IDispatch *pDisp, VARIANT* URL)
+    {
+      Console::WriteLine("WebBrowserEventSink::DocumentComplete");
+    }
+
+    virtual void OnQuit()
+    {
+      Console::WriteLine("WebBrowserEventSink::OnQuit");
+    }
+
+    virtual void OnVisible(bool Visible)
+    {
+      Console::WriteLine("WebBrowserEventSink::OnVisible");
+    }
+
+    virtual void OnToolBar(bool ToolBar)
+    {
+      Console::WriteLine("WebBrowserEventSink::OnToolBar");
+    }
+
+    virtual void OnMenuBar(bool MenuBar)
+    {
+      Console::WriteLine("WebBrowserEventSink::OnMenuBar");
+    }
+
+    virtual void OnStatusBar(bool StatusBar)
+    {
+      Console::WriteLine("WebBrowserEventSink::OnStatusBar");
+    }
+
+    virtual void OnFullScreen(bool FullScreen)
+    {
+      Console::WriteLine("WebBrowserEventSink::OnFullScreen");
+    }
+
+    virtual void OnTheaterMode(bool TheaterMode)
+    {
+      Console::WriteLine("WebBrowserEventSink::OnTheaterMode");
+    }
+
+    virtual void WindowSetResizable(bool Resizable)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowSetResizable");
+    }
+
+    virtual void WindowSetLeft(int Left)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowSetLeft");
+    }
+
+    virtual void WindowSetTop(int Top)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowSetTop");
+    }
+
+    virtual void WindowSetWidth(int Width)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowSetWidth");
+    }
+
+    virtual void WindowSetHeight(int Height)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowSetHeight");
+    }
+
+    virtual void WindowClosing(bool IsChildWindow, bool *Cancel)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowClosing");
+    }
+
+    virtual void ClientToHostWindow(int *CX, int *CY)
+    {
+      Console::WriteLine("WebBrowserEventSink::ClientToHostWindow");
+    }
+
+    virtual void SetSecureLockIcon(int SecureLockIcon)
+    {
+      Console::WriteLine("WebBrowserEventSink::SetSecureLockIcon");
+    }
+
+    virtual void FileDownload(bool ActiveDocument, bool *Cancel)
+    {
+      Console::WriteLine("WebBrowserEventSink::FileDownload");
+    }
+
+    virtual void NavigateError(IDispatch *pDisp, VARIANT *URL, VARIANT *Frame, VARIANT *StatusCode, bool *Cancel)
+    {
+      Console::WriteLine("WebBrowserEventSink::NavigateError");
+    }
+
+    virtual void PrintTemplateInstantiation(IDispatch *pDisp)
+    {
+      Console::WriteLine("WebBrowserEventSink::PrintTemplateInstantiation");
+    }
+
+    virtual void PrintTemplateTeardown(IDispatch *pDisp)
+    {
+      Console::WriteLine("WebBrowserEventSink::PrintTemplateTeardown");
+    }
+
+    virtual void UpdatePageStatus(IDispatch *pDisp, VARIANT *nPage, VARIANT *fDone)
+    {
+      Console::WriteLine("WebBrowserEventSink::UpdatePageStatus");
+    }
+
+    virtual void PrivacyImpactedStateChange(bool bImpacted)
+    {
+      Console::WriteLine("WebBrowserEventSink::PrivacyImpactedStateChange");
+    }
+
+    virtual void NewWindow3(IDispatch **ppDisp, bool *Cancel, unsigned int dwFlags, BSTR bstrUrlContext, BSTR bstrUrl)
+    {
+      Console::WriteLine("WebBrowserEventSink::NewWindow3");
+    }
+
+    virtual void SetPhishingFilterStatus(int PhishingFilterStatus)
+    {
+      Console::WriteLine("WebBrowserEventSink::SetPhishingFilterStatus");
+    }
+
+    virtual void WindowStateChanged(unsigned int dwWindowStateFlags, unsigned int dwValidFlagsMask)
+    {
+      Console::WriteLine("WebBrowserEventSink::WindowStateChanged");
+    }
+
+    virtual void NewProcess(int lCauseFlag, VARIANT *pWB2, bool *Cancel)
+    {
+      Console::WriteLine("WebBrowserEventSink::NewProcess");
+    }
+
+    virtual void ThirdPartyUrlBlocked(VARIANT *URL, unsigned int dwCount)
+    {
+      Console::WriteLine("WebBrowserEventSink::ThirdPartyUrlBlocked");
+    }
+
+    virtual void RedirectXDomainBlocked(IDispatch *pDisp, VARIANT *StartURL, VARIANT *RedirectURL, VARIANT *Frame, VARIANT *StatusCode)
+    {
+      Console::WriteLine("WebBrowserEventSink::RedirectXDomainBlocked");
+    }
+
+    virtual void BeforeScriptExecute(IDispatch *pDispWindow)
+    {
+      Console::WriteLine("WebBrowserEventSink::BeforeScriptExecute");
+    }
+
+    virtual void WebWorkerStarted(unsigned int dwUniqueID, BSTR bstrWorkerLabel)
+    {
+      Console::WriteLine("WebBrowserEventSink::WebWorkerStarted");
+    }
+
+    virtual void WebWorkerFinsihed(unsigned int dwUniqueID)
+    {
+      Console::WriteLine("WebBrowserEventSink::WebWorkerFinsihed");
+    }
+};
 
 
 /**
@@ -1231,6 +1463,132 @@ public:
 };
 
 
+namespace IEWebBrowserFix {
+  public ref class ScriptInterface
+  {
+  public:
+    ScriptInterface(v8::Persistent<v8::Function> cb) {
+      callback = new wrapv8obj();
+      callback->function = cb;
+    }
+    
+    [System::Runtime::InteropServices::ComVisibleAttribute(true)]
+    void postMessageBack(System::String^ str)
+    {
+      v8::HandleScope scope;
+      v8::Handle<v8::Value> argv[1];
+
+      argv[0] = MarshalCLRToV8(str);
+
+      v8::TryCatch try_catch;
+
+      if (this->callback->function.IsEmpty()) {
+        throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
+        abort();
+      } else {
+        // invoke the registered callback function
+        this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
+      }
+      if (try_catch.HasCaught()) {
+        throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
+        exit(1);
+      }
+    }
+
+  private:
+    wrapv8obj *callback;
+
+  };
+
+  static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
+    HandleScope scope;
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
+    return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
+  }
+  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
+    HKEY key;
+    bool success = true;
+    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
+    wstring path(featuresPath + feature);
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
+      success = false;
+    else {
+      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
+      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
+    } 
+    return success;
+  }
+
+  static void SetBrowserFeatureControl() {
+    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
+    System::String^ pName = process->Modules[0]->FileName;
+    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
+    delim[0]='\\';
+    array<System::String^>^ path = pName->Split(delim);
+    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
+    const wchar_t *fileName = fileNameP;
+
+    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
+    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
+    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
+    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
+    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
+    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
+    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
+    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+    SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
+    SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
+    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
+    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
+    SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
+    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
+  }
+
+  static Handle<v8::Value> AddNewWindowToWebBrowser(const v8::Arguments& args) {
+    HandleScope scope;
+
+    try {
+      Console::WriteLine("a1. ");
+      System::Object ^ obj = MarshalV8ToCLR(args[0]);
+      Console::WriteLine("a. "+obj);
+      System::Windows::Controls::WebBrowser^ target = (System::Windows::Controls::WebBrowser^)obj;
+
+      Console::WriteLine("b.");
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[1]);
+
+      Console::WriteLine("c.");
+      System::Object^ rawObject = System::Windows::Controls::WebBrowser::typeid->GetProperty("AxIWebBrowser2", 
+        BindingFlags::Instance | BindingFlags::NonPublic)->GetValue(target, nullptr);
+
+      Console::WriteLine("d.");
+      IntPtr marshalptr = Marshal::GetIUnknownForObject(rawObject);
+      Console::WriteLine("e.");
+      IUnknown *iUnknown = static_cast<IUnknown *>(marshalptr.ToPointer());
+      Console::WriteLine("f.");
+      IWebBrowser2 *webBrowser; 
+      iUnknown->QueryInterface(__uuidof(IWebBrowser2), (void **)&webBrowser);
+      Console::WriteLine("g.");
+      WebBrowserEventSink *events = new WebBrowserEventSink(webBrowser);
+      Console::WriteLine("h.");
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+    return scope.Close(Undefined());
+  }
+}
+
+
 extern "C" void CLR_Init(Handle<v8::Object> target) {
   // Fix registry and "FEATURE" controls, these help align IE with a normal behavior
   // expected (on a per app registry setting basis).  This does not set global registry
@@ -1272,6 +1630,7 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
 
   NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
+  NODE_SET_METHOD(target, "proxyWebEvents", IEWebBrowserFix::AddNewWindowToWebBrowser);
   
 #ifdef GC_DEBUG
   NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);

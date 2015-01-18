@@ -139,7 +139,7 @@ module.exports = (function() {
    *       err('reason')
    *       // '*** -[__NSArrayM insertObject:atIndex:]: object cannot be nil'
    *
-   *       err('reason') == err.message
+   *       err('reason') === err.message
    *       // true
    *
    *       err.stack
@@ -176,13 +176,13 @@ module.exports = (function() {
 
   function NodObjC(o,m) {
     var t = typeof o;
-    if (t == 'string') {
+    if (t === 'string') {
       return NodObjC.NSString('stringWithUTF8String', String(o));
 
-    } else if (t == 'number') {
+    } else if (t === 'number') {
       return NodObjC.NSNumber('numberWithDouble', Number(o));
 
-    } else if ((o instanceof Date ) || (Object.prototype.toString.call(o) == '[object Date]')) {
+    } else if ((o instanceof Date ) || (Object.prototype.toString.call(o) === '[object Date]')) {
       return NodObjC.NSDate('dateWithTimeIntervalSince1970', o / 1000);
 
     } else if (Buffer.isBuffer(o)) {
@@ -202,7 +202,7 @@ module.exports = (function() {
           'options', options,
           'error', err);
 
-    } else if(t == 'function') {
+    } else if(t === 'function') {
       // create a block pointer
       if(m) {
         return Import.createBlock(o,m);
@@ -221,7 +221,7 @@ module.exports = (function() {
   NodObjC.framework =
   NodObjC.importFramework =
   function framework (p,q) {
-    q = (typeof(q) == 'undefined') ? 99999999 : q;
+    q = (typeof(q) === 'undefined') ? 99999999 : q;
     Import.import(p,false,NodObjC,q);
   };
 

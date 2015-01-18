@@ -332,10 +332,11 @@ module.exports = (function() {
    * @member state
    * @type {string} 
    * @memberof Window
-   * @description Gets or sets the state of the window.  The options are "fullscreen", "maximized", "minimized",
+   * @description Gets or sets the state of the window.  The options are "maximized", "minimized",
    *              "fullscreen" or "normal". Note: If the window's property 'canbeFullScreen' is not set to true
    *              setting "fullscreen" will have no effect.
    * @noscreenshot
+   * @default "normal"
    * @example
    *  require('Common');
    *  var win = new Window();

@@ -62,9 +62,9 @@ module.exports = (function() {
       }
     },
     function(e) {
-      if(e == "utility") {
+      if(e === "utility") {
         this.native('setStyleMask', utilityStyle);
-      } else if(e == "inspector") {
+      } else if(e === "inspector") {
         this.native('setStyleMask', inspectorStyle);
       }
     }

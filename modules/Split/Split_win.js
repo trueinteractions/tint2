@@ -8,16 +8,16 @@ module.exports = (function() {
 
   function createNewDefinition(split, size) {
     var definition = null;
-    if(split.orientation == "vertical") {
+    if(split.orientation === "vertical") {
       definition = new $.System.Windows.Controls.ColumnDefinition();
-      if(size && typeof(size) == 'number')
+      if(size && typeof(size) === 'number')
         definition.Width = new $.System.Windows.GridLength(size);
       else if(size)
         definition.Width = size;
     }
     else {
       definition = new $.System.Windows.Controls.RowDefinition();
-      if(size && typeof(size) == 'number')
+      if(size && typeof(size) === 'number')
         definition.Height = new $.System.Windows.GridLength(size);
       else if(size)
         definition.Height = size;
@@ -62,7 +62,7 @@ module.exports = (function() {
 
   Split.prototype.appendChild = function(e) {
     this.fireEvent('resize');
-    var isVertical = this.orientation == "vertical" ? true : false;
+    var isVertical = this.orientation === "vertical" ? true : false;
     var index = this.private.definitions.length;
 
     if(index != 0) 
@@ -105,7 +105,7 @@ module.exports = (function() {
 
   Split.prototype.removeChild = function(e) {
     this.fireEvent('resize');
-    var isVertical = this.orientation == "vertical" ? true : false;
+    var isVertical = this.orientation === "vertical" ? true : false;
     var index = this.private.children.indexOf(e);
     if(this.private.children.length < 1) {
       if(isVertical) {
@@ -134,7 +134,7 @@ module.exports = (function() {
 
   Split.prototype.setPosition = function(position, index) {
     this.fireEvent('resize');
-    var isVertical = this.orientation == "vertical" ? true : false,
+    var isVertical = this.orientation === "vertical" ? true : false,
         defs = this.private.definitions,
         totalSize = 0,
         runningPercent = 0,
@@ -258,16 +258,16 @@ module.exports = (function() {
   Object.defineProperty(Split.prototype, 'style', {
     get:function() {
       // thick, thin, pane
-      if(this.private.dividerWidth == 1) return "thin";
-      else if(this.private.dividerWidth == 3) return "pane";
-      else if(this.private.dividerWidth == 5) return "thick";
+      if(this.private.dividerWidth === 1) return "thin";
+      else if(this.private.dividerWidth === 3) return "pane";
+      else if(this.private.dividerWidth === 5) return "thick";
     },
     set:function(e) {
       this.fireEvent('resize');
-      var isVertical = this.orientation == "vertical" ? true : false;
-      if(e == "thin") this.private.dividerWidth = 1;
-      else if(e == "pane") this.private.dividerWidth = 3;
-      else if(e == "thick") this.private.dividerWidth = 5;
+      var isVertical = this.orientation === "vertical" ? true : false;
+      if(e === "thin") this.private.dividerWidth = 1;
+      else if(e === "pane") this.private.dividerWidth = 3;
+      else if(e === "thick") this.private.dividerWidth = 5;
       for(var i=0; i < this.private.definitions.length; i++) {
         var child = this.private.children[i];
         if(child.isSplitter)

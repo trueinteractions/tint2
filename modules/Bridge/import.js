@@ -95,7 +95,7 @@ module.exports = (function() {
     
     tag.end = isBodyless ? ebody + 2 : ebody + tag.name.length + 3;
     tag.attrib = parseAttrib(tag,content.substring(sattr, eattr + (isBodyless ? -1 : 0)));
-    if(sbody == ebody || names[tag.name] == null) tag.children = [];
+    if(sbody === ebody || names[tag.name] === null) tag.children = [];
     else tag.children = findTags(names[tag.name], content.substring(sbody,ebody));
     return tag;
   }
@@ -110,11 +110,11 @@ module.exports = (function() {
         // quick break for non-matching keys, cheaper on fails (which happen a lot)
         // rather than a full substring. Three is both the max benefit and after that
         // we'll cause some odd behavior (e.g., matching conditions)
-        if( content[1] == key[0] && 
-            content[2] == key[1] && 
-            content[3] == key[2]) 
+        if( content[1] === key[0] && 
+            content[2] === key[1] && 
+            content[3] === key[2]) 
         {
-          if(key.length < 4 || key == content.substring(1,key.length+1)) {
+          if(key.length < 4 || key === content.substring(1,key.length+1)) {
             delete ftags[ftags.length-1].end;
             ftags.push(parseTag(names,{name:key},content));
             break;
@@ -162,25 +162,25 @@ module.exports = (function() {
 
     nodes.forEach(function (node) {
       var name = node.attrib.name;
-      if(node.name == 'depends_on')
+      if(node.name === 'depends_on')
       {
         if(recursive && recursive > 0)
             importFramework(node.attrib.path, true, onto, --recursive);
       } 
-      else if (node.name == 'string_constant')
+      else if (node.name === 'string_constant')
       {
         onto[name] = getValue(node);
       } 
-      else if (node.name == 'enum')
+      else if (node.name === 'enum')
       {
         if (node.attrib.ignore !== "true") onto[name] = parseInt(getValue(node));
       } 
-      else if (node.name == 'struct')
+      else if (node.name === 'struct')
       {
         var type = getType(node);
         onto[name] = core.Types.knownStructs[core.Types.parseStructName(type)] = type;
       } 
-      else if (node.name == 'constant')
+      else if (node.name === 'constant')
       {
         var type = getType(node);
         onto.__defineGetter__(name, function () {
@@ -191,7 +191,7 @@ module.exports = (function() {
           return onto[name] = derefPtr;
         });
       }
-      else if (node.name == 'function')
+      else if (node.name === 'function')
       {
         if(node.attrib.original) { // Support for function aliases
           onto[node.attrib.original] = onto[node.attrib.name];
@@ -203,8 +203,8 @@ module.exports = (function() {
 
         node.children.forEach(function (n, i) {
           var type = n.name;
-          if(type == 'arg') passedTypes.args.push(flattenNode(n));
-          else if (type == 'retval') passedTypes.retval = flattenNode(n);
+          if(type === 'arg') passedTypes.args.push(flattenNode(n));
+          else if (type === 'retval') passedTypes.retval = flattenNode(n);
         });
 
         Object.defineProperty(onto, name, {
@@ -225,8 +225,8 @@ module.exports = (function() {
     if (node.attrib.function_pointer === 'true') {
       rnode.args = [];
       node.children.forEach(function (n) {
-        if(n.name == 'arg') rnode.args.push(flattenNode(n));
-        else if(n.name == 'retval') rnode.retval = flattenNode(n);
+        if(n.name === 'arg') rnode.args.push(flattenNode(n));
+        else if(n.name === 'retval') rnode.retval = flattenNode(n);
       });
     }
     return rnode;
@@ -246,7 +246,7 @@ module.exports = (function() {
    */
   function resolve (framework) {
     // strip off a trailing slash if present
-    if (framework[framework.length-1] == '/')
+    if (framework[framework.length-1] === '/')
       framework = framework.slice(0, framework.length-1);
     // already absolute, return as-is
     if (~framework.indexOf('/')) return framework;

@@ -546,7 +546,7 @@ exports.alloc = function alloc (_type, value) {
  */
 
 exports.allocCString = function allocCString (string, encoding) {
-  if (null == string || (Buffer.isBuffer(string) && exports.isNull(string))) {
+  if (null === string || (Buffer.isBuffer(string) && exports.isNull(string))) {
     return exports.NULL
   }
   var size = Buffer.byteLength(string, encoding) + 1
@@ -588,7 +588,7 @@ exports['readUInt64' + exports.endianness] = exports.readUInt64
 exports['writeInt64' + exports.endianness] = exports.writeInt64
 exports['writeUInt64' + exports.endianness] = exports.writeUInt64
 
-var opposite = exports.endianness == 'LE' ? 'BE' : 'LE'
+var opposite = exports.endianness === 'LE' ? 'BE' : 'LE'
 var int64temp = new Buffer(exports.sizeof.int64)
 var uint64temp = new Buffer(exports.sizeof.uint64)
 

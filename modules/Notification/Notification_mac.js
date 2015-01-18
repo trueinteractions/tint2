@@ -134,7 +134,7 @@ module.exports = (function() {
 
       var $notify = $.NSUserNotification('alloc')('init');
       // Get the default notification center
-      if(center == null) {
+      if(center === null) {
         console.warn('Attempted to deliver notification, but only packaged apps may use notifcations.');
         return false;
       }
