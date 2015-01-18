@@ -174,11 +174,11 @@ module.exports = (function() {
 
       var btn = new $.System.Windows.Controls.Button();
       this.native.mainbutton = btn;
-      btn.previoewMouseDownCallback = function() {
+      btn.previewMouseDownCallback = function() {
         fireEvent('click',['main']);
         w.Close();
       }.bind(this);
-      btn.addEventListener('PreviewMouseDown', btn.previoewMouseDownCallback);
+      btn.addEventListener('PreviewMouseDown', btn.previewMouseDownCallback);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
       label.Content = mainButton.toString();
@@ -199,7 +199,7 @@ module.exports = (function() {
           fireEvent('click',['aux']);
           w.Close();
         }.bind(this);
-        btn2.addEventListener('PreviewMouseDown', btn2.previoewMouseDownCallback);
+        btn2.addEventListener('PreviewMouseDown', btn2.previewMouseDownCallback);
         btn2.Height = 25;
         btn2.Padding = new $.System.Windows.Thickness(0);
         btn2.Content = new $.System.Windows.Controls.StackPanel();
