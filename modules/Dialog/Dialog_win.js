@@ -123,7 +123,6 @@ module.exports = (function() {
       $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
 
-
       var nimg;
       if(!img && application.icon) {
         nimg = utils.makeImage(application.icon);
@@ -165,9 +164,8 @@ module.exports = (function() {
         this.native.supression = cbox;
         cbox.Content = suppression.toString();
         cbox.IsChecked = suppressionChecked ? true : false;
-        cbox.addEventListener('PreviewMouseDown', function() {
-          suppressionChecked = !suppressionChecked;
-        });
+        cbox.previewMouseDownCallback = function() { suppressionChecked = !suppressionChecked; };
+        cbox.addEventListener('PreviewMouseDown', cbox.previewMouseDownCallback);
         w.Content.AddLayoutConstraint(nimg, 'Right', '=', cbox, 'Left', 1.0, -10);
         w.Content.AddLayoutConstraint(w.Content, 'Right', '=', cbox, 'Right', 1.0, 0);
         w.Content.AddLayoutConstraint(cbox, 'Top', '=', text2, 'Bottom', 1.0, 10);
@@ -176,10 +174,11 @@ module.exports = (function() {
 
       var btn = new $.System.Windows.Controls.Button();
       this.native.mainbutton = btn;
-      btn.addEventListener('PreviewMouseDown', function() {
+      btn.previoewMouseDownCallback = function() {
         fireEvent('click',['main']);
         w.Close();
-      }.bind(this));
+      }.bind(this);
+      btn.addEventListener('PreviewMouseDown', btn.previoewMouseDownCallback);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
       label.Content = mainButton.toString();
@@ -196,10 +195,11 @@ module.exports = (function() {
       if(auxButton) {
         var btn2 = new $.System.Windows.Controls.Button();
         this.native.auxbutton = btn2;
-        btn2.addEventListener('PreviewMouseDown', function() {
+        btn2.previewMouseDownCallback = function() {
           fireEvent('click',['aux']);
           w.Close();
-        }.bind(this));
+        }.bind(this);
+        btn2.addEventListener('PreviewMouseDown', btn2.previoewMouseDownCallback);
         btn2.Height = 25;
         btn2.Padding = new $.System.Windows.Thickness(0);
         btn2.Content = new $.System.Windows.Controls.StackPanel();
