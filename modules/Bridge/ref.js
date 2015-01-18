@@ -546,7 +546,7 @@ exports.alloc = function alloc (_type, value) {
  */
 
 exports.allocCString = function allocCString (string, encoding) {
-  if (null === string || (Buffer.isBuffer(string) && exports.isNull(string))) {
+  if (null === string || undefined === string || (Buffer.isBuffer(string) && exports.isNull(string))) {
     return exports.NULL
   }
   var size = Buffer.byteLength(string, encoding) + 1
