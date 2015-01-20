@@ -90,7 +90,6 @@ module.exports = (function() {
     this.private.type = "Window";
     this.private.canBeFullscreen = true;
 
-    //We cannot allow transparency unless there is no window style.
     this.native.ShowInTaskbar = true;
     this.native.ShowActivated = true;
     this.native.Width = options.width;

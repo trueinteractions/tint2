@@ -330,7 +330,6 @@
      */
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
-
     $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
     $app('activateIgnoringOtherApps', true);
   }
