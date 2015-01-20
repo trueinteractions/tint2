@@ -89,6 +89,10 @@ module.exports = (function() {
           child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
 
           var intrinsicSize = child.native('intrinsicContentSize');
+
+          if(this.size == "small") intrinsicSize.height = 24;
+          else intrinsicSize.height = 32;
+
           if(intrinsicSize.width === -1 && intrinsicSize.height > 0)
             toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
           else if(intrinsicSize.height === -1 && intrinsicSize.width > 0)
@@ -105,7 +109,7 @@ module.exports = (function() {
         console.error(e.stack);
         process.exit(1);
       }
-    });
+    }.bind(this));
 
     $NSToolbarDelegateClass.register();
     var $NSToolbarDelegateInstance = $NSToolbarDelegateClass('alloc')('init');
@@ -172,7 +176,7 @@ module.exports = (function() {
           $toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
           break;
           default:
-          $toolbar('setSizeMode',$.NSToolbarDisplayModeLabelOnly);
+          $toolbar('setSizeMode',$.NSToolbarSizeModeDefault);
           break;
         }
       }

@@ -141,6 +141,8 @@ module.exports = (function() {
       e = util.makeNSImage(e);
       if(e) {
         this.nativeView('setImage', e);
+        this.nativeView('cell')('setImagePosition', $.NSImageLeft);
+        this.nativeView('cell')('setImageScaling',$.NSImageScaleProportionallyDown);
       }
     }
   );
