@@ -405,7 +405,7 @@ module.exports = (function() {
    *  win.title = "hello";
    * @screenshot-window {win}
    */
-  (util.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
+  util.makePropertyStringType(Window.prototype,'title','title','setTitle');
 
   /**
    * @member y

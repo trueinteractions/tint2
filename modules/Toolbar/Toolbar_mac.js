@@ -1,6 +1,8 @@
 module.exports = (function() {
-  var Control = require('Control');
-
+  var util = require('Utilities');
+  var Container = require('Container');
+  var ToolbarItem = require('ToolbarItem');
+  var $ = process.bridge.objc;
   /**
    * @class Toolbar
    * @description The toolbar is a strip applied to the top of a window allowing elements to be
@@ -36,205 +38,135 @@ module.exports = (function() {
    * urlLocation.value = 'A text input field';
    * @screenshot-window {win}
    */
-  function Toolbar() {
-    var $ = process.bridge.objc;
-    var $toolbar = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
-    var children = [];
-    var toolbarCache = [];
 
-    $toolbar('setAllowsUserCustomization',$.NO);
-    $toolbar('setAutosavesConfiguration',$.NO);
-    $toolbar('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
-    $toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
+  function makeNSToolbarItemFromNSView(size,identifier,child) {
+    var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',$(identifier));
+    // This is necessary, even though it would seem we're adding toolbar items with fixed height/width Auto Layout
+    // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
+    // masks is necessary.
+    child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
+
+    var intrinsicSize = child.native('intrinsicContentSize');
+    if(child instanceof Button) {
+      if(size === "small") {
+        intrinsicSize.height = 24;
+      } else {
+        intrinsicSize.height = 32;
+      }
+      if(intrinsicSize.width === -1) {
+        intrinsicSize.width = intrinsicSize.height;
+      }
+    }
+    if(child instanceof TextInput || intrinsicSize.width === -1) {
+      intrinsicSize.width = 1000;
+    }
+    toolbarItem('setMaxSize', intrinsicSize);
+    toolbarItem('setMinSize', intrinsicSize);
+    toolbarItem('setView',child.native);
+    return toolbarItem;
+  }
+
+  function Toolbar() {
+    var toolbarCache = [];
+    this.native = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
+    this.native('setAllowsUserCustomization',$.NO);
+    this.native('setAutosavesConfiguration',$.NO);
+    this.native('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
+    this.native('setSizeMode',$.NSToolbarSizeModeSmall);
+
+    this.private = {children:[], identifiers:{}};
+    this.private.getChildren = function() {
+      var nsArrayChildren = $.NSMutableArray('alloc')('init');
+      this.private.children.forEach(function(item) {
+        nsArrayChildren('addObject',$(item.private.identifier));
+      });
+      return nsArrayChildren;
+    }
 
     var $NSToolbarDelegateClass = $.NSObject.extend('ToolbarDelegate'+Math.round(Math.random()*10000));
     $NSToolbarDelegateClass.addMethod('init:','@@:', function(self) { return self; });
-    $NSToolbarDelegateClass.addMethod('toolbarAllowedItemIdentifiers:','@@:', function(toolbar) {
-      try {
-        var $NSArrayChildren = $.NSMutableArray('alloc')('init');
-        //TODO: RELEASE NSArrayChildren ?
-        children.forEach(function(item,index,arr) {
-          $NSArrayChildren('addObject',item.identifier);
-        });
-        return $NSArrayChildren;
-      } catch(e) {
-        console.error(e.message);
-        console.error(e.stack);
-        process.exit(1);
-      }
-    });
-    $NSToolbarDelegateClass.addMethod('toolbarDefaultItemIdentifiers:','@@:', function(toolbar) {
-      try { 
-        var $NSArrayChildren = $.NSMutableArray('alloc')('init');
-        //TODO: RELEASE NSArrayChildren ?
-        children.forEach(function(item,index,arr) {
-          $NSArrayChildren('addObject',item.identifier);
-        });
-        return $NSArrayChildren;
-      } catch(e) {
-        console.error(e.message);
-        console.error(e.stack);
-        process.exit(1);
-      }
-    });
-    $NSToolbarDelegateClass.addMethod('toolbar:itemForItemIdentifier:willBeInsertedIntoToolbar:','@@:@@B', function(self, cmd, toolbar, identifier, willBeInserted) {
-      try {
-        if(!toolbarCache[parseInt(identifier)]) {
-          var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',identifier);
-          var child = children[parseInt(identifier)-1];
-
-          // This is necessary, even though it would seem we're adding toolbar items with fixed height/width Auto Layout
-          // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
-          // masks is necessary.
-          child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
-
-          var intrinsicSize = child.native('intrinsicContentSize');
-          if(child instanceof Button) {
-            if(this.size == "small") {
-              intrinsicSize.height = 24;
-            } else {
-              intrinsicSize.height = 32;
-            }
-            if(intrinsicSize.width === -1) {
-              intrinsicSize.width = intrinsicSize.height;
-            }
-            if(child.title.toString() === "") {
-              child.nativeView('cell')('setImagePosition', $.NSImageOnly);
-            } else {
-              child.nativeView('cell')('setImagePosition', $.NSImageAbove);
-            }
+    $NSToolbarDelegateClass.addMethod('toolbarAllowedItemIdentifiers:','@@:', this.private.getChildren.bind(this));
+    $NSToolbarDelegateClass.addMethod('toolbarDefaultItemIdentifiers:','@@:', this.private.getChildren.bind(this));
+    $NSToolbarDelegateClass.addMethod('toolbar:itemForItemIdentifier:willBeInsertedIntoToolbar:','@@:@@B', function(self, cmd, toolbar, identifier) {
+        if(!toolbarCache[identifier]) {
+          var child = this.private.identifiers[identifier];
+          var toolbarItem = child.native;
+          if(!(child instanceof ToolbarItem)) {
+            toolbarItem = makeNSToolbarItemFromNSView(this.size, identifier, child);
           }
-          if(child instanceof TextInput || intrinsicSize.width === -1) {
-            intrinsicSize.width = 1000;
-          }
-          if(intrinsicSize.height === -1) {
-            if(this.size == "small") intrinsicSize.height = 24;
-            else intrinsicSize.height = 32;
-          }
-          toolbarItem('setMaxSize', intrinsicSize);
-          toolbarItem('setMinSize', intrinsicSize);
-          toolbarItem('setView',child.native);
-          toolbarCache[parseInt(identifier)] = toolbarItem;
+          toolbarCache[identifier] = toolbarItem;
         }
-        return toolbarCache[parseInt(identifier)];
-      } catch(e) {
-        console.error(e.message);
-        console.error(e.stack);
-        process.exit(1);
-      }
+        return toolbarCache[identifier];
     }.bind(this));
 
     $NSToolbarDelegateClass.register();
     var $NSToolbarDelegateInstance = $NSToolbarDelegateClass('alloc')('init');
-    $toolbar('setDelegate',$NSToolbarDelegateInstance);
+    this.native('setDelegate',$NSToolbarDelegateInstance);
 
-    /**
-     * @member state
-     * @type {string}
-     * @memberof Toolbar
-     * @description Gets or sets the style of the toolbar, the values can be "iconandlabel", "icon"
-     *              or "label".
-     */
-    Object.defineProperty(this, 'state', {
-      get:function() { 
-        if($toolbar('displayMode') === $.NSToolbarDisplayModeIconAndLabel) 
-          return "iconandlabel";
-        else if ($toolbar('displayMode') === $.NSToolbarDisplayModeIconOnly)
-          return "icon";
-        else if ($toolbar('displayMode') === $.NSToolbarDisplayModeLabelOnly)
-          return "label";
-        else
-          return "default";
-      },
-      set:function(e) {
-        switch(e) {
-          case 'iconandlabel':
-          $toolbar('setDisplayMode',$.NSToolbarDisplayModeIconAndLabel);
-          break;
-          case 'icon':
-          $toolbar('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
-          break;
-          case 'label':
-          $toolbar('setDisplayMode',$.NSToolbarDisplayModeLabelOnly);
-          break;
-          default:
-          $toolbar('setDisplayMode',$.NSToolbarDisplayModeDefault);
-          break;
-        }
+    this.addEventListener('before-child-attached', function(child) {
+      if(child === "space") {
+        child = { native:$("NSToolbarFlexibleSpaceItem"), private:{} };
       }
-    });
-
-    /**
-     * @member size
-     * @type {string}
-     * @memberof Toolbar
-     * @description Gets or sets the size of the toolbar based on OS recommended values. 
-     *              The values for this can be "regular", "small" or "default".
-     */
-    Object.defineProperty(this, 'size', {
-      get:function() { 
-        if($toolbar('sizeMode') === $.NSToolbarSizeModeRegular) 
-          return "regular";
-        else if ($toolbar('sizeMode') === $.NSToolbarSizeModeSmall)
-          return "small";
-        else 
-          return "default";
-      },
-      set:function(e) {
-        switch(e) {
-          case 'regular':
-          $toolbar('setSizeMode',$.NSToolbarSizeModeRegular);
-          break;
-          case 'small':
-          $toolbar('setSizeMode',$.NSToolbarSizeModeSmall);
-          break;
-          default:
-          $toolbar('setSizeMode',$.NSToolbarSizeModeDefault);
-          break;
-        }
+      if (!child.private.identifier) {
+        child.private.identifier = (this.private.children.length+1).toString();
       }
-    });
+      this.private.identifiers[child.private.identifier] = child;
+      this.native('insertItemWithItemIdentifier', $(child.private.identifier), 'atIndex', this.private.children.length);
+      return child;
+    }.bind(this));
 
-    /**
-     * @method appendChild
-     * @param {child} The control to append to the toolbar control.
-     * @memberof Toolbar
-     * @description appendChild adds a new control to the toolbar.
-     */
-    this.appendChild = function(child) {
-      if(Array.isArray(child)) {
-        for(var i=0; i < child.length; i++) {
-          this.appendChild(child[i]);
-        }
-      } else {
-        if(child === "space") {
-          child = {native:$("NSToolbarFlexibleSpaceItem"), identifier:$("NSToolbarFlexibleSpaceItem")};
-        } else if (!(child instanceof Control)) {
-          throw new Error('The passed in object to append as a child wasnt a control. ['+child+']');
-        } else {
-          child.identifier = $((children.length+1).toString());
-        }
-        children.push(child);
-        $toolbar('insertItemWithItemIdentifier',child.identifier,'atIndex',children.length-1);
-      }
-    }
-
-    /**
-     * @method removeChild
-     * @param {child} The control to remove from the toolbar.
-     * @memberof Toolbar
-     * @description removeChild removes a control from the toolbar.
-     */
-    this.removeChild = function(child) {
-      var index = children.indexOf(child);
-      if(index !== -1) {
-        children.splice(index,1);
-        $toolbar('removeItemAtIndex',index);
-      }
-    }
-
-    Object.defineProperty(this, 'native', { get:function() { return $toolbar; }});
+    this.addEventListener('before-child-dettached', function(child) {
+      this.native('removeItemAtIndex', this.private.children.indexOf(child));
+      delete this.private.identifiers[child.private.identifier];
+      delete toolbarCache[child.private.identifier]
+    }.bind(this));
   } 
 
+  util.defEvents(Toolbar.prototype);
+  util.def(Toolbar.prototype, 'children', function() { return this.private.children; });
+
+  /**
+   * @method appendChild
+   * @param {child} The control to append to the toolbar control.
+   * @memberof Toolbar
+   * @description appendChild adds a new control to the toolbar.
+   */
+  Toolbar.prototype.appendChild = Container.prototype.appendChild;
+  
+  /**
+   * @method removeChild
+   * @param {child} The control to remove from the toolbar.
+   * @memberof Toolbar
+   * @description removeChild removes a control from the toolbar.
+   */
+  Toolbar.prototype.removeChild = Container.prototype.removeChild;
+
+  /**
+   * @member state
+   * @type {string}
+   * @memberof Toolbar
+   * @description Gets or sets the style of the toolbar, the values can be "iconandlabel", "icon"
+   *              "default" or "label".
+   */
+  util.makePropertyMapType(Toolbar.prototype, 'state', 'displayMode', 'setDisplayMode', {
+    iconandlabel:$.NSToolbarDisplayModeIconAndLabel,
+    icon:$.NSToolbarDisplayModeIconOnly,
+    label:$.NSToolbarDisplayModeLabelOnly,
+    default:$.NSToolbarDisplayModeDefault
+  });
+
+  /**
+   * @member size
+   * @type {string}
+   * @memberof Toolbar
+   * @description Gets or sets the size of the toolbar based on OS recommended values. 
+   *              The values for this can be "regular", "small" or "default".
+   */
+
+  util.makePropertyMapType(Toolbar.prototype, 'size', 'sizeMode', 'setSizeMode', {
+    regular:$.NSToolbarSizeModeRegular,
+    small:$.NSToolbarSizeModeSmall,
+    default:$.NSToolbarSizeModeDefault
+  });
   return Toolbar;
 })();

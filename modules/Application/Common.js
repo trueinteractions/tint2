@@ -38,5 +38,6 @@ global.System = require('System');
 global.Table = require('Table');
 global.TextInput = require('TextInput');
 global.Toolbar = require('Toolbar');
+global.ToolbarItem = require('ToolbarItem');
 global.WebView = require('WebView');
 global.Window = require('Window');

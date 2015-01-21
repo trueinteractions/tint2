@@ -1,4 +1,5 @@
-module.exports = (function() { 
+module.exports = (function() {
+  var assert = require('assert');
   var baseUtilities = require('Utilities_base');
   var $ = process.bridge.objc;
 
@@ -176,20 +177,6 @@ module.exports = (function() {
     return imageRef;
   }
 
-  function makePropertyBoolType(name,getselector,setselector) {
-    Object.defineProperty(this, name, {
-      get:function() { return this.native(getselector); },
-      set:function(value) { this.native(setselector, value ? true : false); }
-    });
-  }
-
-  function makePropertyStringType(name,getselector,setselector) {
-    Object.defineProperty(this, name, {
-      get:function() { return this.native(getselector); },
-      set:function(value) { this.native(setselector, $(value ? value : "")); }
-    });
-  }
-
   function makeNSImage(e) {
     var img = null;
     if(!e || typeof(e) !== 'string') return null;
@@ -213,6 +200,61 @@ module.exports = (function() {
     return "data:image/png;base64," + base64String;
   }
 
+  function makePropertyBoolType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native(getselector) === $.YES ? true : false; },
+      set:function(value) { this.native(setselector, value ? $.YES : $.NO); }
+    });
+  }
+
+  function makePropertyStringType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native(getselector); },
+      set:function(value) { this.native(setselector, $(value ? value.toString() : "")); }
+    });
+  }
+
+  function makePropertyMapType(obj,name,getselector,setselector,map) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var val = this.native(getselector);
+        for(key in map) {
+          if(map[key] === val) {
+            return key;
+          }
+          return null;
+        }
+      },
+      set:function(value) {
+        assert.ok(map.hasOwnProperty(value), "["+value+"] is not a valid value for "+name+" property.");
+        var mappedValue = map[value];
+        this.native(setselector, mappedValue); 
+      }
+    });
+  }
+
+  function makePropertyImageType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.private['_'+name]; },
+      set:function(e) {
+        this.private['_'+name] = e;
+        if(e) {
+          e = makeNSImage(e);
+        }
+        this.nativeView(setselector, e ? e : null);
+      }
+    });
+  }
+
+
   function errorwrap(func) {
     var wrap = function() {
       try {
@@ -233,6 +275,8 @@ module.exports = (function() {
   baseUtilities.nsArrayToArray = nsArrayToArray;
   baseUtilities.makePropertyBoolType = makePropertyBoolType;
   baseUtilities.makePropertyStringType = makePropertyStringType;
+  baseUtilities.makePropertyImageType = makePropertyImageType;
+  baseUtilities.makePropertyMapType = makePropertyMapType;
   baseUtilities.makeNSImage = makeNSImage;
   baseUtilities.errorwrap = errorwrap;
   baseUtilities.arrayToNSArray = arrayToNSArray;

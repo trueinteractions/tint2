@@ -15,8 +15,8 @@ module.exports = (function() {
    */
   function ToolbarItem() {
     var $ = process.bridge.objc;
-    this.private = {image:null, identifier:Math.round(Math.random()*1000000).toString()};
-    this.native = this.nativeView = $.NSToolbarItem('alloc')('initWithIdentifier', $(this.private.identifier));
+    this.private = {identifier:Math.round(Math.random()*1000000).toString()};
+    this.native = this.nativeView = $.NSToolbarItem('alloc')('initWithItemIdentifier', $(this.private.identifier));
     var delegateClass = $.NSObject.extend('ToolbarItemDelegate'+Math.round(Math.random()*10000));
     delegateClass.addMethod('init:','@@:', function(self) { return self; });
     delegateClass.addMethod('click:', 'v@:@', function(self, command, sender) { this.fireEvent('click'); }.bind(this));
@@ -32,10 +32,7 @@ module.exports = (function() {
    * @memberof ToolbarItem
    * @description Gets or sets the text label on the toolbar item.
    */
-  util.def(ToolbarItem.prototype, 'title',
-    function() { return this.nativeView('label').toString(); },
-    function(e) { this.nativeView('setLabel', $(e.toString())); }
-  );
+  util.makePropertyStringType(ToolbarItem.prototype, 'title', 'label', 'setLabel');
 
   /**
    * @member toolTip
@@ -43,10 +40,7 @@ module.exports = (function() {
    * @memberof ToolbarItem
    * @description Gets or sets the tool tip  on the toolbar item.
    */
-  util.def(ToolbarItem.prototype, 'toolTip',
-    function() { return this.nativeView('label').toString(); },
-    function(e) { this.nativeView('setLabel', $(e.toString())); }
-  );
+  util.makePropertyStringType(ToolbarItem.prototype, 'tooltip', 'toolTip', 'setToolTip');
 
   /**
    * @member image
@@ -54,16 +48,7 @@ module.exports = (function() {
    * @memberof ToolbarItem
    * @description Gets or sets the image to use on the toolbar item.
    */
-  util.def(ToolbarItem.prototype, 'image',
-    function() { return this.private.image; },
-    function(e) {
-      this.private.image = e;
-      if(e) {
-        e = util.makeNSImage(e);
-      }
-      this.nativeView('setImage', e ? e : null);
-  );
-
+  util.makePropertyImageType(ToolbarItem.prototype, 'image', 'image', 'setImage');
   /**
    * @member enabled
    * @type {bool}
@@ -71,11 +56,7 @@ module.exports = (function() {
    * @description Gets or sets whether the toolbar item is enabled or not. Note if set to false, the
    *              toolbar item may still be shown but dimmed to represent a disabled state.
    */
-  util.def(ToolbarItem.prototype, 'enabled',
-    function() { return this.nativeView('enabled') === $.YES ? true : false; },
-    function(e) { this.nativeView('setEnabled', e ? $.YES : $.NO); }
-  );
-
+  util.makePropertyBoolType(ToolbarItem.prototype, 'enabled', 'enabled', 'setEnabled');
 
   /**
    * @method addEventListener
