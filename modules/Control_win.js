@@ -167,38 +167,7 @@ module.exports = (function() {
     }
   );
 
-  Control.prototype.fireEvent = function(event, args) {
-    try {
-      event = event.toLowerCase();
-      var returnvalue;
-      if(!this.private.events[event]) {
-        this.private.events[event] = [];
-      }
-      (this.private.events[event]).forEach(function(item) { 
-        returnvalue = item.apply(null, args) || returnvalue; 
-      });
-      return returnvalue;
-    } catch(e) {
-      console.error(e.message);
-      console.error(e.stack);
-      process.exit(1);
-    }
-  };
-
-  Control.prototype.addEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(!this.private.events[event]) {
-      this.private.events[event] = []; 
-    }
-    this.private.events[event].push(func);
-  };
-
-  Control.prototype.removeEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
-    }
-  };
+  utils.defEvents(Control.prototype);
 
   function getConstraintSolver() {
     // WPF has an awkward inheritence schema. If we want a border on an element we have to wrap that element

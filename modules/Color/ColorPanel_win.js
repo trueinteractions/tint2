@@ -1,6 +1,7 @@
 module.exports = (function() {
   var Panel = require('Panel');
   var Color = require('Color');
+  var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
@@ -25,13 +26,7 @@ module.exports = (function() {
   ColorPanel.prototype = Object.create(Panel.prototype);
   ColorPanel.prototype.constructor = ColorPanel;
   
-  ColorPanel.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-  }
-
-  ColorPanel.prototype.addEventListener = function(event, func) { if(!this.private.events[event]) this.private.events[event] = []; this.private.events[event].push(func); }
-  ColorPanel.prototype.removeEventListener = function(event, func) { if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) this.private.events[event].splice(this.private.events[event].indexOf(func), 1); }
-
+  util.defEvents(ColorPanel.prototype);
   //TODO: This is not supported on Windows, but is on OSX, add to win?.
   //ColorPanel.prototype.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
   //ColorPanel.prototype.appendChild = ColorPanel.prototype.removeChild = null;

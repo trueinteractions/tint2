@@ -71,7 +71,13 @@ module.exports = (function() {
     function(e) {
       // Private event, do not rely on it.
       this.fireEvent('property-change', ['title', e]);
-      return this.nativeView('setTitle', $(e));
+
+      if(e.toString() === "") {
+        this.nativeView('cell')('setImagePosition', $.NSImageOnly);
+      } else {
+        this.nativeView('cell')('setImagePosition', $.NSImageLeft);
+      }
+      this.nativeView('setTitle', $(e));
     }
   );
 
@@ -141,8 +147,12 @@ module.exports = (function() {
       e = util.makeNSImage(e);
       if(e) {
         this.nativeView('setImage', e);
-        this.nativeView('cell')('setImagePosition', $.NSImageLeft);
-        this.nativeView('cell')('setImageScaling',$.NSImageScaleProportionallyDown);
+        if(this.nativeView('title').toString() === "") {
+          this.nativeView('cell')('setImagePosition', $.NSImageOnly);
+        } else {
+          this.nativeView('cell')('setImagePosition', $.NSImageLeft);
+        }
+        this.nativeView('cell')('setImageScaling',$.NSImageScaleProportionallyUpOrDown);
       }
     }
   );

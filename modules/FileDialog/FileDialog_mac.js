@@ -3,13 +3,13 @@ module.exports = (function() {
     return global.__TINT.FileDialog;
   }
   var $ = process.bridge.objc;
-
-   /**
+  var util = require('Utilities');
+  /**
     * @class FileDialog
     * @description Creates a new file dialog where a user can select a file to open or save.
     * @extends Container
     */
-   /**
+  /**
     * @new
     * @memberof FileDialog
     * @param {string} type The type of file dialog, can be "save" or "open".  Default is open if no parameter is passed in.
@@ -17,11 +17,9 @@ module.exports = (function() {
     */
   function FileDialog(type) {
     var $dialog = (type === "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
-    var allowedFileTypes = null, events = {};
+    var allowedFileTypes = null;
+    this.private = {events:{}};
 
-    function fireEvent(event, args) {
-      if(events[event]) (events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-    }
 
     /**
      * @method addEventListener
@@ -32,8 +30,6 @@ module.exports = (function() {
      *              parameter is the name of the event, the second parameter is the function
      *              to call when the event happens (e.g., a callback).
      */
-    this.addEventListener = function(event, func) { if(!events[event]) events[event] = []; events[event].push(func); }
-
     /**
      * @method removeEventListener
      * @param {string} eventName The name of the dialog event to stop listening to.
@@ -43,7 +39,7 @@ module.exports = (function() {
      *              parameter is the name of the event, the second parameter is the function
      *              that was originally given as the callback for addEventListener.
      */
-    this.removeEventListener = function(event, func) { if(events[event] && events[event].indexOf(func) != -1) events[event].splice(events[event].indexOf(func), 1); }
+     util.defEvents(this);
 
     /**
      * @member title
@@ -214,18 +210,18 @@ module.exports = (function() {
         w = w.native ? w.native : w;
         var comp = $(function(self,e) {
           if(e === $.NSFileHandlingPanelOKButton) {
-            fireEvent('select');
+            this.fireEvent('select');
           } else {
-            fireEvent('cancel');
+            this.fireEvent('cancel');
           }
-        },[$.void,['?',$.long]]);
+        }.bind(this),[$.void,['?',$.long]]);
         $dialog('beginSheetModalForWindow',w,'completionHandler',comp);
       } else {
         var e = $dialog('runModal');
         if(e === $.NSFileHandlingPanelOKButton) {
-          fireEvent('select');
+          this.fireEvent('select');
         } else {
-          fireEvent('cancel');
+          this.fireEvent('cancel');
         }
       }
     }

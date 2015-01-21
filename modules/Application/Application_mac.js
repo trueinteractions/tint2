@@ -69,14 +69,6 @@
 
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
 
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item) { 
-          item.apply(null,args); 
-        });
-      }
-    }
-
     /**
      * @method addEventListener
      * @param {string} eventName The name of the application event to start listening to.
@@ -86,13 +78,6 @@
      *              parameter is the name of the event, the second parameter is the function
      *              to call when the event happens (e.g., a callback).
      */
-    this.addEventListener = function(event, func) { 
-      if(!events[event]) {
-        events[event] = []; 
-      }
-      events[event].push(func); 
-    };
-
     /**
      * @method removeEventListener
      * @param {string} eventName The name of the application event to stop listening to.
@@ -102,11 +87,7 @@
      *              parameter is the name of the event, the second parameter is the function
      *              that was originally given as the callback for addEventListener.
      */
-    this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) !== -1) {
-        events[event].splice(events[event].indexOf(func), 1); 
-      }
-    };
+    util.defEvents(this);
 
     // unused, stub to help move us a bit closer to a standard spec
     this.launch = function() { fireEvent('launch'); };

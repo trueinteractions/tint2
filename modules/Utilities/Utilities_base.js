@@ -1,6 +1,61 @@
 module.exports = (function() {
   var utilsObj = {};
 
+
+  // Define the standard set of events we expect to use on most controls.
+  // This is by default already contained on object that inherit form Control
+  // or Container (and many others).  For objects with no inheritence this
+  // can be used to attach a set of event handling functions quickly.
+  function defineEvents(target) {
+    target.initEvents = function(event) {
+      if(!this.private) {
+        this.private = {};
+      }
+      if(!this.private.events) {
+        this.private.events = {};
+      }
+      if(!this.private.events[event]) {
+        this.private.events[event] = [];
+      }
+    }
+    target.fireEvent = function(event, args) {
+      try {
+        event = event.toLowerCase();
+        this.initEvents(event);
+        var returnvalue;
+        (this.private.events[event]).forEach(function(item) { 
+          returnvalue = item.apply(null, args) || returnvalue; 
+        });
+        return returnvalue;
+      } catch(e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
+    };
+    target.on = target.addListener = target.addEventListener = function(event, func) {
+      event = event.toLowerCase();
+      this.initEvents(event);
+      // Private event, do not rely on this, used for adding native
+      // handles when requested.
+      this.fireEvent('event-listener-added', [event]);
+      if(!this.private.events[event]) {
+        this.private.events[event] = []; 
+      }
+      this.private.events[event].push(func);
+    };
+    target.off = target.removeListener = target.removeEventListener = function(event, func) {
+      event = event.toLowerCase();
+      this.initEvents(event);
+      // Private event, do not rely on, used for removing native
+      // handles when requested.
+      this.fireEvent('event-listener-removed', [event]);
+      if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
+        this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
+      }
+    };
+  }
+
   // Defines the default parameters for all properties within Tint
   // or at least, at some point will be.  The saves as a few lines of
   // code which doesn't seem like a lot but when you have hundreds, 
@@ -135,6 +190,7 @@ module.exports = (function() {
     negate:negate,
     inverse:inverse,
     def:defineProperty,
+    defEvents:defineEvents,
     parseUnits:parseUnits
   };
 })();

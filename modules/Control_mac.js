@@ -164,6 +164,36 @@ module.exports = (function() {
     this.addEventListener('parent-dettached', function() { 
       this.private.parent = null; 
     }.bind(this));
+
+    // Fires when a new listener is attached. This only filters listeners
+    // that are mouse enter, exit and move, it attaches specific handlers
+    // to support these functions that shouldn't normal exist if no one is
+    // listening to these events (for speed reasons since they're high-throughput).
+    this.addEventListener('event-listener-added', function(event) {
+      if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
+        this.private.needsMouseTracking++;
+        if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
+          addTrackingArea.apply(this,null);
+        }
+        else if (this.private.needsMouseTracking === 1) {
+          this.addEventListener('parent-attached', addTrackingArea.bind(this));
+        }
+      }
+    }.bind(this));
+
+    // If the event mouse move is removed (or mouse exit/enter then make sure
+    // we disassociate our tracking and firing of these events internally to save
+    // ourselves quite a bit of an unnecessary performance hit.
+    this.addEventListener('event-listener-removed', function(event) {
+      if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
+        this.private.needsMouseTracking--;
+        if(this.private.needsMouseTracking === 0) {
+          this.nativeView('removeTrackingArea',this.private.trackingArea);
+          this.private.trackingArea('release');
+          this.private.trackingArea = null;
+        }
+      }
+    }.bind(this));
   }
 
   /**
@@ -370,7 +400,6 @@ module.exports = (function() {
       if(this.nativeView('superview')('isEqual',this.nativeView('window')('contentView')) && bnds.origin.y === -1) {
         offsetY = 1;
       }
-        
       return {
         x:Math.round(bnds.origin.x), 
         y:Math.round(bnds.origin.y) + offsetY, 
@@ -379,25 +408,6 @@ module.exports = (function() {
       };
     }
   );
-
-  // TODO? private, move as a function in closure?
-  Control.prototype.fireEvent = function(event, args) {
-    try {
-      event = event.toLowerCase();
-      var returnvalue;
-      if(!this.private.events[event]) {
-        this.private.events[event] = [];
-      }
-      (this.private.events[event]).forEach(function(item) { 
-        returnvalue = item.apply(null, args) || returnvalue; 
-      });
-      return returnvalue;
-    } catch(e) {
-      console.error(e.message);
-      console.error(e.stack);
-      process.exit(1);
-    }
-  };
 
   /**
    * @method addEventListener
@@ -423,22 +433,6 @@ module.exports = (function() {
    *   console.log('mouse is down over button!');
    * });
    */
-  Control.prototype.addEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
-      this.private.needsMouseTracking++;
-      if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
-        addTrackingArea.apply(this,null);
-      }
-      else if (this.private.needsMouseTracking === 1) {
-        this.addEventListener('parent-attached', addTrackingArea.bind(this));
-      }
-    }
-    if(!this.private.events[event]) {
-      this.private.events[event] = []; 
-    }
-    this.private.events[event].push(func);
-  };
 
   /**
    * @method removeEventListener
@@ -468,20 +462,7 @@ module.exports = (function() {
    * // Stop listening to event.
    * buttonNormal.removeEventListener('mousedown', mouseDown);
    */
-  Control.prototype.removeEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(event === "mouseenter" ||   event === "mouseexit" || event === "mousemove") {
-      this.private.needsMouseTracking--;
-      if(this.private.needsMouseTracking === 0) {
-        this.nativeView('removeTrackingArea',this.private.trackingArea);
-        this.private.trackingArea('release');
-        this.private.trackingArea = null;
-      }
-    }
-    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
-    }
-  };
+  util.defEvents(Control.prototype);
 
   var attributeMap = { 'left':$.NSLayoutAttributeLeft, 'right':$.NSLayoutAttributeRight, 'top':$.NSLayoutAttributeTop,
                        'bottom':$.NSLayoutAttributeBottom, 'leading':$.NSLayoutAttributeLeading, 'trailing':$.NSLayoutAttributeTrailing,

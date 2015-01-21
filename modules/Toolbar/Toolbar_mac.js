@@ -89,16 +89,29 @@ module.exports = (function() {
           child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
 
           var intrinsicSize = child.native('intrinsicContentSize');
-
-          if(this.size == "small") intrinsicSize.height = 24;
-          else intrinsicSize.height = 32;
-
-          if(intrinsicSize.width === -1 && intrinsicSize.height > 0)
-            toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
-          else if(intrinsicSize.height === -1 && intrinsicSize.width > 0)
-            toolbarItem('setMaxSize', $.NSMakeSize(intrinsicSize.height,1000));
-          else
-            toolbarItem('setMaxSize', intrinsicSize);
+          if(child instanceof Button) {
+            if(this.size == "small") {
+              intrinsicSize.height = 24;
+            } else {
+              intrinsicSize.height = 32;
+            }
+            if(intrinsicSize.width === -1) {
+              intrinsicSize.width = intrinsicSize.height;
+            }
+            if(child.title.toString() === "") {
+              child.nativeView('cell')('setImagePosition', $.NSImageOnly);
+            } else {
+              child.nativeView('cell')('setImagePosition', $.NSImageAbove);
+            }
+          }
+          if(child instanceof TextInput || intrinsicSize.width === -1) {
+            intrinsicSize.width = 1000;
+          }
+          if(intrinsicSize.height === -1) {
+            if(this.size == "small") intrinsicSize.height = 24;
+            else intrinsicSize.height = 32;
+          }
+          toolbarItem('setMaxSize', intrinsicSize);
           toolbarItem('setMinSize', intrinsicSize);
           toolbarItem('setView',child.native);
           toolbarCache[parseInt(identifier)] = toolbarItem;

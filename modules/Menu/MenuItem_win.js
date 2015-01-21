@@ -18,21 +18,7 @@ module.exports = (function() {
     if(keymodifiers) this.modifiers = keymodifiers;
   }
 
-  MenuItem.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) 
-      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-  }
-
-  MenuItem.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) 
-      this.private.events[event] = []; 
-    this.private.events[event].push(func); 
-  }
-
-  MenuItem.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
-  }
+  utilities.defEvents(MenuItem.prototype);
 /*
   Object.defineProperty(MenuItem.prototype, 'imageOn', {
     get:function() { return this.private.imgOn; },

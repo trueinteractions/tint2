@@ -12,32 +12,12 @@ module.exports = (function() {
       mainButton = null, 
       auxButton = null,
       suppression = null,
-      suppressionChecked = false,
-      events = {},
+      suppressionChecked = false
       type = "information",
       title = "",
       message = "";
 
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item) { 
-          item.apply(null,args);
-        });
-      }
-    };
-
-    this.addEventListener = function(event, func) { 
-      if(!events[event]) {
-        events[event] = []; 
-      }
-      events[event].push(func);
-    };
-
-    this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) !== -1) {
-        events[event].splice(events[event].indexOf(func), 1); 
-      }
-    };
+    utils.defEvents(this);
 
     Object.defineProperty(this, "title", {
       get:function() { return title; },
@@ -175,7 +155,7 @@ module.exports = (function() {
       var btn = new $.System.Windows.Controls.Button();
       this.native.mainbutton = btn;
       btn.previewMouseDownCallback = function() {
-        fireEvent('click',['main']);
+        this.fireEvent('click',['main']);
         w.Close();
       }.bind(this);
       btn.addEventListener('PreviewMouseDown', btn.previewMouseDownCallback);
@@ -196,7 +176,7 @@ module.exports = (function() {
         var btn2 = new $.System.Windows.Controls.Button();
         this.native.auxbutton = btn2;
         btn2.previewMouseDownCallback = function() {
-          fireEvent('click',['aux']);
+          this.fireEvent('click',['aux']);
           w.Close();
         }.bind(this);
         btn2.addEventListener('PreviewMouseDown', btn2.previewMouseDownCallback);

@@ -90,25 +90,7 @@
       this.native = new $.System.Windows.Application();
     }
 
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item) {
-          item.apply(null,args);
-        });
-      }
-    }
-
-    this.addEventListener = function(event, func) { 
-      if(!events[event]) { 
-        events[event] = [];
-      } 
-      events[event].push(func); 
-    };
-    this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) !== -1) {
-        events[event].splice(events[event].indexOf(func), 1); 
-      }
-    };
+    util.defEvents(this);
     this.launch = function() { fireEvent('launch'); };
     this.uninstall = function() { console.warn('unimplemented'); };
 
