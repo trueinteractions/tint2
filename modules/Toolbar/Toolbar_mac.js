@@ -40,28 +40,29 @@ module.exports = (function() {
    */
 
   function makeNSToolbarItemFromNSView(size,identifier,child) {
-    var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',$(identifier));
+    var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',$(identifier.toString()));
     // This is necessary, even though it would seem we're adding toolbar items with fixed height/width Auto Layout
     // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
     // masks is necessary.
     child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
 
     var intrinsicSize = child.native('intrinsicContentSize');
-    if(child instanceof Button) {
+    
+    if(child.native.toString().indexOf("NSButton") > -1) {
       if(size === "small") {
         intrinsicSize.height = 24;
       } else {
         intrinsicSize.height = 32;
       }
-      if(intrinsicSize.width === -1) {
-        intrinsicSize.width = intrinsicSize.height;
-      }
+      intrinsicSize.width = intrinsicSize.height;
     }
-    if(child instanceof TextInput || intrinsicSize.width === -1) {
-      intrinsicSize.width = 1000;
+    if(child.native.toString().indexOf("NSText") > -1) {
+      toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
+      toolbarItem('setMinSize', intrinsicSize);
+    } else {
+      toolbarItem('setMaxSize', intrinsicSize);
+      toolbarItem('setMinSize', intrinsicSize);
     }
-    toolbarItem('setMaxSize', intrinsicSize);
-    toolbarItem('setMinSize', intrinsicSize);
     toolbarItem('setView',child.native);
     return toolbarItem;
   }
@@ -105,7 +106,7 @@ module.exports = (function() {
 
     this.addEventListener('before-child-attached', function(child) {
       if(child === "space") {
-        child = { native:$("NSToolbarFlexibleSpaceItem"), private:{} };
+        child = { native:$("NSToolbarFlexibleSpaceItem"), private:{identifier:"NSToolbarFlexibleSpaceItem"} };
       }
       if (!child.private.identifier) {
         child.private.identifier = (this.private.children.length+1).toString();

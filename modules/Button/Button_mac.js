@@ -152,7 +152,7 @@ module.exports = (function() {
         } else {
           this.nativeView('cell')('setImagePosition', $.NSImageLeft);
         }
-        this.nativeView('cell')('setImageScaling',$.NSImageScaleProportionallyUpOrDown);
+        this.nativeView('cell')('setImageScaling',$.NSImageScaleProportionallyDown);
       }
     }
   );

@@ -54,7 +54,9 @@ module.exports = (function() {
       if(control.nativeView && this.nativeView) {
         this.nativeView('addSubview',control.nativeView);
       }
-      control.fireEvent('parent-attached', [this]);
+      if(control.fireEvent) {
+        control.fireEvent('parent-attached', [this]);
+      }
       this.fireEvent('child-attached', [control]);
     }
   };
