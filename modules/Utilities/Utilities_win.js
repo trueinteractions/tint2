@@ -283,6 +283,42 @@ module.exports = (function() {
     });
   }
 
+  function makePropertyMapType(obj,name,property,map) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var val = this.native[property];
+        for(var key in map) {
+          if(map.hasOwnProperty(key) && map[key] === val) {
+            return key;
+          }
+          return null;
+        }
+      },
+      set:function(value) {
+        assert.ok(map.hasOwnProperty(value), "["+value+"] is not a valid value for "+name+" property.");
+        var mappedValue = map[value];
+        this.native[property] = mappedValue; 
+      }
+    });
+  }
+
+  function makePropertyImageType(obj,name,property) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.private['_'+name]; },
+      set:function(e) {
+        var img = makeImage(e);
+        assert.ok(img, 'The image referenced could not be found: '+e);
+        assert.ok(img.Source, 'The image referenced could not be decoded: '+e);
+        this.private['_'+name] = e;
+        this.nativeView[property] = e.Source;
+      }
+    });
+  }
+
   baseUtilities.forEachItemInControl = forEachItemInControl;
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.makeImage = makeImage;
@@ -290,7 +326,8 @@ module.exports = (function() {
   baseUtilities.animateWPFProperty = animateWPFProperty;
   baseUtilities.wpfDeviceToLogicalPx = wpfDeviceToLogicalPx;
   baseUtilities.makePropertyBoolType = makePropertyBoolType;
-  baseUtilities.makePropertyBoolType = makePropertyStringType;
-
+  baseUtilities.makePropertyStringType = makePropertyStringType;
+  baseUtilities.makePropertyMapType = makePropertyMapType;
+  baseUtilities.makePropertyImageType = makePropertyImageType;
   return baseUtilities;
 })();
