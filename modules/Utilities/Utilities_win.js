@@ -196,9 +196,9 @@ module.exports = (function() {
       img = new $.System.Drawing.Icon(strm2);
     } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null)
+      if(imageRef==null) {
         img = null;
-      else {
+      } else {
         var s = $.System.Convert.FromBase64String(imageRef);
         var ms = new $.System.IO.MemoryStream(s);
         img = new $.System.Drawing.Icon(ms);

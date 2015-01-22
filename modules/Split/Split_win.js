@@ -10,17 +10,19 @@ module.exports = (function() {
     var definition = null;
     if(split.orientation === "vertical") {
       definition = new $.System.Windows.Controls.ColumnDefinition();
-      if(size && typeof(size) === 'number')
+      if(size && typeof(size) === 'number') {
         definition.Width = new $.System.Windows.GridLength(size);
-      else if(size)
+      } else if(size) {
         definition.Width = size;
+      }
     }
     else {
       definition = new $.System.Windows.Controls.RowDefinition();
-      if(size && typeof(size) === 'number')
+      if(size && typeof(size) === 'number') {
         definition.Height = new $.System.Windows.GridLength(size);
-      else if(size)
+      } else if(size) {
         definition.Height = size;
+      }
     }
     return definition;
   }
@@ -122,10 +124,11 @@ module.exports = (function() {
       this.private.backupRemove.apply(this,[this.private.dividers[index/2]]);
       this.private.dividers.splice(index/2,1);
     } else {
-      if(isVertical)
+      if(isVertical) {
         this.nativeView.ColumnDefinitions.RemoveAt(0);
-      else
+      } else {
         this.nativeView.RowDefinitions.RemoveAt(0);
+      }
       this.private.definitions.splice(index, 1);
     }
     this.private.backupRemove.apply(this,arguments);
@@ -165,8 +168,7 @@ module.exports = (function() {
         if(i === index - 1) {
           diff = position - (percent + runningPercent);
           percent = position - runningPercent;
-        } 
-        else if(i === index + 1) {
+        } else if(i === index + 1) {
           percent -= diff;
         }
 
@@ -244,9 +246,9 @@ module.exports = (function() {
           var item = this.private.definitions[index3];
           this.nativeView.RowDefinitions.Add(item);
           var child = this.private.children[index3];
-          if(child.isSplitter)
+          if(child.isSplitter) {
             setGridSplitterDirection(this.private.children[index3].native, false, index3, this.private.dividerWidth);
-          else {
+          } else {
             this.private.children[index3].native.SetValue($.System.Windows.Controls.Grid.ColumnProperty, 0);
             this.private.children[index3].native.SetValue($.System.Windows.Controls.Grid.RowProperty, index3);
           }
@@ -265,9 +267,13 @@ module.exports = (function() {
     set:function(e) {
       this.fireEvent('resize');
       var isVertical = this.orientation === "vertical" ? true : false;
-      if(e === "thin") this.private.dividerWidth = 1;
-      else if(e === "pane") this.private.dividerWidth = 3;
-      else if(e === "thick") this.private.dividerWidth = 5;
+      if(e === "thin") {
+        this.private.dividerWidth = 1;
+      } else if(e === "pane") {
+        this.private.dividerWidth = 3;
+      } else if(e === "thick") {
+        this.private.dividerWidth = 5;
+      }
       for(var i=0; i < this.private.definitions.length; i++) {
         var child = this.private.children[i];
         if(child.isSplitter)
