@@ -75,8 +75,7 @@
   var $ = process.bridge.dotnet;
 
   function Application() {
-    var events = {},
-        name = "", 
+    var name = "", 
         badgeText = "", 
         dockmenu = null, 
         icon = "";

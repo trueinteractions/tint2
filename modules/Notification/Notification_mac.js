@@ -19,7 +19,7 @@ module.exports = (function() {
   function Notification()
   {
     var $ = process.bridge.objc;
-    var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
+    var titlestring = "", textstring = "", subtitlestring = "", 
         soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "";
 
     util.defEvents(this);

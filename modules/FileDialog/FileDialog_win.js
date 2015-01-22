@@ -16,7 +16,6 @@ module.exports = (function() {
     }
     var allowedFileTypes = null, 
         allowAnyFileType = true,
-        events = {},
         canChooseDirectories = false,
         message = "",
         prompt = "";

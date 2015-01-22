@@ -40,8 +40,7 @@
    * @see process
    */
   function Application() {
-    var events = {}, 
-        name = "", badgeText = "", 
+    var name = "", badgeText = "", 
         dockmenu = null, icon = "",
         terminateWhenLastWindowClosed = $.YES;
 

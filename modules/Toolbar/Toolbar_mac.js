@@ -45,9 +45,7 @@ module.exports = (function() {
     // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
     // masks is necessary.
     child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
-
     var intrinsicSize = child.native('intrinsicContentSize');
-    
     if(child.native.toString().indexOf("NSButton") > -1) {
       if(size === "small") {
         intrinsicSize.height = 24;
@@ -76,6 +74,7 @@ module.exports = (function() {
     this.native('setSizeMode',$.NSToolbarSizeModeSmall);
 
     this.private = {children:[], identifiers:{}};
+
     this.private.getChildren = function() {
       var nsArrayChildren = $.NSMutableArray('alloc')('init');
       this.private.children.forEach(function(item) {

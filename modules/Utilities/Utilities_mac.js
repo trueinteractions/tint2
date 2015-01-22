@@ -224,8 +224,8 @@ module.exports = (function() {
       enumerable:true,
       get:function() { 
         var val = this.native(getselector);
-        for(key in map) {
-          if(map[key] === val) {
+        for(var key in map) {
+          if(map.hasOwnProperty(key) && map[key] === val) {
             return key;
           }
           return null;
