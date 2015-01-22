@@ -42,29 +42,29 @@ module.exports = (function() {
        * @description Fires when a row is removed form the table by the user or programmatically.
        */
       ['tableView:didRemoveRowView:forRow:','v@:@@l', function(self,cmd,table,row,rowIndex) { this.fireEvent('row-removed',[rowIndex]); }.bind(this)],
-      ['tableView:heightOfRow:','d@:@l', function(self,cmd,table,rowIndex) { return this.nativeView('rowHeight'); }.bind(this)],
-      ['selectionShouldChangeInTableView:','B@:@', function(self,cmd,table) { return $.YES; }.bind(this)],
-      ['tableView:shouldSelectRow:','B@:@l', function(self,cmd,table,rowIndex) { return $.YES; }.bind(this)],
-      ['tableView:shouldSelectTableColumn:','B@:@@', function(self,cmd,table,column) { return $.YES; }.bind(this)],
+      ['tableView:heightOfRow:','d@:@l', function() { return this.nativeView('rowHeight'); }.bind(this)],
+      ['selectionShouldChangeInTableView:','B@:@', function() { return $.YES; }.bind(this)],
+      ['tableView:shouldSelectRow:','B@:@l', function() { return $.YES; }.bind(this)],
+      ['tableView:shouldSelectTableColumn:','B@:@@', function() { return $.YES; }.bind(this)],
       /**
        * @event select
        * @memberof Table
        * @description Fires when the selected rows change by the user or programmatically. This fires 
        *              prior to the selection actually changing.
        */
-      ['tableViewSelectionIsChanging:','v@:@', function(self,cmd,notif) { this.fireEvent('select'); }.bind(this)],
+      ['tableViewSelectionIsChanging:','v@:@', function() { this.fireEvent('select'); }.bind(this)],
       /**
        * @event selected
        * @memberof Table
        * @description Fires when the selected rows change by the user or programmatically. This fires
        *              after the selection has changed.
        */
-      ['tableViewSelectionDidChange:','v@:@', function(self,cmd,notif) { this.fireEvent('selected'); }.bind(this)],
-      ['tableView:shouldTypeSelectForEvent:withCurrentSearchString:','B@:@@@', function(self,cmd,table,eventnotif,searchString) { return $.YES; }.bind(this)],
-      ['tableView:shouldReorderColumn:toColumn:','B@:@ll', function(self,cmd,table,fromColumnIndex,toColumnIndex) { return $.YES; }.bind(this)],
+      ['tableViewSelectionDidChange:','v@:@', function() { this.fireEvent('selected'); }.bind(this)],
+      ['tableView:shouldTypeSelectForEvent:withCurrentSearchString:','B@:@@@', function() { return $.YES; }.bind(this)],
+      ['tableView:shouldReorderColumn:toColumn:','B@:@ll', function() { return $.YES; }.bind(this)],
       ['tableView:didDragTableColumn:','v@:@@', function(self,cmd,table,column) { this.fireEvent('column-move',[column('identifier').toString()]); }.bind(this)],
-      ['tableViewColumnDidMove:','v@:@', function(self,cmd,notif) { this.fireEvent('column-moved'); }.bind(this)],
-      ['tableViewColumnDidResize:','v@:@', function(self,cmd,notif) { this.fireEvent('column-resized'); }.bind(this)],
+      ['tableViewColumnDidMove:','v@:@', function() { this.fireEvent('column-moved'); }.bind(this)],
+      ['tableViewColumnDidResize:','v@:@', function() { this.fireEvent('column-resized'); }.bind(this)],
       /**
        * @event column-clicked
        * @memberof Table
@@ -79,8 +79,8 @@ module.exports = (function() {
        * @description Fires when the user begins to click a column but prior to any processing.
        */
       ['tableView:mouseDownInHeaderOfTableColumn:','v@:@@', function(self,cmd,table,column) { this.fireEvent('column-mousedown', [column('identifier').toString()]); }.bind(this)],
-      ['tableView:shouldTrackCell:forTableColumn:row:','B@:@@l', function(self,cmd,table,cell,column,rowIndex) { return $.YES; }.bind(this)],
-      ['numberOfRowsInTableView:','l@:@', function(self,cmd,table) { return this.nativeView('numberOfRows'); }.bind(this)] 
+      ['tableView:shouldTrackCell:forTableColumn:row:','B@:@@l', function() { return $.YES; }.bind(this)],
+      ['numberOfRowsInTableView:','l@:@', function() { return this.nativeView('numberOfRows'); }.bind(this)] 
     ]);
     this.nativeClass = this.nativeClass || $.NSTableView;
     this.nativeViewClass = this.nativeViewClass || $.NSTableView;
@@ -112,7 +112,7 @@ module.exports = (function() {
     column('headerCell')('setStringValue', $(e));
     this.nativeView('addTableColumn', column);
     this.nativeView('reloadData');
-  }
+  };
 
   /**
    * @method removeColumn
@@ -127,7 +127,7 @@ module.exports = (function() {
     this.private.columns[e] = null;
     this.private.columnWidth[e] = null;
     this.nativeView('reloadData');
-  }
+  };
 
   /**
    * @method addRow
@@ -141,7 +141,7 @@ module.exports = (function() {
     ndx = ndx || this.nativeView('numberOfRows');
     this.nativeView('insertRowsAtIndexes', $.NSIndexSet('indexSetWithIndex',ndx),
                 'withAnimation', $.NSTableViewAnimationSlideUp);
-  }
+  };
 
   /**
    * @method removeRow
@@ -154,7 +154,7 @@ module.exports = (function() {
     ndx = ndx || this.nativeView('numberOfRows');
     this.nativeView('removeRowsAtIndexes', $.NSIndexSet('indexSetWithIndex',ndx),
             'withAnimation', $.NSTableViewAnimationSlideUp);
-  }
+  };
 
   /**
    * @method moveColumn
@@ -166,7 +166,8 @@ module.exports = (function() {
   Table.prototype.moveColumn = function(ndx, toNdx) {
     this.native('moveColumn', $.NSIndexSet('indexSetWithIndex',ndx),
             'toColumn', $.NSIndexSet('indexSetWithIndex',toNdx));
-  }
+  };
+
   /**
    * @method moveRow
    * @memberof Table
@@ -177,7 +178,7 @@ module.exports = (function() {
   Table.prototype.moveRow = function(ndx, toNdx) {
     this.native('moveRowAtIndex', $.NSIndexSet('indexSetWithIndex',ndx),
             'toIndex', $.NSIndexSet('indexSetWithIndex',toNdx));
-  }
+  };
 
   /**
    * @method setColumnWidth
@@ -190,7 +191,7 @@ module.exports = (function() {
     var column = this.private.columns[id];
     this.private.columnWidth[id] = e;
     column('setWidth',e);
-  }
+  };
 
   /**
    * @method setValueAt
@@ -226,7 +227,7 @@ module.exports = (function() {
     this.private.views[columnId][row] = value;
     this.nativeView('reloadDataForRowIndexes', $.NSIndexSet('indexSetWithIndex',row),
                     'columnIndexes',$.NSIndexSet('indexSetWithIndex', this.nativeView('columnWithIdentifier',$(columnId))));
-  }
+  };
 
   /**
    * @member rowHeightStyle
@@ -276,6 +277,16 @@ module.exports = (function() {
    */
   util.makePropertyBoolType(Table.prototype, 'emptySelection','allowsEmptySelection','setAllowsEmptySelection');
 
+
+  function setIntercellSpacing(type, obj, value) {
+    var rect = obj('intercellSpacing');
+    if(type === "y") {
+      rect.height = value;
+    } else if (type === "x") {
+      rect.width = value;
+    }
+    obj('setIntercellSpacing', rect);
+  }
   /**
    * @member spaceX
    * @type {number}
@@ -285,11 +296,7 @@ module.exports = (function() {
    */
   Object.defineProperty(Table.prototype, 'spaceX', {
     get:function() { return this.nativeView('intercellSpacing').width; },
-    set:function(e) { 
-      var rect = this.nativeView('intercellSpacing');
-      rect.width = e;
-      this.nativeView('setIntercellSpacing', rect);
-    }
+    set:function(e) { setIntercellSpacing('x', this.nativeView, e); }
   });
 
   /**
@@ -301,11 +308,7 @@ module.exports = (function() {
    */
   Object.defineProperty(Table.prototype, 'spaceY', {
     get:function() { return this.nativeView('intercellSpacing').height; },
-    set:function(e) { 
-      var rect = this.nativeView('intercellSpacing');
-      rect.height = e;
-      this.nativeView('setIntercellSpacing', rect);
-    }
+    set:function(e) { setIntercellSpacing('y', this.nativeView, e); }
   });
 
   /**
