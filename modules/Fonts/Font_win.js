@@ -123,13 +123,18 @@ module.exports = (function() {
     Object.defineProperty(this, 'weight', {
       get:function() { return this.private.weight; },
       set:function(e) { 
-        if(e > 999) e = 900;
-        if(e < 100) e = 100;
+        if(e > 999) {
+          e = 900;
+        }
+        if(e < 100) {
+          e = 100;
+        }
         this.private.weight = e;
-        if(this.private.weight >= 500)
+        if(this.private.weight >= 500) {
           this.private.bold = true;
-        else
+        } else {
           this.private.bold = false;
+        }
         rebuildNativeFont(this);
       }
     });
