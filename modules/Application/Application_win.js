@@ -94,9 +94,7 @@
     this.uninstall = function() { console.warn('unimplemented'); };
 
 
-    util.def(this, 'packaged',
-      function() { return process.packaged; }
-    );
+    util.def(this, 'packaged', function() { return process.packaged; } );
 
     this.resource = function(path) {
       if(path.indexOf('app:///') === -1) {

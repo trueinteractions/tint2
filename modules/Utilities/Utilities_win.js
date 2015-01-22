@@ -265,12 +265,32 @@ module.exports = (function() {
     story.Begin(target, $.System.Windows.Media.Animation.HandoffBehavior.Compose);
   }
 
+  function makePropertyBoolType(obj,name,property,truevlaue,falsevalue) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native[property] === truevalue ? true : false; },
+      set:function(value) { this.native[property] = value ? truevalue : falsevalue; }
+    });
+  }
+
+  function makePropertyStringType(obj,name,property) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native[property].toString(); },
+      set:function(value) { this.native[property] = value.toString(); }
+    });
+  }
+
   baseUtilities.forEachItemInControl = forEachItemInControl;
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.makeImage = makeImage;
   baseUtilities.makeWinFormsIcon = makeWinFormsIcon;
   baseUtilities.animateWPFProperty = animateWPFProperty;
   baseUtilities.wpfDeviceToLogicalPx = wpfDeviceToLogicalPx;
+  baseUtilities.makePropertyBoolType = makePropertyBoolType;
+  baseUtilities.makePropertyBoolType = makePropertyStringType;
 
   return baseUtilities;
 })();
