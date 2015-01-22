@@ -18,7 +18,7 @@ module.exports = (function() {
   System.getIconForFile = function(e) {
     var img = $.NSWorkspace('sharedWorkspace')('iconForFile', $(e));
     return utils.makeURIFromNSImage(img);
-  }
+  };
 
   function writeImageToBase64(image) {
     var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
@@ -136,13 +136,13 @@ module.exports = (function() {
     }
   }
 
-  // OSX Specific Types
+  // OSX Specific Types, undocumented on purpose.
   System.disableCrashReporter = function() { 
     exec('defaults write com.apple.CrashReporter DialogType none');
-  }
+  };
   System.enableCrashReporter = function() {
     exec('defaults write com.apple.CrashReporter DialogType crashreport');
-  }
+  };
 
   /**
    * @method keyAtControl
@@ -157,7 +157,7 @@ module.exports = (function() {
   System.keyAtControl = function(input) {
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, keyCodeFromChar(input), true));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, keyCodeFromChar(input), false));
-  }
+  };
   /**
    * @method scrollAt
    * @memberof System
@@ -174,7 +174,7 @@ module.exports = (function() {
     var point = $.CGPointMake(x, y);
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateScrollWheelEvent($.kCGScrollEventUnitPixel, 1, upOrDown));
-  }
+  };
   /**
    * @method scrollAtControl
    * @memberof System
@@ -191,7 +191,7 @@ module.exports = (function() {
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
     var scrollEvent = $.CGEventCreateScrollWheelEvent(null, 1, 1, upOrDown);
     $.CGEventPost($.kCGHIDEventTap, scrollEvent);
-  }
+  };
   /**
    * @method clickAt
    * @memberof System
@@ -209,7 +209,7 @@ module.exports = (function() {
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
-  }
+  };
   /**
    * @method clickAtControl
    * @memberof System
@@ -223,11 +223,9 @@ module.exports = (function() {
     var bounds = control.boundsOnScreen;
     bounds.x = bounds.x + bounds.width/2;
     bounds.y = bounds.y + bounds.height/2;
-    var point = $.CGPointMake(bounds.x, bounds.y);
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
-  }
+    System.clickAt(bounds.x, bounds.y);
+  };
+
   /**
    * @method rightClickAt
    * @memberof System
@@ -245,7 +243,8 @@ module.exports = (function() {
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
-  }
+  };
+
   /**
    * @method rightClickAtControl
    * @memberof System
@@ -259,11 +258,8 @@ module.exports = (function() {
     var bounds = control.boundsOnScreen;
     bounds.x = bounds.x + bounds.width/2;
     bounds.y = bounds.y + bounds.height/2;
-    var point = $.CGPointMake(bounds.x, bounds.y);
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, point, 0));
-    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, point, 0));
-  }
+    System.rightClickAt(bounds.x, bounds.y);
+  };
 
   /**
    * @method takeSnapshotOfActiveScreen
@@ -276,7 +272,8 @@ module.exports = (function() {
   System.takeSnapshotOfActiveScreen = function() {
     var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
     return writeImageToBase64(image, path);
-  }
+  };
+
   /**
    * @method takeSnapshotOfTopWindow
    * @memberof System
@@ -287,7 +284,8 @@ module.exports = (function() {
   System.takeSnapshotOfTopWindow = function() {
     var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListExcludeDesktopElements, 1, $.kCGWindowImageDefault);
     return writeImageToBase64(image);
-  }
+  };
+
   /**
    * @method takeSnapshotOfCurrentWindow
    * @memberof System
@@ -301,7 +299,8 @@ module.exports = (function() {
       var windowNumber = currentWindow('windowNumber');
       return takeSnapshotOfWindowNumber(windowNumber);
     }
-  }
+  };
+
   /**
    * @method takeSnapshotOfWindow
    * @memberof System
@@ -314,7 +313,8 @@ module.exports = (function() {
   System.takeSnapshotOfWindow = function(windowObj) {
     var windowNumber = windowObj.native('windowNumber');
     return takeSnapshotOfWindowNumber(windowNumber);
-  }
+  };
+
   /**
    * @method takeSnapshotOfControl
    * @memberof System
@@ -329,7 +329,7 @@ module.exports = (function() {
     var bitmapRep = $.NSBitmapImageRep('alloc')('initWithData',img('TIFFRepresentation'));
     var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
     return imageData('base64EncodedStringWithOptions',0);
-  }
+  };
 
   return System;
 })();
