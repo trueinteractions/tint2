@@ -90,7 +90,7 @@
     }
 
     util.defEvents(this);
-    this.launch = function() { fireEvent('launch'); };
+    this.launch = function() { this.fireEvent('launch'); };
     this.uninstall = function() { console.warn('unimplemented'); };
 
 
@@ -211,60 +211,28 @@
       };
     };
 
-    function getActiveWindow() {
+    // $.FlashWPFWindow.WindowExtensions.FlashWindow(_win,20);
+    function execAppCommand(command) {
+      var _win = null;
       var coll = this.native.Windows.GetEnumerator();
       while (coll.MoveNext()) {
-        var _win = coll.Current;
+        var tmp = coll.Current;
         if(_win.IsActive) {
-          return _win;
+          _win = tmp;
         }
-        $.FlashWPFWindow.WindowExtensions.FlashWindow(_win,20);
       }
-      return null;
+      if(_win !== null) {
+        $.System.Windows.Input.ApplicationCommands[command].Execute(null,_win);
+      }
     }
 
-    this.paste = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.Paste.Execute(null,_win);
-      }
-    };
-    this.copy = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.Copy.Execute(null,_win);
-      }
-    };
-    this.cut = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.Cut.Execute(null,_win);
-      }
-    };
-    this.undo = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.Undo.Execute(null,_win);
-      }
-    };
-    this.redo = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.Redo.Execute(null,_win);
-      }
-    };
-    this.delete = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.Delete.Execute(null,_win);
-      }
-    };
-    this.selectAll = function() {
-      var _win = getActiveWindow();
-      if(_win !== null) {
-        $.System.Windows.Input.ApplicationCommands.SelectAll.Execute(null,_win);
-      }
-    };
+    this.paste = function() { execAppCommand('Paste'); };
+    this.copy = function() { execAppCommand('Copy'); };
+    this.cut = function() { execAppCommand('Cut'); };
+    this.undo = function() { execAppCommand('Undo'); };
+    this.redo = function() { execAppCommand('Redo'); };
+    this.delete = function() { execAppCommand('Delete'); };
+    this.selectAll = function() { execAppCommand('SelectAll'); };
   }
 
   global.application = new Application();
