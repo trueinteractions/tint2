@@ -18,7 +18,7 @@ module.exports = (function() {
    //   Panel.call(this, $.System.Windows.Forms.ColorDialog, $.System.Windows.Forms.ColorDialog, options);
    // }
     this.private = {visible:false,events:{}};
-    this.native = new $.System.Windows.Forms.ColorDialog();
+    this.nativeView = this.native = new $.System.Windows.Forms.ColorDialog();
     this.native.FullOpen = true;
     this.native.SolidColorOnly = false;
   }
@@ -31,10 +31,7 @@ module.exports = (function() {
   //ColorPanel.prototype.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
   //ColorPanel.prototype.appendChild = ColorPanel.prototype.removeChild = null;
 
-  Object.defineProperty(ColorPanel.prototype, 'showAlpha', {
-    get:function() { return !this.native.SolidColorOnly; },
-    set:function(e) { this.native.SolidColorOnly = (e ? false : true); }
-  });
+  util.makePropertyBoolType(ColorPanel.prototype, 'showAlpha', 'SolidColorOnly', false, true);
 
   Object.defineProperty(ColorPanel.prototype, 'selected', {
     get:function() { 

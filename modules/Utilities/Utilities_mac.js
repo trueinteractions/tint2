@@ -259,7 +259,6 @@ module.exports = (function() {
     });
   }
 
-
   function errorwrap(func) {
     var wrap = function() {
       try {

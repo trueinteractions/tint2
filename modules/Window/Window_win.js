@@ -245,12 +245,12 @@ module.exports = (function() {
     }
   });
 
-  util.makePropertyStringType(Window.property, 'title', 'Title');
+  util.makePropertyStringType(Window.prototype, 'title', 'Title');
 
 
   function setWindowCoordinates(type, winObj, value) {
     var workingArea = $.System.Windows.SystemParameters.WorkArea;
-    if(e === 'center') {
+    if(value === 'center') {
       if(this.animateOnPositionChange) {
         util.animateWPFProperty(winObj, $.System.Windows.Window.LeftProperty, 225, winObj.Left, workingArea.width/2 - winObj.Width/2);
         util.animateWPFProperty(winObj, $.System.Windows.Window.TopProperty, 225, winObj.Top, workingArea.height/2 - winObj.Height/2);
@@ -259,18 +259,18 @@ module.exports = (function() {
         winObj.Top = workingArea.height/2 - winObj.Height/2;
       }
     } else {
-      e = util.parseUnits(e);
+      value = util.parseUnits(value);
       if(this.animateOnPositionChange) {
         util.animateWPFProperty(
           winObj, 
-          (type == "top" ? $.System.Windows.Window.TopProperty : $.System.Windows.Window.LeftProperty), 
+          (type === "top" ? $.System.Windows.Window.TopProperty : $.System.Windows.Window.LeftProperty), 
           225, 
-          (type == "top" ? winObj.Top : winObj.Left) , 
-          e + (type === "top" ? workingArea.Y : workingArea.X));
+          (type === "top" ? winObj.Top : winObj.Left) , 
+          value + (type === "top" ? workingArea.Y : workingArea.X));
       } else if (type === "top") {
-        winObj.Top = e + workingArea.Y;
+        winObj.Top = value + workingArea.Y;
       } else if (type === "left") {
-        winObj.Left = e + workingArea.X;
+        winObj.Left = value + workingArea.X;
       }
     }
   }

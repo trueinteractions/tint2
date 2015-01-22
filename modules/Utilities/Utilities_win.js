@@ -265,7 +265,7 @@ module.exports = (function() {
     story.Begin(target, $.System.Windows.Media.Animation.HandoffBehavior.Compose);
   }
 
-  function makePropertyBoolType(obj,name,property,truevlaue,falsevalue) {
+  function makePropertyBoolType(obj,name,property,truevalue,falsevalue) {
     Object.defineProperty(obj, name, {
       configurable:true,
       enumerable:true,
@@ -293,8 +293,8 @@ module.exports = (function() {
           if(map.hasOwnProperty(key) && map[key] === val) {
             return key;
           }
-          return null;
         }
+        return null;
       },
       set:function(value) {
         assert.ok(map.hasOwnProperty(value), "["+value+"] is not a valid value for "+name+" property.");
