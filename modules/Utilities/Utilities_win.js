@@ -1,6 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.dotnet;
   var $$ = process.bridge.win32;
+  var assert = require('assert');
   var baseUtilities = require('Utilities_base');
 
 
