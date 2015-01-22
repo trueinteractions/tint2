@@ -5,6 +5,7 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var Container = require('Container');
   var TextInput = require('TextInput');
+  var util = require('Utilities');
 
   /**
    * @class Table
@@ -236,38 +237,15 @@ module.exports = (function() {
    *              "medium" or "large". Note that this will override the value of
    *              rowHeight.
    */
-  Object.defineProperty(Table.prototype, 'rowHeightStyle', {
-    get:function() { 
-      var rowSize = this.nativeView('rowSizeStyle');
-      if(rowSize === $.NSTableViewRowSizeStyleDefault) {
-        return "default";
-      } else if(rowSize === $.NSTableViewRowSizeStyleSmall) {
-        return "small";
-      } else if(rowSize === $.NSTableViewRowSizeStyleMedium) {
-        return "medium";
-      } else if(rowSize === $.NSTableViewRowSizeStyleLarge) {
-        return "large";
-      } else {
-        return "unknown";
-      }
-    },
-    set:function(e) { 
-      if(e === "default") { 
-        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleDefault);
-      } else if(e === "small") {
-        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleSmall);
-      } else if(e === "medium") {
-        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleMedium);
-      } else if(e === "large") { 
-        this.nativeView('setRowSizeStyle',$.NSTableViewRowSizeStyleLarge);
-      }
-    }
+  util.makePropertyMapType(Table.prototype, 'rowHeightStyle', 'rowSizeStyle', 'setRowSizeStyle', {
+    'default':$.NSTableViewRowSizeStyleDefault,
+    'small':$.NSTableViewRowSizeStyleSmall,
+    'medium':$.NSTableViewRowSizeStyleMedium,
+    'large':$.NSTableViewRowSizeStyleLarge
   });
 
-  Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
-    get:function() { return this.nativeView('allowsColumnRecording') === $.YES ? true : false; },
-    set:function(e) { this.nativeView('setAllowsColumnReordering', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(Table.prototype, 'columnsCanBeMoved','allowsColumnReordering','setAllowsColumnReordering');
+
   /**
    * @member columnsCanBeResized
    * @type {boolean}
@@ -275,10 +253,7 @@ module.exports = (function() {
    * @description Gets or sets whether the columns can be resized by the user.
    * @default true
    */
-  Object.defineProperty(Table.prototype, 'columnsCanBeResized', {
-    get:function() { return this.nativeView('allowsColumnResizing') === $.YES ? true : false; },
-    set:function(e) { this.nativeView('setAllowsColumnResizing', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(Table.prototype, 'columnsCanBeResized','allowsColumnResizing','setAllowsColumnResizing');
 
   /**
    * @member multipleSelection
@@ -287,10 +262,7 @@ module.exports = (function() {
    * @description Gets or sets whether multiple items can be selected, the default value is 
    *              true.
    */
-  Object.defineProperty(Table.prototype, 'multipleSelection', {
-    get:function() { return this.nativeView('allowsMultipleSelection') === $.YES ? true : false; },
-    set:function(e) { this.nativeView('setAllowsMultipleSelection', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(Table.prototype, 'multipleSelection','allowsMultipleSelection','setAllowsMultipleSelection');
 
   /**
    * @member emptySelection
@@ -302,10 +274,7 @@ module.exports = (function() {
    *              selection.  This only prevents the user for deselecting an item
    *              it does not prevent no items from being selected.
    */
-  Object.defineProperty(Table.prototype, 'emptySelection', {
-    get:function() { return this.nativeView('allowsEmptySelection') === $.YES ? true : false; },
-    set:function(e) { this.nativeView('setAllowsEmptySelection', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(Table.prototype, 'emptySelection','allowsEmptySelection','setAllowsEmptySelection');
 
   /**
    * @member spaceX
@@ -346,13 +315,7 @@ module.exports = (function() {
    * @description Gets or sets the height of the rows by pixel value.  Note
    *              that setting this will override the value of rowHeightStyle.
    */
-  Object.defineProperty(Table.prototype, 'rowHeight', {
-    get:function() { return this.nativeView('rowHeight'); },
-    set:function(e) { 
-      this.nativeView('setRowHeight',e.native);
-      this.nativeView('setNeedsDisplay', $.YES);
-    }
-  });
+  util.makePropertyBoolType(Table.prototype, 'rowHeight','rowHeight','setRowHeight',{display:true});
 
   /**
    * @member numberOfColumns
@@ -360,9 +323,7 @@ module.exports = (function() {
    * @memberof Table
    * @description Gets the number of columns in the table.
    */
-  Object.defineProperty(Table.prototype, 'numberOfColumns', {
-    get:function() { return this.nativeView('numberOfColumns'); }
-  });
+  util.def(Table.prototype, 'numberOfColumns', function() { return this.nativeView('numberOfColumns'); });
 
   /**
    * @member numberOfRows
@@ -370,9 +331,7 @@ module.exports = (function() {
    * @memberof Table
    * @description Gets the number of rows in the table.
    */
-  Object.defineProperty(Table.prototype, 'numberOfRows', {
-    get:function() { return this.nativeView('numberOfRows'); }
-  });
+  util.def(Table.prototype, 'numberOfRows', function() { return this.nativeView('numberOfRows'); });
 
   /**
    * @member selectedRows
@@ -405,13 +364,7 @@ module.exports = (function() {
    * @description Gets or sets whether a table will have alternating colors or not.
    *              The alternating colors default to system values.
    */
-  Object.defineProperty(Table.prototype, 'alternatingColors', {
-    get:function() { return this.nativeView('usesAlternatingRowBackgroundColors') === $.YES ? true : false; },
-    set:function(e) { 
-      this.nativeView('setUsesAlternatingRowBackgroundColors',e ? $.YES : $.NO);
-      this.nativeView('setNeedsDisplay', $.YES);
-    }
-  });
+  util.makePropertyBoolType(Table.prototype, 'alternatingColors','usesAlternatingRowBackgroundColors','setUsesAlternatingRowBackgroundColors',{display:true});
 
   global.__TINT.Table = Table;
 

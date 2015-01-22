@@ -200,12 +200,17 @@ module.exports = (function() {
     return "data:image/png;base64," + base64String;
   }
 
-  function makePropertyBoolType(obj,name,getselector,setselector) {
+  function makePropertyBoolType(obj,name,getselector,setselector,options) {
     Object.defineProperty(obj, name, {
       configurable:true,
       enumerable:true,
       get:function() { return this.native(getselector) === $.YES ? true : false; },
-      set:function(value) { this.native(setselector, value ? $.YES : $.NO); }
+      set:function(value) { 
+        this.native(setselector, value ? $.YES : $.NO);
+        if(options && options.display) {
+          this.nativeView('setNeedsDisplay', $.YES);
+        }
+      }
     });
   }
 
