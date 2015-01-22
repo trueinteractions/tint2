@@ -20,10 +20,10 @@ module.exports = (function() {
 
   util.makePropertyImageType(ImageWell.prototype, 'image', 'Source');
   util.makePropertyMapType(ImageWell.prototype, 'scale', 'Stretch', {
-    'constrain':$.System.Windows.Media.UniformToFill,
-    'fit':$.System.Windows.Media.Fill,
-    'contain':$.System.Windows.Media.Uniform,
-    'none':$.System.Windows.Media.None
+    'constrain':$.System.Windows.Media.Stretch.UniformToFill,
+    'fit':$.System.Windows.Media.Stretch.Fill,
+    'contain':$.System.Windows.Media.Stretch.Uniform,
+    'none':$.System.Windows.Media.Stretch.None
   });
 
   global.__TINT.ImageWell = ImageWell;

@@ -4,7 +4,6 @@ module.exports = (function() {
   var assert = require('assert');
   var baseUtilities = require('Utilities_base');
 
-
   function wpfDeviceToLogicalPx(w,p) {
     var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
     return t.Transform(p);
