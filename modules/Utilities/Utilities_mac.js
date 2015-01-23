@@ -26,7 +26,7 @@ module.exports = (function() {
   function nsDictionaryToObject(nsdictionary) {
     var allKeys = nsdictionary('allKeys');
     var count = allKeys('count');
-    var values = []
+    var values = [];
     for(var i=0; i < count; i++) {
       values[allKeys('objectAtIndex',i)('description')('UTF8String')] = nsdictionary('objectForKey',allKeys('objectAtIndex',i))('description')('UTF8String');
     }
@@ -182,15 +182,19 @@ module.exports = (function() {
 
   function makeNSImage(e) {
     var img = null;
-    if(!e || typeof(e) !== 'string') return null;
-    else if(e.indexOf(':') > -1)
+    if(!e || typeof(e) !== 'string') {
+      return null;
+    } else if(e.indexOf(':') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e)));
-    else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
+    } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
-    else {
+    } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null) img = null;
-      else img = $.NSImage('imageNamed',$(imageRef));
+      if(imageRef === null) {
+        img = null;
+      } else {
+        img = $.NSImage('imageNamed',$(imageRef));
+      }
     }
     return img;
   }
@@ -255,8 +259,8 @@ module.exports = (function() {
           if(map.hasOwnProperty(key) && map[key] === val) {
             return key;
           }
-          return null;
         }
+        return null;
       },
       set:function(value) {
         assert.ok(map.hasOwnProperty(value), "["+value+"] is not a valid value for "+name+" property.");
