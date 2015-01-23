@@ -27,7 +27,7 @@ function run($utils) {
   input.height = 25 * 1.5;
 
   setTimeout(function() {
-    $utils.assert(input.textcolor.red === 1);
+    $utils.assert(input.textcolor.red === 1, 'expected red == 1 got: ', input.textcolor);
     $utils.assert(input.textcolor.green === 0);
     $utils.assert(input.textcolor.blue === 0);
     $utils.assert(input.textcolor.alpha === 1);

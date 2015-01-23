@@ -28,7 +28,6 @@ module.exports = (function() {
       } else {
         this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
       }
-
       // convert pxl based measure to point (18/17) * PixelSize
       this.native.FontSize = this.native.FontSize * 1.05882352941176;
       this.private.defaultBorder = this.nativeView.BorderThickness;

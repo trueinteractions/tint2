@@ -1,6 +1,11 @@
 module.exports = (function() {
+  if(global.__TINT.Scroll) {
+    return global.__TINT.Scroll;
+  }
+
   var Container = require('Container');
   var Color = require('Color');
+  var util = require('Utilities');
   var $ = process.bridge.objc;
 
   /**
@@ -54,32 +59,11 @@ module.exports = (function() {
    *              "none", "line", "normal" or "concave".  The default is "normal".
    * @default "normal"
    */
-  Object.defineProperty(Scroll.prototype, 'border', {
-    get:function() {
-      var s = this.nativeView('borderType');
-      if(s === $.NSNoBorder) {
-        return "none";
-      } else if (s === $.NSLineBorder) {
-        return "line";
-      } else if (s === $.NSBezelBorder) {
-       return "normal";
-      } else if (s === $.NSGrooveBorder) {
-        return "concave";
-      } else {
-        return "unknown";
-      }
-    },
-    set:function(e) { 
-      if(e === "none") {
-        this.nativeView('setBorderType', $.NSNoBorder);
-      } else if (e === "line") {
-        this.nativeView('setBorderType', $.NSLineBorder);
-      } else if (e === "normal") {
-        this.nativeView('setBorderType', $.NSBezelBorder);
-      } else if (e === "concave") {
-        this.nativeView('setBorderType', $.NSGrooveBorder);
-      }
-    }
+  util.makePropertyMapType(Scroll.prototype, 'border', 'borderType', 'setBorderType', {
+    none:$.NSNoBorder,
+    line:$.NSLineBorder,
+    normal:$.NSBezelBorder,
+    concave:$.NSGrooveBorder
   });
 
   /**
@@ -91,10 +75,7 @@ module.exports = (function() {
    *              the bounds of the scroll view.
    * @default true
    */
-  Object.defineProperty(Scroll.prototype, 'vertical', {
-    get:function() { return this.native('hasVerticalScroller') === $.YES ? true : false; },
-    set:function(e) { this.native('setHasVerticalScroller', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(Scroll.prototype, 'vertical', 'hasVerticalScroller', 'setHasVerticalScroller');
 
   /**
    * @member horizontal
@@ -104,10 +85,7 @@ module.exports = (function() {
    *              The default is true.
    * @default true
    */
-  Object.defineProperty(Scroll.prototype, 'horizontal', {
-    get:function() { return this.native('hasHorizontalScroller') === $.YES ? true : false; },
-    set:function(e) { this.native('setHasHorizontalScroller', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(Scroll.prototype, 'horizontal', 'hasHorizontalScroller', 'setHasHorizontalScroller');
 
   /**
    * @member speed
@@ -116,10 +94,7 @@ module.exports = (function() {
    * @description Gets or sets the speed of the scrolling by unit of lines.
    * @default 1
    */
-  Object.defineProperty(Scroll.prototype, 'speed', {
-    get:function() { return this.native('lineScroll'); },
-    set:function(e) { this.native('setLineScroll', e); }
-  });
+  util.makePropertyNumberType(Scroll.prototype, 'speed', 'lineScroll', 'setLineScroll');
 
   /**
    * @member backgroundColor
@@ -142,6 +117,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.Scroll = Scroll;
   return Scroll;
 
 })();

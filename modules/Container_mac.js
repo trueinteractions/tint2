@@ -69,11 +69,10 @@ module.exports = (function() {
    * @see removeChild
    */
   Container.prototype.removeChild = function(control) {
-    this.fireEvent('remove', [control]);
+    control = this.fireEvent('before-child-dettached', [control]) || control;
     if(this.private.children.indexOf(control) !== -1) {
       this.private.children.splice(this.private.children.indexOf(control),1);
     }
-    control = this.fireEvent('before-child-dettached', [control]) || control;
     if(control.nativeView) {
       control.nativeView('removeFromSuperview');
     }

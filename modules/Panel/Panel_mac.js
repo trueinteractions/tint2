@@ -77,10 +77,7 @@ module.exports = (function() {
    * @description Gets or sets if the panel is currently floating or docked.
    * @default "window"
    */
-  util.def(Panel.prototype, 'floating',
-    function() { return this.native('isFloatingPanel') === $.YES ? true : false; },
-    function(e) { this.native('setFloatingPanel', e ? $.YES : $.NO); }
-  );
+  util.makePropertyBoolType(Panel.prototype, 'floating', 'isFloatingPanel', 'setFloatingPanel');
 
   global.__TINT.Panel = Panel;
 

@@ -139,7 +139,7 @@ module.exports = (function() {
     // This is simply to ensure if we remove our content view we properly adhere
     // to OSX/objective-c behavior. OSX/ObjC requires we notify its removal for
     // consistant behavior of events being thrown from the underlying delegate.
-    this.addEventListener('remove', function(control) { 
+    this.addEventListener('before-child-dettached', function(control) { 
       this.native('contentView')('willRemoveSubview',control.nativeView); 
     });
   }

@@ -130,12 +130,12 @@ module.exports = (function() {
     var key = keyCodeFromChar(input);
     $w32.user32.keybd_event(key, 0, 0, 0);
     $w32.user32.keybd_event(key, 0, 0x0002, 0);
-  }
+  };
 
   System.rightClickAtControl = function(control) {
     var z = control.boundsOnScreen;
     return this.rightClickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
-  }
+  };
 
   System.scrollAt = function(x, y, upOrDown) {
     this.clickAt(x,y);
@@ -155,7 +155,7 @@ module.exports = (function() {
       System.keyAtControl('DOWN');
       System.keyAtControl('DOWN');
     }
-  }
+  };
 
   System.scrollAtControl = function(control, upOrDown) {
     var z = control.boundsOnScreen;
@@ -172,7 +172,7 @@ module.exports = (function() {
       bounds = getBoundsOnScreenOfWPFItem(control);
     }
     return this.clickAt(Math.round(bounds.x + bounds.width/2) ,Math.round(bounds.y + bounds.height/2));
-  }
+  };
 
   System.clickAt = function(x,y) {
     var dpi = Screens.active.scaleFactor;
@@ -184,7 +184,7 @@ module.exports = (function() {
     $w32.user32.mouse_event(0x8000|0x0001, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0);  //MOUSEMOVE 
     $w32.user32.mouse_event(0x8000|0x0002, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0);  //LMOUSEDOWN 
     $w32.user32.mouse_event(0x8000|0x0004, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0); //LMOUSEUP
-  }
+  };
 
   System.rightClickAt = function(x,y) {
     var dpi = Screens.active.scaleFactor;
@@ -193,7 +193,7 @@ module.exports = (function() {
     $w32.user32.ShowCursor(1);
     $w32.user32.mouse_event(0x0008, 0, 0, 0, 0); //RMOUSEDOWN
     $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
-  }
+  };
 
   System.takeSnapshotOfActiveScreen = function(path) {
     var scaleFactor = 1; // don't use a scalefactor as we're dealing with winforms 100%.
@@ -207,7 +207,7 @@ module.exports = (function() {
     var mem = new $.System.IO.MemoryStream();
     image.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
     return mem.ToArray().toString('base64');
-  }
+  };
 
   System.takeSnapshotOfTopWindow = function(path) {
     var hwnd = $w32.user32.GetForegroundWindow();
@@ -224,7 +224,7 @@ module.exports = (function() {
     var mem = new $.System.IO.MemoryStream();
     image.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
     return mem.ToArray().toString('base64');
-  }
+  };
 
   System.takeSnapshotOfWindowNumber = function(windowNumber, path) {
     var windows = $.System.Windows.Application.Current.Windows;
@@ -235,7 +235,7 @@ module.exports = (function() {
         return this.takeSnapshotOfWindow(item, path);
       }
     }
-  }
+  };
 
   System.takeSnapshotOfCurrentWindow = function(path) {
     var windows = $.System.Windows.Application.Current.Windows;
@@ -246,7 +246,7 @@ module.exports = (function() {
         return this.takeSnapshotOfWindow(item, path);
       }
     }
-  }
+  };
 
   System.takeSnapshotOfWindow = function(windowObj, path) {
     if(windowObj.native) {
@@ -267,7 +267,7 @@ module.exports = (function() {
     var mem = new $.System.IO.MemoryStream();
     myImage.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
     return mem.ToArray().toString('base64');
-  }
+  };
 
   System.takeSnapshotOfControl = function(c, path) {
     if(c.native) {
@@ -293,7 +293,7 @@ module.exports = (function() {
       var stm = new $.System.IO.MemoryStream();
       png.Save(stm);
       return stm.ToArray().toString('base64');
-  }
+  };
 
   return System;
 })();

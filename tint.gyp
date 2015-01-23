@@ -103,6 +103,7 @@
       'modules/Split/Split_win.js',
       'modules/System/System_win.js',
       'modules/Table/Table_win.js',
+      'modules/Table/TableHelper_win.js',
       'modules/TextInput/TextInput_win.js',
       'modules/Toolbar/Toolbar_win.js',
       'modules/Toolbar/ToolbarItem_win.js',

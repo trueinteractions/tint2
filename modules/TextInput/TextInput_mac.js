@@ -1,8 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
+  var util = require('Utilities');
   var Container = require('Container');
-  var Color = require('Color');
-  var Font = require('Font');
 
   /**
    * @class TextInput
@@ -78,10 +77,7 @@ module.exports = (function() {
    * @memberof TextInput
    * @description Gets or sets the text as the value of the input or label.
    */
-  Object.defineProperty(TextInput.prototype, 'value', {
-    get:function() { return this.nativeView('stringValue')('UTF8String'); },
-    set:function(e) { this.nativeView('setStringValue',$(e)); }
-  });
+  util.makePropertyStringType(TextInput.prototype, 'value', 'stringValue', 'setStringValue');
 
   /**
    * @member enabled
@@ -91,10 +87,7 @@ module.exports = (function() {
    *              control to gray out and visual indicate its unable to take input
    *              or is disabled.
    */
-  Object.defineProperty(TextInput.prototype, 'enabled', {
-    get:function() { return this.nativeView('isEnabled'); },
-    set:function(e) { this.nativeView('setEnabled',e); }
-  });
+  util.makePropertyBoolType(TextInput.prototype, 'enabled', 'isEnabled', 'setEnabled');
 
   /**
    * @member textcolor
@@ -102,10 +95,7 @@ module.exports = (function() {
    * @memberof TextInput
    * @description Gets or sets the color of the text on the input or label.
    */
-  Object.defineProperty(TextInput.prototype, 'textcolor', {
-    get:function() { return new Color(this.nativeView('textColor')); },
-    set:function(e) { this.nativeView('setTextColor',(new Color(e)).native); }
-  });
+  util.makePropertyColorType(TextInput.prototype, 'textcolor', 'textColor', 'setTextColor');
 
   /**
    * @member font
@@ -113,10 +103,7 @@ module.exports = (function() {
    * @memberof TextInput
    * @description Gets or sets the font (family, size, weight, etc) of the text on the input or label.
    */
-  Object.defineProperty(TextInput.prototype, 'font', {
-    get:function() { return new Font(this.nativeView('font')); },
-    set:function(e) { this.nativeView('setFont',(new Font(e)).native); }
-  });
+  util.makePropertyFontType(TextInput.prototype, 'font', 'font', 'setFont');
 
   /**
    * @member readonly
@@ -188,6 +175,7 @@ module.exports = (function() {
    * @description Gets or sets whether the control is visible on screen.
    *              The default is true.
    */
+  //util.makePropertyBoolType(TextInput.prototype, 'visible', 'isHidden', 'setHidden');
   Object.defineProperty(TextInput.prototype, 'visible', {
     get:function() { return !this.nativeView('isHidden'); },
     set:function(e) { this.nativeView('setHidden',e ? false : true); }

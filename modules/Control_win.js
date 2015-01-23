@@ -104,22 +104,11 @@ module.exports = (function() {
   Control.prototype.animateOnSizeChange = false;
   Control.prototype.animateOnPositionChange = false;
 
-  utils.def(Control.prototype, 'alpha',
-    function() { return this.nativeView.Opacity; },
-    function(e) { this.nativeView.Opacity = e; }
-  );
+  utils.makePropertyNumberType(Control.prototype, 'alpha', 'Opacity');
 
-  utils.def(Control.prototype, 'visible',
-    function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
-    function(e) {
-      this.private.states.visible = e;
-      if(e) {
-        this.native.Visibility = $.System.Windows.Visibility.Visible;
-      } else {
-        this.native.Visibility = $.System.Windows.Visibility.Hidden;
-      }
-    }
-  );
+  utils.makePropertyBoolType(Control.prototype, 'visible', 'Visibility',
+    $.System.Windows.Visibility.Visible,
+    $.System.Windows.Visibility.Hidden);
 
   utils.def(Control.prototype, 'boundsOnScreen',
     function() {

@@ -8,11 +8,11 @@
 
   require('Bridge');
   var $ = process.bridge.objc;
-  var util = require('Utilities');
   process.bridge.objc.import('Foundation',0);
   process.bridge.objc.import('Cocoa',0);
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
+  var util = require('Utilities');
   
   // Help with garbage collection, this allows objective-c to reclaim
   // objective-c objects once we're finished with them. The FFI bridge in

@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Utilities) {
+    return global.__TINT.Utilities;
+  }
   var assert = require('assert');
   var baseUtilities = require('Utilities_base');
   var $ = process.bridge.objc;
@@ -204,9 +207,19 @@ module.exports = (function() {
     Object.defineProperty(obj, name, {
       configurable:true,
       enumerable:true,
-      get:function() { return this.native(getselector) === $.YES ? true : false; },
-      set:function(value) { 
-        this.native(setselector, value ? $.YES : $.NO);
+      get:function() {
+        if(options && options.inverse) {
+          return this.native(getselector) === $.NO ? true : false;
+        } else {
+          return this.native(getselector) === $.YES ? true : false;
+        }
+      },
+      set:function(value) {
+        if(options && options.inverse) {
+          this.native(setselector, value ? $.YES : $.NO);
+        } else {
+          this.native(setselector, value ? $.NO : $.YES);
+        }
         if(options && options.display) {
           this.nativeView('setNeedsDisplay', $.YES);
         }
@@ -220,6 +233,15 @@ module.exports = (function() {
       enumerable:true,
       get:function() { return this.native(getselector); },
       set:function(value) { this.native(setselector, $(value ? value.toString() : "")); }
+    });
+  }
+
+  function makePropertyNumberType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native(getselector); },
+      set:function(value) { this.native(setselector, value ? value : 0); }
     });
   }
 
@@ -259,6 +281,38 @@ module.exports = (function() {
     });
   }
 
+  function makePropertyColorType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var Color = require('Color');
+        return (new Color(this.private['_'+name])); 
+      },
+      set:function(e) {
+        var Color = require('Color');
+        this.private['_'+name] = e;
+        this.nativeView(setselector, e ? ((new Color(e)).native) : null);
+      }
+    });
+  }
+
+  function makePropertyFontType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var Font = require('Font');
+        return (new Font(this.private['_'+name])); 
+      },
+      set:function(e) {
+        var Font = require('Font');
+        this.private['_'+name] = e;
+        this.nativeView(setselector, e ? ((new Font(e)).native) : null);
+      }
+    });
+  }
+
   function errorwrap(func) {
     var wrap = function() {
       try {
@@ -273,8 +327,6 @@ module.exports = (function() {
   }
 
   baseUtilities.getImageFromString = getImageFromString;
-  baseUtilities.parseUnits = baseUtilities.parseUnits;
-  baseUtilities.parseColor = baseUtilities.parseColor;
   baseUtilities.nsDictionaryToObject = nsDictionaryToObject;
   baseUtilities.nsArrayToArray = nsArrayToArray;
   baseUtilities.makePropertyBoolType = makePropertyBoolType;
@@ -285,7 +337,11 @@ module.exports = (function() {
   baseUtilities.errorwrap = errorwrap;
   baseUtilities.arrayToNSArray = arrayToNSArray;
   baseUtilities.makeURIFromNSImage = makeURIFromNSImage;
-  
+  baseUtilities.makePropertyColorType = makePropertyColorType;
+  baseUtilities.makePropertyFontType = makePropertyFontType;
+  baseUtilities.makePropertyNumberType = makePropertyNumberType;
+
+  global.__TINT.Utilities = baseUtilities;
   return baseUtilities;
 })();
 

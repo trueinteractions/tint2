@@ -16,11 +16,12 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Window;
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
     Container.call(this, options);
-    this.native.Content = this.nativeView;
+    this.native.Content = new $.System.Windows.Controls.DockPanel();
+    this.native.Content.LastChildFill = true;
+    this.native.Content.Children.Add(this.nativeView);
+    this.nativeView.SetValue($.System.Windows.Controls.DockPanel.DockProperty, $.System.Windows.Controls.Dock.Bottom);
 
-    var closing = function() { 
-      this.fireEvent('close'); 
-    }.bind(this);
+    var closing = function() { this.fireEvent('close'); }.bind(this);
     var closed = function() {
       global.application.private.windowCount--;
       this.fireEvent('closed'); 
@@ -28,15 +29,9 @@ module.exports = (function() {
         process.exit(0);
       }
     }.bind(this);
-    var sizeChanged = function() { 
-      this.fireEvent('resize'); 
-    }.bind(this);
-    var deactivated = function() { 
-      this.fireEvent('blur'); 
-    }.bind(this);
-    var activated = function() { 
-      this.fireEvent('focus'); 
-    }.bind(this);
+    var sizeChanged = function() { this.fireEvent('resize'); }.bind(this);
+    var deactivated = function() { this.fireEvent('blur'); }.bind(this);
+    var activated = function() { this.fireEvent('focus'); }.bind(this);
     var stateChanged = function() {
       if(this.native.WindowState === $.System.Windows.WindowState.Maximized && 
           this.native.WindowStyle === $.System.Windows.WindowStyle.None && 
@@ -126,31 +121,21 @@ module.exports = (function() {
   //});
 
   Object.defineProperty(Window.prototype, 'menu', {
-    get:function() { 
-      return this.private.menu; 
-    },
+    get:function() { return this.private.menu; },
     set:function(e) {
-      if(this.private.menu !== null) {
-        this.nativeView.RemoveLayoutConstraint(this.private.menuConst1);
-        this.nativeView.RemoveLayoutConstraint(this.private.menuConst2);
-        this.nativeView.RemoveLayoutConstraint(this.private.menuConst3);
-        this.nativeView.Internalchildren.Remove(this.private.menuNative);
-        this.private.menuConst1 = null;
-        this.private.menuConst2 = null;
-        this.private.menuConst3 = null;
-        this.private.menuNative = null;
-      }
-      this.private.menu = e;
-      this.private.menu.parent = this.nativeView;
       if(e) {
+        this.private.menu = e;
+        this.private.menu.parent = this.nativeView;
         this.private.menuNative = new $.System.Windows.Controls.Menu();
         for(var i=0; i < e.children.length; i++) {
           this.private.menuNative.Items.Add(e.children[i].native);
         }
-        this.nativeView.InternalChildren.Add(this.private.menuNative);
-        this.private.menuConst1 = this.nativeView.AddLayoutConstraint(this.nativeView,'Left','=',this.private.menuNative,'Left',0,0);
-        this.private.menuConst2 = this.nativeView.AddLayoutConstraint(this.nativeView,'Top','=',this.private.menuNative,'Top',0,0);
-        this.private.menuConst3 = this.nativeView.AddLayoutConstraint(this.nativeView,'Width','=',this.private.menuNative,'Width',1,0);
+        this.native.Content.Children.Insert(0,this.private.menuNative);
+        this.private.menuNative.SetValue($.System.Windows.Controls.DockPanel.DockProperty, $.System.Windows.Controls.Dock.Top);
+      } else if (this.private.menu) {
+        this.native.Content.Children.Remove(this.private.menuNative);
+        this.private.menuNative = null;
+        this.private.menu = null;
       }
     }
   });
@@ -158,32 +143,13 @@ module.exports = (function() {
   Object.defineProperty(Window.prototype, 'toolbar', {
     get:function() { return this.private.toolbar; },
     set:function(e) {
-      if(this.frame === false && e) {
-        if(global.application.warn) {
-          console.warn('Cannot add a toolbar to a window that has Window.frame = false;');
-        }
-        return;
-      }
-      if(e) {
+      if(e && this.frame) {
         this.private.toolbar = e;
-        this.native.Content = new $.System.Windows.Controls.Grid();
-        this.native.Content.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
-        this.native.Content.VerticalAlignment = $.System.Windows.VerticalAlignment.Stretch;
-        var r1 = new $.System.Windows.Controls.RowDefinition();
-        r1.Height = new $.System.Windows.GridLength(1, $.System.Windows.GridUnitType.Auto);
-        var r2 = new $.System.Windows.Controls.RowDefinition();
-        r2.Height = new $.System.Windows.GridLength(1, $.System.Windows.GridUnitType.Star);
-        this.native.Content.RowDefinitions.Add(r1);
-        this.native.Content.RowDefinitions.Add(r2);
-        this.private.toolbar.native.SetValue($.System.Windows.Controls.Grid.RowProperty, 0);
-        this.nativeView.SetValue($.System.Windows.Controls.Grid.RowProperty, 1);
-        this.native.Content.InternalChildren.Add(this.private.toolbar.native);
-        this.native.Content.InternalChildren.Add(this.nativeView);
+        this.native.Content.Children.Insert(this.native.Content.Children.Count - 1, this.private.toolbar.native);
+        this.private.toolbar.native.SetValue($.System.Windows.Controls.DockPanel.DockProperty, $.System.Windows.Controls.Dock.Top);
       } else if(this.private.toolbar) {
+        this.native.Content.Children.Remove(this.private.toolbar.native);
         this.private.toolbar = null;
-        this.native.Content.InternalChildren.Remove(this.private.toolbar.native);
-        this.native.Content.InternalChildren.Remove(this.nativeView);
-        this.native.Content = this.nativeView;
       }
     }
   });

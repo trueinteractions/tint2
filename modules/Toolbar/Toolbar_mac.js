@@ -9,7 +9,7 @@ module.exports = (function() {
    *              added and customized per the user preferences. Note that items in the toolbar 
    *              are not guaranteed to show depending on how the user decides to remove/add items.
    *              A toolbar can be assigned to a window using Window.toolbar.
-   * @extends Control
+   * @extends Container
    * @see Window
    */
   /**
@@ -122,24 +122,8 @@ module.exports = (function() {
     }.bind(this));
   } 
 
-  util.defEvents(Toolbar.prototype);
-  util.def(Toolbar.prototype, 'children', function() { return this.private.children; });
-
-  /**
-   * @method appendChild
-   * @param {child} The control to append to the toolbar control.
-   * @memberof Toolbar
-   * @description appendChild adds a new control to the toolbar.
-   */
-  Toolbar.prototype.appendChild = Container.prototype.appendChild;
-  
-  /**
-   * @method removeChild
-   * @param {child} The control to remove from the toolbar.
-   * @memberof Toolbar
-   * @description removeChild removes a control from the toolbar.
-   */
-  Toolbar.prototype.removeChild = Container.prototype.removeChild;
+  Toolbar.prototype = Object.create(Container.prototype);
+  Toolbar.prototype.constructor = Toolbar;
 
   /**
    * @member state

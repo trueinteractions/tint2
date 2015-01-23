@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Font) {
+    return global.__TINT.Font;
+  }
   var $ = process.bridge.objc;
   var $utilities = require('Utilities');
   var fontManager = $.NSFontManager('sharedFontManager');
@@ -222,5 +225,6 @@ module.exports = (function() {
     return values;
   }
 */
+  global.__TINT.Font = Font;
   return Font;
 })();

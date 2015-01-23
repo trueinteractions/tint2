@@ -1,7 +1,7 @@
 module.exports = (function() {
-  if(global.__TINT.TextInput) {
-    return global.__TINT.TextInput;
-  }
+  //if(global.__TINT.TextInput) {
+  //  return global.__TINT.TextInput;
+  //}
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var Color = require('Color');
@@ -19,10 +19,14 @@ module.exports = (function() {
         first = false;
       }
     }.bind(this));
-    var keyUp = function() {
+    var keyDown = function(sender, eventInfo) {
       if(first) {
         this.fireEvent('inputstart');
         first = false;
+      }
+      eventInfo = process.bridge.dotnet.fromPointer(eventInfo);
+      if(eventInfo.Key.Name === $.System.Windows.Input.Key.Enter.Name) {
+        this.fireEvent('inputend');
       }
     }.bind(this);
     var focus = function() { first = true; }.bind(this);
@@ -41,11 +45,11 @@ module.exports = (function() {
     } else {
       this.native.addEventListener('TextInput', textChanged);
     }
-    this.native.addEventListener('KeyUp', keyUp);
+    this.native.addEventListener('KeyDown', keyDown);
     this.private.callbacks.push(focus);
     this.private.callbacks.push(lostFocus);
     this.private.callbacks.push(textChanged);
-    this.private.callbacks.push(keyUp);
+    this.private.callbacks.push(keyDown);
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;
     this.private.previousBorder = this.native.BorderBrush;

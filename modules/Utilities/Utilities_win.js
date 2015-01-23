@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Utilities) {
+    return global.__TINT.Utilities;
+  }
   var $ = process.bridge.dotnet;
   var $$ = process.bridge.win32;
   var assert = require('assert');
@@ -283,6 +286,15 @@ module.exports = (function() {
     });
   }
 
+  function makePropertyNumberType(obj,name,property) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native[property]; },
+      set:function(value) { this.native[property] = value ? value : 0; }
+    });
+  }
+
   function makePropertyMapType(obj,name,property,map) {
     Object.defineProperty(obj, name, {
       configurable:true,
@@ -329,5 +341,8 @@ module.exports = (function() {
   baseUtilities.makePropertyStringType = makePropertyStringType;
   baseUtilities.makePropertyMapType = makePropertyMapType;
   baseUtilities.makePropertyImageType = makePropertyImageType;
+  baseUtilities.makePropertyNumberType = makePropertyNumberType;
+
+  global.__TINT.Utilities = baseUtilities;
   return baseUtilities;
 })();

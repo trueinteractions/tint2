@@ -141,29 +141,18 @@ module.exports = (function() {
     }
 
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
-    options.delegates.forEach(function(item) {
-      nativeViewExtended.addMethod(item[0],item[1],item[2]);
-    });
+    options.delegates.forEach(function(item) { nativeViewExtended.addMethod(item[0],item[1],item[2]); });
     nativeViewExtended.register();
 
     if(!options.doNotInitialize) {
       this.nativeView = nativeViewExtended('alloc')('init');
-      if(this.nativeClass === this.nativeViewClass) {
-        this.native = this.nativeView;
-      } else {
-        this.native = this.nativeClass('alloc')('init');
-      }
+      this.native = (this.nativeClass === this.nativeViewClass) ? this.nativeView : this.nativeClass('alloc')('init');
       this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     }
 
     this.nativeViewClass = nativeViewExtended;
-
-    this.addEventListener('parent-attached', function(p) { 
-      this.private.parent = p; 
-    }.bind(this));
-    this.addEventListener('parent-dettached', function() { 
-      this.private.parent = null; 
-    }.bind(this));
+    this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
+    this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
 
     // Fires when a new listener is attached. This only filters listeners
     // that are mouse enter, exit and move, it attaches specific handlers
@@ -174,8 +163,7 @@ module.exports = (function() {
         this.private.needsMouseTracking++;
         if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
           addTrackingArea.apply(this,null);
-        }
-        else if (this.private.needsMouseTracking === 1) {
+        } else if (this.private.needsMouseTracking === 1) {
           this.addEventListener('parent-attached', addTrackingArea.bind(this));
         }
       }
@@ -236,10 +224,7 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @screenshot-control {dateWell}
    */
-  util.def(Control.prototype, 'alpha', 
-    function() { return this.nativeView('alphaValue'); },
-    function(e) { return this.nativeView('setAlphaValue', e); }
-  );
+  util.makePropertyNumberType(Control.prototype, 'alpha', 'alphaValue','setAlphaValue');
 
   /**
    * @member visible
@@ -259,10 +244,7 @@ module.exports = (function() {
    *  dateWell.visible = false; // Make our date picker hidden.
    * @screenshot-window {win}
    */
-  util.def(Control.prototype, 'visible',
-    function() { return !this.nativeView('isHidden'); },
-    function(e) { return this.nativeView('setHidden', !e); }
-  );
+  util.makePropertyBoolType(Control.prototype, 'visible', 'isHidden', 'setHidden', {inverse:true});
 
   // Helper function to convert OSX coordinate spaces to 
   // top-left.
@@ -464,12 +446,25 @@ module.exports = (function() {
    */
   util.defEvents(Control.prototype);
 
-  var attributeMap = { 'left':$.NSLayoutAttributeLeft, 'right':$.NSLayoutAttributeRight, 'top':$.NSLayoutAttributeTop,
-                       'bottom':$.NSLayoutAttributeBottom, 'leading':$.NSLayoutAttributeLeading, 'trailing':$.NSLayoutAttributeTrailing,
-                       'width':$.NSLayoutAttributeWidth, 'height':$.NSLayoutAttributeHeight, 'center':$.NSLayoutAttributeCenterX,
-                       'middle':$.NSLayoutAttributeCenterY, 'baseline':$.NSLayoutAttributeBaseline, '<':$.NSLayoutRelationLessThanOrEqual,
-                       '<=':$.NSLayoutRelationLessThanOrEqual, '>':$.NSLayoutRelationGreaterThanOrEqual, 
-                       '>=':$.NSLayoutRelationGreaterThanOrEqual, '=':$.NSLayoutRelationEqual, '==':$.NSLayoutRelationEqual };
+  var attributeMap = { 
+    'left':$.NSLayoutAttributeLeft,
+    'right':$.NSLayoutAttributeRight,
+    'top':$.NSLayoutAttributeTop,
+    'bottom':$.NSLayoutAttributeBottom,
+    'leading':$.NSLayoutAttributeLeading,
+    'trailing':$.NSLayoutAttributeTrailing,
+    'width':$.NSLayoutAttributeWidth,
+    'height':$.NSLayoutAttributeHeight,
+    'center':$.NSLayoutAttributeCenterX,
+    'middle':$.NSLayoutAttributeCenterY,
+    'baseline':$.NSLayoutAttributeBaseline,
+    '<':$.NSLayoutRelationLessThanOrEqual,
+    '<=':$.NSLayoutRelationLessThanOrEqual,
+    '>':$.NSLayoutRelationGreaterThanOrEqual, 
+    '>=':$.NSLayoutRelationGreaterThanOrEqual,
+    '=':$.NSLayoutRelationEqual,
+    '==':$.NSLayoutRelationEqual
+  };
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
     var constraint = $.NSLayoutConstraint('constraintWithItem',

@@ -1,5 +1,6 @@
 module.exports = (function() {
   var Button = require('Button');
+  var util = require('Utilities');
   var $ = process.bridge.objc;
   /**
    * @class DropDown
@@ -35,10 +36,7 @@ module.exports = (function() {
    *              pop over the button.  The default is false.
    * @default false
    */
-  Object.defineProperty(DropDown.prototype, 'pullsdown', {
-    get:function() { return this.nativeView('pullsDown') === $.YES ? true : false; },
-    set:function(e) { this.nativeView('setPullsDown', e ? $.YES : $.NO); }
-  });
+  util.makePropertyBoolType(DropDown.prototype, 'pullsdown', 'pullsDown', 'setPullsDown');
 
   /**
    * @member options
@@ -61,10 +59,7 @@ module.exports = (function() {
    * @memberof DropDown
    * @description Gets or sets the shown title label on the button.
    */
-  Object.defineProperty(DropDown.prototype, 'value', {
-    get:function() { return this.nativeView('titleOfSelectedItem')('UTF8String'); },
-    set:function(e) { this.nativeView('setTitle', $(e)); }
-  });
+  util.makePropertyStringType(DropDown.prototype, 'value', 'titleOfSelectedItem', 'setTitle');
 
   return DropDown;
 })();

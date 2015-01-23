@@ -4,15 +4,14 @@ module.exports = (function() {
   }
 
   var TextInput = require('TextInput');
+  var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
   function DropDown(options) {
     options = options || {};
-
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
     TextInput.call(this, options);
-
     this.native.addEventListener('PreviewMouseDown', function() {
       if(this.private.contextMenu) {
         this.private.contextMenu.IsOpen = !this.private.contextMenu.IsOpen;
@@ -26,18 +25,9 @@ module.exports = (function() {
   DropDown.prototype = Object.create(TextInput.prototype);
   DropDown.prototype.constructor = DropDown;
 
-  Object.defineProperty(DropDown.prototype, 'pullsdown', {
-    get:function() {
-      if(this.private.contextMenu)
-        return this.native.ContextMenu.Placement != $.System.Windows.Controls.Primitives.PlacementMode.Center;
-      else
-        return false;
-    },
-    set:function(e) { 
-      if(e) this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
-      else this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
-    }
-  })
+  util.makePropertyBoolType(DropDown.prototype, 'pullsdown', 
+    $.System.Windows.Controls.Primitives.PlacementMode.Bottom,
+    $.System.Windows.Controls.Primitives.PlacementMode.Center);
 
   Object.defineProperty(DropDown.prototype, 'options', {
     get:function() { return this.private.menu; },
@@ -62,10 +52,7 @@ module.exports = (function() {
     }
   });
 
-  Object.defineProperty(DropDown.prototype, 'value', {
-    get:function() { return this.native.SelectionBoxItem.toStirng(); },
-    set:function(e) { this.native.SelectionBoxItem = e.toString(); }
-  });
+  util.makePropertyStringType(DropDown.prototype, 'value', 'SelectionBoxItem');
 
   global.__TINT.DropDown = DropDown;
   return DropDown;

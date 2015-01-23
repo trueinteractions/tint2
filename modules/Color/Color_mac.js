@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.Color) {
+    return global.__TINT.Color;
+  }
   var $ = process.bridge.objc;
   var TinyColor = require('Color_base');
 
@@ -68,5 +71,6 @@ module.exports = (function() {
    */
   Object.defineProperty(Color.prototype, 'alpha', { get:function() { return this.native('alphaComponent'); }});
 
+  global.__TINT.Color = Color;
   return Color;
 })();

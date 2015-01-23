@@ -84,6 +84,7 @@ function createEnum(typeNative, memberName) {
     var ename = dotnet.execGetProperty(nameEnumerator, 'Current');
     var evalue = dotnet.execGetProperty(valueEnumerator, 'Current');
     obj[ename] = evalue;
+    obj[ename].Name = dotnet.execMethod(evalue, "ToString");
   }
   return obj;
 }
@@ -96,8 +97,11 @@ function createField(target, typeNative, typeName, memberNative, memberName, sta
       configurable:true,
       enumerable:true,
       get:function() {
-        if(static) return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
-        else return wrap(dotnet.execGetField(this.pointer, memberName));
+        if(static) {
+          return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
+        } else {
+          return wrap(dotnet.execGetField(this.pointer, memberName));
+        }
       },
       set:function(e) { 
         dotnet.execSetField((static ? this.classPointer : this.pointer),memberName,unwrap(e)); 
@@ -112,7 +116,9 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
   var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
   objdest[memberName] = function() {
     var s = typeSignature(memberName, arguments);
-    if(!this._methods) this._methods = {};
+    if(!this._methods) {
+      this._methods = {};
+    }
     if(!this._methods[s.signature]) {
       var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
@@ -122,7 +128,9 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
   }
   objdest[memberName+"Async"] = function() {
     var s = typeSignature(memberName, arguments);
-    if(!this._methods) this._methods = {};
+    if(!this._methods) {
+      this._methods = {};
+    }
     if(!this._methods[s.signature]) {
       var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
@@ -139,16 +147,19 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
     configurable:true,
     enumerable:true,
     get:function() {
-      if(!this.props) this.props={};
+      if(!this.props) {
+        this.props={};
+      }
       if(!this.props[memberName]) {
         this.props[memberName] = static ? 
           dotnet.getStaticPropertyObject(this.classPointer, memberName) : 
           dotnet.getPropertyObject(this.pointer, memberName);
       }
-      if(typeof(this.props[memberName]) !== 'undefined' && this.props[memberName] !== null)
+      if(typeof(this.props[memberName]) !== 'undefined' && this.props[memberName] !== null) {
         return wrap(dotnet.getProperty(this.props[memberName], static ? null : this.pointer)); 
-      else
+      } else {
         return null;
+      }
     },
     set:function(e) {
       if(!this.props) this.props={};
