@@ -82,7 +82,7 @@ module.exports = (function() {
     column.parent = this;
     this.private.columns.push(column);
     for(var i=0; i < this.private.rows.length; i++) {
-      var cell = new Cell();
+      var cell = new tableHelper.Cell();
       var row = this.private.rows[i];
       this.private.setCell(cell, column, row);
     }
@@ -123,7 +123,7 @@ module.exports = (function() {
   };
 
   Table.prototype.moveRow = function(ndx, toNdx) {
-    var row = this.private.findRowByIndex(ndx)
+    var row = this.private.findRowByIndex(ndx);
     row.index = toNdx;
   };
 
@@ -197,6 +197,7 @@ module.exports = (function() {
   Object.defineProperty(Table.prototype, 'spaceX', {
     get:function() { return this.private.spaceX; },
     set:function(e) {
+      this.private.spaceX = e;
       this.private.items.forEach(function(e) { 
         e.native.BorderThickness.Left = (this.private.spaceX / 2);
         e.native.BorderThickness.Right = (this.private.spaceX / 2);
