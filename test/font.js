@@ -35,7 +35,7 @@ function run($utils) {
   $utils.assert(font.weight === 900);
   $utils.assert(font.bold === true);
   font.bold = false;
-  $utils.assert(font.weight === 500); // Default for no bolding on MacOSX 10.10 for Arial
+  $utils.assert(font.weight === 500, 'expected font.weight==500, but equaled:'+font.weight); // Default for no bolding on MacOSX 10.10 for Arial
   $utils.assert(font.bold === false);
   font.italic = true;
   $utils.assert(font.italic === true);

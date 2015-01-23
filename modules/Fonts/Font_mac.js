@@ -37,9 +37,7 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'face', { 
       get:function() { return this.native('fontName').toString(); },
-      set:function(e) { 
-        this.native = fontManager('convertFont', this.native,'toFace', $(e.toString()));
-      }
+      set:function(e) { this.native = fontManager('convertFont', this.native,'toFace', $(e.toString())); }
     });
 
     /**
@@ -51,9 +49,7 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'size', { 
       get:function() { return this.native('pointSize'); },
-      set:function(e) { 
-        this.native = fontManager('convertFont', this.native, 'toSize', $(e.toString()));
-      }
+      set:function(e) { this.native = fontManager('convertFont', this.native, 'toSize', $(e.toString())); }
     }); 
 
     /**
@@ -65,10 +61,18 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'family', { 
       get:function() { return this.native('familyName').toString(); },
-      set:function(e) { 
-        this.native = fontManager('convertFont', this.native, 'toFamily', $(e.toString()));
-      }
+      set:function(e) { this.native = fontManager('convertFont', this.native, 'toFamily', $(e.toString())); }
     });
+
+    var convertFont = function(boolValue, on, off) {
+      if(boolValue) {
+          this.native = fontManager('convertFont', this.native,'toHaveTrait', on);
+          this.native = fontManager('convertFont', this.native,'toNotHaveTrait', off);
+        } else {
+          this.native = fontManager('convertFont', this.native,'toNotHaveTrait', on);
+          this.native = fontManager('convertFont', this.native,'toHaveTrait', off);
+        }
+    }.bind(this);
 
     /**
      * @member italic
@@ -79,15 +83,7 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'italic', {
       get:function() { return (fontManager('traitsOfFont', this.native) & $.NSItalicFontMask) === $.NSItalicFontMask ? true : false; },
-      set:function(e) {
-        if(e) {
-          this.native = fontManager('convertFont', this.native,'toHaveTrait',$.NSItalicFontMask);
-          this.native = fontManager('convertFont', this.native,'toNotHaveTrait',$.NSUnitalicFontMask);
-        } else {
-          this.native = fontManager('convertFont', this.native,'toNotHaveTrait',$.NSItalicFontMask);
-          this.native = fontManager('convertFont', this.native,'toHaveTrait',$.NSUnitalicFontMask);
-        }
-      }
+      set:function(e) { convertFont(e, $.NSItalicFontMask, $.NSUnitalicFontMask); }
     });
 
     /**
@@ -99,15 +95,7 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'bold', {
       get:function() { return (fontManager('traitsOfFont', this.native) & $.NSBoldFontMask) === $.NSBoldFontMask ? true : false; },
-      set:function(e) {
-        if(e) {
-          this.native = fontManager('convertFont', this.native,'toHaveTrait', $.NSBoldFontMask);
-          this.native = fontManager('convertFont', this.native,'toNotHaveTrait', $.NSUnboldFontMask);
-        } else {
-          this.native = fontManager('convertFont', this.native,'toNotHaveTrait', $.NSBoldFontMask);
-          this.native = fontManager('convertFont', this.native,'toHaveTrait', $.NSUnboldFontMask);
-        }
-      }
+      set:function(e) { convertFont(e, $.NSBoldFontMask, $.NSUnboldFontMask); }
     });
 
     /**
@@ -119,15 +107,7 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'expanded', {
       get:function() { return (fontManager('traitsOfFont', this.native) & $.NSExpandedFontMask) === $.NSExpandedFontMask ? true : false; },
-      set:function(e) {
-        if(e) {
-          this.native = fontManager('convertFont', this.native, 'toHaveTrait', $.NSExpandedFontMask);
-          this.native = fontManager('convertFont', this.native, 'toNotHaveTrait', $.NSCondensedFontMask);
-        } else {
-          this.native = fontManager('convertFont', this.native, 'toNotHaveTrait', $.NSExpandedFontMask);
-          this.native = fontManager('convertFont', this.native, 'toHaveTrait', $.NSCondensedFontMask);
-        }
-      }
+      set:function(e) { convertFont(e, $.NSExpandedFontMask, $.NSCondensedFontMask); }
     });
 
     /**
