@@ -87,14 +87,14 @@ module.exports = (function() {
       this.private.setCell(cell, column, row);
     }
     this.fireEvent('column-added');
-  }
+  };
 
   Table.prototype.removeColumn = function(e) {
     var column = this.private.findColumnByName(e);
     column.parent = null;
     this.private.columns.splice(this.private.columns.indexOf(column),1);
     this.fireEvent('column-removed');
-  }
+  };
 
   Table.prototype.addRow = function() {
     var row = new tableHelper.Row();
@@ -106,31 +106,31 @@ module.exports = (function() {
       this.private.setCell(cell, column, row);
     }
     this.fireEvent('row-added');
-  }
+  };
 
   Table.prototype.removeRow = function(ndx) {
     var row = this.private.findRowByIndex(ndx);
     row.parent = null;
     this.private.rows.splice(this.private.rows.indexOf(row),1);
     this.fireEvent('row-removed');
-  }
+  };
 
   Table.prototype.moveColumn = function(ndx, toNdx) {
     var columnFrom = this.private.findColumnByIndex(ndx);
     var columnTo = this.private.findColumnByIndex(toNdx);
     columnFrom.index = toNdx;
     columnTo.index = ndx;
-  }
+  };
 
   Table.prototype.moveRow = function(ndx, toNdx) {
     var row = this.private.findRowByIndex(ndx)
     row.index = toNdx;
-  }
+  };
 
   Table.prototype.setColumnWidth = function(name,e) {
     var column = this.private.findColumnByName(name);
     column.width = e;
-  }
+  };
 
   Table.prototype.setValueAt = function(columnId,rowIndex,value) {
     if(typeof(value) === "string" || typeof(value) === "number") {
@@ -143,7 +143,7 @@ module.exports = (function() {
     var column = this.private.findColumnByName(columnId);
     var row = this.private.findRowByIndex(rowIndex+1);
     this.private.setCell(cell, column, row);
-  }
+  };
 
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
     get:function() {
