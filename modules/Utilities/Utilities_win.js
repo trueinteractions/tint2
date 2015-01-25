@@ -199,7 +199,7 @@ module.exports = (function() {
       img = new $.System.Drawing.Icon(strm2);
     } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null) {
+      if(imageRef === null) {
         img = null;
       } else {
         var s = $.System.Convert.FromBase64String(imageRef);
@@ -210,27 +210,28 @@ module.exports = (function() {
     return img;
   }
 
-  function makeImage(e) {
+  function makeImage(e, stretch) {
     var img = null;
-    if(!e || typeof(e) !== 'string') return null;
-    else if(e.indexOf(':') > -1) {
+    stretch = stretch || $.System.Windows.Media.Stretch.None;
+    if(!e || typeof(e) !== 'string') {
+     return null;
+    } else if(e.indexOf(':') > -1) {
       img = new $.System.Windows.Controls.Image();
       img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(new $.System.Uri(e));
+      img.Stretch = stretch;
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
       img = new $.System.Windows.Controls.Image();
-    var strm = $.System.IO.File.OpenRead(e);
-    img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
-    img.Stretch = $.System.Windows.Media.Stretch.None;
-    }
-    else {
+      var strm = $.System.IO.File.OpenRead(e);
+      img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
+      img.Stretch = stretch;
+    } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null) img = null;
-      else {
-        var s = $.System.Convert.FromBase64String(imageRef);
-        var ms = new $.System.IO.MemoryStream(s);
-      img = new $.System.Windows.Controls.Image();
-      img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(ms);
-      img.Stretch = $.System.Windows.Media.Stretch.None;
+      if(imageRef === null) {
+        img = null;
+      } else {
+        img = new $.System.Windows.Controls.Image();
+        img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(new $.System.IO.MemoryStream($.System.Convert.FromBase64String(imageRef)));
+        img.Stretch = stretch;
       }
     }
     return img;
@@ -243,8 +244,8 @@ module.exports = (function() {
     var length = control.Items.Count;
     var i = 0;
 
-    start = typeof(start) == 'undefined' ? 0 : start;
-    depth = typeof(depth) == 'undefined' ? 0 : depth;
+    start = typeof(start) === 'undefined' ? 0 : start;
+    depth = typeof(depth) === 'undefined' ? 0 : depth;
 
     for(var c = 0; c < length; c++) {
       var slength = control.Items.Count;

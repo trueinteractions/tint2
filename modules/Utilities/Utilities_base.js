@@ -1,6 +1,4 @@
 module.exports = (function() {
-  var utilsObj = {};
-
 
   // Define the standard set of events we expect to use on most controls.
   // This is by default already contained on object that inherit form Control
@@ -177,6 +175,19 @@ module.exports = (function() {
     });
   }
 
+  function errorwrap(func) {
+    var wrap = function() {
+      try {
+        return func.apply(null,arguments);
+      } catch(e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
+    }
+    return wrap;
+  }
+
   function identity(v) { return v; }
   function inverse(v) { return (1-v); }
   function negate(v) { return -1*v; }
@@ -191,6 +202,7 @@ module.exports = (function() {
     inverse:inverse,
     def:defineProperty,
     defEvents:defineEvents,
-    parseUnits:parseUnits
+    parseUnits:parseUnits,
+    errorwrap:errorwrap
   };
 })();

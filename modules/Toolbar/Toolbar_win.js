@@ -5,6 +5,28 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
+  function resetChildNodes(toolbar) {
+    for(var i=0; i < toolbar.private.children.length; i++) {
+      var child = toolbar.private.children[i];
+      if(child.private && child.private.type === "ToolbarItem") {
+        if(toolbar.state === "icon") {
+          child.private.image.Height = toolbar.nativeView.Height - 12;
+          child.private.image.Width = toolbar.nativeView.Height - 12;
+          child.private.image.Visibility = $.System.Windows.Visibility.Visible;
+          child.private.label.Visibility = $.System.Windows.Visibility.Collapsed;
+        } else if (toolbar.state === "iconandlabel") {
+          child.private.image.Height = toolbar.nativeView.Height - 24;
+          child.private.image.Width = toolbar.nativeView.Height - 24;
+          child.private.image.Visibility = $.System.Windows.Visibility.Visible;
+          child.private.label.Visibility = $.System.Windows.Visibility.Visible;
+        } else if (toolbar.state === "label") {
+          child.private.image.Visibility = $.System.Windows.Visibility.Collapsed;
+          child.private.label.Visibility = $.System.Windows.Visibility.Visible;
+        }
+      }
+    }
+  }
+
   function Toolbar(options) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ToolBar;
@@ -13,6 +35,8 @@ module.exports = (function() {
     this.nativeView.InternalChildren = this.nativeView.Items;
     this.nativeView.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
     this.nativeView.HorizontalContentAlignment = $.System.Windows.HorizontalAlignment.Stretch;
+    this.nativeView.Height = 48;
+    this.private.toolbartype = "iconandlabel";
     this.addEventListener('before-child-attached', function(child) {
       try {
         if(child === "space") {
@@ -39,27 +63,50 @@ module.exports = (function() {
       }
       return child;
     }.bind(this));
+    this.addEventListener('child-attached', function() {
+      resetChildNodes(this);
+    }.bind(this));
   }
 
   Toolbar.prototype = Object.create(Container.prototype);
   Toolbar.prototype.constructor = Toolbar;
 
-  // TODO: Finish me
-  // iconandlabel
-  // icon
-  // label
   Object.defineProperty(Toolbar.prototype, 'state', {
-    get:function() { return "iconandlabel"; },
-    set:function(e) { }
+    get:function() { return this.private.toolbartype; },
+    set:function(e) {
+      if(e === "icon") {
+        this.private.toolbartype = "icon";
+      } else if (e === "iconandlabel") {
+        this.private.toolbartype = "iconandlabel";
+      } else if (e === "label") {
+        this.private.toolbartype = "label";
+      }
+      resetChildNodes(this);
+    }
   });
 
-  // TODO: Finish me
-  // regular
-  // small
-  // default
   Object.defineProperty(Toolbar.prototype, 'size', {
-    get:function() { return "default"; },
-    set:function(e) { }
+    get:function() { 
+      if(this.nativeView.Height === 38) {
+        return "small";
+      } else if (this.nativeView.Height === 42) {
+        return "regular";
+      } else if (this.nativeView.Height === 48) {
+        return "default";
+      } else {
+        return "unknown";
+      }
+    },
+    set:function(e) {
+      if(e === "small") {
+        this.nativeView.Height = 38;
+      } else if (e === "regular") {
+        this.nativeView.Height = 42;
+      } else if (e === "default") {
+        this.nativeView.Height = 48;
+      }
+      resetChildNodes(this);
+    }
   });
 
   global.__TINT.Toolbar = Toolbar;

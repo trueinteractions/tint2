@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.WebView) {
+    return global.__TINT.WebView;
+  }
   var $ = process.bridge.objc;
   var util = require('Utilities');
   var Container = require('Container');
@@ -441,5 +444,6 @@ module.exports = (function() {
     function() {  return this.nativeView('mainFrameTitle')('UTF8String'); }
   );
 
+  global.__TINT.WebView = WebView;
   return WebView;
 })();

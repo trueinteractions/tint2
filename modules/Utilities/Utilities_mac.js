@@ -317,19 +317,6 @@ module.exports = (function() {
     });
   }
 
-  function errorwrap(func) {
-    var wrap = function() {
-      try {
-        return func.apply(null,arguments);
-      } catch(e) {
-        console.error(e.message);
-        console.error(e.stack);
-        process.exit(1);
-      }
-    }
-    return wrap;
-  }
-
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.nsDictionaryToObject = nsDictionaryToObject;
   baseUtilities.nsArrayToArray = nsArrayToArray;
@@ -338,7 +325,6 @@ module.exports = (function() {
   baseUtilities.makePropertyImageType = makePropertyImageType;
   baseUtilities.makePropertyMapType = makePropertyMapType;
   baseUtilities.makeNSImage = makeNSImage;
-  baseUtilities.errorwrap = errorwrap;
   baseUtilities.arrayToNSArray = arrayToNSArray;
   baseUtilities.makeURIFromNSImage = makeURIFromNSImage;
   baseUtilities.makePropertyColorType = makePropertyColorType;

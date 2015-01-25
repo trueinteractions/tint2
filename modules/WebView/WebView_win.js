@@ -46,6 +46,7 @@ module.exports = (function() {
       this.fireEvent('loading'); 
     }.bind(this));
     this.nativeView.addEventListener('Navigating', function() {
+      
       if(firstLoad) {
         this.private.progress = 0.1;
         // establish the activex instance, store a ref for later.

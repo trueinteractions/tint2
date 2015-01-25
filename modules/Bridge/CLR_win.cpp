@@ -1080,8 +1080,12 @@ public:
 
   static Handle<v8::Value> GetCLRType(const v8::Arguments& args) {
     HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    return scope.Close(MarshalCLRToV8(target->GetType()));
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      return scope.Close(MarshalCLRToV8(target->GetType()));
+    } catch (System::Exception^ e) {
+      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+    }
   }
 
   static Handle<v8::Value> GetStaticMemberTypes(const v8::Arguments& args) {

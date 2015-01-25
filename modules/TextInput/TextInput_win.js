@@ -1,7 +1,7 @@
 module.exports = (function() {
-  //if(global.__TINT.TextInput) {
-  //  return global.__TINT.TextInput;
-  //}
+  if(global.__TINT.TextInput) {
+    return global.__TINT.TextInput;
+  }
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var Color = require('Color');

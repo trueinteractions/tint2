@@ -46,14 +46,13 @@ function run($utils) {
     webView.location = url;
   });
 
-  webView.addEventListener('load', function() { urlLocation.value = webView.location; });
+  webView.addEventListener('load', function() { 
+    urlLocation.value = webView.location;
+    $utils.ok();
+  });
 
   webView.top = webView.bottom = webView.left = webView.right = 0;
   webView.location = "https://www.google.com";
-
-  setTimeout(function() {
-    $utils.ok();
-  }, 1000);
 }
 
 /**
