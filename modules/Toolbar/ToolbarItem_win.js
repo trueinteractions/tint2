@@ -4,7 +4,7 @@ module.exports = (function() {
   }
   var util = require('Utilities');
 
-  function ToolbarItem() {
+  function ToolbarItem(options) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Button;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Button;
