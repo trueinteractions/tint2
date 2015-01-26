@@ -27,7 +27,7 @@ module.exports = (function() {
   }
   function takeSnapshotOfWindowNumber(windowNumber) {
     var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListOptionIncludingWindow | $.kCGWindowListExcludeDesktopElements, windowNumber, $.kCGWindowImageDefault);
-    return writeImageToBase64(image, path);
+    return writeImageToBase64(image);
   }
   function keyCodeFromChar(keyString)
   {
@@ -138,9 +138,11 @@ module.exports = (function() {
 
   // OSX Specific Types, undocumented on purpose.
   System.disableCrashReporter = function() { 
+    var exec = require('child_process').exec;
     exec('defaults write com.apple.CrashReporter DialogType none');
   };
   System.enableCrashReporter = function() {
+    var exec = require('child_process').exec;
     exec('defaults write com.apple.CrashReporter DialogType crashreport');
   };
 
@@ -271,7 +273,7 @@ module.exports = (function() {
    */
   System.takeSnapshotOfActiveScreen = function() {
     var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
-    return writeImageToBase64(image, path);
+    return writeImageToBase64(image);
   };
 
   /**

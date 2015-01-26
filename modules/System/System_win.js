@@ -64,16 +64,6 @@ module.exports = (function() {
       'x':0x0058,
       'y':0x0059,
       'z':0x005A,
-      '0':0x0060,
-      '1':0x0061,
-      '2':0x0062,
-      '3':0x0063,
-      '4':0x0064,
-      '5':0x0065,
-      '6':0x0066,
-      '7':0x0067,
-      '8':0x0068,
-      '9':0x0069,
       '*':0x006A,
       '+':0x006B,
       ',':0x006C,
@@ -98,11 +88,6 @@ module.exports = (function() {
       'RCONTROL':0x00A3,
       'LALT':0x00A4,
       'RALT':0x00A5,
-      ':':0x00BA,
-      '+':0x00BB,
-      ',':0x00BC,
-      '-':0x00BD,
-      '.':0x00BE,
       '?':0x00BF,
       '~':0x00C0,
       '[':0x00DB,
@@ -114,7 +99,7 @@ module.exports = (function() {
       'RETURN':0x000D
     };
     return keys[keyString];
-  }
+  };
 
   function getBoundsOnScreenOfWPFItem(control) {
     var target = $.System.Windows.Window.GetWindow(control);
@@ -160,7 +145,7 @@ module.exports = (function() {
   System.scrollAtControl = function(control, upOrDown) {
     var z = control.boundsOnScreen;
     this.scrollAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2),upOrDown);
-  }
+  };
 
   System.clickAtControl = function(control) {
     var bounds;
@@ -195,7 +180,7 @@ module.exports = (function() {
     $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
   };
 
-  System.takeSnapshotOfActiveScreen = function(path) {
+  System.takeSnapshotOfActiveScreen = function() {
     var scaleFactor = 1; // don't use a scalefactor as we're dealing with winforms 100%.
     var ix = Math.round($.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.X * scaleFactor);
     var iy = Math.round($.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Y * scaleFactor);
@@ -209,9 +194,9 @@ module.exports = (function() {
     return mem.ToArray().toString('base64');
   };
 
-  System.takeSnapshotOfTopWindow = function(path) {
+  System.takeSnapshotOfTopWindow = function() {
     var hwnd = $w32.user32.GetForegroundWindow();
-    var topRect = new $w32.structs['RECT'];
+    var topRect = new $w32.structs.RECT();
     $w32.user32.GetWindowRect(hwnd,topRect.ref());
     var iw = Math.round(topRect.right - topRect.left);
     var ih = Math.round(topRect.bottom - topRect.top);
@@ -222,33 +207,33 @@ module.exports = (function() {
     $w32.gdi32.BitBlt(dc1.pointer.rawpointer, 0, 0, iw, ih, dc2, 0, 0, 0x00cc0020);
     gr1.ReleaseHdc(dc1);
     var mem = new $.System.IO.MemoryStream();
-    image.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
+    myImage.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
     return mem.ToArray().toString('base64');
   };
 
-  System.takeSnapshotOfWindowNumber = function(windowNumber, path) {
+  System.takeSnapshotOfWindowNumber = function(windowNumber) {
     var windows = $.System.Windows.Application.Current.Windows;
     var count = windows.Count;
     for(var i=0; i < count; i++) {
       var item = windows.Item(i);
       if(i === windowNumber) {
-        return this.takeSnapshotOfWindow(item, path);
+        return this.takeSnapshotOfWindow(item);
       }
     }
   };
 
-  System.takeSnapshotOfCurrentWindow = function(path) {
+  System.takeSnapshotOfCurrentWindow = function() {
     var windows = $.System.Windows.Application.Current.Windows;
     var count = windows.Count;
     for(var i=0; i < count; i++) {
       var item = windows.Item(i);
       if(item.IsActive) {
-        return this.takeSnapshotOfWindow(item, path);
+        return this.takeSnapshotOfWindow(item);
       }
     }
   };
 
-  System.takeSnapshotOfWindow = function(windowObj, path) {
+  System.takeSnapshotOfWindow = function(windowObj) {
     if(windowObj.native) {
       windowObj = windowObj.native;
     }
@@ -262,14 +247,14 @@ module.exports = (function() {
     var gr1 = $.System.Drawing.Graphics.FromImage(myImage);
     var dc1 = gr1.GetHdc();
     var dc2 = $w32.user32.GetWindowDC(hwnd.pointer.rawpointer);
-    var result = $w32.gdi32.BitBlt(dc1.pointer.rawpointer, ix, iy, iw, ih, dc2, 0, 0, 0x00cc0020);
+    $w32.gdi32.BitBlt(dc1.pointer.rawpointer, ix, iy, iw, ih, dc2, 0, 0, 0x00cc0020);
     gr1.ReleaseHdc(dc1);
     var mem = new $.System.IO.MemoryStream();
     myImage.Save(mem, $.System.Drawing.Imaging.ImageFormat.Png);
     return mem.ToArray().toString('base64');
   };
 
-  System.takeSnapshotOfControl = function(c, path) {
+  System.takeSnapshotOfControl = function(c) {
     if(c.native) {
       c = c.native;
     }
