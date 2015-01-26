@@ -1,9 +1,21 @@
-if(typeof(process.bridge) === 'undefined') process.initbridge();
-if(typeof(process.bridge.dotnet) === 'undefined') process.bridge.dotnet = {};
-if(typeof(process.bridge.ref) === 'undefined') process.bridge.ref = require('ref');
-if(typeof(process.bridge.struct) === 'undefined') process.bridge.struct = require('struct');
-if(typeof(process.bridge.ffi) === 'undefined') process.bridge.ffi = require('ffi');
-if(typeof(process.bridge.win32) === 'undefined') process.bridge.win32 = require('win32');
+if(typeof(process.bridge) === 'undefined') {
+  process.initbridge();
+}
+if(typeof(process.bridge.dotnet) === 'undefined') {
+  process.bridge.dotnet = {};
+}
+if(typeof(process.bridge.ref) === 'undefined') {
+  process.bridge.ref = require('ref');
+}
+if(typeof(process.bridge.struct) === 'undefined') {
+  process.bridge.struct = require('struct');
+}
+if(typeof(process.bridge.ffi) === 'undefined') {
+  process.bridge.ffi = require('ffi');
+}
+if(typeof(process.bridge.win32) === 'undefined') {
+  process.bridge.win32 = require('win32');
+}
 
 var dotnet = process.bridge;
 var assemblyImported = {};

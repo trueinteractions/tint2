@@ -405,5 +405,7 @@ module.exports = (function() {
   objc.unwrapValues = unwrapValues;
   objc.unwrapValue = unwrapValue;
   objc.objcStorageKey = new Buffer(1);
+  objc.__block_literal_1 = __block_literal_1;
+  objc.__block_descriptor_1 = __block_descriptor_1;
   return objc;
 })();

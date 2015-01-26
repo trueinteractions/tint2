@@ -4,7 +4,6 @@
 
 - (void)startLoading {
 	NSString *url = [[[self request] URL] description];
-
 	if([url rangeOfString:@"app:///"].location != NSNotFound)
 		url = [url stringByReplacingOccurrencesOfString:@"app:///" withString:@"/"];
 	else if([url rangeOfString:@"app://"].location != NSNotFound)
@@ -14,14 +13,6 @@
 	NSString *currentpath;
 	filemgr = [NSFileManager defaultManager];
 	currentpath = [filemgr currentDirectoryPath];
-
-	//NSArray *arguments = [[NSProcessInfo processInfo] arguments];
-	//NSString *cmd = arguments[0];
-	//NSArray *arr = [cmd pathComponents];
-
-	//for(int i=0; i < [arr count]; i++)
-	//	NSLog((NSString *)arr[i]);
-
 	NSString *possible = [currentpath stringByAppendingString:url];
 	if ([filemgr fileExistsAtPath:possible] == YES) {
 		NSData *data = [filemgr contentsAtPath:possible];
@@ -39,7 +30,7 @@
 }
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request {
-	if ([[[request URL] scheme] caseInsensitiveCompare:@"app"] == NSOrderedSame)
+	if ([[[request URL] scheme] caseInsensitiveCompare:@"app"] == NSOrderedSame) 
 		return YES;
 	else
 		return NO;
