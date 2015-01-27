@@ -22,9 +22,6 @@
   // whether it should be reclaimed natively.
   process.bridge.objc.NSAutoreleasePool('alloc')('init');
 
-  // Include the app schema. app:// registers on NSURL and for node require().
-  require('AppSchema')(process.cwd());
-
   // Register our font factory, this is a "boot" step for any app using fonts.
   require('FontInternals');
 
@@ -40,9 +37,7 @@
    * @see process
    */
   function Application() {
-    var name = "", badgeText = "", 
-        dockmenu = null, icon = "",
-        terminateWhenLastWindowClosed = $.YES;
+    var name = "", badgeText = "", dockmenu = null, icon = "", terminateWhenLastWindowClosed = $.YES;
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
@@ -64,7 +59,7 @@
     });
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
-    $app('setDelegate',delegate);
+    $app('setDelegate', delegate);
 
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
 
@@ -115,6 +110,9 @@
     this.resource = function(path) {
       if(path.indexOf('app:///') === -1) {
         path = 'app:///' + path.replace("app://","");
+      }
+      if(path === "app:///blank-page-appschema.html") {
+        return new Buffer("<!doctype html>\n<html>\n<body></body></html>","utf8");
       }
       var url = $.NSURL('URLWithString',$(path.toString()));
       var data = $.NSData('dataWithContentsOfURL',url);
@@ -315,4 +313,7 @@
   }
 
   global.application = new Application();
+
+  // Include the app schema. app:// registers on NSURL and for node require().
+  require('AppSchema')(process.cwd());
 })();

@@ -35,10 +35,10 @@ module.exports = (function() {
   util.makePropertyStringType(ToolbarItem.prototype, 'title', 'label', 'setLabel');
 
   /**
-   * @member toolTip
+   * @member tooltip
    * @type {string}
    * @memberof ToolbarItem
-   * @description Gets or sets the tool tip  on the toolbar item.
+   * @description Gets or sets the tool tip on the toolbar item.
    */
   util.makePropertyStringType(ToolbarItem.prototype, 'tooltip', 'toolTip', 'setToolTip');
 

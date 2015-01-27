@@ -13,64 +13,6 @@
   process.bridge.dotnet.import('WPF\\PresentationCore.dll');
   process.bridge.dotnet.import('WPF\\PresentationFramework.dll');
   process.bridge.dotnet.import('System.Drawing'); 
-    
-  // Load the http module to create an http server.
-  var http = require('http');
-  var mimetype = {};
-  mimetype.gz = 'application/gzip';
-  mimetype.zip = 'application/zip';
-  mimetype.pdf = 'application/pdf';
-  mimetype.json = 'application/json';
-  mimetype.js = 'application/javascript';
-  mimetype.mp3 = 'audio/mp3';
-  mimetype.gif = 'image/gif';
-  mimetype.jpg = mimetype.jpeg = 'image/jpeg';
-  mimetype.png = 'image/png';
-  mimetype.svg = 'image/svg+xml';
-  mimetype.txt = 'text/plain';
-  mimetype.html = mimetype.htm = 'text/html';
-  mimetype.css = 'text/css';
-  mimetype.xml = 'text/xml';
-  mimetype.avi = 'video/avi';
-  mimetype.mpeg = mimetype.mpg = 'video/mpeg';
-  mimetype.mp4 = 'video/mp4';
-  mimetype.ogg = 'video/ogg';
-  mimetype.webm = 'video/webm';
-  mimetype.flv = 'video/x-flv';
-  mimetype.mkv = 'video/x-matroska';
-  // Part of the application schema (app://)
-  var server = http.createServer(function (request, response) {
-    var path = request.url;
-    var data = "";
-    var ext = path.substring(path.lastIndexOf('.')+1);
-    // We need to serve a blank page to IE when it loads (not about:blank)
-    // 
-    if(path === "//this-is-a-blank-page-for-ie-fix.html") {
-      data = new Buffer("<!doctype html>\n<html>\n<body>\n</body>\n</html>\n","utf8");
-    } else {
-      try {
-        var url = new $.System.Uri("app:/"+path);
-        var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
-        var reader = new $.System.IO.StreamReader(stream);
-        data = reader.ReadToEnd();
-      } catch (e) {
-      }
-    }
-    var mimeTypeFromExt = mimetype[ext];
-    if(!mimeTypeFromExt) {
-      mimeTypeFromExt = 'text/plain';
-    }
-    response.writeHead(200, {"Content-Type": mimeTypeFromExt});
-    response.write(data);
-    response.end("");
-  });
-
-  // Listen on port 8000, IP defaults to 127.0.0.1
-  var port = Math.round(10000 + Math.random()*999);
-  server.listen(port);
-
-  // Include the app schema. app:// registers on NSURL and for node require().
-  require('AppSchema');
 
   var $ = process.bridge.dotnet;
 
@@ -80,11 +22,9 @@
         dockmenu = null, 
         icon = "";
 
-    this.private = {};
-    this.private.appSchemaPort = port;
+    Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
     this.private.windowCount = 0;
     this.native = $.System.Windows.Application.Current;
-
     if(this.native === null) {
       this.native = new $.System.Windows.Application();
     }
@@ -100,7 +40,7 @@
       if(path.indexOf('app:///') === -1) {
         path = 'app:///' + path.replace("app://","");
       }
-      if(path === "app:///this-is-a-blank-page-for-ie-fix.html") {
+      if(path === "app:///blank-page-appschema.html") {
         return new Buffer("<!doctype html>\n<html>\n<body></body></html>","utf8");
       }
       try {
@@ -234,4 +174,8 @@
   }
 
   global.application = new Application();
+
+  // Include the app schema. app:// registers on NSURL and for node require().
+  require('AppSchema');
+
 })();

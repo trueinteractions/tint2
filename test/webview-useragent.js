@@ -23,10 +23,12 @@ function run($utils) {
   var agent = "This is my user agent.";
   webview.useragent = agent;
   webview.addEventListener('load', function() {
-    var response = webview.execute("document.querySelector('h2.info').innerText");
-    $utils.assert(agent === response, 'agent ['+agent+'] !== response [' + response +']');
-    $utils.assert(agent === webview.useragent, 'agent ['+agent+'] !== webview.useragent [' + webview.useragent +']');
-    $utils.ok();
+    webview.execute("document.querySelector('h2.info').innerText", function(response) {
+      $utils.assert(agent === response, 'agent ['+agent+'] !== response [' + response +']');
+      $utils.assert(agent === webview.useragent, 'agent ['+agent+'] !== webview.useragent [' + webview.useragent +']');
+      $utils.ok();
+    });
+    
   });
   webview.location = 'http://whatsmyuseragent.com';
 }
