@@ -315,5 +315,5 @@
   global.application = new Application();
 
   // Include the app schema. app:// registers on NSURL and for node require().
-  require('AppSchema')(process.cwd());
+  require('AppSchema');
 })();

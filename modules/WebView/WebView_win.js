@@ -103,12 +103,16 @@ module.exports = (function() {
       e.toString().replace(/'/g,"\\'") + 
       "','*',0,window);\n";
     msg += "window.dispatchEvent(msg);\n";
-    this.execute(msg);
+    this.nativeView.InvokeScript("eval",[msg]);
     this.private.checkForNewTitle();
   }
 
-  WebView.prototype.execute = function(e) { 
-    return this.nativeView.InvokeScript("eval",[e]);
+  WebView.prototype.execute = function(e, cb) { 
+    if(cb) {
+      cb(this.nativeView.InvokeScript("eval",[e]));
+    } else {
+      return this.nativeView.InvokeScript("eval",[e]);
+    }
   }
 
   util.def(WebView.prototype, 'icon',
@@ -120,7 +124,7 @@ module.exports = (function() {
         "      favicon = nodeList[i].getAttribute('href');\n" +
         "if(favicon && favicon[0]==='/') favicon = location.protocol + favicon;\n" +
         "return favicon; })();";
-      return this.execute(exeCmd);
+      return this.nativeView.InvokeScript("eval",[exeCmd]);
     }
   );
 
@@ -157,7 +161,7 @@ module.exports = (function() {
   );
 
   util.def(WebView.prototype, 'title', 
-    function() { return this.execute("document.title"); }
+    function() { return this.nativeView.InvokeScript("eval",["document.title"]); }
   );
 
   global.__TINT.WebView = WebView;

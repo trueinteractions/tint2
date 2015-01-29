@@ -149,7 +149,7 @@ function notok(code) {
   log(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
   exit(1);
 }
-
+ex.notok = notok;
 ex.log = function(e) { log(e); }
 
 if(process.argv[1] && process.argv[2] && process.argv[1].indexOf('utilities') > -1 && process.argv[2] != 'baseline' && process.argv[2] != 'tests') {

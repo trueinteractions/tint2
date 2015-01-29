@@ -1,4 +1,4 @@
-module.exports = function() {
+module.exports = (function() {
 
   if(global.__TINT.AppSchema) {
     return;
@@ -76,4 +76,4 @@ module.exports = function() {
   runApplicationHost();
 
   global.__TINT.AppSchema = true;
-};
+})();
