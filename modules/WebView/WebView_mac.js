@@ -10,7 +10,7 @@ module.exports = (function() {
   function createWebViewPolicyHandler() {
     var result = function(self, cmd, webview, action, request, frame, listener) {
       try {
-        var result = this.fireEvent('policy',[request('URL')('absoluteString')('UTF8String')]);
+        var result = this.fireEvent('policy',[request('URL')('absoluteURL')('description')('UTF8String')]);
         if(typeof(result) === 'undefined') {
           result = true;
         }
@@ -18,6 +18,7 @@ module.exports = (function() {
       } catch (e) {
         console.log(e.message);
         console.log(e.stack);
+        process.exit(1);
       }
     }
     return result;
@@ -37,6 +38,7 @@ module.exports = (function() {
       } catch (e) {
         console.log(e.message);
         console.log(e.stack);
+        process.exit(1);
       }
     }
     return result;
@@ -189,7 +191,7 @@ module.exports = (function() {
         //['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { }.bind(this)],
         ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', function() { this.fireEvent('redirect'); }.bind(this)],
         ['webView:createWebViewWithRequest:', '@@:@@', fireNewWindow.bind(this)],
-        ['webView:decidePolicyForNavigationAction:request:frame:decisionListener:','v@:@@@@', createWebViewPolicyHandler().bind(this)]
+        ['webView:decidePolicyForNavigationAction:request:frame:decisionListener:','v@:@@@@@', createWebViewPolicyHandler().bind(this)]
       ]);
     } else {
       // WKWebView actions
