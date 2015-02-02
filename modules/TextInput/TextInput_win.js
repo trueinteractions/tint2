@@ -19,7 +19,7 @@ module.exports = (function() {
         first = false;
       }
     }.bind(this));
-    var keyDown = function(sender, eventInfo) {
+    this.private.keyDown = function(sender, eventInfo) {
       if(first) {
         this.fireEvent('inputstart');
         first = false;
@@ -29,27 +29,23 @@ module.exports = (function() {
         this.fireEvent('inputend');
       }
     }.bind(this);
-    var focus = function() { first = true; }.bind(this);
-    var lostFocus = function() { 
+    this.private.focus = function() { first = true; }.bind(this);
+    this.private.lostFocus = function() { 
       this.fireEvent('inputend');
       first = false;
     }.bind(this);
-    var textChanged = function() { 
+    this.private.textChanged = function() { 
       setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
     }.bind(this);
 
-    this.native.addEventListener('GotFocus', focus);
-    this.native.addEventListener('LostFocus', lostFocus);
+    this.native.addEventListener('GotFocus', this.private.focus);
+    this.native.addEventListener('LostFocus', this.private.lostFocus);
     if(this.nativeClass === $.System.Windows.Controls.TextBox) {
-      this.native.addEventListener('TextChanged', textChanged);
+      this.native.addEventListener('TextChanged', this.private.textChanged);
     } else {
-      this.native.addEventListener('TextInput', textChanged);
+      this.native.addEventListener('TextInput', this.private.textChanged);
     }
-    this.native.addEventListener('KeyDown', keyDown);
-    this.private.callbacks.push(focus);
-    this.private.callbacks.push(lostFocus);
-    this.private.callbacks.push(textChanged);
-    this.private.callbacks.push(keyDown);
+    this.native.addEventListener('KeyDown', this.private.keyDown);
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;
     this.private.previousBorder = this.native.BorderBrush;
@@ -108,7 +104,6 @@ module.exports = (function() {
         this.native.AcceptsTab = false;
         this.native.Focusable = false;
       } else if(this.private.readonly) {
-        
         this.native.Background = this.private.previousBackground;
         this.native.BorderBrush = this.private.previousBorder;
         this.native.BorderThickness = this.private.previousBorderThickness;
@@ -117,9 +112,7 @@ module.exports = (function() {
         this.native.IsReadOnly = false;
         this.native.AcceptsTab = true;
         this.native.Focusable = true;
-
       }
-
     }
   });
 

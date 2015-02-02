@@ -8,10 +8,11 @@ module.exports = (function() {
 
     this.private = {events:{},submenu:null,key:"",modifiers:"",imgOn:null,imgOff:null,img:null,custom:null,state:false};
     this.native = new $.System.Windows.Controls.MenuItem();
-    this.native.addEventListener('PreviewMouseDown', function() {
+    this.private.mouseDownHandler = function() {
       this.fireEvent('mousedown');
       this.fireEvent('click');
-    }.bind(this));
+    }.bind(this);
+    this.native.addEventListener('PreviewMouseDown', this.private.mouseDownHandler);
 
     if(titlestring) this.title = titlestring;
     if(keystring) this.key = keystring;

@@ -12,11 +12,12 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
     TextInput.call(this, options);
-    this.native.addEventListener('PreviewMouseDown', function() {
+    this.private.previewMouseDownHandler = function() {
       if(this.private.contextMenu) {
         this.private.contextMenu.IsOpen = !this.private.contextMenu.IsOpen;
       }
-    }.bind(this));
+    }.bind(this);
+    this.native.addEventListener('PreviewMouseDown', this.private.previewMouseDownHandler);
     this.private.menu = null;
     this.private.contextMenu = null;
     this.private.selectedIndex = null;
@@ -35,19 +36,19 @@ module.exports = (function() {
       this.private.menu = e;
       // convert menu to context menu.
       this.private.contextMenu = new $.System.Windows.Controls.ContextMenu();
-
       this.private.menu.parent = this.private.contextMenu;
-      for(var i=0; i < e.children.length ; i++)
+      for(var i=0; i < e.children.length ; i++) {
         this.private.contextMenu.Items.Add(e.children[i].native);
-
+      }
       this.native.ContextMenu = this.private.contextMenu;
       this.native.ContextMenu.PlacementTarget = this.native;
       this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
       setTimeout(function() {
         this.native.ContextMenu.MinWidth = this.native.ActualWidth;
-        this.native.addEventListener('SizeChanged', function() {
+        this.private.sizeChangedHandler = function() {
           this.native.ContextMenu.MinWidth = this.native.ActualWidth;
-        }.bind(this));
+        }.bind(this);
+        this.native.addEventListener('SizeChanged', this.private.sizeChangedHandler);
       }.bind(this),0);
     }
   });
