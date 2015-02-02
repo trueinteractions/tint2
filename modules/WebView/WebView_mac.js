@@ -120,7 +120,7 @@ module.exports = (function() {
   function fireNewWindow(s,c,webview,config,navAction,features) {
     try {
       var webview = new WebView(this.useWKWebView ? {configuration:config} : {});
-      return (this.fireEvent('new-window', [webview])) ? webview.nativeView : null;
+      return (this.fireEvent('new-window', [webview])) === false ? null : webview.nativeView;
     } catch (e) {
       console.log(e.message);
       console.log(e.stack);
