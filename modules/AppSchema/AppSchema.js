@@ -32,21 +32,24 @@ module.exports = (function() {
     // Part of the application schema (app://)
     var server = http.createServer(function (request, response) {
       var path = request.url;
-      var data = "";
+      var data = new Buffer(0);
       var ext = path.substring(path.lastIndexOf('.')+1);
       // We need to serve a blank page to render when the webview has yet to receive a location.
-      if(path === "//blank-page-appschema.html") {
+      if(path === "//blank-page-appschema.html" || path === "/blank-page-appschema.html") {
         data = new Buffer("<!doctype html>\n<html>\n<body>\n</body>\n</html>\n","utf8");
       } else {
         data = application.resource(path);
+        if(data === null) {
+          data = new Buffer(0);
+        }
       }
       var mimeTypeFromExt = mimetype[ext];
       if(!mimeTypeFromExt) {
         mimeTypeFromExt = 'text/plain';
       }
-      response.writeHead(200, {"Content-Type": mimeTypeFromExt});
+      response.writeHead(200, {"content-type": mimeTypeFromExt+ "; charset=utf-8", "content-length":data.length, "connection":"close"});
       response.write(data);
-      response.end("");
+      response.end("\r\n", 'utf8');
     });
 
     // Listen on port 8000, IP defaults to 127.0.0.1
