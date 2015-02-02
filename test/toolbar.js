@@ -50,7 +50,6 @@ function run($utils) {
     urlLocation.value = webView.location;
     $utils.ok();
   });
-
   webView.top = webView.bottom = webView.left = webView.right = 0;
   webView.location = "https://www.google.com";
 }
