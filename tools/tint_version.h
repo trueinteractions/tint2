@@ -1,6 +1,6 @@
 #define TINT_MAJOR_VERSION 2
 #define TINT_MINOR_VERSION 0
-#define TINT_PATCH_VERSION 7
+#define TINT_PATCH_VERSION 8
 // #define TINT_TAG ""			// comment out for releases.
 
 #ifndef TINT_STRINGIFY
