@@ -15,6 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  var trackLoc = false;
   application.exitAfterWindowsClose = false;
   var mainWindow = new Window();
   mainWindow.visible = true;
@@ -24,22 +25,18 @@ function run($utils) {
 
   webview.addEventListener('load', function() {
     mainWindow.title = webview.title;
+
+    /* @hidden */ var count = 4;
+    setTimeout(function() { 
+      $utils.assert(webview.title === 'Test'+count, 'expected window.title['+webview.title+'] == Test'+count);
+      $utils.ok(); 
+    },1000);
     webview.postMessage('hello');
     webview.postMessage('hello2');
     webview.postMessage('hello3');
   });
-  /* @hidden */ var count = 1;
-  
-  webview.addEventListener('title', function() {
-    mainWindow.title = webview.title;
-    $utils.assert(webview.title == 'Test'+count, 'expected window.title['+webview.title+'] == Test'+count);
-    if(count == 4) {
-      setTimeout(function() { 
-        mainWindow.destroy();
-        $utils.ok(); 
-      }, 1000);
-    }
-    count++;
+  webview.addEventListener('location-change', function() {
+
   });
   webview.location = 'app://assets/webview-test.html';
 }

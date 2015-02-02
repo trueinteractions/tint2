@@ -10,11 +10,11 @@ module.exports = (function() {
   function createWebViewPolicyHandler() {
     var result = function(self, cmd, webview, action, request, frame, listener) {
       try {
-        var result = this.fireEvent('policy',[request('URL')('absoluteURL')('description')('UTF8String')]);
-        if(typeof(result) === 'undefined') {
-          result = true;
+        var presult = this.fireEvent('policy',[request('URL')('absoluteURL')('description')('UTF8String')]);
+        if(typeof(presult) === 'undefined') {
+          presult = true;
         }
-        listener(result ? 'use' : 'ignore');
+        listener(presult ? 'use' : 'ignore');
       } catch (e) {
         console.log(e.message);
         console.log(e.stack);
@@ -25,16 +25,16 @@ module.exports = (function() {
   }
 
   function createWKWebViewPolicyHandler(pass,fail) {
-    var result = function(self, cmd, webview, navigationResponse, decisionHandler) {
+    var result = function(self, cmd, webview, navigation, decisionHandler) {
       try {
-        var result = this.fireEvent('policy');
-        if(typeof(result) === 'undefined') {
-          result = true;
+        var presult = this.fireEvent('policy', [navigation('request')('URL')('absoluteURL')('description')('UTF8String')]);
+        if(typeof(presult) === 'undefined') {
+          presult = true;
         }
         var d = decisionHandler.reinterpret(32);
         var block = new core.__block_literal_1(d);
         var bfunc = core.createUnwrapperFunction(block.invoke,['v',['?','I']]);
-        bfunc(block.ref(), result ?  pass : fail);
+        bfunc(block.ref(), presult ?  pass : fail);
       } catch (e) {
         console.log(e.message);
         console.log(e.stack);
@@ -107,7 +107,7 @@ module.exports = (function() {
       }
       var loc = this.location;
       if(this.private.previousUrl !== loc) {
-        this.fireEvent('locationchange', [this.private.previousUrl,loc]);
+        this.fireEvent('location-change', [this.private.previousUrl,loc]);
         this.private.previousUrl = loc;
       }
       this.fireEvent('load');
@@ -120,10 +120,11 @@ module.exports = (function() {
   function fireNewWindow(s,c,webview,config,navAction,features) {
     try {
       var webview = new WebView(this.useWKWebView ? {configuration:config} : {});
-      return (this.fireEvent('new-window', [webview]) === false) ? null : webview.nativeView;
+      return (this.fireEvent('new-window', [webview])) ? webview.nativeView : null;
     } catch (e) {
       console.log(e.message);
       console.log(e.stack);
+      process.exit(1);
     }
   }
   /**
@@ -146,7 +147,9 @@ module.exports = (function() {
    * webView.location = "https://www.google.com";
    * @screenshot-window {win}
    */
+   // TODO: Add progress event
   function WebView(options) {
+    var firstLoad = true;
     this.useWKWebView = ((process.bridge.objc.WKWebView && WebView.useNewWKWebView) ? true : false);
     options = options || {};
     options.delegates = options.delegates || [];
@@ -160,10 +163,11 @@ module.exports = (function() {
         // @memberof WebView
         // @description Fires when a navigation or resource load request was cancelled programmatically or for security reasons.
         ['webView:didCancelClientRedirectForFrame:','v@:@@', function(self,_cmd,frame) { this.fireEvent('cancel'); }.bind(this)],
-        // DEPRECATE IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
-        // @event unload
-        // @memberof WebView
-        // @description Fires when a page in the top frame is unloaded.
+        /**
+         * @event unload
+         * @memberof WebView
+         * @description Fires when a page in the top frame is unloaded.
+         */
         ['webView:didClearWindowObject:forFrame:','v@:@@@', function(self,_cmd,win,frame) { this.fireEvent('unload'); }.bind(this)],
         ['webView:didFailLoadWithError:forFrame:','v@:@@', fireError.bind(this)],
         ['webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', fireError.bind(this)],
@@ -203,7 +207,14 @@ module.exports = (function() {
          *              new URL has passed security requirement checks, but has yet to begin making a network request
          *              or render any parts of the page.
          */
-        ['webView:didCommitNavigation:', 'v@:@@', function(self, cmd, webview, navigation) { this.fireEvent('loading'); }.bind(this)],
+        ['webView:didCommitNavigation:', 'v@:@@', function(self, cmd, webview, navigation) {
+          if(firstLoad) {
+            firstLoad = false;
+          } else {
+            this.fireEvent('unload');
+          }
+          this.fireEvent('loading'); 
+        }.bind(this)],
         /**
          * @event error
          * @memberof WebView
@@ -214,11 +225,12 @@ module.exports = (function() {
         ['webView:didFailNavigation:withError:', 'v@:@@@', fireError.bind(this)],
         ['webView:didFailProvisionalNavigation:withError:', 'v@:@@@', fireError.bind(this)],
         /**
-         * @event locationchange
+         * @event location-change
          * @memberof WebView
          * @description Fires when a change in location occurs (E.g., a new URL has been requested). This differs from a 
          *              load (or loading) event in-that it does not fire if the current page is reloaded and the URL or
-         *              location has not changed.
+         *              location has not changed.  The event handler is passed two arguments, the first is the old URL,
+         *              and the second is the new URL.
          */
         /**
          * @event load
@@ -260,16 +272,32 @@ module.exports = (function() {
         /**
          * @event policy
          * @memberof WebView
-         * @description Fires when a new request for a navigation action needs a decision on whether to allow or deny the requested
-         *              navigation (or resource fetch request).  The URL for the target resource is passed in.  If false is returned
-         *              by the event handler the request is canceled, if true is returned the request is allowed to continue.
+         * @description Fires the callback for the event to ask if the page about to be loaded should be blocked.  
+         *              The URL for the target resource or navigation is passed in to the event callback.  If false (and only strictly false) 
+         *              is returned by the event handler the request is blocked.  If any other value is returned (including undefined or null)
+         *              the resource is allowed to load and continue.  This event is useful if you want to screen URL's being loaded and
+         *              deny navigation and resource requests based on the URL (e.g., such as a net nanny or for security reasons).
+         * @noscreenshot
+         * @example
+         * require('Common');
+         * var win = new Window();
+         * var webView = new WebView();
+         * win.appendChild(webView);
+         * webView.left=webView.right=webView.top=webView.bottom=0;
+         * win.visible = true;
+         * webView.addEventListener('policy', function(url) {
+         *    if(url === "https://www.google.com") {
+         *      console.log('blocking requests to google!');
+         *      return false;
+         *    }
+         * });
+         * webView.location = "https://www.google.com";
          */
         ['webView:decidePolicyForNavigationAction:decisionHandler:', ['v',['@',':','@','@','?']], 
           createWKWebViewPolicyHandler($.WKNavigationActionPolicyAllow, $.WKNavigationActionPolicyCancel).bind(this)],
-        ['webView:decidePolicyForNavigationResponse:decisionHandler:', ['v',['@',':','@','@','?']], 
-          createWKWebViewPolicyHandler($.WKNavigationResponsePolicyAllow, $.WKNavigationResponsePolicyCancel).bind(this)],
+        //['webView:decidePolicyForNavigationResponse:decisionHandler:', ['v',['@',':','@','@','?']], 
+        //  createWKWebViewPolicyHandler($.WKNavigationResponsePolicyAllow, $.WKNavigationResponsePolicyCancel).bind(this)],
 
-        // IMPORTANT NODE: API Change in 2.0.8!
         /**
          * @event new-window
          * @memberof WebView
@@ -435,6 +463,11 @@ module.exports = (function() {
    * setTimeout(function() { webView.stop(); }, 1000);
    */
   WebView.prototype.stop = function() { this.loading = false; };
+
+  WebView.prototype.boundsOnWindowOfElement = function(e, cb) {
+    this.execute("var rect = document.querySelector('"+e+"').getBoundingClientRect();\n" +
+                  "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", function(r) { cb(JSON.parse(r)); });
+  }
 
   /**
    * @method postMessage
