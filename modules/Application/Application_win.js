@@ -48,6 +48,8 @@
         var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
         var reader = new $.System.IO.StreamReader(stream);
         var data = reader.ReadToEnd();
+        reader.Close();
+        stream.Close();
         return data;
       } catch (e) { 
         if(this.warn) {
