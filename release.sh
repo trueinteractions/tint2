@@ -102,17 +102,18 @@ echo "Tint $TINT_VERSION" > tools/welcome_tmp.txt
 echo "" >> tools/welcome_tmp.txt
 cat tools/welcome.txt >> tools/welcome_tmp.txt
 pkgbuild --root ./build/.osx-pkg-dist/ --identifier com.trueinteractions.tint --install-location=/ --sign="$2" ./build/dist/tint.pkg
-productbuild --product tools/osx-pkg-reqs.xml --package-path ./build/dist/ --distribution tools/osx-pkg-dist.xml --sign="$2" --resources tools --identifier com.trueinteractions.tint ./build/dist/tint-$TINT_VERSION.pkg
+productbuild --product tools/osx-pkg-reqs.xml --package-path ./build/dist/ --distribution tools/osx-pkg-dist.xml --sign="$2" --resources tools --identifier com.trueinteractions.tint ./build/dist/tint-$TINT_VERSION-x64-osx.pkg
 
 rm ./build/dist/tint.pkg
 rm -rf ./build/.osx-pkg-dist/
 rm tools/welcome_tmp.txt
 
-codesign -s "$1" ./build/dist/tint-$TINT_VERSION.pkg
+codesign -s "$1" ./build/dist/tint-$TINT_VERSION-x64-osx.pkg
 
 read -p "Run tools/msi.bat on Windows... "
 
-spctl --assess -vvvv ./build/dist/tint-$TINT_VERSION.pkg
+spctl --assess -vvvv ./build/dist/tint-$TINT_VERSION-x64-osx.pkg
+mv ./build/dist/tint-$TINT_VERSION-x64.msi ./build/dist/tint-$TINT_VERSION-x64-win.msi
 
 echo "If you do not see an accepted above, an issue with signing occured."
 
