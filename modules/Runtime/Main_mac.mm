@@ -103,8 +103,7 @@ static void uv_event(void *info) {
     [[NSThread currentThread] setName:@"Tint EventLoop"];
 
     // Set Version Information
-    process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"),
-        v8::String::NewSymbol(TINT_VERSION));
+    process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"), v8::String::NewSymbol(TINT_VERSION));
     process_l->Set(v8::String::NewSymbol("packaged"), v8::Boolean::New(packaged));
 
     // Register the app:// protocol.
@@ -170,8 +169,8 @@ int main(int argc, char * argv[]) {
     AppDelegate *delegate = [[AppDelegate alloc] init];
     NSBundle *bundle = [NSBundle mainBundle];
     NSString *package = [bundle pathForResource:@"package" ofType:@"json"];
-
-    if(package) {
+    NSString *identifier = [bundle bundleIdentifier];
+    if(package && identifier) {
         NSString *executable = [bundle executablePath];
         NSDictionary *p = [NSJSONSerialization 
                     JSONObjectWithData:[NSData dataWithContentsOfFile:package] 
@@ -187,7 +186,7 @@ int main(int argc, char * argv[]) {
         }
 
         if(main == nil) {
-            fprintf(stderr, "Cannot find package.json file.\n");
+            fprintf(stderr, "Cannot find main entry within package.json file.\n");
             exit(1);
         }
 
