@@ -6,8 +6,6 @@ var tintVersion = '@@@TINT_VERSION@@@',
   tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
   baseDirectory = process.cwd(),
   pa = require('path'),
-  outputDirectory = baseDirectory+pa.sep+'build',
-  resourceDirectory = outputDirectory+pa.sep+'tmp',
   sourceDirectory = null,
   fs = require('fs'),
   os = require('os'),
@@ -405,6 +403,8 @@ $tint.write=function(__file,_data) {
   fs.writeFileSync(__file,_data);
 }
 $tint.copy=function(src,dst) {
+  src = path.normalize(src);
+  dst = path.normalize(dst);
   var filetodir=function(src,dst) {
     var paths=src.split(pa.sep);
     return filetofile(src,pa.join(dst,paths[paths.length-1]));
@@ -2802,16 +2802,30 @@ var build = $tint.loadbuilder(
   function success(e) { process.exit(0); }, 
   function start() { }
 );
+
+
+if(argv['out']) {
+  outputDirectory = argv['out'];
+  if(outputDirectory[0] !== '/') {
+    outputDirectory = $tint.absolute(outputDirectory,process.cwd());
+  }
+  baseDirectory = $tint.dotdot(outputDirectory);
+} else {
+  outputDirectory = baseDirectory+pa.sep+'build';
+}
+resourceDirectory = outputDirectory+pa.sep+'tmp';
+
 build.reset();
 build.prepconfig();
 if(argv.clean) build.prepclean();
 build.prepobj();
 if(argv['windows-runtime']) tintExecutableWindows = readToBase64(argv['windows-runtime']);
 if(argv['osx-runtime']) tintExecutableOSX = readToBase64(argv['osx-runtime']);
-if(!argv['no-windows-build']) build.prepwin();
-if(!argv['no-osx-build']) build.prepmac();
-if(argv['out']) {
-  outputDirectory = argv['out'];
+if(!argv['no-windows-build'] && argv['windows-build'] !== false) {
+  build.prepwin();
+}
+if(!argv['no-osx-build'] && argv['osx-build'] !== false) {
+  build.prepmac();
 }
 build.postbuild();
 build.play();
