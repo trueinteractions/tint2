@@ -1,18 +1,18 @@
 module.exports = (function() {
-  //if(global.__TINT.WebView) {
-  //  return global.__TINT.WebView;
-  //}
+  if(global.__TINT.WebView) {
+    return global.__TINT.WebView;
+  }
 
   var util = require('Utilities');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
   var $$ = process.bridge.win32;
 
-  $.import('System.Windows.Forms'); 
-  $.import('WPF\\WindowsFormsIntegration.dll');
-  $.System.Windows.Forms.Application.EnableVisualStyles();
-
   function WebView(options) {
+    $.import('System.Windows.Forms'); 
+    $.import('WPF\\WindowsFormsIntegration.dll');
+    $.System.Windows.Forms.Application.EnableVisualStyles();
+
     options = options || {};
     var firstLoad = true;
     var previousUrl = "";

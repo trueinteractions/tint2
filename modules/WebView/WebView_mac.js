@@ -491,7 +491,7 @@ module.exports = (function() {
   /**
    * @method execute
    * @param {string} javascript Executes the javascript (passed in as a string) in the window context of the top frame of the page.
-   * @param {callback} function The function which is called when the execution finishes.  The result is passed as the first argument.
+   * @param {function} callback The function which is called when the execution finishes.  The result is passed as the first argument.
    * @memberof WebView
    * @description This will execute the passed in javascript in the window context of the top frame of the currently loaded page.  The result is
    *              passed back when the callback is ran. 
