@@ -83,7 +83,7 @@ public:
 			path = System::IO::Directory::GetCurrentDirectory();
 			path = System::IO::Path::Combine(path, url);
 		}
-		Console::WriteLine("path: "+path);
+
 		if(System::IO::File::Exists(path)) {
 			return gcnew FileStream(path, System::IO::FileMode::Open);
 		} else {
