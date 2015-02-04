@@ -505,9 +505,11 @@ module.exports = (function() {
   };
 
   Control.prototype.removeLayoutConstraint = function(obj) {
-    this.private.parent.nativeView('removeConstraint',obj);
-    this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
-    this.private.parent.nativeView('layoutSubtreeIfNeeded');
+    if(this.private.parent !== null) {
+      this.private.parent.nativeView('removeConstraint',obj);
+      this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
+      this.private.parent.nativeView('layoutSubtreeIfNeeded');
+    }
   };
 
   /**

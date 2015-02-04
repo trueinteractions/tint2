@@ -141,7 +141,7 @@ module.exports = (function() {
     // consistant behavior of events being thrown from the underlying delegate.
     this.addEventListener('before-child-dettached', function(control) { 
       this.native('contentView')('willRemoveSubview',control.nativeView); 
-    });
+    }.bind(this));
   }
   
   Window.prototype = Object.create(Container.prototype);
