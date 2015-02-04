@@ -33,7 +33,6 @@
     this.launch = function() { this.fireEvent('launch'); };
     this.uninstall = function() { console.warn('unimplemented'); };
 
-
     util.def(this, 'packaged', function() { return process.packaged; } );
 
     this.resource = function(path) {

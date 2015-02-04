@@ -806,7 +806,11 @@ $tint.winmanifest = function(target, values) {
   var fd = fs.openSync(target,'r+');
   var winexe = new WindowsExeFile(fd);
   winexe.WindowsExeRead();
+  //var subsystemPos = winexe.SubsystemPosition;
   fs.closeSync(fd);
+  //var buf = new Buffer(2);
+  //buf.writeUInt16LE(WindowsConst.IMAGE_SUBSYSTEM_WINDOWS_GUI,0);
+  //$tint.writebindata(buf,target,subsystemPos);
   var container = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children[0].Children[0].Children; //[0].Children
   recurseManifest(container,target,values);
   
@@ -1543,6 +1547,8 @@ WindowsConst.RESOURCE_ENTRY_TYPES = [
   RT_ANIICON = {value:22,name:'RT_ANIICON'}, RT_HTML= {value:23,name:'RT_HTML'}, 
   RT_MANIFEST = {value:24,name:'RT_MANIFEST'}
 ];
+WindowsConst.IMAGE_SUBSYSTEM_WINDOWS_GUI = 2; // GUI application
+WindowsConst.IMAGE_SUBSYSTEM_WINDOWS_CUI = 3; // Conosle application
 WindowsConst.IMAGE_DOS_SIGNATURE        = {value:23117, name:'MSDOS'};
 WindowsConst.IMAGE_OS2_SIGNATURE        = {value:17742, name:'OS2'};
 WindowsConst.IMAGE_OS2_SIGNATURE_LE         = {value:17740, name:'OS2 LE'};
@@ -2029,6 +2035,8 @@ WindowsExeFile.prototype.DataDirectoryRead = function() {
   obj.Size = this.ULONG();
   return obj;
 }
+// IMAGE_OPTIONAL_HEADER
+// https://msdn.microsoft.com/en-us/library/windows/desktop/ms680339(v=vs.85).aspx
 WindowsExeFile.prototype.OptionalHeaderRead = function() {
   var obj = {};
   obj.Magic = this.USHORT();

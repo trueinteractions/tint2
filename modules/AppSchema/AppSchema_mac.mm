@@ -49,6 +49,7 @@
 			}
 		}
 	}
+
 	// if url has a leading /
 	if([[url substringToIndex:1] isEqualToString:@"/"]) {
 		path = [[path stringByAppendingString:@"/."] stringByAppendingString:url];
