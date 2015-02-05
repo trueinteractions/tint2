@@ -35,8 +35,8 @@ $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) 
   b.data=$tint.mergeobjs(b.data,packagejson);
   b.data.sources.directory=$tint.absolute(b.data.sources.directory,'.');
   sourceDirectory = $tint.absolute($tint.absolute($tint.dotdot(path),b.data.sources.directory),baseDirectory);
-  b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
-  b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],sourceDirectory);
+  if(b.data.icon && b.data.icon.osx) b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
+  if(b.data.icon && b.data.icon.windows) b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],sourceDirectory);
   b.manifest = path;
   return b; 
 };
@@ -64,18 +64,18 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       if (!this.data.version) throw new Error("The version number does not exist.");
       if (!this.data.sources) throw new Error("A source directory has not been selected.");
       if (this.data.longname.trim() === "") throw new Error("The long name is invalid");
-      if ($tint.ndef(this.data.icon.osx))
-        throw new Error("The key icon->osx was not found in package.json.");
+      if ($tint.ndef(this.data.icon))
+        throw new Error("The key 'icon' was not found in package.json.");
       if ($tint.ndef(this.data.icon.osx[0]))
-        throw new Error("No icon for OSX was specified in icon->osx[] in the package.json.");
+        throw new Error("No icon for OSX was found in the package.json, add {icon:{osx:['appicons.png']}} to your package.json.");
       if (!$tint.file(this.data.icon.osx[0]))
         throw new Error("The specified icon for OSX is not a file or could not be read. ["+this.data.icon.osx[0]+"]");
       if (this.data.icon.osx[0].indexOf(".png") == -1)
         throw new Error("The specified icon for OSX is not a png file. ["+this.data.icon.osx[0]+"]");
       if ($tint.ndef(this.data.icon.windows))
-        throw new Error("The key icon->windows was not found in package.json.");
+        throw new Error("No icon for Windows was found in package.json, add { icon: { windows: ['appicons.png'] } } to package.json.");
       if ($tint.ndef(this.data.icon.windows[0]))
-        throw new Error("No icon for Windows was specified in icon->windows[] in the package.json.");
+        throw new Error("No icon was found for Windows (note, the { icon: { windows } } entry was found, but it wasnt an array) inpackage.json.");
       if (!$tint.file(this.data.icon.windows[0]))
         throw new Error("The specified icon for windows is not a file or could not be read. ["+this.data.icon.windows[0]+"]");
       if (this.data.icon.windows[0].indexOf(".png") == -1)
@@ -2798,10 +2798,10 @@ function readToBase64(e) {
 var build = $tint.loadbuilder(
   argv._[0],
   function error(e, msg) {
-    if(msg) console.error(msg);
-    if(e.stack) console.error(e.stack);
-    else if(!e) throw new Error('unknown');
-    console.error(e);
+    if(msg) console.error("Error: "+msg);
+    //if(e.stack) console.error(e.stack);
+   // else if(!e) throw new Error('unknown');
+    if(e.message) console.error("Error: "+e.message);
     process.exit(1);
   }, 
   function warning(e) { console.warn(e); }, 
@@ -2824,6 +2824,7 @@ resourceDirectory = outputDirectory+pa.sep+'tmp';
 
 build.reset();
 build.prepconfig();
+
 if(argv.clean) build.prepclean();
 build.prepobj();
 if(argv['windows-runtime']) tintExecutableWindows = readToBase64(argv['windows-runtime']);

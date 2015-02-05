@@ -1,0 +1,21 @@
+{
+  "name": "shortname",
+  "longname": "My Application",
+  "namespace": "com.trueinteractions",
+  "version": "10.3.1",
+  "description": "An example module to illustrate the usage of a package.json",
+  "author": "Your Name <you.name@example.org>",
+  "sources": {
+    "directory":"."
+  },
+  "main": "lib/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/some/repo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/some/repo/issues"
+  },
+  "license": "MIT",
+  "copyright": "2014 True Interactions"
+}
