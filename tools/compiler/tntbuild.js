@@ -2771,21 +2771,20 @@ function rebase (base, dir) {
 /// Begin execution. ///
 
 var argv = optimist
-    .argv;
-
-if(!argv._[0]) {
-  console.log(
+  .boolean(['clean','no-windows-build','no-osx-build'])
+  .usage(
     'Tint Build Tool ('+tintVersion+')\n'+
-    'usage: tntbuild [options] package.json\n' + 
-    '   [--out=directory]\t\t\tThe directory to write the output to instead of the default \'build\'\n'+
-    '   [--clean]\t\t\t\tClean the build directory, removing any application files before beginning.\n'+
-    '   [--no-windows-build]\t\t\tDo not compile a windows version of the application.\n'+
-    '   [--no-osx-build]\t\t\tDo not compile an OS X version of the application.\n'+
-    '   [--windows-runtime=tint.exe]\t\tThe runtime to use for Windows (instead of the built-in)\n'+
-    '   [--osx-runtime=tint]\t\t\tThe runtime to use for OS X (instead of the built-in)'
-  );
-  process.exit(0);
-}
+    'usage: tntbuild [options] package.json\n')
+  .string(['out',0])
+  .describe('out', 'The directory to write the output to instead of the default \'build\'')
+  .describe('clean', 'Clean the build directory, removing any application files before beginning.')
+  .describe('no-windows-build', 'Do not compile a windows version of the application.')
+  .describe('no-osx-build', 'Do not compile an OS X version of the application')
+  .describe('windows-runtime', 'The runtime to use for Windows (instead of the built-in)')
+  .describe('osx-runtime', 'The runtime to use for OS X (instead of the built-in)')
+  .demand(1)
+  .argv;
+
 
 function readToBase64(e) {
   try {
