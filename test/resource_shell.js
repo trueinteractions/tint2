@@ -51,7 +51,6 @@ function run($utils) {
       $utils.notok();
     });
   } else {
-    $utils.ok();
     spawn  = require('child_process').spawn,
     rescBuilder  = spawn('..\\build\\msvs\\Release\\tint.exe', 
         ['..\\tools\\compiler\\tntbuild.js','--no-osx-build','--windows-runtime=..\\build\\msvs\\Release\\tint.exe','--out=.\\packagetest-build\\','.\\packagetest\\package.json']
@@ -73,24 +72,25 @@ function run($utils) {
         resc.on('close', function(code, signal) {
           $utils.assert(code === 0, 'Expected code to be 0, instead it was: '+code);
         */
-          var rmdir = spawn('rmdir', ['/S', '.\\packagetest-build\\']);
-          rmdir.on('close', function (code, signal) {
-            $utils.assert(code === 0);
-            $utils.assert(!fs.existsSync('.\\packagetest-build\\'));
-            $utils.ok();
-          });
-          rmdir.on('error', function(err) {
-            console.log('error on rmdir');
-            console.log(err);
-            $utils.notok();
-          });
-        /* }); */
 
+        var rmdir = spawn('cmd', ['/C','rmdir','/Q','/S', '.\\packagetest-build\\']);
+        rmdir.on('close', function (code, signal) {
+          $utils.assert(code === 0);
+          $utils.assert(!fs.existsSync('..\\..\\packagetest-build\\'));
+          $utils.ok();
+        });
+        rmdir.on('error', function(err) {
+          console.log('error on rmdir');
+          console.log(err);
+          $utils.notok();
+        });
+
+        /* });
         resc.on('error', function(err) {
           console.log('error on resc');
           console.log(err);
           $utils.notok();
-        });
+        }); */
     });
     rescBuilder.on('error', function(err) {
       console.log('error on resc builder');

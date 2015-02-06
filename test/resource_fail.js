@@ -35,14 +35,14 @@ function run($utils) {
         );
     resc.on('close', function (code, signal) {
       $utils.assert(code === 1);
-      var rmdir = spawn('rmdir', ['/S', '.\\packagetestfail-build\\']);
+      var rmdir = spawn('cmd', ['/C','rmdir','/Q','/S', '.\\packagetestfail-build\\'],{ stdio: 'inherit' });
       rmdir.on('close', function(code, signal) {
         $utils.assert(code === 0);
         $utils.ok();
       });
       rmdir.on('error', function(err) {
-        $utils.ok();
         console.log('rmdir: ', err);
+        $utils.notok();
       });
 
     });
