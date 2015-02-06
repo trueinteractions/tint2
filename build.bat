@@ -86,16 +86,25 @@ if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=
 :project-gen
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 SETLOCAL
-	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
-		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
-		set GYP_MSVS_VERSION=2010
-		set platformtoolset=v100
+	if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat" (
+		echo Configuring Platform Toolset V120
+		call "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat"
+		set GYP_MSVS_VERSION=2013
+		set platformtoolset=v120
 		goto inner-config
 	)
 	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
+		echo Configuring Platform Toolset V110
 		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2012
 		set platformtoolset=v110
+		goto inner-config
+	)
+	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
+		echo Configuring Platform Toolset V100
+		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
+		set GYP_MSVS_VERSION=2010
+		set platformtoolset=v100
 		goto inner-config
 	)
 	echo Cannot find visual studio VCVarsQueryRegistry.bat
@@ -110,11 +119,12 @@ ENDLOCAL
 :msbuild
 if defined nobuild goto sign
 SETLOCAL
-	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
-		echo Using Platform Toolset V100
-		call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
-		set GYP_MSVS_VERSION=2010
-		set platformtoolset=v100
+
+	if defined VS120COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+		echo Using Platform Toolset V120
+		call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
+		set GYP_MSVS_VERSION=2013
+		set platformtoolset=v120
 		goto msbuild-found
 	)
 	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
@@ -122,6 +132,13 @@ SETLOCAL
 		call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
 		set GYP_MSVS_VERSION=2012
 		set platformtoolset=v110
+		goto msbuild-found
+	)
+	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+		echo Using Platform Toolset V100
+		call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
+		set GYP_MSVS_VERSION=2010
+		set platformtoolset=v100
 		goto msbuild-found
 	)
 	echo Cannot find vcvarsall.bat for visual studio
