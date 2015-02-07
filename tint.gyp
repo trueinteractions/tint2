@@ -1,12 +1,9 @@
 {
   'variables': {
     'v8_use_snapshot%': 'true',
-    # Turn off -Werror in V8
-    # See http://codereview.chromium.org/8159015
-    'werror': '',
-    'node_use_dtrace%': 'true',
-    'node_use_etw%': 'true',
-    'node_use_perfctr%': 'true',
+    'node_use_dtrace%': 'false',
+    'node_use_etw%': 'false',
+    'node_use_perfctr%': 'false',
     'node_has_winsdk%': 'false',
     'node_shared_v8%': 'false',
     'node_shared_zlib%': 'false',
@@ -14,8 +11,9 @@
     'node_shared_cares%': 'false',
     'node_shared_libuv%': 'false',
     'node_use_openssl%': 'true',
-    'node_use_systemtap%': 'false',
     'node_shared_openssl%': 'false',
+    'node_use_mdb%': 'false',
+    'node_v8_options%': '',
     'win_subsystem%': 'console',
     'mac_library_files': [
       'modules/Bridge/class.js',
@@ -112,7 +110,6 @@
       'modules/Window/Window_win.js',
     ],
     'library_files': [
-      'modules/AppSchema/AppSchema.js',
       'libraries/node/src/node.js',
       'libraries/node/lib/_debugger.js',
       'libraries/node/lib/_linklist.js',
@@ -130,6 +127,12 @@
       'libraries/node/lib/freelist.js',
       'libraries/node/lib/fs.js',
       'libraries/node/lib/http.js',
+      'libraries/node/lib/_http_agent.js',
+      'libraries/node/lib/_http_client.js',
+      'libraries/node/lib/_http_common.js',
+      'libraries/node/lib/_http_incoming.js',
+      'libraries/node/lib/_http_outgoing.js',
+      'libraries/node/lib/_http_server.js',
       'libraries/node/lib/https.js',
       'libraries/node/lib/module.js',
       'libraries/node/lib/net.js',
@@ -139,6 +142,7 @@
       'libraries/node/lib/querystring.js',
       'libraries/node/lib/readline.js',
       'libraries/node/lib/repl.js',
+      'libraries/node/lib/smalloc.js',
       'libraries/node/lib/stream.js',
       'libraries/node/lib/_stream_readable.js',
       'libraries/node/lib/_stream_writable.js',
@@ -149,11 +153,17 @@
       'libraries/node/lib/sys.js',
       'libraries/node/lib/timers.js',
       'libraries/node/lib/tls.js',
+      'libraries/node/lib/_tls_common.js',
+      'libraries/node/lib/_tls_legacy.js',
+      'libraries/node/lib/_tls_wrap.js',
       'libraries/node/lib/tty.js',
       'libraries/node/lib/url.js',
       'libraries/node/lib/util.js',
       'libraries/node/lib/vm.js',
       'libraries/node/lib/zlib.js',
+      'libraries/node/deps/debugger-agent/lib/_debugger_agent.js',
+      # begin tint files.
+      'modules/AppSchema/AppSchema.js',
       'modules/Application/Common.js',
       'modules/Bridge/ref.js',
       'modules/Bridge/struct.js',
@@ -181,7 +191,8 @@
       'type': 'executable',
 
       'dependencies': [
-        'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
+        'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
+        # 'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'tint_js2c#host',
         'ffi_bindings',
       ],
@@ -198,57 +209,69 @@
       ],
 
       'sources': [
+        'libraries/node/src/async-wrap.cc',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
         'libraries/node/src/handle_wrap.cc',
         'libraries/node/src/node.cc',
         'libraries/node/src/node_buffer.cc',
         'libraries/node/src/node_constants.cc',
-        'libraries/node/src/node_extensions.cc',
+        'libraries/node/src/node_contextify.cc',
         'libraries/node/src/node_file.cc',
         'libraries/node/src/node_http_parser.cc',
         'libraries/node/src/node_javascript.cc',
+        'libraries/node/src/node_main.cc',
         'libraries/node/src/node_os.cc',
-        'libraries/node/src/node_script.cc',
+        'libraries/node/src/node_v8.cc',
         'libraries/node/src/node_stat_watcher.cc',
-        'libraries/node/src/node_string.cc',
+        'libraries/node/src/node_watchdog.cc',
         'libraries/node/src/node_zlib.cc',
+        'libraries/node/src/node_i18n.cc',
         'libraries/node/src/pipe_wrap.cc',
         'libraries/node/src/signal_wrap.cc',
+        'libraries/node/src/smalloc.cc',
+        'libraries/node/src/spawn_sync.cc',
         'libraries/node/src/string_bytes.cc',
         'libraries/node/src/stream_wrap.cc',
-        'libraries/node/src/slab_allocator.cc',
         'libraries/node/src/tcp_wrap.cc',
         'libraries/node/src/timer_wrap.cc',
         'libraries/node/src/tty_wrap.cc',
         'libraries/node/src/process_wrap.cc',
-        'libraries/node/src/v8_typed_array.cc',
         'libraries/node/src/udp_wrap.cc',
+        'libraries/node/src/uv.cc',
+        # headers to make for a more pleasant IDE experience
+        'libraries/node/src/async-wrap.h',
+        'libraries/node/src/async-wrap-inl.h',
+        'libraries/node/src/base-object.h',
+        'libraries/node/src/base-object-inl.h',
+        'libraries/node/src/env.h',
+        'libraries/node/src/env-inl.h',
         'libraries/node/src/handle_wrap.h',
         'libraries/node/src/node.h',
         'libraries/node/src/node_buffer.h',
         'libraries/node/src/node_constants.h',
-        'libraries/node/src/node_crypto.h',
-        'libraries/node/src/node_extensions.h',
         'libraries/node/src/node_file.h',
         'libraries/node/src/node_http_parser.h',
+        'libraries/node/src/node_internals.h',
         'libraries/node/src/node_javascript.h',
-        'libraries/node/src/node_os.h',
         'libraries/node/src/node_root_certs.h',
-        'libraries/node/src/node_script.h',
-        'libraries/node/src/node_string.h',
         'libraries/node/src/node_version.h',
-        'libraries/node/src/ngx-queue.h',
+        'libraries/node/src/node_watchdog.h',
+        'libraries/node/src/node_wrap.h',
+        'libraries/node/src/node_i18n.h',
         'libraries/node/src/pipe_wrap.h',
+        'libraries/node/src/queue.h',
+        'libraries/node/src/smalloc.h',
         'libraries/node/src/tty_wrap.h',
         'libraries/node/src/tcp_wrap.h',
         'libraries/node/src/udp_wrap.h',
         'libraries/node/src/req_wrap.h',
-        'libraries/node/src/slab_allocator.h',
         'libraries/node/src/string_bytes.h',
         'libraries/node/src/stream_wrap.h',
         'libraries/node/src/tree.h',
-        'libraries/node/src/v8_typed_array.h',
+        'libraries/node/src/util.h',
+        'libraries/node/src/util-inl.h',
+        'libraries/node/src/util.cc',
         'libraries/node/deps/http_parser/http_parser.h',
         '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
         # javascript files to make for an even more pleasant IDE experience
@@ -259,22 +282,65 @@
       'defines': [
         'NODE_WANT_INTERNALS=1',
         'ARCH="<(target_arch)"',
+        'PLATFORM="<(OS)"',
         'NODE_TAG="<(node_tag)"',
+        'NODE_V8_OPTIONS="<(node_v8_options)"',
       ],
       'conditions': [
+        [ 'v8_enable_i18n_support==1', {
+          'defines': [ 'NODE_HAVE_I18N_SUPPORT=1' ],
+          'dependencies': [
+            '<(icu_gyp_path):icui18n',
+            '<(icu_gyp_path):icuuc',
+          ],
+          'conditions': [
+            [ 'icu_small=="true"', {
+              'defines': [ 'NODE_HAVE_SMALL_ICU=1' ],
+          }]],
+        }],
         [ 'node_use_openssl=="true"', {
           'defines': [ 'HAVE_OPENSSL=1' ],
-          'sources': [ 'libraries/node/src/node_crypto.cc' ],
+          'sources': [ 
+            'libraries/node/src/node_crypto.cc',
+            'libraries/node/src/node_crypto_bio.cc',
+            'libraries/node/src/node_crypto_clienthello.cc',
+            'libraries/node/src/node_crypto.h',
+            'libraries/node/src/node_crypto_bio.h',
+            'libraries/node/src/node_crypto_clienthello.h',
+            'libraries/node/src/tls_wrap.cc',
+            'libraries/node/src/tls_wrap.h'
+          ],
           'conditions': [
             [ 'node_shared_openssl=="false"', {
-              'dependencies': [ './libraries/node/deps/openssl/openssl.gyp:openssl' ],
+              'dependencies': [ 
+                './libraries/node/deps/openssl/openssl.gyp:openssl',
+
+                # For tests
+                './libraries/node/deps/openssl/openssl.gyp:openssl-cli',
+              ],
+              # Do not let unused OpenSSL symbols to slip away
+              'xcode_settings': {
+                'OTHER_LDFLAGS': [
+                  '-Wl,-force_load,<(PRODUCT_DIR)/libopenssl.a',
+                ],
+              },
+              'conditions': [
+                ['OS in "linux freebsd"', {
+                  'ldflags': [
+                    '-Wl,--whole-archive <(PRODUCT_DIR)/libopenssl.a -Wl,--no-whole-archive',
+                  ],
+                }],
+              ],
             }]]
         }, {
           'defines': [ 'HAVE_OPENSSL=0' ]
         }],
         [ 'node_use_dtrace=="true"', {
           'defines': [ 'HAVE_DTRACE=1' ],
-          'dependencies': [ 'node_dtrace_header' ],
+          'dependencies': [ 
+            'node_dtrace_header',
+            'specialize_node_d',
+          ],
           'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)' ],
           #
           # DTrace is supported on solaris, mac, and bsd.  There are three
@@ -293,11 +359,14 @@
           # below, and the GYP-generated Makefiles will properly build them when
           # needed.
           #
-          'sources': [
-            'libraries/node/src/node_dtrace.cc',
-          ],
-          'conditions': [ [
-            'OS!="mac"', {
+          'sources': [ 'libraries/node/src/node_dtrace.cc' ],
+          'conditions': [
+            [ 'OS=="linux"', {
+              'sources': [
+                '<(SHARED_INTERMEDIATE_DIR)/node_dtrace_provider.o'
+              ],
+            }],
+            [ 'OS!="mac" and OS!="linux"', {
               'sources': [
                 'libraries/node/src/node_dtrace_ustack.cc',
                 'libraries/node/src/node_dtrace_provider.cc',
@@ -305,13 +374,11 @@
             }
           ] ]
         } ],
-        [ 'node_use_systemtap=="true"', {
-          'defines': [ 'HAVE_SYSTEMTAP=1', 'STAP_SDT_V1=1' ],
-          'dependencies': [ 'node_systemtap_header' ],
+        [ 'node_use_mdb=="true"', {
+          'dependencies': [ 'node_mdb' ],
           'include_dirs': [ '<(SHARED_INTERMEDIATE_DIR)' ],
           'sources': [
-            'libraries/node/src/node_dtrace.cc',
-            '<(SHARED_INTERMEDIATE_DIR)/node_systemtap.h',
+            'libaries/node/src/node_mdb.cc',
           ],
         } ],
         [ 'node_use_etw=="true"', {
@@ -342,7 +409,7 @@
             'libraries/node/deps/v8/include/v8.h',
             'libraries/node/deps/v8/include/v8-debug.h',
           ],
-          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host' ],
+          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8' ],
         }],
         [ 'node_shared_zlib=="false"', {
           'dependencies': [ 'libraries/node/deps/zlib/zlib.gyp:zlib' ],
@@ -649,20 +716,17 @@
             ['OS=="win"',{
               'inputs': ['<@(win_library_files)'],
             }],
-            [ 'node_use_dtrace=="false"'
-              ' and node_use_etw=="false"'
-              ' and node_use_systemtap=="false"',
-            {
-                'inputs': ['libraries/node/src/macros.py']
-              }
-              ],
+            [ 'node_use_dtrace=="false" and node_use_etw=="false"', {
+                'inputs': ['libraries/node/src/notrace_macros.py']
+            }],
             [ 'node_use_perfctr=="false"', {
               'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
             }],
           ],
               'action': [
                 '<(python)',
-                'tools/tint_js2c.py',
+                'libraries/node/tools/js2c.py',
+                ## 'tools/tint_js2c.py',
                 '<@(_outputs)',
                 '<@(_inputs)',
               ],
@@ -731,54 +795,76 @@
       ]
     },
     {
-      'target_name': 'node_systemtap_header',
+      'target_name': 'node_mdb',
       'type': 'none',
       'conditions': [
-        [ 'node_use_systemtap=="true"', {
-          'actions': [
-            {
-              'action_name': 'node_systemtap_header',
-              'inputs': [ 'libraries/node/src/node_systemtap.d' ],
-              'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/node_systemtap.h' ],
-              'action': [ 'dtrace', '-h', '-C', '-s', '<@(_inputs)',
-                '-o', '<@(_outputs)' ]
-            }
-          ]
-        } ]
-      ]
+        [ 'node_use_mdb=="true"',
+          {
+            'dependencies': [ 'libraries/node/deps/mdb_v8/mdb_v8.gyp:mdb_v8' ],
+            'actions': [
+              {
+                'action_name': 'node_mdb',
+                'inputs': [ '<(PRODUCT_DIR)/obj.target/deps/mdb_v8/mdb_v8.so' ],
+                'outputs': [ '<(PRODUCT_DIR)/obj.target/node/src/node_mdb.o' ],
+                'conditions': [
+                  [ 'target_arch=="ia32"', {
+                    'action': [ 'elfwrap', '-o', '<@(_outputs)', '<@(_inputs)' ],
+                  } ],
+                  [ 'target_arch=="x64"', {
+                    'action': [ 'elfwrap', '-64', '-o', '<@(_outputs)', '<@(_inputs)' ],
+                  } ],
+                ],
+              },
+            ],
+          },
+        ],
+      ],
     },
     {
       'target_name': 'node_dtrace_provider',
       'type': 'none',
       'conditions': [
-        [ 'node_use_dtrace=="true" and OS!="mac"', {
+        [ 'node_use_dtrace=="true" and OS!="mac" and OS!="linux"', {
           'actions': [
             {
               'action_name': 'node_dtrace_provider_o',
               'inputs': [
-                'libraries/node/src/node_provider.d',
-                '<(PRODUCT_DIR)/obj.target/node/src/node_dtrace.o'
+                '<(OBJ_DIR)/node/src/node_dtrace.o',
               ],
               'outputs': [
-                '<(PRODUCT_DIR)/obj.target/node/src/node_dtrace_provider.o'
+                '<(OBJ_DIR)/node/src/node_dtrace_provider.o'
               ],
-              'action': [ 'dtrace', '-G', '-xnolibs', '-s', '<@(_inputs)',
-                '-o', '<@(_outputs)' ]
+              'action': [ 'dtrace', '-G', '-xnolibs', '-s', 'libraries/node/src/node_provider.d',
+                '<@(_inputs)', '-o', '<@(_outputs)' ]
             }
           ]
-        } ]
+        }],
+        [ 'node_use_dtrace=="true" and OS=="linux"', {
+          'actions': [
+            {
+              'action_name': 'node_dtrace_provider_o',
+              'inputs': [ 'libraries/node/src/node_provider.d' ],
+              'outputs': [
+                '<(SHARED_INTERMEDIATE_DIR)/node_dtrace_provider.o'
+              ],
+              'action': [
+                'dtrace', '-C', '-G', '-s', '<@(_inputs)', '-o', '<@(_outputs)'
+              ],
+            }
+          ],
+        }],
       ]
     },
     {
       'target_name': 'node_dtrace_ustack',
       'type': 'none',
       'conditions': [
-        [ 'node_use_dtrace=="true" and OS!="mac"', {
+        [ 'node_use_dtrace=="true" and OS!="mac" and OS!="linux"', {
           'actions': [
             {
               'action_name': 'node_dtrace_ustack_constants',
               'inputs': [
-                '<(PRODUCT_DIR)/obj.target/deps/v8/tools/gyp/libv8_base.a'
+                '<(V8_BASE)'
               ],
               'outputs': [
                 '<(SHARED_INTERMEDIATE_DIR)/v8constants.h'
@@ -796,7 +882,7 @@
                 '<(SHARED_INTERMEDIATE_DIR)/v8constants.h'
               ],
               'outputs': [
-                '<(PRODUCT_DIR)/obj.target/node/src/node_dtrace_ustack.o'
+                '<(OBJ_DIR)/node/src/node_dtrace_ustack.o'
               ],
               'conditions': [
                 [ 'target_arch=="ia32"', {
@@ -812,8 +898,34 @@
                   ]
                 } ],
               ]
-            }
+            },
           ]
+        } ],
+      ]
+    },
+    {
+      'target_name': 'specialize_node_d',
+      'type': 'none',
+      'conditions': [
+        [ 'node_use_dtrace=="true"', {
+          'actions': [
+            {
+              'action_name': 'specialize_node_d',
+              'inputs': [
+                'libraries/node/src/node.d'
+              ],
+              'outputs': [
+                '<(PRODUCT_DIR)/node.d',
+              ],
+              'action': [
+                'libraries/node/tools/specialize_node_d.py',
+                '<@(_outputs)',
+                '<@(_inputs)',
+                '<@(OS)',
+                '<@(target_arch)',
+              ],
+            },
+          ],
         } ],
       ]
     }

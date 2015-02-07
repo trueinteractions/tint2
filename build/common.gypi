@@ -1,6 +1,7 @@
 {
   'variables': {
-    'visibility%': 'normal',          # V8's visibility setting
+    'werror': '',
+    'visibility%': 'hidden',          # V8's visibility setting
     'target_arch%': 'x64',            # set v8's target architecture
     'host_arch%': 'x64',              # set v8's host architecture
     'want_separate_host_toolset%': 0, # V8 should not build target and host
@@ -8,18 +9,56 @@
     'component%': 'static_library',   # NB. these names match with what V8 expects
     'msvs_multi_core_compile': '0',   # we do enable multicore compiles, but not using the V8 way
     'gcc_version%': 'unknown',
+    'icu_small': 'false',
+    'node_install_npm%': 'false',
+    'node_prefix%': '',
+    'node_shared_cares%': 'false',
+    'node_shared_http_parser%': 'false',
+    'node_shared_libuv%': 'false',
+    'node_shared_openssl%': 'false',
+    'node_shared_v8%': 'false',
+    'node_shared_zlib%': 'false',
+    'node_tag%': '',
+    'node_unsafe_optimizations%': 0,
+    'node_use_dtrace%': 'true',
+    'node_use_etw%': 'false',
+    'node_use_openssl%': 'true',
+    'node_use_perfctr%': 'false',
     'clang%': 1,
     'python%': 'python',
+    'v8_enable_gdbjit%': 0,
+    'v8_no_strict_aliasing%': 1,
+    'v8_use_snapshot%': 'false',
+    'win_subsystem%': 'console',
+    'uv_library': 'static_library',
+    'uv_parent_path': '/libraries/node/deps/uv/',
+    'uv_use_dtrace': 'true',
+    'v8_enable_gdbjit': 0,
+    'v8_enable_i18n_support': 0,
+    'v8_no_strict_aliasing': 1,
+    'v8_optimized_debug': 0,
+    'v8_random_seed': 0,
+    'want_separate_host_toolset': 0,
 
-    # Turn on optimizations that may trigger compiler bugs.
-    # Use at your own risk. Do *NOT* report bugs if this option is enabled.
-    'node_unsafe_optimizations%': 0,
+    # Enable disassembler for `--print-code` v8 options
+    'v8_enable_disassembler': 1,
 
     # Enable V8's post-mortem debugging only on unix flavors.
     'conditions': [
-      ['OS != "win"', {
+      ['OS == "win"', {
+        'os_posix': 0,
+        'v8_postmortem_support': 'false'
+      }, {
+        'os_posix': 1,
         'v8_postmortem_support': 'true'
-      }]
+      }],
+      ['GENERATOR == "ninja" or OS== "mac"', {
+        'OBJ_DIR': '<(PRODUCT_DIR)/obj',
+        'V8_BASE': '<(PRODUCT_DIR)/libv8_base.a',
+      }, {
+        'OBJ_DIR': '<(PRODUCT_DIR)/obj.target',
+        'V8_BASE': '<(PRODUCT_DIR)/obj.target/deps/v8/tools/gyp/libv8_base.a',
+      }],
     ],
   },
 
@@ -29,6 +68,7 @@
       'Debug': {
         'variables':{
           'runtime':3,
+          'v8_enable_handle_zapping%': 1,
         },
         'defines': [ 'DEBUG', '_DEBUG' ],
         'cflags': [ '-g', '-O0' ],
@@ -59,37 +99,25 @@
       'Release': {
         'variables':{
           'runtime':3,
+          'v8_enable_handle_zapping%': 0,
         },
+        'cflags': [ '-O3', '-ffunction-sections', '-fdata-sections' ],
         'conditions': [
           ['target_arch=="x64"', {
             'msvs_configuration_platform': 'x64',
           }],
-          ['node_unsafe_optimizations==1', {
-            'cflags': [ '-O3', '-ffunction-sections', '-fdata-sections' ],
-            'ldflags': [ '-Wl,--gc-sections' ],
-          }, {
-            'cflags': [ '-O2', '-fno-strict-aliasing' ],
-            'cflags!': [ '-O3', '-fstrict-aliasing' ],
-            'conditions': [
-              # Required by the dtrace post-processor. Unfortunately,
-              # some gcc/binutils combos generate bad code when
-              # -ffunction-sections is enabled. Let's hope for the best.
-              ['OS=="solaris"', {
-                'cflags': [ '-ffunction-sections', '-fdata-sections' ],
-              }, {
-                'cflags!': [ '-ffunction-sections', '-fdata-sections' ],
-              }],
-              ['clang == 0 and gcc_version >= 40', {
-                'cflags': [ '-fno-tree-vrp' ],
-              }],
-              ['clang == 0 and gcc_version <= 44', {
-                'cflags': [ '-fno-tree-sink' ],
-              }],
-            ],
-          }],
           ['OS=="solaris"', {
             # pull in V8's postmortem metadata
             'ldflags': [ '-Wl,-z,allextract' ]
+          }],
+          ['clang == 0 and gcc_version >= 40', {
+            'cflags': [ '-fno-tree-vrp' ],  # Work around compiler bug.
+          }],
+          ['clang == 0 and gcc_version <= 44', {
+            'cflags': [ '-fno-tree-sink' ],  # Work around compiler bug.
+          }],
+          ['OS!="mac" and OS!="win"', {
+            'cflags': [ '-fno-omit-frame-pointer' ],
           }],
         ],
         'msvs_settings': {
@@ -105,7 +133,7 @@
             'ExceptionHandling': 0,
             'AdditionalOptions': [
               '/MP', # compile across multiple CPUs
-              '/wd4506', '/wd4267', '/wd4244', '/wd4344', '/wd4800', '/wd4355', '/wd4005',
+              # '/wd4506', '/wd4267', '/wd4244', '/wd4344', '/wd4800', '/wd4355', '/wd4005',
             ],
           },
           'VCLibrarianTool': {
@@ -122,6 +150,10 @@
         },
       }
     },
+    # Forcibly disable -Werror.  We support a wide range of compilers, it's
+    # simply not feasible to squelch all warnings, never mind that the
+    # libraries in deps/ are not under our control.
+    'cflags!': ['-Werror'],
     'msvs_settings%': {
       'VCCLCompilerTool': {
         'RuntimeTypeInfo': 'false',
@@ -153,6 +185,7 @@
         ]
       },
     },
+    'msvs_disabled_warnings': [4351, 4355, 4800],
     'conditions': [
       ['OS == "win"', {
         'msvs_cygwin_shell': 0, # prevent actions from trying to use cygwin
@@ -175,10 +208,14 @@
           'BUILDING_UV_SHARED=1'
         ],
       }],
-      [ 'OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris"', {
-        'cflags': [ '-Wall', '-Wextra', '-Wno-unused-parameter', '-pthread', ],
+      [ 'OS in "linux freebsd openbsd solaris"', {
+        'cflags': [ '-pthread', ],
+        'ldflags': [ '-pthread' ],
+      }],
+      [ 'OS in "linux freebsd openbsd solaris android"', {
+        'cflags': [ '-Wall', '-Wextra', '-Wno-unused-parameter', ],
         'cflags_cc': [ '-fno-rtti', '-fno-exceptions' ],
-        'ldflags': [ '-pthread', '-rdynamic' ],
+        'ldflags': [ '-rdynamic' ],
         'target_conditions': [
           ['_type=="static_library"', {
             'standalone_static_library': 1, # disable thin archive which needs binutils >= 2.19
@@ -200,6 +237,10 @@
             'ldflags!': [ '-pthread' ],
           }],
         ],
+      }],
+      [ 'OS=="android"', {
+        'defines': ['_GLIBCXX_USE_C99_MATH'],
+        'libraries': [ '-llog' ],
       }],
       ['OS=="mac"', {
         'defines': ['_DARWIN_USE_64_BIT_INODE=1'],
@@ -258,6 +299,11 @@
       }],
       ['OS=="freebsd" and node_use_dtrace=="true"', {
         'libraries': [ '-lelf' ],
+      }],
+      ['OS=="freebsd"', {
+        'ldflags': [
+          '-Wl,--export-dynamic',
+        ],
       }]
     ],
   }
