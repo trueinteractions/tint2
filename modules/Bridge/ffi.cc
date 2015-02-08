@@ -1,5 +1,3 @@
-#include <node_buffer.h>
-#include <node_version.h>
 #include "ffi.h"
 #include <queue>
 #ifdef __APPLE__
@@ -83,9 +81,9 @@ void CallbackInfo::DispatchToV8(callback_info *info, void *retval, void **parame
     // invoke the registered callback function
     info->function->Call(2, argv);
 #ifdef __APPLE__
-  struct kevent event;
-  EV_SET(&event, -1, EVFILT_TIMER | EV_ONESHOT, EV_ADD, NOTE_NSECONDS, 0, 0);
-  kevent(uv_backend_fd(uv_default_loop()), &event, 1, NULL, 0, NULL);
+    struct kevent event;
+    EV_SET(&event, -1, EVFILT_TIMER | EV_ONESHOT, EV_ADD, NOTE_NSECONDS, 0, 0);
+    kevent(uv_backend_fd(uv_default_loop()), &event, 1, NULL, 0, NULL);
 #endif
   }
 
@@ -117,9 +115,9 @@ void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
  */
 
 NAN_METHOD(CallbackInfo::Callback) {
-  NanScope();
-
+  NanEscapableScope();
   if (args.Length() != 4) {
+    fprintf(stderr, "ffi_close\n");
     return NanThrowError("Not enough arguments.");
   }
 
@@ -163,9 +161,7 @@ NAN_METHOD(CallbackInfo::Callback) {
     // TODO: return the error code
     return NanThrowError("ffi_prep_closure() Returned Error");
   }
-
-  Buffer *buf = NanNewBufferHandle((char *)code, sizeof(void *), closure_pointer_cb, info);
-  return scope.Close(buf->handle_);
+  NanReturnValue(NanNewBufferHandle((char *)code, sizeof(void *), closure_pointer_cb, info));
 }
 
 /*
@@ -215,13 +211,13 @@ void CallbackInfo::Invoke(ffi_cif *cif, void *retval, void **parameters, void *u
  */
 
 void CallbackInfo::Initialize(Handle<Object> target) {
-  NanScope();
+  NanEscapableScope();
 
   NODE_SET_METHOD(target, "Callback", Callback);
 
   // initialize our threaded invokation stuff
   g_mainthread = pthread_self();
-  uv_async_init(uv_default_loop(), &g_async, CallbackInfo::WatcherCallback);
+  uv_async_init(uv_default_loop(), &g_async, (uv_async_cb) CallbackInfo::WatcherCallback);
   pthread_mutex_init(&g_queue_mutex, NULL);
 
   // allow the event loop to exit while this is running
@@ -240,16 +236,15 @@ Handle<Value> WrapPointer(char *ptr) {
 }
 
 Handle<Value> WrapPointer(char *ptr, size_t length) {
-  NanScope();
+  NanEscapableScope();
   void *user_data = NULL;
-  Buffer *buf = Buffer::New(ptr, length, wrap_pointer_cb, user_data);
-  return scope.Close(buf->handle_);
+  return NanEscapeScope(NanNewBufferHandle(ptr, length, wrap_pointer_cb, user_data));
 }
 
 ///////////////
 
 void FFI::InitializeStaticFunctions(Handle<Object> target) {
-  Local<Object> o = Object::New();
+  Local<Object> o =  NanNew<Object>();
 
   // dl functions used by the DynamicLibrary JS class
   o->Set(NanNew<String>("dlopen"),  WrapPointer((char *)dlopen));
@@ -263,11 +258,12 @@ void FFI::InitializeStaticFunctions(Handle<Object> target) {
 ///////////////
 
 #define SET_ENUM_VALUE(_value) \
-  target->Set(NanNew<String>(#_value), \
-              Integer::New((ssize_t)_value), \
+  target->ForceSet(NanNew<String>(#_value), \
+              NanNew<Number>((double)(ssize_t)_value), \
               static_cast<PropertyAttribute>(ReadOnly|DontDelete))
 
 void FFI::InitializeBindings(Handle<Object> target) {
+  NanEscapableScope();
 
   // main function exports
   NODE_SET_METHOD(target, "ffi_prep_cif", FFIPrepCif);
@@ -329,30 +325,30 @@ void FFI::InitializeBindings(Handle<Object> target) {
 
   /* flags for dlsym() */
 #ifdef RTLD_NEXT
-  target->Set(NanNew<String>("RTLD_NEXT"), WrapPointer((char *)RTLD_NEXT), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("RTLD_NEXT"), WrapPointer((char *)RTLD_NEXT), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 #endif
 #ifdef RTLD_DEFAULT
-  target->Set(NanNew<String>("RTLD_DEFAULT"), WrapPointer((char *)RTLD_DEFAULT), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("RTLD_DEFAULT"), WrapPointer((char *)RTLD_DEFAULT), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 #endif
 #ifdef RTLD_SELF
-  target->Set(NanNew<String>("RTLD_SELF"), WrapPointer((char *)RTLD_SELF), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("RTLD_SELF"), WrapPointer((char *)RTLD_SELF), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 #endif
 #ifdef RTLD_MAIN_ONLY
-  target->Set(NanNew<String>("RTLD_MAIN_ONLY"), WrapPointer((char *)RTLD_MAIN_ONLY), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("RTLD_MAIN_ONLY"), WrapPointer((char *)RTLD_MAIN_ONLY), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 #endif
 
-  target->Set(NanNew<String>("FFI_ARG_SIZE"), NanNew<Integer>(sizeof(ffi_arg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-  target->Set(NanNew<String>("FFI_SARG_SIZE"), NanNew<Integer>(sizeof(ffi_sarg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-  target->Set(NanNew<String>("FFI_TYPE_SIZE"), NanNew<Integer>(sizeof(ffi_type)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-  target->Set(NanNew<String>("FFI_CIF_SIZE"), NanNew<Integer>(sizeof(ffi_cif)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_ARG_SIZE"), NanNew<Number>((double)sizeof(ffi_arg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_SARG_SIZE"), NanNew<Number>((double)sizeof(ffi_sarg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_TYPE_SIZE"), NanNew<Number>((double)sizeof(ffi_type)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_CIF_SIZE"), NanNew<Number>((double)sizeof(ffi_cif)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 
   bool hasObjc = false;
 #if __OBJC__ || __OBJC2__
   hasObjc = true;
 #endif
-  target->Set(NanNew<String>("HAS_OBJC"), Boolean::New(hasObjc), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("HAS_OBJC"), NanNew<Boolean>(hasObjc), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 
-  Local<Object> ftmap = Object::New();
+  Local<Object> ftmap = NanNew<Object>();
   ftmap->Set(NanNew<String>("void"),     WrapPointer((char *)&ffi_type_void));
   ftmap->Set(NanNew<String>("uint8"),    WrapPointer((char *)&ffi_type_uint8));
   ftmap->Set(NanNew<String>("int8"),     WrapPointer((char *)&ffi_type_sint8));
@@ -393,7 +389,7 @@ void FFI::InitializeBindings(Handle<Object> target) {
  */
 
 NAN_METHOD(FFI::FFIPrepCif) {
-  NanScope();
+  NanEscapableScope();
 
   unsigned int nargs;
   char *rtype, *atypes, *cif;
@@ -422,7 +418,7 @@ NAN_METHOD(FFI::FFIPrepCif) {
       (ffi_type *)rtype,
       (ffi_type **)atypes);
 
-  return scope.Close(Integer::NewFromUnsigned(status));
+  NanReturnValue(NanNew<Integer>(status));
 }
 
 /*
@@ -440,7 +436,7 @@ NAN_METHOD(FFI::FFIPrepCif) {
  */
 
 NAN_METHOD(FFI::FFIPrepCifVar) {
-  NanScope();
+  NanEscapableScope();
 
   unsigned int fargs, targs;
   char *rtype, *atypes, *cif;
@@ -471,7 +467,7 @@ NAN_METHOD(FFI::FFIPrepCifVar) {
       (ffi_type *)rtype,
       (ffi_type **)atypes);
 
-  return scope.Close(Integer::NewFromUnsigned(status));
+  NanReturnValue(NanNew<Integer>(status));
 }
 
 /*
@@ -484,7 +480,7 @@ NAN_METHOD(FFI::FFIPrepCifVar) {
  */
 
 NAN_METHOD(FFI::FFICall) {
-  NanScope();
+  NanEscapableScope();
 
   if (args.Length() != 4) {
     return NanThrowError("ffi_call() requires 4 arguments!");
@@ -510,7 +506,7 @@ NAN_METHOD(FFI::FFICall) {
     }
 #endif
 
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*
@@ -524,7 +520,7 @@ NAN_METHOD(FFI::FFICall) {
  */
 
 NAN_METHOD(FFI::FFICallAsync) {
-  NanScope();
+  NanEscapableScope();
 
   if (args.Length() != 5) {
     return NanThrowError("ffi_call_async() requires 5 arguments!");
@@ -550,7 +546,7 @@ NAN_METHOD(FFI::FFICallAsync) {
       FFI::AsyncFFICall,
       (uv_after_work_cb)FFI::FinishAsyncFFICall);
 
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*
@@ -583,11 +579,10 @@ void FFI::AsyncFFICall(uv_work_t *req) {
  */
 
 void FFI::FinishAsyncFFICall(uv_work_t *req) {
-  NanScope();
 
   AsyncCallParams *p = (AsyncCallParams *)req->data;
 
-  Handle<Value> argv[] = { Null() };
+  Handle<Value> argv[] = { NanNull() };
   if (p->result != FFI_OK) {
     // an Objective-C error was thrown
     argv[0] = WrapPointer(p->err);

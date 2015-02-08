@@ -1,23 +1,15 @@
+#include "node.cc" // this is a hack to get at node's internal globals.
+#include <tint_version.h>
+
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
-#include <node.h>
-#include <node_javascript.h>
-#include <node_string.h>
-#include "v8_typed_array.h"
-#include <stdlib.h>
+
 #include "../AppSchema/AppSchema_mac.h"
+#include "../Bridge/nan.h"
+
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
-#include <tint_version.h>
-
-namespace node {
-    extern v8::Persistent<v8::String> process_symbol;
-    extern v8::Persistent<v8::String> domain_symbol;
-    extern void InitDTrace(v8::Handle<v8::Object> target);
-    extern v8::Local<v8::Value> ExecuteString(v8::Handle<v8::String> source, 
-      v8::Handle<v8::Value> filename);
-}
 
 static bool packaged = false;
 static int embed_closed = 0;
@@ -25,28 +17,25 @@ static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
 static char **init_argv;
-v8::Persistent<v8::Object> bridge;
-v8::Persistent<v8::Object> ref;
 
 namespace REF {
-    extern void Init (v8::Handle<v8::Object> target);
+  extern void Init (v8::Handle<v8::Object> target);
 }
 
 namespace FFI {
-    extern void Init(v8::Handle<v8::Object> target);
+  extern void Init(v8::Handle<v8::Object> target);
 }
 
 v8::Handle<v8::Object> process_l;
+node::Environment *env;
 
-v8::Handle<v8::Value> InitBridge(const v8::Arguments& args) {
-    v8::HandleScope scope;
-    v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
-    bridge_template->SetClassName(v8::String::NewSymbol("bridge"));
-    bridge = v8::Persistent<v8::Object>::New(bridge_template->GetFunction()->NewInstance());
-    process_l->Set(v8::String::NewSymbol("bridge"), bridge);
+NAN_METHOD(InitBridge) {
+    NanScope();
+    v8::Local<v8::Object> bridge = NanNew<v8::Object>();
+    process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
     FFI::Init(bridge);
     REF::Init(bridge);
-    return v8::Object::New();
+    NanReturnValue(NanNew<v8::Object>());
 }
 
 
@@ -60,11 +49,11 @@ static void uv_event(void *info) {
     // events to keep it assuming something else will come and return -1
     // from uv_backend_timeout.
     uv_async_t dummy_uv_handle_;
-    uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
+    uv_async_init(env->event_loop(), &dummy_uv_handle_, (uv_async_cb) uv_noop);
 
     int r;
     struct kevent errors[1];
-    uv_loop_t* loop = uv_default_loop();
+    uv_loop_t* loop = env->event_loop();
     int timeout;
     
     while (!embed_closed) {
@@ -83,9 +72,17 @@ static void uv_event(void *info) {
         // Do not block this thread, place uv callbacks on the main thread, 
         // then repost the semaphore to allow us to continue. Note, we've
         // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
-        dispatch_async(dispatch_get_main_queue(), ^{
-            uv_run(uv_default_loop(), UV_RUN_NOWAIT);
-            uv_sem_post(&embed_sem);
+        dispatch_async(dispatch_get_main_queue(), ^{ 
+          bool more = uv_run(env->event_loop(), UV_RUN_NOWAIT);
+          if (more == false) {
+            EmitBeforeExit(env);
+            // Emit `beforeExit` if the loop became alive either after emitting
+            // event, or after running some callbacks.
+            more = uv_loop_alive(env->event_loop());
+            if (uv_run(env->event_loop(), UV_RUN_NOWAIT) != 0)
+              more = true;
+          }
+          uv_sem_post(&embed_sem);
         });
 
         // Wait for the main loop to deal with events.
@@ -102,19 +99,29 @@ static void uv_event(void *info) {
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     [[NSThread currentThread] setName:@"Tint EventLoop"];
 
-    // Set Version Information
-    process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"), v8::String::NewSymbol(TINT_VERSION));
-    process_l->Set(v8::String::NewSymbol("packaged"), v8::Boolean::New(packaged));
+    process_l = env->process_object();
 
     // Register the app:// protocol.
     [NSURLProtocol registerClass:[AppSchema class]];
 
-    // Resgiter the initial bridge objective-c protocols
+    // Register the initial bridge objective-c protocols
     NODE_SET_METHOD(process_l, "initbridge", InitBridge);
+  
+    // Enable debugger
+    if (node::use_debug_agent)
+      node::EnableDebug(env);
 
-    // Load node and begin processing.
-    node::Load(process_l);
+    // Set Version Information
+    process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
+    process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
 
+    // Start debug agent when argv has --debug
+    if (node::use_debug_agent)
+      node::StartDebug(env, node::debug_wait_connect);
+
+    node::LoadEnvironment(env);
+
+    
     // Start worker that will interrupt main loop when having uv events.
     // keep the UV loop in-sync with CFRunLoop.
     embed_closed = 0;
@@ -124,12 +131,7 @@ static void uv_event(void *info) {
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-    node::EmitExit(process_l);
     embed_closed = 1;
-    /*uv_sem_post(&embed_sem);
-    uv_run(uv_default_loop(), UV_RUN_ONCE);
-    uv_thread_join(&embed_thread);
-    uv_sem_destroy(&embed_sem);*/
 }
 @end
 
@@ -205,40 +207,72 @@ int main(int argc, char * argv[]) {
         strncpy(p_argv[1], pack, pack_len);
         init_argc = argc = 2;
         init_argv = copy_argv(argc, p_argv);
-        argv = uv_setup_args(argc, p_argv);
         packaged = true;
     } else {
         init_argc = argc;
         init_argv = copy_argv(argc, argv);
-        argv = uv_setup_args(argc, argv);
     }
 
-    // This needs to run *before* V8::Initialize()
-    node::Init(init_argc, init_argv);
+    const char* replaceInvalid = getenv("NODE_INVALID_UTF8");
 
+    if (replaceInvalid == NULL)
+      node::WRITE_UTF8_FLAGS |= v8::String::REPLACE_INVALID_UTF8;
+
+    // Try hard not to lose SIGUSR1 signals during the bootstrap process.
+    node::InstallEarlyDebugSignalHandler();
+
+    assert(init_argc > 0);
+
+    // Hack around with the argv pointer. Used for process.title = "blah".
+    argv = uv_setup_args(init_argc, init_argv);
+
+    // This needs to run *before* V8::Initialize().  The const_cast is not
+    // optional, in case you're wondering.
+    int exec_argc;
+    const char** exec_argv;
+    node::Init(&init_argc, const_cast<const char**>(init_argv), &exec_argc, &exec_argv);
+
+    // V8 on Windows doesn't have a good source of entropy. Seed it from
+    // OpenSSL's pool.
+    v8::V8::SetEntropySource(node::crypto::EntropySource);
+
+    int code;
     v8::V8::Initialize();
+    node::node_is_initialized = true;
     {
-        v8::Locker locker;
-        v8::HandleScope handle_scope;
+      v8::Locker locker(node::node_isolate);
+      v8::Isolate::Scope isolate_scope(node::node_isolate);
+      v8::HandleScope handle_scope(node::node_isolate);
+      v8::Local<v8::Context> context = v8::Context::New(node::node_isolate);
+      env = node::CreateEnvironment(
+          node::node_isolate,
+          uv_default_loop(),
+          context,
+          init_argc,
+          init_argv,
+          exec_argc,
+          exec_argv);
+      v8::Context::Scope context_scope(context);
 
-        // Create the one and only Context.
-        v8::Persistent<v8::Context> context = v8::Context::New();
-        v8::Context::Scope context_scope(context);
+      [app setDelegate:delegate];
+      [app setActivationPolicy:NSApplicationActivationPolicyAccessory];
+      [app run];
 
-        // Use original argv, as we're just copying values out of it.
-        process_l = node::SetupProcessObject(init_argc, init_argv);
-        v8_typed_array::AttachBindings(context->Global());
+      code = EmitExit(env);
+      RunAtExit(env);
 
-        [app setDelegate:delegate];
-        [app setActivationPolicy:NSApplicationActivationPolicyAccessory];
-        [app run];
-#ifndef NDEBUG
-        context.Dispose();
-#endif
+      env->Dispose();
+      env = NULL;
     }
 
-#ifndef NDEBUG
-    // Clean up. Not strictly necessary.
+    CHECK_NE(node::node_isolate, NULL);
+    node::node_isolate->Dispose();
+    node::node_isolate = NULL;
     v8::V8::Dispose();
-#endif  // NDEBUG
+
+    delete[] exec_argv;
+    exec_argv = NULL;
+
+    return code;
+
 }

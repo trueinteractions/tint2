@@ -10,20 +10,7 @@
     'msvs_multi_core_compile': '0',   # we do enable multicore compiles, but not using the V8 way
     'gcc_version%': 'unknown',
     'icu_small': 'false',
-    'node_install_npm%': 'false',
-    'node_prefix%': '',
-    'node_shared_cares%': 'false',
-    'node_shared_http_parser%': 'false',
-    'node_shared_libuv%': 'false',
-    'node_shared_openssl%': 'false',
-    'node_shared_v8%': 'false',
-    'node_shared_zlib%': 'false',
-    'node_tag%': '',
     'node_unsafe_optimizations%': 0,
-    'node_use_dtrace%': 'true',
-    'node_use_etw%': 'false',
-    'node_use_openssl%': 'true',
-    'node_use_perfctr%': 'false',
     'clang%': 1,
     'python%': 'python',
     'v8_enable_gdbjit%': 0,
@@ -50,7 +37,7 @@
         'v8_postmortem_support': 'false'
       }, {
         'os_posix': 1,
-        'v8_postmortem_support': 'true'
+        # 'v8_postmortem_support': 'true'  # TODO RE-ENABLE ME
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj',
@@ -265,11 +252,11 @@
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
             '-g',                                   # added for Tint
-            '-stdlib=libc++',                       # added for Tint
+            # '-stdlib=libc++',                       # added for Tint
           ],
           'OTHER_CPLUSPLUSFLAGS': [
             '-g',                                   # added for Tint
-            '-stdlib=libc++'                        # added for Tint
+            # '-stdlib=libc++'                        # added for Tint
           ],
           'OTHER_LDFLAGS':[
             '-framework Carbon', '-framework AppKit'# added for Tint

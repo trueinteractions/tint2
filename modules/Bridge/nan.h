@@ -12,7 +12,7 @@
  *
  * MIT License <https://github.com/rvagg/nan/blob/master/LICENSE.md>
  *
- * Version 1.6.2: current Node unstable: 0.11.16, Node stable: 0.10.36, io.js: 1.1.0
+ * Version 1.5.2: current Node unstable: 0.11.15, Node stable: 0.10.35, io.js: 1.0.3
  *
  * See https://github.com/rvagg/nan for the latest update to this file
  **********************************************************************************/
@@ -165,63 +165,6 @@ template<typename T>
 NAN_INLINE v8::Local<T> _NanEnsureLocal(v8::Local<T> val) {
   return val;
 }
-
-/* io.js 1.0  */
-#if NODE_MODULE_VERSION >= 42 || NODE_VERSION_AT_LEAST(0, 11, 15)
-  NAN_INLINE
-  void NanSetCounterFunction(v8::CounterLookupCallback cb) {
-    v8::Isolate::GetCurrent()->SetCounterFunction(cb);
-  }
-
-  NAN_INLINE
-  void NanSetCreateHistogramFunction(v8::CreateHistogramCallback cb) {
-    v8::Isolate::GetCurrent()->SetCreateHistogramFunction(cb);
-  }
-
-  NAN_INLINE
-  void NanSetAddHistogramSampleFunction(v8::AddHistogramSampleCallback cb) {
-    v8::Isolate::GetCurrent()->SetAddHistogramSampleFunction(cb);
-  }
-
-  NAN_INLINE bool NanIdleNotification(int idle_time_in_ms) {
-    return v8::Isolate::GetCurrent()->IdleNotification(idle_time_in_ms);
-  }
-
-  NAN_INLINE void NanLowMemoryNotification() {
-    v8::Isolate::GetCurrent()->LowMemoryNotification();
-  }
-
-  NAN_INLINE void NanContextDisposedNotification() {
-    v8::Isolate::GetCurrent()->ContextDisposedNotification();
-  }
-#else
-  NAN_INLINE
-  void NanSetCounterFunction(v8::CounterLookupCallback cb) {
-    v8::V8::SetCounterFunction(cb);
-  }
-
-  NAN_INLINE
-  void NanSetCreateHistogramFunction(v8::CreateHistogramCallback cb) {
-    v8::V8::SetCreateHistogramFunction(cb);
-  }
-
-  NAN_INLINE
-  void NanSetAddHistogramSampleFunction(v8::AddHistogramSampleCallback cb) {
-    v8::V8::SetAddHistogramSampleFunction(cb);
-  }
-
-  NAN_INLINE bool NanIdleNotification(int idle_time_in_ms) {
-    return v8::V8::IdleNotification(idle_time_in_ms);
-  }
-
-  NAN_INLINE void NanLowMemoryNotification() {
-    v8::V8::LowMemoryNotification();
-  }
-
-  NAN_INLINE void NanContextDisposedNotification() {
-    v8::V8::ContextDisposedNotification();
-  }
-#endif
 
 #if (NODE_MODULE_VERSION > 0x000B)
 // Node 0.11+ (0.11.12 and below won't compile with these)
@@ -586,7 +529,7 @@ NAN_INLINE _NanWeakCallbackInfo<T, P>* NanMakeWeakPersistent(
     return NanNew(function_template)->HasInstance(value);
   }
 
-  NAN_DEPRECATED NAN_INLINE v8::Local<v8::Context> NanNewContextHandle(
+  NAN_INLINE v8::Local<v8::Context> NanNewContextHandle(
       v8::ExtensionConfiguration* extensions = NULL
     , v8::Handle<v8::ObjectTemplate> tmpl = v8::Handle<v8::ObjectTemplate>()
     , v8::Handle<v8::Value> obj = v8::Handle<v8::Value>()
@@ -1132,7 +1075,7 @@ NAN_INLINE _NanWeakCallbackInfo<T, P>* NanMakeWeakPersistent(
     return function_template->HasInstance(value);
   }
 
-  NAN_DEPRECATED NAN_INLINE v8::Local<v8::Context> NanNewContextHandle(
+  NAN_INLINE v8::Local<v8::Context> NanNewContextHandle(
       v8::ExtensionConfiguration* extensions = NULL
     , v8::Handle<v8::ObjectTemplate> tmpl = v8::Handle<v8::ObjectTemplate>()
     , v8::Handle<v8::Value> obj = v8::Handle<v8::Value>()
@@ -1402,49 +1345,15 @@ class NanCallback {
     return NanNew(handle)->Get(kCallbackIndex)->IsUndefined();
   }
 
-  NAN_INLINE v8::Handle<v8::Value>
-  Call(v8::Handle<v8::Object> target
-     , int argc
-     , v8::Handle<v8::Value> argv[]) const {
-#if (NODE_MODULE_VERSION > 0x000B)  // 0.11.12+
-    v8::Isolate *isolate = v8::Isolate::GetCurrent();
-    return Call_(isolate, target, argc, argv);
-#else
-    return Call_(target, argc, argv);
-#endif
-  }
-
-  NAN_INLINE v8::Handle<v8::Value>
-  Call(int argc, v8::Handle<v8::Value> argv[]) const {
-#if (NODE_MODULE_VERSION > 0x000B)  // 0.11.12+
-    v8::Isolate *isolate = v8::Isolate::GetCurrent();
-    return Call_(isolate, isolate->GetCurrentContext()->Global(), argc, argv);
-#else
-    return Call_(v8::Context::GetCurrent()->Global(), argc, argv);
-#endif
-  }
-
- private:
-  v8::Persistent<v8::Object> handle;
-  static const uint32_t kCallbackIndex = 0;
-
-#if (NODE_MODULE_VERSION > 0x000B)
-  v8::Handle<v8::Value> Call_(v8::Isolate *isolate
-                           , v8::Handle<v8::Object> target
-                           , int argc
-                           , v8::Handle<v8::Value> argv[]) const {
-#else
-  v8::Handle<v8::Value> Call_(v8::Handle<v8::Object> target
-                           , int argc
-                           , v8::Handle<v8::Value> argv[]) const {
-#endif
+  v8::Handle<v8::Value> Call(int argc, v8::Handle<v8::Value> argv[]) const {
     NanEscapableScope();
 #if (NODE_MODULE_VERSION > 0x000B)  // 0.11.12+
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
     v8::Local<v8::Function> callback = NanNew(handle)->
         Get(kCallbackIndex).As<v8::Function>();
     return NanEscapeScope(node::MakeCallback(
         isolate
-      , target
+      , isolate->GetCurrentContext()->Global()
       , callback
       , argc
       , argv
@@ -1454,7 +1363,7 @@ class NanCallback {
     v8::Local<v8::Function> callback = handle->
         Get(kCallbackIndex).As<v8::Function>();
     return NanEscapeScope(node::MakeCallback(
-        target
+        v8::Context::GetCurrent()->Global()
       , callback
       , argc
       , argv
@@ -1463,12 +1372,15 @@ class NanCallback {
     v8::Local<v8::Function> callback = handle->
         Get(kCallbackIndex).As<v8::Function>();
     return NanEscapeScope(NanMakeCallback(
-        target, callback, argc, argv));
+        v8::Context::GetCurrent()->Global(), callback, argc, argv));
 #endif
 #endif
   }
-};
 
+ private:
+  v8::Persistent<v8::Object> handle;
+  static const uint32_t kCallbackIndex = 0;
+};
 
 /* abstract */ class NanAsyncWorker {
  public:
@@ -1871,85 +1783,6 @@ static bool _NanGetExternalParts(
 
 namespace Nan {
   enum Encoding {ASCII, UTF8, BASE64, UCS2, BINARY, HEX, BUFFER};
-}
-
-#if !NODE_VERSION_AT_LEAST(0, 10, 0)
-# include "nan_string_bytes.h"  // NOLINT(build/include)
-#endif
-
-NAN_INLINE v8::Local<v8::Value> NanEncode(
-    const void *buf, size_t len, enum Nan::Encoding encoding = Nan::BINARY) {
-#if (NODE_MODULE_VERSION >= 42)
-  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-  node::encoding node_enc = static_cast<node::encoding>(encoding);
-
-  if (encoding == Nan::UCS2) {
-    return node::Encode(
-        isolate
-      , reinterpret_cast<const uint16_t *>(buf)
-      , len / 2);
-  } else {
-    return node::Encode(
-        isolate
-      , reinterpret_cast<const char *>(buf)
-      , len
-      , node_enc);
-  }
-#elif (NODE_MODULE_VERSION > 0x000B)
-  return node::Encode(
-      v8::Isolate::GetCurrent()
-    , buf, len
-    , static_cast<node::encoding>(encoding));
-#else
-# if NODE_VERSION_AT_LEAST(0, 10, 0)
-  return node::Encode(buf, len, static_cast<node::encoding>(encoding));
-# else
-  return NanIntern::Encode(reinterpret_cast<const char*>(buf), len, encoding);
-# endif
-#endif
-}
-
-NAN_INLINE ssize_t NanDecodeBytes(
-    v8::Handle<v8::Value> val, enum Nan::Encoding encoding = Nan::BINARY) {
-#if (NODE_MODULE_VERSION > 0x000B)
-  return node::DecodeBytes(
-      v8::Isolate::GetCurrent()
-    , val
-    , static_cast<node::encoding>(encoding));
-#else
-# if (NODE_MODULE_VERSION < 0x000B)
-  if (encoding == Nan::BUFFER) {
-    return node::DecodeBytes(val, node::BINARY);
-  }
-# endif
-  return node::DecodeBytes(val, static_cast<node::encoding>(encoding));
-#endif
-}
-
-NAN_INLINE ssize_t NanDecodeWrite(
-    char *buf
-  , size_t len
-  , v8::Handle<v8::Value> val
-  , enum Nan::Encoding encoding = Nan::BINARY) {
-#if (NODE_MODULE_VERSION > 0x000B)
-  return node::DecodeWrite(
-      v8::Isolate::GetCurrent()
-    , buf
-    , len
-    , val
-    , static_cast<node::encoding>(encoding));
-#else
-# if (NODE_MODULE_VERSION < 0x000B)
-  if (encoding == Nan::BUFFER) {
-    return node::DecodeWrite(buf, len, val, node::BINARY);
-  }
-# endif
-  return node::DecodeWrite(
-      buf
-    , len
-    , val
-    , static_cast<node::encoding>(encoding));
-#endif
 }
 
 /* NAN_DEPRECATED */ NAN_INLINE void* _NanRawString(

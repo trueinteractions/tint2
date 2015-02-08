@@ -1,5 +1,6 @@
 {
   'variables': {
+    'v8_postmortem_support': 'false',
     'v8_use_snapshot%': 'true',
     'node_use_dtrace%': 'false',
     'node_use_etw%': 'false',
@@ -12,8 +13,12 @@
     'node_shared_libuv%': 'false',
     'node_use_openssl%': 'true',
     'node_shared_openssl%': 'false',
+    'node_install_npm%': 'false',
     'node_use_mdb%': 'false',
     'node_v8_options%': '',
+    'node_prefix%': '',
+    'node_tag%': '',
+
     'win_subsystem%': 'console',
     'mac_library_files': [
       'modules/Bridge/class.js',
@@ -162,7 +167,7 @@
       'libraries/node/lib/vm.js',
       'libraries/node/lib/zlib.js',
       'libraries/node/deps/debugger-agent/lib/_debugger_agent.js',
-      # begin tint files.
+      # begin common tint files.
       'modules/AppSchema/AppSchema.js',
       'modules/Application/Common.js',
       'modules/Bridge/ref.js',
@@ -192,7 +197,6 @@
 
       'dependencies': [
         'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
-        # 'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'tint_js2c#host',
         'ffi_bindings',
       ],
@@ -207,20 +211,20 @@
         'tools/',
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
-
       'sources': [
         'libraries/node/src/async-wrap.cc',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
         'libraries/node/src/handle_wrap.cc',
-        'libraries/node/src/node.cc',
+        # We include this with a preprocessor in Main_mac.mm
+        # 'libraries/node/src/node.cc',
         'libraries/node/src/node_buffer.cc',
         'libraries/node/src/node_constants.cc',
         'libraries/node/src/node_contextify.cc',
         'libraries/node/src/node_file.cc',
         'libraries/node/src/node_http_parser.cc',
         'libraries/node/src/node_javascript.cc',
-        'libraries/node/src/node_main.cc',
+        # 'libraries/node/src/node_main.cc',
         'libraries/node/src/node_os.cc',
         'libraries/node/src/node_v8.cc',
         'libraries/node/src/node_stat_watcher.cc',
@@ -405,11 +409,12 @@
           ]
         } ],
         [ 'node_shared_v8=="false"', {
+          'include_dirs': [ 'libraries/node/deps/v8/include/' ],
           'sources': [
             'libraries/node/deps/v8/include/v8.h',
             'libraries/node/deps/v8/include/v8-debug.h',
           ],
-          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8' ],
+          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host' ],
         }],
         [ 'node_shared_zlib=="false"', {
           'dependencies': [ 'libraries/node/deps/zlib/zlib.gyp:zlib' ],
@@ -453,7 +458,9 @@
             'modules/AppSchema/AppSchema_mac.mm',
             'modules/Runtime/Main_mac.mm',
           ],
-          'libraries': [ '-framework Carbon' ],
+          'libraries': [ 
+            '-framework Carbon'
+          ],
           'defines!': [
             'PLATFORM="mac"',
           ],
@@ -725,8 +732,8 @@
           ],
               'action': [
                 '<(python)',
-                'libraries/node/tools/js2c.py',
-                ## 'tools/tint_js2c.py',
+                ##'libraries/node/tools/js2c.py',
+                'tools/tint_js2c.py',
                 '<@(_outputs)',
                 '<@(_inputs)',
               ],

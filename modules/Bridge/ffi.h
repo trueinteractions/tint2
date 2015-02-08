@@ -12,13 +12,18 @@
 #include <ffi.h>
 
 #include <uv.h>
+#include <node_object_wrap.h>
+#include <node.h>
+#include <node_buffer.h>
+#include <node_version.h>
 #include "nan.h"
 
 #if __OBJC__ || __OBJC2__
   #include <objc/objc.h>
 #endif
 
-#define THROW_ERROR_EXCEPTION(x) ThrowException(Exception::Error(String::New(x)))
+#define THROW_ERROR_EXCEPTION(x) NanThrowError(x)
+#define THROW_ERROR_EXCEPTION_WITH_STATUS_CODE(x, y) NanThrowError(x, y)
 
 #define FFI_ASYNC_ERROR (ffi_status)1
 
@@ -44,7 +49,7 @@ class AsyncCallParams {
     char *fn;
     char *res;
     char *argv;
-    Persistent<Function> callback;
+    NanCallback *callback;
 };
 
 class FFI {
