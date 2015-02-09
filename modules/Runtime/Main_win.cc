@@ -244,11 +244,11 @@ int main(int argc, char *argv[]) {
   node::Init(init_argc, init_argv);
 
   v8::V8::Initialize();
-// #if HAVE_OPENSSL
+#if HAVE_OPENSSL
   // V8 on Windows doesn't have a good source of entropy. Seed it from
   // OpenSSL's pool.
-  // v8::V8::SetEntropySource(node::crypto::EntropySource);
-// #endif
+  v8::V8::SetEntropySource(node::crypto::EntropySource);
+#endif
   {
     v8::Locker locker;
     v8::HandleScope handle_scope;
