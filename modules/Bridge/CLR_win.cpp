@@ -1212,54 +1212,60 @@ namespace IEWebBrowserFix {
     v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
     return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
   }
-  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
-    HKEY key;
-    bool success = true;
-    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
-    wstring path(featuresPath + feature);
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
-      success = false;
-    else {
-      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
-      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
-    } 
-    return success;
+
+  static void SetBrowserFeatureControlKey(System::Security::Permissions::RegistryPermission^ perms, System::String^ feature, System::String^ fileName, DWORD value) {
+    System::String^ HKCU = "HKEY_CURRENT_USER\\Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    System::String^ HKCU32 = "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    System::String^ HKLM = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    System::String^ HKLM32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+
+    try {
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKCU);
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKCU32);
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM);
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM32);
+      Microsoft::Win32::Registry::SetValue(HKCU, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      Microsoft::Win32::Registry::SetValue(HKCU32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      Microsoft::Win32::Registry::SetValue(HKLM, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      Microsoft::Win32::Registry::SetValue(HKLM32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+    } catch (System::Exception^ e) {
+      // Absorb the potential error message coming through and keep moving; its
+      // a security exception that will exist on specific policy groups of windows.
+      // Unfortunately this means whatever feature control we'd like to turn on, 
+      // we cannot.
+    }
   }
 
   static void SetBrowserFeatureControl() {
+    System::Security::Permissions::RegistryPermission^ perms = gcnew System::Security::Permissions::RegistryPermission(System::Security::Permissions::PermissionState::Unrestricted);
     System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
-    System::String^ pName = process->Modules[0]->FileName;
-    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
-    delim[0]='\\';
-    array<System::String^>^ path = pName->Split(delim);
-    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
-    const wchar_t *fileName = fileNameP;
+    System::String^ fileName = System::IO::Path::GetFileName(process->MainModule->FileName);
 
-    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
-    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
-    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
-    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
-    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
-    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
-    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
-    SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
-    SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
-    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
-    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
-    SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+    SetBrowserFeatureControlKey(perms, "FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
+    SetBrowserFeatureControlKey(perms, "FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
+    SetBrowserFeatureControlKey(perms, "FEATURE_NINPUT_LEGACYMODE", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_SPELLCHECKING", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_VALIDATE_NAVIGATE_URL", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
+    SetBrowserFeatureControlKey(perms, "FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
+    SetBrowserFeatureControlKey(perms, "FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
+    SetBrowserFeatureControlKey(perms, "FEATURE_WEBSOCKET", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+    SetBrowserFeatureControlKey(perms, "FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
+    SetBrowserFeatureControlKey(perms, "FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
+    SetBrowserFeatureControlKey(perms, "FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_ZONE_ELEVATION", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
   }
 }
 
