@@ -467,6 +467,11 @@ module.exports = (function() {
   };
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints)
+    {
+      return null;
+    }
     var constraint = $.NSLayoutConstraint('constraintWithItem',
                         (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
                         'attribute',(attributeMap[layoutObject.firstAttribute] || $.NSLayoutAttributeNotAnAttribute),
@@ -488,6 +493,11 @@ module.exports = (function() {
   };
 
   Control.prototype.changeLayoutConstraint = function(previousConstraint, layoutObject) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints) 
+    {
+      return null;
+    }
     if(previousConstraint('multiplier') !== layoutObject.multiplier  ||
         previousConstraint('secondItem') === null && layoutObject.secondItem !== null || 
         previousConstraint('secondItem') !== null && layoutObject.secondItem === null || 
@@ -505,7 +515,11 @@ module.exports = (function() {
   };
 
   Control.prototype.removeLayoutConstraint = function(obj) {
-    if(this.private.parent !== null) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints) 
+    {
+      return;
+    } else if(this.private.parent !== null) {
       this.private.parent.nativeView('removeConstraint',obj);
       this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
       this.private.parent.nativeView('layoutSubtreeIfNeeded');

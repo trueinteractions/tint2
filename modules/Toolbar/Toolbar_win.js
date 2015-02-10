@@ -39,7 +39,8 @@ module.exports = (function() {
     this.private.toolbartype = "iconandlabel";
     this.addEventListener('before-child-attached', function(child) {
       try {
-        if(child === "space") {
+        // TODO: Support flex-space
+        if(child === "space" || child === "flex-space") {
           var spacer = new $.System.Windows.Shapes.Rectangle();
           spacer.MaxWidth = 1000;
           spacer.MinWidth = 1;
