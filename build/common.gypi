@@ -15,14 +15,11 @@
     'python%': 'python',
     'v8_enable_gdbjit%': 0,
     'v8_no_strict_aliasing%': 1,
-    'v8_use_snapshot%': 'false',
     'win_subsystem%': 'console',
     'uv_library': 'static_library',
     'uv_parent_path': '/libraries/node/deps/uv/',
     'uv_use_dtrace': 'true',
-    'v8_enable_gdbjit': 0,
     'v8_enable_i18n_support': 0,
-    'v8_no_strict_aliasing': 1,
     'v8_optimized_debug': 0,
     'v8_random_seed': 0,
     'want_separate_host_toolset': 0,
@@ -34,10 +31,14 @@
     'conditions': [
       ['OS == "win"', {
         'os_posix': 0,
-        'v8_postmortem_support': 'false'
+        'v8_postmortem_support': 'false',
+        'node_use_etw': 'true',
+        'node_has_winsdk': 'true',
+        'node_use_dtrace': 'false'
       }, {
         'os_posix': 1,
-        # 'v8_postmortem_support': 'true'  # TODO RE-ENABLE ME
+        'v8_postmortem_support': 'true',
+        'node_use_dtrace': 'true'
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj',

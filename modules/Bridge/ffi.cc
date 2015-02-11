@@ -53,8 +53,6 @@ void closure_pointer_cb(char *data, void *hint) {
   callback_info *info = reinterpret_cast<callback_info *>(hint);
   // dispose of the Persistent function reference
   delete info->function;
-  // NanDisposePersistent(info->function);
-  // info->function.Clear();
   // now we can free the closure data
   ffi_closure_free(info);
 }
@@ -145,8 +143,6 @@ NAN_METHOD(CallbackInfo::Callback) {
   // store a reference to the callback function pointer
   // (not sure if this is actually needed...)
   info->code = code;
-
-  //CallbackInfo *self = new CallbackInfo(callback, closure, code, argc);
 
   status = ffi_prep_closure_loc(
     (ffi_closure *)info,
@@ -537,7 +533,6 @@ NAN_METHOD(FFI::FFICallAsync) {
 
   Local<Function> callback = Local<Function>::Cast(args[4]);
   p->callback = new NanCallback(callback);
-  //NanNew<Persistent<Function>>(callback);
 
   uv_work_t *req = new uv_work_t;
   req->data = p;
@@ -595,8 +590,6 @@ void FFI::FinishAsyncFFICall(uv_work_t *req) {
 
   // dispose of our persistent handle to the callback function
   delete p->callback;
-  //NanDisposePersistent(p->callback);
-  //p->callback.Clear();
   
   // free up our memory (allocated in FFICallAsync)
   delete p;

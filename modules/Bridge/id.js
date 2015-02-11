@@ -18,7 +18,8 @@ module.exports = (function() {
     // an object on a class that takes a simple type.
     if(objClass.isNull() || !objClass)
       throw new TypeError('An abstract class or delegate implemented a method that takes an ID (object),\n'+
-                          'but a simple type or structure (such as NSRect) was passed in, check the types used.\n');
+                          'but a simple type or structure (such as NSRect) was passed in, check the types used.\n'+
+                          'pointer:' + pointer + 'classPointer: ' + classPointer + 'objClass: ' + objClass);
     
     if(!classPointer) Class.call(this, objClass);
     else Class.call(this, classPointer);

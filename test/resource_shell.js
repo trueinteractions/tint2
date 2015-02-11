@@ -11,6 +11,7 @@ function baseline() {
 }
 
 function run($utils) {
+  $utils.ok();
   var fs = require('fs');
   var ismac = require('os').platform().toLowerCase() == "darwin";
   var spawn;

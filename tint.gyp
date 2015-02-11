@@ -1,11 +1,11 @@
 {
   'variables': {
-    'v8_postmortem_support': 'false',
     'v8_use_snapshot%': 'true',
-    'node_use_dtrace%': 'false',
-    'node_use_etw%': 'false',
-    'node_use_perfctr%': 'false',
-    'node_has_winsdk%': 'false',
+    'v8_postmortem_support': 'true',
+    'node_use_dtrace%': 'false',          # enabled in common.gypi for posix
+    'node_use_etw%': 'false',             # enabled in common.gypi for windows
+    'node_has_winsdk%': 'false',          # enabled in common.gypi for windows
+    'node_use_perfctr%': 'false',         # performance counters, linux only, not enabled.
     'node_shared_v8%': 'false',
     'node_shared_zlib%': 'false',
     'node_shared_http_parser%': 'false',
@@ -196,6 +196,7 @@
       'type': 'executable',
 
       'dependencies': [
+        'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
         'tint_js2c#host',
         'ffi_bindings',

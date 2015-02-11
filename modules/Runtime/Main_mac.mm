@@ -44,49 +44,45 @@ static void uv_noop(uv_async_t* handle, int status) {}
 static void uv_event(void *info) {
     [[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
 
-    // The dummy handle prevents UV from exiting and throwing incorrect
-    // timeout values, its necessary since uv can't see many of the app
-    // events to keep it assuming something else will come and return -1
-    // from uv_backend_timeout.
-    uv_async_t dummy_uv_handle_;
-    uv_async_init(env->event_loop(), &dummy_uv_handle_, (uv_async_cb) uv_noop);
-
-    int r;
+    int r, timeout, fd;
     struct kevent errors[1];
-    uv_loop_t* loop = env->event_loop();
-    int timeout;
-    
+
     while (!embed_closed) {
-        int fd = uv_backend_fd(loop);
-        timeout = uv_backend_timeout(loop);
-        if(timeout < 0) timeout = 16;
-        if(timeout > 250) timeout = 250;
+      uv_update_time(env->event_loop());
 
-        do {
-            struct timespec ts;
-            ts.tv_sec = timeout / 1000;
-            ts.tv_nsec = (timeout % 1000) * 1000000;
-            r = kevent(fd, NULL, 0, errors, 1, timeout < 0 ? NULL : &ts);
-        } while (r == -1 && errno == EINTR);
+      fd = uv_backend_fd(env->event_loop());
+      timeout = uv_backend_timeout(env->event_loop());
+      
+      if(timeout < 0) 
+        timeout = 16;
+      else if (timeout > 250)
+        timeout = 250;
 
-        // Do not block this thread, place uv callbacks on the main thread, 
-        // then repost the semaphore to allow us to continue. Note, we've
-        // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
-        dispatch_async(dispatch_get_main_queue(), ^{ 
-          bool more = uv_run(env->event_loop(), UV_RUN_NOWAIT);
-          if (more == false) {
-            EmitBeforeExit(env);
-            // Emit `beforeExit` if the loop became alive either after emitting
-            // event, or after running some callbacks.
-            more = uv_loop_alive(env->event_loop());
-            if (uv_run(env->event_loop(), UV_RUN_NOWAIT) != 0)
-              more = true;
-          }
-          uv_sem_post(&embed_sem);
-        });
+      do {
+        struct timespec ts;
+        ts.tv_sec = timeout / 1000;
+        ts.tv_nsec = (timeout % 1000) * 1000000;
+        r = kevent(fd, NULL, 0, errors, 1, &ts);
+      } while (r == -1 && errno == EINTR);
 
-        // Wait for the main loop to deal with events.
-        uv_sem_wait(&embed_sem);
+      // Do not block this thread, place uv callbacks on the main thread, 
+      // then repost the semaphore to allow us to continue. Note, we've
+      // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
+      dispatch_async(dispatch_get_main_queue(), ^{
+        bool more = uv_run(env->event_loop(), UV_RUN_NOWAIT);
+        if (more == false) {
+          EmitBeforeExit(env);
+          // Emit `beforeExit` if the loop became alive either after emitting
+          // event, or after running some callbacks.
+          more = uv_loop_alive(env->event_loop());
+          if (uv_run(env->event_loop(), UV_RUN_NOWAIT) != 0)
+            more = true;
+        }
+        uv_sem_post(&embed_sem);
+      });
+
+      // Wait for the main loop to deal with events.
+      uv_sem_wait(&embed_sem);
     }
 }
 
@@ -107,10 +103,6 @@ static void uv_event(void *info) {
     // Register the initial bridge objective-c protocols
     NODE_SET_METHOD(process_l, "initbridge", InitBridge);
   
-    // Enable debugger
-    if (node::use_debug_agent)
-      node::EnableDebug(env);
-
     // Set Version Information
     process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
     process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
@@ -121,7 +113,10 @@ static void uv_event(void *info) {
 
     node::LoadEnvironment(env);
 
-    
+    // Enable debugger
+    if (node::use_debug_agent)
+      node::EnableDebug(env);
+
     // Start worker that will interrupt main loop when having uv events.
     // keep the UV loop in-sync with CFRunLoop.
     embed_closed = 0;
