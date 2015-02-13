@@ -570,111 +570,111 @@ NAN_METHOD(ReinterpretBufferUntilZeros) {
 
 } // anonymous namespace
 namespace REF {
-	void Init(Handle<Object> target) {
-		NanScope();
+  void Init(Handle<Object> target) {
+    NanScope();
 
-		// "sizeof" map
-		Local<Object> smap = NanNew<v8::Object>();
-		// fixed sizes
-		smap->Set(NanNew<v8::String>("int8"),      NanNew<v8::Integer>(sizeof(int8_t)));
-		smap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::Integer>(sizeof(uint8_t)));
-		smap->Set(NanNew<v8::String>("int16"),     NanNew<v8::Integer>(sizeof(int16_t)));
-		smap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::Integer>(sizeof(uint16_t)));
-		smap->Set(NanNew<v8::String>("int32"),     NanNew<v8::Integer>(sizeof(int32_t)));
-		smap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::Integer>(sizeof(uint32_t)));
-		smap->Set(NanNew<v8::String>("int64"),     NanNew<v8::Integer>(sizeof(int64_t)));
-		smap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::Integer>(sizeof(uint64_t)));
-		smap->Set(NanNew<v8::String>("float"),     NanNew<v8::Integer>(sizeof(float)));
-		smap->Set(NanNew<v8::String>("double"),    NanNew<v8::Integer>(sizeof(double)));
-		// (potentially) variable sizes
-		smap->Set(NanNew<v8::String>("bool"),      NanNew<v8::Integer>(sizeof(bool)));
-		smap->Set(NanNew<v8::String>("byte"),      NanNew<v8::Integer>(sizeof(unsigned char)));
-		smap->Set(NanNew<v8::String>("char"),      NanNew<v8::Integer>(sizeof(char)));
-		smap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::Integer>(sizeof(unsigned char)));
-		smap->Set(NanNew<v8::String>("short"),     NanNew<v8::Integer>(sizeof(short)));
-		smap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::Integer>(sizeof(unsigned short)));
-		smap->Set(NanNew<v8::String>("int"),       NanNew<v8::Integer>(sizeof(int)));
-		smap->Set(NanNew<v8::String>("uint"),      NanNew<v8::Integer>(sizeof(unsigned int)));
-		smap->Set(NanNew<v8::String>("long"),      NanNew<v8::Integer>(sizeof(long)));
-		smap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::Integer>(sizeof(unsigned long)));
-		smap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::Integer>(sizeof(long long)));
-		smap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::Integer>(sizeof(unsigned long long)));
-		smap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::Integer>(sizeof(char *)));
-		smap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::Integer>(sizeof(size_t)));
-		// size of a Persistent handle to a JS object
-		smap->Set(NanNew<v8::String>("Object"),    NanNew<v8::Integer>(sizeof(Persistent<Object>)));
+    // "sizeof" map
+    Local<Object> smap = NanNew<v8::Object>();
+    // fixed sizes
+    smap->Set(NanNew<v8::String>("int8"),      NanNew<v8::Number>((double)sizeof(int8_t)));
+    smap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::Number>((double)sizeof(uint8_t)));
+    smap->Set(NanNew<v8::String>("int16"),     NanNew<v8::Number>((double)sizeof(int16_t)));
+    smap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::Number>((double)sizeof(uint16_t)));
+    smap->Set(NanNew<v8::String>("int32"),     NanNew<v8::Number>((double)sizeof(int32_t)));
+    smap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::Number>((double)sizeof(double)));
+    smap->Set(NanNew<v8::String>("int64"),     NanNew<v8::Number>((double)sizeof(int64_t)));
+    smap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::Number>((double)sizeof(uint64_t)));
+    smap->Set(NanNew<v8::String>("float"),     NanNew<v8::Number>((double)sizeof(float)));
+    smap->Set(NanNew<v8::String>("double"),    NanNew<v8::Number>((double)sizeof(double)));
+    // (potentially) variable sizes
+    smap->Set(NanNew<v8::String>("bool"),      NanNew<v8::Number>((double)sizeof(bool)));
+    smap->Set(NanNew<v8::String>("byte"),      NanNew<v8::Number>((double)sizeof(unsigned char)));
+    smap->Set(NanNew<v8::String>("char"),      NanNew<v8::Number>((double)sizeof(char)));
+    smap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::Number>((double)sizeof(unsigned char)));
+    smap->Set(NanNew<v8::String>("short"),     NanNew<v8::Number>((double)sizeof(short)));
+    smap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::Number>((double)sizeof(unsigned short)));
+    smap->Set(NanNew<v8::String>("int"),       NanNew<v8::Number>((double)sizeof(int)));
+    smap->Set(NanNew<v8::String>("uint"),      NanNew<v8::Number>((double)sizeof(unsigned int)));
+    smap->Set(NanNew<v8::String>("long"),      NanNew<v8::Number>((double)sizeof(long)));
+    smap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::Number>((double)sizeof(unsigned long)));
+    smap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::Number>((double)sizeof(long long)));
+    smap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::Number>((double)sizeof(unsigned long long)));
+    smap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::Number>((double)sizeof(char *)));
+    smap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::Number>((double)sizeof(size_t)));
+    // size of a Persistent handle to a JS object
+    smap->Set(NanNew<v8::String>("Object"),    NanNew<v8::Number>((double)sizeof(Persistent<Object>)));
 
-		// "alignof" map
-		Local<Object> amap = NanNew<v8::Object>();
-		struct int8_s { int8_t a; };
-		amap->Set(NanNew<v8::String>("int8"),      NanNew<v8::Integer>(__alignof__(struct int8_s)));
-		struct uint8_s { uint8_t a; };
-		amap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::Integer>(__alignof__(struct uint8_s)));
-		struct int16_s { int16_t a; };
-		amap->Set(NanNew<v8::String>("int16"),     NanNew<v8::Integer>(__alignof__(struct int16_s)));
-		struct uint16_s { uint16_t a; };
-		amap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::Integer>(__alignof__(struct uint16_s)));
-		struct int32_s { int32_t a; };
-		amap->Set(NanNew<v8::String>("int32"),     NanNew<v8::Integer>(__alignof__(struct int32_s)));
-		struct uint32_s { uint32_t a; };
-		amap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::Integer>(__alignof__(struct uint32_s)));
-		struct int64_s { int64_t a; };
-		amap->Set(NanNew<v8::String>("int64"),     NanNew<v8::Integer>(__alignof__(struct int64_s)));
-		struct uint64_s { uint64_t a; };
-		amap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::Integer>(__alignof__(struct uint64_s)));
-		struct float_s { float a; };
-		amap->Set(NanNew<v8::String>("float"),     NanNew<v8::Integer>(__alignof__(struct float_s)));
-		struct double_s { double a; };
-		amap->Set(NanNew<v8::String>("double"),    NanNew<v8::Integer>(__alignof__(struct double_s)));
-		struct bool_s { bool a; };
-		amap->Set(NanNew<v8::String>("bool"),      NanNew<v8::Integer>(__alignof__(struct bool_s)));
-		struct char_s { char a; };
-		amap->Set(NanNew<v8::String>("char"),      NanNew<v8::Integer>(__alignof__(struct char_s)));
-		struct uchar_s { unsigned char a; };
-		amap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::Integer>(__alignof__(struct uchar_s)));
-		struct short_s { short a; };
-		amap->Set(NanNew<v8::String>("short"),     NanNew<v8::Integer>(__alignof__(struct short_s)));
-		struct ushort_s { unsigned short a; };
-		amap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::Integer>(__alignof__(struct ushort_s)));
-		struct int_s { int a; };
-		amap->Set(NanNew<v8::String>("int"),       NanNew<v8::Integer>(__alignof__(struct int_s)));
-		struct uint_s { unsigned int a; };
-		amap->Set(NanNew<v8::String>("uint"),      NanNew<v8::Integer>(__alignof__(struct uint_s)));
-		struct long_s { long a; };
-		amap->Set(NanNew<v8::String>("long"),      NanNew<v8::Integer>(__alignof__(struct long_s)));
-		struct ulong_s { unsigned long a; };
-		amap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::Integer>(__alignof__(struct ulong_s)));
-		struct longlong_s { long long a; };
-		amap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::Integer>(__alignof__(struct longlong_s)));
-		struct ulonglong_s { unsigned long long a; };
-		amap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::Integer>(__alignof__(struct ulonglong_s)));
-		struct pointer_s { char *a; };
-		amap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::Integer>(__alignof__(struct pointer_s)));
-		struct size_t_s { size_t a; };
-		amap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::Integer>(__alignof__(struct size_t_s)));
-		struct Object_s { Persistent<Object> a; };
-		amap->Set(NanNew<v8::String>("Object"),    NanNew<v8::Integer>(__alignof__(struct Object_s)));
+    // "alignof" map
+    Local<Object> amap = NanNew<v8::Object>();
+    struct int8_s { int8_t a; };
+    amap->Set(NanNew<v8::String>("int8"),      NanNew<v8::Number>((double)__alignof__(struct int8_s)));
+    struct uint8_s { uint8_t a; };
+    amap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::Number>((double)__alignof__(struct uint8_s)));
+    struct int16_s { int16_t a; };
+    amap->Set(NanNew<v8::String>("int16"),     NanNew<v8::Number>((double)__alignof__(struct int16_s)));
+    struct uint16_s { uint16_t a; };
+    amap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::Number>((double)__alignof__(struct uint16_s)));
+    struct int32_s { int32_t a; };
+    amap->Set(NanNew<v8::String>("int32"),     NanNew<v8::Number>((double)__alignof__(struct int32_s)));
+    struct uint32_s { double a; };
+    amap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::Number>((double)__alignof__(struct uint32_s)));
+    struct int64_s { int64_t a; };
+    amap->Set(NanNew<v8::String>("int64"),     NanNew<v8::Number>((double)__alignof__(struct int64_s)));
+    struct uint64_s { uint64_t a; };
+    amap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::Number>((double)__alignof__(struct uint64_s)));
+    struct float_s { float a; };
+    amap->Set(NanNew<v8::String>("float"),     NanNew<v8::Number>((double)__alignof__(struct float_s)));
+    struct double_s { double a; };
+    amap->Set(NanNew<v8::String>("double"),    NanNew<v8::Number>((double)__alignof__(struct double_s)));
+    struct bool_s { bool a; };
+    amap->Set(NanNew<v8::String>("bool"),      NanNew<v8::Number>((double)__alignof__(struct bool_s)));
+    struct char_s { char a; };
+    amap->Set(NanNew<v8::String>("char"),      NanNew<v8::Number>((double)__alignof__(struct char_s)));
+    struct uchar_s { unsigned char a; };
+    amap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::Number>((double)__alignof__(struct uchar_s)));
+    struct short_s { short a; };
+    amap->Set(NanNew<v8::String>("short"),     NanNew<v8::Number>((double)__alignof__(struct short_s)));
+    struct ushort_s { unsigned short a; };
+    amap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::Number>((double)__alignof__(struct ushort_s)));
+    struct int_s { int a; };
+    amap->Set(NanNew<v8::String>("int"),       NanNew<v8::Number>((double)__alignof__(struct int_s)));
+    struct uint_s { unsigned int a; };
+    amap->Set(NanNew<v8::String>("uint"),      NanNew<v8::Number>((double)__alignof__(struct uint_s)));
+    struct long_s { long a; };
+    amap->Set(NanNew<v8::String>("long"),      NanNew<v8::Number>((double)__alignof__(struct long_s)));
+    struct ulong_s { unsigned long a; };
+    amap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::Number>((double)__alignof__(struct ulong_s)));
+    struct longlong_s { long long a; };
+    amap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::Number>((double)__alignof__(struct longlong_s)));
+    struct ulonglong_s { unsigned long long a; };
+    amap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::Number>((double)__alignof__(struct ulonglong_s)));
+    struct pointer_s { char *a; };
+    amap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::Number>((double)__alignof__(struct pointer_s)));
+    struct size_t_s { size_t a; };
+    amap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::Number>((double)__alignof__(struct size_t_s)));
+    struct Object_s { Persistent<Object> a; };
+    amap->Set(NanNew<v8::String>("Object"),    NanNew<v8::Number>((double)__alignof__(struct Object_s)));
 
-		// exports
-		target->Set(NanNew<v8::String>("sizeof"), smap);
-		target->Set(NanNew<v8::String>("alignof"), amap);
-		target->Set(NanNew<v8::String>("endianness"), NanNew<v8::String>(CheckEndianness()), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-		target->Set(NanNew<v8::String>("NULL"), WrapNullPointer(), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+    // exports
+    target->ForceSet(NanNew<v8::String>("sizeof"), smap);
+    target->ForceSet(NanNew<v8::String>("alignof"), amap);
+    target->ForceSet(NanNew<v8::String>("endianness"), NanNew<v8::String>(CheckEndianness()), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+    target->ForceSet(NanNew<v8::String>("NULL"), WrapNullPointer(), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 
-		NODE_SET_METHOD(target, "address", Address);
-		NODE_SET_METHOD(target, "hexAddress", HexAddress);
-		NODE_SET_METHOD(target, "isNull", IsNull);
-		NODE_SET_METHOD(target, "readObject", ReadObject);
-		NODE_SET_METHOD(target, "writeObject", WriteObject);
-		NODE_SET_METHOD(target, "readPointer", ReadPointer);
-		NODE_SET_METHOD(target, "writePointer", WritePointer);
-		NODE_SET_METHOD(target, "readInt64", ReadInt64);
-		NODE_SET_METHOD(target, "writeInt64", WriteInt64);
-		NODE_SET_METHOD(target, "readUInt64", ReadUInt64);
-		NODE_SET_METHOD(target, "writeUInt64", WriteUInt64);
-		NODE_SET_METHOD(target, "readCString", ReadCString);
-		NODE_SET_METHOD(target, "reinterpret", ReinterpretBuffer);
-		NODE_SET_METHOD(target, "reinterpretUntilZeros", ReinterpretBufferUntilZeros);
-	}
+    NODE_SET_METHOD(target, "address", Address);
+    NODE_SET_METHOD(target, "hexAddress", HexAddress);
+    NODE_SET_METHOD(target, "isNull", IsNull);
+    NODE_SET_METHOD(target, "readObject", ReadObject);
+    NODE_SET_METHOD(target, "writeObject", WriteObject);
+    NODE_SET_METHOD(target, "readPointer", ReadPointer);
+    NODE_SET_METHOD(target, "writePointer", WritePointer);
+    NODE_SET_METHOD(target, "readInt64", ReadInt64);
+    NODE_SET_METHOD(target, "writeInt64", WriteInt64);
+    NODE_SET_METHOD(target, "readUInt64", ReadUInt64);
+    NODE_SET_METHOD(target, "writeUInt64", WriteUInt64);
+    NODE_SET_METHOD(target, "readCString", ReadCString);
+    NODE_SET_METHOD(target, "reinterpret", ReinterpretBuffer);
+    NODE_SET_METHOD(target, "reinterpretUntilZeros", ReinterpretBufferUntilZeros);
+  }
 }
 NODE_MODULE(binding, REF::Init);
