@@ -11,7 +11,7 @@
 #define V8_NUM_CAST_TYPE double
 #else
 #define V8_NUM_TYPE Integer
-#define V8_NUM_CAST_TYPE uint32_t
+#define V8_NUM_CAST_TYPE int32_t
 #endif
 
 pthread_t          CallbackInfo::g_mainthread;
