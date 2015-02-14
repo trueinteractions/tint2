@@ -54,7 +54,7 @@ module.exports = (function() {
 
     // Listen on port 8000, IP defaults to 127.0.0.1
     application.private.appSchemaPort = Math.round(10000 + Math.random()*999);
-    server.listen(application.private.appSchemaPort);
+    server.listen(application.private.appSchemaPort, '127.0.0.1');
   }
 
   runApplicationHost();
