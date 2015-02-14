@@ -7,6 +7,15 @@
 #include "node_buffer.h"
 #include "nan.h"
 
+
+#if __x86_64__
+#define V8_NUM_TYPE Number
+#define V8_NUM_CAST_TYPE double
+#else
+#define V8_NUM_TYPE Integer
+#define V8_NUM_CAST_TYPE uint32_t
+#endif
+
 #ifdef _WIN32
   #define __alignof__ __alignof
   #define snprintf(buf, bufSize, format, arg) _snprintf_s(buf, bufSize, _TRUNCATE, format, arg)
@@ -339,7 +348,7 @@ NAN_METHOD(ReadInt64) {
     rtn = NanNew<v8::String>((const char *)strbuf);
   } else {
     // return a Number
-    rtn = NanNew<v8::Number>(static_cast<double>(val));
+    rtn = NanNew<v8::V8_NUM_TYPE>(static_cast<V8_NUM_CAST_TYPE>(val));
   }
 
   NanReturnValue(rtn);
@@ -416,7 +425,7 @@ NAN_METHOD(ReadUInt64) {
     rtn = NanNew<v8::String>((const char *)strbuf);
   } else {
     // return a Number
-    rtn = NanNew<v8::Number>(static_cast<double>(val));
+    rtn = NanNew<v8::V8_NUM_TYPE>(static_cast<V8_NUM_CAST_TYPE>(val));
   }
 
   NanReturnValue(rtn);
@@ -576,84 +585,84 @@ namespace REF {
     // "sizeof" map
     Local<Object> smap = NanNew<v8::Object>();
     // fixed sizes
-    smap->Set(NanNew<v8::String>("int8"),      NanNew<v8::Number>((double)sizeof(int8_t)));
-    smap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::Number>((double)sizeof(uint8_t)));
-    smap->Set(NanNew<v8::String>("int16"),     NanNew<v8::Number>((double)sizeof(int16_t)));
-    smap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::Number>((double)sizeof(uint16_t)));
-    smap->Set(NanNew<v8::String>("int32"),     NanNew<v8::Number>((double)sizeof(int32_t)));
-    smap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::Number>((double)sizeof(double)));
-    smap->Set(NanNew<v8::String>("int64"),     NanNew<v8::Number>((double)sizeof(int64_t)));
-    smap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::Number>((double)sizeof(uint64_t)));
-    smap->Set(NanNew<v8::String>("float"),     NanNew<v8::Number>((double)sizeof(float)));
-    smap->Set(NanNew<v8::String>("double"),    NanNew<v8::Number>((double)sizeof(double)));
+    smap->Set(NanNew<v8::String>("int8"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(int8_t)));
+    smap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(uint8_t)));
+    smap->Set(NanNew<v8::String>("int16"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(int16_t)));
+    smap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(uint16_t)));
+    smap->Set(NanNew<v8::String>("int32"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(int32_t)));
+    smap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(double)));
+    smap->Set(NanNew<v8::String>("int64"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(int64_t)));
+    smap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(uint64_t)));
+    smap->Set(NanNew<v8::String>("float"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(float)));
+    smap->Set(NanNew<v8::String>("double"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(double)));
     // (potentially) variable sizes
-    smap->Set(NanNew<v8::String>("bool"),      NanNew<v8::Number>((double)sizeof(bool)));
-    smap->Set(NanNew<v8::String>("byte"),      NanNew<v8::Number>((double)sizeof(unsigned char)));
-    smap->Set(NanNew<v8::String>("char"),      NanNew<v8::Number>((double)sizeof(char)));
-    smap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::Number>((double)sizeof(unsigned char)));
-    smap->Set(NanNew<v8::String>("short"),     NanNew<v8::Number>((double)sizeof(short)));
-    smap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::Number>((double)sizeof(unsigned short)));
-    smap->Set(NanNew<v8::String>("int"),       NanNew<v8::Number>((double)sizeof(int)));
-    smap->Set(NanNew<v8::String>("uint"),      NanNew<v8::Number>((double)sizeof(unsigned int)));
-    smap->Set(NanNew<v8::String>("long"),      NanNew<v8::Number>((double)sizeof(long)));
-    smap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::Number>((double)sizeof(unsigned long)));
-    smap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::Number>((double)sizeof(long long)));
-    smap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::Number>((double)sizeof(unsigned long long)));
-    smap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::Number>((double)sizeof(char *)));
-    smap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::Number>((double)sizeof(size_t)));
+    smap->Set(NanNew<v8::String>("bool"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(bool)));
+    smap->Set(NanNew<v8::String>("byte"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(unsigned char)));
+    smap->Set(NanNew<v8::String>("char"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(char)));
+    smap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(unsigned char)));
+    smap->Set(NanNew<v8::String>("short"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(short)));
+    smap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(unsigned short)));
+    smap->Set(NanNew<v8::String>("int"),       NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(int)));
+    smap->Set(NanNew<v8::String>("uint"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(unsigned int)));
+    smap->Set(NanNew<v8::String>("long"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(long)));
+    smap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(unsigned long)));
+    smap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(long long)));
+    smap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(unsigned long long)));
+    smap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(char *)));
+    smap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(size_t)));
     // size of a Persistent handle to a JS object
-    smap->Set(NanNew<v8::String>("Object"),    NanNew<v8::Number>((double)sizeof(Persistent<Object>)));
+    smap->Set(NanNew<v8::String>("Object"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(Persistent<Object>)));
 
     // "alignof" map
     Local<Object> amap = NanNew<v8::Object>();
     struct int8_s { int8_t a; };
-    amap->Set(NanNew<v8::String>("int8"),      NanNew<v8::Number>((double)__alignof__(struct int8_s)));
+    amap->Set(NanNew<v8::String>("int8"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct int8_s)));
     struct uint8_s { uint8_t a; };
-    amap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::Number>((double)__alignof__(struct uint8_s)));
+    amap->Set(NanNew<v8::String>("uint8"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct uint8_s)));
     struct int16_s { int16_t a; };
-    amap->Set(NanNew<v8::String>("int16"),     NanNew<v8::Number>((double)__alignof__(struct int16_s)));
+    amap->Set(NanNew<v8::String>("int16"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct int16_s)));
     struct uint16_s { uint16_t a; };
-    amap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::Number>((double)__alignof__(struct uint16_s)));
+    amap->Set(NanNew<v8::String>("uint16"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct uint16_s)));
     struct int32_s { int32_t a; };
-    amap->Set(NanNew<v8::String>("int32"),     NanNew<v8::Number>((double)__alignof__(struct int32_s)));
+    amap->Set(NanNew<v8::String>("int32"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct int32_s)));
     struct uint32_s { double a; };
-    amap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::Number>((double)__alignof__(struct uint32_s)));
+    amap->Set(NanNew<v8::String>("uint32"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct uint32_s)));
     struct int64_s { int64_t a; };
-    amap->Set(NanNew<v8::String>("int64"),     NanNew<v8::Number>((double)__alignof__(struct int64_s)));
+    amap->Set(NanNew<v8::String>("int64"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct int64_s)));
     struct uint64_s { uint64_t a; };
-    amap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::Number>((double)__alignof__(struct uint64_s)));
+    amap->Set(NanNew<v8::String>("uint64"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct uint64_s)));
     struct float_s { float a; };
-    amap->Set(NanNew<v8::String>("float"),     NanNew<v8::Number>((double)__alignof__(struct float_s)));
+    amap->Set(NanNew<v8::String>("float"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct float_s)));
     struct double_s { double a; };
-    amap->Set(NanNew<v8::String>("double"),    NanNew<v8::Number>((double)__alignof__(struct double_s)));
+    amap->Set(NanNew<v8::String>("double"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct double_s)));
     struct bool_s { bool a; };
-    amap->Set(NanNew<v8::String>("bool"),      NanNew<v8::Number>((double)__alignof__(struct bool_s)));
+    amap->Set(NanNew<v8::String>("bool"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct bool_s)));
     struct char_s { char a; };
-    amap->Set(NanNew<v8::String>("char"),      NanNew<v8::Number>((double)__alignof__(struct char_s)));
+    amap->Set(NanNew<v8::String>("char"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct char_s)));
     struct uchar_s { unsigned char a; };
-    amap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::Number>((double)__alignof__(struct uchar_s)));
+    amap->Set(NanNew<v8::String>("uchar"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct uchar_s)));
     struct short_s { short a; };
-    amap->Set(NanNew<v8::String>("short"),     NanNew<v8::Number>((double)__alignof__(struct short_s)));
+    amap->Set(NanNew<v8::String>("short"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct short_s)));
     struct ushort_s { unsigned short a; };
-    amap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::Number>((double)__alignof__(struct ushort_s)));
+    amap->Set(NanNew<v8::String>("ushort"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct ushort_s)));
     struct int_s { int a; };
-    amap->Set(NanNew<v8::String>("int"),       NanNew<v8::Number>((double)__alignof__(struct int_s)));
+    amap->Set(NanNew<v8::String>("int"),       NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct int_s)));
     struct uint_s { unsigned int a; };
-    amap->Set(NanNew<v8::String>("uint"),      NanNew<v8::Number>((double)__alignof__(struct uint_s)));
+    amap->Set(NanNew<v8::String>("uint"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct uint_s)));
     struct long_s { long a; };
-    amap->Set(NanNew<v8::String>("long"),      NanNew<v8::Number>((double)__alignof__(struct long_s)));
+    amap->Set(NanNew<v8::String>("long"),      NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct long_s)));
     struct ulong_s { unsigned long a; };
-    amap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::Number>((double)__alignof__(struct ulong_s)));
+    amap->Set(NanNew<v8::String>("ulong"),     NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct ulong_s)));
     struct longlong_s { long long a; };
-    amap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::Number>((double)__alignof__(struct longlong_s)));
+    amap->Set(NanNew<v8::String>("longlong"),  NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct longlong_s)));
     struct ulonglong_s { unsigned long long a; };
-    amap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::Number>((double)__alignof__(struct ulonglong_s)));
+    amap->Set(NanNew<v8::String>("ulonglong"), NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct ulonglong_s)));
     struct pointer_s { char *a; };
-    amap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::Number>((double)__alignof__(struct pointer_s)));
+    amap->Set(NanNew<v8::String>("pointer"),   NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct pointer_s)));
     struct size_t_s { size_t a; };
-    amap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::Number>((double)__alignof__(struct size_t_s)));
+    amap->Set(NanNew<v8::String>("size_t"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct size_t_s)));
     struct Object_s { Persistent<Object> a; };
-    amap->Set(NanNew<v8::String>("Object"),    NanNew<v8::Number>((double)__alignof__(struct Object_s)));
+    amap->Set(NanNew<v8::String>("Object"),    NanNew<v8::V8_NUM_TYPE>((V8_NUM_CAST_TYPE)__alignof__(struct Object_s)));
 
     // exports
     target->ForceSet(NanNew<v8::String>("sizeof"), smap);
