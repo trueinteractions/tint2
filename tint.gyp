@@ -1,25 +1,28 @@
 {
   'variables': {
-    'v8_use_snapshot%': 'true',
-    'v8_postmortem_support': 'true',
+    'v8_use_snapshot': 'false',
+    'v8_postmortem_support%': 'true',
     'node_use_dtrace%': 'false',          # enabled in common.gypi for posix
-    'node_use_etw%': 'false',             # enabled in common.gypi for windows
-    'node_has_winsdk%': 'false',          # enabled in common.gypi for windows
-    'node_use_perfctr%': 'false',         # performance counters, linux only, not enabled.
-    'node_shared_v8%': 'false',
-    'node_shared_zlib%': 'false',
-    'node_shared_http_parser%': 'false',
-    'node_shared_cares%': 'false',
-    'node_shared_libuv%': 'false',
-    'node_use_openssl%': 'true',
-    'node_shared_openssl%': 'false',
-    'node_install_npm%': 'false',
-    'node_use_mdb%': 'false',
-    'node_v8_options%': '',
-    'node_prefix%': '',
-    'node_tag%': '',
+    'node_use_etw': 'false',             # enabled in common.gypi for windows
+    'node_has_winsdk': 'false',          # enabled in common.gypi for windows
+    'node_use_perfctr': 'false',         # performance counters, linux only, not enabled.
+    'node_shared_v8': 'false',
+    'node_shared_zlib': 'false',
+    'node_shared_http_parser': 'false',
+    'node_shared_cares': 'false',
+    'node_shared_libuv': 'false',
+    'node_use_openssl': 'true',
+    'node_shared_openssl': 'false',
+    'node_install_npm': 'false',
+    'node_use_mdb': 'false',
+    'v8_enable_gdbjit': 0,
+    'v8_no_strict_aliasing': 1,
+    'node_unsafe_optimizations': 0,
+    'node_v8_options': '',
+    'node_prefix': '',
+    'node_tag': '',
 
-    'win_subsystem%': 'console',
+    'win_subsystem': 'console',
     'mac_library_files': [
       'modules/Bridge/class.js',
       'modules/Bridge/core.js',

@@ -179,14 +179,23 @@ module.exports = (function() {
    */
   function wrapValue (val, type) {
     var basetype = type.type ? type.type : type;
-    if(basetype === '@' || basetype === '#') return createObject(val, basetype);
-    else if (basetype === '@?') return createObject(createBlock(val, '@'));
-    else if (basetype === '^?') return createUnwrapperFunction(val, type);
-    else if (basetype === ':') return objc.sel_getName(val);
-    else if (basetype === 'B') return val ? true : false;
-    else if (basetype === 'c' && val === 1) return true;
-    else if (basetype === 'c' && val === 0) return false;
-    else return val;
+    if(basetype === '@' || basetype === '#') {
+      return createObject(val, basetype);
+    } else if (basetype === '@?') {
+      return createObject(createBlock(val, '@'));
+    } else if (basetype === '^?') {
+      return createUnwrapperFunction(val, type);
+    } else if (basetype === ':') {
+      return objc.sel_getName(val);
+    } else if (basetype === 'B') {
+      return val ? true : false;
+    } else if (basetype === 'c' && val === 1) {
+      return true;
+    } else if (basetype === 'c' && val === 0) {
+      return false;
+    } else {
+      return val;
+    }
   }
 
   /**
@@ -195,7 +204,9 @@ module.exports = (function() {
    */
   function wrapValues (values, objtypes) {
     var result = [];
-    for(var i=0; i < objtypes.length; i++) result.push(wrapValue(values[i], objtypes[i]));
+    for(var i=0; i < objtypes.length; i++) {
+      result.push(wrapValue(values[i], objtypes[i]));
+    }
     return result;
   }
 
@@ -204,16 +215,24 @@ module.exports = (function() {
    */
   function unwrapValue (val, type) {
     var basetype = type.type ? type.type : type;
-    if (basetype === '@?') return createBlock(val, basetype);
-    else if (basetype === '^?') return createWrapperPointer(val, type);
-    else if (basetype === '@' || basetype === '#') {
-      if(Buffer.isBuffer(val)) return val;
+    if (basetype === '@?') {
+      return createBlock(val, basetype);
+    } else if (basetype === '^?') {
+      return createWrapperPointer(val, type);
+    } else if (basetype === '@' || basetype === '#') {
+      if(Buffer.isBuffer(val)) {
+        return val;
+      }
       return val ? val.pointer : null;
+    }  else if (basetype === ':') {
+      return selCache[val] || (selCache[val] = objc.sel_registerName(val));
+    } else if (val === true) {
+      return 1;
+    } else if (val === false) {
+      return 0;
+    } else {
+      return val;
     }
-    else if (basetype === ':') return selCache[val] || (selCache[val] = objc.sel_registerName(val));
-    else if (val === true) return 1;
-    else if (val === false) return 0;
-    else return val;
   }
 
   /**
@@ -222,7 +241,9 @@ module.exports = (function() {
    */
   function unwrapValues (values, objtypes) {
     var result = [];
-    for(var i=0; i < objtypes.length; i++) result.push(unwrapValue(values[i], objtypes[i]));
+    for(var i=0; i < objtypes.length; i++) {
+      result.push(unwrapValue(values[i], objtypes[i]));
+    }
     return result;
   }
 
@@ -311,10 +332,10 @@ module.exports = (function() {
    * literal expression (see `Block-ABI-Apple.txt` above).
    * The "block literal" is the struct type for each Block instance.
    */
-  var __block_literal_1 = struct({
+  objc.__block_literal_1 = struct({
     isa: 'pointer',
-    flags: 'int32',
-    reserved: 'int32',
+    flags: 'int',
+    reserved: 'int',
     invoke: 'pointer',
     descriptor: 'pointer'
   });
@@ -324,15 +345,11 @@ module.exports = (function() {
    * complex Block scenarios involving actual closure variables needing storage
    * (in `NodObjC`, JavaScript closures are leveraged instead).
    */
-  var __block_descriptor_1 = struct({
+  objc.__block_descriptor_1 = struct({
     reserved: 'ulonglong',
     Block_size: 'ulonglong'
   });
-  // The class of the block instances; lazy-loaded
-  var BD = new __block_descriptor_1();
-  BD.reserved = 0;
-  BD.Block_size = __block_literal_1.size;
-  var CGB;
+  objc.CGB = dlopen().get('_NSConcreteGlobalBlock');
 
   /**
    * Creates a C block instance from a JS Function.
@@ -342,20 +359,29 @@ module.exports = (function() {
    * @api private
    */
   function createBlock (func, type) {
-    if (!func) return null;
-    else if (func.pointer) return func.pointer;
-    var bl = new __block_literal_1;
+    if (!func) {
+      return null;
+    } else if (func.pointer) {
+      return func.pointer;
+    }
+    // The class of the block instances; lazy-loaded
+    var BD = new objc.__block_descriptor_1();
+    BD.reserved = 0;
+    BD.Block_size = objc.__block_literal_1.size;
+
+    var bl = new objc.__block_literal_1;
     // Set the class of the instance
-    bl.isa = CGB || (CGB = dlopen().get('_NSConcreteGlobalBlock'));
+    bl.isa = objc.CGB;
     // Global flags
     bl.flags = 1 << 29;
     bl.reserved = 0;
     bl.invoke = createWrapperPointer(func, type);
     bl.descriptor = BD.ref();
+    console.assert(!bl.isa.isNull(), 'block function class is null.');
+    console.assert(!bl['ref.buffer'].isNull(), 'block function is null.');
     var reffed = bl.ref();
-
-    console.assert(!objc.object_getClass(reffed).isNull(), reffed.inspect());
-    console.log('ref: '+reffed.inspect());
+    console.assert(!reffed.isNull(), 'reference to block function is null');
+    console.assert(!objc.object_getClass(reffed).isNull(), 'class was null ', reffed);
     return reffed;
   }
 
@@ -367,10 +393,14 @@ module.exports = (function() {
    * @api private
    */
   function createObject (val, type) {
-    if(val.isNull && val.isNull()) return null;
+    if(val.isNull && val.isNull()) {
+      return null;
+    }
 
     var cache = objc.objc_getAssociatedObject(val, objc.objcStorageKey);
-    if(!cache.isNull()) return cache.readObject(0);
+    if(!cache.isNull()) {
+      return cache.readObject(0);
+    }
 
     var wrappedObj = (type === '@') ? new (require('id'))(val) 
                                    : new (require('class'))(val);
@@ -409,7 +439,5 @@ module.exports = (function() {
   objc.unwrapValues = unwrapValues;
   objc.unwrapValue = unwrapValue;
   objc.objcStorageKey = new Buffer(1);
-  objc.__block_literal_1 = __block_literal_1;
-  objc.__block_descriptor_1 = __block_descriptor_1;
   return objc;
 })();

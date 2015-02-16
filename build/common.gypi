@@ -10,12 +10,8 @@
     'msvs_multi_core_compile': '0',   # we do enable multicore compiles, but not using the V8 way
     'gcc_version%': 'unknown',
     'icu_small': 'false',
-    'node_unsafe_optimizations%': 0,
     'clang%': 1,
     'python%': 'python',
-    'v8_enable_gdbjit%': 0,
-    'v8_no_strict_aliasing%': 1,
-    'win_subsystem%': 'console',
     'uv_library': 'static_library',
     'uv_parent_path': '/libraries/node/deps/uv/',
     'uv_use_dtrace': 'true',
@@ -244,20 +240,14 @@
           'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',        # -fno-exceptions
           'GCC_ENABLE_CPP_RTTI': 'NO',              # -fno-rtti
           'GCC_ENABLE_PASCAL_STRINGS': 'NO',        # No -mpascal-strings
-          'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',       # added for Tint
-          'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',   # added for Tint
           'GCC_THREADSAFE_STATICS': 'NO',           # -fno-threadsafe-statics
           'PREBINDING': 'NO',                       # No -Wl,-prebind
           'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.7, chng from 10.5
           'USE_HEADERMAP': 'NO',
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
-            '-g',                                   # added for Tint
-            # '-stdlib=libc++',                       # added for Tint
-          ],
-          'OTHER_CPLUSPLUSFLAGS': [
-            '-g',                                   # added for Tint
-            # '-stdlib=libc++'                        # added for Tint
+            '-fobjc-arc',                           # added for Tint, objc runtime
+            '-fobjc-runtime=macosx',                # added for Tint, objc runtime
           ],
           'OTHER_LDFLAGS':[
             '-framework Carbon', '-framework AppKit'# added for Tint
@@ -267,8 +257,6 @@
             '-Wendif-labels',
             '-W',
             '-Wno-unused-parameter',
-            '-fobjc-arc',                           # added for Tint, objc runtime
-            '-fobjc-runtime=macosx',                # added for Tint, objc runtime
           ],
         },
         'target_conditions': [

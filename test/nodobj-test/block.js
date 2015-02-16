@@ -1,4 +1,5 @@
-var $ = require('../'),
+require('Bridge');
+var $ = process.bridge.objc;
 	assert = require('assert');
 
 $.import('Foundation')
