@@ -35,6 +35,7 @@ function run($utils) {
     });
     newWebView.left=newWebView.right=newWebView.top=newWebView.bottom=0;
   });
+  $utils.assert(webview.location === null);
   var b = webview.boundsOnScreen;
   webview.addEventListener('load', function() {
     webview.boundsOnWindowOfElement('#newwin', function(coords) {

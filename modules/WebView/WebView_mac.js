@@ -574,9 +574,11 @@ module.exports = (function() {
   util.def(WebView.prototype, 'location',
     function() { 
       if(this.useWKWebView) {
-        return this.nativeView('URL')('absoluteURL')('description')('UTF8String');
+        var url = this.nativeView('URL');
+        return url === null ? null : url('absoluteURL')('description')('UTF8String');
       } else {
-        return this.nativeView('mainFrameURL')('UTF8String'); 
+        var url = this.nativeView('mainFrameURL');
+        return url === null ? null : url('UTF8String'); 
       }
     },
     function(url) {

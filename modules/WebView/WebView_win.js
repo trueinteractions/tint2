@@ -203,7 +203,10 @@ module.exports = (function() {
   );
 
   util.def(WebView.prototype, 'location',
-    function() { return this.private.browser.Url.AbsoluteUri; },
+    function() {
+      var url = this.private.browser.Url;
+      return url === null ? null : url.AbsoluteUri; 
+    },
     function(url) {
       // Win8 adds (or seemingly adds) new support for URI schemas, investigate url monikers
       // as well, asyncronous pluggable protocols wont work since they're system wide and
