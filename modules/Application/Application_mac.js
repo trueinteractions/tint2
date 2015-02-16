@@ -308,7 +308,18 @@
      */
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
-    $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
+    /**
+     * @member background
+     * @type {boolean}
+     * @memberof process
+     * @description If process.background is set to true prior to using require('Common') or require('Application')
+     *              the application is launched as a background application (e.g., does not appear in the dock or
+     *              taskbar.)
+     * @see Window
+     */
+    if(!process.background) {
+      $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
+    }
     $app('activateIgnoringOtherApps', true);
   }
 
