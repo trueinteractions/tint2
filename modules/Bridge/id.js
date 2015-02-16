@@ -16,13 +16,17 @@ module.exports = (function() {
 
     // This is absolutely necessary, otherwise we'll seg fault if a user passes in a simple type or specifies
     // an object on a class that takes a simple type.
-    if(objClass.isNull() || !objClass)
+    if(objClass.isNull() || !objClass) {
       throw new TypeError('An abstract class or delegate implemented a method that takes an ID (object),\n'+
                           'but a simple type or structure (such as NSRect) was passed in, check the types used.\n'+
-                          'pointer:' + pointer + 'classPointer: ' + classPointer + 'objClass: ' + objClass);
+                          'pointer:' + pointer.inspect() + ' objClass: ' + objClass.inspect());
+    }
     
-    if(!classPointer) Class.call(this, objClass);
-    else Class.call(this, classPointer);
+    if(!classPointer) {
+      Class.call(this, objClass);
+    } else {
+      Class.call(this, classPointer);
+    }
     this.pointer = pointer;
     this.isClass = false;
     this.type = '@';

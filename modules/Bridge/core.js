@@ -179,23 +179,14 @@ module.exports = (function() {
    */
   function wrapValue (val, type) {
     var basetype = type.type ? type.type : type;
-    if(basetype === '@' || basetype === '#') {
-      return createObject(val, basetype);
-    } else if (basetype === '@?') {
-      return createObject(createBlock(val, '@'));
-    } else if (basetype === '^?') {
-      return createUnwrapperFunction(val, type);
-    } else if (basetype === ':') {
-      return objc.sel_getName(val);
-    } else if (basetype === 'B') {
-      return val ? true : false;
-    } else if (basetype === 'c' && val === 1) {
-      return true;
-    } else if (basetype === 'c' && val === 0) {
-      return false;
-    } else {
-      return val;
-    }
+    if(basetype === '@' || basetype === '#') return createObject(val, basetype);
+    else if (basetype === '@?') return createObject(createBlock(val, '@'));
+    else if (basetype === '^?') return createUnwrapperFunction(val, type);
+    else if (basetype === ':') return objc.sel_getName(val);
+    else if (basetype === 'B') return val ? true : false;
+    else if (basetype === 'c' && val === 1) return true;
+    else if (basetype === 'c' && val === 0) return false;
+    else return val;
   }
 
   /**
@@ -204,9 +195,7 @@ module.exports = (function() {
    */
   function wrapValues (values, objtypes) {
     var result = [];
-    for(var i=0; i < objtypes.length; i++) {
-      result.push(wrapValue(values[i], objtypes[i]));
-    }
+    for(var i=0; i < objtypes.length; i++) result.push(wrapValue(values[i], objtypes[i]));
     return result;
   }
 
@@ -215,24 +204,16 @@ module.exports = (function() {
    */
   function unwrapValue (val, type) {
     var basetype = type.type ? type.type : type;
-    if (basetype === '@?') {
-      return createBlock(val, basetype);
-    } else if (basetype === '^?') {
-      return createWrapperPointer(val, type);
-    } else if (basetype === '@' || basetype === '#') {
-      if(Buffer.isBuffer(val)) {
-        return val;
-      }
+    if (basetype === '@?') return createBlock(val, basetype);
+    else if (basetype === '^?') return createWrapperPointer(val, type);
+    else if (basetype === '@' || basetype === '#') {
+      if(Buffer.isBuffer(val)) return val;
       return val ? val.pointer : null;
-    }  else if (basetype === ':') {
-      return selCache[val] || (selCache[val] = objc.sel_registerName(val));
-    } else if (val === true) {
-      return 1;
-    } else if (val === false) {
-      return 0;
-    } else {
-      return val;
     }
+    else if (basetype === ':') return selCache[val] || (selCache[val] = objc.sel_registerName(val));
+    else if (val === true) return 1;
+    else if (val === false) return 0;
+    else return val;
   }
 
   /**
@@ -371,7 +352,11 @@ module.exports = (function() {
     bl.reserved = 0;
     bl.invoke = createWrapperPointer(func, type);
     bl.descriptor = BD.ref();
-    return bl.ref();
+    var reffed = bl.ref();
+
+    console.assert(!objc.object_getClass(reffed).isNull(), reffed.inspect());
+    console.log('ref: '+reffed.inspect());
+    return reffed;
   }
 
   /**
@@ -385,10 +370,8 @@ module.exports = (function() {
     if(val.isNull && val.isNull()) return null;
 
     var cache = objc.objc_getAssociatedObject(val, objc.objcStorageKey);
+    if(!cache.isNull()) return cache.readObject(0);
 
-    if(!cache.isNull()) {
-      return cache.readObject(0);
-    }
     var wrappedObj = (type === '@') ? new (require('id'))(val) 
                                    : new (require('class'))(val);
 
