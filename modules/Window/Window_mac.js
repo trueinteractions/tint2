@@ -40,7 +40,7 @@ module.exports = (function() {
        * @description Fires when the window is destroyed and resources are released, this is 
        *              fired just before the window is closed.
        */
-      ['windowWillClose:', 'v@:@@', function() { this.fireEvent('close'); return $.YES; }.bind(this)],
+      ['windowShouldClose:', 'B@:@@', function() { this.fireEvent('close'); return $.YES; }.bind(this)],
       /**
        * @event enter-fullscreen
        * @memberof Window
@@ -98,7 +98,10 @@ module.exports = (function() {
        * @description Fires after the window has been destroyed and all resources have been
        *              released.  Do not refer to the window during this event.
        */
-      ['windowDidClose:', 'v@:@@', function() { this.fireEvent('closed'); }.bind(this)]
+      ['windowWillClose:', 'v@:@@', function() { 
+        this.fireEvent('closed'); 
+        delete this;
+      }.bind(this)]
     ]);
     this.nativeClass = this.nativeClass || $.NSWindow;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
