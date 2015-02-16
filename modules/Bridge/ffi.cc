@@ -6,14 +6,6 @@
 #include <sys/time.h>
 #endif
 
-#if __x86_64__
-#define V8_NUM_TYPE Number
-#define V8_NUM_CAST_TYPE double
-#else
-#define V8_NUM_TYPE Integer
-#define V8_NUM_CAST_TYPE int32_t
-#endif
-
 pthread_t          CallbackInfo::g_mainthread;
 pthread_mutex_t    CallbackInfo::g_queue_mutex;
 std::queue<ThreadedCallbackInvokation *> CallbackInfo::g_queue;
@@ -123,7 +115,6 @@ void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
 NAN_METHOD(CallbackInfo::Callback) {
   NanEscapableScope();
   if (args.Length() != 4) {
-    fprintf(stderr, "ffi_close\n");
     return NanThrowError("Not enough arguments.");
   }
 
@@ -263,7 +254,7 @@ void FFI::InitializeStaticFunctions(Handle<Object> target) {
 
 #define SET_ENUM_VALUE(_value) \
   target->ForceSet(NanNew<String>(#_value), \
-              NanNew<V8_NUM_TYPE>((V8_NUM_CAST_TYPE)(ssize_t)_value), \
+              NanNew<Number>((ssize_t)_value), \
               static_cast<PropertyAttribute>(ReadOnly|DontDelete))
 
 void FFI::InitializeBindings(Handle<Object> target) {
@@ -341,10 +332,10 @@ void FFI::InitializeBindings(Handle<Object> target) {
   target->ForceSet(NanNew<String>("RTLD_MAIN_ONLY"), WrapPointer((char *)RTLD_MAIN_ONLY), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 #endif
 
-  target->ForceSet(NanNew<String>("FFI_ARG_SIZE"), NanNew<V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(ffi_arg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-  target->ForceSet(NanNew<String>("FFI_SARG_SIZE"), NanNew<V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(ffi_sarg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-  target->ForceSet(NanNew<String>("FFI_TYPE_SIZE"), NanNew<V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(ffi_type)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
-  target->ForceSet(NanNew<String>("FFI_CIF_SIZE"), NanNew<V8_NUM_TYPE>((V8_NUM_CAST_TYPE)sizeof(ffi_cif)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_ARG_SIZE"), NanNew<Number>(sizeof(ffi_arg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_SARG_SIZE"), NanNew<Number>(sizeof(ffi_sarg)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_TYPE_SIZE"), NanNew<Number>(sizeof(ffi_type)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
+  target->ForceSet(NanNew<String>("FFI_CIF_SIZE"), NanNew<Number>(sizeof(ffi_cif)), static_cast<PropertyAttribute>(ReadOnly|DontDelete));
 
   bool hasObjc = false;
 #if __OBJC__ || __OBJC2__

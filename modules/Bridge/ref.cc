@@ -577,7 +577,7 @@ namespace REF {
   Local<Object> smap = NanNew<v8::Object>();
   // fixed sizes
 #define SET_SIZEOF(name, type) \
-  smap->Set(NanNew<v8::String>( #name ), NanNew<v8::Uint32>(static_cast<uint32_t>(sizeof(type))));
+  smap->Set(NanNew<v8::String>( #name ), NanNew<v8::Number>(sizeof(type)));
   SET_SIZEOF(int8, int8_t);
   SET_SIZEOF(uint8, uint8_t);
   SET_SIZEOF(int16, int16_t);
