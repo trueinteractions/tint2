@@ -776,12 +776,12 @@ module.exports = (function() {
         if(this.native('standardWindowButton',$.NSWindowZoomButton)) {
           this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
         }
-        this.native('setStyleMask',this.native('styleMask') | $.NSResizableWindowMask);
+        this.native('setStyleMask', this.native('styleMask') | $.NSResizableWindowMask);
       } else {
         if(this.native('standardWindowButton',$.NSWindowZoomButton)) {
           this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
         }
-        this.native('setStyleMask',this.native('styleMask') & (~$.NSResizableWindowMask) );
+        this.native('setStyleMask', this.native('styleMask') & (~$.NSResizableWindowMask) );
       }
     }
   );

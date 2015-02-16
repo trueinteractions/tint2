@@ -44,6 +44,9 @@ module.exports = (function() {
    * @see removeChild
    */
   Container.prototype.appendChild = function(control) {
+    if(this === control) {
+      throw new Error('A control cannot be added as a child to itself.');
+    }
     if(Array.isArray(control)) {
       for(var i=0; i < control.length; i++) {
         this.appendChild(control[i]);

@@ -484,7 +484,8 @@ module.exports = (function() {
     constraint('setPriority', 490); // NSLayoutPriorityDragThatCannotResizeWindow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 1); // NSLayoutPriorityDefaultLow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 0); // NSLayoutPriorityDefaultLow
-
+    this.nativeView('setContentCompressionResistancePriority',250,'forOrientation',1);
+    this.nativeView('setContentCompressionResistancePriority',250,'forOrientation',0);
     this.private.parent.nativeView('addConstraint', constraint);
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');

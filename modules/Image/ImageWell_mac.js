@@ -18,6 +18,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSImageView;
     this.nativeViewClass = this.nativeViewClass || $.NSImageView;
     Container.call(this, options);
+    this.native('setEditable', $.YES);
     this.native('setImageAlignment',$.NSImageAlignCenter);
     this.animates = false;
     this.alignment = "center";
