@@ -97,8 +97,9 @@ module.exports = (function() {
         var p = this.private;
         var changeConstraint = null;
 
-        if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null)
+        if(na && na[0] && p.user[na[0]] !== null && na[1] && p.user[na[1]] !== null) {
           throw new Error('A '+name+' cannot be set when the '+na[0]+' and '+na[1]+' have been set already.');
+        }
 
         this.private.states[propertyName] = value;
         p.user[propertyName] = value;

@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.SelectInput) {
+    return global.__TINT.SelectInput;
+  }
   var $ = process.bridge.objc;
   var TextInput = require('TextInput');
 
@@ -99,5 +102,6 @@ module.exports = (function() {
    */
   SelectInput.prototype.item = function(index) { return this.nativeView('itemObjectValueAtIndex',index); }
 
+  global.__TINT.SelectInput = SelectInput;
   return SelectInput;
 })();

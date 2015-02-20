@@ -81,7 +81,9 @@ module.exports = (function() {
     this.private.type = "Window";
     this.private.canBeFullscreen = true;
 
-    this.native.ShowInTaskbar = true;
+    if(!process.background) {
+      this.native.ShowInTaskbar = true;
+    }
     this.native.ShowActivated = true;
     this.native.Width = options.width;
     this.native.Height = options.height;

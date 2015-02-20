@@ -80,12 +80,12 @@ module.exports = (function() {
     return $.tintWebKitResponseDelegate;
   }
 
-  function fireError(self, cmd, webviewOrError, navigation, error) {
+  function fireError(self, cmd, webview, navigationOrError, error) {
     try {
       if(this.useWKWebView) {
         this.fireEvent('error',[error('localizedDescription')('UTF8String')]);
       } else {
-        this.fireEvent('error',[webviewOrError('localizedDescription')('UTF8String')]);
+        this.fireEvent('error',[navigationOrError('localizedDescription')('UTF8String')]);
       }
     } catch (e) {
       console.log(e.message);

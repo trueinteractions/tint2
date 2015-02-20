@@ -1,4 +1,7 @@
 module.exports = (function() {
+  if(global.__TINT.SearchInput) {
+    return global.__TINT.SearchInput;
+  }
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
   var Control = require('Control');
@@ -48,6 +51,7 @@ module.exports = (function() {
     }
   });
 
+  global.__TINT.SearchInput = SearchInput;
   return SearchInput;
 
 })();

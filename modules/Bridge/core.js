@@ -377,11 +377,13 @@ module.exports = (function() {
     bl.reserved = 0;
     bl.invoke = createWrapperPointer(func, type);
     bl.descriptor = BD.ref();
+
     console.assert(!bl.isa.isNull(), 'block function class is null.');
     console.assert(!bl['ref.buffer'].isNull(), 'block function is null.');
     var reffed = bl.ref();
     console.assert(!reffed.isNull(), 'reference to block function is null');
     console.assert(!objc.object_getClass(reffed).isNull(), 'class was null ', reffed);
+
     return reffed;
   }
 

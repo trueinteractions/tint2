@@ -119,7 +119,12 @@ module.exports = (function() {
         console.assert(Array.isArray(items));
         allowedFileTypes = items;
         var arr = $.NSMutableArray('arrayWithCapacity',items.length);
-        items.forEach(function(item,i) { arr('insertObject',$(item),'atIndex',i); });
+        items.forEach(function(item,i) {
+          if(item === "folder") {
+            item = "public.folder";
+          }
+          arr('insertObject',$(item),'atIndex',i);
+        });
         $dialog('setAllowedFileTypes',arr);
       }
     });

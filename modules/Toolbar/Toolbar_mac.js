@@ -3,12 +3,56 @@ module.exports = (function() {
   var Container = require('Container');
   var ToolbarItem = require('ToolbarItem');
   var $ = process.bridge.objc;
+
+
+  function makeNSToolbarItemFromNSView(size,identifier,child) {
+    var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',$(identifier.toString()));
+    // This is necessary, even though it would seem we're adding toolbar items with fixed height/width Auto Layout
+    // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
+    // masks is necessary.
+    child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
+    var intrinsicSize = child.native('intrinsicContentSize');
+
+    var name = child.native.toString();
+    var maxWidth = intrinsicSize.width, maxHeight = intrinsicSize.height;
+
+    if(child.width !== null && child.width.toString().indexOf('%') === -1) {
+      intrinsicSize.width = util.parseUnits(child.width);
+    }
+    if(child.height !== null && child.height.toString().indexOf('%') === -1) {
+      intrinsicSize.height = util.parseUnits(child.height);
+    }
+
+    if(name.indexOf("NSButton") > -1) {
+      maxHeight = (size === "small") ? 24 : 32;
+      intrinsicSize.height = intrinsicSize.width = maxWidth = maxHeight;
+    } 
+
+    if( name.indexOf("NSText") > -1 || 
+        name.indexOf("NSProgress") > -1 ||
+        name.indexOf("NSBox") > -1 ||
+        name.indexOf("NSSearch") > -1 || 
+        name.indexOf("NSTable") > -1) 
+    {
+      maxWidth = 1000;
+    } 
+
+    toolbarItem('setMaxSize', $.NSMakeSize(maxWidth, maxHeight));
+    toolbarItem('setMinSize', intrinsicSize);
+    toolbarItem('setView',child.native);
+    return toolbarItem;
+  }
+
   /**
    * @class Toolbar
    * @description The toolbar is a strip applied to the top of a window allowing elements to be
    *              added and customized per the user preferences. Note that items in the toolbar 
    *              are not guaranteed to show depending on how the user decides to remove/add items.
-   *              A toolbar can be assigned to a window using Window.toolbar.
+   *              A toolbar can be assigned to a window using Window.toolbar. Note, the toolbar
+   *              supports adding two special "identifier" components with "appendChild". The first
+   *              is "space" which provides a consistant OS defined space between two items 
+   *              in the toolbar, and the second "flex-space" which defines a flexible (expands and
+   *              collapses as needed) space.
    * @extends Container
    * @see Window
    */
@@ -38,33 +82,6 @@ module.exports = (function() {
    * urlLocation.value = 'A text input field';
    * @screenshot-window {win}
    */
-
-  function makeNSToolbarItemFromNSView(size,identifier,child) {
-    var toolbarItem = $.NSToolbarItem('alloc')('initWithItemIdentifier',$(identifier.toString()));
-    // This is necessary, even though it would seem we're adding toolbar items with fixed height/width Auto Layout
-    // actually still applies.  Without this rendering is undefined, so setting the translation of autoresizing
-    // masks is necessary.
-    child.native('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
-    var intrinsicSize = child.native('intrinsicContentSize');
-    if(child.native.toString().indexOf("NSButton") > -1) {
-      if(size === "small") {
-        intrinsicSize.height = 24;
-      } else {
-        intrinsicSize.height = 32;
-      }
-      intrinsicSize.width = intrinsicSize.height;
-    }
-    if(child.native.toString().indexOf("NSText") > -1) {
-      toolbarItem('setMaxSize', $.NSMakeSize(1000,intrinsicSize.height));
-      toolbarItem('setMinSize', intrinsicSize);
-    } else {
-      toolbarItem('setMaxSize', intrinsicSize);
-      toolbarItem('setMinSize', intrinsicSize);
-    }
-    toolbarItem('setView',child.native);
-    return toolbarItem;
-  }
-
   function Toolbar() {
     var toolbarCache = [];
     this.native = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
@@ -73,7 +90,7 @@ module.exports = (function() {
     this.native('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
     this.native('setSizeMode',$.NSToolbarSizeModeSmall);
 
-    this.private = {children:[], identifiers:{}};
+    this.private = {children:[], identifiers:{}, ignoreConstraints:true};
 
     this.private.getChildren = function() {
       var nsArrayChildren = $.NSMutableArray('alloc')('init');
@@ -88,15 +105,15 @@ module.exports = (function() {
     $NSToolbarDelegateClass.addMethod('toolbarAllowedItemIdentifiers:','@@:', this.private.getChildren.bind(this));
     $NSToolbarDelegateClass.addMethod('toolbarDefaultItemIdentifiers:','@@:', this.private.getChildren.bind(this));
     $NSToolbarDelegateClass.addMethod('toolbar:itemForItemIdentifier:willBeInsertedIntoToolbar:','@@:@@B', function(self, cmd, toolbar, identifier) {
-        if(!toolbarCache[identifier]) {
-          var child = this.private.identifiers[identifier];
-          var toolbarItem = child.native;
-          if(!(child instanceof ToolbarItem)) {
-            toolbarItem = makeNSToolbarItemFromNSView(this.size, identifier, child);
-          }
-          toolbarCache[identifier] = toolbarItem;
+      if(!toolbarCache[identifier]) {
+        var child = this.private.identifiers[identifier];
+        var toolbarItem = child.native;
+        if(!(child instanceof ToolbarItem)) {
+          toolbarItem = makeNSToolbarItemFromNSView(this.size, identifier, child);
         }
-        return toolbarCache[identifier];
+        toolbarCache[identifier] = toolbarItem;
+      }
+      return toolbarCache[identifier];
     }.bind(this));
 
     $NSToolbarDelegateClass.register();
@@ -105,6 +122,9 @@ module.exports = (function() {
 
     this.addEventListener('before-child-attached', function(child) {
       if(child === "space") {
+        child = { native:$("NSToolbarSpaceItem"), private:{identifier:"NSToolbarSpaceItem"} };
+      }
+      if(child === "flex-space") {
         child = { native:$("NSToolbarFlexibleSpaceItem"), private:{identifier:"NSToolbarFlexibleSpaceItem"} };
       }
       if (!child.private.identifier) {

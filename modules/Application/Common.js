@@ -17,6 +17,7 @@ global.DateWell = require('DateWell');
 global.Dialog = require('Dialog');
 global.DropDown = require('DropDown');
 global.FileDialog = require('FileDialog');
+global.FileInput = require('FileInput');
 global.Font = require('Font');
 global.FontPanel = require('FontPanel');
 global.ImageWell = require('ImageWell');

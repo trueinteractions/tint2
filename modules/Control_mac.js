@@ -467,6 +467,11 @@ module.exports = (function() {
   };
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints)
+    {
+      return null;
+    }
     var constraint = $.NSLayoutConstraint('constraintWithItem',
                         (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
                         'attribute',(attributeMap[layoutObject.firstAttribute] || $.NSLayoutAttributeNotAnAttribute),
@@ -479,7 +484,8 @@ module.exports = (function() {
     constraint('setPriority', 490); // NSLayoutPriorityDragThatCannotResizeWindow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 1); // NSLayoutPriorityDefaultLow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 0); // NSLayoutPriorityDefaultLow
-
+    this.nativeView('setContentCompressionResistancePriority',250,'forOrientation',1);
+    this.nativeView('setContentCompressionResistancePriority',250,'forOrientation',0);
     this.private.parent.nativeView('addConstraint', constraint);
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');
@@ -488,6 +494,11 @@ module.exports = (function() {
   };
 
   Control.prototype.changeLayoutConstraint = function(previousConstraint, layoutObject) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints) 
+    {
+      return null;
+    }
     if(previousConstraint('multiplier') !== layoutObject.multiplier  ||
         previousConstraint('secondItem') === null && layoutObject.secondItem !== null || 
         previousConstraint('secondItem') !== null && layoutObject.secondItem === null || 
@@ -505,7 +516,11 @@ module.exports = (function() {
   };
 
   Control.prototype.removeLayoutConstraint = function(obj) {
-    if(this.private.parent !== null) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints) 
+    {
+      return;
+    } else if(this.private.parent !== null) {
       this.private.parent.nativeView('removeConstraint',obj);
       this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
       this.private.parent.nativeView('layoutSubtreeIfNeeded');

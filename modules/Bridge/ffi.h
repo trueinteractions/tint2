@@ -54,7 +54,7 @@ class AsyncCallParams {
 
 class FFI {
   public:
-		static void Init(Handle<Object> Target);
+    static void Init(Handle<Object> Target);
     static void InitializeStaticFunctions(Handle<Object> Target);
     static void InitializeBindings(Handle<Object> Target);
 
