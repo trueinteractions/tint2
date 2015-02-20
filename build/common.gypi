@@ -28,13 +28,15 @@
       ['OS == "win"', {
         'os_posix': 0,
         'v8_postmortem_support': 'false',
+        'node_use_dtrace': 'false',
         'node_use_etw': 'true',
-        'node_has_winsdk': 'true',
-        'node_use_dtrace': 'false'
+        'node_has_winsdk': 'true'
       }, {
         'os_posix': 1,
         'v8_postmortem_support': 'true',
-        'node_use_dtrace': 'true'
+        'node_use_dtrace': 'true',
+        'node_use_etw': 'false',
+        'node_has_winsdk': 'false'
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj',
@@ -245,12 +247,11 @@
           'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.7, chng from 10.5
           'USE_HEADERMAP': 'NO',
           'OTHER_CFLAGS': [
-            '-fno-strict-aliasing',
-            '-fobjc-arc',                           # added for Tint, objc runtime
             '-fobjc-runtime=macosx',                # added for Tint, objc runtime
           ],
           'OTHER_LDFLAGS':[
-            '-framework Carbon', '-framework AppKit'# added for Tint
+            '-framework Carbon',                    # added for Tint
+            '-framework AppKit'                     # added for Tint
           ],
           'WARNING_CFLAGS': [
             '-Wall',

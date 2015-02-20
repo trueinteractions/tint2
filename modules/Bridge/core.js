@@ -332,10 +332,10 @@ module.exports = (function() {
    * literal expression (see `Block-ABI-Apple.txt` above).
    * The "block literal" is the struct type for each Block instance.
    */
-  objc.__block_literal_1 = struct({
+  var __block_literal_1 = struct({
     isa: 'pointer',
-    flags: 'int',
-    reserved: 'int',
+    flags: 'int32',
+    reserved: 'int32',
     invoke: 'pointer',
     descriptor: 'pointer'
   });
@@ -345,11 +345,15 @@ module.exports = (function() {
    * complex Block scenarios involving actual closure variables needing storage
    * (in `NodObjC`, JavaScript closures are leveraged instead).
    */
-  objc.__block_descriptor_1 = struct({
+  var __block_descriptor_1 = struct({
     reserved: 'ulonglong',
     Block_size: 'ulonglong'
   });
-  objc.CGB = dlopen().get('_NSConcreteGlobalBlock');
+  // The class of the block instances; lazy-loaded
+  var BD = new __block_descriptor_1();
+  BD.reserved = 0;
+  BD.Block_size = __block_literal_1.size;
+  var CGB;
 
   /**
    * Creates a C block instance from a JS Function.
@@ -359,31 +363,18 @@ module.exports = (function() {
    * @api private
    */
   function createBlock (func, type) {
-    if (!func) {
-      return null;
-    } else if (func.pointer) {
-      return func.pointer;
-    }
-    // The class of the block instances; lazy-loaded
-    var BD = new objc.__block_descriptor_1();
-    BD.reserved = 0;
-    BD.Block_size = objc.__block_literal_1.size;
-
-    var bl = new objc.__block_literal_1;
+    if (!func) return null;
+    else if (func.pointer) return func.pointer;
+    var bl = new __block_literal_1;
     // Set the class of the instance
-    bl.isa = objc.CGB;
+    bl.isa = CGB || (CGB = dlopen().get('_NSConcreteGlobalBlock'));
     // Global flags
     bl.flags = 1 << 29;
     bl.reserved = 0;
     bl.invoke = createWrapperPointer(func, type);
     bl.descriptor = BD.ref();
-
-    console.assert(!bl.isa.isNull(), 'block function class is null.');
-    console.assert(!bl['ref.buffer'].isNull(), 'block function is null.');
     var reffed = bl.ref();
-    console.assert(!reffed.isNull(), 'reference to block function is null');
-    console.assert(!objc.object_getClass(reffed).isNull(), 'class was null ', reffed);
-
+    console.assert(!objc.object_getClass(reffed).isNull(), reffed.inspect());
     return reffed;
   }
 
@@ -441,5 +432,7 @@ module.exports = (function() {
   objc.unwrapValues = unwrapValues;
   objc.unwrapValue = unwrapValue;
   objc.objcStorageKey = new Buffer(1);
+  objc.__block_literal_1 = __block_literal_1;
+  objc.__block_descriptor_1 = __block_descriptor_1;
   return objc;
 })();

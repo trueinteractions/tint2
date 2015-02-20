@@ -16,7 +16,7 @@
     'node_install_npm': 'false',
     'node_use_mdb': 'false',
     'v8_enable_gdbjit': 0,
-    'v8_no_strict_aliasing': 1,
+    'v8_no_strict_aliasing': 0,
     'node_unsafe_optimizations': 0,
     'node_v8_options': '',
     'node_prefix': '',
@@ -464,9 +464,6 @@
             'modules/AppSchema/AppSchema_mac.mm',
             'modules/Runtime/Main_mac.mm',
           ],
-          'libraries': [ 
-            '-framework Carbon'
-          ],
           'defines!': [
             'PLATFORM="mac"',
           ],
@@ -538,7 +535,7 @@
       },
       'all_dependent_settings': {
         'variables': {
-          'python':'>(python)',
+          'python':'>(python)'
         },
         'msvs_settings': {
           'VCCLCompilerTool': {

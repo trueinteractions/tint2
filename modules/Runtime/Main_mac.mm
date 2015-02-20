@@ -39,9 +39,6 @@ NAN_METHOD(InitBridge) {
     NanReturnValue(NanNew<v8::Object>());
 }
 
-
-static void uv_noop(uv_async_t* handle, int status) {}
-
 static void uv_event(void *info) {
   [[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
 
