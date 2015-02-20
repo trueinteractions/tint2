@@ -459,6 +459,7 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
         dt = gcnew System::DateTime(dt->Ticks, System::DateTimeKind::Utc);
     long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
     long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
+    delete dt;
     jsdata = v8::Date::New((double)value);
   }
   else if (type == System::DateTimeOffset::typeid)  jsdata = stringCLR2V8(netdata->ToString());
@@ -745,6 +746,7 @@ public:
     try {
       System::String^ assemblyName = stringV82CLR(args[0]->ToString());
       System::Reflection::Assembly^ assembly = System::Reflection::Assembly::Load(assemblyName);
+      delete assemblyName;
       return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -775,6 +777,12 @@ public:
       else
         assembly = System::Reflection::Assembly::Load(userpath);
 
+      delete netPath;
+      delete version;
+      delete installRoot;
+      delete netFramework;
+      delete framworkRegPath;
+      delete userpath;
       return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
 
     } catch (System::Exception^ e) {
@@ -850,6 +858,10 @@ public:
 
       baseType->GetField(field,
         BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->SetValue(target, value);
+      
+      delete baseType;
+      delete field;
+
       return scope.Close(Undefined());
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -870,6 +882,8 @@ public:
          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
 
       System::Object^ rtn = fieldinfo->GetValue(nullptr);
+      delete fieldinfo;
+      delete field;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -889,6 +903,10 @@ public:
          BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
 
       System::Object^ rtn = fieldinfo->GetValue(target);
+      
+      delete fieldinfo;
+      delete baseType;
+      delete field;
 
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
@@ -911,6 +929,8 @@ public:
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
         nullptr, cshargs, nullptr);
 
+      delete method;
+      delete cshargs;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -946,7 +966,7 @@ public:
         nullptr,
         cshargs,
         nullptr);
-
+      delete method;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -960,6 +980,7 @@ public:
       System::String^ property = stringV82CLR(args[1]->ToString());
       PropertyInfo^ rtn = target->GetProperty(property,  
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+      delete property;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -974,10 +995,12 @@ public:
       try {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+        delete property;
         return scope.Close(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
+        delete property;
         return scope.Close(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
@@ -998,7 +1021,7 @@ public:
         cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
 
       System::Object^ rtn = method->Invoke(target, cshargs);
-
+  
       return scope.Close(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -1033,6 +1056,7 @@ public:
       System::Object^ value = MarshalV8ToCLR(args[2]);
       System::String^ field = stringV82CLR(args[1]->ToString());
       target->GetType()->GetProperty(field)->SetValue(target, value);
+      delete field;
       return scope.Close(Undefined());
     } catch(System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -1046,6 +1070,8 @@ public:
       System::String^ property = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = target->GetProperty(property,
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
+      delete property;
+      delete target;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -1060,6 +1086,8 @@ public:
       try {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
+        delete property;
+        delete target;
         return scope.Close(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
@@ -1089,6 +1117,9 @@ public:
         target,
         cshargs);
 
+      delete cshargs;
+      delete type;
+      delete method;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -1112,7 +1143,9 @@ public:
         nullptr,
         target,
         cshargs);
-
+      delete cshargs;
+      delete type;
+      delete method;
       return scope.Close(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
       return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));

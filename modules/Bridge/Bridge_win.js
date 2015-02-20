@@ -265,17 +265,17 @@ function createFromType(nativeType, onto) {
       }
     }
 
-      Object.defineProperty(info.onto, name, {
-        configurable:true, enumerable:true,
-        get:function() { 
-          delete this.onto[this.name];
-          if(dotnet.execGetProperty(this.type, "IsEnum")) {
-            return this.onto[this.name] = createEnum(this.type,this.name);
-          } else if (dotnet.execGetProperty(this.type, "IsClass") || dotnet.execGetProperty(this.type, "IsValueType")) {
-            return this.onto[this.name] = createClass(this.type,this.name);
-          }
-        }.bind(info)
-      });
+    Object.defineProperty(info.onto, name, {
+      configurable:true, enumerable:true,
+      get:function() { 
+        delete this.onto[this.name];
+        if(dotnet.execGetProperty(this.type, "IsEnum")) {
+          return this.onto[this.name] = createEnum(this.type,this.name);
+        } else if (dotnet.execGetProperty(this.type, "IsClass") || dotnet.execGetProperty(this.type, "IsValueType")) {
+          return this.onto[this.name] = createClass(this.type,this.name);
+        }
+      }.bind(info)
+    });
   }
 }
 
