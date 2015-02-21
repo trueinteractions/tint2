@@ -498,7 +498,11 @@ module.exports = (function() {
    */
   WebView.prototype.execute = function(jscode, cb) {
     if(this.useWKWebView) {
-      var callback = $(function(obj, result) { if(cb) { cb(result('description')('UTF8String').toString()); } }.bind(this), ['v',['@','@']]);
+
+      var callback = null;
+      if(cb) {
+        callback = $(function(obj, result) { if(cb) { cb(result('description')('UTF8String').toString()); } }.bind(this), ['v',['@','@']]);
+      }
       this.nativeView('evaluateJavaScript', $(jscode.toString()), 'completionHandler', callback);
     } else {
       var result = this.nativeView('stringByEvaluatingJavaScriptFromString',$(jscode.toString()))('UTF8String').toString();

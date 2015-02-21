@@ -374,7 +374,7 @@ module.exports = (function() {
     bl.invoke = createWrapperPointer(func, type);
     bl.descriptor = BD.ref();
     var reffed = bl.ref();
-    console.assert(!objc.object_getClass(reffed).isNull(), reffed.inspect());
+    //console.assert(!objc.object_getClass(reffed).isNull(), reffed.inspect());
     return reffed;
   }
 
