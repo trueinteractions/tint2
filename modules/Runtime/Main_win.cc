@@ -300,6 +300,9 @@ int main(int argc, char *argv[]) {
 		  exec_argv);
 	  v8::Context::Scope context_scope(context);
 
+	  node_load();
+	  win_msg_loop();
+
 	  env->Dispose();
 	  env = NULL;
   }
