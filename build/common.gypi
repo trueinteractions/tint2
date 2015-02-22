@@ -29,12 +29,14 @@
         'os_posix': 0,
         'v8_postmortem_support': 'false',
         'node_use_dtrace': 'false',
-        'node_has_winsdk': 'true'
+        'node_has_winsdk': 'true',
+        'v8_no_strict_aliasing': 1
       }, {
         'os_posix': 1,
         'v8_postmortem_support': 'true',
         'node_use_dtrace': 'true',
-        'node_has_winsdk': 'false'
+        'node_has_winsdk': 'false',
+        'v8_no_strict_aliasing': 0
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj',

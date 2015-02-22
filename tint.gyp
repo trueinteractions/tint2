@@ -16,7 +16,7 @@
     'node_install_npm': 'false',
     'node_use_mdb': 'false',
     'v8_enable_gdbjit': 0,
-    'v8_no_strict_aliasing': 0,
+    'v8_no_strict_aliasing%': 0,
     'node_unsafe_optimizations': 0,
     'node_v8_options': '',
     'node_prefix': '',

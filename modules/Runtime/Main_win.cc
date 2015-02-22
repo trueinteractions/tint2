@@ -7,23 +7,15 @@
 #endif
 
 #include "node.cc" // this is a hack to get at node's internal globals.
-#include <tint_version.h>
-
 #include <stdlib.h>
 #include <io.h>
 #include <fcntl.h>
 #include <windows.h>
 #include <nan.h>
-#include <node_javascript.h>
 #if HAVE_OPENSSL
 # include "node_crypto.h"
 #endif
 #include <tint_version.h>
-
-//TODO: Find a better way of doing this instead of "trusting"
-//that this private interface signature will remain the same.
-extern "C" DWORD uv_get_poll_timeout(uv_loop_t* loop);
-#define uv__has_active_reqs(loop) (ngx_queue_empty(&(loop)->active_reqs) == 0)
 #include "win/req-inl.h"
 
 static bool packaged = false;
