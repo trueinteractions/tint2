@@ -29,13 +29,11 @@
         'os_posix': 0,
         'v8_postmortem_support': 'false',
         'node_use_dtrace': 'false',
-        'node_use_etw': 'true',
         'node_has_winsdk': 'true'
       }, {
         'os_posix': 1,
         'v8_postmortem_support': 'true',
         'node_use_dtrace': 'true',
-        'node_use_etw': 'false',
         'node_has_winsdk': 'false'
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {

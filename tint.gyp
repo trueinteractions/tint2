@@ -1,6 +1,6 @@
 {
   'variables': {
-    'v8_use_snapshot': 'false',
+    'v8_use_snapshot%': 'true',
     'v8_postmortem_support%': 'true',
     'node_use_dtrace%': 'false',          # enabled in common.gypi for posix
     'node_use_etw': 'false',             # enabled in common.gypi for windows
@@ -215,6 +215,7 @@
         'libraries/node/deps/uv/include/',
         'libraries/node/deps/uv/src/',
         'tools/',
+		    'modules/Bridge/',
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
       'sources': [
@@ -415,7 +416,9 @@
           ]
         } ],
         [ 'node_shared_v8=="false"', {
-          'include_dirs': [ 'libraries/node/deps/v8/include/' ],
+          'include_dirs': [ 
+            'libraries/node/deps/v8/include/'
+          ],
           'sources': [
             'libraries/node/deps/v8/include/v8.h',
             'libraries/node/deps/v8/include/v8-debug.h',
@@ -573,6 +576,7 @@
         'libraries/node/deps/uv/src/',
         'libraries/node-ffi/src',
         'libraries/node/deps/v8/include/',
+		    'modules/Bridge/',
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
       'sources':[
@@ -711,35 +715,28 @@
       'toolsets': ['host'],
       'actions': [
         {
-          'action_name': 'tint_js2c',
+          'action_name': 'node_js2c',
           'inputs': [
             '<@(library_files)',
-            'libraries/node/config.gypi'
+            './libraries/node/config.gypi',
           ],
           'outputs': [
             '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
           ],
           'conditions': [
-            ['OS=="mac"',{
-              'inputs': ['<@(mac_library_files)'],
-            }],
-            ['OS=="win"',{
-              'inputs': ['<@(win_library_files)'],
-            }],
             [ 'node_use_dtrace=="false" and node_use_etw=="false"', {
-                'inputs': ['libraries/node/src/notrace_macros.py']
+              'inputs': [ './libraries/node/src/notrace_macros.py' ]
             }],
             [ 'node_use_perfctr=="false"', {
-              'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
-            }],
+              'inputs': [ './libraries/node/src/perfctr_macros.py' ]
+            }]
           ],
-              'action': [
-                '<(python)',
-                ##'libraries/node/tools/js2c.py',
-                'tools/tint_js2c.py',
-                '<@(_outputs)',
-                '<@(_inputs)',
-              ],
+          'action': [
+            '<(python)',
+            './libraries/node/tools/js2c.py',
+            '<@(_outputs)',
+            '<@(_inputs)',
+          ],
         },
       ],
     }, # end tint_js2c

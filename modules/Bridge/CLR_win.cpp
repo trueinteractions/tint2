@@ -1,6 +1,6 @@
 #include <v8.h>
 #include <node.h>
-#include <node_buffer.h>
+#include <nan.h>
 #include <stdio.h>
 #include <vcclr.h>
 #include <vector>
@@ -34,18 +34,6 @@ using namespace Microsoft::Win32;
 // #define GC_DEBUG 1
 
 extern "C" void uv_run_nowait();
-
-namespace v8 {
-  namespace internal {
-    class Object {};
-  }
-  struct HeapStatsUpdate {};
-}
-Persistent<Function> bufferConstructor;
-
-struct wrapv8obj {
-  v8::Persistent<v8::Function> function;
-};
 
 #ifndef SHGSI_ICON
 typedef struct _SHSTOCKICONINFO
@@ -173,8 +161,8 @@ typedef enum SHSTOCKICONID
 SHSTDAPI SHGetStockIconInfo(SHSTOCKICONID siid, UINT uFlags, __inout SHSTOCKICONINFO *psii);
 #endif
 
-Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
-System::String^ exceptionV82stringCLR(Handle<v8::Value> exception);
+v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
+System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
 /**
@@ -397,7 +385,7 @@ void wrap_cb(char *data, void *hint) { }
 
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
-    HandleScope scope;
+    
     v8::String::Utf8Value utf8text(text);
     if (*utf8text)
         return gcnew System::String(*utf8text, 0, utf8text.length(), System::Text::Encoding::UTF8);
@@ -407,24 +395,23 @@ System::String^ stringV82CLR(Handle<v8::String> text)
 
 Handle<v8::String> stringCLR2V8(System::String^ text)
 {
-    HandleScope scope;
     if (text->Length > 0)
     {
       const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
-      v8::Handle<v8::String> v8str = v8::String::New(str);
+      v8::Local<v8::String> v8str = NanNew<v8::String>(str);
       Marshal::FreeHGlobal(IntPtr((void *)str));
-      return scope.Close(v8str);
+      return v8str;
     }
     else
-      return scope.Close(v8::String::Empty());
+      return v8::String::Empty(v8::Isolate::GetCurrent());
 }
 
-System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
+System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception)
 {
-  HandleScope scope;
+  
   if (exception->IsObject())
   {
-    Handle<Value> stack = exception->ToObject()->Get(v8::String::NewSymbol("stack"));
+	Handle<Value> stack = exception->ToObject()->Get(NanNew<v8::String>("stack"));
     if (stack->IsString())
       return gcnew System::String(stringV82CLR(stack->ToString()));
   }
@@ -433,22 +420,22 @@ System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
 
 Handle<Value> throwV8Exception(Handle<Value> exception)
 {
-  HandleScope scope;
-  return scope.Close(ThrowException(exception));
+	NanThrowError(exception);
+	return exception;
 }
 
-Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
+v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
 {
-  HandleScope scope;
-  Handle<v8::Value> jsdata;
+  
+  v8::Handle<v8::Value> jsdata;
 
   if (netdata == nullptr)
-      return scope.Close(Null());
+      return v8::Null(v8::Isolate::GetCurrent());
 
   System::Type^ type = netdata->GetType();
   if (type == System::String::typeid)         jsdata = stringCLR2V8((System::String^)netdata);
   else if (type == System::Char::typeid)      jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
-  else if (type == bool::typeid)              jsdata = v8::Boolean::New((bool)netdata);
+  else if (type == bool::typeid)              jsdata = NanNew<v8::Boolean>((bool)netdata);
   else if (type == System::Guid::typeid)      jsdata = stringCLR2V8(netdata->ToString());
   else if (type == System::DateTime::typeid)
   {
@@ -460,51 +447,49 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
     long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
     long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
     delete dt;
-    jsdata = v8::Date::New((double)value);
+    jsdata = v8::Date::New(v8::Isolate::GetCurrent(),(double)value);
   }
   else if (type == System::DateTimeOffset::typeid)  jsdata = stringCLR2V8(netdata->ToString());
-  else if (type == int::typeid)                     jsdata = v8::Integer::New((int)netdata);
-  else if (type == System::Int64::typeid)           jsdata = v8::Number::New(((System::IConvertible^)netdata)->ToDouble(nullptr));
-  else if (type == double::typeid)                  jsdata = v8::Number::New((double)netdata);
-  else if (type == float::typeid)                   jsdata = v8::Number::New((float)netdata);
+  else if (type == int::typeid)                     jsdata = NanNew<v8::Integer>((int)netdata);
+  else if (type == System::Int64::typeid)           jsdata = NanNew<v8::Number>(((System::IConvertible^)netdata)->ToDouble(nullptr));
+  else if (type == double::typeid)                  jsdata = NanNew<v8::Number>((double)netdata);
+  else if (type == float::typeid)                   jsdata = NanNew<v8::Number>((float)netdata);
   else if (type == cli::array<byte>::typeid)
   {
     cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
-    node::Buffer* slowBuffer = node::Buffer::New(buffer->Length);
+	v8::Handle<v8::Value> slowBuffer = NanNewBufferHandle(buffer->Length);
     if (buffer->Length > 0)
     {
       pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
       memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
-    }
-    Handle<v8::Value> args[] = { slowBuffer->handle_, v8::Integer::New(buffer->Length), v8::Integer::New(0) };
-    jsdata = bufferConstructor->NewInstance(3, args);
-    (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("array"), v8::Boolean::New(true));
+	}
+	(v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("array"), NanNew<v8::Boolean>(true));
+	jsdata = slowBuffer;
   } else {
 #ifdef GC_DEBUG
   CppClassCount++;
 #endif
     GCHandle handle = GCHandle::Alloc(netdata);
     void *ptr = GCHandle::ToIntPtr(handle).ToPointer();
-    node::Buffer *buf = node::Buffer::New((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
-    jsdata = buf->handle_;
+    v8::Handle<v8::Object> buf = NanNewBufferHandle((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
     if(type == System::IntPtr::typeid) {
       void *rawptr = ((System::IntPtr ^)netdata)->ToPointer();
-      node::Buffer *bufptr = node::Buffer::New((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
-      (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
-    }
+      v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
+      (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("rawpointer"), bufptr);
+	}
+	jsdata = buf;
   }
-  return scope.Close(jsdata);
+  return jsdata;
 }
 
 Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
 {
-    HandleScope scope;
-    Handle<v8::Object> result = v8::Object::New();
+    Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
     System::Type^ type = netdata->GetType();
 
     // Avoid stack overflow due to self-referencing reflection elements
     if (0 == System::String::Compare(type->FullName, "System.Reflection.RuntimeMethodInfo"))
-        return scope.Close(result);
+        return result;
 
     for each (FieldInfo^ field in type->GetFields(BindingFlags::Public | BindingFlags::Instance))
         result->Set(stringCLR2V8(field->Name), MarshalCLRToV8(field->GetValue(netdata)));
@@ -515,12 +500,12 @@ Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
         if (getMethod != nullptr && getMethod->GetParameters()->Length <= 0)
             result->Set(stringCLR2V8(property->Name), MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
     }
-    return scope.Close(result);
+    return result;
 }
 
-System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
+System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
 {
-    HandleScope scope;
+    
     if (jsdata->IsArray())
     {
       Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
@@ -544,7 +529,7 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
     else if (jsdata->IsNumber())      return jsdata->NumberValue();
     else if (jsdata->IsUndefined() || 
       jsdata->IsNull())               return nullptr;
-    else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(v8::String::NewSymbol("array"))->BooleanValue()) {
+    else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(NanNew<v8::String>("array"))->BooleanValue()) {
       Handle<v8::Object> jsbuffer = jsdata->ToObject();
       cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
       if (netbuffer->Length > 0) 
@@ -579,18 +564,17 @@ System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
       throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
 }
 
-Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
-{
-  HandleScope scope;
+v8::Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
+{ 
   Handle<v8::Object> result;
   Handle<v8::String> message;
   Handle<v8::String> name;
 
   if (exception == nullptr)
   {
-    result = v8::Object::New();
-    message = v8::String::New("Unrecognized exception thrown by CLR.");
-    name = v8::String::New("InternalException");
+    result = v8::Object::New(v8::Isolate::GetCurrent());
+    message = NanNew<v8::String>("Unrecognized exception thrown by CLR.");
+    name = NanNew<v8::String>("InternalException");
   }
   else
   {
@@ -615,12 +599,12 @@ Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
   // Construct an error that is just used for the prototype - not verify efficient
   // but 'typeof Error' should work in JavaScript
   result->SetPrototype(v8::Exception::Error( message));
-  result->Set(v8::String::NewSymbol("message"), message);
+  result->Set(NanNew<v8::String>("message"), message);
   
   // Recording the actual type - 'name' seems to be the common used property
-  result->Set(v8::String::NewSymbol("name"), name);
+  result->Set(NanNew<v8::String>("name"), name);
 
-  return scope.Close(result);
+  return result;
 }
 
 static int countFound = 0;
@@ -638,27 +622,26 @@ public:
     Delete();
     delete cppobject;
   }
-  void SetCallback(v8::Persistent<v8::Function> cb) {
-    callback = new wrapv8obj();
-    callback->function = cb;
+  void SetCallback(v8::Local<v8::Function> cb) {
+	callback = new NanCallback(cb);
+	  //js_callback.MakeWeak(handle->GetReference(), CLREventHandleCleanupJS);
   }
   void *GetReference() {
     return cppobject;
   }
   void PassThru(... cli::array<System::Object^>^ args) {
-    v8::HandleScope scope;
     std::vector<v8::Handle<v8::Value>> argv;
     v8::TryCatch try_catch;
 
     for(int i=0; i < args->Length; i++) 
       argv.push_back(MarshalCLRToV8(args[i]));
 
-    if (this->callback == NULL || this->callback->function.IsEmpty()) {
+    if (this->callback == NULL || this->callback->IsEmpty()) {
       throw gcnew System::Exception("CLR Fatal (PassThru): Callback has been garbage collected.");
       exit(1);
     } else {
       // invoke the registered callback function
-      this->callback->function->Call(v8::Context::GetCurrent()->Global(), args->Length, argv.data());
+	  callback->Call(args->Length, argv.data());
     }
     if (try_catch.HasCaught())
       try_catch.ReThrow();
@@ -666,8 +649,8 @@ public:
 
   void Delete() {
     if(callback) {
-      callback->function.Dispose();
-      callback->function.Clear();
+	  //callback->function.Dispose();
+      //callback->function.Clear();
       delete callback;
       callback = NULL;
       delete this;
@@ -675,7 +658,6 @@ public:
   }
 
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
-    v8::HandleScope scope;
     v8::Handle<v8::Value> argv[2];
 
     argv[0] = MarshalCLRToV8(sender);
@@ -683,12 +665,12 @@ public:
 
     v8::TryCatch try_catch;
 
-    if (this->callback == NULL || this->callback->function.IsEmpty()) {
+    if (this->callback == NULL || this->callback->IsEmpty()) {
       throw gcnew System::Exception("CLR Fatal (EventHandler): Callback has been garbage collected.");
       exit(1);
     } else {
       // invoke the registered callback function
-      this->callback->function->Call(v8::Context::GetCurrent()->Global(), 2, argv);
+      this->callback->Call(2, argv);
     }
     if (try_catch.HasCaught()) {
       throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
@@ -699,7 +681,7 @@ public:
     return id;
   }
 private:
-  wrapv8obj *callback;
+  NanCallback *callback;
   gcroot<CLREventHandler ^> * cppobject;
   int id;
 };
@@ -715,47 +697,42 @@ class CLR {
 public:
 
 #ifdef GC_DEBUG
-  static Handle<v8::Value> GetCppClassCount(const v8::Arguments& args) {
-    HandleScope scope;
-    return scope.Close(v8::Number::New(CppClassCount));
+  static NAN_METHOD(GetCppClassCount) {
+    NanReturnValue(v8::Number::New(CppClassCount));
   }
 #endif
 
-  static Handle<v8::Value> GetReferencedAssemblies(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetReferencedAssemblies) {
     try {
       array<System::Reflection::AssemblyName^>^ assemblies = System::Reflection::Assembly::GetExecutingAssembly()->GetReferencedAssemblies();
-      return scope.Close(MarshalCLRToV8(assemblies));
+	  NanReturnValue(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+		NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> GetLoadedAssemblies(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetLoadedAssemblies) {
     try {
       array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
-      return scope.Close(MarshalCLRToV8(assemblies));
+      NanReturnValue(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> LoadAssemblyFromMemory(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(LoadAssemblyFromMemory) {
     try {
       System::String^ assemblyName = stringV82CLR(args[0]->ToString());
       System::Reflection::Assembly^ assembly = System::Reflection::Assembly::Load(assemblyName);
       delete assemblyName;
-      return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
+      NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   /** Load an Execution of DOTNET CLR **/
-  static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(LoadAssembly) {
     try {
       System::String^ userpath = stringV82CLR(args[0]->ToString());
 
@@ -783,51 +760,47 @@ public:
       delete netFramework;
       delete framworkRegPath;
       delete userpath;
-      return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
+      NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
 
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> GetCLRType(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetCLRType) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
-      return scope.Close(MarshalCLRToV8(target->GetType()));
+      NanReturnValue(MarshalCLRToV8(target->GetType()));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
-  static Handle<v8::Value> GetStaticMemberTypes(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetStaticMemberTypes) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Static | 
         BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
-  static Handle<v8::Value> GetMemberTypes(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetMemberTypes) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Instance | 
         BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
-  static Handle<v8::Value> ExecNew(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecNew) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
 
@@ -839,14 +812,13 @@ public:
 
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecSetField) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[3]);
@@ -862,14 +834,13 @@ public:
       delete baseType;
       delete field;
 
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticField(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticField) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
@@ -884,14 +855,13 @@ public:
       System::Object^ rtn = fieldinfo->GetValue(nullptr);
       delete fieldinfo;
       delete field;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetField(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetField) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
@@ -908,14 +878,13 @@ public:
       delete baseType;
       delete field;
 
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticMethodObject) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ method = stringV82CLR(args[1]->ToString());
@@ -931,14 +900,13 @@ public:
 
       delete method;
       delete cshargs;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetMethodObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetMethodObject) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ method = stringV82CLR(args[1]->ToString());
@@ -955,9 +923,9 @@ public:
           // be reflected types we'll try jut a name match.
           MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
           if(rtnl == nullptr)
-            return scope.Close(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
+            NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
           else
-            return scope.Close(MarshalCLRToV8(rtnl));
+            NanReturnValue(MarshalCLRToV8(rtnl));
         }
       }
 
@@ -967,28 +935,26 @@ public:
         cshargs,
         nullptr);
       delete method;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticPropertyObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticPropertyObject) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
       PropertyInfo^ rtn = target->GetProperty(property,  
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
       delete property;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetPropertyObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetPropertyObject) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
@@ -996,21 +962,20 @@ public:
         PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
         delete property;
-        return scope.Close(MarshalCLRToV8(rtn));
+        NanReturnValue(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
         delete property;
-        return scope.Close(MarshalCLRToV8(rtn));
+        NanReturnValue(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated.
-  static Handle<v8::Value> ExecMethodObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecMethodObject) {
     try {
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
       System::Object^ target = MarshalV8ToCLR(args[1]);
@@ -1022,49 +987,45 @@ public:
 
       System::Object^ rtn = method->Invoke(target, cshargs);
   
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecPropertyGet(const v8::Arguments &args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecPropertyGet) {
     try {
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
-      return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
+      NanReturnValue(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecPropertySet) {
     try {
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
       prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecSetProperty) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[2]);
       System::String^ field = stringV82CLR(args[1]->ToString());
       target->GetType()->GetProperty(field)->SetValue(target, value);
       delete field;
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticProperty(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticProperty) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
@@ -1072,14 +1033,13 @@ public:
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
       delete property;
       delete target;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetProperty(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetProperty) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
@@ -1088,19 +1048,18 @@ public:
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
         delete property;
         delete target;
-        return scope.Close(MarshalCLRToV8(rtn));
+        NanReturnValue(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
-        return scope.Close(MarshalCLRToV8(rtn));
+        NanReturnValue(MarshalCLRToV8(rtn));
       }
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecStaticMethod(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecStaticMethod) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       int argSize = args.Length() - 2;
@@ -1120,14 +1079,13 @@ public:
       delete cshargs;
       delete type;
       delete method;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecMethod(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecMethod) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       int argSize = args.Length() - 2;
@@ -1146,14 +1104,13 @@ public:
       delete cshargs;
       delete type;
       delete method;
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecMethodObjectAsync(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecMethodObjectAsync) {
     try {
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
       System::Object^ target = MarshalV8ToCLR(args[1]);
@@ -1167,10 +1124,10 @@ public:
       System::ComponentModel::BackgroundWorker^ worker = gcnew System::ComponentModel::BackgroundWorker();
       worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(del, &(TintInterop::AsyncEventDelegate::DoWorkHandler));
       worker->RunWorkerAsync();
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } 
     catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -1179,24 +1136,21 @@ public:
       uv_run_nowait();
   }
 
-  static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecAddEvent) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ event = stringV82CLR(args[1]->ToString());
       System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
       v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
       CLREventHandler ^handle = gcnew CLREventHandler();
-      Persistent<Function> js_callback = Persistent<Function>::New(callback);
-      handle->SetCallback(js_callback);
-      js_callback.MakeWeak(handle->GetReference(), CLREventHandleCleanupJS);
+	  handle->SetCallback(callback);
       System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
       System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
       eInfo->AddEventHandler(target, d);
 
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -1207,27 +1161,26 @@ namespace IEWebBrowserFix {
   public ref class ScriptInterface
   {
   public:
-    ScriptInterface(v8::Persistent<v8::Function> cb) {
-      callback = new wrapv8obj();
-      callback->function = cb;
+    ScriptInterface(v8::Local<v8::Function> cb) {
+      callback = new NanCallback(cb);
+      //callback->function = cb;
     }
     
     [System::Runtime::InteropServices::ComVisibleAttribute(true)]
     void postMessageBack(System::String^ str)
     {
-      v8::HandleScope scope;
       v8::Handle<v8::Value> argv[1];
 
       argv[0] = MarshalCLRToV8(str);
 
       v8::TryCatch try_catch;
 
-      if (this->callback->function.IsEmpty()) {
+      if (this->callback->IsEmpty()) {
         throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
         abort();
       } else {
         // invoke the registered callback function
-        this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
+        this->callback->Call(1, argv);
       }
       if (try_catch.HasCaught()) {
         throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
@@ -1236,14 +1189,13 @@ namespace IEWebBrowserFix {
     }
 
   private:
-    wrapv8obj *callback;
+	NanCallback *callback;
 
   };
 
-  static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(CreateScriptInterface) {
     v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
-    return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
+    NanReturnValue(MarshalCLRToV8(gcnew ScriptInterface(callback)));
   }
 
   static void SetBrowserFeatureControlKey(System::Security::Permissions::RegistryPermission^ perms, System::String^ feature, System::String^ fileName, DWORD value) {
@@ -1309,8 +1261,8 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   // values for anything outside of our application.
   IEWebBrowserFix::SetBrowserFeatureControl();
 
-  bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
-      Context::GetCurrent()->Global()->Get(v8::String::New("Buffer"))));
+  //bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
+  //    Context::GetCurrent()->Global()->Get(v8::String::New("Buffer"))));
 
   // OLD, non-optimized execution methods.
   NODE_SET_METHOD(target, "execNew", CLR::ExecNew);

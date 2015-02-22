@@ -6,14 +6,15 @@
 #define _WIN32_WINNT 0x0600
 #endif
 
-#include <node.h>
+#include "node.cc" // this is a hack to get at node's internal globals.
+#include <tint_version.h>
+
 #include <stdlib.h>
 #include <io.h>
 #include <fcntl.h>
 #include <windows.h>
+#include <nan.h>
 #include <node_javascript.h>
-#include <node_string.h>
-#include "v8_typed_array.h"
 #if HAVE_OPENSSL
 # include "node_crypto.h"
 #endif
@@ -32,9 +33,11 @@ static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
 static char **init_argv;
+static int code;
 
 v8::Handle<v8::Object> process_l;
-v8::Persistent<v8::Object> bridge;
+v8::Handle<v8::Object> bridge;
+node::Environment *env;
 
 DWORD mainThreadId = 0;
 
@@ -50,26 +53,36 @@ extern "C" void CLR_Init(v8::Handle<v8::Object> target);
 
 void uv_noop(uv_async_t* handle, int status) {}
 
-v8::Handle<v8::Value> init_bridge(const v8::Arguments& args) {
-  v8::HandleScope scope;
-  v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New();
-  bridge_template->SetClassName(v8::String::NewSymbol("bridge"));
-  bridge = v8::Persistent<v8::Object>::New(bridge_template->GetFunction()->NewInstance());
-  process_l->Set(v8::String::NewSymbol("bridge"), bridge);
+NAN_METHOD(InitBridge) {
+	NanScope();
+	v8::Local<v8::Object> bridge = NanNew<v8::Object>();
+	process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
+	FFI::Init(bridge);
+	REF::Init(bridge);
+	NanReturnValue(NanNew<v8::Object>());
+}
+
+/*
+NAN_METHOD(init_bridge) {
+  v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New(v8::Isolate::GetCurrent());
+  bridge_template->SetClassName(NanNew<v8::String>("bridge"));
+  bridge = bridge_template->GetFunction()->NewInstance();
+  process_l->Set(NanNew<v8::String>("bridge"), bridge);
   FFI::Init(bridge);
   REF::Init(bridge);
   CLR_Init(bridge);
-  return v8::Object::New();
-}
+  NanReturnValue(NanNew<v8::Object>());
+}*/
 
 void uv_event(void *info) {
 
   while (!embed_closed) {
+    uv_update_time(env->event_loop());
     // Unlike Unix, in which we can just rely on one backend fd to determine
     // whether we should iterate libuv loop, on Window, IOCP is just one part
     // of the libuv loop, we should also check whether we have other types of
     // events.
-    uv_loop_t* loop = uv_default_loop();
+    uv_loop_t* loop = env->event_loop();
     bool block = loop->idle_handles == NULL &&
                  loop->pending_reqs_tail == NULL &&
                  loop->endgame_handles == NULL &&
@@ -84,7 +97,7 @@ void uv_event(void *info) {
       OVERLAPPED_ENTRY overlappeds[128];
       ULONG count;
 
-      DWORD timeout = uv_get_poll_timeout(loop);
+      DWORD timeout = uv_backend_timeout(loop);
       if(timeout == INFINITE) {
         timeout = 15;
       } else if (timeout > 100) {
@@ -130,24 +143,35 @@ void uv_event(void *info) {
 }
 
 void node_load() {
+  process_l = env->process_object();
   // Set version Information
-  process_l->Get(v8::String::NewSymbol("versions"))->ToObject()->Set(v8::String::NewSymbol("tint"), v8::String::NewSymbol(TINT_VERSION));
+  process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
   // Set whether we're in a packaged or non-packaged environment.
-  process_l->Set(v8::String::NewSymbol("packaged"), v8::Boolean::New(packaged));
+  process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
   // Register the app:// schema.
   InitAppRequest();
   // Register the initial bridge: C++/C/C# (CLR) dotnet
-  NODE_SET_METHOD(process_l, "initbridge", init_bridge);
+  NODE_SET_METHOD(process_l, "initbridge", InitBridge);
 
   // The dummy handle prevents UV from exiting and throwing incorrect
   // timeout values, its necessary since uv can't see many of the app
   // events to keep it assuming something else will come and return -1
   // from uv_backend_timeout.
   uv_async_t dummy_uv_handle_;
-  uv_async_init(uv_default_loop(), &dummy_uv_handle_, uv_noop);
+  uv_async_init(uv_default_loop(), &dummy_uv_handle_, (uv_async_cb)uv_noop);
 
   // Load node and begin processing.
-  node::Load(process_l);
+  // node::Load(process_l);
+  
+  // Start debug agent when argv has --debug
+  if (node::use_debug_agent)
+	  node::StartDebug(env, node::debug_wait_connect);
+
+  node::LoadEnvironment(env);
+
+  // Enable debugger
+  if (node::use_debug_agent)
+	  node::EnableDebug(env);
 
   // This must post after the node::Load otherwise we will get infinte
   // timeouts from libuv and if there isn't file descirptor setup yet
@@ -167,12 +191,10 @@ extern "C" void uv_run_nowait() {
 }
 
 void node_terminate() {
-  node::EmitExit(process_l);
+ // node::EmitExit(process_l);
   embed_closed = 1;
-  uv_sem_post(&embed_sem);
-  uv_run(uv_default_loop(), UV_RUN_ONCE);
-  uv_thread_join(&embed_thread);
-  uv_sem_destroy(&embed_sem);
+  EmitExit(env);
+  RunAtExit(env);
 }
 
 static char **copy_argv(int argc, char **argv) {
@@ -240,6 +262,58 @@ int main(int argc, char *argv[]) {
 
   mainThreadId = GetCurrentThreadId();
 
+
+  const char* replaceInvalid = getenv("NODE_INVALID_UTF8");
+
+  if (replaceInvalid == NULL)
+	  node::WRITE_UTF8_FLAGS |= v8::String::REPLACE_INVALID_UTF8;
+
+  assert(init_argc > 0);
+
+  // Hack around with the argv pointer. Used for process.title = "blah".
+  argv = uv_setup_args(init_argc, init_argv);
+
+  // This needs to run *before* V8::Initialize().  The const_cast is not
+  // optional, in case you're wondering.
+  int exec_argc;
+  const char** exec_argv;
+  node::Init(&init_argc, const_cast<const char**>(init_argv), &exec_argc, &exec_argv);
+
+  // V8 on Windows doesn't have a good source of entropy. Seed it from
+  // OpenSSL's pool.
+  v8::V8::SetEntropySource(node::crypto::EntropySource);
+
+  v8::V8::Initialize();
+  node::node_is_initialized = true;
+  {
+	  v8::Locker locker(node::node_isolate);
+	  v8::Isolate::Scope isolate_scope(node::node_isolate);
+	  v8::HandleScope handle_scope(node::node_isolate);
+	  v8::Local<v8::Context> context = v8::Context::New(node::node_isolate);
+	  env = node::CreateEnvironment(
+		  node::node_isolate,
+		  uv_default_loop(),
+		  context,
+		  init_argc,
+		  init_argv,
+		  exec_argc,
+		  exec_argv);
+	  v8::Context::Scope context_scope(context);
+
+	  env->Dispose();
+	  env = NULL;
+  }
+
+  CHECK_NE(node::node_isolate, NULL);
+  node::node_isolate->Dispose();
+  node::node_isolate = NULL;
+  v8::V8::Dispose();
+
+  delete[] exec_argv;
+  exec_argv = NULL;
+
+  return code;
+  /*
   // This needs to run *before* V8::Initialize()
   node::Init(init_argc, init_argv);
 
@@ -270,6 +344,7 @@ int main(int argc, char *argv[]) {
   // Clean up. Not strictly necessary.
   v8::V8::Dispose();
 #endif
+  */
 }
 
 
