@@ -59,6 +59,7 @@ NAN_METHOD(InitBridge) {
 	process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
 	FFI::Init(bridge);
 	REF::Init(bridge);
+  CLR_Init(bridge);
 	NanReturnValue(NanNew<v8::Object>());
 }
 

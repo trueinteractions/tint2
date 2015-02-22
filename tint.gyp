@@ -715,28 +715,38 @@
       'toolsets': ['host'],
       'actions': [
         {
-          'action_name': 'node_js2c',
+          'action_name': 'tint_js2c',
           'inputs': [
             '<@(library_files)',
-            './libraries/node/config.gypi',
+            'libraries/node/config.gypi'
           ],
           'outputs': [
             '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
           ],
           'conditions': [
-            [ 'node_use_dtrace=="false" and node_use_etw=="false"', {
-              'inputs': [ './libraries/node/src/notrace_macros.py' ]
+            ['OS=="mac"',{
+              'inputs': ['<@(mac_library_files)'],
             }],
+            ['OS=="win"',{
+              'inputs': ['<@(win_library_files)'],
+            }],
+            [ 'node_use_dtrace=="false"'
+              ' and node_use_etw=="false"'
+              ' and node_use_systemtap=="false"',
+            {
+                'inputs': ['libraries/node/src/notrace_macros.py']
+              }
+              ],
             [ 'node_use_perfctr=="false"', {
-              'inputs': [ './libraries/node/src/perfctr_macros.py' ]
-            }]
+              'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
+            }],
           ],
-          'action': [
-            '<(python)',
-            './libraries/node/tools/js2c.py',
-            '<@(_outputs)',
-            '<@(_inputs)',
-          ],
+              'action': [
+                '<(python)',
+                'tools/tint_js2c.py',
+                '<@(_outputs)',
+                '<@(_inputs)',
+              ],
         },
       ],
     }, # end tint_js2c
