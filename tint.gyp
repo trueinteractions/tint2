@@ -327,7 +327,7 @@
                 './libraries/node/deps/openssl/openssl.gyp:openssl',
 
                 # For tests
-                './libraries/node/deps/openssl/openssl.gyp:openssl-cli',
+                # './libraries/node/deps/openssl/openssl.gyp:openssl-cli',
               ],
               # Do not let unused OpenSSL symbols to slip away
               'xcode_settings': {
