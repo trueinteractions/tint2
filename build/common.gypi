@@ -112,7 +112,7 @@
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
-            'WholeProgramOptimization': 'true',
+            'WholeProgramOptimization': 'false',
             'OmitFramePointers': 'true',
             'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
@@ -122,15 +122,14 @@
             ],
           },
           'VCLibrarianTool': {
+            'LinkTimeCodeGeneration': 'true',
             'AdditionalOptions': [
-              '/LTCG', # link time code generation
             ],
           },
           'VCLinkerTool': {
-            'LinkTimeCodeGeneration': 1, # link-time code generation
             'OptimizeReferences': 2, # /OPT:REF
             'EnableCOMDATFolding': 2, # /OPT:ICF
-            'LinkIncremental': 1, # disable incremental linking
+            'LinkIncremental': 1,
           },
         },
       }

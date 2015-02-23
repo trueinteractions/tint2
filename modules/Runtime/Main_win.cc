@@ -6,6 +6,7 @@
 #define _WIN32_WINNT 0x0600
 #endif
 
+#include "win/req-inl.h" // this must be included before node is.
 #include "node.cc" // this is a hack to get at node's internal globals.
 #include <stdlib.h>
 #include <io.h>
@@ -16,7 +17,6 @@
 # include "node_crypto.h"
 #endif
 #include <tint_version.h>
-#include "win/req-inl.h"
 
 static bool packaged = false;
 static int embed_closed = 0;

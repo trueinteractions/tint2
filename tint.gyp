@@ -545,11 +545,13 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
+            'WholeProgramOptimization': 'false', # very slow builds with this :(
             'AdditionalIncludeDirectories': [
               '$(newincludepath)'
             ]
           },
           'VCLinkerTool': {
+            'LinkIncremental': 1,
             'RuntimeLibrary':'>(runtime)',
             'conditions': [
               ['target_arch=="x64"', {
@@ -563,6 +565,9 @@
                 ]
               }]
             ]
+          },
+          'VCLibrarianTool': {
+            'LinkTimeCodeGeneration': 'true',
           }
         }
       }
