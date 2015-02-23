@@ -293,7 +293,7 @@
       'defines': [
         'NODE_WANT_INTERNALS=1',
         'ARCH="<(target_arch)"',
-        'PLATFORM="<(OS)"',
+        #'PLATFORM="<(OS)"', # we use conditions to define which OS value to use, GYP changes them, creating havok.
         'NODE_TAG="<(node_tag)"',
         'NODE_V8_OPTIONS="<(node_v8_options)"',
       ],
@@ -511,7 +511,10 @@
           'SubSystem': 1,
           'AdditionalDependencies':[ ],
           'AdditionalOptions': [
-            '/IGNORE:4098',
+            '/IGNORE:4248', # forward-declarations between .NET and native C++ spit out
+                            # a very ominous (useless) warning that if the native C++ type
+                            # uses the same symbols as the .NET type and the .NET type is
+                            # managed all hell will breakout.
             '/CLRTHREADATTRIBUTE:STA',
           ],
           'conditions': [
@@ -542,14 +545,12 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'AdditionalOptions':['/wd4355'],
             'AdditionalIncludeDirectories': [
               '$(newincludepath)'
             ]
           },
           'VCLinkerTool': {
             'RuntimeLibrary':'>(runtime)',
-            'AdditionalOptions':['/IGNORE:4221'],
             'conditions': [
               ['target_arch=="x64"', {
                 'AdditionalLibraryDirectories':[
@@ -659,8 +660,9 @@
         },
         'VCCLCompilerTool': {
           'RuntimeTypeInfo': 'true',
-          'ExceptionHandling': 0,
-          'AdditionalOptions': [ '/CLR', '/EHa' ],
+          'AdditionalOptions': [ 
+            '/CLR',   # enable cross-talk with .NET assemblies.
+          ]
         },
       }
     },

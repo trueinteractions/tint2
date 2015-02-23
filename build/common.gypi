@@ -65,13 +65,14 @@
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
+            'MultiProcessorCompilation': 'true',
             'RuntimeLibrary': 3, # static debug
             'Optimization': 0, # /Od, no optimization
             'MinimalRebuild': 'false',
             'OmitFramePointers': 'false',
             #'BasicRuntimeChecks': 3, # /RTC1
             'RuntimeTypeInfo': 'true',
-            'ExceptionHandling': 0,
+            'ExceptionHandling': 2, # /EHa
           },
           'VCLinkerTool': {
             'LinkIncremental': 2, # enable incremental linking
@@ -108,6 +109,7 @@
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
+            'MultiProcessorCompilation': 'true',
             'RuntimeLibrary': 2, # static release 
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
@@ -116,11 +118,7 @@
             'OmitFramePointers': 'true',
             'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
-            'ExceptionHandling': 0,
-            'AdditionalOptions': [
-              '/MP', # compile across multiple CPUs
-              # '/wd4506', '/wd4267', '/wd4244', '/wd4344', '/wd4800', '/wd4355', '/wd4005',
-            ],
+            'ExceptionHandling': 2, # /EHa
           },
           'VCLibrarianTool': {
             'AdditionalOptions': [
@@ -147,7 +145,7 @@
         'DebugInformationFormat': 3, # Generate a PDB
         'WarningLevel': 3,
         'BufferSecurityCheck': 'true',
-        'ExceptionHandling': 1, # /EHsc
+        'ExceptionHandling': 2, # /EHa
         'SuppressStartupBanner': 'true',
         'WarnAsError': 'false',
       },
