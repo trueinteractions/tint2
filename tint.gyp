@@ -201,11 +201,13 @@
       'type': 'executable',
 
       'dependencies': [
+        'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host',
         'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
         'tint_js2c#host',
         'ffi_bindings',
       ],
+
       'include_dirs': [
         'libraries/node/src',
         'libraries/node/tools/msvs/genfiles',
@@ -219,6 +221,10 @@
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
       'sources': [
+        # not sure why but from upstream..
+        'libraries/node/deps/v8/include/v8.h',
+        'libraries/node/deps/v8/include/v8-debug.h',
+        # regular includes.
         'libraries/node/src/async-wrap.cc',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
@@ -415,16 +421,6 @@
             'libraries/node/tools/msvs/genfiles/node_perfctr_provider.rc',
           ]
         } ],
-        [ 'node_shared_v8=="false"', {
-          'include_dirs': [ 
-            'libraries/node/deps/v8/include/'
-          ],
-          'sources': [
-            'libraries/node/deps/v8/include/v8.h',
-            'libraries/node/deps/v8/include/v8-debug.h',
-          ],
-          'dependencies': [ 'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host' ],
-        }],
         [ 'node_shared_zlib=="false"', {
           'dependencies': [ 'libraries/node/deps/zlib/zlib.gyp:zlib' ],
         }],
