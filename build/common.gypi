@@ -65,7 +65,6 @@
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'MultiProcessorCompilation': 'true',
             'RuntimeLibrary': 3, # static debug
             'Optimization': 0, # /Od, no optimization
             'MinimalRebuild': 'false',
@@ -109,7 +108,6 @@
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'MultiProcessorCompilation': 'true',
             'RuntimeLibrary': 2, # static release 
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
@@ -119,6 +117,9 @@
             'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
             'ExceptionHandling': 2, # /EHa
+            'AdditionalOptions': [
+              # '/MP', # compile across multiple CPUs
+            ],
           },
           'VCLibrarianTool': {
             'AdditionalOptions': [
