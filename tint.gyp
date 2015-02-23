@@ -201,9 +201,9 @@
       'type': 'executable',
 
       'dependencies': [
-        'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host',
         'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
+        'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host',
         'tint_js2c#host',
         'ffi_bindings',
       ],
