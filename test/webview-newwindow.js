@@ -21,6 +21,7 @@ function run($utils) {
   var webview = new WebView();
   mainWindow.appendChild(webview);
   webview.left = webview.right = webview.top = webview.bottom = 0;
+  
   webview.addEventListener('new-window', function(newWebView) {
     var newWindow = new Window();
     newWindow.visible = true;
@@ -37,10 +38,14 @@ function run($utils) {
   });
   $utils.assert(webview.location === null);
   var b = webview.boundsOnScreen;
+  //$utils.assert(webview.location === null);
+  
   webview.addEventListener('load', function() {
     webview.boundsOnWindowOfElement('#newwin', function(coords) {
       $utils.clickAt(b.x + coords.x, b.y + coords.y);
     });
+
+  //},1000)
   });
 
   webview.location = 'app://assets/webview-newwindow.html';

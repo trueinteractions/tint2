@@ -496,16 +496,16 @@ module.exports = (function() {
    * @description This will execute the passed in javascript in the window context of the top frame of the currently loaded page.  The result is
    *              passed back when the callback is ran. 
    */
-  WebView.prototype.execute = function(e, cb) {
+  WebView.prototype.execute = function(jscode, cb) {
     if(this.useWKWebView) {
-      this.nativeView('evaluateJavaScript', $(e.toString()), 'completionHandler', 
-        $(function(obj, result) {
-          if(cb) {
-            cb(result('description')('UTF8String').toString()); 
-          }
-        }.bind(this), ['v',['@','@']]));
+
+      var callback = null;
+      if(cb) {
+        callback = $(function(obj, result) { if(cb) { cb(result('description')('UTF8String').toString()); } }.bind(this), ['v',['@','@']]);
+      }
+      this.nativeView('evaluateJavaScript', $(jscode.toString()), 'completionHandler', callback);
     } else {
-      var result = this.nativeView('stringByEvaluatingJavaScriptFromString',$(e.toString()))('UTF8String').toString();
+      var result = this.nativeView('stringByEvaluatingJavaScriptFromString',$(jscode.toString()))('UTF8String').toString();
       if(cb) {
         cb(result);
       }
@@ -523,8 +523,7 @@ module.exports = (function() {
   //
   util.def(WebView.prototype, 'icon', 
     function() {
-      if(this.useWKWebView) {
-      } else {
+      if(!this.useWKWebView) {
         var ico = this.nativeView('mainFrameIcon');
         if(ico) {
           return util.makeURIFromNSImage(ico);
