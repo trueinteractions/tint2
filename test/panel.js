@@ -14,6 +14,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  application.exitAfterWindowsClose = false;
   var panel = new Panel();
   panel.visible = true;
   panel.title = "Hello";

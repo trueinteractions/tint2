@@ -4,41 +4,23 @@ module.exports = (function() {
   }
 
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
   function FileDialog(type) {
     var $dialog;
 
-    if(type == "save") { 
+    if(type === "save") { 
       $dialog = new $.Microsoft.Win32.SaveFileDialog();
     } else {
       $dialog = new $.Microsoft.Win32.OpenFileDialog();
     }
     var allowedFileTypes = null, 
         allowAnyFileType = true,
-        events = {},
         canChooseDirectories = false,
         message = "",
         prompt = "";
 
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item,index,arr) {
-          item.apply(null,args);
-        });
-      }
-    }
-
-    this.addEventListener = function(event, func) { 
-      if(!events[event]) {
-        events[event] = [];
-      } 
-      events[event].push(func);
-    }
-    this.removeEventListener = function(event, func) {
-      if(events[event] && events[event].indexOf(func) !== -1) {
-        events[event].splice(events[event].indexOf(func), 1);
-      }
-    }
+    util.defEvents(this);
 
     Object.defineProperty(this, "title", {
       get:function() { return $dialog.Title.toString(); },
@@ -116,7 +98,7 @@ module.exports = (function() {
       set:function(e) {
         if(type === "save" && e) {
           throw new Error('Save dialogs cannot ask for multiple file paths.');
-        } else if(type == "save" && !e) {
+        } else if(type === "save" && !e) {
           return;
         }
         $dialog.Multiselect = e ? true : false;
@@ -156,16 +138,16 @@ module.exports = (function() {
     this.open = function(z) {
       setTimeout(function() {
         if(!$dialog.ShowDialog(z ? z.native : undefined)) {
-          fireEvent('cancel');
+          this.fireEvent('cancel');
         } else {
-          fireEvent('select');
+          this.fireEvent('select');
         }
-      }, 100);
+      }.bind(this), 100);
     }
 
     //TODO: This is not supported "native" in windows.
     this.cancel = function() {
-      fireEvent('cancel');
+      this.fireEvent('cancel');
       // cannot be executed.
     }
   }

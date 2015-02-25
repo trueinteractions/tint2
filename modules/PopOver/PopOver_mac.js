@@ -3,7 +3,7 @@ module.exports = (function() {
   var $ = process.bridge.objc;
 
   function PopOver(options) {
-    var options = options || {};
+    options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
       ['popoverDidClose:', 'v@:@@', function(self, cmd, notif) { this.fireEvent('close'); }.bind(this)],
@@ -61,7 +61,7 @@ module.exports = (function() {
   });
 
   PopOver.prototype.open = function(container, side) {
-    var edge = side == 'left' ? $.NSMinXEdge : side == 'right' ? $.NSMaxXEdge : side == 'top' ? $.NSMinYEdge : $.NSMaxYEdge;
+    var edge = side === 'left' ? $.NSMinXEdge : side === 'right' ? $.NSMaxXEdge : side === 'top' ? $.NSMinYEdge : $.NSMaxYEdge;
     // The timeout is necessary, popover will not show if the view
     // has yet to complete its layout, give it a tick to calculate.
     setTimeout(function() {

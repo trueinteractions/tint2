@@ -26,7 +26,7 @@ function run($utils) {
   forwardButton.image = 'forward';
 
   mainWindow.appendChild(webView);
-  toolbar.appendChild([backButton, forwardButton, 'space', urlLocation, 'space']);
+  toolbar.appendChild([backButton, forwardButton,'space', urlLocation,'space']);
   mainWindow.toolbar = toolbar;
 
   mainWindow.titleVisible = false;
@@ -46,13 +46,12 @@ function run($utils) {
     webView.location = url;
   });
 
-  webView.addEventListener('load', function() { urlLocation.value = webView.location; });
-
+  webView.addEventListener('load', function() { 
+    urlLocation.value = webView.location;
+    $utils.ok();
+  });
   webView.top = webView.bottom = webView.left = webView.right = 0;
   webView.location = "https://www.google.com";
-  setTimeout(function() {
-    $utils.ok();
-  }, 500);
 }
 
 /**

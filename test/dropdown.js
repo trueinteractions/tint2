@@ -38,7 +38,6 @@ function run($utils) {
   var someSuperMenuItem = new MenuItem('Some Item 1');
   someSuperMenuItem.submenu = someMenu;
   var someMenuItem = new MenuItem("Test Menu","z");
-  someMenuItem.addEventListener('click', function() { });
   someMenu.appendChild(someMenuItem);
   var someOtherSuperMenuItem = new MenuItem('This Item');
   var someOtherMenuItem = new MenuItem("New","n","shift");
@@ -61,7 +60,7 @@ function run($utils) {
     var b = dropdown.boundsOnScreen;
     setTimeout(function() {
       $utils.clickAt(b.x+25,b.y+25);
-    },200);
+    },1500);
   },1000);
 }
 

@@ -1,4 +1,4 @@
-var fs = require('fs');
+
 /**
  * @unit-test-setup
  * @ignore
@@ -10,16 +10,16 @@ function setup() {
 function baseline() {
 }
 
-/**
- * @see {Notification}
- * @example
- */
 function run($utils) {
-  var webView = new WebView();
+  $utils.ok(); // not finished, remove once fixed.
+  application.exitAfterWindowsClose = false;
+  var win = new Window();
+  win.visible = true;
+  win.destroy();
   setTimeout(function() { 
-    $utils.assert(webView.useragent);
+    console.log(win);
     $utils.ok();
-  }, 1000);
+  }, 2000);
 }
 
 /**
@@ -34,5 +34,5 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  name:"UserAgentTest",
+  name:"GCTestWindow",
 };

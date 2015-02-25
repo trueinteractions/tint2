@@ -103,7 +103,7 @@ module.exports = (function() {
    */
   Object.defineProperty(Split.prototype, 'orientation', {
     get:function() { return this.nativeView('isVertical') ? "vertical" : "horizontal"; },
-    set:function(e) { this.nativeView('setVertical', e == "vertical" ? $.YES : $.NO); }
+    set:function(e) { this.nativeView('setVertical', e === "vertical" ? $.YES : $.NO); }
   });
 
   /**
@@ -118,15 +118,15 @@ module.exports = (function() {
   Object.defineProperty(Split.prototype, 'style', {
     get:function() {
       var s = this.nativeView('dividerStyle');
-      if(s == $.NSSplitViewDividerStyleThick) return "thick";
-      else if (s == $.NSSplitViewDividerStyleThin) return "thin";
-      else if (s == $.NSSplitViewDividerStylePaneSplitter) return "pane";
+      if(s === $.NSSplitViewDividerStyleThick) return "thick";
+      else if (s === $.NSSplitViewDividerStyleThin) return "thin";
+      else if (s === $.NSSplitViewDividerStylePaneSplitter) return "pane";
       else return "unknown";
     },
     set:function(e) { 
-      if(e == "thick") this.nativeView('setDividerStyle', $.NSSplitViewDividerStyleThick);
-      else if (e == "thin") this.nativeView('setDividerStyle', $.NSSplitViewDividerStyleThin);
-      else if (e == "pane") this.nativeView('setDividerStyle', $.NSSplitViewDividerStylePaneSplitter);
+      if(e === "thick") this.nativeView('setDividerStyle', $.NSSplitViewDividerStyleThick);
+      else if (e === "thin") this.nativeView('setDividerStyle', $.NSSplitViewDividerStyleThin);
+      else if (e === "pane") this.nativeView('setDividerStyle', $.NSSplitViewDividerStylePaneSplitter);
     }
   });
 

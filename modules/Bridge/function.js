@@ -37,7 +37,7 @@ function Function (retType, argTypes, abi) {
   // instances)
   this.retType = ref.coerceType(retType)
   this.argTypes = argTypes.map(ref.coerceType)
-  this.abi = null == abi ? bindings.FFI_DEFAULT_ABI : abi
+  this.abi = null === abi ? bindings.FFI_DEFAULT_ABI : abi
 }
 
 /**
@@ -97,7 +97,7 @@ Function.prototype.get = function get (buffer, offset) {
 
 Function.prototype.set = function set (buffer, offset, value) {
   var ptr
-  if ('function' == typeof value) {
+  if ('function' === typeof value) {
     ptr = this.toPointer(value)
   } else if (Buffer.isBuffer(value)) {
     ptr = value

@@ -44,14 +44,22 @@ module.exports = (function() {
    * @see removeChild
    */
   Container.prototype.appendChild = function(control) {
+    if(this === control) {
+      throw new Error('A control cannot be added as a child to itself.');
+    }
     if(Array.isArray(control)) {
       for(var i=0; i < control.length; i++) {
         this.appendChild(control[i]);
       }
     } else {
+      control = this.fireEvent('before-child-attached', [control]) || control;
       this.private.children.push(control);
-      this.nativeView('addSubview',control.nativeView);
-      control.fireEvent('parent-attached', [this]);
+      if(control.nativeView && this.nativeView) {
+        this.nativeView('addSubview',control.nativeView);
+      }
+      if(control.fireEvent) {
+        control.fireEvent('parent-attached', [this]);
+      }
       this.fireEvent('child-attached', [control]);
     }
   };
@@ -64,12 +72,16 @@ module.exports = (function() {
    * @see removeChild
    */
   Container.prototype.removeChild = function(control) {
-    this.fireEvent('remove', [control]);
+    control = this.fireEvent('before-child-dettached', [control]) || control;
     if(this.private.children.indexOf(control) !== -1) {
       this.private.children.splice(this.private.children.indexOf(control),1);
     }
-    control.nativeView('removeFromSuperview');
-    control.fireEvent('parent-dettached', [this]);
+    if(control.nativeView) {
+      control.nativeView('removeFromSuperview');
+    }
+    if(control.fireEvent) {
+      control.fireEvent('parent-dettached', [this]);
+    }
     this.fireEvent('child-dettached', [control]);
   };
 

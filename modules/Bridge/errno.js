@@ -17,10 +17,10 @@ var DynamicLibrary = require('dynamic_library')
   , int = ref.types.int
   , intPtr = ref.refType(int)
 
-if (process.platform == 'darwin' || process.platform == 'mac') {
+if (process.platform === 'darwin' || process.platform === 'mac') {
   var __error = DynamicLibrary().get('__error')
   errnoPtr = ForeignFunction(__error, intPtr, [])
-} else if (process.platform == 'win32') {
+} else if (process.platform === 'win32') {
   var _errno = DynamicLibrary('msvcrt.dll').get('_errno')
   errnoPtr = ForeignFunction(_errno, intPtr, [])
 } else {  // linux, sunos, etc.

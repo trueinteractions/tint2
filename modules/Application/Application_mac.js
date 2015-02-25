@@ -8,11 +8,11 @@
 
   require('Bridge');
   var $ = process.bridge.objc;
-  var util = require('Utilities');
   process.bridge.objc.import('Foundation',0);
   process.bridge.objc.import('Cocoa',0);
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
+  var util = require('Utilities');
   
   // Help with garbage collection, this allows objective-c to reclaim
   // objective-c objects once we're finished with them. The FFI bridge in
@@ -21,9 +21,6 @@
   // to decremenet the number of handles.  Once no handle exists, objc decides
   // whether it should be reclaimed natively.
   process.bridge.objc.NSAutoreleasePool('alloc')('init');
-
-  // Include the app schema. app:// registers on NSURL and for node require().
-  require('AppSchema')(process.cwd());
 
   // Register our font factory, this is a "boot" step for any app using fonts.
   require('FontInternals');
@@ -40,10 +37,7 @@
    * @see process
    */
   function Application() {
-    var events = {}, 
-        name = "", badgeText = "", 
-        dockmenu = null, icon = "",
-        terminateWhenLastWindowClosed = $.YES;
+    var name = "", badgeText = "", dockmenu = null, icon = "", terminateWhenLastWindowClosed = $.YES;
 
     var $app = $.NSApplication('sharedApplication');
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
@@ -65,17 +59,9 @@
     });
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
-    $app('setDelegate',delegate);
+    $app('setDelegate', delegate);
 
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
-
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item) { 
-          item.apply(null,args); 
-        });
-      }
-    }
 
     /**
      * @method addEventListener
@@ -86,13 +72,6 @@
      *              parameter is the name of the event, the second parameter is the function
      *              to call when the event happens (e.g., a callback).
      */
-    this.addEventListener = function(event, func) { 
-      if(!events[event]) {
-        events[event] = []; 
-      }
-      events[event].push(func); 
-    };
-
     /**
      * @method removeEventListener
      * @param {string} eventName The name of the application event to stop listening to.
@@ -102,11 +81,7 @@
      *              parameter is the name of the event, the second parameter is the function
      *              that was originally given as the callback for addEventListener.
      */
-    this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) !== -1) {
-        events[event].splice(events[event].indexOf(func), 1); 
-      }
-    };
+    util.defEvents(this);
 
     // unused, stub to help move us a bit closer to a standard spec
     this.launch = function() { fireEvent('launch'); };
@@ -135,6 +110,9 @@
     this.resource = function(path) {
       if(path.indexOf('app:///') === -1) {
         path = 'app:///' + path.replace("app://","");
+      }
+      if(path === "app:///blank-page-appschema.html") {
+        return new Buffer("<!doctype html>\n<html>\n<body></body></html>","utf8");
       }
       var url = $.NSURL('URLWithString',$(path.toString()));
       var data = $.NSData('dataWithContentsOfURL',url);
@@ -330,10 +308,23 @@
      */
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
-
-    $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
+    /**
+     * @member background
+     * @type {boolean}
+     * @memberof process
+     * @description If process.background is set to true prior to using require('Common') or require('Application')
+     *              the application is launched as a background application (e.g., does not appear in the dock or
+     *              taskbar.)
+     * @see Window
+     */
+    if(!process.background) {
+      $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
+    }
     $app('activateIgnoringOtherApps', true);
   }
 
   global.application = new Application();
+
+  // Include the app schema. app:// registers on NSURL and for node require().
+  require('AppSchema');
 })();

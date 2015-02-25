@@ -9,16 +9,10 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var utils = require('Utilities');
 
-  function wpfDeviceToLogicalPx(w,p) {
-    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
-    return t.Transform(p);
-  }
-
   function Control(options) {
     options = options || {};
     options.delegates = options.delegates || [];
 
-  
     this.nativeView = new this.nativeViewClass();
     if(this.nativeClass === this.nativeViewClass) {
       this.native = this.nativeView;
@@ -41,53 +35,41 @@ module.exports = (function() {
       if(options.nonStandardEvents) {
         return;
       }
-      var rightMouseUp = function() { this.fireEvent('rightmouseup'); }.bind(this);
-      var rightMouseDown = function() { this.fireEvent('rightmousedown'); }.bind(this);
-      var leftMouseDown =  function() { this.fireEvent('leftmousedown'); }.bind(this);
-      var leftMouseUp = function() { this.fireEvent('leftmouseup'); }.bind(this);
-      var mouseUp = function() {
+      this.private.rightMouseUp = function() { this.fireEvent('rightmouseup'); }.bind(this);
+      this.private.rightMouseDown = function() { this.fireEvent('rightmousedown'); }.bind(this);
+      this.private.leftMouseDown =  function() { this.fireEvent('leftmousedown'); }.bind(this);
+      this.private.leftMouseUp = function() { this.fireEvent('leftmouseup'); }.bind(this);
+      this.private.mouseUp = function() {
         setTimeout(function() {
           this.fireEvent('mouseup');
           this.fireEvent('click');
         }.bind(this),0);
       }.bind(this);
-      var mouseDown = function() { 
+      this.private.mouseDown = function() { 
         this.fireEvent('private-pre-mousedown');
         this.fireEvent('mousedown'); 
       }.bind(this);
-      var mouseMove = function() { this.fireEvent('mousemove'); }.bind(this);
-      var mouseEnter = function() { this.fireEvent('mouseenter'); }.bind(this);
-      var mouseLeave = function() { this.fireEvent('mouseexit'); }.bind(this);
-      var keyDown = function() { 
+      this.private.mouseMove = function() { this.fireEvent('mousemove'); }.bind(this);
+      this.private.mouseEnter = function() { this.fireEvent('mouseenter'); }.bind(this);
+      this.private.mouseLeave = function() { this.fireEvent('mouseexit'); }.bind(this);
+      this.private.keyDown = function() { 
         setTimeout(function() { this.fireEvent('keydown'); }.bind(this),0);
       }.bind(this);
-      var keyUp = function() { 
+      this.private.keyUp = function() { 
         setTimeout(function() { this.fireEvent('keyup'); }.bind(this),0);
       }.bind(this);
 
-      this.native.addEventListener('MouseRightButtonUp', rightMouseUp);
-      this.native.addEventListener('MouseRightButtonDown', rightMouseDown);
-      this.native.addEventListener('MouseLeftButtonDown', leftMouseDown);
-      this.native.addEventListener('MouseLeftButtonUp', leftMouseUp);
-      this.native.addEventListener('PreviewMouseUp', mouseUp);
-      this.native.addEventListener('PreviewMouseDown', mouseDown);
-      this.native.addEventListener('MouseMove', mouseMove);
-      this.native.addEventListener('MouseEnter', mouseEnter);
-      this.native.addEventListener('MouseLeave', mouseLeave);
-      this.native.addEventListener('KeyDown', keyDown);
-      this.native.addEventListener('KeyUp', keyUp);
-
-      this.private.callbacks.push(rightMouseUp);
-      this.private.callbacks.push(rightMouseDown);
-      this.private.callbacks.push(leftMouseDown);
-      this.private.callbacks.push(leftMouseUp);
-      this.private.callbacks.push(mouseUp);
-      this.private.callbacks.push(mouseDown);
-      this.private.callbacks.push(mouseMove);
-      this.private.callbacks.push(mouseEnter);
-      this.private.callbacks.push(mouseLeave);
-      this.private.callbacks.push(keyDown);
-      this.private.callbacks.push(keyUp);
+      this.native.addEventListener('MouseRightButtonUp', this.private.rightMouseUp);
+      this.native.addEventListener('MouseRightButtonDown', this.private.rightMouseDown);
+      this.native.addEventListener('MouseLeftButtonDown', this.private.leftMouseDown);
+      this.native.addEventListener('MouseLeftButtonUp', this.private.leftMouseUp);
+      this.native.addEventListener('PreviewMouseUp', this.private.mouseUp);
+      this.native.addEventListener('PreviewMouseDown', this.private.mouseDown);
+      this.native.addEventListener('MouseMove', this.private.mouseMove);
+      this.native.addEventListener('MouseEnter', this.private.mouseEnter);
+      this.native.addEventListener('MouseLeave', this.private.mouseLeave);
+      this.native.addEventListener('KeyDown', this.private.keyDown);
+      this.native.addEventListener('KeyUp', this.private.keyUp);
     }.bind(this);
 
     addNativeEventHandlers();
@@ -109,26 +91,14 @@ module.exports = (function() {
   Control.prototype.animateOnSizeChange = false;
   Control.prototype.animateOnPositionChange = false;
 
-  Object.defineProperty(Control.prototype, 'alpha', {
-    configurable:true,
-    get:function() { return this.nativeView.Opacity; },
-    set:function(e) { this.nativeView.Opacity = e; }
-  });
+  utils.makePropertyNumberType(Control.prototype, 'alpha', 'Opacity');
 
-   Object.defineProperty(Control.prototype, 'visible', {
-      get:function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
-      set:function(e) {
-        this.private.states.visible = e;
-        if(e) {
-          this.native.Visibility = $.System.Windows.Visibility.Visible;
-        } else {
-          this.native.Visibility = $.System.Windows.Visibility.Hidden;
-        }
-      }
-    });
+  utils.makePropertyBoolType(Control.prototype, 'visible', 'Visibility',
+    $.System.Windows.Visibility.Visible,
+    $.System.Windows.Visibility.Hidden);
 
-  Object.defineProperty(Control.prototype,'boundsOnScreen', {
-    get:function() {
+  utils.def(Control.prototype, 'boundsOnScreen',
+    function() {
       if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
         return null;
       }
@@ -137,13 +107,13 @@ module.exports = (function() {
         return null;
       }
       var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      var p = utils.wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
    }
-  });
+  );
 
-  Object.defineProperty(Control.prototype,'boundsOnWindow', {
-    get:function() {
+  utils.def(Control.prototype, 'boundsOnWindow',
+    function() {
       if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
         return null;
       }
@@ -152,13 +122,13 @@ module.exports = (function() {
         return null;
       }
       var bounds = this.nativeView.TransformToVisual(target).TransformBounds($.System.Windows.Controls.Primitives.LayoutInformation.GetLayoutSlot(this.nativeView));
-      var p = wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
+      var p = utils.wpfDeviceToLogicalPx(target,this.nativeView.PointToScreen(new $.System.Windows.Point(0,0)));
       return {x:Math.round(p.X - target.Left), y:Math.round(p.Y - target.Top), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
-  });
+  );
 
-  Object.defineProperty(Control.prototype,'bounds', {
-    get:function() {
+  utils.def(Control.prototype, 'bounds',
+    function() {
       var target = this.nativeView.Parent;
       if(this.native.GetType().Equals($.System.Windows.Window)) {
         return this.boundsOnWindow;
@@ -171,40 +141,9 @@ module.exports = (function() {
       var p = this.nativeView.TransformToAncestor(target).Transform(new $.System.Windows.Point(0,0));
       return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
     }
-  });
+  );
 
-  Control.prototype.fireEvent = function(event, args) {
-    try {
-      event = event.toLowerCase();
-      var returnvalue;
-      if(!this.private.events[event]) {
-        this.private.events[event] = [];
-      }
-      (this.private.events[event]).forEach(function(item) { 
-        returnvalue = item.apply(null, args) || returnvalue; 
-      });
-      return returnvalue;
-    } catch(e) {
-      console.error(e.message);
-      console.error(e.stack);
-      process.exit(1);
-    }
-  };
-
-  Control.prototype.addEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(!this.private.events[event]) {
-      this.private.events[event] = []; 
-    }
-    this.private.events[event].push(func);
-  };
-
-  Control.prototype.removeEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
-    }
-  };
+  utils.defEvents(Control.prototype);
 
   function getConstraintSolver() {
     // WPF has an awkward inheritence schema. If we want a border on an element we have to wrap that element
@@ -265,7 +204,7 @@ module.exports = (function() {
       target.ChangeConstant(previousConstraint, layoutObject.constant);
     }
     return previousConstraint;
-  }
+  };
 
   Control.prototype.removeLayoutConstraint = function(n) {
     this.private.parent.nativeView.RemoveLayoutConstraint(n);

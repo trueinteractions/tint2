@@ -482,6 +482,7 @@ def configure_node(o):
   host_arch = host_arch_win() if os.name == 'nt' else host_arch_cc()
   target_arch = options.dest_cpu or host_arch
   o['variables']['host_arch'] = host_arch
+  print target_arch
   o['variables']['target_arch'] = target_arch
 
   if target_arch == 'arm':

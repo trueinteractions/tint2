@@ -217,11 +217,11 @@ module.exports = (function() {
     rtn = typeEncodings[type[type.length-1]]
     if (rtn) return rtn
     // couldn't find the type. throw a descriptive error as to why:
-    if (type[0] == '[') return 'pointer';
+    if (type[0] === '[') return 'pointer';
       //throw new Error('Array types not yet supported: ' + type)
-    if (type[0] == '(') return 'pointer';
+    if (type[0] === '(') return 'pointer';
       //throw new Error('Union types not yet supported: ' + type)
-    if (type[0] == 'b') return 'pointer';
+    if (type[0] === 'b') return 'pointer';
       //throw new Error('Bit field types not yet supported: ' + type)
     throw new Error('Could not convert type: ' + type)
   }
@@ -267,9 +267,9 @@ module.exports = (function() {
           cur.push(c)
         }
 
-        if (c == '{' || c == '[' || c == '(') {
+        if (c === '{' || c === '[' || c === '(') {
           depth++
-        } else if (c == '}' || c == ']' || c == ')') {
+        } else if (c === '}' || c === ']' || c === ')') {
           depth--
           if (!depth)
             add()

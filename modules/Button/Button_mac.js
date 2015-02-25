@@ -40,10 +40,7 @@ module.exports = (function() {
    * @description Gets or sets whether the button has a border around it.
    * @default true
    */
-  util.def(Button.prototype, 'border',
-    function() { return this.nativeView('isBordered') === $.YES ? true : false; },
-    function(e) { return this.nativeView('setBordered', e === true ? $.YES : $.NO); }
-  );
+  util.makePropertyBoolType(Button.prototype, 'border', 'isBordered', 'setBordered');
 
   /**
    * @member state
@@ -71,7 +68,13 @@ module.exports = (function() {
     function(e) {
       // Private event, do not rely on it.
       this.fireEvent('property-change', ['title', e]);
-      return this.nativeView('setTitle', $(e));
+
+      if(e.toString() === "") {
+        this.nativeView('cell')('setImagePosition', $.NSImageOnly);
+      } else {
+        this.nativeView('cell')('setImagePosition', $.NSImageLeft);
+      }
+      this.nativeView('setTitle', $(e));
     }
   );
 
@@ -141,6 +144,12 @@ module.exports = (function() {
       e = util.makeNSImage(e);
       if(e) {
         this.nativeView('setImage', e);
+        if(this.nativeView('title').toString() === "") {
+          this.nativeView('cell')('setImagePosition', $.NSImageOnly);
+        } else {
+          this.nativeView('cell')('setImagePosition', $.NSImageLeft);
+        }
+        this.nativeView('cell')('setImageScaling',$.NSImageScaleProportionallyDown);
       }
     }
   );

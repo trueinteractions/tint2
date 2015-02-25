@@ -18,6 +18,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSImageView;
     this.nativeViewClass = this.nativeViewClass || $.NSImageView;
     Container.call(this, options);
+    this.native('setEditable', $.YES);
     this.native('setImageAlignment',$.NSImageAlignCenter);
     this.animates = false;
     this.alignment = "center";
@@ -38,7 +39,9 @@ module.exports = (function() {
     set:function(e) {
       this.private.currentImage = e;
       var img = utilities.makeNSImage(e);
-      if(!img) console.log('Error, image was invalud: ', e);
+      if(!img) {
+        console.log('Error, image was invalud: ', e);
+      }
       this.nativeView('setImage',img);
       img('release');
     }
@@ -48,26 +51,26 @@ module.exports = (function() {
   Object.defineProperty(ImageWell.prototype, 'alignment', {
     get:function() { 
       var align = this.nativeView('imageAlignment');
-      if(align == $.NSImageAlignCenter) return "center";
-      else if (align == $.NSImageAlignTop) return "top";
-      else if (align == $.NSImageAlignTopLeft) return "top-left";
-      else if (align == $.NSImageAlignTopRight) return "top-right";
-      else if (align == $.NSImageAlignLeft) return "left";
-      else if (align == $.NSImageAlignBottom) return "bottom";
-      else if (align == $.NSImageAlignBottomLeft) return "bottom-left";
-      else if (align == $.NSImageAlignBottomRight) return "bottom-right";
+      if(align === $.NSImageAlignCenter) return "center";
+      else if (align === $.NSImageAlignTop) return "top";
+      else if (align === $.NSImageAlignTopLeft) return "top-left";
+      else if (align === $.NSImageAlignTopRight) return "top-right";
+      else if (align === $.NSImageAlignLeft) return "left";
+      else if (align === $.NSImageAlignBottom) return "bottom";
+      else if (align === $.NSImageAlignBottomLeft) return "bottom-left";
+      else if (align === $.NSImageAlignBottomRight) return "bottom-right";
       else return "right";
     },
     set:function(e) {
-      if(e == "center") this.nativeView('setImageAlignment', $.NSImageAlignCenter);
-      else if(e == "top") this.nativeView('setImageAlignment', $.NSImageAlignTop);
-      else if(e == "top-left") this.nativeView('setImageAlignment', $.NSImageAlignTopLeft);
-      else if(e == "top-right") this.nativeView('setImageAlignment', $.NSImageAlignTopRight);
-      else if(e == "left") this.nativeView('setImageAlignment', $.NSImageAlignLeft);
-      else if(e == "bottom") this.nativeView('setImageAlignment', $.NSImageAlignBottom);
-      else if(e == "bottom-left") this.nativeView('setImageAlignment', $.NSImageAlignBottomLeft);
-      else if(e == "bottom-right") this.nativeView('setImageAlignment', $.NSImageAlignBottomRight);
-      else if(e == "right") this.nativeView('setImageAlignment', $.NSImageAlignRight);
+      if(e === "center") this.nativeView('setImageAlignment', $.NSImageAlignCenter);
+      else if(e === "top") this.nativeView('setImageAlignment', $.NSImageAlignTop);
+      else if(e === "top-left") this.nativeView('setImageAlignment', $.NSImageAlignTopLeft);
+      else if(e === "top-right") this.nativeView('setImageAlignment', $.NSImageAlignTopRight);
+      else if(e === "left") this.nativeView('setImageAlignment', $.NSImageAlignLeft);
+      else if(e === "bottom") this.nativeView('setImageAlignment', $.NSImageAlignBottom);
+      else if(e === "bottom-left") this.nativeView('setImageAlignment', $.NSImageAlignBottomLeft);
+      else if(e === "bottom-right") this.nativeView('setImageAlignment', $.NSImageAlignBottomRight);
+      else if(e === "right") this.nativeView('setImageAlignment', $.NSImageAlignRight);
     }
   }); */
 
@@ -81,22 +84,32 @@ module.exports = (function() {
   Object.defineProperty(ImageWell.prototype, 'scale', {
     get:function() { 
       var scaling = this.nativeView('imageScaling');
-      if(scaling == $.NSImageScaleProportionallyDown) return "constrain";
-      else if (scaling == $.NSImageScaleAxesIndependently) return "fit";
-      else if (scaling == $.NSImageScaleProportionallyUpOrDown) return "contain";
-      else return "none";
+      if(scaling === $.NSImageScaleProportionallyDown) {
+        return "constrain";
+      } else if (scaling === $.NSImageScaleAxesIndependently) {
+        return "fit";
+      } else if (scaling === $.NSImageScaleProportionallyUpOrDown) {
+        return "contain";
+      } else {
+        return "none";
+      }
     },
     set:function(e) {
-      if(e == "constrain") this.nativeView('setImageScaling', $.NSImageScaleProportionallyDown);
-      else if(e == "fit") this.nativeView('setImageScaling', $.NSImageScaleAxesIndependently);
-      else if(e == "contain") this.nativeView('setImageScaling', $.NSImageScaleProportionallyUpOrDown);
-      else if(e == "none") this.nativeView('setImageScaling', $.NSImageScaleNone);
+      if(e === "constrain") {
+        this.nativeView('setImageScaling', $.NSImageScaleProportionallyDown);
+      } else if(e === "fit") {
+        this.nativeView('setImageScaling', $.NSImageScaleAxesIndependently);
+      } else if(e === "contain") {
+        this.nativeView('setImageScaling', $.NSImageScaleProportionallyUpOrDown);
+      } else if(e === "none") {
+        this.nativeView('setImageScaling', $.NSImageScaleNone);
+      }
     }
   });
   /*
   TODO: Support this on Windows
   Object.defineProperty(ImageWell.prototype, 'animates', {
-    get:function() { return this.nativeView('animates') == $.YES ? true : false; },
+    get:function() { return this.nativeView('animates') === $.YES ? true : false; },
     set:function(e) { this.nativeView('setAnimates', e ? $.YES : $.NO); }
   });*/
 

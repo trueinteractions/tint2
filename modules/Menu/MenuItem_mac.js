@@ -52,13 +52,6 @@ module.exports = (function() {
     }
   }
 
-  MenuItem.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) {
-      (this.private.events[event]).forEach(function(item) { 
-        item.apply(null,args);
-      });
-    }
-  }
   /**
    * @method addEventListener
    * @param {string} eventName The name of the event to start listening to.
@@ -68,12 +61,7 @@ module.exports = (function() {
    *              parameter is the name of the event, the second parameter is the function
    *              to call when the event happens (e.g., a callback).
    */
-  MenuItem.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) {
-      this.private.events[event] = [];
-    }
-    this.private.events[event].push(func); 
-  }
+
   /**
    * @method removeEventListener
    * @param {string} eventName The name of the event to stop listening to.
@@ -83,10 +71,7 @@ module.exports = (function() {
    *              parameter is the name of the event, the second parameter is the function
    *              that was originally given as the callback for addEventListener.
    */
-  MenuItem.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) 
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
-  }
+   utilities.defEvents(MenuItem.prototype);
 /*
   TODO: See if we can support a hover state rather
   than these properties, do not transfer to other OS'

@@ -4,6 +4,7 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var Color = require('Color');
+  var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
   function Scroll(options) {
@@ -23,13 +24,11 @@ module.exports = (function() {
   Scroll.prototype = Object.create(Container.prototype);
   Scroll.prototype.constructor = Scroll;
 
-  //Content
   Scroll.prototype.setChild = function(control) {
     control.private.parent = this;
     this.native.Content = control.native; 
   }
 
-  //BorderBrush
   Object.defineProperty(Scroll.prototype, 'border', {
     get:function() { return this.private.border; },
     set:function(e) {
@@ -38,37 +37,17 @@ module.exports = (function() {
     }
   });
 
-  //VerticalScrollBarVisibility
-  Object.defineProperty(Scroll.prototype, 'vertical', {
-    get:function() { return this.nativeView.VerticalScrollBarVisibility === $.System.Windows.Controls.ScrollBarVisibility.Auto; },
-    set:function(e) {
-      if(e) {
-        this.nativeView.VerticalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Auto;
-      } else {
-        this.nativeView.VerticalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Hidden;
-      }
-    }
-  });
+  util.makePropertyBoolType(Scroll.prototype, 'vertical', 'VerticalScrollBarVisibility', 
+    $.System.Windows.Controls.ScrollBarVisibility.Auto,
+    $.System.Windows.Controls.ScrollBarVisibility.Hidden);
 
-  //HorizontalScrollBarVisibility
-  Object.defineProperty(Scroll.prototype, 'horizontal', {
-    get:function() { return this.nativeView.HorizontalScrollBarVisibility === $.System.Windows.Controls.ScrollBarVisibility.Auto; },
-    set:function(e) {
-      if(e) {
-        this.nativeView.HorizontalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Auto;
-      } else {
-        this.nativeView.HorizontalScrollBarVisibility = $.System.Windows.Controls.ScrollBarVisibility.Hidden;
-      }
-    }
-  });
 
-  //PanningDeceleration, TODO: shore this up with OSX.
-  Object.defineProperty(Scroll.prototype, 'speed', {
-    get:function() { return this.nativeView.PanningDeceleration; },
-    set:function(e) { this.nativeView.PanningDeceleration = e; }
-  });
+  util.makePropertyBoolType(Scroll.prototype, 'vertical', 'HorizontalScrollBarVisibility', 
+    $.System.Windows.Controls.ScrollBarVisibility.Auto,
+    $.System.Windows.Controls.ScrollBarVisibility.Hidden);
 
-  //Background  
+  util.makePropertyNumberType(Scroll.prototype, 'speed', 'PanningDeceleration');
+
   Object.defineProperty(Scroll.prototype, 'backgroundColor', {
     get:function() { return this.private.background; },
     set:function(e) {

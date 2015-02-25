@@ -6,8 +6,6 @@ var tintVersion = '@@@TINT_VERSION@@@',
   tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
   baseDirectory = process.cwd(),
   pa = require('path'),
-  outputDirectory = baseDirectory+pa.sep+'build',
-  resourceDirectory = outputDirectory+pa.sep+'tmp',
   sourceDirectory = null,
   fs = require('fs'),
   os = require('os'),
@@ -37,8 +35,8 @@ $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) 
   b.data=$tint.mergeobjs(b.data,packagejson);
   b.data.sources.directory=$tint.absolute(b.data.sources.directory,'.');
   sourceDirectory = $tint.absolute($tint.absolute($tint.dotdot(path),b.data.sources.directory),baseDirectory);
-  b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
-  b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],sourceDirectory);
+  if(b.data.icon && b.data.icon.osx) b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
+  if(b.data.icon && b.data.icon.windows) b.data.icon.windows[0]=$tint.absolute(b.data.icon.windows[0],sourceDirectory);
   b.manifest = path;
   return b; 
 };
@@ -66,18 +64,18 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       if (!this.data.version) throw new Error("The version number does not exist.");
       if (!this.data.sources) throw new Error("A source directory has not been selected.");
       if (this.data.longname.trim() === "") throw new Error("The long name is invalid");
-      if ($tint.ndef(this.data.icon.osx))
-        throw new Error("The key icon->osx was not found in package.json.");
+      if ($tint.ndef(this.data.icon))
+        throw new Error("The key 'icon' was not found in package.json.");
       if ($tint.ndef(this.data.icon.osx[0]))
-        throw new Error("No icon for OSX was specified in icon->osx[] in the package.json.");
+        throw new Error("No icon for OSX was found in the package.json, add {icon:{osx:['appicons.png']}} to your package.json.");
       if (!$tint.file(this.data.icon.osx[0]))
         throw new Error("The specified icon for OSX is not a file or could not be read. ["+this.data.icon.osx[0]+"]");
       if (this.data.icon.osx[0].indexOf(".png") == -1)
         throw new Error("The specified icon for OSX is not a png file. ["+this.data.icon.osx[0]+"]");
       if ($tint.ndef(this.data.icon.windows))
-        throw new Error("The key icon->windows was not found in package.json.");
+        throw new Error("No icon for Windows was found in package.json, add { icon: { windows: ['appicons.png'] } } to package.json.");
       if ($tint.ndef(this.data.icon.windows[0]))
-        throw new Error("No icon for Windows was specified in icon->windows[] in the package.json.");
+        throw new Error("No icon was found for Windows (note, the { icon: { windows } } entry was found, but it wasnt an array) inpackage.json.");
       if (!$tint.file(this.data.icon.windows[0]))
         throw new Error("The specified icon for windows is not a file or could not be read. ["+this.data.icon.windows[0]+"]");
       if (this.data.icon.windows[0].indexOf(".png") == -1)
@@ -405,6 +403,8 @@ $tint.write=function(__file,_data) {
   fs.writeFileSync(__file,_data);
 }
 $tint.copy=function(src,dst) {
+  src = path.normalize(src);
+  dst = path.normalize(dst);
   var filetodir=function(src,dst) {
     var paths=src.split(pa.sep);
     return filetofile(src,pa.join(dst,paths[paths.length-1]));
@@ -806,7 +806,11 @@ $tint.winmanifest = function(target, values) {
   var fd = fs.openSync(target,'r+');
   var winexe = new WindowsExeFile(fd);
   winexe.WindowsExeRead();
+  //var subsystemPos = winexe.SubsystemPosition;
   fs.closeSync(fd);
+  //var buf = new Buffer(2);
+  //buf.writeUInt16LE(WindowsConst.IMAGE_SUBSYSTEM_WINDOWS_GUI,0);
+  //$tint.writebindata(buf,target,subsystemPos);
   var container = winexe.Resources.Entries[2].Directory.Entries[0].Directory.Entries[0].Data.VersionInfo.Children[0].Children[0].Children; //[0].Children
   recurseManifest(container,target,values);
   
@@ -1543,6 +1547,8 @@ WindowsConst.RESOURCE_ENTRY_TYPES = [
   RT_ANIICON = {value:22,name:'RT_ANIICON'}, RT_HTML= {value:23,name:'RT_HTML'}, 
   RT_MANIFEST = {value:24,name:'RT_MANIFEST'}
 ];
+WindowsConst.IMAGE_SUBSYSTEM_WINDOWS_GUI = 2; // GUI application
+WindowsConst.IMAGE_SUBSYSTEM_WINDOWS_CUI = 3; // Conosle application
 WindowsConst.IMAGE_DOS_SIGNATURE        = {value:23117, name:'MSDOS'};
 WindowsConst.IMAGE_OS2_SIGNATURE        = {value:17742, name:'OS2'};
 WindowsConst.IMAGE_OS2_SIGNATURE_LE         = {value:17740, name:'OS2 LE'};
@@ -2029,6 +2035,8 @@ WindowsExeFile.prototype.DataDirectoryRead = function() {
   obj.Size = this.ULONG();
   return obj;
 }
+// IMAGE_OPTIONAL_HEADER
+// https://msdn.microsoft.com/en-us/library/windows/desktop/ms680339(v=vs.85).aspx
 WindowsExeFile.prototype.OptionalHeaderRead = function() {
   var obj = {};
   obj.Magic = this.USHORT();
@@ -2763,20 +2771,20 @@ function rebase (base, dir) {
 /// Begin execution. ///
 
 var argv = optimist
-    .argv;
-
-if(!argv._[0]) {
-  console.log(
+  .boolean(['clean','no-windows-build','no-osx-build'])
+  .usage(
     'Tint Build Tool ('+tintVersion+')\n'+
-    'usage: tntbuild [options] package.json\n' + 
-    '\t[--clean]\n'+
-    '\t[--no-windows-build]\n'+
-    '\t[--no-osx-build]\n'+
-    '\t[--windows-runtime=tint.exe]\n'+
-    '\t[--osx-runtime=tint]'
-  );
-  process.exit(0);
-}
+    'usage: tntbuild [options] package.json\n')
+  .string(['out',0])
+  .describe('out', 'The directory to write the output to instead of the default \'build\'')
+  .describe('clean', 'Clean the build directory, removing any application files before beginning.')
+  .describe('no-windows-build', 'Do not compile a windows version of the application.')
+  .describe('no-osx-build', 'Do not compile an OS X version of the application')
+  .describe('windows-runtime', 'The runtime to use for Windows (instead of the built-in)')
+  .describe('osx-runtime', 'The runtime to use for OS X (instead of the built-in)')
+  .demand(1)
+  .argv;
+
 
 function readToBase64(e) {
   try {
@@ -2790,10 +2798,10 @@ function readToBase64(e) {
 var build = $tint.loadbuilder(
   argv._[0],
   function error(e, msg) {
-    if(msg) console.error(msg);
-    if(e.stack) console.error(e.stack);
-    else if(!e) throw new Error('unknown');
-    console.error(e);
+    if(msg) console.error("Error: "+msg);
+    //if(e.stack) console.error(e.stack);
+   // else if(!e) throw new Error('unknown');
+    if(e.message) console.error("Error: "+e.message);
     process.exit(1);
   }, 
   function warning(e) { console.warn(e); }, 
@@ -2801,14 +2809,32 @@ var build = $tint.loadbuilder(
   function success(e) { process.exit(0); }, 
   function start() { }
 );
+
+
+if(argv['out']) {
+  outputDirectory = argv['out'];
+  if(outputDirectory[0] !== '/') {
+    outputDirectory = $tint.absolute(outputDirectory,process.cwd());
+  }
+  baseDirectory = $tint.dotdot(outputDirectory);
+} else {
+  outputDirectory = baseDirectory+pa.sep+'build';
+}
+resourceDirectory = outputDirectory+pa.sep+'tmp';
+
 build.reset();
 build.prepconfig();
+
 if(argv.clean) build.prepclean();
 build.prepobj();
 if(argv['windows-runtime']) tintExecutableWindows = readToBase64(argv['windows-runtime']);
 if(argv['osx-runtime']) tintExecutableOSX = readToBase64(argv['osx-runtime']);
-if(!argv['no-windows-build']) build.prepwin();
-if(!argv['no-osx-build']) build.prepmac();
+if(!argv['no-windows-build'] && argv['windows-build'] !== false) {
+  build.prepwin();
+}
+if(!argv['no-osx-build'] && argv['osx-build'] !== false) {
+  build.prepmac();
+}
 build.postbuild();
 build.play();
 

@@ -33,7 +33,7 @@ function DynamicLibrary (path, mode) {
     return new DynamicLibrary(path, mode)
   }
 
-  if (null == mode) {
+  if (null === mode || undefined === mode) {
     mode = DynamicLibrary.FLAGS.RTLD_LAZY
   }
 

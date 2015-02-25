@@ -87,8 +87,9 @@ module.exports = (function() {
    */
   function Menu(title) {
     var $ = process.bridge.objc;
-    if(typeof(title) == 'undefined') title = "";
-
+    if(typeof(title) === 'undefined') {
+      title = "";
+    }
     var $menu = $.NSMenu('alloc')('initWithTitle',$(title));
     var children = [];
 

@@ -1,5 +1,6 @@
 module.exports = (function() {
   var center = process.bridge.objc.NSUserNotificationCenter('defaultUserNotificationCenter');
+  var util = require('Utilities');
   /**
    * @class Notification
    * @description Creates a new notification.  Notifications are small two-three line notifications
@@ -18,42 +19,24 @@ module.exports = (function() {
   function Notification()
   {
     var $ = process.bridge.objc;
-    var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
+    var titlestring = "", textstring = "", subtitlestring = "", 
         soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "";
 
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item) {
-          item.apply(null,args);
-        });
-      }
-    }
-
-    this.addEventListener = function(event, func) {
-      if(!events[event]) {
-        events[event] = [];
-      }
-      events[event].push(func);
-    }
-    this.removeEventListener = function(event, func) {
-      if(events[event] && events[event].indexOf(func) !== -1) {
-        events[event].splice(events[event].indexOf(func), 1);
-      }
-    }
+    util.defEvents(this);
     
     var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
     NSUserNotificationCenterDelegate.addMethod('init:', '@@:', function(self) { return self; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { return $.YES; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didActivateNotification:','v@:@@', function(self,_cmd,center,notify) {
       if(notify('activationType') === $.NSUserNotificationActivationTypeContentsClicked) {
-        fireEvent('click',['contents']);
+        this.fireEvent('click',['contents']);
       } else if(notify('activationType') === $.NSUserNotificationActivationTypeActionButtonClicked) {
-        fireEvent('click',['button']);
+        this.fireEvent('click',['button']);
       } else {
-        fireEvent('click', ['unknown']);
+        this.fireEvent('click', ['unknown']);
       }
-    });
-    NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didDeliverNotification:','v@:@@', function(self,_cmd,center,notify) { fireEvent('fired'); });
+    }.bind(this));
+    NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:didDeliverNotification:','v@:@@', function(self,_cmd,center,notify) { this.fireEvent('fired'); }.bind(this));
     NSUserNotificationCenterDelegate.register();
 
     if(center != null) {
@@ -134,7 +117,7 @@ module.exports = (function() {
 
       var $notify = $.NSUserNotification('alloc')('init');
       // Get the default notification center
-      if(center == null) {
+      if(center === null) {
         console.warn('Attempted to deliver notification, but only packaged apps may use notifcations.');
         return false;
       }
@@ -177,7 +160,8 @@ module.exports = (function() {
 
   /**
    * @method requestPermission
-   * @param {function} callback A function to callback as to the result of the request. The function will be passed on parameter that is either true or false.
+   * @param {function} callback A function to callback as to the result of the request. 
+   *                            The function will be passed on parameter that is either true or false.
    * @memberof Notification
    * @description This method requests permission to use notifications from the underlying operating system. At the moment this always returns true unless there
    *              is an explicit ban on the application pushing notifications (perhaps it was done too often or the user has explicitly set them not to show in

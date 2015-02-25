@@ -35,8 +35,6 @@ if(ismac) {
     fs.writeSync(1, e);
   }
   exit = function(code) {
-    if(debug) fs.writeSync(1, 'process.exit'); // fix for appveyor
-    if(debug) fs.writeSync(2, 'code '+code);  // fix for appveyor
     process.exit(code);
   }
 }
@@ -50,222 +48,17 @@ var brightBlueBegin = '\033[36m'
 var colorEnd = '\033[0m';
 var currentTest = null;
 var createBaseline = false;
-var ex = {};
+var ex = require('System');
 var tintexec;
 
 
+ex.writeImage = function writeImageToFile(image, path) {
+    var bf = new Buffer(image, 'base64');
+    var fs = require('fs');
+    fs.writeFileSync(path,bf);
+}
+
 if (ismac) {
-    function convertBoundsToCGPoint(p) {
-      return p;
-    }
-    ex.disableCrashReporter = function disableCrashReporter() { 
-      exec('defaults write com.apple.CrashReporter DialogType none');
-    }
-    ex.enableCrashReporter = function enableCrashReporter() {
-      exec('defaults write com.apple.CrashReporter DialogType crashreport');
-    }
-    ex.keyCodeFromChar = function keyCodeFromChar(keyString)
-    {
-      switch(keyString) {
-        case "a": return 0;
-        case "s": return 1;
-        case "d": return 2;
-        case "f": return 3;
-        case "h": return 4;
-        case "g": return 5;
-        case "z": return 6;
-        case "x": return 7;
-        case "c": return 8;
-        case "v": return 9;
-        // what is 10?
-        case "b": return 11;
-        case "q": return 12;
-        case "w": return 13;
-        case "e": return 14;
-        case "r": return 15;
-        case "y": return 16;
-        case "t": return 17;
-        case "1": return 18;
-        case "2": return 19;
-        case "3": return 20;
-        case "4": return 21;
-        case "6": return 22;
-        case "5": return 23;
-        case "=": return 24;
-        case "9": return 25;
-        case "7": return 26;
-        case "-": return 27;
-        case "8": return 28;
-        case "0": return 29;
-        case "]": return 30;
-        case "o": return 31;
-        case "u": return 32;
-        case "[": return 33;
-        case "i": return 34;
-        case "p": return 35;
-        case "RETURN": return 36;
-        case "l": return 37;
-        case "j": return 38;
-        case "'": return 39;
-        case "k": return 40;
-        case ";": return 41;
-        case "\\": return 42;
-        case ",": return 43;
-        case "/": return 44;
-        case "n": return 45;
-        case "m": return 46;
-        case ".": return 47;
-        case "TAB": return 48;
-        case "SPACE": return 49;
-        case "`": return 50;
-        case "BACK": return 51;
-        case "ENTER": return 52;
-        case "ESCAPE": return 53;
-        // some more missing codes abound, reserved I presume, but it would
-        // have been helpful for Apple to have a document with them all listed
-        case ".": return 65;
-        case "*": return 67;
-        case "+": return 69;
-        case "CLEAR": return 71;
-        case "/": return 75;
-        case "ENTER-NUM": return 76;  // numberpad on full kbd
-        case "=": return 78;
-        case "=": return 81;
-        case "0": return 82;
-        case "1": return 83;
-        case "2": return 84;
-        case "3": return 85;
-        case "4": return 86;
-        case "5": return 87;
-        case "6": return 88;
-        case "7": return 89;
-        case "8": return 91;
-        case "9": return 92;
-        case "F5": return 96;
-        case "F6": return 97;
-        case "F7": return 98;
-        case "F3": return 99;
-        case "F8": return 100;
-        case "F9": return 101;
-        case "F11": return 103;
-        case "F13": return 105;
-        case "F14": return 107;
-        case "F10": return 109;
-        case "F12": return 111;
-        case "F15": return 113;
-        case "HELP": return 114;
-        case "HOME": return 115;
-        case "PGUP": return 116;
-        case "DELETE": return 117;
-        case "F4": return 118;
-        case "END": return 119;
-        case "F2": return 120;
-        case "PGDN": return 121;
-        case "F1": return 122;
-        case "LEFT": return 123;
-        case "RIGHT": return 124;
-        case "DOWN": return 125;
-        case "UP": return 126;
-        default:
-          return 0;
-      }
-    }
-    ex.keyAtControl = function keyAtControl(input) {
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), true));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, this.keyCodeFromChar(input), false));
-    }
-    ex.rightClickAtControl = function rightClickAtControl(control) {
-      var bounds = control.boundsOnScreen;
-      bounds.x = bounds.x + bounds.width/2;
-      bounds.y = bounds.y + bounds.height/2;
-      var point = $.CGPointMake(bounds.x, bounds.y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, convertBoundsToCGPoint(point), 0));
-    }
-    ex.scrollAt = function scrollAt(x, y, upOrDown) {
-      var point = $.CGPointMake(x, y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateScrollWheelEvent($.kCGScrollEventUnitPixel, 1, upOrDown));
-    }
-    ex.scrollAtControl = function scrollAtControl(control, upOrDown) {
-      var bounds = control.boundsOnScreen;
-      bounds.x = bounds.x + bounds.width/2;
-      bounds.y = bounds.y + bounds.height/2;
-      var point = $.CGPointMake(bounds.x, bounds.y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
-      var scrollEvent = $.CGEventCreateScrollWheelEvent(null, 1, 1, upOrDown);
-      $.CGEventPost($.kCGHIDEventTap, scrollEvent);
-    }
-    ex.clickAtControl = function clickAtControl(control) {
-      var bounds = control.boundsOnScreen;
-      bounds.x = bounds.x + bounds.width/2;
-      bounds.y = bounds.y + bounds.height/2;
-      var point = $.CGPointMake(bounds.x, bounds.y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, convertBoundsToCGPoint(point), 0));
-    }
-    ex.clickAt = function clickAt(x,y) {
-      var point = $.CGPointMake(x, y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, convertBoundsToCGPoint(point), 0));
-    }
-    ex.rightClickAt = function rightClickAt(x,y) {
-      var point = $.CGPointMake(x, y);
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseDown, convertBoundsToCGPoint(point), 0));
-      $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventRightMouseUp, convertBoundsToCGPoint(point), 0));
-    }
-    ex.writeImageToBase64 = function writeImageToBase64(image) {
-      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
-      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
-      return imageData('base64EncodedStringWithOptions',0);
-    }
-    ex.writeImage = function writeImage(image, path) {
-      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
-      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
-      var base64String = imageData('base64EncodedStringWithOptions',0);
-      var bf = new Buffer(base64String.toString(), 'base64');
-      var fs = require('fs');
-      fs.writeFileSync(path,bf);
-    }
-    ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
-      var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
-      this.writeImage(image, path);
-    }
-    ex.takeSnapshotOfActiveScreenToBase64 = function takeSnapshotOfActiveScreenToBase64() {
-      var image = $.CGWindowListCreateImage($.CGRectInfinite, $.kCGWindowListOptionAll, $.kCGNullWindowID, $.kCGWindowImageDefault);
-      return this.writeImageToBase64(image);
-    }
-    ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
-      var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListExcludeDesktopElements, 1, $.kCGWindowImageDefault);
-      this.writeImage(image, path);
-    }
-    ex.takeSnapshotOfWindowNumber = function takeSnapshotOfWindowNumber(windowNumber, path) {
-      var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListOptionIncludingWindow | $.kCGWindowListExcludeDesktopElements, windowNumber, $.kCGWindowImageDefault);
-      this.writeImage(image, path);
-    }
-    ex.takeSnapshotOfCurrentWindow = function takeSnapshotOfCurrentWindow(path) {
-      var currentWindow = $.NSApplication('sharedApplication')('mainWindow');
-      if(currentWindow == null) return;// throw new Error('There is no current window.');
-      var windowNumber = currentWindow('windowNumber');
-      this.takeSnapshotOfWindowNumber(windowNumber, path);
-    }
-    ex.takeSnapshotOfWindow = function(windowObj, path) {
-      var windowNumber = windowObj.native('windowNumber');
-      this.takeSnapshotOfWindowNumber(windowNumber, path);
-    }
-    ex.takeSnapshotOfControl = function(c, path) {
-      var img = $.NSImage('alloc')('initWithData', c.nativeView('dataWithPDFInsideRect',c.nativeView('bounds')));
-      var bitmapRep = $.NSBitmapImageRep('alloc')('initWithData',img('TIFFRepresentation'));
-      var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
-      var base64String = imageData('base64EncodedStringWithOptions',0);
-      var bf = new Buffer(base64String.toString(), 'base64');
-      var fs = require('fs');
-      fs.writeFileSync(path,bf);
-    }
     ex.setupShell = function setupShell(name, cmd) {
       execAndPump("mkdir "+name+"-test", function() {
         execAndPump("cp -a -p tools/Shell.app "+name+"-test", function() {
@@ -277,7 +70,6 @@ if (ismac) {
         }, notok);
       }, notok);
     }
-
     ex.runShell = function runShell(name, cb, err, options) {
       spawnAndPump("./"+name+"-test/Shell.app/Contents/MacOS/Runtime ./"+name+"-test/Shell.app/Contents/Resources/test.js tests", cb, err, options);
     }
@@ -290,287 +82,10 @@ if (ismac) {
 } // END MAC SPECIFIC CODE
 else 
 { // BEGIN WINDOWS SPECIFIC CODE
-
-  var $$ = process.bridge.win32;
-
-  ex.keyCodeFromChar = function keyCodeFromChar(keyString)
-  {
-    var keys = {
-      '\b':0x0008,
-      '\t':0x0009,
-      'TAB':0x0009,
-      '\n':0x000D,
-      'SHIFT':0x0010,
-      'CONTROL':0x0011,
-      'ALT':0x0012,
-      'CAPSLOCK':0x0014,
-      'PAUSE':0x0013,
-      'ESC':0x001B,
-      ':':0x0020,
-      'PGUP':0x0021,
-      'PGDN':0x0022,
-      'UP':0x0026,
-      'DOWN':0x0028,
-      'DEL':0x002E,
-      '0':0x0030,
-      '1':0x0031,
-      '2':0x0032,
-      '3':0x0033,
-      '4':0x0034,
-      '5':0x0035,
-      '6':0x0036,
-      '7':0x0037,
-      '8':0x0038,
-      '9':0x0039,
-      'a':0x0041,
-      'b':0x0042,
-      'c':0x0043,
-      'd':0x0044,
-      'e':0x0045,
-      'f':0x0046,
-      'g':0x0047,
-      'h':0x0048,
-      'i':0x0049,
-      'j':0x004A,
-      'k':0x004B,
-      'l':0x004C,
-      'm':0x004D,
-      'n':0x004E,
-      'o':0x004F,
-      'p':0x0050,
-      'q':0x0051,
-      'r':0x0052,
-      's':0x0053,
-      't':0x0054,
-      'u':0x0055,
-      'v':0x0056,
-      'w':0x0057,
-      'x':0x0058,
-      'y':0x0059,
-      'z':0x005A,
-      '0':0x0060,
-      '1':0x0061,
-      '2':0x0062,
-      '3':0x0063,
-      '4':0x0064,
-      '5':0x0065,
-      '6':0x0066,
-      '7':0x0067,
-      '8':0x0068,
-      '9':0x0069,
-      '*':0x006A,
-      '+':0x006B,
-      ',':0x006C,
-      '-':0x006D,
-      '.':0x006E,
-      '/':0x006F,
-      'F1':0x0070,
-      'F2':0x0071,
-      'F3':0x0072,
-      'F4':0x0073,
-      'F5':0x0074,
-      'F6':0x0075,
-      'F7':0x0076,
-      'F8':0x0077,
-      'F9':0x0078,
-      'F10':0x0079,
-      'F11':0x007A,
-      'F12':0x007B,
-      'LSHIFT':0x00A0,
-      'RSHIFT':0x00A1,
-      'LCONTROL':0x00A2,
-      'RCONTROL':0x00A3,
-      'LALT':0x00A4,
-      'RALT':0x00A5,
-      ':':0x00BA,
-      '+':0x00BB,
-      ',':0x00BC,
-      '-':0x00BD,
-      '.':0x00BE,
-      '?':0x00BF,
-      '~':0x00C0,
-      '[':0x00DB,
-      '\\':0x00DC,
-      ']':0x00DD,
-      '"':0x00DE,
-      '!':0x00DF,
-      '<':0x00E2,
-      'RETURN':0x000D
-    };
-  return keys[keyString];
-  }
-
-
-  ex.keyAtControl = function keyAtControl(input) {
-    if(debug) log('-- keyAtControl: '+input+' ');
-    var key = ex.keyCodeFromChar(input);
-    if(debug) log(key+' ');
-    $w32.user32.keybd_event(key, 0, 0, 0);
-    if(debug) log(' up ');
-    $w32.user32.keybd_event(key, 0, 0x0002, 0);
-    if(debug) log(' down\n');
-  }
-  ex.rightClickAtControl = function rightClickAtControl(control) {
-    var z = control.boundsOnScreen;
-    return ex.rightClickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
-  }
-  ex.scrollAt = function scrollAt(x, y, upOrDown) {
-    if(debug) log('-- scrollAt: '+x+' '+y+' upOrDown '+upOrDown+'\n');
-    ex.clickAt(x,y);
-    if(upOrDown > 0) {
-      ex.keyAtControl('UP');
-      ex.keyAtControl('UP');
-      ex.keyAtControl('UP');
-      ex.keyAtControl('UP');
-      ex.keyAtControl('UP');
-      ex.keyAtControl('UP');
-    }
-    else {
-      ex.keyAtControl('DOWN');
-      ex.keyAtControl('DOWN');
-      ex.keyAtControl('DOWN');
-      ex.keyAtControl('DOWN');
-      ex.keyAtControl('DOWN');
-      ex.keyAtControl('DOWN');
-    }
-  }
-  ex.scrollAtControl = function scrollAtControl(control, upOrDown) {
-    if(debug) log('-- scrollAtControl\n');
-    var z = control.boundsOnScreen;
-    ex.scrollAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2),upOrDown);
-  }
-  ex.clickAtControl = function clickAtControl(control) {
-    if(debug) log('-- clickAtControl\n');
-    var z = control.boundsOnScreen;
-    return ex.clickAt(Math.round(z.x + z.width/2) ,Math.round(z.y + z.height/2));
-  }
-  ex.clickAt = function clickAt(x,y) {
-    if(debug) log('-- clickAt '+x+' '+y+' ');
-    var dpi = Screens.active.scaleFactor;
-    var w = Screens.active.bounds.width;
-    var h = Screens.active.bounds.height;
-    if(debug) log(' dpi '+dpi+' ');
-    $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
-    //if(debug) log(' cursorhidden ');
-    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
-    $w32.user32.ShowCursor(1);
-    //if(debug) log(' cursorposset('+(x*dpi)+','+(y*dpi)+') ');
-    $w32.user32.mouse_event(0x8000|0x0001, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0);  //MOUSEMOVE 
-    $w32.user32.mouse_event(0x8000|0x0002, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0);  //LMOUSEDOWN 
-    if(debug) log(' lmousedown ');
-    $w32.user32.mouse_event(0x8000|0x0004, Math.round(((x/w))*65535), Math.round(((y/h))*65535), 0, 0); //LMOUSEUP
-    if(debug) log(' lmouseup\n');
-    //if(debug) log(' cursorshown ');
-  }
-  ex.rightClickAt = function rightClickAt(x,y) {
-    var dpi = Screens.active.scaleFactor;
-    //log('right clicking at: ('+x+','+y+') with desktop DPI: '+(96 * dpi));
-    $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
-    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
-    $w32.user32.ShowCursor(1);
-    $w32.user32.mouse_event(0x0008, 0, 0, 0, 0); //RMOUSEDOWN
-    $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
-  }
-
-  ex.writeImage = function writeImage(image, path) {
-    // TODO
-  }
-
-  ex.takeSnapshotOfActiveScreen = function takeSnapshotOfActiveScreen(path) {
-    var scaleFactor = 1; // don't use a scalefactor as we're dealing with winforms 100%.
-    var ix = Math.round($.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.X * scaleFactor);
-    var iy = Math.round($.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Y * scaleFactor);
-    var iw = Math.round($.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width * scaleFactor);
-    var ih = Math.round($.System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height * scaleFactor);
-    var image = new $.System.Drawing.Bitmap(iw, ih, $.System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-    var g = $.System.Drawing.Graphics.FromImage(image);
-    g.CopyFromScreen(ix, iy, ix, iy, new $.System.Drawing.Size(iw, ih), $.System.Drawing.CopyPixelOperation.SourceCopy);
-    image.Save(path, $.System.Drawing.Imaging.ImageFormat.Png);
-  }
-
-  ex.takeSnapshotOfActiveScreenToBase64 = function takeSnapshotOfActiveScreenToBase64() {
-    // TODO;
-    return "TODO";
-  }
-
-  ex.takeSnapshotOfTopWindow = function takeSnapshotOfTopWindow(path) {
-    var hwnd = $$.user32.GetForegroundWindow();
-    var topRect = new $$.structs['RECT'];
-    $$.user32.GetWindowRect(hwnd,topRect.ref());
-    var ix = topRect.left;
-    var iy = topRect.top;
-    var iw = Math.round(topRect.right - topRect.left);
-    var ih = Math.round(topRect.bottom - topRect.top);
-    var myImage = new $.System.Drawing.Bitmap(iw, ih);
-    var gr1 = $.System.Drawing.Graphics.FromImage(myImage);
-    var dc1 = gr1.GetHdc();
-    var dc2 = $$.user32.GetWindowDC(hwnd);
-    var result = $$.gdi32.BitBlt(dc1.pointer.rawpointer, 0, 0, iw, ih, dc2, 0, 0, 0x00cc0020);
-    gr1.ReleaseHdc(dc1);
-    myImage.Save(path, $.System.Drawing.Imaging.ImageFormat.Png);
-  }
-
-  ex.takeSnapshotOfWindowNumber = function takeSnapshotOfWindowNumber(windowNumber, path) {
-    var windows = $.System.Windows.Application.Current.Windows;
-    var count = windows.Count;
-    for(var i=0; i < count; i++) {
-      var item = windows.Item(i);
-      if(i == windowNumber) {
-        return ex.takeSnapshotOfWindow(item, path);
-      }
-    }
-  }
-  ex.takeSnapshotOfCurrentWindow = function takeSnapshotOfCurrentWindow(path) {
-    var windows = $.System.Windows.Application.Current.Windows;
-    var count = windows.Count;
-    for(var i=0; i < count; i++) {
-      var item = windows.Item(i);
-      if(item.IsActive)
-        return ex.takeSnapshotOfWindow(item, path);
-    }
-  }
-  ex.takeSnapshotOfWindow = function(windowObj, path) {
-    if(windowObj.native) windowObj = windowObj.native;
-    var scaleFactor = $.System.Windows.SystemParameters.Dpi/96;
-    var hwnd = (new $.System.Windows.Interop.WindowInteropHelper(windowObj)).EnsureHandle();
-    var ix = 0;
-    var iy = 0;
-    var iw = Math.round(windowObj.Width * scaleFactor);
-    var ih = Math.round(windowObj.Height * scaleFactor);
-    var myImage = new $.System.Drawing.Bitmap(iw, ih);
-    var gr1 = $.System.Drawing.Graphics.FromImage(myImage);
-    var dc1 = gr1.GetHdc();
-    var dc2 = $$.user32.GetWindowDC(hwnd.pointer.rawpointer);
-    var result = $$.gdi32.BitBlt(dc1.pointer.rawpointer, ix, iy, iw, ih, dc2, 0, 0, 0x00cc0020);
-    gr1.ReleaseHdc(dc1);
-    myImage.Save(path, $.System.Drawing.Imaging.ImageFormat.Png);
-  }
-  ex.takeSnapshotOfControl = function(c, path) {
-    if(c.native) c = c.native;
-    var rtb = new $.System.Windows.Media.Imaging.RenderTargetBitmap(
-      Math.ceil(c.RenderSize.Width), 
-      Math.ceil(c.RenderSize.Height),
-      96.00000000001, 
-      96.00000000001, 
-      $.System.Windows.Media.PixelFormats.Pbgra32);
-      var sourceBrush = new $.System.Windows.Media.VisualBrush(c);
-      var drawingVisual = new $.System.Windows.Media.DrawingVisual();
-      var drawingContext = drawingVisual.RenderOpen();
-      drawingContext.DrawRectangle(sourceBrush, 
-        new $.System.Windows.Media.Pen(), 
-        new $.System.Windows.Rect(new $.System.Windows.Point(0,0), new $.System.Windows.Point(c.RenderSize.Width,c.RenderSize.Height)));
-      
-      drawingContext.Close();
-      rtb.Render(drawingVisual);
-      var png = new $.System.Windows.Media.Imaging.PngBitmapEncoder();
-      png.Frames.Add($.System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
-      var stm = $.System.IO.File.Create(path);
-      png.Save(stm);
-  }
-  function setupShell(name, cmd) { /* Do nothing */ }
-  function runShell(name, cb, err, options) { spawnAndPump(tintexec + " "+" name.js", cb, err, options); }
-  function runBaseline(name, cb, err, options) { /* Do nothing */ }
-  function shutdownShell(name, cb) { /* Do nothing */ }
+  ex.setupShell = function setupShell(name, cmd) { /* Do nothing */ }
+  ex.runShell = function runShell(name, cb, err, options) { spawnAndPump(tintexec + " "+" name.js", cb, err, options); }
+  ex.runBaseline = function runBaseline(name, cb, err, options) { /* Do nothing */ }
+  ex.shutdownShell = function shutdownShell(name, cb) { /* Do nothing */ }
 
 } // END WINDOWS SPECIFIC CODE
 
@@ -634,7 +149,7 @@ function notok(code) {
   log(brightRedBegin+failureMark+colorEnd+' notok:['+code+']'+nl);
   exit(1);
 }
-
+ex.notok = notok;
 ex.log = function(e) { log(e); }
 
 if(process.argv[1] && process.argv[2] && process.argv[1].indexOf('utilities') > -1 && process.argv[2] != 'baseline' && process.argv[2] != 'tests') {
@@ -665,7 +180,7 @@ function test(item) {
       if(currentTest.timeout) {
         setTimeout(function() {
           log('timeout exceeded.'+nl);
-          log(ex.takeSnapshotOfActiveScreenToBase64(''));
+          log(ex.takeSnapshotOfActiveScreen());
           exit(1);
         }, 50000);
       }
@@ -676,5 +191,6 @@ function test(item) {
     }
   }
 }
+
 module.exports = ex;
 

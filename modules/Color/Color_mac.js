@@ -1,6 +1,9 @@
 module.exports = (function() {
+  if(global.__TINT.Color) {
+    return global.__TINT.Color;
+  }
   var $ = process.bridge.objc;
-  var utilities = require('Utilities');
+  var TinyColor = require('Color_base');
 
   /**
    * @class Color
@@ -22,11 +25,19 @@ module.exports = (function() {
     } else if(type.type === '@') {
       this.native = type;
     } else {
-      var rgba = utilities.parseColor(type);
-      if(rgba.r > 1) rgba.r = rgba.r / 255;
-      if(rgba.g > 1) rgba.g = rgba.g / 255;
-      if(rgba.b > 1) rgba.b = rgba.b / 255;
-      if(rgba.a > 1) rgba.a = rgba.a / 255;
+      var rgba = (new TinyColor(type)).toRgb();
+      if(rgba.r > 1) {
+        rgba.r = rgba.r / 255;
+      }
+      if(rgba.g > 1) {
+        rgba.g = rgba.g / 255;
+      }
+      if(rgba.b > 1) {
+        rgba.b = rgba.b / 255;
+      }
+      if(rgba.a > 1) {
+        rgba.a = rgba.a / 255;
+      }
       this.native = $.NSColor('colorWithRed',rgba.r,'green',rgba.g,'blue',rgba.b,'alpha',rgba.a);
     }
   }
@@ -60,5 +71,6 @@ module.exports = (function() {
    */
   Object.defineProperty(Color.prototype, 'alpha', { get:function() { return this.native('alphaComponent'); }});
 
+  global.__TINT.Color = Color;
   return Color;
 })();

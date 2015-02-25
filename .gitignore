@@ -56,3 +56,4 @@ Thumbs.db
 *Thumbs.db*
 test/memtests/*
 officialrelease.sh
+test/assets/test.html

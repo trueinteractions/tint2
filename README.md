@@ -115,3 +115,7 @@ Commercial support available at http://www.trueinteractions.com/
 
 Copyright &copy; 2014 True Interactions
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/trueinteractions/tint2/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

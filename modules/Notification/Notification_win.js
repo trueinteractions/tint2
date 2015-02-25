@@ -9,30 +9,11 @@ module.exports = (function() {
 
   function Notification()
   {
-    var events = {}, titlestring = "", textstring = "", subtitlestring = "", 
+    var titlestring = "", textstring = "", subtitlestring = "", 
         soundEnabled = false, actionbuttontitle = "",
         timeoutHandle = null, callbacks = [];
 
-    function fireEvent(event, args) {
-      if(events[event]) {
-        (events[event]).forEach(function(item) { 
-          item.apply(null,args); 
-        });
-      }
-    }
-
-    this.addEventListener = function(event, func) { 
-      if(!events[event]) {
-        events[event] = [];
-      }
-      events[event].push(func); 
-    };
-
-    this.removeEventListener = function(event, func) { 
-      if(events[event] && events[event].indexOf(func) != -1) {
-        events[event].splice(events[event].indexOf(func), 1); 
-      }
-    };
+    utils.defEvents(this);
 
     Object.defineProperty(this, 'title', {
       get:function() { return titlestring; },
@@ -91,7 +72,7 @@ module.exports = (function() {
       }
       var mouseDown = function() {
         clearTimeout(timeoutHandle);
-        fireEvent('click',['contents']);
+        this.fireEvent('click',['contents']);
         animateOut();
       }.bind(this);
 
@@ -116,7 +97,7 @@ module.exports = (function() {
       w.Content.AddLayoutConstraint(img, 'Right', '=', img, 'Left', 1.0, 50);
 
       var mouseDownSecond = function() {
-        fireEvent('click',['button']);
+        this.fireEvent('click',['button']);
         animateOut();
       }.bind(this);
 
@@ -125,7 +106,7 @@ module.exports = (function() {
       callbacks.push(mouseDownSecond);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
-      label.Content = actionbuttontitle == "" ? "Dismiss" : actionbuttontitle;
+      label.Content = actionbuttontitle === "" ? "Dismiss" : actionbuttontitle;
       label.Width = 40;
 
       btn.Content.InternalChildren.Add(label);
@@ -170,7 +151,7 @@ module.exports = (function() {
       w.Top = workarea.Y + workarea.Height - w.Height - 5;
       
       w.Show();
-      fireEvent('fired');
+      this.fireEvent('fired');
 
       // Set the timeout to animate in, animate out and close the window.
       var dur = new $.System.Windows.Duration($.System.TimeSpan.FromSeconds(0.175));

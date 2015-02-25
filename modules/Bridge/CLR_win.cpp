@@ -1,16 +1,14 @@
-
 #include <v8.h>
 #include <node.h>
-#include <node_buffer.h>
+#include <nan.h>
 #include <stdio.h>
 #include <vcclr.h>
 #include <vector>
 #include <msclr/marshal.h>
 #include <windows.h>
-#include <Shellapi.h>
-#include <comdef.h>
 #include "../AutoLayoutPanel.cpp"
 
+#using <mscorlib.dll>
 #using <System.dll>
 #using <System.Core.dll>
 #using <WPF/WindowsBase.dll>
@@ -28,21 +26,15 @@ using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
 
+// This keeps counts of how many objects the CLR is creating and
+// subsequently the callbacks (weak) to destroy them. It tests whether
+// V8 is actually releasing the C++ wrappers around pinned CLR objects,
+// it however, does not test if the CLR garbage collector is reclaiming
+// them.
+
 // #define GC_DEBUG 1
 
 extern "C" void uv_run_nowait();
-
-namespace v8 {
-  namespace internal {
-    class Object {};
-  }
-  struct HeapStatsUpdate {};
-}
-Persistent<Function> bufferConstructor;
-
-struct wrapv8obj {
-  v8::Persistent<v8::Function> function;
-};
 
 #ifndef SHGSI_ICON
 typedef struct _SHSTOCKICONINFO
@@ -170,8 +162,8 @@ typedef enum SHSTOCKICONID
 SHSTDAPI SHGetStockIconInfo(SHSTOCKICONID siid, UINT uFlags, __inout SHSTOCKICONINFO *psii);
 #endif
 
-Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
-System::String^ exceptionV82stringCLR(Handle<v8::Value> exception);
+v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
+System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
 /**
@@ -340,100 +332,33 @@ namespace TintInterop {
   };
 }
 
-
-namespace IEWebBrowserFix {
-  public ref class ScriptInterface
-  {
-  public:
-    ScriptInterface(v8::Persistent<v8::Function> cb) {
-      callback = new wrapv8obj();
-      callback->function = cb;
-    }
-    
-    [System::Runtime::InteropServices::ComVisibleAttribute(true)]
-    void postMessageBack(System::String^ str)
-    {
-      v8::HandleScope scope;
-      v8::Handle<v8::Value> argv[1];
-
-      argv[0] = MarshalCLRToV8(str);
-
-      v8::TryCatch try_catch;
-
-      if (this->callback->function.IsEmpty()) {
-        throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
-        abort();
-      } else {
-        // invoke the registered callback function
-        this->callback->function->Call(v8::Context::GetCurrent()->Global(), 1, argv);
-      }
-      if (try_catch.HasCaught()) {
-        throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
-        exit(1);
-      }
-    }
-
-  private:
-    wrapv8obj *callback;
-
-  };
-
-  static Handle<v8::Value> CreateScriptInterface(const v8::Arguments& args) {
-    HandleScope scope;
-    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
-    return scope.Close(MarshalCLRToV8(gcnew ScriptInterface(Persistent<Function>::New(callback))));
-  }
-  static bool SetBrowserFeatureControlKey(wstring feature, const wchar_t *appName, DWORD value) {
-    HKEY key;
-    bool success = true;
-    wstring featuresPath(L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\");
-    wstring path(featuresPath + feature);
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &key, NULL) != ERROR_SUCCESS)
-      success = false;
-    else {
-      if (RegSetValueExW(key, appName, 0, REG_DWORD, (const BYTE*) &value, sizeof(value)) != ERROR_SUCCESS) success = false;
-      if (RegCloseKey(key) != ERROR_SUCCESS) success = false;
-    } 
-    return success;
-  }
-
-  static void SetBrowserFeatureControl() {
-    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
-    System::String^ pName = process->Modules[0]->FileName;
-    array<wchar_t>^ delim = gcnew array<wchar_t>(1);
-    delim[0]='\\';
-    array<System::String^>^ path = pName->Split(delim);
-    pin_ptr<const wchar_t> fileNameP = PtrToStringChars(path[path->Length-1]);
-    const wchar_t *fileName = fileNameP;
-
-    SetBrowserFeatureControlKey(L"FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
-    SetBrowserFeatureControlKey(L"FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
-    SetBrowserFeatureControlKey(L"FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
-    SetBrowserFeatureControlKey(L"FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
-    SetBrowserFeatureControlKey(L"FEATURE_NINPUT_LEGACYMODE", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_SPELLCHECKING", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_VALIDATE_NAVIGATE_URL", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
-    SetBrowserFeatureControlKey(L"FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
-    SetBrowserFeatureControlKey(L"FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
-    SetBrowserFeatureControlKey(L"FEATURE_WEBSOCKET", fileName, 1);
-    SetBrowserFeatureControlKey(L"FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
-    SetBrowserFeatureControlKey(L"FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
-    SetBrowserFeatureControlKey(L"FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
-    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
-    SetBrowserFeatureControlKey(L"FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
-    SetBrowserFeatureControlKey(L"FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_ZONE_ELEVATION", fileName, 0);
-    SetBrowserFeatureControlKey(L"FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
-  }
-}
-
+#define DISPID_BEFORENAVIGATE2              250           // hyperlink clicked on
+#define DISPID_NEWWINDOW2                   251
+#define DISPID_NAVIGATECOMPLETE2            252           // UIActivate new document
+#define DISPID_ONQUIT                       253
+#define DISPID_ONVISIBLE                    254           // sent when the window goes visible/hidden
+#define DISPID_ONTOOLBAR                    255           // sent when the toolbar should be shown/hidden
+#define DISPID_ONMENUBAR                    256           // sent when the menubar should be shown/hidden
+#define DISPID_ONSTATUSBAR                  257           // sent when the statusbar should be shown/hidden
+#define DISPID_ONFULLSCREEN                 258           // sent when kiosk mode should be on/off
+#define DISPID_DOCUMENTCOMPLETE             259           // new document goes ReadyState_Complete
+#define DISPID_ONTHEATERMODE                260           // sent when theater mode should be on/off
+#define DISPID_ONADDRESSBAR                 261           // sent when the address bar should be shown/hidden
+#define DISPID_WINDOWSETRESIZABLE           262           // sent to set the style of the host window frame
+#define DISPID_WINDOWCLOSING                263           // sent before script window.close closes the window 
+#define DISPID_WINDOWSETLEFT                264           // sent when the put_left method is called on the WebOC
+#define DISPID_WINDOWSETTOP                 265           // sent when the put_top method is called on the WebOC
+#define DISPID_WINDOWSETWIDTH               266           // sent when the put_width method is called on the WebOC
+#define DISPID_WINDOWSETHEIGHT              267           // sent when the put_height method is called on the WebOC 
+#define DISPID_CLIENTTOHOSTWINDOW           268           // sent during window.open to request conversion of dimensions
+#define DISPID_SETSECURELOCKICON            269           // sent to suggest the appropriate security icon to show
+#define DISPID_FILEDOWNLOAD                 270           // Fired to indicate the File Download dialog is opening
+#define DISPID_NAVIGATEERROR                271           // Fired to indicate the a binding error has occured
+#define DISPID_PRIVACYIMPACTEDSTATECHANGE   272           // Fired when the user's browsing experience is impacted
+#define DISPID_NEWWINDOW3                   273
+#define DISPID_VIEWUPDATE                   281           // Fired when the contents of a shell browser window change
+#define DISPID_SETPHISHINGFILTERSTATUS      282           // Fired by the Phishing Filter API to signal what state the analysis is in
+#define DISPID_WINDOWSTATECHANGED           283           // Fired to indicate that the browser window's visibility or enabled state has changed
 
 /**
  ** Begin CLR Bridge Code
@@ -449,6 +374,12 @@ void gchandle_cleanup(char *data, void *hint) {
   handle.Free();
 }
 
+
+// Extracts a C string from a V8 Utf8Value.
+// static const char* ToCString(const v8::String::Utf8Value& value) {
+//	return *value ? *value : "<string conversion failed>";
+// }
+
 // This does not seem to be executed but is the call back for when we have .NET objects,
 // when have properties that are pointers, that those pointers are passed back to JS (for example)
 // WPF Window .NET CLR object has a property called HWND which is the native win32
@@ -461,34 +392,34 @@ void wrap_cb(char *data, void *hint) { }
 
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
-    HandleScope scope;
-    v8::String::Utf8Value utf8text(text);
-    if (*utf8text)
-        return gcnew System::String(*utf8text, 0, utf8text.length(), System::Text::Encoding::UTF8);
-    else
-        return System::String::Empty;
+  NanEscapableScope();
+  v8::String::Utf8Value utf8text(text);
+  if (*utf8text)
+      return gcnew System::String(*utf8text, 0, utf8text.length(), System::Text::Encoding::UTF8);
+  else
+      return System::String::Empty;
 }
 
 Handle<v8::String> stringCLR2V8(System::String^ text)
 {
-    HandleScope scope;
-    if (text->Length > 0)
-    {
-      const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
-      v8::Handle<v8::String> v8str = v8::String::New(str);
-      Marshal::FreeHGlobal(IntPtr((void *)str));
-      return scope.Close(v8str);
-    }
-    else
-      return scope.Close(v8::String::Empty());
+  NanEscapableScope();
+  if (text->Length > 0)
+  {
+    const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
+    v8::Local<v8::String> v8str = NanNew<v8::String>(str);
+    Marshal::FreeHGlobal(IntPtr((void *)str));
+    return NanEscapeScope(v8str);
+  }
+  else
+    return NanEscapeScope(v8::String::Empty(v8::Isolate::GetCurrent()));
 }
 
-System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
+System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception)
 {
-  HandleScope scope;
+  NanEscapableScope();
   if (exception->IsObject())
   {
-    Handle<Value> stack = exception->ToObject()->Get(v8::String::NewSymbol("stack"));
+	Handle<Value> stack = exception->ToObject()->Get(NanNew<v8::String>("stack"));
     if (stack->IsString())
       return gcnew System::String(stringV82CLR(stack->ToString()));
   }
@@ -497,22 +428,23 @@ System::String^ exceptionV82stringCLR(Handle<v8::Value> exception)
 
 Handle<Value> throwV8Exception(Handle<Value> exception)
 {
-  HandleScope scope;
-  return scope.Close(ThrowException(exception));
+  NanEscapableScope();
+  NanThrowError(exception);
+  return NanEscapeScope(exception);
 }
 
-Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
+v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
 {
-  HandleScope scope;
-  Handle<v8::Value> jsdata;
+  NanEscapableScope();
+  v8::Handle<v8::Value> jsdata;
 
-  if (netdata == nullptr)
-      return scope.Close(Null());
-
+  if (netdata == nullptr) {
+	  return NanEscapeScope(v8::Null(v8::Isolate::GetCurrent()));
+  }
   System::Type^ type = netdata->GetType();
   if (type == System::String::typeid)         jsdata = stringCLR2V8((System::String^)netdata);
   else if (type == System::Char::typeid)      jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
-  else if (type == bool::typeid)              jsdata = v8::Boolean::New((bool)netdata);
+  else if (type == bool::typeid)              jsdata = NanNew<v8::Boolean>((bool)netdata);
   else if (type == System::Guid::typeid)      jsdata = stringCLR2V8(netdata->ToString());
   else if (type == System::DateTime::typeid)
   {
@@ -523,137 +455,137 @@ Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
         dt = gcnew System::DateTime(dt->Ticks, System::DateTimeKind::Utc);
     long long MinDateTimeTicks = 621355968000000000; // new DateTime(1970, 1, 1, 0, 0, 0).Ticks;
     long long value = ((dt->Ticks - MinDateTimeTicks) / 10000);
-    jsdata = v8::Date::New((double)value);
+    delete dt;
+    jsdata = v8::Date::New(v8::Isolate::GetCurrent(),(double)value);
   }
   else if (type == System::DateTimeOffset::typeid)  jsdata = stringCLR2V8(netdata->ToString());
-  else if (type == int::typeid)                     jsdata = v8::Integer::New((int)netdata);
-  else if (type == System::Int64::typeid)           jsdata = v8::Number::New(((System::IConvertible^)netdata)->ToDouble(nullptr));
-  else if (type == double::typeid)                  jsdata = v8::Number::New((double)netdata);
-  else if (type == float::typeid)                   jsdata = v8::Number::New((float)netdata);
-  else if (type == cli::array<byte>::typeid)
-  {
-    cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
-    node::Buffer* slowBuffer = node::Buffer::New(buffer->Length);
-    if (buffer->Length > 0)
-    {
-      pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
-      memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
-    }
-    Handle<v8::Value> args[] = { slowBuffer->handle_, v8::Integer::New(buffer->Length), v8::Integer::New(0) };
-    jsdata = bufferConstructor->NewInstance(3, args);
-    (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("array"), v8::Boolean::New(true));
-  } else {
+  else if (type == int::typeid)                     jsdata = NanNew<v8::Integer>((int)netdata);
+  else if (type == System::Int64::typeid)           jsdata = NanNew<v8::Number>(((System::IConvertible^)netdata)->ToDouble(nullptr));
+  else if (type == double::typeid)                  jsdata = NanNew<v8::Number>((double)netdata);
+  else if (type == float::typeid)                   jsdata = NanNew<v8::Number>((float)netdata);
+  //else if (type == cli::array<byte>::typeid)
+  //{
+  //  cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
+  //  if (buffer->Length > 0)
+  //  {
+  //    v8::Handle<v8::Value> slowBuffer = NanNewBufferHandle(buffer->Length);
+  //    pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
+  //    memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
+  //  }
+  //  (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("array"), NanNew<v8::Boolean>(true));
+  //  jsdata = slowBuffer;
+  //} 
+  else {
 #ifdef GC_DEBUG
-  CppClassCount++;
+    CppClassCount++;
 #endif
     GCHandle handle = GCHandle::Alloc(netdata);
     void *ptr = GCHandle::ToIntPtr(handle).ToPointer();
-    node::Buffer *buf = node::Buffer::New((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
-    jsdata = buf->handle_;
+    jsdata = NanNewBufferHandle((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
     if(type == System::IntPtr::typeid) {
       void *rawptr = ((System::IntPtr ^)netdata)->ToPointer();
-      node::Buffer *bufptr = node::Buffer::New((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
-      (v8::Handle<v8::Object>::Cast(jsdata))->Set(v8::String::NewSymbol("rawpointer"), bufptr->handle_);
+      v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
+      (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("rawpointer"), bufptr);
     }
   }
-  return scope.Close(jsdata);
+  return NanEscapeScope(jsdata);
 }
 
 Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
 {
-    HandleScope scope;
-    Handle<v8::Object> result = v8::Object::New();
-    System::Type^ type = netdata->GetType();
+  NanEscapableScope();
+  Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
+  System::Type^ type = netdata->GetType();
 
-    // Avoid stack overflow due to self-referencing reflection elements
-    if (0 == System::String::Compare(type->FullName, "System.Reflection.RuntimeMethodInfo"))
-        return scope.Close(result);
+  // Avoid stack overflow due to self-referencing reflection elements
+  if (0 == System::String::Compare(type->FullName, "System.Reflection.RuntimeMethodInfo"))
+      return NanEscapeScope(result);
 
-    for each (FieldInfo^ field in type->GetFields(BindingFlags::Public | BindingFlags::Instance))
-        result->Set(stringCLR2V8(field->Name), MarshalCLRToV8(field->GetValue(netdata)));
+  for each (FieldInfo^ field in type->GetFields(BindingFlags::Public | BindingFlags::Instance))
+      result->Set(stringCLR2V8(field->Name), MarshalCLRToV8(field->GetValue(netdata)));
 
-    for each (PropertyInfo^ property in type->GetProperties(BindingFlags::GetProperty | BindingFlags::Public | BindingFlags::Instance))
-    {
-        MethodInfo^ getMethod = property->GetGetMethod();
-        if (getMethod != nullptr && getMethod->GetParameters()->Length <= 0)
-            result->Set(stringCLR2V8(property->Name), MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
-    }
-    return scope.Close(result);
+  for each (PropertyInfo^ property in type->GetProperties(BindingFlags::GetProperty | BindingFlags::Public | BindingFlags::Instance))
+  {
+      MethodInfo^ getMethod = property->GetGetMethod();
+      if (getMethod != nullptr && getMethod->GetParameters()->Length <= 0)
+          result->Set(stringCLR2V8(property->Name), MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
+  }
+  return NanEscapeScope(result);
 }
 
-System::Object^ MarshalV8ToCLR(Handle<v8::Value> jsdata)
+System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
 {
-    HandleScope scope;
-    if (jsdata->IsArray())
+  NanEscapableScope();
+  if (jsdata->IsArray())
+  {
+    Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
+    cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
+    for (unsigned int i = 0; i < jsarray->Length(); i++)
+        netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
+    return netarray;
+  }
+  else if (jsdata->IsDate())
+  {
+    Handle<v8::Date> jsdate = Handle<v8::Date>::Cast(jsdata);
+    long long  ticks = (long long)jsdate->NumberValue();
+    long long MinDateTimeTicks = 621355968000000000;// (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
+    System::DateTime ^netobject = gcnew System::DateTime(ticks * 10000 + MinDateTimeTicks, System::DateTimeKind::Utc);
+    return netobject;
+  }
+  else if (jsdata->IsString())      return stringV82CLR(Handle<v8::String>::Cast(jsdata));
+  else if (jsdata->IsBoolean())     return jsdata->BooleanValue();
+  else if (jsdata->IsInt32())       return jsdata->Int32Value();
+  else if (jsdata->IsUint32())      return jsdata->Uint32Value();
+  else if (jsdata->IsNumber())      return jsdata->NumberValue();
+  else if (jsdata->IsUndefined() || 
+    jsdata->IsNull())               return nullptr;
+  else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(NanNew<v8::String>("array"))->BooleanValue()) {
+    Handle<v8::Object> jsbuffer = jsdata->ToObject();
+    cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
+    if (netbuffer->Length > 0) 
     {
-      Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
-      cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
-      for (unsigned int i = 0; i < jsarray->Length(); i++)
-          netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
-      return netarray;
+      pin_ptr<byte> pinnedNetbuffer = &netbuffer[0];
+      memcpy(pinnedNetbuffer, node::Buffer::Data(jsbuffer), netbuffer->Length);
     }
-    else if (jsdata->IsDate())
+    return netbuffer;
+  }
+  else if (node::Buffer::HasInstance(jsdata)) 
+  {
+    void *data = (void *)node::Buffer::Data(jsdata.As<v8::Object>());
+    GCHandle handle = GCHandle::FromIntPtr(IntPtr(data));
+    return handle.Target;
+  }
+  else if (jsdata->IsObject()) 
+  {
+    System::Collections::Generic::IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
+    Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
+    Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
+    for (unsigned int i = 0; i < propertyNames->Length(); i++)
     {
-      Handle<v8::Date> jsdate = Handle<v8::Date>::Cast(jsdata);
-      long long  ticks = (long long)jsdate->NumberValue();
-      long long MinDateTimeTicks = 621355968000000000;// (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
-      System::DateTime ^netobject = gcnew System::DateTime(ticks * 10000 + MinDateTimeTicks, System::DateTimeKind::Utc);
-      return netobject;
+        Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
+        v8::String::Utf8Value utf8name(name);
+        System::String^ netname = gcnew System::String(*utf8name);
+        System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
+        netobject->Add(netname, netvalue);
     }
-    else if (jsdata->IsString())      return stringV82CLR(Handle<v8::String>::Cast(jsdata));
-    else if (jsdata->IsBoolean())     return jsdata->BooleanValue();
-    else if (jsdata->IsInt32())       return jsdata->Int32Value();
-    else if (jsdata->IsUint32())      return jsdata->Uint32Value();
-    else if (jsdata->IsNumber())      return jsdata->NumberValue();
-    else if (jsdata->IsUndefined() || 
-      jsdata->IsNull())               return nullptr;
-    else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(v8::String::NewSymbol("array"))->BooleanValue()) {
-      Handle<v8::Object> jsbuffer = jsdata->ToObject();
-      cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
-      if (netbuffer->Length > 0) 
-      {
-        pin_ptr<byte> pinnedNetbuffer = &netbuffer[0];
-        memcpy(pinnedNetbuffer, node::Buffer::Data(jsbuffer), netbuffer->Length);
-      }
-      return netbuffer;
-    }
-    else if (node::Buffer::HasInstance(jsdata)) 
-    {
-      void *data = (void *)node::Buffer::Data(jsdata.As<v8::Object>());
-      GCHandle handle = GCHandle::FromIntPtr(IntPtr(data));
-      return handle.Target;
-    }
-    else if (jsdata->IsObject()) 
-    {
-      System::Collections::Generic::IDictionary<System::String^,System::Object^>^ netobject = gcnew System::Dynamic::ExpandoObject();
-      Handle<v8::Object> jsobject = Handle<v8::Object>::Cast(jsdata);
-      Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
-      for (unsigned int i = 0; i < propertyNames->Length(); i++)
-      {
-          Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
-          v8::String::Utf8Value utf8name(name);
-          System::String^ netname = gcnew System::String(*utf8name);
-          System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
-          netobject->Add(netname, netvalue);
-      }
-      return netobject;
-    }
-    else
-      throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
+    return netobject;
+  }
+  else
+    throw gcnew System::Exception("Unable to convert V8 value to CLR value.");
 }
 
-Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
+v8::Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
 {
-  HandleScope scope;
+  NanEscapableScope();
   Handle<v8::Object> result;
   Handle<v8::String> message;
   Handle<v8::String> name;
 
   if (exception == nullptr)
   {
-    result = v8::Object::New();
-    message = v8::String::New("Unrecognized exception thrown by CLR.");
-    name = v8::String::New("InternalException");
+    result = v8::Object::New(v8::Isolate::GetCurrent());
+    message = NanNew<v8::String>("Unrecognized exception thrown by CLR.");
+    name = NanNew<v8::String>("InternalException");
   }
   else
   {
@@ -678,12 +610,12 @@ Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
   // Construct an error that is just used for the prototype - not verify efficient
   // but 'typeof Error' should work in JavaScript
   result->SetPrototype(v8::Exception::Error( message));
-  result->Set(v8::String::NewSymbol("message"), message);
+  result->Set(NanNew<v8::String>("message"), message);
   
   // Recording the actual type - 'name' seems to be the common used property
-  result->Set(v8::String::NewSymbol("name"), name);
+  result->Set(NanNew<v8::String>("name"), name);
 
-  return scope.Close(result);
+  return NanEscapeScope(result);
 }
 
 static int countFound = 0;
@@ -701,27 +633,26 @@ public:
     Delete();
     delete cppobject;
   }
-  void SetCallback(v8::Persistent<v8::Function> cb) {
-    callback = new wrapv8obj();
-    callback->function = cb;
+  void SetCallback(v8::Local<v8::Function> cb) {
+    callback = new NanCallback(cb);
   }
   void *GetReference() {
     return cppobject;
   }
   void PassThru(... cli::array<System::Object^>^ args) {
-    v8::HandleScope scope;
+    NanEscapableScope();
     std::vector<v8::Handle<v8::Value>> argv;
     v8::TryCatch try_catch;
 
     for(int i=0; i < args->Length; i++) 
       argv.push_back(MarshalCLRToV8(args[i]));
 
-    if (this->callback == NULL || this->callback->function.IsEmpty()) {
-      ThrowException(v8::Exception::Error(v8::String::New("CLR fatal: Callback has been garbage collected.")));
+    if (this->callback == NULL || this->callback->IsEmpty()) {
+      throw gcnew System::Exception("CLR Fatal (PassThru): Callback has been garbage collected.");
       exit(1);
     } else {
       // invoke the registered callback function
-      this->callback->function->Call(v8::Context::GetCurrent()->Global(), args->Length, argv.data());
+	  callback->Call(args->Length, argv.data());
     }
     if (try_catch.HasCaught())
       try_catch.ReThrow();
@@ -729,8 +660,6 @@ public:
 
   void Delete() {
     if(callback) {
-      callback->function.Dispose();
-      callback->function.Clear();
       delete callback;
       callback = NULL;
       delete this;
@@ -738,7 +667,7 @@ public:
   }
 
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
-    v8::HandleScope scope;
+    NanEscapableScope();
     v8::Handle<v8::Value> argv[2];
 
     argv[0] = MarshalCLRToV8(sender);
@@ -746,12 +675,12 @@ public:
 
     v8::TryCatch try_catch;
 
-    if (this->callback == NULL || this->callback->function.IsEmpty()) {
-      throw gcnew System::Exception("CLR Fatal: Callback has been garbage collected.");
+    if (this->callback == NULL || this->callback->IsEmpty()) {
+      throw gcnew System::Exception("CLR Fatal (EventHandler): Callback has been garbage collected.");
       exit(1);
     } else {
       // invoke the registered callback function
-      this->callback->function->Call(v8::Context::GetCurrent()->Global(), 2, argv);
+      this->callback->Call(2, argv);
     }
     if (try_catch.HasCaught()) {
       throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
@@ -762,7 +691,7 @@ public:
     return id;
   }
 private:
-  wrapv8obj *callback;
+  NanCallback *callback;
   gcroot<CLREventHandler ^> * cppobject;
   int id;
 };
@@ -778,46 +707,47 @@ class CLR {
 public:
 
 #ifdef GC_DEBUG
-  static Handle<v8::Value> GetCppClassCount(const v8::Arguments& args) {
-    HandleScope scope;
-    return scope.Close(v8::Number::New(CppClassCount));
+  static NAN_METHOD(GetCppClassCount) {
+    NanScope();
+    NanReturnValue(v8::Number::New(CppClassCount));
   }
 #endif
 
-  static Handle<v8::Value> GetReferencedAssemblies(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetReferencedAssemblies) {
+    NanScope();
     try {
       array<System::Reflection::AssemblyName^>^ assemblies = System::Reflection::Assembly::GetExecutingAssembly()->GetReferencedAssemblies();
-      return scope.Close(MarshalCLRToV8(assemblies));
+      NanReturnValue(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+		  NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> GetLoadedAssemblies(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetLoadedAssemblies) {
+	NanScope();
     try {
       array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
-      return scope.Close(MarshalCLRToV8(assemblies));
+      NanReturnValue(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> LoadAssemblyFromMemory(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(LoadAssemblyFromMemory) {
+	NanScope();
     try {
       System::String^ assemblyName = stringV82CLR(args[0]->ToString());
       System::Reflection::Assembly^ assembly = System::Reflection::Assembly::Load(assemblyName);
-      return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
+      delete assemblyName;
+      NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   /** Load an Execution of DOTNET CLR **/
-  static Handle<v8::Value> LoadAssembly(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(LoadAssembly) {
+    NanScope();
     try {
       System::String^ userpath = stringV82CLR(args[0]->ToString());
 
@@ -839,47 +769,56 @@ public:
       else
         assembly = System::Reflection::Assembly::Load(userpath);
 
-      return scope.Close(MarshalCLRToV8(assembly->GetTypes()));
-
+      delete netPath;
+      delete version;
+      delete installRoot;
+      delete netFramework;
+      delete framworkRegPath;
+      delete userpath;
+	  NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> GetCLRType(const v8::Arguments& args) {
-    HandleScope scope;
-    System::Object^ target = MarshalV8ToCLR(args[0]);
-    return scope.Close(MarshalCLRToV8(target->GetType()));
+  static NAN_METHOD(GetCLRType) {
+    NanScope();
+    try {
+      System::Object^ target = MarshalV8ToCLR(args[0]);
+      NanReturnValue(MarshalCLRToV8(target->GetType()));
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+    }
   }
 
-  static Handle<v8::Value> GetStaticMemberTypes(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetStaticMemberTypes) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Static | 
         BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
-  static Handle<v8::Value> GetMemberTypes(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(GetMemberTypes) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Instance | 
         BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
-  static Handle<v8::Value> ExecNew(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecNew) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
 
@@ -891,14 +830,14 @@ public:
 
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecSetField(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecSetField) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[3]);
@@ -910,14 +849,18 @@ public:
 
       baseType->GetField(field,
         BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->SetValue(target, value);
-      return scope.Close(Undefined());
+      
+      delete baseType;
+      delete field;
+
+      NanReturnUndefined();
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticField(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticField) {
+    NanScope();
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
@@ -930,14 +873,16 @@ public:
          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
 
       System::Object^ rtn = fieldinfo->GetValue(nullptr);
-      return scope.Close(MarshalCLRToV8(rtn));
+      delete fieldinfo;
+      delete field;
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetField(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetField) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
@@ -949,15 +894,19 @@ public:
          BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
 
       System::Object^ rtn = fieldinfo->GetValue(target);
+      
+      delete fieldinfo;
+      delete baseType;
+      delete field;
 
-      return scope.Close(MarshalCLRToV8(rtn));
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticMethodObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticMethodObject) {
+    NanScope();
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ method = stringV82CLR(args[1]->ToString());
@@ -971,14 +920,16 @@ public:
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
         nullptr, cshargs, nullptr);
 
-      return scope.Close(MarshalCLRToV8(rtn));
+      delete method;
+      delete cshargs;
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetMethodObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetMethodObject) {
+    NanScope();
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ method = stringV82CLR(args[1]->ToString());
@@ -995,9 +946,9 @@ public:
           // be reflected types we'll try jut a name match.
           MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
           if(rtnl == nullptr)
-            return scope.Close(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
+            NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
           else
-            return scope.Close(MarshalCLRToV8(rtnl));
+            NanReturnValue(MarshalCLRToV8(rtnl));
         }
       }
 
@@ -1006,141 +957,149 @@ public:
         nullptr,
         cshargs,
         nullptr);
-
-      return scope.Close(MarshalCLRToV8(rtn));
+      delete method;
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticPropertyObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticPropertyObject) {
+    NanScope();
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
       PropertyInfo^ rtn = target->GetProperty(property,  
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
-      return scope.Close(MarshalCLRToV8(rtn));
+      delete property;
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetPropertyObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetPropertyObject) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
       try {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
-        return scope.Close(MarshalCLRToV8(rtn));
+        delete property;
+        NanReturnValue(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
-        return scope.Close(MarshalCLRToV8(rtn));
+        delete property;
+        NanReturnValue(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated.
-  static Handle<v8::Value> ExecMethodObject(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecMethodObject) {
+    NanScope();
     try {
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
       System::Object^ target = MarshalV8ToCLR(args[1]);
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-      for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
-
+	  for (int i = 0; i < argSize; i++) {
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]), i);
+	  }
       System::Object^ rtn = method->Invoke(target, cshargs);
-
-      return scope.Close(MarshalCLRToV8(rtn));
+  
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecPropertyGet(const v8::Arguments &args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecPropertyGet) {
+    NanEscapableScope();
     try {
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
-      return scope.Close(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
+      NanReturnValue(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecPropertySet(const v8::Arguments &args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecPropertySet) {
+    NanScope();
     try {
       PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
       prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecSetProperty(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecSetProperty) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::Object^ value = MarshalV8ToCLR(args[2]);
       System::String^ field = stringV82CLR(args[1]->ToString());
       target->GetType()->GetProperty(field)->SetValue(target, value);
-      return scope.Close(Undefined());
+      delete field;
+      NanReturnUndefined();
     } catch(System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetStaticProperty(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetStaticProperty) {
+    NanScope();
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = target->GetProperty(property,
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
-      return scope.Close(MarshalCLRToV8(rtn));
+      delete property;
+      delete target;
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecGetProperty(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecGetProperty) {
+	NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
       try {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
-        return scope.Close(MarshalCLRToV8(rtn));
+        delete property;
+		delete target;
+        NanReturnValue(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
-        return scope.Close(MarshalCLRToV8(rtn));
+		NanReturnValue(MarshalCLRToV8(rtn));
       }
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+	  NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecStaticMethod(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecStaticMethod) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-      for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
-
+	  for (int i = 0; i < argSize; i++) {
+        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]), i);
+	  }
       System::Type^ type = (System::Type ^)target;
       System::String^ method = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
@@ -1149,14 +1108,17 @@ public:
         target,
         cshargs);
 
-      return scope.Close(MarshalCLRToV8(rtn));
+      delete cshargs;
+      delete type;
+      delete method;
+      NanReturnValue(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecMethod(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecMethod) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       int argSize = args.Length() - 2;
@@ -1172,16 +1134,17 @@ public:
         nullptr,
         target,
         cshargs);
-
-      return scope.Close(MarshalCLRToV8(rtn));
-    } 
-    catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      delete cshargs;
+      delete type;
+      delete method;
+      NanReturnValue(MarshalCLRToV8(rtn));
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
-  static Handle<v8::Value> ExecMethodObjectAsync(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecMethodObjectAsync) {
+    NanScope();
     try {
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
       System::Object^ target = MarshalV8ToCLR(args[1]);
@@ -1195,50 +1158,147 @@ public:
       System::ComponentModel::BackgroundWorker^ worker = gcnew System::ComponentModel::BackgroundWorker();
       worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(del, &(TintInterop::AsyncEventDelegate::DoWorkHandler));
       worker->RunWorkerAsync();
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } 
     catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static void CLR::HandleMessageLoop(System::Windows::Interop::MSG% msg, bool% handled) {
-    if(msg.message == WM_APP+1)
+    if(msg.message == WM_APP+1) {
       uv_run_nowait();
+    }
   }
 
-  static Handle<v8::Value> ExecAddEvent(const v8::Arguments& args) {
-    HandleScope scope;
+  static NAN_METHOD(ExecAddEvent) {
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ event = stringV82CLR(args[1]->ToString());
       System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
       v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
       CLREventHandler ^handle = gcnew CLREventHandler();
-      Persistent<Function> js_callback = Persistent<Function>::New(callback);
-      handle->SetCallback(js_callback);
-      js_callback.MakeWeak(handle->GetReference(), CLREventHandleCleanupJS);
+	  handle->SetCallback(callback);
       System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
       System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
       eInfo->AddEventHandler(target, d);
-
-      return scope.Close(Undefined());
+      NanReturnUndefined();
     } catch (System::Exception^ e) {
-      return scope.Close(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
 };
 
 
+namespace IEWebBrowserFix {
+  public ref class ScriptInterface
+  {
+  public:
+    ScriptInterface(v8::Local<v8::Function> cb) {
+      NanEscapableScope();
+      callback = new NanCallback(cb);
+    }
+    
+    [System::Runtime::InteropServices::ComVisibleAttribute(true)]
+    void postMessageBack(System::String^ str)
+    {
+      NanEscapableScope();
+      v8::Handle<v8::Value> argv[1];
+
+      argv[0] = MarshalCLRToV8(str);
+
+      v8::TryCatch try_catch;
+
+      if (this->callback->IsEmpty()) {
+        throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
+		exit(1);
+      } else {
+        // invoke the registered callback function
+        this->callback->Call(1, argv);
+      }
+      if (try_catch.HasCaught()) {
+        throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
+        exit(1);
+      }
+    }
+
+  private:
+	NanCallback *callback;
+
+  };
+
+  static NAN_METHOD(CreateScriptInterface) {
+	NanEscapableScope();
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
+    NanReturnValue(MarshalCLRToV8(gcnew ScriptInterface(NanEscapeScope(callback))));
+  }
+
+  static void SetBrowserFeatureControlKey(System::Security::Permissions::RegistryPermission^ perms, System::String^ feature, System::String^ fileName, DWORD value) {
+    System::String^ HKCU = "HKEY_CURRENT_USER\\Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    System::String^ HKCU32 = "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    System::String^ HKLM = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    System::String^ HKLM32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+
+    try {
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKCU);
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKCU32);
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM);
+      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM32);
+      Microsoft::Win32::Registry::SetValue(HKCU, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      Microsoft::Win32::Registry::SetValue(HKCU32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      Microsoft::Win32::Registry::SetValue(HKLM, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      Microsoft::Win32::Registry::SetValue(HKLM32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+    } catch (System::Exception^ e) {
+      // Absorb the potential error message coming through and keep moving; its
+      // a security exception that will exist on specific policy groups of windows.
+      // Unfortunately this means whatever feature control we'd like to turn on, 
+      // we cannot.
+    }
+  }
+
+  static void SetBrowserFeatureControl() {
+    System::Security::Permissions::RegistryPermission^ perms = gcnew System::Security::Permissions::RegistryPermission(System::Security::Permissions::PermissionState::Unrestricted);
+    System::Diagnostics::Process ^process = System::Diagnostics::Process::GetCurrentProcess();
+    System::String^ fileName = System::IO::Path::GetFileName(process->MainModule->FileName);
+
+    SetBrowserFeatureControlKey(perms, "FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+    SetBrowserFeatureControlKey(perms, "FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering
+    SetBrowserFeatureControlKey(perms, "FEATURE_IVIEWOBJECTDRAW_DMLT9_WITH_GDI  ", fileName, 0); // force directX
+    SetBrowserFeatureControlKey(perms, "FEATURE_NINPUT_LEGACYMODE", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_DISABLE_NAVIGATION_SOUNDS", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_SCRIPTURL_MITIGATION", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_SPELLCHECKING", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_STATUS_BAR_THROTTLING", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_VALIDATE_NAVIGATE_URL", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_WEBOC_DOCUMENT_ZOOM", fileName, 1); // allow zoom.
+    SetBrowserFeatureControlKey(perms, "FEATURE_WEBOC_POPUPMANAGEMENT", fileName, 0); // disallow auto-popups
+    SetBrowserFeatureControlKey(perms, "FEATURE_ADDON_MANAGEMENT", fileName, 0); // disallow auto-addons/plugins
+    SetBrowserFeatureControlKey(perms, "FEATURE_WEBSOCKET", fileName, 1);
+    SetBrowserFeatureControlKey(perms, "FEATURE_WINDOW_RESTRICTIONS", fileName, 0); // disallow popups
+    SetBrowserFeatureControlKey(perms, "FEATURE_SECURITYBAND", fileName, 0); // disallow security band (still retains security)
+    SetBrowserFeatureControlKey(perms, "FEATURE_LOCALMACHINE_LOCKDOWN", fileName, 1); // allow file's to integrate with IWebBrowser JS execute.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BLOCK_LMZ_SCRIPT", fileName, 0); // disable activeX security band warnings on local scripts.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BLOCK_LMZ_OBJECT", fileName, 0); // disable activeX security.
+    SetBrowserFeatureControlKey(perms, "FEATURE_RESTRICT_ACTIVEXINSTALL", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_PROTOCOL_LOCKDOWN", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_ZONE_ELEVATION", fileName, 0);
+    SetBrowserFeatureControlKey(perms, "FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
+  }
+}
+
+
 extern "C" void CLR_Init(Handle<v8::Object> target) {
+  NanScope();
+
   // Fix registry and "FEATURE" controls, these help align IE with a normal behavior
   // expected (on a per app registry setting basis).  This does not set global registry
   // values for anything outside of our application.
   IEWebBrowserFix::SetBrowserFeatureControl();
-
-  bufferConstructor = Persistent<Function>::New(Handle<Function>::Cast(
-      Context::GetCurrent()->Global()->Get(v8::String::New("Buffer"))));
 
   // OLD, non-optimized execution methods.
   NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
@@ -1271,8 +1331,7 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
   NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
 
-  NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
-  
+  NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);  
 #ifdef GC_DEBUG
   NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);
 #endif

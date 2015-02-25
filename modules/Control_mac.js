@@ -141,28 +141,46 @@ module.exports = (function() {
     }
 
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
-    options.delegates.forEach(function(item) {
-      nativeViewExtended.addMethod(item[0],item[1],item[2]);
-    });
+    options.delegates.forEach(function(item) { nativeViewExtended.addMethod(item[0],item[1],item[2]); });
     nativeViewExtended.register();
 
     if(!options.doNotInitialize) {
       this.nativeView = nativeViewExtended('alloc')('init');
-      if(this.nativeClass === this.nativeViewClass) {
-        this.native = this.nativeView;
-      } else {
-        this.native = this.nativeClass('alloc')('init');
-      }
+      this.native = (this.nativeClass === this.nativeViewClass) ? this.nativeView : this.nativeClass('alloc')('init');
       this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     }
 
     this.nativeViewClass = nativeViewExtended;
+    this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
+    this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
 
-    this.addEventListener('parent-attached', function(p) { 
-      this.private.parent = p; 
+    // Fires when a new listener is attached. This only filters listeners
+    // that are mouse enter, exit and move, it attaches specific handlers
+    // to support these functions that shouldn't normal exist if no one is
+    // listening to these events (for speed reasons since they're high-throughput).
+    this.addEventListener('event-listener-added', function(event) {
+      if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
+        this.private.needsMouseTracking++;
+        if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
+          addTrackingArea.apply(this,null);
+        } else if (this.private.needsMouseTracking === 1) {
+          this.addEventListener('parent-attached', addTrackingArea.bind(this));
+        }
+      }
     }.bind(this));
-    this.addEventListener('parent-dettached', function() { 
-      this.private.parent = null; 
+
+    // If the event mouse move is removed (or mouse exit/enter then make sure
+    // we disassociate our tracking and firing of these events internally to save
+    // ourselves quite a bit of an unnecessary performance hit.
+    this.addEventListener('event-listener-removed', function(event) {
+      if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
+        this.private.needsMouseTracking--;
+        if(this.private.needsMouseTracking === 0) {
+          this.nativeView('removeTrackingArea',this.private.trackingArea);
+          this.private.trackingArea('release');
+          this.private.trackingArea = null;
+        }
+      }
     }.bind(this));
   }
 
@@ -206,10 +224,7 @@ module.exports = (function() {
    * @screenshot-window {win}
    * @screenshot-control {dateWell}
    */
-  util.def(Control.prototype, 'alpha', 
-    function() { return this.nativeView('alphaValue'); },
-    function(e) { return this.nativeView('setAlphaValue', e); }
-  );
+  util.makePropertyNumberType(Control.prototype, 'alpha', 'alphaValue','setAlphaValue');
 
   /**
    * @member visible
@@ -229,10 +244,7 @@ module.exports = (function() {
    *  dateWell.visible = false; // Make our date picker hidden.
    * @screenshot-window {win}
    */
-  util.def(Control.prototype, 'visible',
-    function() { return !this.nativeView('isHidden'); },
-    function(e) { return this.nativeView('setHidden', !e); }
-  );
+  util.makePropertyBoolType(Control.prototype, 'visible', 'isHidden', 'setHidden', {inverse:true});
 
   // Helper function to convert OSX coordinate spaces to 
   // top-left.
@@ -370,7 +382,6 @@ module.exports = (function() {
       if(this.nativeView('superview')('isEqual',this.nativeView('window')('contentView')) && bnds.origin.y === -1) {
         offsetY = 1;
       }
-        
       return {
         x:Math.round(bnds.origin.x), 
         y:Math.round(bnds.origin.y) + offsetY, 
@@ -379,25 +390,6 @@ module.exports = (function() {
       };
     }
   );
-
-  // TODO? private, move as a function in closure?
-  Control.prototype.fireEvent = function(event, args) {
-    try {
-      event = event.toLowerCase();
-      var returnvalue;
-      if(!this.private.events[event]) {
-        this.private.events[event] = [];
-      }
-      (this.private.events[event]).forEach(function(item) { 
-        returnvalue = item.apply(null, args) || returnvalue; 
-      });
-      return returnvalue;
-    } catch(e) {
-      console.error(e.message);
-      console.error(e.stack);
-      process.exit(1);
-    }
-  };
 
   /**
    * @method addEventListener
@@ -423,22 +415,6 @@ module.exports = (function() {
    *   console.log('mouse is down over button!');
    * });
    */
-  Control.prototype.addEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(event === "mouseenter" || event === "mouseexit" || event === "mousemove") {
-      this.private.needsMouseTracking++;
-      if(this.private.needsMouseTracking === 1 && this.nativeView('window')) {
-        addTrackingArea.apply(this,null);
-      }
-      else if (this.private.needsMouseTracking === 1) {
-        this.addEventListener('parent-attached', addTrackingArea.bind(this));
-      }
-    }
-    if(!this.private.events[event]) {
-      this.private.events[event] = []; 
-    }
-    this.private.events[event].push(func);
-  };
 
   /**
    * @method removeEventListener
@@ -468,29 +444,34 @@ module.exports = (function() {
    * // Stop listening to event.
    * buttonNormal.removeEventListener('mousedown', mouseDown);
    */
-  Control.prototype.removeEventListener = function(event, func) {
-    event = event.toLowerCase();
-    if(event === "mouseenter" ||   event === "mouseexit" || event === "mousemove") {
-      this.private.needsMouseTracking--;
-      if(this.private.needsMouseTracking === 0) {
-        this.nativeView('removeTrackingArea',this.private.trackingArea);
-        this.private.trackingArea('release');
-        this.private.trackingArea = null;
-      }
-    }
-    if(this.private.events[event] && this.private.events[event].indexOf(func) !== -1) {
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1);
-    }
+  util.defEvents(Control.prototype);
+
+  var attributeMap = { 
+    'left':$.NSLayoutAttributeLeft,
+    'right':$.NSLayoutAttributeRight,
+    'top':$.NSLayoutAttributeTop,
+    'bottom':$.NSLayoutAttributeBottom,
+    'leading':$.NSLayoutAttributeLeading,
+    'trailing':$.NSLayoutAttributeTrailing,
+    'width':$.NSLayoutAttributeWidth,
+    'height':$.NSLayoutAttributeHeight,
+    'center':$.NSLayoutAttributeCenterX,
+    'middle':$.NSLayoutAttributeCenterY,
+    'baseline':$.NSLayoutAttributeBaseline,
+    '<':$.NSLayoutRelationLessThanOrEqual,
+    '<=':$.NSLayoutRelationLessThanOrEqual,
+    '>':$.NSLayoutRelationGreaterThanOrEqual, 
+    '>=':$.NSLayoutRelationGreaterThanOrEqual,
+    '=':$.NSLayoutRelationEqual,
+    '==':$.NSLayoutRelationEqual
   };
 
-  var attributeMap = { 'left':$.NSLayoutAttributeLeft, 'right':$.NSLayoutAttributeRight, 'top':$.NSLayoutAttributeTop,
-                       'bottom':$.NSLayoutAttributeBottom, 'leading':$.NSLayoutAttributeLeading, 'trailing':$.NSLayoutAttributeTrailing,
-                       'width':$.NSLayoutAttributeWidth, 'height':$.NSLayoutAttributeHeight, 'center':$.NSLayoutAttributeCenterX,
-                       'middle':$.NSLayoutAttributeCenterY, 'baseline':$.NSLayoutAttributeBaseline, '<':$.NSLayoutRelationLessThanOrEqual,
-                       '<=':$.NSLayoutRelationLessThanOrEqual, '>':$.NSLayoutRelationGreaterThanOrEqual, 
-                       '>=':$.NSLayoutRelationGreaterThanOrEqual, '=':$.NSLayoutRelationEqual, '==':$.NSLayoutRelationEqual };
-
   Control.prototype.addLayoutConstraint = function(layoutObject) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints)
+    {
+      return null;
+    }
     var constraint = $.NSLayoutConstraint('constraintWithItem',
                         (layoutObject.firstItem ? layoutObject.firstItem.nativeView : layoutObject.item.nativeView),
                         'attribute',(attributeMap[layoutObject.firstAttribute] || $.NSLayoutAttributeNotAnAttribute),
@@ -503,7 +484,8 @@ module.exports = (function() {
     constraint('setPriority', 490); // NSLayoutPriorityDragThatCannotResizeWindow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 1); // NSLayoutPriorityDefaultLow
     this.nativeView('setContentHuggingPriority',250,'forOrientation', 0); // NSLayoutPriorityDefaultLow
-
+    this.nativeView('setContentCompressionResistancePriority',250,'forOrientation',1);
+    this.nativeView('setContentCompressionResistancePriority',250,'forOrientation',0);
     this.private.parent.nativeView('addConstraint', constraint);
     this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
     this.private.parent.nativeView('layoutSubtreeIfNeeded');
@@ -512,6 +494,11 @@ module.exports = (function() {
   };
 
   Control.prototype.changeLayoutConstraint = function(previousConstraint, layoutObject) {
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints) 
+    {
+      return null;
+    }
     if(previousConstraint('multiplier') !== layoutObject.multiplier  ||
         previousConstraint('secondItem') === null && layoutObject.secondItem !== null || 
         previousConstraint('secondItem') !== null && layoutObject.secondItem === null || 
@@ -526,12 +513,18 @@ module.exports = (function() {
       previousConstraint('setConstant', layoutObject.constant);
     }
     return previousConstraint;
-  }
+  };
 
   Control.prototype.removeLayoutConstraint = function(obj) {
-    this.private.parent.nativeView('removeConstraint',obj);
-    this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
-    this.private.parent.nativeView('layoutSubtreeIfNeeded');
+    if(this.private.parent !== null && 
+        this.private.parent.private.ignoreConstraints) 
+    {
+      return;
+    } else if(this.private.parent !== null) {
+      this.private.parent.nativeView('removeConstraint',obj);
+      this.private.parent.nativeView('updateConstraintsForSubtreeIfNeeded');
+      this.private.parent.nativeView('layoutSubtreeIfNeeded');
+    }
   };
 
   /**

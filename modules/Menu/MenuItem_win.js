@@ -8,31 +8,18 @@ module.exports = (function() {
 
     this.private = {events:{},submenu:null,key:"",modifiers:"",imgOn:null,imgOff:null,img:null,custom:null,state:false};
     this.native = new $.System.Windows.Controls.MenuItem();
-    this.native.addEventListener('PreviewMouseDown', function() {
+    this.private.mouseDownHandler = function() {
       this.fireEvent('mousedown');
       this.fireEvent('click');
-    }.bind(this));
+    }.bind(this);
+    this.native.addEventListener('PreviewMouseDown', this.private.mouseDownHandler);
 
     if(titlestring) this.title = titlestring;
     if(keystring) this.key = keystring;
     if(keymodifiers) this.modifiers = keymodifiers;
   }
 
-  MenuItem.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) 
-      (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-  }
-
-  MenuItem.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) 
-      this.private.events[event] = []; 
-    this.private.events[event].push(func); 
-  }
-
-  MenuItem.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) 
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
-  }
+  utilities.defEvents(MenuItem.prototype);
 /*
   Object.defineProperty(MenuItem.prototype, 'imageOn', {
     get:function() { return this.private.imgOn; },
@@ -99,13 +86,14 @@ module.exports = (function() {
     set:function(e) {
       this.private.key = e;
       var mods = this.modifiers;
-      if(e == "" || e == null || mods == "" || mods == null) {
+      if(e === "" || e === null || mods === "" || mods === null) {
         this.native.InputGestureText = "";
         return;
       }
       mods = this.modifiers.split(',');
-      for(var i=0; i < mods.length; i++)
+      for(var i=0; i < mods.length; i++) {
         mods[i] = utilities.capitalize(mods[i]);
+      }
       mods = mods.join('+');
       this.native.InputGestureText = mods + '+' + e.toString().toUpperCase();
     }
@@ -116,13 +104,14 @@ module.exports = (function() {
     set:function(e) { 
       this.private.modifiers = e;
       var key = this.key;
-      if(e == "" || e == null || key == null || key == "") {
+      if(e === "" || e === null || key === null || key === "") {
         this.native.InputGestureText = "";
         return;
       }
       e = e.split(',');
-      for(var i=0; i < e.length; i++)
+      for(var i=0; i < e.length; i++) {
         e[i] = utilities.capitalize(e[i]);
+      }
       e=e.join('+');
       e = e + "+" + key.toUpperCase();
       this.native.InputGestureText = e;
@@ -137,8 +126,9 @@ module.exports = (function() {
   Object.defineProperty(MenuItem.prototype, 'custom', {
     get:function() { return this.private.custom; },
     set:function(e) {
-      if(this.private.custom != null)
+      if(this.private.custom !== null) {
         this.native.Items.Remove(this.private.custom.native);
+      }
       this.private.custom = e;
       this.native.Items.Add(e.native);
     }

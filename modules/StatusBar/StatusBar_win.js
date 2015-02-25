@@ -27,26 +27,7 @@ module.exports = (function() {
     };
   }
 
-  StatusBar.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) {
-      (this.private.events[event]).forEach(function(item) { 
-        item.apply(null,args);
-      });
-    }
-  };
-
-  StatusBar.prototype.addEventListener = function(event, func) { 
-    if(!this.private.events[event]) {
-      this.private.events[event] = []; 
-    }
-    this.private.events[event].push(func); 
-  };
-
-  StatusBar.prototype.removeEventListener = function(event, func) { 
-    if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) {
-      this.private.events[event].splice(this.private.events[event].indexOf(func), 1); 
-    }
-  };
+  utilities.defEvents(StatusBar.prototype);
 
   StatusBar.prototype.close = function() { 
     this.native.Dispose();

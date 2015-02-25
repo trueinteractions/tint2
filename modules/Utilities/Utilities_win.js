@@ -1,7 +1,16 @@
 module.exports = (function() {
+  if(global.__TINT.Utilities) {
+    return global.__TINT.Utilities;
+  }
   var $ = process.bridge.dotnet;
   var $$ = process.bridge.win32;
+  var assert = require('assert');
   var baseUtilities = require('Utilities_base');
+
+  function wpfDeviceToLogicalPx(w,p) {
+    var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
+    return t.Transform(p);
+  }
 
   function getImageFromString(e) {
     var imageRef = null;
@@ -177,21 +186,22 @@ module.exports = (function() {
 
   function makeWinFormsIcon(e) {
     var img = null;
-    if(!e || typeof(e) !== 'string') return null;
-    else if(e.indexOf(':') > -1) {
+    if(!e || typeof(e) !== 'string') {
+      return null;
+    } else if(e.indexOf(':') > -1) {
       var url = new $.System.Uri(e);
       var wr = $.System.Net.WebRequest.Create(url);
-      var strm = wr.GetResponse().GetResponseStream();
-      var bmp = new $.System.Drawing.Bitmap(strm);
+      var strm1 = wr.GetResponse().GetResponseStream();
+      var bmp = new $.System.Drawing.Bitmap(strm1);
       img = $.System.Drawing.Icon.FromHandle(bmp.GetHicon());
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
-      var strm = $.System.IO.File.OpenRead(e);
-      img = new $.System.Drawing.Icon(strm);
+      var strm2 = $.System.IO.File.OpenRead(e);
+      img = new $.System.Drawing.Icon(strm2);
     } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null)
+      if(imageRef === null) {
         img = null;
-      else {
+      } else {
         var s = $.System.Convert.FromBase64String(imageRef);
         var ms = new $.System.IO.MemoryStream(s);
         img = new $.System.Drawing.Icon(ms);
@@ -200,27 +210,28 @@ module.exports = (function() {
     return img;
   }
 
-  function makeImage(e) {
+  function makeImage(e, stretch) {
     var img = null;
-    if(!e || typeof(e) !== 'string') return null;
-    else if(e.indexOf(':') > -1) {
+    stretch = stretch || $.System.Windows.Media.Stretch.None;
+    if(!e || typeof(e) !== 'string') {
+     return null;
+    } else if(e.indexOf(':') > -1) {
       img = new $.System.Windows.Controls.Image();
       img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(new $.System.Uri(e));
+      img.Stretch = stretch;
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
       img = new $.System.Windows.Controls.Image();
-    var strm = $.System.IO.File.OpenRead(e);
-    img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
-    img.Stretch = $.System.Windows.Media.Stretch.None;
-    }
-    else {
+      var strm = $.System.IO.File.OpenRead(e);
+      img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
+      img.Stretch = stretch;
+    } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null) img = null;
-      else {
-        var s = $.System.Convert.FromBase64String(imageRef);
-        var ms = new $.System.IO.MemoryStream(s);
-      img = new $.System.Windows.Controls.Image();
-      img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(ms);
-      img.Stretch = $.System.Windows.Media.Stretch.None;
+      if(imageRef === null) {
+        img = null;
+      } else {
+        img = new $.System.Windows.Controls.Image();
+        img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(new $.System.IO.MemoryStream($.System.Convert.FromBase64String(imageRef)));
+        img.Stretch = stretch;
       }
     }
     return img;
@@ -233,8 +244,8 @@ module.exports = (function() {
     var length = control.Items.Count;
     var i = 0;
 
-    start = typeof(start) == 'undefined' ? 0 : start;
-    depth = typeof(depth) == 'undefined' ? 0 : depth;
+    start = typeof(start) === 'undefined' ? 0 : start;
+    depth = typeof(depth) === 'undefined' ? 0 : depth;
 
     for(var c = 0; c < length; c++) {
       var slength = control.Items.Count;
@@ -258,11 +269,81 @@ module.exports = (function() {
     story.Begin(target, $.System.Windows.Media.Animation.HandoffBehavior.Compose);
   }
 
+  function makePropertyBoolType(obj,name,property,truevalue,falsevalue) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native[property] === truevalue ? true : false; },
+      set:function(value) { this.native[property] = value ? truevalue : falsevalue; }
+    });
+  }
+
+  function makePropertyStringType(obj,name,property) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native[property].toString(); },
+      set:function(value) { this.native[property] = value.toString(); }
+    });
+  }
+
+  function makePropertyNumberType(obj,name,property) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native[property]; },
+      set:function(value) { this.native[property] = value ? value : 0; }
+    });
+  }
+
+  function makePropertyMapType(obj,name,property,map) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var val = this.native[property];
+        for(var key in map) {
+          if(map.hasOwnProperty(key) && map[key] === val) {
+            return key;
+          }
+        }
+        return null;
+      },
+      set:function(value) {
+        assert.ok(map.hasOwnProperty(value), "["+value+"] is not a valid value for "+name+" property.");
+        var mappedValue = map[value];
+        this.native[property] = mappedValue; 
+      }
+    });
+  }
+
+  function makePropertyImageType(obj,name,property) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.private['_'+name]; },
+      set:function(e) {
+        var img = makeImage(e);
+        assert.ok(img, 'The image referenced could not be found: '+e);
+        assert.ok(img.Source, 'The image referenced could not be decoded: '+e);
+        this.private['_'+name] = e;
+        this.nativeView[property] = e.Source;
+      }
+    });
+  }
+
   baseUtilities.forEachItemInControl = forEachItemInControl;
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.makeImage = makeImage;
   baseUtilities.makeWinFormsIcon = makeWinFormsIcon;
   baseUtilities.animateWPFProperty = animateWPFProperty;
+  baseUtilities.wpfDeviceToLogicalPx = wpfDeviceToLogicalPx;
+  baseUtilities.makePropertyBoolType = makePropertyBoolType;
+  baseUtilities.makePropertyStringType = makePropertyStringType;
+  baseUtilities.makePropertyMapType = makePropertyMapType;
+  baseUtilities.makePropertyImageType = makePropertyImageType;
+  baseUtilities.makePropertyNumberType = makePropertyNumberType;
 
+  global.__TINT.Utilities = baseUtilities;
   return baseUtilities;
 })();

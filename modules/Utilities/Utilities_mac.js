@@ -1,4 +1,8 @@
-module.exports = (function() { 
+module.exports = (function() {
+  if(global.__TINT.Utilities) {
+    return global.__TINT.Utilities;
+  }
+  var assert = require('assert');
   var baseUtilities = require('Utilities_base');
   var $ = process.bridge.objc;
 
@@ -22,7 +26,7 @@ module.exports = (function() {
   function nsDictionaryToObject(nsdictionary) {
     var allKeys = nsdictionary('allKeys');
     var count = allKeys('count');
-    var values = []
+    var values = [];
     for(var i=0; i < count; i++) {
       values[allKeys('objectAtIndex',i)('description')('UTF8String')] = nsdictionary('objectForKey',allKeys('objectAtIndex',i))('description')('UTF8String');
     }
@@ -176,31 +180,21 @@ module.exports = (function() {
     return imageRef;
   }
 
-  function makePropertyBoolType(name,getselector,setselector) {
-    Object.defineProperty(this, name, {
-      get:function() { return this.native(getselector); },
-      set:function(value) { this.native(setselector, value ? true : false); }
-    });
-  }
-
-  function makePropertyStringType(name,getselector,setselector) {
-    Object.defineProperty(this, name, {
-      get:function() { return this.native(getselector); },
-      set:function(value) { this.native(setselector, $(value ? value : "")); }
-    });
-  }
-
   function makeNSImage(e) {
     var img = null;
-    if(!e || typeof(e) !== 'string') return null;
-    else if(e.indexOf(':') > -1)
+    if(!e || typeof(e) !== 'string') {
+      return null;
+    } else if(e.indexOf(':') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e)));
-    else if (e.indexOf('/') > -1 || e.indexOf('.') > -1)
+    } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
-    else {
+    } else {
       var imageRef = getImageFromString(e);
-      if(imageRef==null) img = null;
-      else img = $.NSImage('imageNamed',$(imageRef));
+      if(imageRef === null) {
+        img = null;
+      } else {
+        img = $.NSImage('imageNamed',$(imageRef));
+      }
     }
     return img;
   }
@@ -213,31 +207,131 @@ module.exports = (function() {
     return "data:image/png;base64," + base64String;
   }
 
-  function errorwrap(func) {
-    var wrap = function() {
-      try {
-        return func.apply(null,arguments);
-      } catch(e) {
-        console.error(e.message);
-        console.error(e.stack);
-        process.exit(1);
+  function makePropertyBoolType(obj,name,getselector,setselector,options) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() {
+        if(options && options.inverse) {
+          return this.native(getselector) === $.NO ? true : false;
+        } else {
+          return this.native(getselector) === $.YES ? true : false;
+        }
+      },
+      set:function(value) {
+        if(options && options.inverse) {
+          this.native(setselector, value ? $.YES : $.NO);
+        } else {
+          this.native(setselector, value ? $.NO : $.YES);
+        }
+        if(options && options.display) {
+          this.nativeView('setNeedsDisplay', $.YES);
+        }
       }
-    }
-    return wrap;
+    });
+  }
+
+  function makePropertyStringType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native(getselector); },
+      set:function(value) { this.native(setselector, $(value ? value.toString() : "")); }
+    });
+  }
+
+  function makePropertyNumberType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.native(getselector); },
+      set:function(value) { this.native(setselector, value ? value : 0); }
+    });
+  }
+
+  function makePropertyMapType(obj,name,getselector,setselector,map) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var val = this.native(getselector);
+        for(var key in map) {
+          if(map.hasOwnProperty(key) && map[key] === val) {
+            return key;
+          }
+        }
+        return null;
+      },
+      set:function(value) {
+        assert.ok(map.hasOwnProperty(value), "["+value+"] is not a valid value for "+name+" property.");
+        var mappedValue = map[value];
+        this.native(setselector, mappedValue); 
+      }
+    });
+  }
+
+  function makePropertyImageType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return this.private['_'+name]; },
+      set:function(e) {
+        this.private['_'+name] = e;
+        if(e) {
+          e = makeNSImage(e);
+        }
+        this.nativeView(setselector, e ? e : null);
+      }
+    });
+  }
+
+  function makePropertyColorType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var Color = require('Color');
+        return (new Color(this.private['_'+name])); 
+      },
+      set:function(e) {
+        var Color = require('Color');
+        this.private['_'+name] = e;
+        this.nativeView(setselector, e ? ((new Color(e)).native) : null);
+      }
+    });
+  }
+
+  function makePropertyFontType(obj,name,getselector,setselector) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        var Font = require('Font');
+        return (new Font(this.private['_'+name])); 
+      },
+      set:function(e) {
+        var Font = require('Font');
+        this.private['_'+name] = e;
+        this.nativeView(setselector, e ? ((new Font(e)).native) : null);
+      }
+    });
   }
 
   baseUtilities.getImageFromString = getImageFromString;
-  baseUtilities.parseUnits = baseUtilities.parseUnits;
-  baseUtilities.parseColor = baseUtilities.parseColor;
   baseUtilities.nsDictionaryToObject = nsDictionaryToObject;
   baseUtilities.nsArrayToArray = nsArrayToArray;
   baseUtilities.makePropertyBoolType = makePropertyBoolType;
   baseUtilities.makePropertyStringType = makePropertyStringType;
+  baseUtilities.makePropertyImageType = makePropertyImageType;
+  baseUtilities.makePropertyMapType = makePropertyMapType;
   baseUtilities.makeNSImage = makeNSImage;
-  baseUtilities.errorwrap = errorwrap;
   baseUtilities.arrayToNSArray = arrayToNSArray;
   baseUtilities.makeURIFromNSImage = makeURIFromNSImage;
-  
+  baseUtilities.makePropertyColorType = makePropertyColorType;
+  baseUtilities.makePropertyFontType = makePropertyFontType;
+  baseUtilities.makePropertyNumberType = makePropertyNumberType;
+
+  global.__TINT.Utilities = baseUtilities;
   return baseUtilities;
 })();
 

@@ -1,6 +1,7 @@
 module.exports = (function() {
   var Panel = require('Panel');
   var Color = require('Color');
+  var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
   function ColorPanel(NativeObjectClass, NativeViewClass, options) {
@@ -17,7 +18,7 @@ module.exports = (function() {
    //   Panel.call(this, $.System.Windows.Forms.ColorDialog, $.System.Windows.Forms.ColorDialog, options);
    // }
     this.private = {visible:false,events:{}};
-    this.native = new $.System.Windows.Forms.ColorDialog();
+    this.nativeView = this.native = new $.System.Windows.Forms.ColorDialog();
     this.native.FullOpen = true;
     this.native.SolidColorOnly = false;
   }
@@ -25,21 +26,12 @@ module.exports = (function() {
   ColorPanel.prototype = Object.create(Panel.prototype);
   ColorPanel.prototype.constructor = ColorPanel;
   
-  ColorPanel.prototype.fireEvent = function(event, args) {
-    if(this.private.events[event]) (this.private.events[event]).forEach(function(item,index,arr) { item.apply(null,args); });
-  }
-
-  ColorPanel.prototype.addEventListener = function(event, func) { if(!this.private.events[event]) this.private.events[event] = []; this.private.events[event].push(func); }
-  ColorPanel.prototype.removeEventListener = function(event, func) { if(this.private.events[event] && this.private.events[event].indexOf(func) != -1) this.private.events[event].splice(this.private.events[event].indexOf(func), 1); }
-
+  util.defEvents(ColorPanel.prototype);
   //TODO: This is not supported on Windows, but is on OSX, add to win?.
   //ColorPanel.prototype.setChild = function(e) { this.native('setAccessoryView',e.nativeView); }
   //ColorPanel.prototype.appendChild = ColorPanel.prototype.removeChild = null;
 
-  Object.defineProperty(ColorPanel.prototype, 'showAlpha', {
-    get:function() { return !this.native.SolidColorOnly; },
-    set:function(e) { this.native.SolidColorOnly = (e ? false : true); }
-  });
+  util.makePropertyBoolType(ColorPanel.prototype, 'showAlpha', 'SolidColorOnly', false, true);
 
   Object.defineProperty(ColorPanel.prototype, 'selected', {
     get:function() { 

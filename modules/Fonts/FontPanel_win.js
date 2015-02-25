@@ -43,13 +43,13 @@ module.exports = (function() {
         //TODO: Create a real font dialog.
         var interval = setInterval(function() {
           var c = this.native.Font;
-          if(c.Bold != s.Bold || 
-              s.Name != c.Name ||
-              c.Size != s.Size ||
-              c.Italic != s.Italic || 
-              c.Strikeout != s.Strikeout ||
-              c.Height != s.Height || 
-              c.Underline != s.Underline)
+          if(c.Bold !== s.Bold || 
+              s.Name !== c.Name ||
+              c.Size !== s.Size ||
+              c.Italic !== s.Italic || 
+              c.Strikeout !== s.Strikeout ||
+              c.Height !== s.Height || 
+              c.Underline !== s.Underline)
           {
 
             var f = new Font(c.Name,c.Size);

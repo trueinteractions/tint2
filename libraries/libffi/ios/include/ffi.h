@@ -1,1 +1,1 @@
-#include <ffi_armv7.h>
+#include <ffi.h>

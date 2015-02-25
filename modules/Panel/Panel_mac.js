@@ -31,7 +31,7 @@ module.exports = (function() {
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSPanel;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
-    options.styleMask = options.styleMask || ((Panel.initialStyle == "utility") ? utilityStyle : inspectorStyle);
+    options.styleMask = options.styleMask || ((Panel.initialStyle === "utility") ? utilityStyle : inspectorStyle);
     options.width = options.width || 200;
     options.height = options.height || 250;
     Window.call(this, options);
@@ -62,9 +62,9 @@ module.exports = (function() {
       }
     },
     function(e) {
-      if(e == "utility") {
+      if(e === "utility") {
         this.native('setStyleMask', utilityStyle);
-      } else if(e == "inspector") {
+      } else if(e === "inspector") {
         this.native('setStyleMask', inspectorStyle);
       }
     }
@@ -77,10 +77,7 @@ module.exports = (function() {
    * @description Gets or sets if the panel is currently floating or docked.
    * @default "window"
    */
-  util.def(Panel.prototype, 'floating',
-    function() { return this.native('isFloatingPanel') === $.YES ? true : false; },
-    function(e) { this.native('setFloatingPanel', e ? $.YES : $.NO); }
-  );
+  util.makePropertyBoolType(Panel.prototype, 'floating', 'isFloatingPanel', 'setFloatingPanel');
 
   global.__TINT.Panel = Panel;
 

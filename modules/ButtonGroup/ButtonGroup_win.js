@@ -30,21 +30,21 @@ module.exports = (function() {
   //Object.defineProperty(ButtonGroup.prototype, 'style', {
   //  get:function() { 
   //    var buttonStyle = this.nativeView('segmentStyle');
-  //    if (buttonStyle == $.NSSegmentStyleRounded) return "rounded";
-  //    else if (buttonStyle == $.NSSegmentStyleTexturedRounded) return "textured";
-  //    else if (buttonStyle == $.NSSegmentStyleRoundRect) return "roundrect";
-  //    else if (buttonStyle == $.NSSegmentStyleTexturedSquare) return "square";
-  //    else if (buttonStyle == $.NSSegmentStyleCapsule) return "capsule";
-  //    else if (buttonStyle == $.NSSegmentStyleSmallSquare) return "smallsquare";
+  //    if (buttonStyle === $.NSSegmentStyleRounded) return "rounded";
+  //    else if (buttonStyle === $.NSSegmentStyleTexturedRounded) return "textured";
+  //    else if (buttonStyle === $.NSSegmentStyleRoundRect) return "roundrect";
+  //    else if (buttonStyle === $.NSSegmentStyleTexturedSquare) return "square";
+  //    else if (buttonStyle === $.NSSegmentStyleCapsule) return "capsule";
+  //    else if (buttonStyle === $.NSSegmentStyleSmallSquare) return "smallsquare";
   //    else return "default";
   //  },
   //  set:function(type) {
-  //    if (type == "rounded") this.nativeView('setSegmentStyle',$.NSSegmentStyleRounded);
-  //   else if (type == "textured") this.nativeView('setSegmentStyle',$.NSSegmentStyleTexturedRounded);
-  //   else if (type == "roundrect") this.nativeView('setSegmentStyle', $.NSSegmentStyleRoundRect);
-  //    else if (type == "capsule") this.nativeView('setSegmentStyle', $.NSSegmentStyleCapsule);
-  //    else if (type == "smallsquare") this.nativeView('setSegmentStyle', $.NSSegmentStyleSmallSquare);
-  //    else if (type == "square") this.nativeView('setSegmentStyle', $.NSSegmentStyleTexturedSquare);
+  //    if (type === "rounded") this.nativeView('setSegmentStyle',$.NSSegmentStyleRounded);
+  //   else if (type === "textured") this.nativeView('setSegmentStyle',$.NSSegmentStyleTexturedRounded);
+  //   else if (type === "roundrect") this.nativeView('setSegmentStyle', $.NSSegmentStyleRoundRect);
+  //    else if (type === "capsule") this.nativeView('setSegmentStyle', $.NSSegmentStyleCapsule);
+  //    else if (type === "smallsquare") this.nativeView('setSegmentStyle', $.NSSegmentStyleSmallSquare);
+  //    else if (type === "square") this.nativeView('setSegmentStyle', $.NSSegmentStyleTexturedSquare);
   //    else this.native('setSegmentStyle', $.NSSegmentStyleAutomatic);
   //  }
   //});
@@ -53,7 +53,7 @@ module.exports = (function() {
     get:function() { return this.private.selected; },
     set:function(e) {
       var buttons = this.private.segmentedButtons;
-      if(buttons.length == 0) this.private.selected = 0;
+      if(buttons.length === 0) this.private.selected = 0;
       else if(e > (buttons.length-1)) this.private.selected = buttons.length-1;
       else if(e < 0) this.private.selected = 0;
       else this.private.selected = e;

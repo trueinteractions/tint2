@@ -11,9 +11,10 @@ module.exports = (function() {
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
     TextInput.call(this, options);
     this.native.IsEditable = true;
-    this.native.addEventListener('SelectionChanged', function() {
+    this.private.selectionChangedHandler = function() {
       this.fireEvent('change');
-    }.bind(this));
+    }.bind(this);
+    this.native.addEventListener('SelectionChanged', this.private.selectionChangedHandler);
   }
 
   SelectInput.prototype = Object.create(TextInput.prototype);

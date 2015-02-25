@@ -40,7 +40,7 @@ module.exports = (function() {
        * @description Fires when the window is destroyed and resources are released, this is 
        *              fired just before the window is closed.
        */
-      ['windowWillClose:', 'v@:@@', function() { this.fireEvent('close'); return $.YES; }.bind(this)],
+      ['windowShouldClose:', 'B@:@@', function() { this.fireEvent('close'); return $.YES; }.bind(this)],
       /**
        * @event enter-fullscreen
        * @memberof Window
@@ -98,7 +98,10 @@ module.exports = (function() {
        * @description Fires after the window has been destroyed and all resources have been
        *              released.  Do not refer to the window during this event.
        */
-      ['windowDidClose:', 'v@:@@', function() { this.fireEvent('closed'); }.bind(this)]
+      ['windowWillClose:', 'v@:@@', function() { 
+        this.fireEvent('closed'); 
+        delete this;
+      }.bind(this)]
     ]);
     this.nativeClass = this.nativeClass || $.NSWindow;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
@@ -139,9 +142,9 @@ module.exports = (function() {
     // This is simply to ensure if we remove our content view we properly adhere
     // to OSX/objective-c behavior. OSX/ObjC requires we notify its removal for
     // consistant behavior of events being thrown from the underlying delegate.
-    this.addEventListener('remove', function(control) { 
+    this.addEventListener('before-child-dettached', function(control) { 
       this.native('contentView')('willRemoveSubview',control.nativeView); 
-    });
+    }.bind(this));
   }
   
   Window.prototype = Object.create(Container.prototype);
@@ -167,12 +170,13 @@ module.exports = (function() {
       }
     },
     function(e) {
+      this.private.savedMask = this.native('styleMask');
       this.minimizeButton = e;
       this.maximizeButton = e;
       this.closeButton = e;
       this.resizable = e;
       if(version > 13) {
-        this.native('setStyleMask', e ? this.private.defaultStyleMask : 0 );
+        this.native('setStyleMask', e ? this.private.savedMask : ($.NSBorderlessWindowMask) );
       }
     }
   );
@@ -317,7 +321,7 @@ module.exports = (function() {
       if(e) {
         this.native('setCollectionBehavior', this.native('collectionBehavior') | $.NSWindowCollectionBehaviorFullScreenPrimary);
       } else { 
-        this.native('setCollectionBehavior', this.native('collectionBehavior') ^ $.NSWindowCollectionBehaviorFullScreenPrimary);
+        this.native('setCollectionBehavior', this.native('collectionBehavior') & ~$.NSWindowCollectionBehaviorFullScreenPrimary);
       }
       
       // enable the button (or disable the button on Mavericks/Lion)
@@ -331,10 +335,11 @@ module.exports = (function() {
    * @member state
    * @type {string} 
    * @memberof Window
-   * @description Gets or sets the state of the window.  The options are "fullscreen", "maximized", "minimized",
+   * @description Gets or sets the state of the window.  The options are "maximized", "minimized",
    *              "fullscreen" or "normal". Note: If the window's property 'canbeFullScreen' is not set to true
    *              setting "fullscreen" will have no effect.
    * @noscreenshot
+   * @default "normal"
    * @example
    *  require('Common');
    *  var win = new Window();
@@ -403,7 +408,7 @@ module.exports = (function() {
    *  win.title = "hello";
    * @screenshot-window {win}
    */
-  (util.makePropertyStringType.bind(Window.prototype))('title','title','setTitle');
+  util.makePropertyStringType(Window.prototype,'title','title','setTitle');
 
   /**
    * @member y
@@ -523,6 +528,76 @@ module.exports = (function() {
       var rect = this.native('frame');
       rect.size.height = e;
       this.native('setFrame', rect, 'display', $.YES, 'animate', this.animateOnSizeChange ? $.YES : $.NO);
+    }
+  );
+
+  util.def(Window.prototype, 'titleTransparent',
+    function() {
+      if(version < 14) {
+        return false;
+      } else {
+        return this.native('titlebarAppearsTransparent') === $.YES;
+      }
+    },
+    function(e) {
+      if(version < 14) {
+        console.log('Warning window.titleTransparent (a private property) is not available on this platform.');
+      } else {
+        this.native('setTitlebarAppearsTransparent', e ? $.YES : $.NO);
+      }
+    }
+  );
+
+  util.def(Window.prototype, 'appearance',
+    function() {
+      if(version < 14) {
+        return "normal";
+      } else {
+        return this.private.appearance ? this.private.appearance : "vibrant";
+      }
+    },
+    function(e) {
+      if(version < 14) {
+        console.log('Warning window.appearance (a private property) is not available on this platform.');
+      } else {
+        var appearance = $("NSAppearanceNameAqua");
+        if(e === "vibrant") {
+          appearance = $("NSAppearanceNameAqua");
+        } else if (e === "light") {
+          appearance = $("NSAppearanceNameLightContent");
+        } else if (e === "dark") {
+          appearance = $("NSAppearanceNameVibrantDark");
+          this.backgroundColor = '#232323';
+        } else {
+          appearance = $("NSAppearanceNameVibrantLight");
+          e = "normal";
+        }
+        this.private.appearance = e;
+        var a = $.NSAppearance('appearanceNamed', appearance);
+        $.NSAppearance('setCurrentAppearance', a);
+        this.native('setAppearance', a);
+      }
+    }
+  );
+
+  util.def(Window.prototype, 'extendIntoTitle', 
+    function() {
+      if(version < 14) {
+        return false;
+      } else {
+        return (this.native('styleMask') & NSFullSizeContentViewWindowMask) === $.NSFullSizeContentViewWindowMask ? true : false;
+      }
+    },
+    function(e) {
+      if(version < 14) {
+        console.log('Warning window.extendIntoTitle (a private property) is not available on this platform.');
+      } else {
+        if(e) {
+          this.native('setStyleMask', this.native('styleMask') | $.NSFullSizeContentViewWindowMask);
+        } else {
+          this.native('setStyleMask', this.native('styleMask') & ~$.NSFullSizeContentViewWindowMask);
+        }
+      }
     }
   );
 
@@ -701,12 +776,12 @@ module.exports = (function() {
         if(this.native('standardWindowButton',$.NSWindowZoomButton)) {
           this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.YES);
         }
-        this.native('setStyleMask',this.native('styleMask') | $.NSResizableWindowMask);
+        this.native('setStyleMask', this.native('styleMask') | $.NSResizableWindowMask);
       } else {
         if(this.native('standardWindowButton',$.NSWindowZoomButton)) {
           this.native('standardWindowButton',$.NSWindowZoomButton)('setEnabled',$.NO);
         }
-        this.native('setStyleMask',this.native('styleMask') & (~$.NSResizableWindowMask) );
+        this.native('setStyleMask', this.native('styleMask') & (~$.NSResizableWindowMask) );
       }
     }
   );
@@ -744,7 +819,7 @@ module.exports = (function() {
            this.native('setHasShadow', $.NO);
         }
         this.native('setBackgroundColor', this.private.backgroundObj.native);
-        this.native('setAlphaValue', this.private.backgroundObj.alpha);
+        //this.native('setAlphaValue', this.private.backgroundObj.alpha);
       }
     }
   );

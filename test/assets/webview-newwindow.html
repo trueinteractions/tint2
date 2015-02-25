@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WebView New Window</title>
+	<script>
+		setTimeout(function() { 
+			window.postMessageToHost('loaded!');
+		}, 1000);
+	</script>
+</head>
+<body>
+	<a id="newwin" href="webview-newwindow.html" target="_new">New Window</a>
+	<div id="offscreen" style="left:10px;top:1000px;position:absolute;width:200px;height:200px;">Nope</div>
+</body>
+</html>

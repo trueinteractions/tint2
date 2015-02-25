@@ -19,34 +19,33 @@ module.exports = (function() {
         first = false;
       }
     }.bind(this));
-    var keyUp = function() {
+    this.private.keyDown = function(sender, eventInfo) {
       if(first) {
         this.fireEvent('inputstart');
         first = false;
       }
+      eventInfo = process.bridge.dotnet.fromPointer(eventInfo);
+      if(eventInfo.Key.Name === $.System.Windows.Input.Key.Enter.Name) {
+        this.fireEvent('inputend');
+      }
     }.bind(this);
-    var focus = function() { first = true; }.bind(this);
-    var lostFocus = function() { 
+    this.private.focus = function() { first = true; }.bind(this);
+    this.private.lostFocus = function() { 
       this.fireEvent('inputend');
       first = false;
     }.bind(this);
-    var textChanged = function() { 
+    this.private.textChanged = function() { 
       setTimeout(function() { this.fireEvent('input'); }.bind(this),0);
     }.bind(this);
 
-    this.native.addEventListener('GotFocus', focus);
-    this.native.addEventListener('LostFocus', lostFocus);
+    this.native.addEventListener('GotFocus', this.private.focus);
+    this.native.addEventListener('LostFocus', this.private.lostFocus);
     if(this.nativeClass === $.System.Windows.Controls.TextBox) {
-      this.native.addEventListener('TextChanged', textChanged);
+      this.native.addEventListener('TextChanged', this.private.textChanged);
     } else {
-      this.native.addEventListener('TextInput', textChanged);
+      this.native.addEventListener('TextInput', this.private.textChanged);
     }
-    this.native.addEventListener('KeyUp', keyUp);
-
-    this.private.callbacks.push(focus);
-    this.private.callbacks.push(lostFocus);
-    this.private.callbacks.push(textChanged);
-    this.private.callbacks.push(keyUp);
+    this.native.addEventListener('KeyDown', this.private.keyDown);
     this.private.readyonly = false;
     this.private.previousBackground = this.native.Background;
     this.private.previousBorder = this.native.BorderBrush;
@@ -65,6 +64,18 @@ module.exports = (function() {
   Object.defineProperty(TextInput.prototype, 'enabled', {
     get:function() { return this.native.IsReadOnly; },
     set:function(e) { this.native.IsReadOnly = e ? true : false; }
+  });
+
+  Object.defineProperty(TextInput.prototype, 'font', {
+    get:function() { return Font.fromWPFObject(this.nativeView); },
+    set:function(e) {
+      var font = Font.parseFont(e);
+      this.nativeView.FontFamily = font.native.FontFamily;
+      this.nativeView.FontStyle = font.native.FontStyle;
+      this.nativeView.FontWeight = font.native.FontWeight;
+      this.nativeView.FontStretch = font.native.FontStretch;
+      this.nativeView.FontSize = font.size;
+    }
   });
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {
@@ -93,7 +104,6 @@ module.exports = (function() {
         this.native.AcceptsTab = false;
         this.native.Focusable = false;
       } else if(this.private.readonly) {
-        
         this.native.Background = this.private.previousBackground;
         this.native.BorderBrush = this.private.previousBorder;
         this.native.BorderThickness = this.private.previousBorderThickness;
@@ -102,9 +112,7 @@ module.exports = (function() {
         this.native.IsReadOnly = false;
         this.native.AcceptsTab = true;
         this.native.Focusable = true;
-
       }
-
     }
   });
 
@@ -115,14 +123,14 @@ module.exports = (function() {
 
   Object.defineProperty(TextInput.prototype, 'alignment', {
     get:function() {
-      if (this.native.TextAlignment == $.System.Windows.TextAlignment.Left) return "left";
-      else if (this.native.TextAlignment == $.System.Windows.TextAlignment.Right) return "right";
-      else if (this.native.TextAlignment == $.System.Windows.TextAlignment.Center) return "center";
+      if (this.native.TextAlignment === $.System.Windows.TextAlignment.Left) return "left";
+      else if (this.native.TextAlignment === $.System.Windows.TextAlignment.Right) return "right";
+      else if (this.native.TextAlignment === $.System.Windows.TextAlignment.Center) return "center";
       else return "unknown";
     },
     set:function(e) {
-      if (e == 'right') this.native.TextAlignment = $.System.Windows.TextAlignment.Right;
-      else if (e == 'center') this.native.TextAlignment = $.System.Windows.TextAlignment.Center;
+      if (e === 'right') this.native.TextAlignment = $.System.Windows.TextAlignment.Right;
+      else if (e === 'center') this.native.TextAlignment = $.System.Windows.TextAlignment.Center;
       else this.native.TextAlignment = $.System.Windows.TextAlignment.Left;
     }
   });
@@ -139,7 +147,7 @@ module.exports = (function() {
 
   //TODO: Is this 1:1 functionality? Can users still scroll with no visible scrollbar?
   Object.defineProperty(TextInput.prototype, 'scrollable', {
-    get:function() { return this.nativeView.VerticalScrollBarVisibility == $.System.Windows.Controls.ScrollBarVisibility.Auto; },
+    get:function() { return this.nativeView.VerticalScrollBarVisibility === $.System.Windows.Controls.ScrollBarVisibility.Auto; },
     set:function(e) { this.nativeView.VerticalScrollBarVisibility = e ?  $.System.Windows.Controls.ScrollBarVisibility.Auto :  $.System.Windows.Controls.ScrollBarVisibility.Hidden; }
   });
 

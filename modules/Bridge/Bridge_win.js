@@ -1,9 +1,21 @@
-if(typeof(process.bridge) == 'undefined') process.initbridge();
-if(typeof(process.bridge.dotnet) == 'undefined') process.bridge.dotnet = {};
-if(typeof(process.bridge.ref) == 'undefined') process.bridge.ref = require('ref');
-if(typeof(process.bridge.struct) == 'undefined') process.bridge.struct = require('struct');
-if(typeof(process.bridge.ffi) == 'undefined') process.bridge.ffi = require('ffi');
-if(typeof(process.bridge.win32) == 'undefined') process.bridge.win32 = require('win32');
+if(typeof(process.bridge) === 'undefined') {
+  process.initbridge();
+}
+if(typeof(process.bridge.dotnet) === 'undefined') {
+  process.bridge.dotnet = {};
+}
+if(typeof(process.bridge.ref) === 'undefined') {
+  process.bridge.ref = require('ref');
+}
+if(typeof(process.bridge.struct) === 'undefined') {
+  process.bridge.struct = require('struct');
+}
+if(typeof(process.bridge.ffi) === 'undefined') {
+  process.bridge.ffi = require('ffi');
+}
+if(typeof(process.bridge.win32) === 'undefined') {
+  process.bridge.win32 = require('win32');
+}
 
 var dotnet = process.bridge;
 var assemblyImported = {};
@@ -84,6 +96,7 @@ function createEnum(typeNative, memberName) {
     var ename = dotnet.execGetProperty(nameEnumerator, 'Current');
     var evalue = dotnet.execGetProperty(valueEnumerator, 'Current');
     obj[ename] = evalue;
+    obj[ename].Name = dotnet.execMethod(evalue, "ToString");
   }
   return obj;
 }
@@ -96,8 +109,11 @@ function createField(target, typeNative, typeName, memberNative, memberName, sta
       configurable:true,
       enumerable:true,
       get:function() {
-        if(static) return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
-        else return wrap(dotnet.execGetField(this.pointer, memberName));
+        if(static) {
+          return wrap(dotnet.execGetStaticField(this.classPointer, memberName));
+        } else {
+          return wrap(dotnet.execGetField(this.pointer, memberName));
+        }
       },
       set:function(e) { 
         dotnet.execSetField((static ? this.classPointer : this.pointer),memberName,unwrap(e)); 
@@ -112,7 +128,9 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
   var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
   objdest[memberName] = function() {
     var s = typeSignature(memberName, arguments);
-    if(!this._methods) this._methods = {};
+    if(!this._methods) {
+      this._methods = {};
+    }
     if(!this._methods[s.signature]) {
       var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
@@ -122,7 +140,9 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
   }
   objdest[memberName+"Async"] = function() {
     var s = typeSignature(memberName, arguments);
-    if(!this._methods) this._methods = {};
+    if(!this._methods) {
+      this._methods = {};
+    }
     if(!this._methods[s.signature]) {
       var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
@@ -139,16 +159,19 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
     configurable:true,
     enumerable:true,
     get:function() {
-      if(!this.props) this.props={};
+      if(!this.props) {
+        this.props={};
+      }
       if(!this.props[memberName]) {
         this.props[memberName] = static ? 
           dotnet.getStaticPropertyObject(this.classPointer, memberName) : 
           dotnet.getPropertyObject(this.pointer, memberName);
       }
-      if(typeof(this.props[memberName]) !== 'undefined' && this.props[memberName] !== null)
+      if(typeof(this.props[memberName]) !== 'undefined' && this.props[memberName] !== null) {
         return wrap(dotnet.getProperty(this.props[memberName], static ? null : this.pointer)); 
-      else
+      } else {
         return null;
+      }
     },
     set:function(e) {
       if(!this.props) this.props={};
@@ -167,11 +190,15 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
  */
 function createMember(target, typeNative, typeName, memberNative, memberName, static) {
   var type = dotnet.execMethod(dotnet.execGetProperty(memberNative, 'MemberType'), 'ToString');
-  if(type == "Field") createField(target, typeNative, typeName, memberNative, memberName, static);
-  else if(type == "Method") {
-    if(memberName.substring(0,4) != "get_")
+  if(type === "Field") {
+    createField(target, typeNative, typeName, memberNative, memberName, static);
+  } else if(type === "Method") {
+    if(memberName.substring(0,4) != "get_") {
       createMethod(target, typeNative, typeName, memberNative, memberName, static);
-  } else if(type == "Property") createProperty(target, typeNative, typeName, memberNative, memberName, static);
+    }
+  } else if(type === "Property") {
+    createProperty(target, typeNative, typeName, memberNative, memberName, static);
+  }
 }
 
 function createClass(typeNative, typeName) {
@@ -238,23 +265,17 @@ function createFromType(nativeType, onto) {
       }
     }
 
-    if(dotnet.execGetProperty(nativeType, "IsEnum")) {
-      Object.defineProperty(info.onto, name, {
-        configurable:true, enumerable:true,
-        get:function() { 
-          delete this.onto[this.name];
+    Object.defineProperty(info.onto, name, {
+      configurable:true, enumerable:true,
+      get:function() { 
+        delete this.onto[this.name];
+        if(dotnet.execGetProperty(this.type, "IsEnum")) {
           return this.onto[this.name] = createEnum(this.type,this.name);
-        }.bind(info)
-      });
-    } else if(dotnet.execGetProperty(nativeType, "IsClass") || dotnet.execGetProperty(nativeType, "IsValueType")) {
-      Object.defineProperty(info.onto, name, {
-        configurable:true, enumerable:true,
-        get:function() {
-          delete this.onto[this.name];
+        } else if (dotnet.execGetProperty(this.type, "IsClass") || dotnet.execGetProperty(this.type, "IsValueType")) {
           return this.onto[this.name] = createClass(this.type,this.name);
-        }.bind(info)
-      });
-    }
+        }
+      }.bind(info)
+    });
   }
 }
 
@@ -262,9 +283,9 @@ function createFromType(nativeType, onto) {
  * the classes, enums, fields, properties, etc onto the object passed in (onto)
  */
 function ImportOnto(assembly, onto) {
-  if(assembly.toLowerCase().indexOf('.dll') == -1 
-    && assembly.toLowerCase().indexOf('.exe') == -1) 
+  if(assembly.toLowerCase().indexOf('.dll') === -1 && assembly.toLowerCase().indexOf('.exe') === -1) {
     assembly += ".dll";
+  }
 
   var types = dotnet.loadAssembly(assembly);
   var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");

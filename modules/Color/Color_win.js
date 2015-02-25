@@ -3,7 +3,7 @@ module.exports = (function() {
     return global.__TINT.Color;
   }
   var $ = process.bridge.dotnet;
-  var util = require('Utilities');
+  var TinyColor = require('Color_base');
 
   function Color(type) {
     if(type instanceof Color) { 
@@ -11,7 +11,7 @@ module.exports = (function() {
     } else if(type.pointer) {
       this.native = type;
     } else {
-      var rgba = util.parseColor(type);
+      var rgba = (new TinyColor(type)).toRgb();
       this.native = $.System.Windows.Media.Color.FromArgb(
         $.System.Convert.ToByte(Math.round(rgba.a*255)),
         $.System.Convert.ToByte(Math.round(rgba.r)),

@@ -1,10 +1,18 @@
 @echo off
 
+:msbuild2013
+if not defined VS120COMNTOOLS goto vc-set-2010
+if not exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" goto vc-set-2010
+if not defined VCINSTALLDIR call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
+if not defined VCINSTALLDIR goto msbuild
+goto msbuild-found
+
+
 :msbuild
 if not defined VS110COMNTOOLS goto vc-set-2010
 if not exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" goto vc-set-2010
 if not defined VCINSTALLDIR call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
-if not defined VCINSTALLDIR goto msbuild-not-found
+if not defined VCINSTALLDIR goto vc-set-2010
 goto msbuild-found
 
 :vc-set-2010

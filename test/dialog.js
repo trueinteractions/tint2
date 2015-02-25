@@ -3,7 +3,7 @@ var fs = require('fs');
  * @unit-test-setup
  * @ignore
  */
-function setup() {
+ function setup() {
   require('Common');
 }
 
@@ -15,14 +15,14 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ var Screens = require('Screens');
-  /* @hidden */ var scn = Screens.active;
-  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
+  var Screens = require('Screens');
+  var scn = Screens.active;
+  var ismac = require('os').platform().toLowerCase() == "darwin";
   var win = new Window();
   win.visible = true;
-  /* @hidden */ win.x=0;
-  /* @hidden */ win.y=0;
-  /* @hidden */ var confirm = 'main';
+  win.x=0;
+  win.y=0;
+  var confirm = 'main';
   win.bringToFront();
   var dialog = new Dialog();
   dialog.title = "Dialog Title";
@@ -33,44 +33,58 @@ function run($utils) {
   dialog.mainbutton = "Main";
   dialog.auxbutton = "Aux";
   dialog.addEventListener('click', function(e) {
-    /* @hidden */ $utils.assert(e==confirm, 'got '+e+' expected '+confirm);
-    /* @hidden */ if(e == 'aux' && confirm == 'aux') {
-    /* @hidden */   $utils.assert(dialog.suppressionChecked === false);
-    /* @hidden */   $utils.ok();
-    /* @hidden */ }
-    /* @hidden */ dialog.open(win); // perhaps only allow a dialog to open once?
-    /* @hidden */ confirm = 'aux';
-    /* @hidden */ setTimeout(function() {
-    /* @hidden */   if(ismac) $utils.clickAt(250,124); // TODO: Fix this hard coded value, hopefully this is consistant, should hit supression
-    /* @hidden */   else $utils.clickAt((scn.bounds.width/2)-95,(scn.bounds.height/2)+10); // click no supression checkbox 415,398 (cbox)
-    /* @hidden */ },500);
-    /* @hidden */ setTimeout(function() {
-    /* @hidden */   if(ismac) $utils.clickAt(300,154); // TODO: Fix this hard coded value, hopefully this is consistant, should hit aux 
-    /* @hidden */   else $utils.clickAt((scn.bounds.width/2)+85,(scn.bounds.height/2)+40); // click aux/cancel.
-    /* @hidden */ },1500);
+    $utils.assert(e==confirm, 'got '+e+' expected '+confirm);
+    if(e == 'aux' && confirm == 'aux') {
+       $utils.assert(dialog.suppressionChecked === false);
+       $utils.ok();
+    }
+    // TODO: perhaps only allow a dialog to open once?
+    dialog.open(win); 
+    confirm = 'aux';
+    setTimeout(function() {
+      if(ismac) {
+        // TODO: Fix this hard coded value, hopefully this is consistant, should hit supression
+        $utils.clickAt(250,124); 
+      } else {
+        // click no supression checkbox
+        $utils.clickAtControl(dialog.native.supression);
+      }
+    },500);
+    setTimeout(function() {
+      if(ismac) {
+        // TODO: Fix this hard coded value, hopefully this is consistant, should hit aux
+        $utils.clickAt(300,154);
+      } else {
+        // click aux/cancel.
+        $utils.clickAtControl(dialog.native.auxbutton); 
+      }
+    },1500);
   });
   dialog.open(win);
-  /* @hidden */ $utils.assert(dialog.title == "Dialog Title", dialog.title);
-  /* @hidden */ $utils.assert(dialog.message == "Message dialog", dialog.message);
-  /* @hidden */ $utils.assert(dialog.icon == "assets/tintcompiler.png", dialog.icon);
-  /* @hidden */ $utils.assert(dialog.suppressionChecked == true);
-  /* @hidden */ setTimeout(function() {
-  /* @hidden */   if(ismac)
-  /* @hidden */     $utils.clickAt(400,154); // hopefully this is consistant, should hit main
-  /* @hidden */                              // find a better way of doing this :/
-  /* @hidden */   else
-  /* @hidden */     $utils.clickAt((scn.bounds.width/2)+175,(scn.bounds.height/2)+40); // click main
-  /* @hidden */ },100);
+  $utils.assert(dialog.title == "Dialog Title", dialog.title);
+  $utils.assert(dialog.message == "Message dialog", dialog.message);
+  $utils.assert(dialog.icon == "assets/tintcompiler.png", dialog.icon);
+  $utils.assert(dialog.suppressionChecked == true);
+  setTimeout(function() {
+    if(ismac) {
+      // hopefully this is consistant, should hit main
+      // find a better way of doing this :/
+      $utils.clickAt(400,154); 
+    } else {
+      // click main
+      $utils.clickAtControl(dialog.native.mainbutton);
+    }
+  },100);
 }
 
 /**
  * @unit-test-shutdown
  * @ignore
  */
-function shutdown() {
-}
+ function shutdown() {
+ }
 
-module.exports = {
+ module.exports = {
   setup:setup, 
   run:run, 
   shutdown:shutdown, 

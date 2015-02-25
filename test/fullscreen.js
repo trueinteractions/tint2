@@ -16,24 +16,24 @@ function baseline() {
 function run($utils) {
   var mainWindow = new Window();
   mainWindow.visible = true;
-  /* @hidden */ mainWindow.width = 500;
-  /* @hidden */ var mainScreen = Screens.active;
+   mainWindow.width = 500;
+   var mainScreen = Screens.active;
   // Set the maximize button on OSX +10.9 to go fullscreen.
   mainWindow.canBeFullscreen = true;
   // Make the window fullscreen.
   mainWindow.state = "fullscreen";
 
-  /* @hidden */ setTimeout(function() { 
-  /* @hidden */   $utils.assert(mainWindow.bounds.width >= mainScreen.bounds.width, 'width assertion failed: '+mainWindow.bounds.width+' != '+mainScreen.bounds.width); 
-  /* @hidden */ }, 1000);
-  /* @hidden */ setTimeout(function() { 
-  /* @hidden */   mainWindow.state = "normal"; 
-  /* @hidden */ }, 2000);
-  /* @hidden */ 
-  /* @hidden */ setTimeout(function() { 
-  /* @hidden */   $utils.assert(mainWindow.width == 500, 'main windows bounds was: ' + mainWindow.bounds.width);
-  /* @hidden */   $utils.ok();
-  /* @hidden */ }, 3000);
+   setTimeout(function() { 
+     $utils.assert(mainWindow.bounds.width >= mainScreen.bounds.width, 'width assertion failed: '+mainWindow.bounds.width+' != '+mainScreen.bounds.width); 
+   }, 1000);
+   setTimeout(function() { 
+     mainWindow.state = "normal"; 
+   }, 2000);
+   
+   setTimeout(function() { 
+     $utils.assert(mainWindow.width == 500, 'main windows bounds was: ' + mainWindow.bounds.width);
+     $utils.ok();
+   }, 3000);
 
 }
 
