@@ -25,7 +25,6 @@ module.exports = (function() {
     , Class = require('class')
     , join = path.join
     , basename = path.basename
-    , exists = fs.existsSync || path.existsSync
     , SUFFIX = '.framework'
     , PATH = [
         '/System/Library/Frameworks'

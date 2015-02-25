@@ -146,7 +146,7 @@ module.exports = (function() {
   /*!
    * toString() override.
    */
-  Method.prototype.toString = function toString () {
+  Method.prototype.toString = function() {
     return '[Method: '+this.getName()+' '+this.getReturnType()+'('+this.getArgumentTypes()+') ]';
   }
 

@@ -4,6 +4,7 @@
  */
 
 if(!process.bridge) process.initbridge();
+
 var Type = require('type')
   , assert = require('assert')
   , ref = require('ref')
@@ -15,7 +16,7 @@ var Type = require('type')
   // status codes
   , FFI_OK = bindings.FFI_OK
   , FFI_BAD_TYPEDEF = bindings.FFI_BAD_TYPEDEF
-  , FFI_BAD_ABI = bindings.FFI_BAD_ABI
+  , FFI_BAD_ABI = bindings.FFI_BAD_ABI;
 
 /**
  * JS wrapper for the `ffi_prep_cif_var` function.
@@ -25,28 +26,28 @@ var Type = require('type')
 function CIF_var (rtype, types, numFixedArgs, abi) {
 
   // the return and arg types are expected to be coerced at this point...
-  assert(!!rtype, 'expected a return "type" object as the first argument')
-  assert(Array.isArray(types), 'expected an Array of arg "type" objects as the second argument')
-  assert(numFixedArgs >= 1, 'expected the number of fixed arguments to be at least 1')
+  assert(!!rtype, 'expected a return "type" object as the first argument');
+  assert(Array.isArray(types), 'expected an Array of arg "type" objects as the second argument');
+  assert(numFixedArgs >= 1, 'expected the number of fixed arguments to be at least 1');
 
   // the buffer that will contain the return `ffi_cif *` instance
-  var cif = new Buffer(FFI_CIF_SIZE)
+  var cif = new Buffer(FFI_CIF_SIZE);
 
-  var numTotalArgs = types.length
-  var _argtypesptr = new Buffer(numTotalArgs * POINTER_SIZE)
-  var _rtypeptr = Type(rtype)
+  var numTotalArgs = types.length;
+  var _argtypesptr = new Buffer(numTotalArgs * POINTER_SIZE);
+  var _rtypeptr = Type(rtype);
 
   for (var i = 0; i < numTotalArgs; i++) {
-    var ffiType = Type(types[i])
-    _argtypesptr.writePointer(ffiType, i * POINTER_SIZE)
+    var ffiType = Type(types[i]);
+    _argtypesptr.writePointer(ffiType, i * POINTER_SIZE);
   }
 
   // prevent GC of the arg type and rtn type buffers (not sure if this is required)
-  cif.rtnTypePtr = _rtypeptr
-  cif.argTypesPtr = _argtypesptr
+  cif.rtnTypePtr = _rtypeptr;
+  cif.argTypesPtr = _argtypesptr;
 
   if (typeof abi === 'undefined') {
-    abi = FFI_DEFAULT_ABI
+    abi = FFI_DEFAULT_ABI;
   }
 
   var status = ffi_prep_cif_var(cif, numFixedArgs, numTotalArgs, _rtypeptr, _argtypesptr, abi)
@@ -54,25 +55,25 @@ function CIF_var (rtype, types, numFixedArgs, abi) {
   if (status !== FFI_OK) {
     switch (status) {
       case FFI_BAD_TYPEDEF:
-        var err = new Error('ffi_prep_cif_var() returned an FFI_BAD_TYPEDEF error')
-        err.code = 'FFI_BAD_TYPEDEF'
-        err.errno = status
-        throw err
+        var errtypedef = new Error('ffi_prep_cif_var() returned an FFI_BAD_TYPEDEF error');
+        errtypedef.code = 'FFI_BAD_TYPEDEF';
+        errtypedef.errno = status;
+        throw errtypedef;
         break;
       case FFI_BAD_ABI:
-        var err = new Error('ffi_prep_cif_var() returned an FFI_BAD_ABI error')
-        err.code = 'FFI_BAD_ABI'
-        err.errno = status
+        var errabi = new Error('ffi_prep_cif_var() returned an FFI_BAD_ABI error');
+        errabi.code = 'FFI_BAD_ABI';
+        errabi.errno = status;
         throw err
         break;
       default:
-        var err = new Error('ffi_prep_cif_var() returned an error: ' + status)
-        err.errno = status
-        throw err
+        var err = new Error('ffi_prep_cif_var() returned an error: ' + status);
+        err.errno = status;
+        throw err;
         break;
     }
   }
-
-  return cif
+  return cif;
 }
-module.exports = CIF_var
+
+module.exports = CIF_var;

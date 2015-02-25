@@ -174,7 +174,9 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
       }
     },
     set:function(e) {
-      if(!this.props) this.props={};
+      if(!this.props) {
+        this.props={};
+      }
       if(!this.props[memberName]) {
         this.props[memberName] = static ? 
           dotnet.getStaticPropertyObject(this.classPointer, memberName) : 
@@ -227,18 +229,18 @@ function createClass(typeNative, typeName) {
   var typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
 
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var memberName = dotnet.execGetProperty(memberNative, 'Name');
-    createMember(cls, typeNative, typeName, memberNative, memberName, true);
+    var mNativeStatic = dotnet.execGetProperty(typeEnumerator, 'Current');
+    var mNameStatic = dotnet.execGetProperty(mNativeStatic, 'Name');
+    createMember(cls, typeNative, typeName, mNativeStatic, mNameStatic, true);
   }
 
   // Find all INSTANCE members.
   typeEnumerator = dotnet.execMethod(dotnet.getMemberTypes(typeNative),'GetEnumerator');
 
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var memberName = dotnet.execGetProperty(memberNative, 'Name');
-    createMember(cls, typeNative, typeName, memberNative, memberName, false);
+    var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
+    var mName = dotnet.execGetProperty(mNative, 'Name');
+    createMember(cls, typeNative, typeName, mNative, mName, false);
   }
 
   return classCache[qualifiedName] = cls;

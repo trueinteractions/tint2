@@ -70,9 +70,9 @@ module.exports = (function() {
     // TODO: Add support for passing in a wrapped Ivar instance as the `name`
     if (arguments.length > 1) {
       // setter
-      var ivar = this.isClass ? this.getClassVariable(name) : this.getClass().getInstanceVariable(name);
-      var unwrapped = core.unwrapValue(value, ivar.getTypeEncoding());
-      return core.object_setIvar(this.pointer, ivar.pointer, unwrapped);
+      var ivars = this.isClass ? this.getClassVariable(name) : this.getClass().getInstanceVariable(name);
+      var unwrapped = core.unwrapValue(value, ivars.getTypeEncoding());
+      return core.object_setIvar(this.pointer, ivars.pointer, unwrapped);
     } else {
       var ptr = new Buffer(core.REF.sizeof.pointer);
       var ivar = core.object_getInstanceVariable(this.pointer, name, ptr);

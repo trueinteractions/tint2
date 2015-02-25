@@ -13,11 +13,11 @@ function baseline() {
 function run($utils) {
   $utils.ok();
   var fs = require('fs');
-  var ismac = require('os').platform().toLowerCase() == "darwin";
+  var ismac = require('os').platform().toLowerCase() === "darwin";
   var spawn;
   if(ismac) {
-    spawn  = require('child_process').spawn,
-      rescBuilder  = spawn('../build/xcode/Release/tint', 
+    spawn  = require('child_process').spawn;
+    var rescBuilder  = spawn('../build/xcode/Release/tint', 
         ['../tools/compiler/tntbuild.js','--no-windows-build','--osx-runtime=../build/xcode/Release/tint','--out=./packagetest-build/','./packagetest/package.json']
         ); //,{ stdio: 'inherit' }
     rescBuilder.on('close', function (code, signal) {

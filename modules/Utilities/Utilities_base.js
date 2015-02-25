@@ -130,17 +130,15 @@ module.exports = (function() {
         if ((typeof value === "string" || value instanceof String) 
           && value.indexOf('%') > -1) 
         {
-          var parsedValue = parseUnits(value);
-          layoutObject.multiplier = percentFunc(parsedValue);
+          layoutObject.multiplier = percentFunc(parseUnits(value));
           layoutObject.constant = 0.0;
           layoutObject.secondAttribute = percentName;
         } 
         else if (typeof value === "number" || value instanceof Number 
           || typeof value === "string" || value instanceof String) 
         {
-          var parsedValue = parseUnits(value);
           layoutObject.multiplier = 1.0;
-          layoutObject.constant = scalarFunc(parsedValue);
+          layoutObject.constant = scalarFunc(parseUnits(value));
           layoutObject.secondAttribute = scalarName;
         } else {
           layoutObject.secondItem = value;

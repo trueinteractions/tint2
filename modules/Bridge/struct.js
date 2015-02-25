@@ -43,21 +43,16 @@
  * Module dependencies.
  */
 
-var ref = require('ref')
-var util = require('util')
-var assert = require('assert')
-
-/**
- * Module exports.
- */
-
-module.exports = Struct
+var ref = require('ref');
+var util = require('util');
+var assert = require('assert');
 
 /**
  * The Struct "type" meta-constructor.
  */
 
 function Struct () {
+
 
   /**
    * This is the "constructor" of the Struct type that gets returned.
@@ -106,7 +101,9 @@ function Struct () {
   })
 
   StructType.defineProperty = defineProperty
-  StructType.toString = toString
+  StructType.toString = function() {
+    return '[StructType]'
+  };
   StructType.fields = {}
 
   // Setup the ref "type" interface. The constructor doubles as the "type" object
@@ -133,7 +130,7 @@ function Struct () {
     })
   }
 
-  return StructType
+  return StructType;
 }
 
 /**
@@ -163,14 +160,6 @@ function set (buffer, offset, value) {
   } else {
     new this(buffer, value)
   }
-}
-
-/**
- * Custom `toString()` override for struct type instances.
- */
-
-function toString () {
-  return '[StructType]'
 }
 
 /**
@@ -333,6 +322,13 @@ proto.inspect = function inspect () {
  * returns a Buffer pointing to this struct data structure.
  */
 
-proto.ref = function ref () {
+proto.ref = function() {
   return this['ref.buffer']
 }
+
+
+/**
+ * Module exports.
+ */
+
+module.exports = Struct;
