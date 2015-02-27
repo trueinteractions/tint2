@@ -20,7 +20,9 @@ module.exports = (function() {
     }.bind(this);
     this.native.addEventListener('PreviewMouseDown', this.private.previewMouseDownHandler);
     this.private.menu = null;
-    this.private.contextMenu = null;
+    this.native.ContextMenu = new $.System.Windows.Controls.ContextMenu();
+    this.native.ContextMenu.PlacementTarget = this.native;
+    this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
     this.private.selectedIndex = null;
   }
 
@@ -28,29 +30,16 @@ module.exports = (function() {
   FileInput.prototype.constructor = FileInput;
 
   util.def(FileInput.prototype, "allowFileTypes",
-    function() { return this.private.allowedFileTypes; },
-    function(items) { 
-      console.assert(Array.isArray(items));
-
-      this.private.allowedFileTypes = items;
-      var arr = $.NSMutableArray('arrayWithCapacity',items.length);
-      items.forEach(function(item,i) {
-        if(item === "folder") {
-          item = "public.folder";
-        }
-        arr('insertObject',$(item),'atIndex',i); 
-      });
-      this.nativeView('cell')('setAllowedTypes',arr);
-    }
+    function() { return this.private.allowFileTypes; },
+    function(items) { this.private.allowFileTypes = items; }
   );
 
   util.def(FileInput.prototype, 'location', 
     function() {
-      var url = this.nativeView('URL');
-      return url === null ? null : url('absoluteURL')('description')('UTF8String');
+      
     },
     function(value) {
-      this.nativeView('setURL', $.NSURL('fileURLWithPath', $(value)));
+
     }
   );
 
