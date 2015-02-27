@@ -143,7 +143,7 @@ module.exports = (function() {
      * @param {MenuItem} menuitem The submenu item to remove from the menu object.
      */
     this.removeChild = function(menuitem) {
-      if(children.indexOf(menuitem) != -1) {
+      if(children.indexOf(menuitem) !== -1) {
         children.splice(children.indexOf(menuitem),1);
         $menu('removeItem',menuitem.native);
       }

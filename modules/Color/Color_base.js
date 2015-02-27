@@ -1001,7 +1001,7 @@ function stringInputToObject(color) {
         color = TinyColor.names[color];
         named = true;
     }
-    else if (color == 'transparent') {
+    else if (color === 'transparent') {
         return { r: 0, g: 0, b: 0, a: 0, format: "name" };
     }
 

@@ -22,8 +22,11 @@ module.exports = (function() {
 
   Object.defineProperty(SelectInput.prototype, 'value', {
     get:function() {
-      if(this.native.SelectedIndex == -1) return this.native.Text;
-      else return this.native.SelectedValue.toString();
+      if(this.native.SelectedIndex === -1) {
+        return this.native.Text;
+      } else {
+        return this.native.SelectedValue.toString();
+      }
     },
     set:function(e) { this.native.Text = e.toString(); }
   });

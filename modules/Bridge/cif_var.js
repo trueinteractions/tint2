@@ -64,7 +64,7 @@ function CIF_var (rtype, types, numFixedArgs, abi) {
         var errabi = new Error('ffi_prep_cif_var() returned an FFI_BAD_ABI error');
         errabi.code = 'FFI_BAD_ABI';
         errabi.errno = status;
-        throw err
+        throw errabi;
         break;
       default:
         var err = new Error('ffi_prep_cif_var() returned an error: ' + status);

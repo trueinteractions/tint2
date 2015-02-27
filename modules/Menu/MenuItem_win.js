@@ -53,8 +53,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.submenu = e;
       this.private.submenu.parent = this.native;
-      for(var i=0; i < e.children.length ; i++)
+      for(var i=0; i < e.children.length ; i++) {
         this.native.Items.Add(e.children[i].native);
+      }
     }
   });
 
@@ -73,12 +74,12 @@ module.exports = (function() {
 
   Object.defineProperty(MenuItem.prototype, 'enabled', {
     get:function() { return this.native.IsEnabled; },
-    set:function(e) { return this.native.IsEnabled = e ? true : false; }
+    set:function(e) { this.native.IsEnabled = (e ? true : false); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'visible', {
     get:function() { return !this.native.IsVisible; },
-    set:function(e) { return this.native.IsVisible = e ? false : true; }
+    set:function(e) { this.native.IsVisible = (e ? false : true); }
   });
 
   Object.defineProperty(MenuItem.prototype, 'key', {

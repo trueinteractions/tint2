@@ -47,6 +47,100 @@ var ref = require('ref');
 var util = require('util');
 var assert = require('assert');
 
+
+/**
+ * The "get" function of the Struct "type" interface
+ */
+
+function get (buffer, offset) {
+  if (offset > 0) {
+    buffer = buffer.slice(offset)
+  }
+  return new this(buffer)
+}
+
+/**
+ * The "set" function of the Struct "type" interface
+ */
+
+function set (buffer, offset, value) {
+  if (offset > 0) {
+    buffer = buffer.slice(offset)
+  }
+  var isStruct = value instanceof this
+  if (isStruct) {
+    // optimization: copy the buffer contents directly rather
+    // than going through the ref-struct constructor
+    value['ref.buffer'].copy(buffer, offset, 0, this.size);
+  } else {
+    new this(buffer, value)
+  }
+}
+
+
+function recalc (struct) {
+
+  // reset size and alignment
+  struct.size = 0
+  struct.alignment = 0
+
+  var fieldNames = Object.keys(struct.fields)
+
+  // first loop through is to determine the `alignment` of this struct
+  fieldNames.forEach(function (name) {
+    var field = struct.fields[name]
+    var type = field.type
+    var alignment = type.alignment || ref.alignof.pointer
+    if (type.indirection > 1) {
+      alignment = ref.alignof.pointer
+    }
+    struct.alignment = Math.max(struct.alignment, alignment)
+  })
+
+  // second loop through sets the `offset` property on each "field"
+  // object, and sets the `struct.size` as we go along
+  fieldNames.forEach(function (name) {
+    var field = struct.fields[name]
+    var type = field.type
+
+    if (null != type.fixedLength) {
+      // "ref-array" types set the "fixedLength" prop. don't treat arrays like one
+      // contiguous entity. instead, treat them like individual elements in the
+      // struct. doing this makes the padding end up being calculated correctly.
+      field.offset = addType(type.type)
+      for (var i = 1; i < type.fixedLength; i++) {
+        addType(type.type)
+      }
+    } else {
+      field.offset = addType(type)
+    }
+  })
+
+  function addType (type) {
+    var offset = struct.size
+    var align = type.indirection === 1 ? type.alignment : ref.alignof.pointer
+    var padding = (align - (offset % align)) % align
+    var size = type.indirection === 1 ? type.size : ref.sizeof.pointer
+
+    offset += padding
+
+    assert.equal(offset % align, 0, "offset should align")
+
+    // adjust the "size" of the struct type
+    struct.size = offset + size
+
+    // return the calulated offset
+    return offset
+  }
+
+  // any final padding?
+  var left = struct.size % struct.alignment
+  if (left > 0) {
+    struct.size += struct.alignment - left
+  }
+}
+
+
 /**
  * The Struct "type" meta-constructor.
  */
@@ -133,34 +227,6 @@ function Struct () {
   return StructType;
 }
 
-/**
- * The "get" function of the Struct "type" interface
- */
-
-function get (buffer, offset) {
-  if (offset > 0) {
-    buffer = buffer.slice(offset)
-  }
-  return new this(buffer)
-}
-
-/**
- * The "set" function of the Struct "type" interface
- */
-
-function set (buffer, offset, value) {
-  if (offset > 0) {
-    buffer = buffer.slice(offset)
-  }
-  var isStruct = value instanceof this
-  if (isStruct) {
-    // optimization: copy the buffer contents directly rather
-    // than going through the ref-struct constructor
-    value['ref.buffer'].copy(buffer, offset, 0, this.size);
-  } else {
-    new this(buffer, value)
-  }
-}
 
 /**
  * Adds a new field to the struct instance with the given name and type.
@@ -203,68 +269,6 @@ function defineProperty (name, type) {
   recalc(this)
 
   Object.defineProperty(this.prototype, name, desc);
-}
-
-function recalc (struct) {
-
-  // reset size and alignment
-  struct.size = 0
-  struct.alignment = 0
-
-  var fieldNames = Object.keys(struct.fields)
-
-  // first loop through is to determine the `alignment` of this struct
-  fieldNames.forEach(function (name) {
-    var field = struct.fields[name]
-    var type = field.type
-    var alignment = type.alignment || ref.alignof.pointer
-    if (type.indirection > 1) {
-      alignment = ref.alignof.pointer
-    }
-    struct.alignment = Math.max(struct.alignment, alignment)
-  })
-
-  // second loop through sets the `offset` property on each "field"
-  // object, and sets the `struct.size` as we go along
-  fieldNames.forEach(function (name) {
-    var field = struct.fields[name]
-    var type = field.type
-
-    if (null != type.fixedLength) {
-      // "ref-array" types set the "fixedLength" prop. don't treat arrays like one
-      // contiguous entity. instead, treat them like individual elements in the
-      // struct. doing this makes the padding end up being calculated correctly.
-      field.offset = addType(type.type)
-      for (var i = 1; i < type.fixedLength; i++) {
-        addType(type.type)
-      }
-    } else {
-      field.offset = addType(type)
-    }
-  })
-
-  function addType (type) {
-    var offset = struct.size
-    var align = type.indirection === 1 ? type.alignment : ref.alignof.pointer
-    var padding = (align - (offset % align)) % align
-    var size = type.indirection === 1 ? type.size : ref.sizeof.pointer
-
-    offset += padding
-
-    assert.equal(offset % align, 0, "offset should align")
-
-    // adjust the "size" of the struct type
-    struct.size = offset + size
-
-    // return the calulated offset
-    return offset
-  }
-
-  // any final padding?
-  var left = struct.size % struct.alignment
-  if (left > 0) {
-    struct.size += struct.alignment - left
-  }
 }
 
 /**

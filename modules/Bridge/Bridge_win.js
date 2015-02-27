@@ -195,7 +195,7 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   if(type === "Field") {
     createField(target, typeNative, typeName, memberNative, memberName, static);
   } else if(type === "Method") {
-    if(memberName.substring(0,4) != "get_") {
+    if(memberName.substring(0,4) !== "get_") {
       createMethod(target, typeNative, typeName, memberNative, memberName, static);
     }
   } else if(type === "Property") {
@@ -272,10 +272,11 @@ function createFromType(nativeType, onto) {
       get:function() { 
         delete this.onto[this.name];
         if(dotnet.execGetProperty(this.type, "IsEnum")) {
-          return this.onto[this.name] = createEnum(this.type,this.name);
+          this.onto[this.name] = createEnum(this.type,this.name);
         } else if (dotnet.execGetProperty(this.type, "IsClass") || dotnet.execGetProperty(this.type, "IsValueType")) {
-          return this.onto[this.name] = createClass(this.type,this.name);
+          this.onto[this.name] = createClass(this.type,this.name);
         }
+        return this.onto[this.name];
       }.bind(info)
     });
   }

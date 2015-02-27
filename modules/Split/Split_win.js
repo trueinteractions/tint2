@@ -67,7 +67,7 @@ module.exports = (function() {
     var isVertical = this.orientation === "vertical" ? true : false;
     var index = this.private.definitions.length;
 
-    if(index != 0) 
+    if(index !== 0) 
     {
       var definition1 = createNewDefinition(this, this.private.dividerWidth);
       if(isVertical) this.nativeView.ColumnDefinitions.Add(definition1);

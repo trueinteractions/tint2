@@ -204,8 +204,11 @@ module.exports = (function() {
             *              'aux' is passed in to the callback when the auxillary button is pressed.
             *               'main' is passed in to the callback when the main button is pressed.
             */
-            if(e == $.NSAlertFirstButtonReturn) this.fireEvent('click',['main']);
-            else this.fireEvent('click',['aux']);
+            if(e === $.NSAlertFirstButtonReturn) {
+              this.fireEvent('click',['main']);
+            } else {
+              this.fireEvent('click',['aux']);
+            }
           } catch(e) {
             console.error(e.message);
             console.error(e.stack);
@@ -217,8 +220,9 @@ module.exports = (function() {
         var e = this.native('runModal');
         if(e === $.NSAlertFirstButtonReturn) {
           this.fireEvent('click',['main']);
+        } else {
+          this.fireEvent('click',['aux']);
         }
-        else this.fireEvent('click',['aux']);
       }
     }.bind(this);
   }

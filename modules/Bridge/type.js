@@ -110,7 +110,7 @@ function Type (type) {
   if (!rtn && type.name) {
     // handle "ref" types other than the set that node-ffi is using (i.e.
     // a separate copy)
-    if ('CString' == type.name) {
+    if ('CString' === type.name) {
       rtn = type.ffi_type = bindings.FFI_TYPES.pointer
     } else {
       var cur = type
