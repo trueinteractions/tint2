@@ -737,19 +737,18 @@
               ' and node_use_etw=="false"'
               ' and node_use_systemtap=="false"',
             {
-                'inputs': ['libraries/node/src/notrace_macros.py']
-              }
-              ],
+              'inputs': ['libraries/node/src/notrace_macros.py']
+            }],
             [ 'node_use_perfctr=="false"', {
               'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
             }],
           ],
-              'action': [
-                '<(python)',
-                'tools/tint_js2c.py',
-                '<@(_outputs)',
-                '<@(_inputs)',
-              ],
+          'action': [
+            '<(python)',
+            'tools/tint_js2c.py',
+            '<@(_outputs)',
+            '<@(_inputs)',
+          ],
         },
       ],
     }, # end tint_js2c

@@ -1,3 +1,43 @@
+diff --git a/deps/v8/build/toolchain.gypi b/deps/v8/build/toolchain.gypi
+index 1d47360..a99f1b0 100644
+--- a/deps/v8/build/toolchain.gypi
++++ b/deps/v8/build/toolchain.gypi
+@@ -659,7 +659,7 @@
+               }],
+               ['v8_target_arch=="x64"', {
+                 # TODO(2207): remove this option once the bug is fixed.
+-                'WholeProgramOptimization': 'true',
++                # 'WholeProgramOptimization': 'true',
+               }],
+             ],
+           },
+@@ -824,17 +824,17 @@
+                 'EnableIntrinsicFunctions': 'true',
+                 'FavorSizeOrSpeed': '0',
+                 'StringPooling': 'true',
+-                'conditions': [
+-                  ['component=="shared_library"', {
++                # 'conditions': [
++                  # ['component=="shared_library"', {
+                     'RuntimeLibrary': '2',  #/MD
+-                  }, {
+-                    'RuntimeLibrary': '0',  #/MT
+-                  }],
+-                  ['v8_target_arch=="x64"', {
++                  # }, {
++                  #  'RuntimeLibrary': '0',  #/MT
++                  # }],
++                  # ['v8_target_arch=="x64"', {
+                     # TODO(2207): remove this option once the bug is fixed.
+-                    'WholeProgramOptimization': 'true',
+-                  }],
+-                ],
++                    # 'WholeProgramOptimization': 'true',
++                  # }],
++                # ],
+               },
+               'VCLinkerTool': {
+                 'LinkIncremental': '1',
 diff --git a/libraries/node/src/node.js b/libraries/node/src/node.js
 index e5833cb..6263c11 100644
 --- a/libraries/node/src/node.js

@@ -19,24 +19,26 @@ module.exports = (function() {
     }.bind(this);
     this.native.addEventListener('PreviewMouseDown', this.private.previewMouseDownHandler);
     this.private.menu = null;
-    this.private.contextMenu = null;
+    this.private.contextMenu = new $.System.Windows.Controls.ContextMenu();
     this.private.selectedIndex = null;
+
+    util.makePropertyBoolTypeOnTarget(DropDown.prototype, 'pullsdown', 
+      this.private.contextMenu,
+      'Placement',
+      $.System.Windows.Controls.Primitives.PlacementMode.Bottom,
+      $.System.Windows.Controls.Primitives.PlacementMode.Center);
   }
 
   DropDown.prototype = Object.create(TextInput.prototype);
   DropDown.prototype.constructor = DropDown;
-
-  util.makePropertyBoolType(DropDown.prototype, 'pullsdown', 
-    $.System.Windows.Controls.Primitives.PlacementMode.Bottom,
-    $.System.Windows.Controls.Primitives.PlacementMode.Center);
 
   Object.defineProperty(DropDown.prototype, 'options', {
     get:function() { return this.private.menu; },
     set:function(e) {
       this.private.menu = e;
       // convert menu to context menu.
-      this.private.contextMenu = new $.System.Windows.Controls.ContextMenu();
       this.private.menu.parent = this.private.contextMenu;
+      this.private.contextMenu.Items.Clear();
       for(var i=0; i < e.children.length ; i++) {
         this.private.contextMenu.Items.Add(e.children[i].native);
       }
