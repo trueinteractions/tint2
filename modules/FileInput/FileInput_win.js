@@ -23,6 +23,11 @@ module.exports = (function() {
     this.native.ContextMenu = new $.System.Windows.Controls.ContextMenu();
     this.native.ContextMenu.PlacementTarget = this.native;
     this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
+
+    var item = $.System.Windows.Controls.MenuItem();
+    item.Header = "Chose ...";
+    this.native.ContextMenu.Items.Add(item);
+
     this.private.selectedIndex = null;
   }
 
