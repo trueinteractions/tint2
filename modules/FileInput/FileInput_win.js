@@ -8,26 +8,9 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
-
-  function FileInput(options) {
-    options = options || {};
-    this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
-    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
-    TextInput.call(this, options);
-    this.private.previewMouseDownHandler = function() {
-      if(this.native.ContextMenu) {
-        this.native.ContextMenu.IsOpen = !this.native.ContextMenu.IsOpen;
-      }
-    }.bind(this);
-    this.native.addEventListener('PreviewMouseDown', this.private.previewMouseDownHandler);
-    this.private.menu = null;
-    this.native.ContextMenu = new $.System.Windows.Controls.ContextMenu();
-    this.native.ContextMenu.PlacementTarget = this.native;
-    this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
-
+  function createchoose() {
     var item = new $.System.Windows.Controls.MenuItem();
-    item.addEventListener('PreviewMouseDown', function() {
-  
+    item.previewMouseDown = function() {
       var dialog = new FileDialog("open");
       dialog.allowMultiple = false;
 
@@ -46,11 +29,30 @@ module.exports = (function() {
       }.bind(this));
 
       dialog.open();
-    }.bind(this));
-
+    };
+    item.addEventListener('PreviewMouseDown', item.previewMouseDown.bind(this));
     item.Header = "Choose ...";
-    this.native.ContextMenu.Items.Add(item);
+    return item;
+  }
+
+  function FileInput(options) {
+    options = options || {};
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
+    TextInput.call(this, options);
+    this.private.previewMouseDownHandler = function() {
+      if(this.native.ContextMenu) {
+        this.native.ContextMenu.IsOpen = !this.native.ContextMenu.IsOpen;
+      }
+    }.bind(this);
+    this.native.addEventListener('PreviewMouseDown', this.private.previewMouseDownHandler);
+    this.private.location = null;
+    this.native.ContextMenu = new $.System.Windows.Controls.ContextMenu();
+    this.native.ContextMenu.PlacementTarget = this.native;
     this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
+
+    var item = createchoose.call(this);
+    this.native.ContextMenu.Items.Add(item);
 
     setTimeout(function() {
       this.native.ContextMenu.MinWidth = this.native.ActualWidth;
@@ -59,8 +61,6 @@ module.exports = (function() {
       }.bind(this);
       this.native.addEventListener('SizeChanged', this.private.sizeChangedHandler);
     }.bind(this),0);
-
-    this.private.selectedIndex = null;
   }
 
   FileInput.prototype = Object.create(TextInput.prototype);
@@ -72,14 +72,38 @@ module.exports = (function() {
   );
 
   util.def(FileInput.prototype, 'location', 
-    function() {
-      
-    },
+    function() { return this.private.location; },
     function(value) {
+      this.native.ContextMenu.Items.Clear();
+      var item = createchoose.call(this);
+      this.native.ContextMenu.Items.Add(item);
 
+      value = value.replace(/\\/g, '\\');
+      var paths = value.split('\\');
+      var runningPath = "", previousPath = "";
+      for(var i=0; i < paths.length; i++) {
+        runningPath = runningPath + paths[i] + ((i === (paths.length - 1)) ? "" : "\\");
+        if(runningPath !== previousPath) {
+          var item = new $.System.Windows.Controls.MenuItem();
+          item.Header = runningPath;
+          item.selector = function() {
+            this.native.SelectionBoxItem = item.Header;
+          };
+          item.addEventListener('PreviewMouseDown', item.selector.bind(this));
+          var img = new $.System.Windows.Controls.Image();
+          img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(
+            new $.System.IO.MemoryStream($.System.Convert.FromBase64String($.TintInterop.Shell.GetIconForFile(runningPath))));
+          item.Icon = img;
+          this.native.ContextMenu.Items.Add(item);
+        }
+        previousPath = runningPath;
+      }
+      this.private.location = value;
+      this.native.SelectionBoxItem = value;
     }
   );
 
   global.__TINT.FileInput = FileInput;
   return FileInput;
 })();
+

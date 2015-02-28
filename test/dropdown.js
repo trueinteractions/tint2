@@ -26,7 +26,6 @@ function run($utils) {
   label.left = 10;
   label.right = 10;
 
-  
   var dropdown = new DropDown();
   dropdown.top = 35;
   dropdown.left = 10;
