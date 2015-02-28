@@ -4,6 +4,7 @@ module.exports = (function() {
   }
 
   var TextInput = require('TextInput');
+  var FileDialog = require('FileDialog');
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
@@ -14,8 +15,8 @@ module.exports = (function() {
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
     TextInput.call(this, options);
     this.private.previewMouseDownHandler = function() {
-      if(this.private.contextMenu) {
-        this.private.contextMenu.IsOpen = !this.private.contextMenu.IsOpen;
+      if(this.native.ContextMenu) {
+        this.native.ContextMenu.IsOpen = !this.native.ContextMenu.IsOpen;
       }
     }.bind(this);
     this.native.addEventListener('PreviewMouseDown', this.private.previewMouseDownHandler);
@@ -24,9 +25,40 @@ module.exports = (function() {
     this.native.ContextMenu.PlacementTarget = this.native;
     this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
 
-    var item = $.System.Windows.Controls.MenuItem();
-    item.Header = "Chose ...";
+    var item = new $.System.Windows.Controls.MenuItem();
+    item.addEventListener('PreviewMouseDown', function() {
+  
+      var dialog = new FileDialog("open");
+      dialog.allowMultiple = false;
+
+      if(this.allowFileTypes) {
+        dialog.allowFileTypes = this.allowFileTypes;
+      }
+      if(this.location) {
+        dialog.filename = this.location;
+      }
+      dialog.addEventListener('select', function() {
+        // TODO ?? //
+        this.location = dialog.filename;
+      }.bind(this));
+      dialog.addEventListener('cancel', function() {
+        // TODO ?? //
+      }.bind(this));
+
+      dialog.open();
+    }.bind(this));
+
+    item.Header = "Choose ...";
     this.native.ContextMenu.Items.Add(item);
+    this.native.ContextMenu.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Center;
+
+    setTimeout(function() {
+      this.native.ContextMenu.MinWidth = this.native.ActualWidth;
+      this.private.sizeChangedHandler = function() {
+        this.native.ContextMenu.MinWidth = this.native.ActualWidth;
+      }.bind(this);
+      this.native.addEventListener('SizeChanged', this.private.sizeChangedHandler);
+    }.bind(this),0);
 
     this.private.selectedIndex = null;
   }

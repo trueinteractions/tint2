@@ -43,13 +43,13 @@ function run($utils) {
   //TODO: Figure out a way to test the blocking "open" function
   /* @hidden */ if(ismac) 
   dialog.open(win);
-  /* @hidden */ $utils.assert(dialog.title == "Dialog Title")
-  /* @hidden */ $utils.assert(dialog.message == "Message dialog")
-  /* @hidden */ $utils.assert(dialog.prompt == "PROMPT")
-  /* @hidden */ $utils.assert(dialog.allowMultiple == true)
-  /* @hidden */ //$utils.assert(dialog.directory == "file:///Users/tlinton/Pictures/",dialog.directory);
-  /* @hidden */ $utils.assert(dialog.filename == "somefile.png");
-  /* @hidden */ $utils.assert(dialog.type == "open");
+  /* @hidden */ $utils.assert(dialog.title === "Dialog Title")
+  /* @hidden */ $utils.assert(dialog.message === "Message dialog")
+  /* @hidden */ $utils.assert(dialog.prompt === "PROMPT")
+  /* @hidden */ $utils.assert(dialog.allowMultiple === true)
+  /* @hidden */ //$utils.assert(dialog.directory === "file:///Users/tlinton/Pictures/",dialog.directory);
+  /* @hidden */ $utils.assert(dialog.filename === "somefile.png");
+  /* @hidden */ $utils.assert(dialog.type === "open");
   /* @hidden */ setTimeout(function() {
   /* @hidden */   dialog.cancel();
   /* @hidden */ },2000);
