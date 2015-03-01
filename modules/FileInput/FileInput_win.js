@@ -11,6 +11,7 @@ module.exports = (function() {
   function createchoose() {
     var item = new $.System.Windows.Controls.MenuItem();
     item.previewMouseDown = function() {
+
       var dialog = new FileDialog("open");
       dialog.allowMultiple = false;
 
@@ -28,7 +29,7 @@ module.exports = (function() {
         // TODO ?? //
       }.bind(this));
 
-      dialog.open();
+      dialog.open({native:$.System.Windows.Application.Current.MainWindow});
     };
     item.addEventListener('PreviewMouseDown', item.previewMouseDown.bind(this));
     item.Header = "Choose ...";

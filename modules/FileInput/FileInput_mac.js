@@ -6,7 +6,16 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var util = require('Utilities');
   var Control = require('Control');
-
+  /**
+   * @class FileInput
+   * @description Creates a new file input control.
+   * @extends Control
+   */
+  /**
+   * @new
+   * @memberof FileInput
+   * @description Creates a new FileInput control.
+   */
   function FileInput(options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -20,6 +29,12 @@ module.exports = (function() {
   FileInput.prototype = Object.create(Control.prototype);
   FileInput.prototype.constructor = FileInput;
 
+  /**
+   * @member allowFileTypes
+   * @type {array}
+   * @memberof FileInput
+   * @description Gets or sets an array containing the file types (by extension) that are allowed.
+   */
   util.def(FileInput.prototype, "allowFileTypes",
     function() { return this.private.allowedFileTypes; },
     function(items) { 
@@ -37,6 +52,12 @@ module.exports = (function() {
     }
   );
 
+  /**
+   * @member location
+   * @type {string}
+   * @memberof FileInput
+   * @description Gets or sets the location or file name of the file selected in the control.
+   */
   util.def(FileInput.prototype, 'location', 
     function() {
       var url = this.nativeView('URL');

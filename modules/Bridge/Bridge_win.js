@@ -23,23 +23,33 @@ var classCache = {};
 dotnet.statistics = {assemblies_hit:0, assemblies_miss:0, enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
 function unwrap(a) {
-  if(a && a.pointer) return a.pointer;
-  else if(a && a.classPointer) return a.classPointer;
-  else return a;
+  if(a && a.pointer) {
+    return a.pointer;
+  } else if(a && a.classPointer) {
+    return a.classPointer;
+  } else {
+    return a;
+  }
 }
 
 function wrap(b) {
-  if(Buffer.isBuffer(b) && !b.array) return createJSInstance(b);
-  else return b;
+  if(Buffer.isBuffer(b) && !b.array) {
+    return createJSInstance(b);
+  } else {
+    return b;
+  }
 }
 
 function unwrapValues(e) {
   if(Array.isArray(e)) {
     var unwrapped = [];
-    for(var i=0; i < types.length; i++) unwrapped[i] = unwrap(types[i]);
+    for(var i=0; i < types.length; i++) {
+      unwrapped[i] = unwrap(types[i]);
+    }
     return unwrapped;
-  } else
+  } else {
     return unwrap(e);
+  }
 }
 
 function createJSInstance(pointer) {
