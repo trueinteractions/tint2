@@ -6,8 +6,8 @@ language:
 before_install:
 
 install:
-  - ./config.sh
-  - ./build.sh
+  - ./tools.sh config
+  - ./tools.sh build
 
 script:
   - ./test.sh

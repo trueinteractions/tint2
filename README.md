@@ -30,9 +30,9 @@ Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-./config.sh
-./build.sh
-./test.sh
+./tools.sh config
+./tools.sh build
+./tools.sh test
 ```
 
 <h3>Windows</h3>
@@ -44,9 +44,9 @@ Ensure you have Visual Studio 2010 SP1 and WinSDK 7.0 (note problems occur with 
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-config.bat
-build.bat
-test.bat
+tools.bat config
+tools.bat build
+tools.bat test
 ```
 
 32-bit build
@@ -55,11 +55,12 @@ test.bat
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-config.bat x86
-build.bat release x86
-test.bat
+tools.bat config x86
+tools.bat build x86
+tools.bat test
 ```
 
+You can also use ``tools.sh clean`` to clean the build, or ``tools.sh build debug`` for a debug build (these commands also work on tools.bat)
 
 <h3>Post-Build</h3>
 After building you'll find the binary in ``build/xcode/Release/tint`` or ``build\msvs\Release\tint.exe``. You can also use the Xcode project files or MSVS 2010 files in ``build\xcode`` and ``build\msvs``. Optionally you can use ninja build files that are generated in ``build/ninja/out/Release`` and ``build/ninja/out/Debug`` on posix (OSX only at the moment).
