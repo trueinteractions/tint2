@@ -1,0 +1,135 @@
+diff --git a/deps/v8/build/toolchain.gypi b/deps/v8/build/toolchain.gypi
+index 1d47360..a99f1b0 100644
+--- a/deps/v8/build/toolchain.gypi
++++ b/deps/v8/build/toolchain.gypi
+@@ -659,7 +659,7 @@
+               }],
+               ['v8_target_arch=="x64"', {
+                 # TODO(2207): remove this option once the bug is fixed.
+-                'WholeProgramOptimization': 'true',
++                # 'WholeProgramOptimization': 'true',
+               }],
+             ],
+           },
+@@ -824,17 +824,17 @@
+                 'EnableIntrinsicFunctions': 'true',
+                 'FavorSizeOrSpeed': '0',
+                 'StringPooling': 'true',
+-                'conditions': [
+-                  ['component=="shared_library"', {
++                # 'conditions': [
++                  # ['component=="shared_library"', {
+                     'RuntimeLibrary': '2',  #/MD
+-                  }, {
+-                    'RuntimeLibrary': '0',  #/MT
+-                  }],
+-                  ['v8_target_arch=="x64"', {
++                  # }, {
++                  #  'RuntimeLibrary': '0',  #/MT
++                  # }],
++                  # ['v8_target_arch=="x64"', {
+                     # TODO(2207): remove this option once the bug is fixed.
+-                    'WholeProgramOptimization': 'true',
+-                  }],
+-                ],
++                    # 'WholeProgramOptimization': 'true',
++                  # }],
++                # ],
+               },
+               'VCLinkerTool': {
+                 'LinkIncremental': '1',
+diff --git a/deps/v8/src/arm/cpu-arm.cc b/deps/v8/src/arm/cpu-arm.cc
+index 9c7104e..4cabde8 100644
+--- a/deps/v8/src/arm/cpu-arm.cc
++++ b/deps/v8/src/arm/cpu-arm.cc
+@@ -14,6 +14,10 @@
+ 
+ #include "src/v8.h"
+ 
++#if defined(V8_TARGET_OS_IOS)
++#include <libkern/OSCacheControl.h>
++#endif
++
+ #if V8_TARGET_ARCH_ARM
+ 
+ #include "src/assembler.h"
+@@ -37,7 +41,8 @@ void CpuFeatures::FlushICache(void* start, size_t size) {
+ 
+ #elif V8_OS_QNX
+   msync(start, size, MS_SYNC | MS_INVALIDATE_ICACHE);
+-
++#elif defined(V8_TARGET_OS_IOS)
++  sys_icache_invalidate(start, size);
+ #else
+   register uint32_t beg asm("r0") = reinterpret_cast<uint32_t>(start);
+   register uint32_t end asm("r1") = beg + size;
+diff --git a/deps/v8/tools/js2c.py b/deps/v8/tools/js2c.py
+old mode 100755
+new mode 100644
+index 77485f6..088d09a
+--- a/deps/v8/tools/js2c.py
++++ b/deps/v8/tools/js2c.py
+@@ -571,6 +571,9 @@ def main():
+       sources.js: JS internal sources or macros.py.""")
+   (options, args) = parser.parse_args()
+ 
++  args[1] = args[1].replace('../','').replace('..\\','').replace('libraries\\','').replace('node\\','').replace('deps\\','').replace('v8\\','').replace('tools\\','').replace('gyp\\','')
++  args[2] = args[2].replace('../','').replace('..\\','').replace('libraries\\','').replace('node\\','').replace('deps\\','').replace('v8\\','').replace('tools\\','').replace('gyp\\','')
++  
+   JS2C(args[3:], args[0], args[1], args[2], options.raw, options.startup_blob)
+ 
+ 
+diff --git a/src/node.cc b/src/node.cc
+index c8dfe04..b109cda 100644
+--- a/src/node.cc
++++ b/src/node.cc
+@@ -85,7 +85,7 @@ typedef int mode_t;
+ #include <grp.h>  // getgrnam()
+ #endif
+ 
+-#ifdef __APPLE__
++#if defined(__APPLE__) && !defined(V8_TARGET_OS_IOS)
+ #include <crt_externs.h>
+ #define environ (*_NSGetEnviron())
+ #elif !defined(_MSC_VER)
+diff --git a/src/node.js b/src/node.js
+index 5046038..8843d0f 100644
+--- a/src/node.js
++++ b/src/node.js
+@@ -482,10 +482,16 @@
+         break;
+ 
+       default:
+-        // Probably an error on in uv_guess_handle()
+-        throw new Error('Implement me. Unknown stream file type!');
++        // See https://groups.google.com/forum/#!topic/nodejs/t1V8psq309w
++        if(process.platform === 'win32' && (fd === 1 || fd === 2)) {
++          var fs = NativeModule.require('fs');
++          stream = new fs.SyncWriteStream(fd);
++          stream._type = 'fs';
++        } else {
++          // Probably an error on in uv_guess_handle()
++          throw new Error('Implement me. Unknown stream file type!');
++        }
+     }
+-
+     // For supporting legacy API we put the FD here.
+     stream.fd = fd;
+ 
+@@ -554,8 +560,15 @@
+           break;
+ 
+         default:
++        // See https://groups.google.com/forum/#!topic/nodejs/t1V8psq309w
++        if(process.platform === 'win32' && (fd === 1 || fd === 2)) {
++          var fs = NativeModule.require('fs');
++          stream = new fs.SyncWriteStream(fd);
++          stream._type = 'fs';
++        } else {
+           // Probably an error on in uv_guess_handle()
+-          throw new Error('Implement me. Unknown stdin file type!');
++          throw new Error('Implement me. Unknown stream file type!');
++        }
+       }
+ 
+       // For supporting legacy API we put the FD here.

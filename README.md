@@ -65,7 +65,7 @@ tools.bat test
 Ensure you have Xcode 5, OSX Mountain Lion, git and Python 2.6 (or 2.7) in addition to the iOS 7 SDK installed.  In addition to build a non-simulator version (an actual iOS build) you'll need a provisioning profile and iOS Developer certificate from Apple.
 
 
-iOS 7 Build
+iOS 7+ Build
 
 ```bash
 mkdir tint

@@ -2,6 +2,7 @@
 
 if [ "$1" == "config" ]; then
   git apply build/node.diff 2> /dev/null
+  git apply build/ios.diff 2> /dev/null
   if [ $CC ]; then
     echo "Warning using a pre-set compiler $CC"
   fi
@@ -24,11 +25,11 @@ elif [ "$1" == "build" ]; then
     CONFIG="Release"
   fi
 
-  if [ "$3" == "ios" ]; then
-    xcodebuild -configuration $CONFIG -project build/xcode-ios/tint.xcodeproj build 
+  if [ "$3" == "ios" -o "$2" == "ios" ]; then
+    xcodebuild -configuration $CONFIG -project build/xcode-ios/tint.xcodeproj build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
     exit 0
   fi
-  if [ "$3" == "ios-simulator" ]; then
+  if [ "$3" == "ios-simulator" -o "$2" == "ios-simulator" ]; then
     xcodebuild -configuration $CONFIG -project build/xcode-ios-simulator/tint.xcodeproj build 
     exit 0
   fi

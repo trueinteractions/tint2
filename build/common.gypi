@@ -42,7 +42,7 @@
       }],
       ['target_ios==1', {
         'arm_version':'default',
-        'arm_float_abi':'soft',
+        'arm_float_abi':'hard',
         'arm_thumb':0
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
@@ -316,7 +316,7 @@
             '-stdlib=libc++'                        # added for Tint
           ],
           'OTHER_LDFLAGS':[
-            '-framework Carbon', '-framework AppKit'# added for Tint
+            '-framework UIKit'                      # added for Tint
           ],
           'WARNING_CFLAGS': [
             '-Wall',

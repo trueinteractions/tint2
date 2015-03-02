@@ -308,8 +308,7 @@
       'conditions': [
         [ 'target_ios_simulator==1', {
           'mac_bundle':1,
-          'target_arch':'ia32',
-          'node_use_openssl': 'false'
+          'target_arch':'ia32'
         }],
         [ 'target_ios==1', {
           'mac_bundle':1

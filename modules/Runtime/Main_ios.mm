@@ -1,72 +1,10 @@
-#if defined(V8_TARGET_OS_IOS)
-
-
 bool SSL2_ENABLE = false;
-bool SSL3_ENABLE = false;
-#define   PREFIXED(z)  UI ## z
-
-namespace v8 {
-namespace base {
-
-class OS {
-public:
-  bool ArmUsingHardFloat();
-};
-
-bool OS::ArmUsingHardFloat() {
-  // GCC versions 4.6 and above define __ARM_PCS or __ARM_PCS_VFP to specify
-  // the Floating Point ABI used (PCS stands for Procedure Call Standard).
-  // We use these as well as a couple of other defines to statically determine
-  // what FP ABI used.
-  // GCC versions 4.4 and below don't support hard-fp.
-  // GCC versions 4.5 may support hard-fp without defining __ARM_PCS or
-  // __ARM_PCS_VFP.
-
-#define GCC_VERSION (__GNUC__ * 10000                                          \
-                     + __GNUC_MINOR__ * 100                                    \
-                     + __GNUC_PATCHLEVEL__)
-#if GCC_VERSION >= 40600
-#if defined(__ARM_PCS_VFP)
-  return true;
-#else
-  return false;
-#endif
-
-#elif GCC_VERSION < 40500
-  return false;
-
-#else
-#if defined(__ARM_PCS_VFP)
-  return true;
-#elif defined(__ARM_PCS) || defined(__SOFTFP__) || defined(__SOFTFP) || \
-      !defined(__VFP_FP__)
-  return false;
-#else
-#error "Your version of GCC does not report the FP ABI compiled for."          \
-       "Please report it on this issue"                                        \
-       "http://code.google.com/p/v8/issues/detail?id=2140"
-
-#endif
-#endif
-#undef GCC_VERSION
-}
-}
-}
-
-
-#else
-#define   PREFIXED(z)  NS ## z
-#endif
 
 #include "node.cc" // this is a hack to get at node's internal globals.
 #include <tint_version.h>
 
 #import <Foundation/Foundation.h>
-#if !defined(V8_TARGET_OS_IOS)
 #import <Cocoa/Cocoa.h>
-#else
-#import <UIKit/UIKit.h>
-#endif
 
 #include "../AppSchema/AppSchema_mac.h"
 #include "../Bridge/nan.h"
@@ -149,7 +87,7 @@ static void uv_event(void *info) {
 }
 
 
-@interface AppDelegate : NSObject <PREFIXED(ApplicationDelegate)>
+@interface AppDelegate : NSObject <NSApplicationDelegate>
 @end
 
 @implementation AppDelegate
@@ -225,7 +163,7 @@ static char **copy_argv(int argc, char **argv) {
 }
 
 int main(int argc, char * argv[]) {
-  PREFIXED(Application) *app = [PREFIXED(Application) sharedApplication];
+  NSApplication *app = [NSApplication sharedApplication];
   AppDelegate *delegate = [[AppDelegate alloc] init];
   NSBundle *bundle = [NSBundle mainBundle];
   NSString *package = [bundle pathForResource:@"package" ofType:@"json"];
@@ -290,11 +228,9 @@ int main(int argc, char * argv[]) {
   const char** exec_argv;
   node::Init(&init_argc, const_cast<const char**>(init_argv), &exec_argc, &exec_argv);
 
-#if !defined(V8_TARGET_OS_IOS)
   // V8 on Windows doesn't have a good source of entropy. Seed it from
   // OpenSSL's pool.
   v8::V8::SetEntropySource(node::crypto::EntropySource);
-#endif
 
   v8::V8::Initialize();
   node::node_is_initialized = true;
@@ -314,12 +250,9 @@ int main(int argc, char * argv[]) {
     v8::Context::Scope context_scope(context);
 
     [app setDelegate:delegate];
-#if !defined(V8_TARGET_OS_IOS)
     [app setActivationPolicy:NSApplicationActivationPolicyAccessory];
     [app run];
-#else
-    UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
-#endif
+
     env->Dispose();
     env = NULL;
   }
