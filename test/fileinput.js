@@ -11,20 +11,22 @@ function baseline() {
 }
 
 /**
- * @see {DropDown}
  * @example
  */
 function run($utils) {
+  $utils.ok(); // disabled for now.
   var mainWindow = new Window();
   mainWindow.visible = true;
-  var label = new TextInput();
+  var input = new FileInput();
 
-  label.readonly = true;
-  label.value = "This is a label";
-  label.top = 10;
-  label.height = 25;
-  label.left = 10;
-  label.right = 10;
+  mainWindow.appendChild(input);
+
+  input.top = 10;
+  input.height = 25;
+  input.left = 10;
+  input.right = 10;
+
+  input.location = "C:\\Windows\\regedit.exe";
 
   var dropdown = new DropDown();
   dropdown.top = 35;
@@ -41,9 +43,7 @@ function run($utils) {
   var someOtherSuperMenuItem = new MenuItem('This Item');
   var someOtherMenuItem = new MenuItem("New","n","shift");
   someOtherMenuItem.enabled = true;
-  someOtherSuperMenuItem.addEventListener('click', function() {
-    $utils.ok();
-  });
+
   var someOtherMenu = new Menu("SomeMenu2");
   someOtherMenu.appendChild(someOtherMenuItem);
   someOtherSuperMenuItem.submenu = someOtherMenu;
@@ -51,16 +51,9 @@ function run($utils) {
   dockmenu.appendChild(someOtherSuperMenuItem);
   dropdown.options = dockmenu;
 
-  mainWindow.appendChild(label);
   mainWindow.appendChild(dropdown);
 
-  setTimeout(function() {
-    $utils.clickAtControl(dropdown);
-    var b = dropdown.boundsOnScreen;
-    setTimeout(function() {
-      $utils.clickAt(b.x+25,b.y+25);
-    },1500);
-  },1000);
+
 }
 
 /**
@@ -73,8 +66,7 @@ function shutdown() {
 module.exports = {
   setup:setup, 
   run:run, 
-  shutdown:shutdown,
-  timeout:true, 
+  shutdown:shutdown, 
   shell:false,
-  name:"DropDown",
+  name:"FileInput",
 };

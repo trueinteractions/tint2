@@ -15,7 +15,7 @@ var ref = require('ref')
  * Module exports.
  */
 
-module.exports = Function
+module.exports = FFIFunction
 
 /**
  * Creates and returns a "type" object for a C "function pointer".
@@ -23,9 +23,9 @@ module.exports = Function
  * @api public
  */
 
-function Function (retType, argTypes, abi) {
-  if (!(this instanceof Function)) {
-    return new Function(retType, argTypes, abi)
+function FFIFunction (retType, argTypes, abi) {
+  if (!(this instanceof FFIFunction)) {
+    return new FFIFunction(retType, argTypes, abi)
   }
 
 
@@ -44,32 +44,32 @@ function Function (retType, argTypes, abi) {
  * The "ffi_type" is set for node-ffi functions.
  */
 
-Function.prototype.ffi_type = bindings.FFI_TYPES.pointer
+FFIFunction.prototype.ffi_type = bindings.FFI_TYPES.pointer
 
 /**
  * The "size" is always pointer-sized.
  */
 
-Function.prototype.size = ref.sizeof.pointer
+FFIFunction.prototype.size = ref.sizeof.pointer
 
 /**
  * The "alignment" is always pointer-aligned.
  */
 
-Function.prototype.alignment = ref.alignof.pointer
+FFIFunction.prototype.alignment = ref.alignof.pointer
 
 /**
  * The "indirection" is always 1 to ensure that our get()/set() get called.
  */
 
-Function.prototype.indirection = 1
+FFIFunction.prototype.indirection = 1
 
 /**
  * Returns a ffi.Callback pointer (Buffer) of this function type for the
  * given `fn` Function.
  */
 
-Function.prototype.toPointer = function toPointer (fn) {
+FFIFunction.prototype.toPointer = function toPointer (fn) {
   return Callback(this.retType, this.argTypes, this.abi, fn)
 }
 
@@ -78,7 +78,7 @@ Function.prototype.toPointer = function toPointer (fn) {
  * given `buf` Buffer.
  */
 
-Function.prototype.toFunction = function toFunction (buf) {
+FFIFunction.prototype.toFunction = function toFunction (buf) {
   return ForeignFunction(buf, this.retType, this.argTypes, this.abi)
 }
 
@@ -86,7 +86,7 @@ Function.prototype.toFunction = function toFunction (buf) {
  * get function; return a ForeignFunction instance.
  */
 
-Function.prototype.get = function get (buffer, offset) {
+FFIFunction.prototype.get = function get (buffer, offset) {
   var ptr = buffer.readPointer(offset)
   return this.toFunction(ptr)
 }
@@ -95,7 +95,7 @@ Function.prototype.get = function get (buffer, offset) {
  * set function; return a Callback buffer.
  */
 
-Function.prototype.set = function set (buffer, offset, value) {
+FFIFunction.prototype.set = function set (buffer, offset, value) {
   var ptr
   if ('function' === typeof value) {
     ptr = this.toPointer(value)

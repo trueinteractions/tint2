@@ -12,7 +12,7 @@ function baseline() {
 
 
 function run($utils) {
-	var ismac = require('os').platform().toLowerCase() == "darwin";
+	var ismac = require('os').platform().toLowerCase() === "darwin";
 	var spawn = require('child_process').spawn,
     	resc  = spawn(ismac ? '../build/xcode/Release/tint' : '..\\build\\msvs\\Release\\tint.exe' , ['packagetest/lib/main.js']);
 

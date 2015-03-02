@@ -67,7 +67,7 @@ module.exports = (function() {
     var isVertical = this.orientation === "vertical" ? true : false;
     var index = this.private.definitions.length;
 
-    if(index != 0) 
+    if(index !== 0) 
     {
       var definition1 = createNewDefinition(this, this.private.dividerWidth);
       if(isVertical) this.nativeView.ColumnDefinitions.Add(definition1);
@@ -211,8 +211,8 @@ module.exports = (function() {
         // Re-set the grid splitter dirctions.
         // reassign column/row values for children.
         for(var index1=0; index1 < this.private.definitions.length; index1++) {
-          var item = this.private.definitions[index1];
-          this.nativeView.ColumnDefinitions.Add(item);
+          var item1 = this.private.definitions[index1];
+          this.nativeView.ColumnDefinitions.Add(item1);
           var child = this.private.children[index1];
           if(child.isSplitter) {
             setGridSplitterDirection(this.private.children[index1].native, true, index1, this.private.dividerWidth);
@@ -230,8 +230,8 @@ module.exports = (function() {
         // but do not add them yet.
         //var defs = this.private.definitions;
         //var newdefs = [];
-        this.private.definitions.forEach(function(item, index2, arr) {
-          arr[index2] = createNewDefinition(this, item.Width);
+        this.private.definitions.forEach(function(item2, index2, arr) {
+          arr[index2] = createNewDefinition(this, item2.Width);
         }.bind(this));
 
         // Clear any existing column definitions,
@@ -243,10 +243,10 @@ module.exports = (function() {
         // Re-set the grid splitter dirctions.
         // reassign column/row values for children.
         for(var index3=0; index3 < this.private.definitions.length; index3++) {
-          var item = this.private.definitions[index3];
-          this.nativeView.RowDefinitions.Add(item);
-          var child = this.private.children[index3];
-          if(child.isSplitter) {
+          var item3 = this.private.definitions[index3];
+          this.nativeView.RowDefinitions.Add(item3);
+          var childHoriz = this.private.children[index3];
+          if(childHoriz.isSplitter) {
             setGridSplitterDirection(this.private.children[index3].native, false, index3, this.private.dividerWidth);
           } else {
             this.private.children[index3].native.SetValue($.System.Windows.Controls.Grid.ColumnProperty, 0);

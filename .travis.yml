@@ -1,13 +1,11 @@
-# Mac OS X (https://github.com/travis-ci-tester/toolchain-table)
-
 language:
   - objective-c
 
 before_install:
 
 install:
-  - ./config.sh
-  - ./build.sh
 
 script:
-  - ./test.sh
+  - ./tools.sh config
+  - ./tools.sh build
+  - ./tools.sh test

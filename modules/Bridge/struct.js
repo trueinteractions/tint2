@@ -43,98 +43,10 @@
  * Module dependencies.
  */
 
-var ref = require('ref')
-var util = require('util')
-var assert = require('assert')
+var ref = require('ref');
+var util = require('util');
+var assert = require('assert');
 
-/**
- * Module exports.
- */
-
-module.exports = Struct
-
-/**
- * The Struct "type" meta-constructor.
- */
-
-function Struct () {
-
-  /**
-   * This is the "constructor" of the Struct type that gets returned.
-   *
-   * Invoke it with `new` to create a new Buffer instance backing the struct.
-   * Pass it an existing Buffer instance to use that as the backing buffer.
-   * Pass in an Object containing the struct fields to auto-populate the
-   * struct with the data.
-   */
-
-  function StructType (arg, data) {
-    if (!(this instanceof StructType)) {
-      return new StructType(arg, data)
-    }
-    var store
-    if (Buffer.isBuffer(arg)) {
-      assert(arg.length >= StructType.size, 'Buffer instance must be at least ' +
-          StructType.size + ' bytes to back this struct type')
-      store = arg
-      arg = data
-    } else {
-      store = new Buffer(StructType.size)
-    }
-
-    // set the backing Buffer store
-    store.type = StructType
-    this['ref.buffer'] = store
-
-    if (arg) {
-      for (var key in arg) {
-        // hopefully hit the struct setters
-        this[key] = arg[key]
-      }
-    }
-    StructType._instanceCreated = true
-  }
-
-  // make instances inherit from the `proto`
-  StructType.prototype = Object.create(proto, {
-    constructor: {
-        value: StructType
-      , enumerable: false
-      , writable: true
-      , configurable: true
-    }
-  })
-
-  StructType.defineProperty = defineProperty
-  StructType.toString = toString
-  StructType.fields = {}
-
-  // Setup the ref "type" interface. The constructor doubles as the "type" object
-  StructType.size = 0
-  StructType.alignment = 0
-  StructType.indirection = 1
-  StructType.get = get
-  StructType.set = set
-
-  // Read the fields list and apply all the fields to the struct
-  // TODO: Better arg handling... (maybe look at ES6 binary data API?)
-  var arg = arguments[0]
-  if (Array.isArray(arg)) {
-    // legacy API
-    arg.forEach(function (a) {
-      var type = a[0]
-      var name = a[1]
-      StructType.defineProperty(name, type)
-    })
-  } else if (typeof arg === 'object') {
-    Object.keys(arg).forEach(function (name) {
-      var type = arg[name]
-      StructType.defineProperty(name, type)
-    })
-  }
-
-  return StructType
-}
 
 /**
  * The "get" function of the Struct "type" interface
@@ -165,56 +77,6 @@ function set (buffer, offset, value) {
   }
 }
 
-/**
- * Custom `toString()` override for struct type instances.
- */
-
-function toString () {
-  return '[StructType]'
-}
-
-/**
- * Adds a new field to the struct instance with the given name and type.
- * Note that this function will throw an Error if any instances of the struct
- * type have already been created, therefore this function must be called at the
- * beginning, before any instances are created.
- */
-
-function defineProperty (name, type) {
-
-  // allow string types for convenience
-  type = ref.coerceType(type)
-
-  assert(!this._instanceCreated, 'an instance of this Struct type has already ' +
-      'been created, cannot add new "fields" anymore')
-  assert.equal('string', typeof name, 'expected a "string" field name')
-  assert(type && /object|function/i.test(typeof type) && 'size' in type &&
-      'indirection' in type
-      , 'expected a "type" object describing the field type: "' + type + '"')
-  assert(type.indirection > 1 || type.size > 0,
-      '"type" object must have a size greater than 0')
-  assert(!(name in this.prototype), 'the field "' + name +
-      '" already exists in this Struct type')
-
-  var field = {
-    type: type
-  }
-  this.fields[name] = field
-
-  // define the getter/setter property
-  var desc = { enumerable: true , configurable: true }
-  desc.get = function () {
-    return ref.get(this['ref.buffer'], field.offset, type)
-  }
-  desc.set = function (value) {
-    return ref.set(this['ref.buffer'], field.offset, value, type)
-  }
-
-  // calculate the new size and field offsets
-  recalc(this)
-
-  Object.defineProperty(this.prototype, name, desc);
-}
 
 function recalc (struct) {
 
@@ -278,6 +140,137 @@ function recalc (struct) {
   }
 }
 
+
+/**
+ * The Struct "type" meta-constructor.
+ */
+
+function Struct () {
+
+
+  /**
+   * This is the "constructor" of the Struct type that gets returned.
+   *
+   * Invoke it with `new` to create a new Buffer instance backing the struct.
+   * Pass it an existing Buffer instance to use that as the backing buffer.
+   * Pass in an Object containing the struct fields to auto-populate the
+   * struct with the data.
+   */
+
+  function StructType (arg, data) {
+    if (!(this instanceof StructType)) {
+      return new StructType(arg, data)
+    }
+    var store
+    if (Buffer.isBuffer(arg)) {
+      assert(arg.length >= StructType.size, 'Buffer instance must be at least ' +
+          StructType.size + ' bytes to back this struct type')
+      store = arg
+      arg = data
+    } else {
+      store = new Buffer(StructType.size)
+    }
+
+    // set the backing Buffer store
+    store.type = StructType
+    this['ref.buffer'] = store
+
+    if (arg) {
+      for (var key in arg) {
+        // hopefully hit the struct setters
+        this[key] = arg[key]
+      }
+    }
+    StructType._instanceCreated = true
+  }
+
+  // make instances inherit from the `proto`
+  StructType.prototype = Object.create(proto, {
+    constructor: {
+        value: StructType
+      , enumerable: false
+      , writable: true
+      , configurable: true
+    }
+  })
+
+  StructType.defineProperty = defineProperty
+  StructType.toString = function() {
+    return '[StructType]'
+  };
+  StructType.fields = {}
+
+  // Setup the ref "type" interface. The constructor doubles as the "type" object
+  StructType.size = 0
+  StructType.alignment = 0
+  StructType.indirection = 1
+  StructType.get = get
+  StructType.set = set
+
+  // Read the fields list and apply all the fields to the struct
+  // TODO: Better arg handling... (maybe look at ES6 binary data API?)
+  var arg = arguments[0]
+  if (Array.isArray(arg)) {
+    // legacy API
+    arg.forEach(function (a) {
+      var type = a[0]
+      var name = a[1]
+      StructType.defineProperty(name, type)
+    })
+  } else if (typeof arg === 'object') {
+    Object.keys(arg).forEach(function (name) {
+      var type = arg[name]
+      StructType.defineProperty(name, type)
+    })
+  }
+
+  return StructType;
+}
+
+
+/**
+ * Adds a new field to the struct instance with the given name and type.
+ * Note that this function will throw an Error if any instances of the struct
+ * type have already been created, therefore this function must be called at the
+ * beginning, before any instances are created.
+ */
+
+function defineProperty (name, type) {
+
+  // allow string types for convenience
+  type = ref.coerceType(type)
+
+  assert(!this._instanceCreated, 'an instance of this Struct type has already ' +
+      'been created, cannot add new "fields" anymore')
+  assert.equal('string', typeof name, 'expected a "string" field name')
+  assert(type && /object|function/i.test(typeof type) && 'size' in type &&
+      'indirection' in type
+      , 'expected a "type" object describing the field type: "' + type + '"')
+  assert(type.indirection > 1 || type.size > 0,
+      '"type" object must have a size greater than 0')
+  assert(!(name in this.prototype), 'the field "' + name +
+      '" already exists in this Struct type')
+
+  var field = {
+    type: type
+  }
+  this.fields[name] = field
+
+  // define the getter/setter property
+  var desc = { enumerable: true , configurable: true }
+  desc.get = function () {
+    return ref.get(this['ref.buffer'], field.offset, type)
+  }
+  desc.set = function (value) {
+    return ref.set(this['ref.buffer'], field.offset, value, type)
+  }
+
+  // calculate the new size and field offsets
+  recalc(this)
+
+  Object.defineProperty(this.prototype, name, desc);
+}
+
 /**
  * this is the custom prototype of Struct type instances.
  */
@@ -333,6 +326,13 @@ proto.inspect = function inspect () {
  * returns a Buffer pointing to this struct data structure.
  */
 
-proto.ref = function ref () {
+proto.ref = function() {
   return this['ref.buffer']
 }
+
+
+/**
+ * Module exports.
+ */
+
+module.exports = Struct;

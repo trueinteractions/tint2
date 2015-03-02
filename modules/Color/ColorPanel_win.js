@@ -61,10 +61,10 @@ module.exports = (function() {
         // on this.
         var interval = setInterval(function() {
           var c = this.native.Color;
-          if(c.R.ToString() != selectedColor.R.ToString() || 
-              c.G.ToString() != selectedColor.G.ToString() || 
-              c.B.ToString() != selectedColor.B.ToString() || 
-              (this.showAlpha && c.A.ToString() != selectedColor.A.ToString()))
+          if(c.R.ToString() !== selectedColor.R.ToString() || 
+              c.G.ToString() !== selectedColor.G.ToString() || 
+              c.B.ToString() !== selectedColor.B.ToString() || 
+              (this.showAlpha && c.A.ToString() !== selectedColor.A.ToString()))
           {
             this.fireEvent('colorchange');
             this.fireEvent('closed');

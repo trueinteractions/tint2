@@ -712,11 +712,11 @@ write('../libraries/node/config.mk',
 if options.use_ninja:
   gyp_args = ['-f', 'ninja-' + flavor]
 elif options.dest_os == "ios":
-  gyp_args = ['-f', 'xcode', '-Dtarget_ios']
+  gyp_args = ['-f', 'xcode', '-Dios', '-Dtarget_ios=1', '-Dtarget_ios_simulator=0']
 elif options.dest_os == "ios-simulator":
-  gyp_args = ['-f', 'xcode', '-Dtarget_ios_simulator']
+  gyp_args = ['-f', 'xcode', '-Dios-simulator', '-Dtarget_ios=0', '-Dtarget_ios_simulator=1']
 elif options.use_xcode:
-  gyp_args = ['-f', 'xcode']
+  gyp_args = ['-f', 'xcode', '-Dtarget_ios=0', '-Dtarget_ios_simulator=0']
 elif flavor == 'win':
   gyp_args = ['-f', 'msvs', '-G', 'msvs_version=auto']
 else:

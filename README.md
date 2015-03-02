@@ -30,9 +30,9 @@ Ensure you have Xcode, OSX Mountain Lion, git and Python 2.6 (or 2.7).
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-./config.sh
-./build.sh
-./test.sh
+./tools.sh config
+./tools.sh build
+./tools.sh test
 ```
 
 <h3>Windows</h3>
@@ -44,9 +44,9 @@ Ensure you have Visual Studio 2010 SP1 and WinSDK 7.0 (note problems occur with 
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-config.bat
-build.bat
-test.bat
+tools.bat config
+tools.bat build
+tools.bat test
 ```
 
 32-bit build
@@ -55,9 +55,9 @@ test.bat
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-config.bat x86
-build.bat release x86
-test.bat
+tools.bat config x86
+tools.bat build x86
+tools.bat test
 ```
 
 <h3>iOS</h3>
@@ -71,8 +71,8 @@ iOS 7 Build
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-./config.sh ios
-./build.sh release ios
+./tools.sh config ios
+./tools.sh build release ios
 ```
 
 iOS Simulator Build
@@ -80,17 +80,16 @@ iOS Simulator Build
 mkdir tint
 cd tint
 git clone https://github.com/trueinteractions/tint2.git .
-./config.sh ios-simulator
-./build.sh release ios-simulator
+./tools.sh config ios-simulator
+./tools.sh build release ios-simulator
 ```
 
-Note: You can replace release with debug for all versions.
 
 <h3>Post-Build</h3>
 After building you'll find the binary in ``build/xcode/Release/tint`` or ``build\msvs\Release\tint.exe``. You can also use the Xcode project files or MSVS 2010 files in ``build\xcode`` and ``build\msvs``. Optionally you can use ninja build files that are generated in ``build/ninja/out/Release`` and ``build/ninja/out/Debug`` on posix (OSX only at the moment).
 
 <h3>Troubleshooting Builds</h3>
-If you have issues compiling ensure you're using Python 2.7 or 2.6 (``./config.sh`` (``config.bat`` on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use ``echo $PYTHON`` (``echo %PYTHON%`` on Windows) and ``echo $CC`` (``echo %CC%`` on Windows) to check to see if any of these are set to alternate versions.
+If you have issues compiling ensure you're using Python 2.7 or 2.6 (``./tools.sh config`` (``tools.bat config`` on Windows) will print out the python version it plans to use).  In addition ensure your CC environment variable is set to Xcode's built in clang and not an alternate GCC version.  Use ``echo $PYTHON`` (``echo %PYTHON%`` on Windows) and ``echo $CC`` (``echo %CC%`` on Windows) to check to see if any of these are set to alternate versions.
 
 On OSX some third-party utility systems such as brew may overwrite these to values that are not compatible with OSX Xcode/clang builds.  If you're still having issues you can build using the Xcode project files in ``./build/xcode/`` directory.
 

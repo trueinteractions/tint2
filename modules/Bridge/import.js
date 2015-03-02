@@ -25,7 +25,6 @@ module.exports = (function() {
     , Class = require('class')
     , join = path.join
     , basename = path.basename
-    , exists = fs.existsSync || path.existsSync
     , SUFFIX = '.framework'
     , PATH = [
         '/System/Library/Frameworks'
@@ -47,8 +46,8 @@ module.exports = (function() {
    * of these BridgeSupport XML nodes.
    */
 
-  var typePrefix = (process.arch=='x64') ? '64' : '';
-  var typeSuffix = (process.arch=='x64') ? '' : '64';
+  var typePrefix = (process.arch==='x64') ? '64' : '';
+  var typeSuffix = (process.arch==='x64') ? '' : '64';
 
   function getType(node) {
     return node.attrib['type'+typePrefix] || node.attrib['type'+typeSuffix];
@@ -64,10 +63,16 @@ module.exports = (function() {
       i = fromIndex;
       if (i < 0) {
         i += length;
-        if (i < 0) i = 0;
+        if (i < 0) {
+          i = 0;
+        }
       }
     }
-    for (; i < length; i++) if (subject[i] === target) return i;
+    for (; i < length; i++) {
+      if (subject[i] === target) {
+        return i;
+      }
+    }
     return -1;
   }
 
@@ -78,8 +83,10 @@ module.exports = (function() {
     {
       split = fastIndexOf(attr[i], "=");
       name = attr[i].substring(0, split);
-      value = attr[i].substring(split+2, (i==attr.length-1) ? attr[i].length-1 : undefined);
-      if(fastIndexOf(value, '&') != -1) value = value.replace(quoteRegExp, '"')
+      value = attr[i].substring(split+2, (i === attr.length-1) ? attr[i].length-1 : undefined);
+      if(fastIndexOf(value, '&') !== -1) {
+        value = value.replace(quoteRegExp, '"');
+      }
       coll[name]=value;
     }
     return coll;
@@ -88,15 +95,18 @@ module.exports = (function() {
   function parseTag(names, tag, content) {
     var sattr = 2 + tag.name.length
         , eattr = fastIndexOf(content,'>',1)
-        , isBodyless = (content[eattr - 1]=='/');
+        , isBodyless = (content[eattr - 1] === '/');
     
     var sbody = eattr + 1
       , ebody = isBodyless ? eattr - 1 : content.indexOf('</'+tag.name, eattr); // cannot use fastIndexOf
     
     tag.end = isBodyless ? ebody + 2 : ebody + tag.name.length + 3;
     tag.attrib = parseAttrib(tag,content.substring(sattr, eattr + (isBodyless ? -1 : 0)));
-    if(sbody === ebody || names[tag.name] === null) tag.children = [];
-    else tag.children = findTags(names[tag.name], content.substring(sbody,ebody));
+    if(sbody === ebody || names[tag.name] === null) {
+      tag.children = [];
+    } else {
+      tag.children = findTags(names[tag.name], content.substring(sbody,ebody));
+    }
     return tag;
   }
 
@@ -122,7 +132,7 @@ module.exports = (function() {
         }
       }
       ndx = fastIndexOf(content, '<', ftags[ftags.length-1].end );
-    } while(ndx != -1);
+    } while(ndx !== -1);
 
     ftags.shift();
     
@@ -152,10 +162,14 @@ module.exports = (function() {
       , bridgeSupportDylib = join(bridgedir, fw.name + DY_SUFFIX);
 
     // If there's no BridgeSupport file, then bail...
-    if (!exists(bridgeSupportXML)) return;
+    if (!exists(bridgeSupportXML)) {
+      return;
+    }
 
     // Load the "inline" dylib if it exists
-    if (exists(bridgeSupportDylib)) fw.lib = core.dlopen(bridgeSupportDylib);
+    if (exists(bridgeSupportDylib)) {
+      fw.lib = core.dlopen(bridgeSupportDylib);
+    }
 
     var tags = {'function':{'retval':{'retval':null,'arg':null},'arg':{'retval':null,'arg':null}},'depends_on':null,'string_constant':null,'enum':null,'struct':null,'constant':null};
     var nodes = findTags(tags, read(bridgeSupportXML, 'utf8'));
@@ -164,8 +178,9 @@ module.exports = (function() {
       var name = node.attrib.name;
       if(node.name === 'depends_on')
       {
-        if(recursive && recursive > 0)
-            importFramework(node.attrib.path, true, onto, --recursive);
+        if(recursive && recursive > 0) {
+          importFramework(node.attrib.path, true, onto, --recursive);
+        }
       } 
       else if (node.name === 'string_constant')
       {
@@ -173,7 +188,9 @@ module.exports = (function() {
       } 
       else if (node.name === 'enum')
       {
-        if (node.attrib.ignore !== "true") onto[name] = parseInt(getValue(node));
+        if (node.attrib.ignore !== "true") {
+          onto[name] = parseInt(getValue(node));
+        }
       } 
       else if (node.name === 'struct')
       {
@@ -203,8 +220,11 @@ module.exports = (function() {
 
         node.children.forEach(function (n, i) {
           var type = n.name;
-          if(type === 'arg') passedTypes.args.push(flattenNode(n));
-          else if (type === 'retval') passedTypes.retval = flattenNode(n);
+          if(type === 'arg') {
+            passedTypes.args.push(flattenNode(n));
+          } else if (type === 'retval') {
+            passedTypes.retval = flattenNode(n);
+          }
         });
 
         Object.defineProperty(onto, name, {
@@ -225,8 +245,11 @@ module.exports = (function() {
     if (node.attrib.function_pointer === 'true') {
       rnode.args = [];
       node.children.forEach(function (n) {
-        if(n.name === 'arg') rnode.args.push(flattenNode(n));
-        else if(n.name === 'retval') rnode.retval = flattenNode(n);
+        if(n.name === 'arg') {
+          rnode.args.push(flattenNode(n));
+        } else if(n.name === 'retval') {
+          rnode.retval = flattenNode(n);
+        }
       });
     }
     return rnode;
@@ -246,14 +269,21 @@ module.exports = (function() {
    */
   function resolve (framework) {
     // strip off a trailing slash if present
-    if (framework[framework.length-1] === '/')
+    if (framework[framework.length-1] === '/') {
       framework = framework.slice(0, framework.length-1);
+    }
+
     // already absolute, return as-is
-    if (~framework.indexOf('/')) return framework;
+    if (~framework.indexOf('/')) {
+      return framework;
+    }
+
     var i=0, l=PATH.length, rtn=null;
     for (; i<l; i++) {
       rtn = join(PATH[i], framework + SUFFIX);
-      if (exists(rtn)) return rtn;
+      if (exists(rtn)) {
+        return rtn;
+      }
     }
     throw new Error('Could not resolve framework: ' + framework);
   }
@@ -300,7 +330,9 @@ module.exports = (function() {
     var shortName=basename(framework, SUFFIX);
     // Check if the framework has already been loaded
     var fw=cache[shortName];
-    if (fw) return;
+    if (fw) {
+      return;
+    }
     // Load the main framework binary file
     var frameworkPath=join(framework, shortName), lib=core.dlopen(frameworkPath);
 
@@ -317,7 +349,9 @@ module.exports = (function() {
     if (!skip) {
       var classes = core.getClassList();
       classes.forEach(function (c) {
-        if (c in onto) return;
+        if (c in onto) {
+          return;
+        }
         onto.__defineGetter__(c, function () {
           var clazz = Class.getClassByName(c, onto);
           delete onto[c];
@@ -336,6 +370,8 @@ module.exports = (function() {
   ex.framework = importFramework;
   ex.PATH = PATH;
   ex.allocReference = allocReference;
-  ex.createBlock = function(func, types) { return core.wrapValue(core.createBlock(func, types), '@'); };
+  ex.createBlock = function(func, types) { 
+    return core.wrapValue(core.createBlock(func, types), '@'); 
+  };
   return ex;
 })();

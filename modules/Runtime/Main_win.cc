@@ -55,18 +55,6 @@ NAN_METHOD(InitBridge) {
 	NanReturnValue(NanNew<v8::Object>());
 }
 
-/*
-NAN_METHOD(init_bridge) {
-  v8::Local<v8::FunctionTemplate> bridge_template = v8::FunctionTemplate::New(v8::Isolate::GetCurrent());
-  bridge_template->SetClassName(NanNew<v8::String>("bridge"));
-  bridge = bridge_template->GetFunction()->NewInstance();
-  process_l->Set(NanNew<v8::String>("bridge"), bridge);
-  FFI::Init(bridge);
-  REF::Init(bridge);
-  CLR_Init(bridge);
-  NanReturnValue(NanNew<v8::Object>());
-}*/
-
 void uv_event(void *info) {
 
   while (!embed_closed) {
@@ -153,9 +141,6 @@ void node_load() {
   uv_async_t dummy_uv_handle_;
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, (uv_async_cb)uv_noop);
 
-  // Load node and begin processing.
-  // node::Load(process_l);
-  
   // Start debug agent when argv has --debug
   if (node::use_debug_agent)
 	  node::StartDebug(env, node::debug_wait_connect);
@@ -184,7 +169,6 @@ extern "C" void uv_run_nowait() {
 }
 
 void node_terminate() {
- // node::EmitExit(process_l);
   embed_closed = 1;
   EmitExit(env);
   RunAtExit(env);
@@ -309,38 +293,6 @@ int main(int argc, char *argv[]) {
   exec_argv = NULL;
 
   return code;
-  /*
-  // This needs to run *before* V8::Initialize()
-  node::Init(init_argc, init_argv);
-
-  v8::V8::Initialize();
-#if HAVE_OPENSSL
-  // V8 on Windows doesn't have a good source of entropy. Seed it from
-  // OpenSSL's pool.
-  v8::V8::SetEntropySource(node::crypto::EntropySource);
-#endif
-  {
-    v8::Locker locker;
-    v8::HandleScope handle_scope;
-
-    // Create the one and only Context.
-    v8::Persistent<v8::Context> context = v8::Context::New();
-    v8::Context::Scope context_scope(context);
-
-    // Use original argv, as we're just copying values out of it.
-    process_l = node::SetupProcessObject(init_argc, init_argv);
-    v8_typed_array::AttachBindings(context->Global());
-    node_load();
-    win_msg_loop();
-#ifndef NDEBUG
-    context.Dispose();
-#endif
-  }
-#ifndef NDEBUG
-  // Clean up. Not strictly necessary.
-  v8::V8::Dispose();
-#endif
-  */
 }
 
 

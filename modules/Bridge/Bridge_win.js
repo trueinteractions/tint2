@@ -23,23 +23,33 @@ var classCache = {};
 dotnet.statistics = {assemblies_hit:0, assemblies_miss:0, enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
 function unwrap(a) {
-  if(a && a.pointer) return a.pointer;
-  else if(a && a.classPointer) return a.classPointer;
-  else return a;
+  if(a && a.pointer) {
+    return a.pointer;
+  } else if(a && a.classPointer) {
+    return a.classPointer;
+  } else {
+    return a;
+  }
 }
 
 function wrap(b) {
-  if(Buffer.isBuffer(b) && !b.array) return createJSInstance(b);
-  else return b;
+  if(Buffer.isBuffer(b) && !b.array) {
+    return createJSInstance(b);
+  } else {
+    return b;
+  }
 }
 
 function unwrapValues(e) {
   if(Array.isArray(e)) {
     var unwrapped = [];
-    for(var i=0; i < types.length; i++) unwrapped[i] = unwrap(types[i]);
+    for(var i=0; i < types.length; i++) {
+      unwrapped[i] = unwrap(types[i]);
+    }
     return unwrapped;
-  } else
+  } else {
     return unwrap(e);
+  }
 }
 
 function createJSInstance(pointer) {
@@ -174,7 +184,9 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
       }
     },
     set:function(e) {
-      if(!this.props) this.props={};
+      if(!this.props) {
+        this.props={};
+      }
       if(!this.props[memberName]) {
         this.props[memberName] = static ? 
           dotnet.getStaticPropertyObject(this.classPointer, memberName) : 
@@ -193,7 +205,7 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   if(type === "Field") {
     createField(target, typeNative, typeName, memberNative, memberName, static);
   } else if(type === "Method") {
-    if(memberName.substring(0,4) != "get_") {
+    if(memberName.substring(0,4) !== "get_") {
       createMethod(target, typeNative, typeName, memberNative, memberName, static);
     }
   } else if(type === "Property") {
@@ -227,18 +239,18 @@ function createClass(typeNative, typeName) {
   var typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
 
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var memberName = dotnet.execGetProperty(memberNative, 'Name');
-    createMember(cls, typeNative, typeName, memberNative, memberName, true);
+    var mNativeStatic = dotnet.execGetProperty(typeEnumerator, 'Current');
+    var mNameStatic = dotnet.execGetProperty(mNativeStatic, 'Name');
+    createMember(cls, typeNative, typeName, mNativeStatic, mNameStatic, true);
   }
 
   // Find all INSTANCE members.
   typeEnumerator = dotnet.execMethod(dotnet.getMemberTypes(typeNative),'GetEnumerator');
 
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var memberNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var memberName = dotnet.execGetProperty(memberNative, 'Name');
-    createMember(cls, typeNative, typeName, memberNative, memberName, false);
+    var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
+    var mName = dotnet.execGetProperty(mNative, 'Name');
+    createMember(cls, typeNative, typeName, mNative, mName, false);
   }
 
   return classCache[qualifiedName] = cls;
@@ -270,10 +282,11 @@ function createFromType(nativeType, onto) {
       get:function() { 
         delete this.onto[this.name];
         if(dotnet.execGetProperty(this.type, "IsEnum")) {
-          return this.onto[this.name] = createEnum(this.type,this.name);
+          this.onto[this.name] = createEnum(this.type,this.name);
         } else if (dotnet.execGetProperty(this.type, "IsClass") || dotnet.execGetProperty(this.type, "IsValueType")) {
-          return this.onto[this.name] = createClass(this.type,this.name);
+          this.onto[this.name] = createClass(this.type,this.name);
         }
+        return this.onto[this.name];
       }.bind(info)
     });
   }

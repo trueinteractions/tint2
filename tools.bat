@@ -12,6 +12,7 @@ if /i "%1"=="--?" goto help
 if /i "%1"=="/?" goto help
 
 @rem Process arguments.
+set clean=
 set config=Release
 set msiplatform=x64
 set target=Build
@@ -37,16 +38,19 @@ set noperfctr_arg=1
 set noperfctr_msi_arg=1
 set subsystem=console
 set platformtoolset=v110
+set build=
 
 :next-arg
 if "%1"=="" goto args-done
 if /i "%1"=="debug"         set config=Debug&goto arg-ok
 if /i "%1"=="release"       set config=Release&goto arg-ok
-if /i "%1"=="clean"         set target=Clean&goto arg-ok
+if /i "%1"=="clean"       	set clean=1&goto arg-ok
+if /i "%1"=="clean_msvs"    set target=Clean&goto arg-ok
 if /i "%1"=="ia32"          set target_arch=ia32&goto arg-ok
 if /i "%1"=="x86"           set target_arch=ia32&goto arg-ok
 if /i "%1"=="x64"           set target_arch=x64&goto arg-ok
 if /i "%1"=="config" 	    set gyp=1&goto arg-ok
+if /i "%1"=="build"		    set build=1&goto arg-ok
 if /i "%1"=="nobuild"       set nobuild=1&goto arg-ok
 if /i "%1"=="nosign"        set nosign=1&goto arg-ok
 if /i "%1"=="nosnapshot"    set nosnapshot=1&goto arg-ok
@@ -74,16 +78,54 @@ shift
 goto next-arg
 
 :args-done
-if defined upload goto upload
-if defined jslint goto jslint
-
 if "%config%"=="Debug" set debug_arg=--debug
 if "%target_arch%"=="x64" set msiplatform=x64
 if defined nosnapshot set nosnapshot_arg=--without-snapshot
 if defined noetw set noetw_arg=--without-etw& set noetw_msi_arg=/p:NoETW=1
 if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=/p:NoPerfCtr=1
+if not defined build if not defined gyp if not defined test if not defined clean goto help
 
-:project-gen
+
+:clean
+if not defined clean goto config
+rmdir /S /Q .\build\msvs\ >nul 2>&1
+rmdir /S /Q .\build\ninja\ >nul 2>&1
+rmdir /S /Q .\build\xcode\ >nul 2>&1
+rmdir /S /Q .\build\Release\ >nul 2>&1
+rmdir /S /Q .\build\Debug\ >nul 2>&1
+rmdir /S /Q .\build\out\ >nul 2>&1
+rmdir /S /Q .\build\tint.build >nul 2>&1
+rmdir /S /Q .\build\dist\tint >nul 2>&1
+
+:config
+if not defined gyp goto msbuild
+git apply build/node.diff 2> nul
+
+IF EXIST "%PROGRAMFILES(X86)%" (GOTO 64BIT) ELSE (GOTO 32BIT)
+
+:64BIT
+set hostarch=x64
+goto begin
+
+:32BIT
+set hostarch=x86
+:begin
+
+:: This must come before GetWindowsSdkDir as GetWindowsSdkDir tramples on 
+:: the passed in arguments.
+set arch=x64
+if /i "%1"=="x86" set arch=ia32
+
+set newpath=C:\Python27;C:\Python26;C:\Python
+echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
+
+echo Architecture %arch% (host architecture %hostarch%)
+
+if NOT exist .\libraries\node\node.gyp (
+  git submodule init
+  git submodule update
+)
+
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 SETLOCAL
 	if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat" (
@@ -91,33 +133,30 @@ SETLOCAL
 		call "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2013
 		set platformtoolset=v120
-		goto inner-config
-	)
-	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
+	) else if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		echo Configuring Platform Toolset V110
 		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2012
 		set platformtoolset=v110
-		goto inner-config
-	)
-	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
+	) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		echo Configuring Platform Toolset V100
 		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2010
 		set platformtoolset=v100
-		goto inner-config
+	) else (
+		echo Cannot find visual studio VCVarsQueryRegistry.bat
+		goto exit
 	)
-	echo Cannot find visual studio VCVarsQueryRegistry.bat
-	goto exit
-
-:inner-config
 	python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
 	if errorlevel 1 goto create-msvs-files-failed
 	if not exist build\msvs\tint.sln goto create-msvs-files-failed
 ENDLOCAL
 
+
+
 :msbuild
-if defined nobuild goto sign
+if not defined build goto test
+
 SETLOCAL
 
 	if defined VS120COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
@@ -144,14 +183,20 @@ SETLOCAL
 	echo Cannot find vcvarsall.bat for visual studio
 	goto exit
 
+
 :msbuild-found
  	copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
- 	:: /maxcpucount:2
-	msbuild build\msvs\tint.sln /t:%target% /m /p:Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+	msbuild build\msvs\tint.sln /t:%target% /maxcpucount:4 /p:Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
 	if errorlevel 1 goto exit
 ENDLOCAL
 
 copy /Y build\msvs\%config%\tint.exe build\msvs\%config%\tint_%subsystem%.exe
+
+
+:test 
+if not defined test goto sign
+cd test
+run.bat *.js
 
 :msbuild-not-found
 :sign
@@ -175,7 +220,7 @@ goto exit
 goto exit
 
 :help
-echo build.bat [debug/release] [config] [nobuild] [x86/x64]
+echo build.bat [debug/release] [x86/x64] config build test
 goto exit
 
 :exit

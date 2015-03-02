@@ -269,6 +269,15 @@ module.exports = (function() {
     story.Begin(target, $.System.Windows.Media.Animation.HandoffBehavior.Compose);
   }
 
+  function makePropertyBoolTypeOnTarget(obj,name,target,property,truevalue,falsevalue) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { return target[property] === truevalue ? true : false; },
+      set:function(value) { target[property] = value ? truevalue : falsevalue; }
+    });
+  }
+
   function makePropertyBoolType(obj,name,property,truevalue,falsevalue) {
     Object.defineProperty(obj, name, {
       configurable:true,
@@ -339,6 +348,7 @@ module.exports = (function() {
   baseUtilities.animateWPFProperty = animateWPFProperty;
   baseUtilities.wpfDeviceToLogicalPx = wpfDeviceToLogicalPx;
   baseUtilities.makePropertyBoolType = makePropertyBoolType;
+  baseUtilities.makePropertyBoolTypeOnTarget = makePropertyBoolTypeOnTarget;
   baseUtilities.makePropertyStringType = makePropertyStringType;
   baseUtilities.makePropertyMapType = makePropertyMapType;
   baseUtilities.makePropertyImageType = makePropertyImageType;

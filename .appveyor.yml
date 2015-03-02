@@ -1,9 +1,9 @@
 version: 1.0.{build}
 os: Unstable
+clone_depth: 2
 build_script:
-- config.bat x86
-- build.bat x86
-- cd test
-- run.bat
-test: off
+- tools.bat config x86
+- tools.bat build x86
+test_script:
+- tools.bat test
 deploy: off

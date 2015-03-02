@@ -70,7 +70,8 @@ module.exports = (function() {
     });
     var z;
     try { z = Struct(props); } catch(e) { }
-    return structCache[parsed.name] = z;
+    structCache[parsed.name] = z;
+    return z;
   }
 
   /**
@@ -138,8 +139,8 @@ module.exports = (function() {
     curProp = [];
     numBrackets = 0;
 
-    for (var i=1; i < entries.length; i+=2) {
-      rtn.props.push([entries[i], entries[i+1]]);
+    for (var j=1; j < entries.length; j+=2) {
+      rtn.props.push([entries[j], entries[j+1]]);
     }
     return rtn
   }
@@ -302,7 +303,7 @@ module.exports = (function() {
    */
   function registerTypes(onto) {
     for(var i=0; i < DELIMS.length; i++) {
-      if(DELIMS[i] != 'pointer') {
+      if(DELIMS[i] !== 'pointer') {
         onto[typeEncodings[DELIMS[i]]] = DELIMS[i];
       }
     }

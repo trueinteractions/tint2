@@ -1,8 +1,10 @@
 {
   'variables': {
+    'target_ios%': 0,
+    'target_ios_simulator%': 0,
     'v8_use_snapshot%': 'true',
     'v8_postmortem_support%': 'true',
-    'node_use_dtrace%': 'false',          # enabled in common.gypi for posix
+    'node_use_dtrace%': 'false',         # enabled in common.gypi for posix
     'node_use_etw': 'false',             # enabled in common.gypi for windows
     'node_has_winsdk': 'false',          # enabled in common.gypi for windows
     'node_use_perfctr': 'false',         # performance counters, linux only, not enabled.
@@ -745,19 +747,18 @@
               ' and node_use_etw=="false"'
               ' and node_use_systemtap=="false"',
             {
-                'inputs': ['libraries/node/src/notrace_macros.py']
-              }
-              ],
+              'inputs': ['libraries/node/src/notrace_macros.py']
+            }],
             [ 'node_use_perfctr=="false"', {
               'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
             }],
           ],
-              'action': [
-                '<(python)',
-                'tools/tint_js2c.py',
-                '<@(_outputs)',
-                '<@(_inputs)',
-              ],
+          'action': [
+            '<(python)',
+            'tools/tint_js2c.py',
+            '<@(_outputs)',
+            '<@(_inputs)',
+          ],
         },
       ],
     }, # end tint_js2c

@@ -20,7 +20,6 @@ module.exports = (function() {
     var allowedFileTypes = null;
     this.private = {events:{}};
 
-
     /**
      * @method addEventListener
      * @param {string} eventName The name of the dialog event to start listening to.
@@ -48,19 +47,19 @@ module.exports = (function() {
      * @description Gets or sets the title for the file dialog window.
      */
     Object.defineProperty(this, "title", {
-      get:function() { return $dialog('title'); },
+      get:function() { return $dialog('title')('description')('UTF8String'); },
       set:function(e) { $dialog('setTitle', $(e)); }
     });
 
     // TODO: Not supported on windows.
     Object.defineProperty(this, "message", {
-      get:function() { return $dialog('message'); },
+      get:function() { return $dialog('message')('description')('UTF8String'); },
       set:function(e) { $dialog('setMessage', $(e)); }
     });
 
     // TODO: Not supported on windows.
     Object.defineProperty(this, "prompt", {
-      get:function() { return $dialog('prompt'); },
+      get:function() { return $dialog('prompt')('description')('UTF8String'); },
       set:function(e) { $dialog('setPrompt', $(e)); }
     });
 
@@ -82,7 +81,7 @@ module.exports = (function() {
      * @description Gets or sets the filename the file dialog has (specified by the user).
      */
     Object.defineProperty(this, 'filename', {
-      get:function() { return $dialog('nameFieldStringValue'); },
+      get:function() { return $dialog('nameFieldStringValue')('description')('UTF8String'); },
       set:function(val) { $dialog('setNameFieldStringValue', $(val)); }
     });
 
