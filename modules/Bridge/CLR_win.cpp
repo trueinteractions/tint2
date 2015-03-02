@@ -26,6 +26,7 @@ using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
 
+
 // This keeps counts of how many objects the CLR is creating and
 // subsequently the callbacks (weak) to destroy them. It tests whether
 // V8 is actually releasing the C++ wrappers around pinned CLR objects,
@@ -389,6 +390,15 @@ void gchandle_cleanup(char *data, void *hint) {
 // .NET to determine if it needs to be collected.  In otherwords, do nothing.
 void wrap_cb(char *data, void *hint) { }
 
+std::string stringV82STR(Handle<v8::String> text) {
+  NanUtf8String utf8string(text);
+  return std::string(*utf8string);
+}
+
+std::string stringCLR2STR(System::String^ text) {
+  char *utf8string = (char *)Marshal::StringToHGlobalAnsi(text).ToPointer();
+  return std::string(utf8string);
+}
 
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
@@ -775,7 +785,7 @@ public:
       delete netFramework;
       delete framworkRegPath;
       delete userpath;
-	  NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
+	    NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -1008,9 +1018,9 @@ public:
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
-	  for (int i = 0; i < argSize; i++) {
+      for (int i = 0; i < argSize; i++) {
         cshargs->SetValue(MarshalV8ToCLR(args[i + 2]), i);
-	  }
+      }
       System::Object^ rtn = method->Invoke(target, cshargs);
   
       NanReturnValue(MarshalCLRToV8(rtn));
@@ -1291,7 +1301,6 @@ namespace IEWebBrowserFix {
   }
 }
 
-
 extern "C" void CLR_Init(Handle<v8::Object> target) {
   NanScope();
 
@@ -1331,7 +1340,7 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
   NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
 
-  NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);  
+  NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
 #ifdef GC_DEBUG
   NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);
 #endif
