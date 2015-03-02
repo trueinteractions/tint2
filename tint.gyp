@@ -2,7 +2,7 @@
   'variables': {
     'v8_use_snapshot%': 'true',
     'v8_postmortem_support%': 'true',
-    'node_use_dtrace%': 'false',          # enabled in common.gypi for posix
+    'node_use_dtrace%': 'false',         # enabled in common.gypi for posix
     'node_use_etw': 'false',             # enabled in common.gypi for windows
     'node_has_winsdk': 'false',          # enabled in common.gypi for windows
     'node_use_perfctr': 'false',         # performance counters, linux only, not enabled.
