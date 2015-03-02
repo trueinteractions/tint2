@@ -83,7 +83,7 @@ if "%target_arch%"=="x64" set msiplatform=x64
 if defined nosnapshot set nosnapshot_arg=--without-snapshot
 if defined noetw set noetw_arg=--without-etw& set noetw_msi_arg=/p:NoETW=1
 if defined noperfctr set noperfctr_arg=--without-perfctr& set noperfctr_msi_arg=/p:NoPerfCtr=1
-if not defined build if not defined gyp if not defined test goto help
+if not defined build if not defined gyp if not defined test if not defined clean goto help
 
 
 :clean
