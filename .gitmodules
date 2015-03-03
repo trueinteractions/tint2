@@ -7,3 +7,8 @@
 	path = libraries/wpf-autolayout
 	url = https://github.com/trueinteractions/wpf-autolayout.git
 	branch = master
+
+[submodule "libraries/ffi"]
+	path = libraries/ffi
+	url = https://github.com/atgreen/libffi.git
+	branch = master

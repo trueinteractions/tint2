@@ -793,6 +793,9 @@
           },
         }],
         ['target_ios==1',  {
+          'variables': {
+            'OS':'ios'
+          },
           'include_dirs': [
             'libraries/libffi/ios/include'
           ]

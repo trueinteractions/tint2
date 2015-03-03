@@ -47,6 +47,8 @@ elif [ "$1" == "clean" ]; then
   rm -rf ./build/msvs/
   rm -rf ./build/ninja/
   rm -rf ./build/xcode/
+  rm -rf ./build/xcode-ios/
+  rm -rf ./build/xcode-ios-simulator/
   rm -rf ./build/Release/
   rm -rf ./build/Debug/
   rm -rf ./build/out/
