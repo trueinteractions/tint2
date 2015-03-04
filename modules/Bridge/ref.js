@@ -378,7 +378,9 @@ exports.coerceType = function coerceType (type) {
   var rtn = type
   if (typeof rtn === 'string') {
     rtn = exports.types[type]
-    if (rtn) return rtn
+    if (rtn) {
+      return rtn
+    }
 
     // strip whitespace
     rtn = type.replace(/\s+/g, '').toLowerCase()

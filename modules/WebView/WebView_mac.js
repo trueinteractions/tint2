@@ -119,8 +119,8 @@ module.exports = (function() {
   }
   function fireNewWindow(s,c,webview,config,navAction,features) {
     try {
-      var webview = new WebView(this.useWKWebView ? {configuration:config} : {});
-      return (this.fireEvent('new-window', [webview])) === false ? null : webview.nativeView;
+      var newWebview = new WebView(this.useWKWebView ? {configuration:config} : {});
+      return (this.fireEvent('new-window', [newWebview])) === false ? null : newWebview.nativeView;
     } catch (e) {
       console.log(e.message);
       console.log(e.stack);
@@ -576,8 +576,8 @@ module.exports = (function() {
         var url = this.nativeView('URL');
         return url === null ? null : url('absoluteURL')('description')('UTF8String');
       } else {
-        var url = this.nativeView('mainFrameURL');
-        return url === null ? null : url('UTF8String'); 
+        var mainUrl = this.nativeView('mainFrameURL');
+        return mainUrl === null ? null : mainUrl('UTF8String'); 
       }
     },
     function(url) {
@@ -611,8 +611,8 @@ module.exports = (function() {
   util.def(WebView.prototype, "useragent",
     function() { 
       if(this.useWKWebView) {
-        var userAgent = this.nativeView('_customUserAgent');
-        return userAgent.toString();
+        var userAgentWk = this.nativeView('_customUserAgent');
+        return userAgentWk.toString();
       } else {
         var userAgent = this.nativeView('customUserAgent');
         if(!userAgent)

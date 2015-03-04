@@ -260,9 +260,13 @@ module.exports = (function() {
   Object.defineProperty(Split.prototype, 'style', {
     get:function() {
       // thick, thin, pane
-      if(this.private.dividerWidth === 1) return "thin";
-      else if(this.private.dividerWidth === 3) return "pane";
-      else if(this.private.dividerWidth === 5) return "thick";
+      if(this.private.dividerWidth === 1) {
+        return "thin";
+      } else if(this.private.dividerWidth === 3) {
+        return "pane";
+      } else if(this.private.dividerWidth === 5) {
+        return "thick";
+      }
     },
     set:function(e) {
       this.fireEvent('resize');

@@ -205,24 +205,40 @@ module.exports = (function() {
    */
 
   function map (type) {
-    if (!type) throw new Error('got falsey "type" to map ('+type+'). this should NOT happen!');
-    if (type.type) type = type.type;
-    if (isStruct(type)) return getStruct(type);
+    if (!type) {
+      throw new Error('got falsey "type" to map ('+type+'). this should NOT happen!');
+    }
+    if (type.type) {
+      type = type.type;
+    }
+    if (isStruct(type)) {
+      return getStruct(type);
+    }
     type = type.replace(methodEncodingsTest, '')
     // if the first letter is a ^ then it's a "pointer" type
     if (type[0] === '^') return 'pointer'
     // now we can try matching from the typeEncodings map
     var rtn = typeEncodings[type]
-    if (rtn) return rtn
+    if (rtn) {
+      return rtn
+    }
     // last shot... try the last char? this may be a bad idea...
     rtn = typeEncodings[type[type.length-1]]
-    if (rtn) return rtn
+    if (rtn) {
+      return rtn
+    }
     // couldn't find the type. throw a descriptive error as to why:
-    if (type[0] === '[') return 'pointer';
+    if (type[0] === '[') {
+      return 'pointer';
+    }
       //throw new Error('Array types not yet supported: ' + type)
-    if (type[0] === '(') return 'pointer';
+    if (type[0] === '(') {
+      return 'pointer';
+    }
       //throw new Error('Union types not yet supported: ' + type)
-    if (type[0] === 'b') return 'pointer';
+    if (type[0] === 'b') {
+      return 'pointer';
+    }
       //throw new Error('Bit field types not yet supported: ' + type)
     throw new Error('Could not convert type: ' + type)
   }
@@ -262,37 +278,38 @@ module.exports = (function() {
         , len = types.length
         , depth = 0
       for (var i=0; i<len; i++) {
-        var c = types[i]
+        var c = types[i];
 
         if (depth || !/(\d)/.test(c)) {
-          cur.push(c)
+          cur.push(c);
         }
 
         if (c === '{' || c === '[' || c === '(') {
-          depth++
+          depth++;
         } else if (c === '}' || c === ']' || c === ')') {
-          depth--
-          if (!depth)
-            add()
+          depth--;
+          if (!depth) {
+            add();
+          }
         } else if (~DELIMS.indexOf(c) && !depth) {
-          add()
+          add();
         }
       }
       function add () {
-        rtn.push(cur.join(''))
-        cur = []
-        depth = 0
+        rtn.push(cur.join(''));
+        cur = [];
+        depth = 0;
       }
-      assert.equal(rtn[1], '@', '_self argument expected as first arg: ' + types)
-      assert.equal(rtn[2], ':', 'SEL argument expected as second arg: ' + types)
-      return [ rtn[0], rtn.slice(1) ]
+      assert.equal(rtn[1], '@', '_self argument expected as first arg: ' + types);
+      assert.equal(rtn[2], ':', 'SEL argument expected as second arg: ' + types);
+      return [ rtn[0], rtn.slice(1) ];
     } else if (Array.isArray(types)) {
       return normalizeObjects(types);
     } else { 
-      var args = types.args
-      assert.equal(args[0], '@', '_self argument expected as first arg: ' + types)
-      assert.equal(args[1], ':', 'SEL argument expected as second arg: ' + types)
-      return [ types.retval, args ]
+      var args = types.args;
+      assert.equal(args[0], '@', '_self argument expected as first arg: ' + types);
+      assert.equal(args[1], ':', 'SEL argument expected as second arg: ' + types);
+      return [ types.retval, args ];
     }
   }
 

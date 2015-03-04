@@ -35,8 +35,9 @@ module.exports = (function() {
       if(e instanceof Control) {
         this.private.searchButton = e;
         this.nativeView('cell')('setSearchButtonCell',e.nativeView('cell'));
-      } else
+      } else {
         throw new Error('The search button must be an instance (or derived work) of a Button.');
+      }
     }
   });
 
@@ -46,8 +47,9 @@ module.exports = (function() {
       if(e instanceof Control) {
         this.private.cancelButton = e;
         this.nativeView('cell')('setCancelButtonCell',e.nativeView('cell'));
-      } else
+      } else {
         throw new Error('The cancel button must be an instance (or derived work) of a Button.');
+      }
     }
   });
 
