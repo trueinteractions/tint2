@@ -454,6 +454,7 @@ def configure_arm(o):
   # CHECKME VFPv3 implies ARMv7+ but is the reverse true as well?
   fpu = 'vfpv3' if armv7 else 'vfpv2'
 
+  o['variables']['arm64'] = int(armv7)
   o['variables']['armv7'] = int(armv7)
   o['variables']['arm_fpu'] = fpu
   o['variables']['arm_neon'] = int(is_arm_neon())
@@ -712,7 +713,7 @@ write('../libraries/node/config.mk',
 if options.use_ninja:
   gyp_args = ['-f', 'ninja-' + flavor]
 elif options.dest_os == "ios":
-  gyp_args = ['-f', 'xcode', '-Dios', '-Dtarget_ios=1', '-Dtarget_ios_simulator=0']
+  gyp_args = ['-f', 'xcode', '-Dios', '-Dtarget_ios=1', '-Dtarget_ios_simulator=0', '-Dtarget_arch=arm64']
 elif options.dest_os == "ios-simulator":
   gyp_args = ['-f', 'xcode', '-Dios-simulator', '-Dtarget_ios=0', '-Dtarget_ios_simulator=1']
 elif options.use_xcode:

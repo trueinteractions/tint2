@@ -282,12 +282,12 @@
       ['target_ios==1', {
         'defines': [
           '_DARWIN_USE_64_BIT_INODE=1', 
-          '__ARM_EABI__=1',
+           '__ARM_EABI__=1',
           'V8_TARGET_OS_IOS=1'
         ],
         'xcode_settings': {
           'mac_bundle':1,
-          'ARCHS': ['armv7','armv7s'],
+          'ARCHS': ['armv7s'],
           'SDKROOT': '<!(xcrun --sdk iphoneos --show-sdk-path)',   # added for Tint
           'PROJECT_DIR': '<@(DEPTH)/build/xcode-ios/',  # added for Tint
           'SYMROOT': '<@(DEPTH)/build/xcode-ios/',      # added for Tint
@@ -324,7 +324,7 @@
             '-W',
             '-Wno-unused-parameter',
             '-fobjc-arc',                           # added for Tint, objc runtime
-            '-fobjc-runtime=ios',                # added for Tint, objc runtime
+            '-fobjc-runtime=ios',                   # added for Tint, objc runtime
           ],
         },
         'target_conditions': [

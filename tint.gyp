@@ -781,6 +781,9 @@
           'dependencies': [
             'libraries/dlfcn-win32/dlfcn.gyp:dlfcn',
             'libraries/pthreads-win32/pthread.gyp:pthread'
+          ],
+          'include_dirs': [
+            'libraries/libffi/ios',
           ]
         }],
         ['OS=="mac"', {
@@ -791,13 +794,16 @@
                 '-ObjC++'
             ]
           },
+          'include_dirs': [
+            'libraries/libffi/ios',
+          ]
         }],
         ['target_ios==1',  {
           'variables': {
             'OS':'ios'
           },
           'include_dirs': [
-            'libraries/libffi/ios/include'
+            'libraries/libffi/ios',
           ]
         }]
       ]

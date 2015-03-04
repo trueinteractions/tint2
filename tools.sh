@@ -14,9 +14,18 @@ if [ "$1" == "config" ]; then
     git submodule update
   fi
 
-  $PYTHON ./tools/tint_conf.py --subsystem=console --with-arm7 --with-arm-float-abi=soft --without-snapshot --without-etw --without-perfctr --dest-cpu=arm --xcode --dest-os=ios --tag= > /dev/null
+  $PYTHON ./tools/tint_conf.py --subsystem=console --with-arm7 --with-arm-float-abi=soft --without-snapshot --without-etw --without-perfctr --dest-cpu=armv7s --xcode --dest-os=ios --tag=
   $PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --without-etw --without-perfctr --dest-cpu=ia32 --xcode --dest-os=ios-simulator --tag= > /dev/null
   $PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --dest-cpu=x64 --xcode --tag= > /dev/null
+
+  # elif [ "$1" == "bump-ffi"]; then
+  # cd libraries/ffi
+  # ./autoconf.sh
+  # ./configure --prefix=`pwd`/build/ios/ --includedir=`pwd`/build/ios/include --oldincludedir=`pwd`/build/ios/include --libdir=`pwd`/build/ios/lib --build=x86_64  --host=aarch64
+  # ./configure --prefix=`pwd`/build/mac/ --includedir=`pwd`/build/mac/include --oldincludedir=`pwd`/build/mac/include --libdir=`pwd`/build/mac/lib
+  # -- ./configure --prefix=`pwd`/build/win/ --includedir=`pwd`/build/win/include --oldincludedir=`pwd`/build/win/include --libdir=`pwd`/build/win/lib
+  # cd ../..
+
 elif [ "$1" == "build" ]; then
 
   if [ "$2" == "debug" ]; then
