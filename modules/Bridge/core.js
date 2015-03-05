@@ -133,8 +133,9 @@ module.exports = (function() {
       , count = ref.alloc('uint')
       , ivars = objc.class_copyIvarList(classPtr, count);
       count = count.deref();
-    for (var i=0; i<count; i++) 
+    for (var i=0; i<count; i++) {
       rtn.push(objc.ivar_getName(ivars.readPointer(i * ref.sizeof.pointer)));
+    }
 
     free(ivars);
     return rtn;
@@ -150,8 +151,9 @@ module.exports = (function() {
       , methods = objc.class_copyMethodList(classPtr, numMethods)
       , count = numMethods.deref();
 
-    for (var i=0; i<count; i++)
+    for (var i=0; i<count; i++) {
       rtn.push(wrapValue(objc.method_getName(methods.readPointer(i * ref.sizeof.pointer)),':'));
+    }
     
     free(methods);
     return rtn;
