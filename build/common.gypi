@@ -43,7 +43,9 @@
       ['target_ios==1', {
         'arm_version':'default',
         'arm_float_abi':'hard',
-        'arm_thumb':0
+        'arm_thumb':0,
+        'v8_target_arch':'arm',
+        'arm_fpu':'default'
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj',
@@ -281,8 +283,6 @@
       }],
       ['target_ios==1', {
         'defines': [
-          '_DARWIN_USE_64_BIT_INODE=1', 
-           '__ARM_EABI__=1',
           'V8_TARGET_OS_IOS=1'
         ],
         'xcode_settings': {

@@ -88,18 +88,22 @@
       'conditions': [
         ['OS=="mac" and target_ios==1', {
           'cflags': [
+            '-fasm-blocks'
           ],
           'include_dirs': [ 
-            'ios/',
+            'ios/include/',
             '<!(xcrun --sdk iphoneos --show-sdk-path)/usr/include/mach'
           ],
           'sources': [
-            'ios/ffi.c',
-            'ios/java_raw_api.c',
-            'ios/prep_cif.c',
-            'ios/raw_api.c',
-            'ios/sysv.S',
-            'ios/types.c',
+            # 'ios/src/aarch64/ffi_arm64.c',
+            # 'ios/src/aarch64/sysv_arm64.S',
+            'ios/src/arm/ffi_armv7.c',
+            'ios/src/arm/sysv_armv7.S',
+            'ios/src/arm/trampoline_armv7.S',
+            'ios/src/java_raw_api.c',
+            'ios/src/prep_cif.c',
+            'ios/src/raw_api.c',
+            'ios/src/types.c'
           ],
         }], 
         ['OS=="mac" and target_ios==0', {

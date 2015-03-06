@@ -1,3 +1,5 @@
+#ifdef __i386__
+
 /* fficonfig.h.  Generated from fficonfig.h.in by configure.  */
 /* fficonfig.h.in.  Generated from configure.ac by autoheader.  */
 
@@ -12,8 +14,6 @@
 /* Define to 1 if using `alloca.c'. */
 /* #undef C_ALLOCA */
 
-#define HAVE_MACHINE_ASM_H
-
 /* Define to the flags needed for the .section .eh_frame directive. */
 #define EH_FRAME_FLAGS "aw"
 
@@ -27,7 +27,7 @@
 /* #undef FFI_MMAP_EXEC_EMUTRAMP_PAX */
 
 /* Cannot use malloc on this target, so, we revert to alternative means */
-/* #undef FFI_MMAP_EXEC_WRIT */
+#define FFI_MMAP_EXEC_WRIT 1
 
 /* Define this if you do not want support for the raw API. */
 /* #undef FFI_NO_RAW_API */
@@ -42,18 +42,21 @@
    */
 #define HAVE_ALLOCA_H 1
 
+/* Define if your assembler supports .ascii. */
+/* #undef HAVE_AS_ASCII_PSEUDO_OP */
+
 /* Define if your assembler supports .cfi_* directives. */
 /* #undef HAVE_AS_CFI_PSEUDO_OP */
 
 /* Define if your assembler supports .register. */
 /* #undef HAVE_AS_REGISTER_PSEUDO_OP */
 
-/* Define if the compiler uses zarch features. */
-/* #undef HAVE_AS_S390_ZARCH */
-
 /* Define if your assembler and linker support unaligned PC relative relocs.
    */
 /* #undef HAVE_AS_SPARC_UA_PCREL */
+
+/* Define if your assembler supports .string. */
+/* #undef HAVE_AS_STRING_PSEUDO_OP */
 
 /* Define if your assembler supports unwind section type. */
 /* #undef HAVE_AS_X86_64_UNWIND_SECTION_TYPE */
@@ -82,9 +85,6 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
-/* Define to 1 if you have the `mkostemp' function. */
-/* #undef HAVE_MKOSTEMP */
-
 /* Define to 1 if you have the `mmap' function. */
 #define HAVE_MMAP 1
 
@@ -92,7 +92,7 @@
 #define HAVE_MMAP_ANON 1
 
 /* Define if mmap of /dev/zero works. */
-#define HAVE_MMAP_DEV_ZERO 1
+/* #undef HAVE_MMAP_DEV_ZERO */
 
 /* Define if read-only mmap of a plain file works. */
 #define HAVE_MMAP_FILE 1
@@ -138,7 +138,7 @@
 #define PACKAGE_NAME "libffi"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libffi 3.99999"
+#define PACKAGE_STRING "libffi 3.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libffi"
@@ -147,7 +147,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.99999"
+#define PACKAGE_VERSION "3.1"
 
 /* The size of `double', as computed by sizeof. */
 #define SIZEOF_DOUBLE 8
@@ -156,7 +156,7 @@
 #define SIZEOF_LONG_DOUBLE 16
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 8
+#define SIZEOF_SIZE_T 4
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -177,7 +177,7 @@
 /* #undef USING_PURIFY */
 
 /* Version number of package */
-#define VERSION "3.99999"
+#define VERSION "3.1"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -209,3 +209,6 @@
 #endif
 #endif
 
+
+
+#endif

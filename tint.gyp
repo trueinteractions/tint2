@@ -803,7 +803,7 @@
             'OS':'ios'
           },
           'include_dirs': [
-            'libraries/libffi/ios',
+            'libraries/libffi/ios/include',
           ]
         }]
       ]

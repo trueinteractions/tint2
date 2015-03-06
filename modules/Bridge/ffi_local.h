@@ -9,7 +9,13 @@
 
 /* define FFI_BUILDING before including ffi.h to workaround a libffi bug on Windows */
 #define FFI_BUILDING
-#include <ffi.h>
+#if defined(__arm64__)
+#include "ffi_arm64.h"
+#elif defined(__arm__)
+#include "ffi_armv7.h"
+#elif __APPLE__
+#include <ffi_x86_64.h>
+#endif
 
 #include <uv.h>
 #include <node_object_wrap.h>
