@@ -41,11 +41,11 @@
         'v8_no_strict_aliasing': 0
       }],
       ['target_ios==1', {
-        'arm_version':'default',
-        'arm_float_abi':'hard',
+        'arm_version':'7',
+        'arm_float_abi':'soft',
         'arm_thumb':0,
         'v8_target_arch':'arm',
-        'arm_fpu':'default'
+        'arm_fpu':'vfpv3'
       }],
       ['GENERATOR == "ninja" or OS== "mac"', {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj',
@@ -283,9 +283,10 @@
       }],
       ['target_ios==1', {
         'defines': [
-          'V8_TARGET_OS_IOS=1'
+          'V8_TARGET_OS_IOS=1',
         ],
         'xcode_settings': {
+          'INFOPLIST_FILE': './build/Info.plist',
           'mac_bundle':1,
           'ARCHS': ['armv7s'],
           'SDKROOT': '<!(xcrun --sdk iphoneos --show-sdk-path)',   # added for Tint
