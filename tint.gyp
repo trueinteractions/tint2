@@ -21,7 +21,6 @@
     'node_v8_options': '',
     'node_prefix': '',
     'node_tag': '',
-
     'win_subsystem': 'console',
     'mac_library_files': [
       'modules/Bridge/class.js',
@@ -547,7 +546,7 @@
             ]
           },
           'VCLinkerTool': {
-            'LinkIncremental': 1,
+            'LinkIncremental': 2,
             'RuntimeLibrary':'>(runtime)',
             'conditions': [
               ['target_arch=="x64"', {
