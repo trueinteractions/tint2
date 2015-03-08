@@ -401,16 +401,14 @@ exports.coerceType = function coerceType (type) {
       // allow string names to be passed in
       rtn = exports.types[rtn];
       if (refCount > 0) {
-        assert(rtn && 'size' in rtn && 'indirection' in rtn
-            , 'could not determine a proper "type" from: ' + JSON.stringify(type));
+        assert(rtn && 'size' in rtn && 'indirection' in rtn, 'could not determine a proper "type" from: ' + JSON.stringify(type));
         for (var i = 0; i < refCount; i++) {
           rtn = exports.refType(rtn);
         }
       }
     }
   }
-  assert(rtn && 'size' in rtn && 'indirection' in rtn
-      , 'could not determine a proper "type" from: ' + JSON.stringify(type));
+  assert(rtn && 'size' in rtn && 'indirection' in rtn, 'could not determine a proper "type" from: ' + JSON.stringify(type));
   return rtn;
 };
 
@@ -841,13 +839,13 @@ var types = exports.types = {};
  */
 
 types.void = {
-    size: 0
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return null;
-    }
-  , set: function set (buf, offset, val) {
-    }
+  size: 0,
+  indirection: 1, 
+  get: function get (buf, offset) {
+    return null;
+  },
+  set: function set (buf, offset, val) {
+  }
 };
 
 /**
@@ -855,17 +853,17 @@ types.void = {
  */
 
 types.int8 = {
-    size: exports.sizeof.int8
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf.readInt8(offset || 0);
+  size: exports.sizeof.int8, 
+  indirection: 1, 
+  get: function get (buf, offset) {
+    return buf.readInt8(offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    if (typeof val === 'string') {
+      val = val.charCodeAt(0);
     }
-  , set: function set (buf, offset, val) {
-      if (typeof val === 'string') {
-        val = val.charCodeAt(0);
-      }
-      return buf.writeInt8(val, offset || 0);
-    }
+    return buf.writeInt8(val, offset || 0);
+  }
 };
 
 /**
@@ -873,17 +871,17 @@ types.int8 = {
  */
 
 types.uint8 = {
-    size: exports.sizeof.uint8
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf.readUInt8(offset || 0);
+  size: exports.sizeof.uint8,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf.readUInt8(offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    if (typeof val === 'string') {
+      val = val.charCodeAt(0);
     }
-  , set: function set (buf, offset, val) {
-      if (typeof val === 'string') {
-        val = val.charCodeAt(0);
-      }
-      return buf.writeUInt8(val, offset || 0);
-    }
+    return buf.writeUInt8(val, offset || 0);
+  }
 };
 
 /**
@@ -891,14 +889,14 @@ types.uint8 = {
  */
 
 types.int16 = {
-    size: exports.sizeof.int16
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readInt16' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeInt16' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.int16,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readInt16' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeInt16' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -906,14 +904,14 @@ types.int16 = {
  */
 
 types.uint16 = {
-    size: exports.sizeof.uint16
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readUInt16' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeUInt16' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.uint16,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readUInt16' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeUInt16' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -921,14 +919,14 @@ types.uint16 = {
  */
 
 types.int32 = {
-    size: exports.sizeof.int32
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readInt32' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeInt32' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.int32,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readInt32' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeInt32' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -936,14 +934,14 @@ types.int32 = {
  */
 
 types.uint32 = {
-    size: exports.sizeof.uint32
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readUInt32' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeUInt32' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.uint32,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readUInt32' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeUInt32' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -951,14 +949,14 @@ types.uint32 = {
  */
 
 types.int64 = {
-    size: exports.sizeof.int64
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readInt64' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeInt64' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.int64,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readInt64' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeInt64' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -966,14 +964,14 @@ types.int64 = {
  */
 
 types.uint64 = {
-    size: exports.sizeof.uint64
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readUInt64' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeUInt64' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.uint64,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readUInt64' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeUInt64' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -981,14 +979,14 @@ types.uint64 = {
  */
 
 types.float = {
-    size: exports.sizeof.float
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readFloat' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeFloat' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.float,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readFloat' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeFloat' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -996,14 +994,14 @@ types.float = {
  */
 
 types.double = {
-    size: exports.sizeof.double
-  , indirection: 1
-  , get: function get (buf, offset) {
-      return buf['readDouble' + exports.endianness](offset || 0);
-    }
-  , set: function set (buf, offset, val) {
-      return buf['writeDouble' + exports.endianness](val, offset || 0);
-    }
+  size: exports.sizeof.double,
+  indirection: 1,
+  get: function get (buf, offset) {
+    return buf['readDouble' + exports.endianness](offset || 0);
+  },
+  set: function set (buf, offset, val) {
+    return buf['writeDouble' + exports.endianness](val, offset || 0);
+  }
 };
 
 /**
@@ -1032,34 +1030,34 @@ types.Object = {
  */
 
 types.CString = {
-    size: exports.sizeof.pointer
-  , alignment: exports.alignof.pointer
-  , indirection: 1
-  , get: function get (buf, offset) {
-      var _buf = buf.readPointer(offset);
-      if (_buf.isNull()) {
-        return null;
-      }
-      return _buf.readCString(0);
+  size: exports.sizeof.pointer,
+  alignment: exports.alignof.pointer,
+  indirection: 1,
+  get: function get (buf, offset) {
+    var _buf = buf.readPointer(offset);
+    if (_buf.isNull()) {
+      return null;
     }
-  , set: function set (buf, offset, val) {
-      var _buf = exports.allocCString(val);
-      return buf.writePointer(_buf, offset);
-    }
+    return _buf.readCString(0);
+  },
+  set: function set (buf, offset, val) {
+    var _buf = exports.allocCString(val);
+    return buf.writePointer(_buf, offset);
+  }
 };
 
 // alias Utf8String
 var utfstringwarned = false
 Object.defineProperty(types, 'Utf8String', {
-    enumerable: false
-  , configurable: true
-  , get: function () {
-      if (!utfstringwarned) {
-        utfstringwarned = true;
-        console.error('"Utf8String" type is deprecated, use "CString" instead');
-      }
-      return types.CString;
+  enumerable: false,
+  configurable: true,
+  get: function () {
+    if (!utfstringwarned) {
+      utfstringwarned = true;
+      console.error('"Utf8String" type is deprecated, use "CString" instead');
     }
+    return types.CString;
+  }
 });
 
 /**
@@ -1145,8 +1143,8 @@ Object.defineProperty(types, 'Utf8String', {
  */
 
 // "typedef"s for the variable-sized types
-;[ 'bool', 'byte', 'char', 'uchar', 'short', 'ushort', 'int', 'uint', 'long'
-, 'ulong', 'longlong', 'ulonglong', 'size_t' ].forEach(function (name) {
+;[ 'bool', 'byte', 'char', 'uchar', 'short', 'ushort', 'int', 'uint', 'long',
+   'ulong', 'longlong', 'ulonglong', 'size_t' ].forEach(function (name) {
   var unsigned = name === 'bool'
               || name === 'byte'
               || name === 'size_t'
