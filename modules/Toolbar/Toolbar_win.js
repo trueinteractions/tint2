@@ -57,7 +57,6 @@ module.exports = (function() {
           }
           child.native.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
         }
-
         if(child.private && child.private.user && child.private.user.width) {
           child.native.MinWidth = child.private.user.width;
         }

@@ -74,7 +74,7 @@
             'ExceptionHandling': 2, # /EHa
           },
           'VCLinkerTool': {
-            'LinkIncremental': 2, # enable incremental linking
+            'LinkIncremental': 1, # enable incremental linking
             'GenerateDebugInformation': 'true',
           },
         },
