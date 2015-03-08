@@ -4,10 +4,13 @@ module.exports = (function() {
   }
 
   var $ = process.bridge.dotnet;
+  process.bridge.dotnet.import('System.Windows.Forms.dll'); 
   var util = require('Utilities');
+
 
   function FileDialog(type) {
     var $dialog;
+    var $dirDialog = new $.System.Windows.Forms.FolderBrowserDialog();
 
     if(type === "save") { 
       $dialog = new $.Microsoft.Win32.SaveFileDialog();
@@ -23,14 +26,36 @@ module.exports = (function() {
     util.defEvents(this);
 
     Object.defineProperty(this, "title", {
-      get:function() { return $dialog.Title.toString(); },
-      set:function(e) { $dialog.Title = e.toString(); }
+      get:function() { 
+        if(canChooseDirectories) {
+          return "";
+        } else {
+          return $dialog.Title.toString();
+        }
+      },
+      set:function(e) {
+        if(!canChooseDirectories) {
+          $dialog.Title = e.toString();
+        }
+      }
     });
 
     // TODO: This isn't supported on windows. 
     Object.defineProperty(this, "message", {
-      get:function() { return message; },
-      set:function(e) { message = e.toString(); }
+      get:function() {
+        if(canChooseDirectories) {
+          return $dirDialog.Description.toString();
+        } else {
+          return message;
+        }
+      },
+      set:function(e) {
+        if(canChooseDirectories) {
+          $dirDialog.Description = e.toString();
+        } else {
+          message = e.toString();
+        }
+      }
     });
 
     // TODO: This isn't supported on windows. 
@@ -40,13 +65,35 @@ module.exports = (function() {
     });
 
     Object.defineProperty(this, "directory", {
-      get:function() { return $dialog.InitialDirectory.toString(); },
-      set:function(e) { $dialog.InitialDirectory = $.System.IO.Path.GetFullPath(e.toString()); }
+      get:function() {
+        if(canChooseDirectories) {
+          return $dirDialog.SelectedPath.toString();
+        } else {
+          return $dialog.InitialDirectory.toString();
+        }
+      },
+      set:function(e) { 
+        if(canChooseDirectories) {
+          $dirDialog.SelectedPath = $.System.IO.Path.GetFullPath(e.toString());
+        } else {
+          $dialog.InitialDirectory = $.System.IO.Path.GetFullPath(e.toString());
+        }
+      }
     });
 
     Object.defineProperty(this, 'filename', {
-      get:function() { return $dialog.FileName; },
-      set:function(val) { $dialog.FileName = val.toString(); }
+      get:function() { 
+        if(canChooseDirectories) {
+          return null;
+        } else {
+          return $dialog.FileName;
+        }
+      },
+      set:function(val) {
+        if(!canChooseDirectories) {
+          $dialog.FileName = val.toString();
+        }
+      }
     });
 
     Object.defineProperty(this, 'type', {
@@ -74,29 +121,38 @@ module.exports = (function() {
       get:function() { return allowedFileTypes.filter(function(item) { return item === allfiles; }); },
       set:function(items) { 
         console.assert(Array.isArray(items));
-        allowedFileTypes = items;
-        items = allowedFileTypes;
+        allowedFileTypes = [];
         for(var i=0; i < items.length ; i++) {
-          items[i] = (items[i]).toUpperCase() + ' Files ('+items[i]+') |*.'+items[i];
+          if(items[i] === "folder") {
+            this.allowDirectories = true;
+          } else {
+            allowedFileTypes.push((items[i]).toUpperCase() + ' Files ('+items[i]+') |*.'+items[i]);
+          }
         }
 
-        if(allowAnyFileType && !items.indexOf(allfiles)) {
-          items.push(allfiles);
+        if(allowAnyFileType && !allowedFileTypes.indexOf(allfiles)) {
+          allowedFileTypes.push(allfiles);
         }
-        $dialog.Filter = items.join('|');
+        if(!canChooseDirectories) {
+          $dialog.Filter = allowedFileTypes.join('|');
+        }
       }
     });
 
     Object.defineProperty(this, "allowMultiple", {
       get:function() {
-        if(type === "save") {
+        if(canChooseDirectories) {
+          return false;
+        } else if(type === "save") {
           return false;
         } else {
           return $dialog.Multiselect ? true : false;
         }
       },
       set:function(e) {
-        if(type === "save" && e) {
+        if(canChooseDirectories) {
+          throw new Error('Only one folder can be selected at a time.');
+        } else if(type === "save" && e) {
           throw new Error('Save dialogs cannot ask for multiple file paths.');
         } else if(type === "save" && !e) {
           return;
@@ -123,8 +179,10 @@ module.exports = (function() {
 
     Object.defineProperty(this, "selection", {
       get:function() {
-        if(type === "open") {
-          return $dialog.FileNames;
+        if(canChooseDirectories) {
+          return $dirDialog.SelectedPath;
+        } else if(type === "open") {
+          return $dialog.FileName;
         } else {
           return $dialog.FileNames[0];
         }
@@ -137,11 +195,21 @@ module.exports = (function() {
     // TODO: Make this asyncronous.
     this.open = function(z) {
       setTimeout(function() {
-        if(!$dialog.ShowDialog(z ? z.native : undefined)) {
-          this.fireEvent('cancel');
+        if(canChooseDirectories) {
+          if(!$dirDialog.ShowDialog()) {
+            this.fireEvent('cancel');
+          } else {
+            this.fireEvent('select');
+          }
         } else {
-          this.fireEvent('select');
+          if(!$dialog.ShowDialog(z ? z.native : undefined)) {
+            this.fireEvent('cancel');
+          } else {
+            this.fireEvent('select');
+          }
         }
+        
+        
       }.bind(this), 100);
     }
 

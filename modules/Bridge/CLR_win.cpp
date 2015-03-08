@@ -231,24 +231,33 @@ namespace TintInterop {
   public:
 
     static System::String^ GetIconFromFile(System::String^ file, int index) {
-      HICON hIcon;
-      UINT n = ExtractIconEx((const char*)(void*)Marshal::StringToHGlobalAnsi(file), index, &(hIcon), NULL, 1);
-      if(n == 0) n = ExtractIconEx((const char*)(void*)Marshal::StringToHGlobalAnsi(file), index, NULL, &(hIcon), 1);
-      if(n != 0) {
-        System::Drawing::Icon^ icon = System::Drawing::Icon::FromHandle(System::IntPtr((void *)hIcon));
-        System::Windows::Media::Imaging::BitmapSource^ source = System::Windows::Interop::Imaging::CreateBitmapSourceFromHIcon(
-          icon->Handle,
-          System::Windows::Int32Rect(0,0,icon->Width,icon->Height),
-          System::Windows::Media::Imaging::BitmapSizeOptions::FromEmptyOptions()
-        );
-        
-        System::Windows::Media::Imaging::PngBitmapEncoder^ encoder = gcnew System::Windows::Media::Imaging::PngBitmapEncoder();
-        encoder->Frames->Add( System::Windows::Media::Imaging::BitmapFrame::Create(source) );
+      try {
+        HICON hIcon[] = { 0, 0, 0, 0 };
+        UINT n = ExtractIconEx((const char*)(void*)Marshal::StringToHGlobalAnsi(file), index, hIcon, NULL, 1);
+        if(n == 0) {
+          n = ExtractIconEx((const char*)(void*)Marshal::StringToHGlobalAnsi(file), index, NULL, hIcon, 1);
+        }
+        if(n != 0) {
+          System::Drawing::Icon^ icon = System::Drawing::Icon::FromHandle(System::IntPtr((void *)hIcon[0]));
+          if(icon == nullptr || icon->Handle == System::IntPtr::Zero) {
+            return nullptr;
+          }
+          System::Windows::Media::Imaging::BitmapSource^ source = System::Windows::Interop::Imaging::CreateBitmapSourceFromHIcon(
+            icon->Handle,
+            System::Windows::Int32Rect(0,0,icon->Width,icon->Height),
+            System::Windows::Media::Imaging::BitmapSizeOptions::FromEmptyOptions()
+          );
+          
+          System::Windows::Media::Imaging::PngBitmapEncoder^ encoder = gcnew System::Windows::Media::Imaging::PngBitmapEncoder();
+          encoder->Frames->Add( System::Windows::Media::Imaging::BitmapFrame::Create(source) );
 
-        System::IO::MemoryStream^ stream = gcnew System::IO::MemoryStream();
-        encoder->Save(stream);
-        return System::Convert::ToBase64String(stream->ToArray());
-      } else {
+          System::IO::MemoryStream^ stream = gcnew System::IO::MemoryStream();
+          encoder->Save(stream);
+          return System::Convert::ToBase64String(stream->ToArray());
+        } else {
+          return nullptr;
+        }
+      } catch (System::Exception ^e) {
         return nullptr;
       }
     }
@@ -279,23 +288,26 @@ namespace TintInterop {
 
     static System::String^ GetIconForFile(System::String^ file) 
     {
-      SHFILEINFO shfi;
-      SHGetFileInfo((const char*)(void*)Marshal::StringToHGlobalAnsi(file), FILE_ATTRIBUTE_NORMAL, &shfi, sizeof(SHFILEINFO), 
-        SHGFI_USEFILEATTRIBUTES | SHGFI_ICON | SHGFI_LARGEICON);
-      
-      System::Drawing::Icon^ icon = System::Drawing::Icon::FromHandle(System::IntPtr((void *)shfi.hIcon));
+      try {
+        SHFILEINFO shfi;
+        SHGetFileInfo((const char*)(void*)Marshal::StringToHGlobalAnsi(file), FILE_ATTRIBUTE_NORMAL, &shfi, sizeof(SHFILEINFO), 
+          SHGFI_USEFILEATTRIBUTES | SHGFI_ICON | SHGFI_LARGEICON);
+        
+        System::Drawing::Icon^ icon = System::Drawing::Icon::FromHandle(System::IntPtr((void *)shfi.hIcon));
+        System::Windows::Media::Imaging::BitmapSource^ source = System::Windows::Interop::Imaging::CreateBitmapSourceFromHIcon(icon->Handle,
+          System::Windows::Int32Rect(0,0,icon->Width,icon->Height),
+          System::Windows::Media::Imaging::BitmapSizeOptions::FromEmptyOptions());
+        
+        System::Windows::Media::Imaging::PngBitmapEncoder^ encoder = gcnew System::Windows::Media::Imaging::PngBitmapEncoder();
+        encoder->Frames->Add( System::Windows::Media::Imaging::BitmapFrame::Create(source) );
 
-      System::Windows::Media::Imaging::BitmapSource^ source = System::Windows::Interop::Imaging::CreateBitmapSourceFromHIcon(icon->Handle,
-        System::Windows::Int32Rect(0,0,icon->Width,icon->Height),
-        System::Windows::Media::Imaging::BitmapSizeOptions::FromEmptyOptions());
-      
-      System::Windows::Media::Imaging::PngBitmapEncoder^ encoder = gcnew System::Windows::Media::Imaging::PngBitmapEncoder();
-      encoder->Frames->Add( System::Windows::Media::Imaging::BitmapFrame::Create(source) );
+        System::IO::MemoryStream^ stream = gcnew System::IO::MemoryStream();
+        encoder->Save(stream);
 
-      System::IO::MemoryStream^ stream = gcnew System::IO::MemoryStream();
-      encoder->Save(stream);
-
-      return System::Convert::ToBase64String(stream->ToArray());
+        return System::Convert::ToBase64String(stream->ToArray());
+      } catch (System::Exception ^e) {
+        return nullptr;
+      }
     }
   };
 

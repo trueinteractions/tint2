@@ -8,7 +8,7 @@
   require('Bridge');
   var util = require('Utilities');
   process.bridge.dotnet.import('mscorlib');
-  process.bridge.dotnet.import('System.dll'); 
+  process.bridge.dotnet.import('System.dll');
   process.bridge.dotnet.import('WPF\\WindowsBase.dll');
   process.bridge.dotnet.import('WPF\\PresentationCore.dll');
   process.bridge.dotnet.import('WPF\\PresentationFramework.dll');

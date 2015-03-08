@@ -57,6 +57,13 @@ module.exports = (function() {
           }
           child.native.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
         }
+
+        if(child.private && child.private.user && child.private.user.width) {
+          child.native.MinWidth = child.private.user.width;
+        }
+        if(child.private && child.private.user && child.private.user.height) {
+          child.native.MinHeight = child.private.user.height;
+        }
       } catch(e) {
         console.log(e.message);
         console.log(e.stack);

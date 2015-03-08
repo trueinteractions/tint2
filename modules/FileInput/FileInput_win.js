@@ -19,11 +19,11 @@ module.exports = (function() {
         dialog.allowFileTypes = this.allowFileTypes;
       }
       if(this.location) {
-        dialog.filename = this.location;
+        dialog.selection = this.location;
       }
       dialog.addEventListener('select', function() {
-        // TODO ?? //
-        this.location = dialog.filename;
+        var sel = dialog.selection;
+        this.location = sel;
       }.bind(this));
       dialog.addEventListener('cancel', function() {
         // TODO ?? //
@@ -92,9 +92,12 @@ module.exports = (function() {
           };
           item.addEventListener('PreviewMouseDown', item.selector.bind(this));
           var img = new $.System.Windows.Controls.Image();
-          img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(
-            new $.System.IO.MemoryStream($.System.Convert.FromBase64String($.TintInterop.Shell.GetIconForFile(runningPath))));
-          item.Icon = img;
+          var fromFileIcon = $.TintInterop.Shell.GetIconForFile(runningPath);
+          if(fromFileIcon) {
+            img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(
+              new $.System.IO.MemoryStream($.System.Convert.FromBase64String(fromFileIcon)));
+            item.Icon = img;
+          }
           this.native.ContextMenu.Items.Add(item);
         }
         previousPath = runningPath;

@@ -212,7 +212,7 @@ module.exports = (function() {
 
   function makeImage(e, stretch) {
     var img = null;
-    stretch = stretch || $.System.Windows.Media.Stretch.None;
+    stretch = stretch || $.System.Windows.Media.Stretch.Uniform;
     if(!e || typeof(e) !== 'string') {
      return null;
     } else if(e.indexOf(':') > -1) {
