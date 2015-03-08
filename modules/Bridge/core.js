@@ -305,12 +305,17 @@ module.exports = (function() {
         // somewhat faulty but since 95% of objects coming through are mostly ID/Class
         // it works, we may have issues for function pointers/etc. 
         for(var i=argTypes.length; i < arguments.length; i++) {
-          if(arguments[i].type) newtypes.push(arguments[i].type)
-          else if(arguments[i].pointer) newtypes.push('@');
-          else if(typeof arguments[i] === 'function') newtypes.push('@?');
-          else if(typeof arguments[i] === 'string') newtypes.push('r*');
-          else if(typeof arguments[i] === 'number') newtypes.push('d');
-          else newtypes.push('?');
+          if(arguments[i].type) {
+            newtypes.push(arguments[i].type);
+          } else if(arguments[i].pointer) {
+            newtypes.push('@');
+          } else if(typeof arguments[i] === 'function') {
+            newtypes.push('@?');
+          } else if(typeof arguments[i] === 'string') {
+            newtypes.push('r*');
+          } else if(typeof arguments[i] === 'number') {
+            newtypes.push('d');
+          } else newtypes.push('?');
         }
         return wrapValue(varFunc
                           .apply(null, types.mapArray(newtypes))

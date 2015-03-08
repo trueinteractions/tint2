@@ -25,8 +25,11 @@ module.exports = (function() {
   Object.defineProperty(Slider.prototype, 'value', {
     get:function() { return this.native.Value; },
     set:function(e) {
-      if (e > 1) e = 1;
-      else if (e < 0) e = 0;
+      if (e > 1) {
+        e = 1;
+      } else if (e < 0) {
+        e = 0;
+      }
       this.native.Value = e; 
     }
   });
