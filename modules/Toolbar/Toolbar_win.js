@@ -59,9 +59,11 @@ module.exports = (function() {
         }
         if(child.private && child.private.user && child.private.user.width) {
           child.native.MinWidth = child.private.user.width;
+          child.native.MaxWidth = 1000;
         }
         if(child.private && child.private.user && child.private.user.height) {
           child.native.MinHeight = child.private.user.height;
+          child.native.MaxHeight = 1000;
         }
       } catch(e) {
         console.log(e.message);

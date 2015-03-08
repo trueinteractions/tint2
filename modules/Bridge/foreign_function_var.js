@@ -3,7 +3,10 @@
  * Module dependencies.
  */
 
-if(!process.bridge) process.initbridge();
+if(!process.bridge) {
+  process.initbridge();
+}
+
 var CIF_var = require('cif_var')
   , Type = require('type')
   , _ForeignFunction = require('_foreign_function')
@@ -41,7 +44,7 @@ function VariadicForeignFunction (funcPtr, returnType, fixedArgTypes, abi) {
   // get the names of the fixed arg types
   var fixedKey = fixedArgTypes.map(function (type) {
     return getId(type);
-  })
+  });
 
 
   // what gets returned is another function that needs to be invoked with the rest
@@ -49,8 +52,8 @@ function VariadicForeignFunction (funcPtr, returnType, fixedArgTypes, abi) {
   function variadic_function_generator () {
 
     // first get the types of variadic args we are working with
-    var argTypes = fixedArgTypes.slice();;
-    var key = fixedKey.slice()
+    var argTypes = fixedArgTypes.slice();
+    var key = fixedKey.slice();
 
     for (var i = 0; i < arguments.length; i++) {
       var type = ref.coerceType(arguments[i]);
