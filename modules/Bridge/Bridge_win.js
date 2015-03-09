@@ -272,7 +272,9 @@ function createFromType(nativeType, onto) {
     if(space) {
       var spl = space.split('.');
       for(var i=0; i < spl.length; i++) {
-        if(!info.onto[spl[i]]) info.onto[spl[i]] = {};
+        if(!info.onto[spl[i]]) {
+          info.onto[spl[i]] = {};
+        }
         info.onto = info.onto[spl[i]];
       }
     }

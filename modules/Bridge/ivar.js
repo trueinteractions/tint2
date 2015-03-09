@@ -27,7 +27,9 @@ module.exports = (function() {
    * @api private
    */
   Ivar.wrap = function(pointer) {
-    if (pointer.isNull()) return null;
+    if (pointer.isNull()) {
+      return null;
+    }
     return new Ivar(pointer);
   }
 

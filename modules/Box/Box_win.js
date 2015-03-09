@@ -43,8 +43,11 @@ module.exports = (function() {
     },
     set:function(e) {
       this.custom = true;
-      if(e === "none") this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
-      else if (e === "line") this.nativeView.BorderThickness = new $.System.Windows.Thickness(1);
+      if(e === "none") {
+        this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
+      } else if (e === "line") {
+        this.nativeView.BorderThickness = new $.System.Windows.Thickness(1);
+      }
     }
   });
 

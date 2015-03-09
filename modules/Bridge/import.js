@@ -23,7 +23,6 @@ module.exports = (function() {
     , path = require('path')
     , core = require('core')
     , Class = require('class')
-    , join = path.join
     , basename = path.basename
     , SUFFIX = '.framework'
     , PATH = [
@@ -181,28 +180,20 @@ module.exports = (function() {
         if(recursive && recursive > 0) {
           importFramework(node.attrib.path, true, onto, --recursive);
         }
-      } 
-      else if (node.name === 'string_constant')
-      {
+      } else if (node.name === 'string_constant') {
         onto[name] = getValue(node);
-      } 
-      else if (node.name === 'enum')
-      {
+      } else if (node.name === 'enum') {
         if (node.attrib.ignore !== "true") {
           onto[name] = parseInt(getValue(node));
         }
-      } 
-      else if (node.name === 'struct')
-      {
-        var type = getType(node);
-        onto[name] = core.Types.knownStructs[core.Types.parseStructName(type)] = type;
-      } 
-      else if (node.name === 'constant')
-      {
-        var type = getType(node);
+      } else if (node.name === 'struct') {
+        var structtype = getType(node);
+        onto[name] = core.Types.knownStructs[core.Types.parseStructName(structtype)] = structtype;
+      }  else if (node.name === 'constant')  {
+        var consttype = getType(node);
         onto.__defineGetter__(name, function () {
           var ptr = fw.lib.get(name);
-          ptr._type = '^' + type;
+          ptr._type = '^' + consttype;
           var derefPtr = ptr.deref();
           delete onto[name];
           return onto[name] = derefPtr;
@@ -219,10 +210,10 @@ module.exports = (function() {
           , passedTypes = {args:[],name:name};
 
         node.children.forEach(function (n, i) {
-          var type = n.name;
-          if(type === 'arg') {
+          var typeName = n.name;
+          if(typeName === 'arg') {
             passedTypes.args.push(flattenNode(n));
-          } else if (type === 'retval') {
+          } else if (typeName === 'retval') {
             passedTypes.retval = flattenNode(n);
           }
         });

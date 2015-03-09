@@ -24,7 +24,9 @@ module.exports = (function() {
   Object.defineProperty(SearchInput.prototype, 'searches', {
     get:function() { return utilities.nsArrayToArray(this.nativeView('recentSearches')); },
     set:function(e) {
-      if(!Array.isArray(e)) throw new Error('Searches expected an array of strings.');
+      if(!Array.isArray(e)) {
+        throw new Error('Searches expected an array of strings.');
+      }
       this.nativeView('setRecentSearches',utilities.arrayToNSArray(e));
     }
   });

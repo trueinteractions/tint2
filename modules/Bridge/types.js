@@ -52,21 +52,27 @@ module.exports = (function() {
     // First check if a regular name was passed in
     var rtn = structCache[type];
 
-    if (rtn) return rtn;
+    if (rtn) {
+      return rtn;
+    }
 
     // If the struct type name has already been created, return that one
     var name = parseStructName(type);
 
     rtn = structCache[name];
-    if (rtn) return rtn;
+    if (rtn) {
+      return rtn;
+    }
 
-    if(knownStructs[name]) type = knownStructs[name];
+    if(knownStructs[name]) {
+      type = knownStructs[name];
+    }
     // Next parse the type structure
     var parsed = parseStruct(type);
     // Otherwise we need to create a new Struct constructor
     var props = [];
     parsed.props.forEach(function (prop) {
-      props.push([ map(prop[1]), prop[0] ])
+      props.push([ map(prop[1]), prop[0] ]);
     });
     var z;
     try { z = Struct(props); } catch(e) { }
@@ -81,11 +87,12 @@ module.exports = (function() {
    */
 
   function parseStructName (struct) {
-    var s = struct.substring(1, struct.length-1)
-      , equalIndex = s.indexOf('=')
-    if (~equalIndex)
-      s = s.substring(0, equalIndex)
-    return s
+    var s = struct.substring(1, struct.length-1), 
+        equalIndex = s.indexOf('=');
+    if (~equalIndex) {
+      s = s.substring(0, equalIndex);
+    }
+    return s;
   }
 
   /**
@@ -96,12 +103,12 @@ module.exports = (function() {
    */
 
   function parseStruct (struct) {
-    var s = struct.substring(1, struct.length-1)
-      , equalIndex = s.indexOf('=')
-      , rtn = {
-          name: s.substring(0, equalIndex)
-        , props: []
-      }
+    var s = struct.substring(1, struct.length-1),
+        equalIndex = s.indexOf('='),
+        rtn = {
+          name: s.substring(0, equalIndex),
+          props: []
+      };
     s = s.substring(equalIndex+1);
     
     var curProp = [], numBrackets = 0, entries = [];
@@ -110,9 +117,9 @@ module.exports = (function() {
       var cur = s[i];
       switch (cur) {
         case '"':
-          if (numBrackets > 0)
+          if (numBrackets > 0) {
             curProp.push(cur);
-          else {  
+          } else {  
             entries.push(curProp.join(''));
             curProp = [];
             numBrackets = 0;
@@ -142,7 +149,7 @@ module.exports = (function() {
     for (var j=1; j < entries.length; j+=2) {
       rtn.props.push([entries[j], entries[j+1]]);
     }
-    return rtn
+    return rtn;
   }
 
 
@@ -172,9 +179,9 @@ module.exports = (function() {
     , '#': 'pointer'  // Class
     , ':': 'pointer'  // SEL
     , '?': 'pointer'  // Unknown, used for function pointers
-  }
+  };
 
-  var DELIMS = Object.keys(typeEncodings)
+  var DELIMS = Object.keys(typeEncodings);
 
   /**
    * A map of the additional type info for some ObjC methods.
@@ -190,14 +197,14 @@ module.exports = (function() {
     , 'O': 'bycopy'
     , 'R': 'byref'
     , 'V': 'oneway'
-  }
+  };
 
   /**
    * Used to remove and method encodings present on the type.
    * NodObjC does not use them...
    */
 
-  var methodEncodingsTest = new RegExp('^(' + Object.keys(methodEncodings).join('|') + ')')
+  var methodEncodingsTest = new RegExp('^(' + Object.keys(methodEncodings).join('|') + ')');
 
   /**
    * Maps a single Obj-C 'type' into a valid node-ffi type.
@@ -216,16 +223,18 @@ module.exports = (function() {
     }
     type = type.replace(methodEncodingsTest, '')
     // if the first letter is a ^ then it's a "pointer" type
-    if (type[0] === '^') return 'pointer'
+    if (type[0] === '^') {
+      return 'pointer';
+    }
     // now we can try matching from the typeEncodings map
-    var rtn = typeEncodings[type]
+    var rtn = typeEncodings[type];
     if (rtn) {
-      return rtn
+      return rtn;
     }
     // last shot... try the last char? this may be a bad idea...
-    rtn = typeEncodings[type[type.length-1]]
+    rtn = typeEncodings[type[type.length-1]];
     if (rtn) {
-      return rtn
+      return rtn;
     }
     // couldn't find the type. throw a descriptive error as to why:
     if (type[0] === '[') {
@@ -240,7 +249,7 @@ module.exports = (function() {
       return 'pointer';
     }
       //throw new Error('Bit field types not yet supported: ' + type)
-    throw new Error('Could not convert type: ' + type)
+    throw new Error('Could not convert type: ' + type);
   }
 
   /**
@@ -251,8 +260,8 @@ module.exports = (function() {
 
   function mapArray (types) {
     return types.map(function (type) {
-      return Array.isArray(type) ? mapArray(type) : map(type)
-    })
+      return Array.isArray(type) ? mapArray(type) : map(type);
+    });
   }
 
   /**

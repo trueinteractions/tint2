@@ -122,8 +122,12 @@ module.exports = (function() {
         return false;
       }
 
-      if(!titlestring || titlestring === "") return false;
-      if(!textstring || textstring === "") return false;
+      if(!titlestring || titlestring === "") {
+        return false;
+      }
+      if(!textstring || textstring === "") {
+        return false;
+      }
 
       // Set the title of the notification
       $notify('setTitle',$(titlestring));
@@ -146,8 +150,9 @@ module.exports = (function() {
       else if(actionbuttontitle && actionbuttontitle !== "")
       {
         $notify('setActionButtonTitle',$(actionbuttontitle));
-        if(otherbuttontitle && otherbuttontitle != "")
+        if(otherbuttontitle && otherbuttontitle != "") {
           $notify('setOtherButtonTitle',$(otherbuttontitle));
+        }
         $notify('setHasActionButton',$.YES);
         var num = $.NSNumber('numberWithDouble',1);
         $notify('setValue', num, 'forKey', $('_showsButtons'));

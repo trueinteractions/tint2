@@ -53,13 +53,21 @@ module.exports = (function() {
     get:function() { return this.private.selected; },
     set:function(e) {
       var buttons = this.private.segmentedButtons;
-      if(buttons.length === 0) this.private.selected = 0;
-      else if(e > (buttons.length-1)) this.private.selected = buttons.length-1;
-      else if(e < 0) this.private.selected = 0;
-      else this.private.selected = e;
+      if(buttons.length === 0) {
+        this.private.selected = 0;
+      } else if(e > (buttons.length-1)) {
+        this.private.selected = buttons.length-1;
+      } else if(e < 0) {
+        this.private.selected = 0;
+      } else {
+        this.private.selected = e;
+      }
       for(var i=0; i < buttons.length ; i++) {
-        if(i==e) buttons[i].native.IsChecked = true;
-        else buttons[i].native.IsChecked = false;
+        if(i===e) {
+          buttons[i].native.IsChecked = true;
+        } else {
+          buttons[i].native.IsChecked = false;
+        }
       }
     }
   });

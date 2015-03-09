@@ -14,9 +14,15 @@ module.exports = (function() {
     }.bind(this);
     this.native.addEventListener('PreviewMouseDown', this.private.mouseDownHandler);
 
-    if(titlestring) this.title = titlestring;
-    if(keystring) this.key = keystring;
-    if(keymodifiers) this.modifiers = keymodifiers;
+    if(titlestring) { 
+      this.title = titlestring;
+    }
+    if(keystring) {
+      this.key = keystring;
+    }
+    if(keymodifiers) {
+      this.modifiers = keymodifiers;
+    }
   }
 
   utilities.defEvents(MenuItem.prototype);
@@ -26,7 +32,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.imgOn = e; 
       e = utilities.makeNSImage(e);
-      if(e) this.native('setOnStateImage', e);
+      if(e) {
+        this.native('setOnStateImage', e);
+      }
     }
   });
 
@@ -35,7 +43,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.imgOff = e; 
       e = utilities.makeNSImage(e);
-      if(e) this.native('setOffStateImage', e);
+      if(e) { 
+        this.native('setOffStateImage', e);
+      }
     }
   });
 */
@@ -44,7 +54,9 @@ module.exports = (function() {
     set:function(e) { 
       this.private.img = e;
       e = utilities.makeImage(e);
-      if(e) this.native.Icon = e;
+      if(e) {
+        this.native.Icon = e;
+      }
     }
   });
 

@@ -3,7 +3,9 @@
  * Module dependencies.
  */
 
-if(!process.bridge) process.initbridge();
+if(!process.bridge) {
+  process.initbridge();
+}
 
 var Type = require('type')
   , assert = require('assert')

@@ -84,10 +84,11 @@ module.exports = (function() {
     // loop pass it will not be properly set.
     setTimeout(function() {
       var div;
-      if(this.nativeView('isVertical'))
+      if(this.nativeView('isVertical')) {
         div = this.bounds.width;
-      else
+      }  else {
         div = this.bounds.height;
+      }
       position = position * div;
       this.nativeView('setPosition', position, 'ofDividerAtIndex', index);
     }.bind(this),100);

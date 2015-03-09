@@ -273,7 +273,9 @@ module.exports = (function() {
     var argTypes = type.args || type[1] || [];
     var rtnType = type.retval || type[0] || 'v';
 
-    if (func.pointer) return func.pointer;
+    if (func.pointer) {
+      return func.pointer;
+    }
     return new ffi.Callback(types.map(rtnType), types.mapArray(argTypes), function() {
       return unwrapValue(func.apply(null, wrapValues(arguments, argTypes)), rtnType);              
     });
@@ -370,8 +372,11 @@ module.exports = (function() {
    * @api private
    */
   function createBlock (func, type) {
-    if (!func) return null;
-    else if (func.pointer) return func.pointer;
+    if (!func) {
+      return null;
+    } else if (func.pointer) {
+      return func.pointer;
+    }
     var bl = new __block_literal_1;
     // Set the class of the instance
     bl.isa = CGB || (CGB = dlopen().get('_NSConcreteGlobalBlock'));

@@ -85,20 +85,20 @@ module.exports = (function() {
       for(var i=0; i < paths.length; i++) {
         runningPath = runningPath + paths[i] + ((i === (paths.length - 1)) ? "" : "\\");
         if(runningPath !== previousPath) {
-          var item = new $.System.Windows.Controls.MenuItem();
-          item.Header = runningPath;
-          item.selector = function() {
-            this.native.SelectionBoxItem = item.Header;
+          var menuItem = new $.System.Windows.Controls.MenuItem();
+          menuItem.Header = runningPath;
+          menuItem.selector = function() {
+            this.native.SelectionBoxItem = menuItem.Header;
           };
-          item.addEventListener('PreviewMouseDown', item.selector.bind(this));
+          menuItem.addEventListener('PreviewMouseDown', menuItem.selector.bind(this));
           var img = new $.System.Windows.Controls.Image();
           var fromFileIcon = $.TintInterop.Shell.GetIconForFile(runningPath);
           if(fromFileIcon) {
             img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(
               new $.System.IO.MemoryStream($.System.Convert.FromBase64String(fromFileIcon)));
-            item.Icon = img;
+            menuItem.Icon = img;
           }
-          this.native.ContextMenu.Items.Add(item);
+          this.native.ContextMenu.Items.Add(menuItem);
         }
         previousPath = runningPath;
       }

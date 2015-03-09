@@ -43,7 +43,9 @@ module.exports = (function() {
   Object.defineProperty(FontPanel.prototype, 'selected', {
     get:function() {
       var font = this.private.fontManager('convertFont',this.native('font'));
-      if(font === null) return null;
+      if(font === null) {
+        return null;
+      }
       return new Font(font);
     },
     set:function(fontObj) { 
