@@ -546,7 +546,7 @@
             ]
           },
           'VCLinkerTool': {
-            'LinkIncremental': 1,
+            'LinkIncremental': 2,
             'RuntimeLibrary':'>(runtime)',
             'conditions': [
               ['target_arch=="x64"', {
