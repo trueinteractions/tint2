@@ -3,9 +3,9 @@
  * Module dependencies.
  */
 
-var CIF = require('cif');
-  , _ForeignFunction = require('_foreign_function');
-  , assert = require('assert');
+var CIF = require('cif')
+  , _ForeignFunction = require('_foreign_function')
+  , assert = require('assert')
   , ref = require('ref');
 
 /**
