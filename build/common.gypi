@@ -118,7 +118,7 @@
             'EnableIntrinsicFunctions': 'true',
             'ExceptionHandling': 2, # /EHa
             'AdditionalOptions': [
-              '/MP', # compile across multiple CPUs
+              # '/MP', # compile across multiple CPUs
             ],
           },
           'VCLibrarianTool': {
