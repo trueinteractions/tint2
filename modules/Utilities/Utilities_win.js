@@ -336,7 +336,7 @@ module.exports = (function() {
         assert.ok(img, 'The image referenced could not be found: '+e);
         assert.ok(img.Source, 'The image referenced could not be decoded: '+e);
         this.private['_'+name] = e;
-        this.nativeView[property] = e.Source;
+        this.nativeView[property] = img.Source;
       }
     });
   }

@@ -29,4 +29,3 @@ module.exports = (function() {
   global.__TINT.ImageWell = ImageWell;
   return ImageWell;
 })();
-

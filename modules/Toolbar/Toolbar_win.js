@@ -8,19 +8,22 @@ module.exports = (function() {
   function resetChildNodes(toolbar) {
     for(var i=0; i < toolbar.private.children.length; i++) {
       var child = toolbar.private.children[i];
+      var topedges = toolbar.nativeView.Height * 0.075;
+      var sides = toolbar.nativeView.Height * 0.025;
+      child.nativeView.Margin = new $.System.Windows.Thickness(sides,topedges,sides,topedges);
       if(child.private && child.private.type === "ToolbarItem") {
         if(toolbar.state === "icon") {
-          child.private.image.Height = toolbar.nativeView.Height - 12;
-          child.private.image.Width = toolbar.nativeView.Height - 12;
-          child.private.image.Visibility = $.System.Windows.Visibility.Visible;
+          //child.private.img.Height = toolbar.nativeView.Height - 12;
+          //child.private.img.Width = toolbar.nativeView.Height - 12;
+          child.private.img.Visibility = $.System.Windows.Visibility.Visible;
           child.private.label.Visibility = $.System.Windows.Visibility.Collapsed;
         } else if (toolbar.state === "iconandlabel") {
-          child.private.image.Height = toolbar.nativeView.Height - 24;
-          child.private.image.Width = toolbar.nativeView.Height - 24;
-          child.private.image.Visibility = $.System.Windows.Visibility.Visible;
+          //child.private.img.Height = toolbar.nativeView.Height - 24;
+          //child.private.img.Width = toolbar.nativeView.Height - 24;
+          child.private.img.Visibility = $.System.Windows.Visibility.Visible;
           child.private.label.Visibility = $.System.Windows.Visibility.Visible;
         } else if (toolbar.state === "label") {
-          child.private.image.Visibility = $.System.Windows.Visibility.Collapsed;
+          child.private.img.Visibility = $.System.Windows.Visibility.Collapsed;
           child.private.label.Visibility = $.System.Windows.Visibility.Visible;
         }
       }
@@ -33,9 +36,9 @@ module.exports = (function() {
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ToolBar;
     Container.call(this, options);
     this.nativeView.InternalChildren = this.nativeView.Items;
-    this.nativeView.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
     this.nativeView.HorizontalContentAlignment = $.System.Windows.HorizontalAlignment.Stretch;
     this.nativeView.Height = 48;
+    this.nativeView.OverflowMode = $.System.Windows.Controls.OverflowMode.Never;
     this.private.toolbartype = "iconandlabel";
     this.addEventListener('before-child-attached', function(child) {
       try {
@@ -43,6 +46,7 @@ module.exports = (function() {
         if(child === "space" || child === "flex-space") {
           var spacer = new $.System.Windows.Shapes.Rectangle();
           spacer.MaxWidth = 1000;
+          spacer.Width = 25;
           spacer.MinWidth = 1;
           spacer.Margin = new $.System.Windows.Thickness(15,0,15,0);
           spacer.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
@@ -59,11 +63,17 @@ module.exports = (function() {
         }
         if(child.private && child.private.user && child.private.user.width) {
           child.native.MinWidth = child.private.user.width;
-          child.native.MaxWidth = 1000;
         }
         if(child.private && child.private.user && child.private.user.height) {
           child.native.MinHeight = child.private.user.height;
-          child.native.MaxHeight = 1000;
+        }
+        if(child.native.Height > this.nativeView.Height || child.native.MinHeight > this.nativeView.Height) {
+          if(child.native.Height) {
+            this.nativeView.Height = child.native.Height  + 10;
+          }
+          if(child.native.MinHeight) {
+            this.nativeView.Height = child.native.MinHeight + 10;
+          }
         }
       } catch(e) {
         console.log(e.message);
