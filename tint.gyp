@@ -540,7 +540,7 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'WholeProgramOptimization': 'false', # very slow builds with this :(
+            'WholeProgramOptimization': 'true', # very slow builds with this :(
             'AdditionalIncludeDirectories': [
               '$(newincludepath)'
             ]
