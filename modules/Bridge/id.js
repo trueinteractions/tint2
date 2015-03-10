@@ -4,8 +4,8 @@ module.exports = (function() {
    * Module dependencies.
    */
 
-  var core  = require('core')
-    , Class = require('class')
+  var core  = require('core'),
+      Class = require('class');
 
   /**
    * The 'id' function is essentially the "base class" for all Objective-C
@@ -40,13 +40,13 @@ module.exports = (function() {
    * @return {String} The class name as a String.
    * @api public
    */
-  ID.prototype.getClassName = function() { return core.object_getClassName(this.pointer); }
+  ID.prototype.getClassName = function() { return core.object_getClassName(this.pointer); };
 
   /**
    * Dynamically changes the object's Class.
    */
   //TODO: Decouple this...
-  ID.prototype.setClass = function(newClass) { return core.wrapValue(core.object_setClass(this.pointer, newClass.pointer),'@'); }
+  ID.prototype.setClass = function(newClass) { return core.wrapValue(core.object_setClass(this.pointer, newClass.pointer),'@'); };
 
   /**
    * Walks up the inheritance chain and returns an Array of Strings of
@@ -59,7 +59,7 @@ module.exports = (function() {
       c = c.getSuperclass();
     }
     return rtn;
-  }
+  };
 
   /**
    * Getter/setter function for instance variables (ivars) of the object,
@@ -78,7 +78,7 @@ module.exports = (function() {
       var ivar = core.object_getInstanceVariable(this.pointer, name, ptr);
       return core.wrapValue(ptr.readPointer(0), core.ivar_getTypeEncoding(ivar));
     }
-  }
+  };
 
   /**
    * Returns an Array of Strings of the names of the ivars that the current object
@@ -97,7 +97,7 @@ module.exports = (function() {
       c = c.getSuperclass();
     }
     return sort === false ? rtn : rtn.sort();
-  }
+  };
 
   /**
    * Returns an Array of Strings of the names of methods that the current object
@@ -108,7 +108,7 @@ module.exports = (function() {
     var rtn=[], c=this.getClass(), md=maxDepth || 1, depth=0;
     while (c && depth++ < md) {
       var ms=c.getInstanceMethods(), i=ms.length;
-      while (i--) 
+      while (i--) {
         if (!~rtn.indexOf(ms[i])) {
           rtn.push(ms[i]);
         }
@@ -116,7 +116,7 @@ module.exports = (function() {
       c = c.getSuperclass();
     }
     return sort === false ? rtn : rtn.sort();
-  }
+  };
 
   /**
    * Returns a **node-ffi** pointer pointing to this object. This is a convenience
@@ -124,7 +124,7 @@ module.exports = (function() {
    *
    * @return {Pointer} A pointer to this object.
    */
-  ID.prototype.ref = function() { return this.pointer.ref(); }
+  ID.prototype.ref = function() { return this.pointer.ref(); };
 
   /**
    * The overidden `toString()` function proxies up to the real Objective-C object's
@@ -134,12 +134,12 @@ module.exports = (function() {
    * [[id description] UTF8String]
    * ```
    */
-  ID.prototype.toString = function() { return this('description')('UTF8String'); }
+  ID.prototype.toString = function() { return this('description')('UTF8String'); };
 
   /*!
    * Custom inspect() function for `util.inspect()`.
    */
-  ID.prototype.inspect = function() { return this.toString();  }
+  ID.prototype.inspect = function() { return this.toString();  };
 
   return ID;
 })();
