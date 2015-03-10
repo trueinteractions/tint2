@@ -74,7 +74,7 @@
             'ExceptionHandling': 2, # /EHa
           },
           'VCLinkerTool': {
-            'LinkIncremental': 2, # enable incremental linking
+            'LinkIncremental': 1, # /LINKINCREMENTAL:NO
             'GenerateDebugInformation': 'true',
           },
         },
@@ -112,13 +112,13 @@
             'Optimization': 3, # /Ox, full optimization
             'FavorSizeOrSpeed': 1, # /Ot, favour speed over size
             'InlineFunctionExpansion': 2, # /Ob2, inline anything eligible
-            'WholeProgramOptimization': 'true',
+            'WholeProgramOptimization': 'false',
             'OmitFramePointers': 'true',
             'EnableFunctionLevelLinking': 'true',
             'EnableIntrinsicFunctions': 'true',
             'ExceptionHandling': 2, # /EHa
             'AdditionalOptions': [
-              # '/MP', # compile across multiple CPUs
+              '/MP', # compile across multiple CPUs
             ],
           },
           'VCLibrarianTool': {
@@ -129,7 +129,7 @@
           'VCLinkerTool': {
             'OptimizeReferences': 2, # /OPT:REF
             'EnableCOMDATFolding': 2, # /OPT:ICF
-            'LinkIncremental': 1,
+            'LinkIncremental': 1, # /LINKINCREMENTAL:NO
           },
         },
       }

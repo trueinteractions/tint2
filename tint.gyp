@@ -540,13 +540,16 @@
         },
         'msvs_settings': {
           'VCCLCompilerTool': {
-            'WholeProgramOptimization': 'true', # very slow builds with this :(
+            'WholeProgramOptimization': 'false', # very slow builds with this :(
             'AdditionalIncludeDirectories': [
               '$(newincludepath)'
-            ]
+            ],
+            'AdditionalOptions': [
+              '/MP', # compile across multiple CPUs
+            ],
           },
           'VCLinkerTool': {
-            'LinkIncremental': 2,
+            'LinkIncremental': 1, # /LINKINCREMENTAL:NO
             'RuntimeLibrary':'>(runtime)',
             'conditions': [
               ['target_arch=="x64"', {
