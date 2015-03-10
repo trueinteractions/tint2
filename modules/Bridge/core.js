@@ -317,7 +317,9 @@ module.exports = (function() {
             newtypes.push('r*');
           } else if(typeof arguments[i] === 'number') {
             newtypes.push('d');
-          } else newtypes.push('?');
+          } else {
+            newtypes.push('?');
+          }
         }
         return wrapValue(varFunc
                           .apply(null, types.mapArray(newtypes))

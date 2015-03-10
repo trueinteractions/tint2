@@ -3,22 +3,24 @@
  * Module dependencies.
  */
 
-if(!process.bridge) process.initbridge();
-var ForeignFunction = require('foreign_function')
-  , assert = require('assert')
-  , bindings = process.bridge
-  , funcs = bindings.StaticFunctions
-  , ref = require('ref')
-  , read  = require('fs').readFileSync
+if(!process.bridge) {
+  process.initbridge();
+}
+var ForeignFunction = require('foreign_function'),
+    assert = require('assert'),
+    bindings = process.bridge,
+    funcs = bindings.StaticFunctions,
+    ref = require('ref'),
+    read  = require('fs').readFileSync;
 
 // typedefs
-var int = ref.types.int
-  , voidPtr = ref.refType(ref.types.void)
+var int = ref.types.int,
+    voidPtr = ref.refType(ref.types.void);
 
-var dlopen  = ForeignFunction(funcs.dlopen,  voidPtr, [ 'string', int ])
-  , dlclose = ForeignFunction(funcs.dlclose, int,     [ voidPtr ])
-  , dlsym   = ForeignFunction(funcs.dlsym,   voidPtr, [ voidPtr, 'string' ])
-  , dlerror = ForeignFunction(funcs.dlerror, 'string', [ ])
+var dlopen  = ForeignFunction(funcs.dlopen,  voidPtr, [ 'string', int ]),
+    dlclose = ForeignFunction(funcs.dlclose, int,     [ voidPtr ]),
+    dlsym   = ForeignFunction(funcs.dlsym,   voidPtr, [ voidPtr, 'string' ]),
+    dlerror = ForeignFunction(funcs.dlerror, 'string', [ ]);
 
 /**
  * `DynamicLibrary` loads and fetches function pointers for dynamic libraries
@@ -30,18 +32,18 @@ var dlopen  = ForeignFunction(funcs.dlopen,  voidPtr, [ 'string', int ])
 
 function DynamicLibrary (path, mode) {
   if (!(this instanceof DynamicLibrary)) {
-    return new DynamicLibrary(path, mode)
+    return new DynamicLibrary(path, mode);
   }
 
   if (null === mode || undefined === mode) {
-    mode = DynamicLibrary.FLAGS.RTLD_LAZY
+    mode = DynamicLibrary.FLAGS.RTLD_LAZY;
   }
 
-  this._handle = dlopen(path, mode)
-  assert(Buffer.isBuffer(this._handle), 'expected a Buffer instance to be returned from `dlopen()`')
+  this._handle = dlopen(path, mode);
+  assert(Buffer.isBuffer(this._handle), 'expected a Buffer instance to be returned from `dlopen()`');
 
   if (this._handle.isNull()) {
-    var err = this.error()
+    var err = this.error();
 
     // THIS CODE IS BASED ON GHC Trac ticket #2615
     // http://hackage.haskell.org/trac/ghc/attachment/ticket/2615
@@ -60,20 +62,20 @@ function DynamicLibrary (path, mode) {
     // an error message is returned.
 
     // see if the error message is due to an invalid ELF header
-    var match
-
-    if (match = err.match(/^(([^ \t()])+\.so([^ \t:()])*):([ \t])*invalid ELF header$/)) {
-      var content = read(match[1], 'ascii')
+    var match = err.match(/^(([^ \t()])+\.so([^ \t:()])*):([ \t])*invalid ELF header$/);
+    if (match) {
+      var content = read(match[1], 'ascii');
       // try to find a GROUP ( ... ) command
-      if (match = content.match(/GROUP *\( *(([^ )])+)/)){
-        return DynamicLibrary.call(this, match[1], mode)
+      match = content.match(/GROUP *\( *(([^ )])+)/);
+      if (match) {
+        return DynamicLibrary.call(this, match[1], mode);
       }
     }
 
-    throw new Error('Dynamic Linking Error: ' + err)
+    throw new Error('Dynamic Linking Error: ' + err);
   }
 }
-module.exports = DynamicLibrary
+module.exports = DynamicLibrary;
 
 /**
  * Set the exported flags from "dlfcn.h"
@@ -81,9 +83,11 @@ module.exports = DynamicLibrary
 
 DynamicLibrary.FLAGS = {};
 Object.keys(bindings).forEach(function (k) {
-  if (!/^RTLD_/.test(k)) return;
-  var desc = Object.getOwnPropertyDescriptor(bindings, k)
-  Object.defineProperty(DynamicLibrary.FLAGS, k, desc)
+  if (!/^RTLD_/.test(k)) {
+    return;
+  }
+  var desc = Object.getOwnPropertyDescriptor(bindings, k);
+  Object.defineProperty(DynamicLibrary.FLAGS, k, desc);
 });
 
 
@@ -92,32 +96,32 @@ Object.keys(bindings).forEach(function (k) {
  */
 
 DynamicLibrary.prototype.close = function () {
-  return dlclose(this._handle)
-}
+  return dlclose(this._handle);
+};
 
 /**
  * Get a symbol from this library, returns a Pointer for (memory address of) the symbol
  */
 
 DynamicLibrary.prototype.get = function (symbol) {
-  assert.equal('string', typeof symbol)
+  assert.equal('string', typeof symbol);
 
-  var ptr = dlsym(this._handle, symbol)
-  assert(Buffer.isBuffer(ptr))
+  var ptr = dlsym(this._handle, symbol);
+  assert(Buffer.isBuffer(ptr));
 
   if (ptr.isNull()) {
-    throw new Error('Dynamic Symbol Retrieval Error: ' + this.error())
+    throw new Error('Dynamic Symbol Retrieval Error: ' + this.error());
   }
 
-  ptr.name = symbol
+  ptr.name = symbol;
 
-  return ptr
-}
+  return ptr;
+};
 
 /**
  * Returns the result of the dlerror() system function
  */
 
 DynamicLibrary.prototype.error = function error () {
-  return dlerror()
-}
+  return dlerror();
+};

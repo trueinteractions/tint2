@@ -18,27 +18,27 @@ module.exports = (function() {
   /*!
    * Module dependencies.
    */
-  var fs = require('fs')
-    , read = require('fs').readFileSync
-    , path = require('path')
-    , core = require('core')
-    , Class = require('class')
-    , basename = path.basename
-    , SUFFIX = '.framework'
-    , PATH = [
-        '/System/Library/Frameworks'
-      , '/System/Library/PrivateFrameworks'
-    ]
-    , join = path.join
-    , exists = fs.existsSync || path.existsSync
-    , DY_SUFFIX = '.dylib'
-    , BS_SUFFIX = '.bridgesupport';
+  var fs = require('fs'),
+      read = require('fs').readFileSync,
+      path = require('path'),
+      core = require('core'),
+      Class = require('class'),
+      basename = path.basename,
+      SUFFIX = '.framework',
+      PATH = [
+        '/System/Library/Frameworks',
+        '/System/Library/PrivateFrameworks'
+      ],
+      join = path.join,
+      exists = fs.existsSync || path.existsSync,
+      DY_SUFFIX = '.dylib',
+      BS_SUFFIX = '.bridgesupport';
 
   /*!
    * A cache for the frameworks that have already been imported.
    */
 
-  var cache = {}
+  var cache = {};
 
   /*!
    * Architecture-specific functions that return the Obj-C type or value from one
@@ -196,7 +196,8 @@ module.exports = (function() {
           ptr._type = '^' + consttype;
           var derefPtr = ptr.deref();
           delete onto[name];
-          return onto[name] = derefPtr;
+          onto[name] = derefPtr
+          return onto[name];
         });
       }
       else if (node.name === 'function')
@@ -223,7 +224,8 @@ module.exports = (function() {
             var ptr = fw.lib.get(name);
             var unwrapper = core.createUnwrapperFunction(ptr, passedTypes, isVariadic);
             delete onto[name];
-            return onto[name] = unwrapper;
+            onto[name] = unwrapper;
+            return onto[name];
           }
         });
       }
@@ -346,7 +348,8 @@ module.exports = (function() {
         onto.__defineGetter__(c, function () {
           var clazz = Class.getClassByName(c, onto);
           delete onto[c];
-          return onto[c] = clazz;
+          onto[c] = clazz
+          return onto[c];
         });
       });
     }

@@ -22,24 +22,6 @@ var assemblyImported = {};
 var classCache = {};
 dotnet.statistics = {assemblies_hit:0, assemblies_miss:0, enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
-function unwrap(a) {
-  if(a && a.pointer) {
-    return a.pointer;
-  } else if(a && a.classPointer) {
-    return a.classPointer;
-  } else {
-    return a;
-  }
-}
-
-function wrap(b) {
-  if(Buffer.isBuffer(b) && !b.array) {
-    return createJSInstance(b);
-  } else {
-    return b;
-  }
-}
-
 function createJSInstance(pointer) {
   var typeNative = dotnet.getCLRType(pointer);
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
@@ -63,6 +45,24 @@ function createJSInstance(pointer) {
     N.prototype = Object.create(c.prototype);
     N.prototype.constructor = N;
     return new N();
+  }
+}
+
+function unwrap(a) {
+  if(a && a.pointer) {
+    return a.pointer;
+  } else if(a && a.classPointer) {
+    return a.classPointer;
+  } else {
+    return a;
+  }
+}
+
+function wrap(b) {
+  if(Buffer.isBuffer(b) && !b.array) {
+    return createJSInstance(b);
+  } else {
+    return b;
   }
 }
 

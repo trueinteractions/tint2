@@ -354,8 +354,9 @@ module.exports = (function() {
     },
     set:function(e) {
       var indexes = $.NSMutableIndexSet('indexSet');
-      for(var i=0; i < e.length; i++)
+      for(var i=0; i < e.length; i++) {
         indexes('addIndex',e[i]);
+      }
       this.nativeView('selectRowIndexes',indexes,'byExtendingSelection',false);
     }
   });

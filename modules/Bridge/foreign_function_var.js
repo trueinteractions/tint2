@@ -7,14 +7,12 @@ if(!process.bridge) {
   process.initbridge();
 }
 
-var CIF_var = require('cif_var')
-  , Type = require('type')
-  , _ForeignFunction = require('_foreign_function')
-  , assert = require('assert')
-  , ref = require('ref')
-  , bindings = process.bridge
-  , POINTER_SIZE = ref.sizeof.pointer
-  , FFI_ARG_SIZE = bindings.FFI_ARG_SIZE;
+var CIF_var = require('cif_var'),
+    Type = require('type'),
+    _ForeignFunction = require('_foreign_function'),
+    assert = require('assert'),
+    ref = require('ref'),
+    bindings = process.bridge;
 
 /**
  * For when you want to call to a C function with variable amount of arguments.

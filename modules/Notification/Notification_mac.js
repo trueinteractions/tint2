@@ -150,7 +150,7 @@ module.exports = (function() {
       else if(actionbuttontitle && actionbuttontitle !== "")
       {
         $notify('setActionButtonTitle',$(actionbuttontitle));
-        if(otherbuttontitle && otherbuttontitle != "") {
+        if(otherbuttontitle && otherbuttontitle !== "") {
           $notify('setOtherButtonTitle',$(otherbuttontitle));
         }
         $notify('setHasActionButton',$.YES);

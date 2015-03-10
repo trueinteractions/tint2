@@ -4,7 +4,6 @@ module.exports = (function() {
   }
   var Button = require('Button');
   var util = require('Utilities');
-  var $ = process.bridge.dotnet;
 
   function ToolbarItem(options) {
     options = options || {};

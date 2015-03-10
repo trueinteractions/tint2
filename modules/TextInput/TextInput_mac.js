@@ -155,7 +155,9 @@ module.exports = (function() {
         return "right";
       } else if (this.nativeView('alignment') === 2) {
         return "center";
-      } else return "unknown";
+      } else {
+        return "unknown";
+      }
     },
     set:function(e) {
       if(e === 'left') {

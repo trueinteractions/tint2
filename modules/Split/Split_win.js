@@ -150,8 +150,9 @@ module.exports = (function() {
     position = position > 1 ? 1 : position;
     position = position < 0 ? 0 : position;
     index = index * 2 + 1;
-    if(index >= defs.length) 
+    if(index >= defs.length) {
       throw new Error('The second argument, the index of the seperator doesnt exist.');
+    }
 
     // Prior to calculating new layout positions make sure our 
     // layout is correct. If someone calls setPosition twice in

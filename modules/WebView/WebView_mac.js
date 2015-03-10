@@ -615,8 +615,9 @@ module.exports = (function() {
         return userAgentWk.toString();
       } else {
         var userAgent = this.nativeView('customUserAgent');
-        if(!userAgent)
-          userAgent = this.nativeView('userAgentForURL', this.nativeView('mainFrameURL'))
+        if(!userAgent) {
+          userAgent = this.nativeView('userAgentForURL', this.nativeView('mainFrameURL'));
+        }
         return userAgent.toString();
       }
     },
