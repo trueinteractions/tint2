@@ -303,18 +303,18 @@ function importOnto(assembly, onto) {
   }
 }
 
-function import (e) {
+function imports (e) {
   if(!assemblyImported[e]) {
     dotnet.statistics.assemblies_miss++;
-    ImportOnto(e, process.bridge.dotnet);
+    importOnto(e, process.bridge.dotnet);
   } else {
     dotnet.statistics.assemblies_hit++;
   }
   assemblyImported[e] = true;
 }
 
-process.bridge.dotnet.import = import;
-process.bridge.dotnet.Import = import;
+process.bridge.dotnet.import = imports;
+process.bridge.dotnet.Import = imports;
 
 process.bridge.dotnet.importonto = importOnto;
 process.bridge.dotnet.Importonto = importOnto;

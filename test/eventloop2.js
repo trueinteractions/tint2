@@ -20,11 +20,14 @@ function run($utils) {
   };
 
   http.get(options, function(resp){
+    console.log(1);
     resp.on('data', function(chunk){
+      console.log(2);
       $utils.assert(chunk);
       $utils.ok();
     });
   }).on("error", function(e){
+    console.log(e);
     $utils.notok();
   });
 }

@@ -532,34 +532,6 @@ exports.alloc = function alloc (_type, value) {
 };
 
 /**
- * Returns a new `Buffer` instance with the given String written to it with the
- * given encoding (defaults to __'utf8'__). The buffer is 1 byte longer than the
- * string itself, and is NUL terminated.
- *
- * ```
- * var buf = ref.allocCString('hello world');
- *
- * console.log(buf.toString());
- * 'hello world\u0000'
- * ```
- *
- * @param {String} string The JavaScript string to be converted to a C string.
- * @param {String} encoding (optional) The encoding to use for the C string. Defaults to __'utf8'__.
- * @return {Buffer} The new `Buffer` instance with the specified String wrtten to it, and a trailing NUL byte.
- */
-
-exports.allocCString = function allocCString (string, encoding) {
-  if (null === string || undefined === string || (Buffer.isBuffer(string) && exports.isNull(string))) {
-    return exports.NULL;
-  }
-  var size = Buffer.byteLength(string, encoding) + 1;
-  var buffer = new Buffer(size);
-  exports.writeCString(buffer, 0, string, encoding);
-  buffer.type = charPtrType;
-  return buffer;
-};
-
-/**
  * Writes the given string as a C String (NULL terminated) to the given buffer
  * at the given offset. "encoding" is optional and defaults to __'utf8'__.
  *
@@ -1177,7 +1149,7 @@ exports.types.bool.set = (function (_set) {
       val = val ? 1 : 0;
     }
     return _set(buf, offset, val);
-  }
+  };
 })(exports.types.bool.set);
 
 /*!
@@ -1382,6 +1354,34 @@ Buffer.prototype.reinterpret = function reinterpret (size) {
 
 Buffer.prototype.reinterpretUntilZeros = function reinterpretUntilZeros (size) {
   return exports.reinterpretUntilZeros(this, size);
+};
+
+/**
+ * Returns a new `Buffer` instance with the given String written to it with the
+ * given encoding (defaults to __'utf8'__). The buffer is 1 byte longer than the
+ * string itself, and is NUL terminated.
+ *
+ * ```
+ * var buf = ref.allocCString('hello world');
+ *
+ * console.log(buf.toString());
+ * 'hello world\u0000'
+ * ```
+ *
+ * @param {String} string The JavaScript string to be converted to a C string.
+ * @param {String} encoding (optional) The encoding to use for the C string. Defaults to __'utf8'__.
+ * @return {Buffer} The new `Buffer` instance with the specified String wrtten to it, and a trailing NUL byte.
+ */
+
+exports.allocCString = function allocCString (string, encoding) {
+  if (null === string || undefined === string || (Buffer.isBuffer(string) && exports.isNull(string))) {
+    return exports.NULL;
+  }
+  var size = Buffer.byteLength(string, encoding) + 1;
+  var buffer = new Buffer(size);
+  exports.writeCString(buffer, 0, string, encoding);
+  buffer.type = charPtrType;
+  return buffer;
 };
 
 /**
