@@ -38,7 +38,7 @@ function ForeignFunction (cif, funcPtr, returnType, argTypes) {
     }
 
     // storage buffers for input arguments and the return value
-    var result = new Buffer(resultSize);
+    var result = new Buffer(resultSize)
       , argsList = new Buffer(argsArraySize);
 
     // write arguments to storage areas
