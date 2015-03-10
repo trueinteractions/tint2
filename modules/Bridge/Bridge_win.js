@@ -40,18 +40,6 @@ function wrap(b) {
   }
 }
 
-function unwrapValues(e) {
-  if(Array.isArray(e)) {
-    var unwrapped = [];
-    for(var i=0; i < types.length; i++) {
-      unwrapped[i] = unwrap(types[i]);
-    }
-    return unwrapped;
-  } else {
-    return unwrap(e);
-  }
-}
-
 function createJSInstance(pointer) {
   var typeNative = dotnet.getCLRType(pointer);
   var typeName = dotnet.execGetProperty(typeNative, 'Name');
@@ -71,10 +59,10 @@ function createJSInstance(pointer) {
   } else if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
     dotnet.statistics.classes++;
     var c = createClass(typeNative, typeName);
-    var n = function() { this.pointer = pointer; }
-    n.prototype = Object.create(c.prototype);
-    n.prototype.constructor = n;
-    return new n;
+    var N = function() { this.pointer = pointer; };
+    N.prototype = Object.create(c.prototype);
+    N.prototype.constructor = N;
+    return new N();
   }
 }
 
@@ -92,7 +80,7 @@ function typeSignature(memberName, args) {
  * by the following functions */
 
 
-function createEnum(typeNative, memberName) {
+function createEnum(typeNative) {
   var names = dotnet.execMethod(typeNative,"GetEnumNames");
   var values = dotnet.execMethod(typeNative,"GetEnumValues");
   var nameEnumerator = dotnet.execMethod(names, "GetEnumerator");
@@ -147,7 +135,7 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
     }
     var args = [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
     return wrap(dotnet.callMethod.apply(null, args));
-  }
+  };
   objdest[memberName+"Async"] = function() {
     var s = typeSignature(memberName, arguments);
     if(!this._methods) {
@@ -159,7 +147,7 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
     }
     var args = [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
     dotnet.callMethodAsync.apply(null, args);
-  }
+  };
 }
 
 function createProperty(target, typeNative, typeName, memberNative, memberName, static) {
@@ -229,11 +217,11 @@ function createClass(typeNative, typeName) {
       args.push(unwrap(arguments[i]));
     }
     this.pointer = dotnet.execNew.apply(null,args);
-  }
+  };
 
   // These must be available on both the static and instance of the class/object.
-  cls.prototype.toString = cls.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + typeName + ''; }
-  cls.prototype.inspect = cls.inspect = function() { return '\033[33m CLR ' + this.toString() + '\033[39m'; }
+  cls.prototype.toString = cls.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + typeName + ''; };
+  cls.prototype.inspect = cls.inspect = function() { return '\033[33m CLR ' + this.toString() + '\033[39m'; };
   cls.prototype.addEventListener = cls.addEventListener = function(event, callback) { dotnet.execAddEvent(this.pointer,event,callback); };
   cls.prototype.classPointer = cls.classPointer = typeNative;
   cls.prototype.className = cls.className = typeName;
@@ -271,7 +259,7 @@ function createFromType(nativeType, onto) {
   if(dotnet.execGetProperty(nativeType, "IsPublic")) {
     var name = dotnet.execGetProperty(nativeType,"Name");
     var space = dotnet.execGetProperty(nativeType,"Namespace");
-    var info = { onto:onto, type:nativeType, name:name }
+    var info = { onto:onto, type:nativeType, name:name };
     
     if(space) {
       var spl = space.split('.');
@@ -301,7 +289,7 @@ function createFromType(nativeType, onto) {
 /* Import onto the object specified, this takes an assembly, and loads
  * the classes, enums, fields, properties, etc onto the object passed in (onto)
  */
-function ImportOnto(assembly, onto) {
+function importOnto(assembly, onto) {
   if(assembly.toLowerCase().indexOf('.dll') === -1 && assembly.toLowerCase().indexOf('.exe') === -1) {
     assembly += ".dll";
   }
@@ -315,7 +303,7 @@ function ImportOnto(assembly, onto) {
   }
 }
 
-function Import (e) {
+function import (e) {
   if(!assemblyImported[e]) {
     dotnet.statistics.assemblies_miss++;
     ImportOnto(e, process.bridge.dotnet);
@@ -323,12 +311,12 @@ function Import (e) {
     dotnet.statistics.assemblies_hit++;
   }
   assemblyImported[e] = true;
-};
+}
 
-process.bridge.dotnet.import = Import;
-process.bridge.dotnet.Import = Import;
+process.bridge.dotnet.import = import;
+process.bridge.dotnet.Import = import;
 
-process.bridge.dotnet.importonto = ImportOnto;
-process.bridge.dotnet.Importonto = ImportOnto;
+process.bridge.dotnet.importonto = importOnto;
+process.bridge.dotnet.Importonto = importOnto;
 process.bridge.dotnet.fromPointer = createJSInstance;
 process.bridge.dotnet.import(process.execPath);

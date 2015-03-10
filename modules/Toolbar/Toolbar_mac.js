@@ -84,7 +84,7 @@ module.exports = (function() {
    */
   function Toolbar() {
     var toolbarCache = [];
-    this.native = $.NSToolbar('alloc')('initWithIdentifier',$(application.name));
+    this.native = $.NSToolbar('alloc')('initWithIdentifier',$(global.application.name));
     this.native('setAllowsUserCustomization',$.NO);
     this.native('setAutosavesConfiguration',$.NO);
     this.native('setDisplayMode',$.NSToolbarDisplayModeIconOnly);
@@ -98,7 +98,7 @@ module.exports = (function() {
         nsArrayChildren('addObject',$(item.private.identifier));
       });
       return nsArrayChildren;
-    }
+    };
 
     var $NSToolbarDelegateClass = $.NSObject.extend('ToolbarDelegate'+Math.round(Math.random()*10000));
     $NSToolbarDelegateClass.addMethod('init:','@@:', function(self) { return self; });
@@ -138,7 +138,7 @@ module.exports = (function() {
     this.addEventListener('before-child-dettached', function(child) {
       this.native('removeItemAtIndex', this.private.children.indexOf(child));
       delete this.private.identifiers[child.private.identifier];
-      delete toolbarCache[child.private.identifier]
+      delete toolbarCache[child.private.identifier];
     }.bind(this));
   } 
 
