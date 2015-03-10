@@ -5,8 +5,9 @@ module.exports = (function() {
 
   var TintFontPanel = $.NSFontPanel.extend('TintFontPanel');
   TintFontPanel.addClassMethod('sharedFontPanel', '@@:', function(self,cmd) {
-    if(!$.TintFontPanel.panel) 
+    if(!$.TintFontPanel.panel) {
       $.TintFontPanel.panel = $.TintFontPanel('alloc')('init');
+    }
     return $.TintFontPanel.panel;
   });
   

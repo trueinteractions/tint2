@@ -1,7 +1,5 @@
 module.exports = (function() {
   var $ = process.bridge.dotnet;
-  var Container = require('Container');
-  var TextInput = require('TextInput');
 
   var exports = {};
   exports.headerColor = $.System.Windows.SystemColors.ControlLightBrush;
@@ -266,7 +264,6 @@ module.exports = (function() {
         var cntlDown = $.System.Windows.Input.Keyboard.IsKeyDown($.System.Windows.Input.Key.LeftCtrl) 
                       || $.System.Windows.Input.Keyboard.IsKeyDown($.System.Windows.Input.Key.RightCtrl);
         var multiple = parent.private.multiple;
-        var canBeEmpty = parent.private.allowEmptySelection;
         var isSelected = !this.selected;
         var firstSelectedIndex = 1e20;
         var lastSelectedIndex = -1;

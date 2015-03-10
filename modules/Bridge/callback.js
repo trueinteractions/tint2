@@ -3,11 +3,14 @@
  * Module dependencies.
  */
 
-if(!process.bridge) process.initbridge();
-var ref = require('ref')
-  , CIF = require('cif')
-  , assert = require('assert')
-  , _Callback = process.bridge.Callback
+if(!process.bridge) {
+  process.initbridge();
+}
+
+var ref = require('ref'), 
+    CIF = require('cif'),
+    assert = require('assert'),
+    _Callback = process.bridge.Callback;
 
 /**
  * Turns a JavaScript function into a C function pointer.
@@ -18,47 +21,47 @@ var ref = require('ref')
 function Callback (retType, argTypes, abi, func) {
 
   if (typeof abi === 'function') {
-    func = abi
-    abi = void(0)
+    func = abi;
+    abi = void(0);
   }
 
   // check args
-  assert(!!retType, 'expected a return "type" object as the first argument')
-  assert(Array.isArray(argTypes), 'expected Array of arg "type" objects as the second argument')
-  assert.equal(typeof func, 'function', 'expected a function as the third argument')
+  assert(!!retType, 'expected a return "type" object as the first argument');
+  assert(Array.isArray(argTypes), 'expected Array of arg "type" objects as the second argument');
+  assert.equal(typeof func, 'function', 'expected a function as the third argument');
 
   // normalize the "types" (they could be strings, so turn into real type
   // instances)
-  retType = ref.coerceType(retType)
-  argTypes = argTypes.map(ref.coerceType)
+  retType = ref.coerceType(retType);
+  argTypes = argTypes.map(ref.coerceType);
 
   // create the `ffi_cif *` instance
-  var cif = CIF(retType, argTypes, abi)
-  var argc = argTypes.length
+  var cif = CIF(retType, argTypes, abi);
+  var argc = argTypes.length;
 
   var callback = _Callback(cif, retType.size, argc, function (retval, params) {
-    var args = []
+    var args = [];
     for (var i = 0; i < argc; i++) {
-      var type = argTypes[i]
-      var argPtr = params.readPointer(i * ref.sizeof.pointer, type.size)
-      argPtr.type = type
-      args.push(argPtr.deref())
+      var type = argTypes[i];
+      var argPtr = params.readPointer(i * ref.sizeof.pointer, type.size);
+      argPtr.type = type;
+      args.push(argPtr.deref());
     }
 
     // Invoke the user-given function
-    var result = func.apply(null, args)
+    var result = func.apply(null, args);
     try {
-      ref.set(retval, 0, result, retType)
+      ref.set(retval, 0, result, retType);
     } catch (e) {
-      e.message = 'error setting return value - ' + e.message
-      throw e
+      e.message = 'error setting return value - ' + e.message;
+      throw e;
     }
-  })
+  });
 
   // store reference to the CIF Buffer so that it doesn't get
   // garbage collected before the callback Buffer does
   callback._cif = cif;
 
-  return callback
+  return callback;
 }
-module.exports = Callback
+module.exports = Callback;

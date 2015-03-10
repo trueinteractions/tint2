@@ -193,8 +193,12 @@ module.exports = (function() {
     } else if (Object.prototype.toString.call(o) === '[object RegExp]') {
       var options = 0;
       //if (o.global) options |= NodObjC. ???
-      if (o.ignoreCase) options |= NodObjC.NSRegularExpressionCaseInsensitive;
-      if (o.multiline) options |= NodObjC.NSRegularExpressionAnchorsMatchLines;
+      if (o.ignoreCase) {
+        options |= NodObjC.NSRegularExpressionCaseInsensitive;
+      }
+      if (o.multiline) {
+        options |= NodObjC.NSRegularExpressionAnchorsMatchLines;
+      }
       // TODO: add NSError support here
       var err = null;
       return NodObjC.NSRegularExpression(

@@ -70,7 +70,9 @@ module.exports = (function() {
   Object.defineProperty(Box.prototype, 'borderRadius', {
     get:function() { return this.nativeView.CornerRadius.TopLeft; },
     set:function(e) {
-      if(typeof(e) !== 'number') e = 0;
+      if(typeof(e) !== 'number') {
+        e = 0;
+      }
       this.custom = true;
       this.nativeView.CornerRadius = new $.System.Windows.CornerRadius(e); 
     }

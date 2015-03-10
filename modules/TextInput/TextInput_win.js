@@ -123,15 +123,24 @@ module.exports = (function() {
 
   Object.defineProperty(TextInput.prototype, 'alignment', {
     get:function() {
-      if (this.native.TextAlignment === $.System.Windows.TextAlignment.Left) return "left";
-      else if (this.native.TextAlignment === $.System.Windows.TextAlignment.Right) return "right";
-      else if (this.native.TextAlignment === $.System.Windows.TextAlignment.Center) return "center";
-      else return "unknown";
+      if (this.native.TextAlignment === $.System.Windows.TextAlignment.Left) {
+        return "left";
+      } else if (this.native.TextAlignment === $.System.Windows.TextAlignment.Right) {
+        return "right";
+      } else if (this.native.TextAlignment === $.System.Windows.TextAlignment.Center) {
+        return "center";
+      } else {
+        return "unknown";
+      }
     },
     set:function(e) {
-      if (e === 'right') this.native.TextAlignment = $.System.Windows.TextAlignment.Right;
-      else if (e === 'center') this.native.TextAlignment = $.System.Windows.TextAlignment.Center;
-      else this.native.TextAlignment = $.System.Windows.TextAlignment.Left;
+      if (e === 'right') {
+        this.native.TextAlignment = $.System.Windows.TextAlignment.Right;
+      } else if (e === 'center') {
+        this.native.TextAlignment = $.System.Windows.TextAlignment.Center;
+      } else {
+        this.native.TextAlignment = $.System.Windows.TextAlignment.Left;
+      }
     }
   });
 
@@ -148,7 +157,7 @@ module.exports = (function() {
   //TODO: Is this 1:1 functionality? Can users still scroll with no visible scrollbar?
   Object.defineProperty(TextInput.prototype, 'scrollable', {
     get:function() { return this.nativeView.VerticalScrollBarVisibility === $.System.Windows.Controls.ScrollBarVisibility.Auto; },
-    set:function(e) { this.nativeView.VerticalScrollBarVisibility = e ?  $.System.Windows.Controls.ScrollBarVisibility.Auto :  $.System.Windows.Controls.ScrollBarVisibility.Hidden; }
+    set:function(e) { this.nativeView.VerticalScrollBarVisibility = e ?  $.System.Windows.Controls.ScrollBarVisibility.Auto : $.System.Windows.Controls.ScrollBarVisibility.Hidden; }
   });
 
   global.__TINT.TextInput = TextInput;

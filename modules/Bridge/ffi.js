@@ -7,9 +7,8 @@ if(!process.bridge) {
   process.initbridge();
 }
 
-var ref = require('ref');
-var assert = require('assert');
-var bindings = process.bridge;
+var ref = require('ref'),
+    bindings = process.bridge;
 
 
 /**

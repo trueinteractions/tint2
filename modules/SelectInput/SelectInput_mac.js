@@ -34,8 +34,11 @@ module.exports = (function() {
 
   Object.defineProperty(SelectInput.prototype, 'value', {
     get:function() {
-      if(this.selectedIndex === -1) return this.nativeView('stringValue')('UTF8String'); 
-      else return this.nativeView('itemObjectValueAtIndex',this.nativeView('indexOfSelectedItem'));
+      if(this.selectedIndex === -1) {
+        return this.nativeView('stringValue')('UTF8String'); 
+      } else {
+        return this.nativeView('itemObjectValueAtIndex',this.nativeView('indexOfSelectedItem'));
+      }
     },
     set:function(e) { this.nativeView('setStringValue',$(e)); }
   });

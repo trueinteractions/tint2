@@ -28,7 +28,9 @@ module.exports = (function() {
    * @api private
    */
   Method.wrap = function(pointer) {
-    if (pointer.isNull()) return null;
+    if (pointer.isNull()) {
+      return null;
+    }
     return new Method(pointer);
   }
 
@@ -51,8 +53,9 @@ module.exports = (function() {
    */
   Method.prototype.getArgumentTypes = function() {
     var rtn=[], len=this.getNumberOfArguments();
-    for (var i=0; i<len; i++)
+    for (var i=0; i<len; i++) {
       rtn.push(this.getArgumentType(i));
+    }
     return rtn;
   }
 

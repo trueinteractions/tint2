@@ -70,8 +70,11 @@ module.exports = (function() {
     if(index !== 0) 
     {
       var definition1 = createNewDefinition(this, this.private.dividerWidth);
-      if(isVertical) this.nativeView.ColumnDefinitions.Add(definition1);
-      else this.nativeView.RowDefinitions.Add(definition1);
+      if(isVertical) {
+        this.nativeView.ColumnDefinitions.Add(definition1);
+      } else {
+        this.nativeView.RowDefinitions.Add(definition1);
+      }
       this.private.definitions.push(definition1);
       
       var divider = new $.System.Windows.Controls.GridSplitter();

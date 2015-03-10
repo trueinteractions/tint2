@@ -219,12 +219,15 @@ function createClass(typeNative, typeName) {
   if(classCache[qualifiedName]) {
     dotnet.statistics.cachehit++;
     return classCache[qualifiedName];
-  } else
+  } else {
     dotnet.statistics.cachemiss++;
+  }
 
   var cls = function() {
     var args = [typeNative];
-    for(var i=0; i < arguments.length; i++) args.push(unwrap(arguments[i]));
+    for(var i=0; i < arguments.length; i++) {
+      args.push(unwrap(arguments[i]));
+    }
     this.pointer = dotnet.execNew.apply(null,args);
   }
 
@@ -253,7 +256,8 @@ function createClass(typeNative, typeName) {
     createMember(cls, typeNative, typeName, mNative, mName, false);
   }
 
-  return classCache[qualifiedName] = cls;
+  classCache[qualifiedName] = cls;
+  return classCache[qualifiedName];
 }
 
 /* Entry point for assemblies, all assemblies are loaded in from 
