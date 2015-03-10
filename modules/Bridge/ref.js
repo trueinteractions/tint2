@@ -841,10 +841,10 @@ var types = exports.types = {};
 types.void = {
   size: 0,
   indirection: 1, 
-  get: function get (buf, offset) {
+  get: function get () {
     return null;
   },
-  set: function set (buf, offset, val) {
+  set: function set () {
   }
 };
 
@@ -1010,12 +1010,12 @@ types.double = {
  */
 
 types.Object = {
-    size: exports.sizeof.Object
-  , indirection: 1
-  , get: function get (buf, offset) {
+    size: exports.sizeof.Object,
+    indirection: 1,
+    get:function get (buf, offset) {
       return buf.readObject(offset || 0);
-    }
-  , set: function set (buf, offset, val) {
+    },
+    set: function set (buf, offset, val) {
       return buf.writeObject(val, offset || 0);
     }
 };
@@ -1047,7 +1047,7 @@ types.CString = {
 };
 
 // alias Utf8String
-var utfstringwarned = false
+var utfstringwarned = false;
 Object.defineProperty(types, 'Utf8String', {
   enumerable: false,
   configurable: true,
@@ -1143,12 +1143,8 @@ Object.defineProperty(types, 'Utf8String', {
  */
 
 // "typedef"s for the variable-sized types
-;[ 'bool', 'byte', 'char', 'uchar', 'short', 'ushort', 'int', 'uint', 'long',
-   'ulong', 'longlong', 'ulonglong', 'size_t' ].forEach(function (name) {
-  var unsigned = name === 'bool'
-              || name === 'byte'
-              || name === 'size_t'
-              || name[0] === 'u';
+[ 'bool', 'byte', 'char', 'uchar', 'short', 'ushort', 'int', 'uint', 'long', 'ulong', 'longlong', 'ulonglong', 'size_t' ].forEach(function (name) {
+  var unsigned = name === 'bool' || name === 'byte' || name === 'size_t' || name[0] === 'u';
   var size = exports.sizeof[name];
   assert(size >= 1 && size <= 8);
   var typeName = 'int' + (size * 8);
@@ -1173,7 +1169,7 @@ Object.keys(exports.alignof).forEach(function (name) {
 exports.types.bool.get = (function (_get) {
   return function get (buf, offset) {
     return _get(buf, offset) ? true : false;
-  }
+  };
 })(exports.types.bool.get);
 exports.types.bool.set = (function (_set) {
   return function set (buf, offset, val) {
@@ -1442,7 +1438,7 @@ if (!(exports.NULL instanceof Buffer)) {
   SlowBuffer.prototype.readUInt64LE = Buffer.prototype.readUInt64LE;
   SlowBuffer.prototype.writeUInt64LE = Buffer.prototype.writeUInt64LE;
   SlowBuffer.prototype.inspect = overwriteInspect(SlowBuffer.prototype.inspect);
-};
+}
 
 function overwriteInspect (inspect) {
   if (inspect.name === 'refinspect') {

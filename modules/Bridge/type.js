@@ -9,7 +9,7 @@ if(!process.bridge) {
 
 var ref = require('ref'),
     assert = require('assert'),
-    Struct = require('struct'),
+    struct = require('struct'),
     bindings = process.bridge;
 
 /**
@@ -17,7 +17,7 @@ var ref = require('ref'),
  * This struct type is used internally to define custom struct rtn/arg types.
  */
 
-var FFI_TYPE = Type.FFI_TYPE = Struct();
+var FFI_TYPE = aType.FFI_TYPE = struct();
 FFI_TYPE.defineProperty('size',      ref.types.size_t);
 FFI_TYPE.defineProperty('alignment', ref.types.ushort);
 FFI_TYPE.defineProperty('type',      ref.types.ushort);
@@ -34,7 +34,7 @@ assert.equal(bindings.FFI_TYPE_SIZE, FFI_TYPE.size);
  * @api private
  */
 
-function Type (type) {
+function aType (type) {
   type = ref.coerceType(type);
   assert(type.indirection >= 1, 'invalid "type" given: ' + (type.name || type));
   var rtn;
@@ -62,7 +62,7 @@ function Type (type) {
         fieldNames = Object.keys(fields),
         numFields = fieldNames.length,
         numElements = 0,
-        ffi_type = new FFI_TYPE,
+        ffi_type = new FFI_TYPE(),
         i = 0,
         field,
         ffi_type_ptr;
@@ -94,12 +94,12 @@ function Type (type) {
       field = fields[fieldNames[i]];
       if (field.type.fixedLength > 0) {
         // a fixed-length "ref-array" type
-        ffi_type_ptr = Type(field.type.type);
+        ffi_type_ptr = aType(field.type.type);
         for (var j = 0; j < field.type.fixedLength; j++) {
           elements.writePointer(ffi_type_ptr, (index++) * ref.sizeof.pointer);
         }
       } else {
-        ffi_type_ptr = Type(field.type);
+        ffi_type_ptr = aType(field.type);
         elements.writePointer(ffi_type_ptr, (index++) * ref.sizeof.pointer);
       }
     }
@@ -126,4 +126,4 @@ function Type (type) {
   assert(rtn, 'Could not determine the `ffi_type` instance for type: ' + (type.name || type));
   return rtn;
 }
-module.exports = Type;
+module.exports = aType;
