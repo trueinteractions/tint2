@@ -6,6 +6,7 @@
 if(!process.bridge) {
   process.initbridge();
 }
+
 var ForeignFunction = require('foreign_function'),
     assert = require('assert'),
     bindings = process.bridge,

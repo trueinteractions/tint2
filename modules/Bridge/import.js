@@ -197,7 +197,7 @@ module.exports = (function() {
           var derefPtr = ptr.deref();
           delete onto[name];
           onto[name] = derefPtr
-          return onto[name];
+          return derefPtr;
         });
       }
       else if (node.name === 'function')
@@ -225,7 +225,7 @@ module.exports = (function() {
             var unwrapper = core.createUnwrapperFunction(ptr, passedTypes, isVariadic);
             delete onto[name];
             onto[name] = unwrapper;
-            return onto[name];
+            return unwrapper;
           }
         });
       }
