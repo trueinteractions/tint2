@@ -11,8 +11,7 @@ var CIF_var = require('cif_var'),
     Type = require('type'),
     _ForeignFunction = require('_foreign_function'),
     assert = require('assert'),
-    ref = require('ref'),
-    bindings = process.bridge;
+    ref = require('ref');
 
 /**
  * For when you want to call to a C function with variable amount of arguments.
