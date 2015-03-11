@@ -122,8 +122,9 @@ echo %path%|findstr /i /c:"python">nul  || set path=%path%;%newpath%
 echo Architecture %arch% (host architecture %hostarch%)
 
 if NOT exist .\libraries\node\node.gyp (
-  git submodule init
-  git submodule update
+  git clone https://github.com/joyent/node.git --depth 2 -b v0.12.0-release libraries\node 
+  git clone https://github.com/trueinteractions/wpf-autolayout.git libraries\wpf-autolayout
+  :: git submodule update --init --recursive
 )
 
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
