@@ -11,6 +11,8 @@ if defined APPVEYOR (
 
 if exist ..\build\msvs\Release\tint.exe (
 	set TINTEXEC=..\build\msvs\Release\tint.exe
+) else if exist ..\build\msvs\Debug\tint.exe (
+	set TINTEXEC=..\build\msvs\Debug\tint.exe
 ) else if exist ..\tint.exe (
 	set TINTEXEC=..\tint.exe
 ) else if exist tint.exe (
