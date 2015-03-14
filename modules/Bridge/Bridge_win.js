@@ -201,30 +201,38 @@ function createMember(target, typeNative, typeName, memberNative, memberName, st
   }
 }
 
+
+function CLRClass() {
+};
+CLRClass.prototype.toString = function() { 
+  return (this.pointer ? 'Object ' : 'Class ') + this.className + '';
+};
+CLRClass.prototype.inspect = function() { 
+  return '\033[33m CLR ' + this.toString() + '\033[39m'; 
+};
+CLRClass.prototype.addEventListener = function(event, callback) { 
+  dotnet.execAddEvent(this.pointer,event,callback); 
+};
+
 function createClass(typeNative, typeName) {
   dotnet.statistics.classes++;
   var qualifiedName = dotnet.execGetProperty(typeNative,'AssemblyQualifiedName');
   if(classCache[qualifiedName]) {
-    dotnet.statistics.cachehit++;
     return classCache[qualifiedName];
-  } else {
-    dotnet.statistics.cachemiss++;
   }
-
-  var cls = function() {
-    var args = [typeNative];
+  // These must be available on both the static and instance of the class/object.
+  
+  var CLRClassInstance = function() {
+    var args = [this.classPointer];
     for(var i=0; i < arguments.length; i++) {
       args.push(unwrap(arguments[i]));
     }
     this.pointer = dotnet.execNew.apply(null,args);
   };
-
-  // These must be available on both the static and instance of the class/object.
-  cls.prototype.toString = cls.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + typeName + ''; };
-  cls.prototype.inspect = cls.inspect = function() { return '\033[33m CLR ' + this.toString() + '\033[39m'; };
-  cls.prototype.addEventListener = cls.addEventListener = function(event, callback) { dotnet.execAddEvent(this.pointer,event,callback); };
-  cls.prototype.classPointer = cls.classPointer = typeNative;
-  cls.prototype.className = cls.className = typeName;
+  CLRClassInstance.prototype = Object.create(CLRClass.prototype);
+  CLRClassInstance.prototype.constructor = CLRClassInstance;
+  CLRClassInstance.prototype.classPointer = CLRClassInstance.classPointer = typeNative;
+  CLRClassInstance.prototype.className = CLRClassInstance.className = typeName;
 
   // Find all STATIC members.
   var typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
@@ -232,7 +240,7 @@ function createClass(typeNative, typeName) {
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var mNativeStatic = dotnet.execGetProperty(typeEnumerator, 'Current');
     var mNameStatic = dotnet.execGetProperty(mNativeStatic, 'Name');
-    createMember(cls, typeNative, typeName, mNativeStatic, mNameStatic, true);
+    createMember(CLRClassInstance, typeNative, typeName, mNativeStatic, mNameStatic, true);
   }
 
   // Find all INSTANCE members.
@@ -241,10 +249,10 @@ function createClass(typeNative, typeName) {
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
     var mName = dotnet.execGetProperty(mNative, 'Name');
-    createMember(cls, typeNative, typeName, mNative, mName, false);
+    createMember(CLRClassInstance, typeNative, typeName, mNative, mName, false);
   }
 
-  classCache[qualifiedName] = cls;
+  classCache[qualifiedName] = CLRClassInstance;
   return classCache[qualifiedName];
 }
 
