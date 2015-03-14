@@ -22,31 +22,6 @@ var assemblyImported = {};
 var classCache = {};
 dotnet.statistics = {assemblies_hit:0, assemblies_miss:0, enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
-function createJSInstance(pointer) {
-  var typeNative = dotnet.getCLRType(pointer);
-  var typeName = dotnet.execGetProperty(typeNative, 'Name');
-
-  if(dotnet.execGetProperty(typeNative, "IsEnum")) {
-    dotnet.statistics.enums++;
-    var fullName = dotnet.execGetProperty(typeNative, "FullName");
-    var v = fullName.split('.');
-    var enumValue = dotnet.execMethod(pointer,'ToString');
-    v.push(enumValue);
-    var dst = process.bridge.dotnet;
-    for(var i=0; i < v.length ; i++) {
-      dotnet.statistics.values++;
-      dst = dst[v[i]];
-    }
-    return dst;
-  } else if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
-    dotnet.statistics.classes++;
-    var c = createClass(typeNative, typeName);
-    var N = function() { this.pointer = pointer; };
-    N.prototype = Object.create(c.prototype);
-    N.prototype.constructor = N;
-    return new N();
-  }
-}
 
 function unwrap(a) {
   if(a && a.pointer) {
@@ -254,6 +229,32 @@ function createClass(typeNative, typeName) {
 
   classCache[qualifiedName] = CLRClassInstance;
   return classCache[qualifiedName];
+}
+
+function createJSInstance(pointer) {
+  var typeNative = dotnet.getCLRType(pointer);
+  var typeName = dotnet.execGetProperty(typeNative, 'Name');
+
+  if(dotnet.execGetProperty(typeNative, "IsEnum")) {
+    dotnet.statistics.enums++;
+    var fullName = dotnet.execGetProperty(typeNative, "FullName");
+    var v = fullName.split('.');
+    var enumValue = dotnet.execMethod(pointer,'ToString');
+    v.push(enumValue);
+    var dst = process.bridge.dotnet;
+    for(var i=0; i < v.length ; i++) {
+      dotnet.statistics.values++;
+      dst = dst[v[i]];
+    }
+    return dst;
+  } else if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
+    dotnet.statistics.classes++;
+    var c = createClass(typeNative, typeName);
+    var N = function() { this.pointer = pointer; };
+    N.prototype = Object.create(c.prototype);
+    N.prototype.constructor = N;
+    return new N();
+  }
 }
 
 /* Entry point for assemblies, all assemblies are loaded in from 

@@ -485,18 +485,18 @@ v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
   else if (type == System::Int64::typeid)           jsdata = NanNew<v8::Number>(((System::IConvertible^)netdata)->ToDouble(nullptr));
   else if (type == double::typeid)                  jsdata = NanNew<v8::Number>((double)netdata);
   else if (type == float::typeid)                   jsdata = NanNew<v8::Number>((float)netdata);
-  //else if (type == cli::array<byte>::typeid)
-  //{
-  //  cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
-  //  if (buffer->Length > 0)
-  //  {
-  //    v8::Handle<v8::Value> slowBuffer = NanNewBufferHandle(buffer->Length);
-  //    pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
-  //    memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
-  //  }
-  //  (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("array"), NanNew<v8::Boolean>(true));
-  //  jsdata = slowBuffer;
-  //} 
+  else if (type == cli::array<byte>::typeid)
+  {
+    cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
+    v8::Handle<v8::Value> slowBuffer = NanNewBufferHandle(buffer->Length);
+    if (buffer->Length > 0)
+    {
+      pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
+      memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
+    }
+    (v8::Handle<v8::Object>::Cast(slowBuffer))->Set(NanNew<v8::String>("array"), NanNew<v8::Boolean>(true));
+    jsdata = slowBuffer;
+  } 
   else {
 #ifdef GC_DEBUG
     CppClassCount++;
