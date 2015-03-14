@@ -90,7 +90,7 @@ module.exports = (function() {
     while (c && depth++ < md) {
       var is=c.getInstanceVariables(), i=is.length;
       while (i--) {
-        if (!~rtn.indexOf(is[i])) {
+        if (rtn.indexOf(is[i]) === -1) {
           rtn.push(is[i]);
         }
       }
@@ -109,7 +109,7 @@ module.exports = (function() {
     while (c && depth++ < md) {
       var ms=c.getInstanceMethods(), i=ms.length;
       while (i--) {
-        if (!~rtn.indexOf(ms[i])) {
+        if (rtn.indexOf(ms[i]) === -1) {
           rtn.push(ms[i]);
         }
       }
