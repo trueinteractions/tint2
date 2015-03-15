@@ -98,7 +98,7 @@ module.exports = (function() {
    *              provided as a string "left", "right", "top" or "bottom".
    */
   PopOver.prototype.open = function(container, side) {
-    var edge = side === 'left' ? $.NSMinXEdge : side === 'right' ? $.NSMaxXEdge : side === 'top' ? $.NSMinYEdge : $.NSMaxYEdge;
+    var edge = side === 'left' ? $.NSMinXEdge : side === 'right' ? $.NSMaxXEdge : side === 'top' ? $.NSMaxYEdge : $.NSMinYEdge;
     // The timeout is necessary, popover will not show if the view
     // has yet to complete its layout, give it a tick to calculate.
     setTimeout(function() {

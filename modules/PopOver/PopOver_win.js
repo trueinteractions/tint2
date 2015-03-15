@@ -19,9 +19,9 @@ module.exports = (function() {
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
     Container.call(this, options);
 
-    this.native.Child = this.private.canvas = $.System.Xaml.XamlServices.Parse("<Canvas xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Margin=\"0,0,0,0\"><Canvas.Effect><DropShadowEffect Opacity=\"0.4\" ShadowDepth=\"1\"/></Canvas.Effect></Canvas>");
-    this.private.rect = $.System.Xaml.XamlServices.Parse("<Rectangle xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"  Stretch=\"Fill\" Fill=\"#f7f7f7\" Canvas.Left=\"12\" RadiusX=\"6\" RadiusY=\"6\"></Rectangle>");
-    this.private.arrow = $.System.Xaml.XamlServices.Parse("<Path xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Fill=\"#f7f7f7\" Data=\"M11.7,27.2V0c0,0-0.7,3.4-3.4,5.7C5,8.6,0,11.9,0,13.6s5,5,8.3,7.9C11,23.9,11.7,27.2,11.7,27.2z\" Canvas.Top=\"100\" Canvas.Left=\"0.5\"></Path>");
+    this.native.Child = this.private.canvas = $.System.Xaml.XamlServices.Parse("<Canvas xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Margin=\"0,0,0,0\"><Canvas.Effect><DropShadowEffect Opacity=\"1\" BlurRadius=\"3\" ShadowDepth=\"0.5\"/></Canvas.Effect></Canvas>");
+    this.private.rect = $.System.Xaml.XamlServices.Parse("<Rectangle xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"  Stretch=\"Fill\" Fill=\"#f7f7f7\" Opacity=\"1\" Canvas.Left=\"12\" RadiusX=\"6\" RadiusY=\"6\"></Rectangle>");
+    this.private.arrow = $.System.Xaml.XamlServices.Parse("<Path xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Fill=\"#f7f7f7\" Opacity=\"1\" Data=\"M11.7,27.2V0c0,0-0.7,3.4-3.4,5.7C5,8.6,0,11.9,0,13.6s5,5,8.3,7.9C11,23.9,11.7,27.2,11.7,27.2z\" Canvas.Top=\"100\" Canvas.Left=\"0.5\"></Path>");
     this.private.canvas.Children.Add(this.private.rect);
     this.private.canvas.Children.Add(this.private.arrow);
     this.private.canvas.Children.Add(this.nativeView);
@@ -143,6 +143,7 @@ module.exports = (function() {
     this.private.attached = true;
 
     targetWindow.addEventListener('LocationChanged', this.private.locationChange);
+    targetWindow.addEventListener('SizeChanged', this.private.locationChange);
     this.private.updateLocation();
     this.fireEvent('open');
     this.native.IsOpen = true;
