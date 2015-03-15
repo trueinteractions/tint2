@@ -1,8 +1,8 @@
 
 module.exports = (function() {
-  //if(global.__TINT.PopOver) {
-   // return global.__TINT.PopOver;
-  //}
+  if(global.__TINT.PopOver) {
+    return global.__TINT.PopOver;
+  }
 
 
   var arrowHeight = 11.5;
@@ -35,10 +35,51 @@ module.exports = (function() {
 
     this.private.attached = false;
 
+    this.private.updateLocation = function() {
+      var horizontalOffset = 0;
+      var verticalOffset = 0;
+
+      this.native.HorizontalOffset = horizontalOffset;
+      this.native.VerticalOffset = verticalOffset;
+
+      if (this.private.side === "left") {
+        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("180.0"));
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, arrowHeight - margin/2);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, margin);
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width + arrowHeight*2 - margin/2);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 + arrowWidth/2 + margin);
+        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Left;
+      } else if (this.private.side === "top") {
+        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("270.0"));
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, arrowHeight- margin/2);
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 - arrowWidth/2 + margin);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height + arrowHeight*2 - margin/2);
+        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Top;
+        if(this.private.container instanceof Window) {
+          this.native.VerticalOffset = this.native.VerticalOffset + margin/2;
+        }
+      } else if (this.private.side === "bottom") {
+        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("90.0"));
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, arrowHeight + margin/2);
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 + arrowWidth/2 + margin);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, margin/2);
+        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
+      } else {
+        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("0.0"));
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, arrowHeight + margin/2);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, margin);
+        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, margin/2);
+        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 - arrowWidth/2 + margin);
+        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
+      }
+      this.native.PlacementTarget = this.private.container.nativeView;
+    }.bind(this);
+
     this.private.locationChange = function() {
       if(this.private.attached) {
-        this.native.HorizontalOffset = this.native.HorizontalOffset + 1;
-        this.native.HorizontalOffset = this.native.HorizontalOffset - 1;
+        this.private.updateLocation();
       }
     }.bind(this);
       
@@ -73,7 +114,7 @@ module.exports = (function() {
         this.native.Width = e;
         this.private.canvas.Width = e;
         this.private.rect.Width = e - arrowHeight - margin;
-        this.nativeView.Width = e - margin*4;
+        this.nativeView.Width = e - margin * 4;
       }
     }
   });
@@ -85,7 +126,7 @@ module.exports = (function() {
         this.native.Height = e;
         this.private.canvas.Height = e;
         this.private.rect.Height = e - arrowHeight- margin;
-        this.nativeView.Height = e - margin*4;
+        this.nativeView.Height = e - margin * 4;
       }
     }
   });
@@ -98,74 +139,23 @@ module.exports = (function() {
     if(targetWindow === null) {
       throw new Error('Container wasn\'t attached to a window.');
     }
+    this.private.side = side;
+    this.private.container = container;
     this.private.attached = true;
 
     targetWindow.addEventListener('LocationChanged', this.private.locationChange);
-
-    var horizontalOffset = 0;
-    var verticalOffset = 0;
-
-    if(container instanceof Window) {
-      verticalOffset = - ($.System.Windows.SystemParameters.WindowNonClientFrameThickness.Top + 
-        $.System.Windows.SystemParameters.WindowNonClientFrameThickness.Bottom);
-      horizontalOffset = - ($.System.Windows.SystemParameters.WindowNonClientFrameThickness.Left + 
-        $.System.Windows.SystemParameters.WindowNonClientFrameThickness.Right);
-    }
-
-    this.native.HorizontalOffset = horizontalOffset;
-    this.native.VerticalOffset = verticalOffset;
-
-    if (side === "left") {
-      this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("180.0"));
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, arrowHeight - margin/2);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.rect, margin);
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width + arrowHeight*2 - margin/2);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 + arrowWidth/2 + margin);
-      this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Left;
-      if(container instanceof Window) {
-        this.native.HorizontalOffset = this.native.HorizontalOffset + margin/2;
-      }
-    } else if (side === "top") {
-      this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("270.0"));
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.rect, arrowHeight- margin/2);
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 - arrowWidth/2 + margin);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height + arrowHeight*2 - margin/2);
-      this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Top;
-      if(container instanceof Window) {
-        this.native.VerticalOffset = this.native.VerticalOffset + margin/2;
-      }
-    } else if (side === "bottom") {
-      this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("90.0"));
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.rect, arrowHeight + margin/2);
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 + arrowWidth/2 + margin);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, margin/2);
-      this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
-      if(container instanceof Window) {
-        this.native.VerticalOffset = this.native.VerticalOffset - margin;
-      }
-    } else {
-      this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("0.0"));
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, arrowHeight + margin/2);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.rect, margin);
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, margin/2);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 - arrowWidth/2 + margin);
-      this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
-      if(container instanceof Window) {
-        this.native.HorizontalOffset = this.native.HorizontalOffset - margin;
-      }
-    }
-    this.native.PlacementTarget = container.nativeView;
+    this.private.updateLocation();
     this.fireEvent('open');
     this.native.IsOpen = true;
   };
 
   PopOver.prototype.close = function() {
     this.private.attached = false;
+    this.private.container = null;
+    this.private.side = null;
     this.native.IsOpen = false;
   };
 
-  //global.__TINT.PopOver = PopOver;
+  global.__TINT.PopOver = PopOver;
   return PopOver;
 })();
