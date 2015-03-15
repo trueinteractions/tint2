@@ -32,15 +32,12 @@ module.exports = (function() {
     $.System.Windows.Controls.Canvas.SetLeft(this.nativeView, margin + margin/2);
     $.System.Windows.Controls.Canvas.SetTop(this.nativeView, 2*margin);
 
-
     this.private.attached = false;
 
     this.private.updateLocation = function() {
-      var horizontalOffset = 0;
-      var verticalOffset = 0;
 
-      this.native.HorizontalOffset = horizontalOffset;
-      this.native.VerticalOffset = verticalOffset;
+      this.native.HorizontalOffset = 0;
+      this.native.VerticalOffset = 0;
 
       if (this.private.side === "left") {
         this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("180.0"));
@@ -56,9 +53,6 @@ module.exports = (function() {
         $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 - arrowWidth/2 + margin);
         $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height + arrowHeight*2 - margin/2);
         this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Top;
-        if(this.private.container instanceof Window) {
-          this.native.VerticalOffset = this.native.VerticalOffset + margin/2;
-        }
       } else if (this.private.side === "bottom") {
         this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("90.0"));
         $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
@@ -74,11 +68,17 @@ module.exports = (function() {
         $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 - arrowWidth/2 + margin);
         this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
       }
+
       this.native.PlacementTarget = this.private.container.nativeView;
+
     }.bind(this);
 
     this.private.locationChange = function() {
       if(this.private.attached) {
+        this.native.VerticalOffset = this.native.VerticalOffset + 1;
+        this.native.VerticalOffset = this.native.VerticalOffset - 1;
+        this.native.HorizontalOffset = this.native.HorizontalOffset + 1;
+        this.native.HorizontalOffset = this.native.HorizontalOffset - 1;
         this.private.updateLocation();
       }
     }.bind(this);
@@ -100,7 +100,8 @@ module.exports = (function() {
     this.height = 300;
     this.width = 300;
 
-    this.native.PopupAnimation = $.System.Windows.Controls.Primitives.PopupAnimation.Slide; // Scroll, Slide, Fade & None
+    // Scroll, Slide, Fade & None
+    this.native.PopupAnimation = $.System.Windows.Controls.Primitives.PopupAnimation.Slide;
   }
 
   PopOver.prototype = Object.create(Container.prototype);
