@@ -4,12 +4,10 @@ module.exports = (function() {
     return global.__TINT.PopOver;
   }
 
-
   var arrowHeight = 11.5;
   var arrowWidth = 27.5;
   var margin = 10;
 
-  var Window = require('Window');
   var Container = require('Container');
   var $ = process.bridge.dotnet;
   $.import('System.Xaml.dll');

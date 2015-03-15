@@ -1,7 +1,24 @@
 module.exports = (function() {
+  if(global.__TINT.PopOver) {
+    return global.__TINT.PopOver;
+  }
+
   var Container = require('Container');
   var $ = process.bridge.objc;
 
+  /**
+   * @class PopOver
+   * @description Creates a pop-over that can extend outside of a window bounds as a floating
+   *              panel above the control.  The pop over is useful for providing ancillary information
+   *              or to collect non-required information.  It can also be used as a tool tip for users
+   *              as to how to use a program.
+   * @extends Container
+   */
+   /**
+    * @new
+    * @memberof PopOver
+    * @description Creates a new PopOver control.
+    */
   function PopOver(options) {
     options = options || {};
     options.delegates = options.delegates || [];
@@ -36,6 +53,12 @@ module.exports = (function() {
   PopOver.prototype = Object.create(Container.prototype);
   PopOver.prototype.constructor = PopOver;
 
+  /**
+   * @member width
+   * @type {Integer}
+   * @memberof PopOver
+   * @description Gets or sets the width of the pop over.
+   */
   Object.defineProperty(PopOver.prototype, 'width', {
     get:function() { return this.native('contentSize').width; },
     set:function(e) {
@@ -48,6 +71,12 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @member height
+   * @type {Integer}
+   * @memberof PopOver
+   * @description Gets or sets the height of the pop over.
+   */
   Object.defineProperty(PopOver.prototype, 'height', {
     get:function() { return this.native('contentSize').height; },
     set:function(e) {
@@ -60,6 +89,14 @@ module.exports = (function() {
     }
   });
 
+  /**
+   * @method open
+   * @param {Container} container The container or control to place the pop over.. over.
+   * @param {string} side The side to present the pop over on, this must be "left", "right", "top" or "bottom".
+   * @memberof PopOver
+   * @description The open method opens the pop over over the control or container specified, with the position
+   *              provided as a string "left", "right", "top" or "bottom".
+   */
   PopOver.prototype.open = function(container, side) {
     var edge = side === 'left' ? $.NSMinXEdge : side === 'right' ? $.NSMaxXEdge : side === 'top' ? $.NSMinYEdge : $.NSMaxYEdge;
     // The timeout is necessary, popover will not show if the view
@@ -69,10 +106,15 @@ module.exports = (function() {
     }.bind(this), 100);
   }
 
+  /**
+   * @method close
+   * @memberof PopOver
+   * @description Closes the pop over.
+   */
   PopOver.prototype.close = function() {
     this.native('performClose',this.native);
   }
 
+  global.__TINT.PopOver = PopOver;
   return PopOver;
-
 })();
