@@ -169,8 +169,8 @@ module.exports = (function() {
         this.private.stack.Children.Remove(this.private.img);
       }
       this.private.img = utilities.makeImage(e);
-      this.private.img.Height = this.private.img.Source.Height * (this.private.img.Source.DpiY/$.System.Windows.SystemParameters.Dpi);
-      this.private.img.Width = this.private.img.Source.Width * (this.private.img.Source.DpiX/$.System.Windows.SystemParameters.Dpi);;
+      //this.private.img.Height = this.private.img.Source.Height * (this.private.img.Source.DpiY/$.System.Windows.SystemParameters.Dpi);
+      //this.private.img.Width = this.private.img.Source.Width * (this.private.img.Source.DpiX/$.System.Windows.SystemParameters.Dpi);
       if(this.private.img !== null) {
         this.private.stack.Children.Insert(0,this.private.img);
       }
