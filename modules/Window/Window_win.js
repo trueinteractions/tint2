@@ -122,9 +122,9 @@ module.exports = (function() {
   //  set:function(e) { }
   //});
 
-  Object.defineProperty(Window.prototype, 'menu', {
-    get:function() { return this.private.menu; },
-    set:function(e) {
+  util.def(Window.prototype, 'menu', 
+    function() { return this.private.menu; },
+    function(e) {
       if(e) {
         this.private.menu = e;
         this.private.menu.parent = this.nativeView;
@@ -139,12 +139,11 @@ module.exports = (function() {
         this.private.menuNative = null;
         this.private.menu = null;
       }
-    }
-  });
+    });
 
-  Object.defineProperty(Window.prototype, 'toolbar', {
-    get:function() { return this.private.toolbar; },
-    set:function(e) {
+  util.def(Window.prototype, 'toolbar',
+    function() { return this.private.toolbar; },
+    function(e) {
       if(e && this.frame) {
         this.private.toolbar = e;
         this.native.Content.Children.Insert(this.native.Content.Children.Count - 1, this.private.toolbar.native);
@@ -153,16 +152,15 @@ module.exports = (function() {
         this.native.Content.Children.Remove(this.private.toolbar.native);
         this.private.toolbar = null;
       }
-    }
-  });
+    });
 
-  Object.defineProperty(Window.prototype, 'canBeFullscreen', {
-    get:function() { return this.private.canBeFullscreen; },
-    set:function(e) { this.private.canBeFullscreen = e ? true : false; }
-  });
+  util.def(Window.prototype, 'canBeFullscreen',
+    function() { return this.private.canBeFullscreen; },
+    function(e) { this.private.canBeFullscreen = e ? true : false; }
+  );
 
-  Object.defineProperty(Window.prototype, 'state', {
-    get:function() { 
+  util.def(Window.prototype, 'state',
+    function() { 
       if(this.private.fullscreen) {
         return "fullscreen";
       } else if(this.native.WindowState === $.System.Windows.WindowState.Maximized) {
@@ -173,7 +171,7 @@ module.exports = (function() {
         return "normal";
       }
     },
-    set:function(e) {
+    function(e) {
       if(e !== "fullscreen" && this.private.fullscreen) {
         if(this.private.previousStyle !== "") {
           this.native.WindowStyle = this.private.previousStyle;
@@ -210,8 +208,7 @@ module.exports = (function() {
         this.native.ResizeMode = $.System.Windows.ResizeMode.NoResize;
         this.private.fullscreen = true;
       }
-    }
-  });
+    });
 
   util.makePropertyStringType(Window.prototype, 'title', 'Title');
 
@@ -253,9 +250,9 @@ module.exports = (function() {
     function(e) { setWindowCoordinates('left', this.native, e); }
   );
 
-  Object.defineProperty(Window.prototype, 'width', {
-    get:function() { return Math.round(this.native.ActualWidth); },
-    set:function(e) { 
+  util.def(Window.prototype, 'width',
+    function() { return Math.round(this.native.ActualWidth); },
+    function(e) { 
       e = util.parseUnits(e);
       if(this.animateOnSizeChange) {
         util.animateWPFProperty(this.native, $.System.Windows.FrameworkElement.WidthProperty, 225, this.native.Width, e);
@@ -263,12 +260,12 @@ module.exports = (function() {
         this.native.Width = e; 
       }
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'height', {
-    get:function() { return Math.round(this.native.ActualHeight); },
-    set:function(e) { this.native.Height = util.parseUnits(e); }
-  });
+  util.def(Window.prototype, 'height',
+    function() { return Math.round(this.native.ActualHeight); },
+    function(e) { this.native.Height = util.parseUnits(e); }
+  );
 
   //TODO: Implement me
   //Object.defineProperty(Window.prototype, 'titleVisible', {
@@ -277,9 +274,9 @@ module.exports = (function() {
   //});
 
   // Override Control's definition of visible to a window context.
-  Object.defineProperty(Window.prototype, 'visible', {
-    get:function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
-    set:function(e) {
+  util.def(Window.prototype, 'visible',
+    function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
+    function(e) {
       if(e) {
         this.native.Show();
         this.native.Visibility = $.System.Windows.Visibility.Visible;
@@ -289,14 +286,14 @@ module.exports = (function() {
         
       }
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'maximizeButton', {
-    get:function() {
+  util.def(Window.prototype, 'maximizeButton',
+    function() {
       var hwnd = this.private.hwnd;
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
     },
-    set:function(e) {
+    function(e) {
       var hwnd = this.private.hwnd;
       var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
@@ -309,14 +306,14 @@ module.exports = (function() {
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MAXIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'minimizeButton', {
-    get:function() {
+  util.def(Window.prototype, 'minimizeButton',
+    function() {
       var hwnd = this.private.hwnd;
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
     },
-    set:function(e) {
+    function(e) {
       var hwnd = this.private.hwnd;
       var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
@@ -329,11 +326,11 @@ module.exports = (function() {
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'closeButton', {
-    get:function() { return this.private.closeButton; },
-    set:function(e) {
+  util.def(Window.prototype, 'closeButton',
+    function() { return this.private.closeButton; },
+    function(e) {
       this.private.closeButton = e;
       var hwnd = this.private.hwnd;
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
@@ -343,25 +340,25 @@ module.exports = (function() {
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_CLOSE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'resizable', {
-    get:function() { 
+  util.def(Window.prototype, 'resizable',
+    function() { 
       return this.native.ResizeMode !== $.System.Windows.ResizeMode.NoResize && 
         this.native.ResizeMode !== $.System.Windows.ResizeMode.CanMinimize;
     },
-    set:function(e) {
+    function(e) {
       if(e) {
         this.native.ResizeMode = $.System.Windows.ResizeMode.CanResizeWithGrip;
       } else { 
         this.native.ResizeMode = $.System.Windows.ResizeMode.CanMinimize;
       }
     }
-  });
+  );
 
-  Object.defineProperty(Window.prototype, 'backgroundColor', {
-    get:function() { return this.private.background; },
-    set:function(e) {
+  util.def(Window.prototype, 'backgroundColor',
+    function() { return this.private.background; },
+    function(e) {
       if(e === 'auto') {
         this.private.background = 'auto';
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
@@ -371,7 +368,7 @@ module.exports = (function() {
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
       }
     }
-  });
+  );
 
   util.makePropertyBoolType(Window.prototype, 'alwaysOnTop', 'TopMost', true, false);
 
