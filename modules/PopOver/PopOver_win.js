@@ -9,6 +9,7 @@ module.exports = (function() {
   var margin = 10;
 
   var Container = require('Container');
+  var util = require('Utilities');
   var $ = process.bridge.dotnet;
   $.import('System.Xaml.dll');
 
@@ -37,35 +38,42 @@ module.exports = (function() {
       this.native.HorizontalOffset = 0;
       this.native.VerticalOffset = 0;
 
-      if (this.private.side === "left") {
-        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("180.0"));
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, arrowHeight - margin/2);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, margin);
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width + arrowHeight*2 - margin/2);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 + arrowWidth/2 + margin);
-        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Left;
-      } else if (this.private.side === "top") {
-        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("270.0"));
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, arrowHeight- margin/2);
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 - arrowWidth/2 + margin);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height + arrowHeight*2 - margin/2);
-        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Top;
+      var transform = "0.0", 
+          rectLeft  = arrowHeight + margin/2,
+          rectTop   = this.private.rect.Height/2 - arrowWidth/2 + margin, 
+          arrowLeft = margin/2, 
+          arrowTop  = rectTop,
+          placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
+
+      if(this.private.side === "left") {
+        transform   = "180.0";
+        rectLeft    = arrowHeight - margin/2;
+        rectTop     = margin;
+        arrowLeft   = this.private.rect.Width + arrowHeight*2 - margin/2;
+        arrowTop    = this.private.rect.Height/2 + arrowWidth/2 + margin;
+        placement   = $.System.Windows.Controls.Primitives.PlacementMode.Left;
+      }  else if (this.private.side === "top") {
+        transform   = "270.0";
+        rectLeft    = margin;
+        rectTop     = arrowHeight - margin/2;
+        arrowLeft   = this.private.rect.Width/2 - arrowWidth/2 + margin;
+        arrowTop    = this.private.rect.Height + arrowHeight*2 - margin/2;
+        placement   = $.System.Windows.Controls.Primitives.PlacementMode.Top;
       } else if (this.private.side === "bottom") {
-        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("90.0"));
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, margin);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, arrowHeight + margin/2);
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, this.private.rect.Width/2 + arrowWidth/2 + margin);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, margin/2);
-        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
-      } else {
-        this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse("0.0"));
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, arrowHeight + margin/2);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.rect, margin);
-        $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, margin/2);
-        $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, this.private.rect.Height/2 - arrowWidth/2 + margin);
-        this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
+        transform   = "90.0";
+        rectLeft    = margin;
+        rectTop     = arrowHeight + margin/2;
+        arrowLeft   = this.private.rect.Width/2 + arrowWidth/2 + margin;
+        arrowTop    = margin/2;
+        placement   = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
       }
+
+      this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse(transform));
+      $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, rectLeft);
+      $.System.Windows.Controls.Canvas.SetTop(this.private.rect, rectTop);
+      $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, arrowLeft);
+      $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, arrowTop);
+      this.native.Placement = placement;
 
       this.native.PlacementTarget = this.private.container.nativeView;
 
@@ -105,30 +113,27 @@ module.exports = (function() {
   PopOver.prototype = Object.create(Container.prototype);
   PopOver.prototype.constructor = PopOver;
 
-
-  Object.defineProperty(PopOver.prototype, 'width', {
-    get:function() { return this.native.Width; },
-    set:function(e) {
+  util.def(PopOver.prototype, 'width', 
+    function() { return this.native.Width; },
+    function(e) {
       if(typeof(e) === "number") {
         this.native.Width = e;
         this.private.canvas.Width = e;
         this.private.rect.Width = e - arrowHeight - margin;
         this.nativeView.Width = e - margin * 4;
       }
-    }
-  });
+    });
 
-  Object.defineProperty(PopOver.prototype, 'height', {
-    get:function() { return this.native.Height; },
-    set:function(e) {
+  util.def(PopOver.prototype, 'height',
+    function() { return this.native.Height; },
+    function(e) {
       if(typeof(e) === "number") {
         this.native.Height = e;
         this.private.canvas.Height = e;
         this.private.rect.Height = e - arrowHeight- margin;
         this.nativeView.Height = e - margin * 4;
       }
-    }
-  });
+    });
 
   PopOver.prototype.open = function(container, side) {
     if(!(container && container.native)) {
