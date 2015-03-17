@@ -74,7 +74,7 @@ function createEnum(typeNative) {
   return obj;
 }
 
-function createField(target, typeNative, typeName, memberNative, memberName, static) {
+function createField(target, typeNative, typeName, memberName, static) {
   dotnet.statistics.fields++;
   var objdest = static ? target : target.prototype;
   if(!objdest.hasOwnProperty(memberName)) {
@@ -95,11 +95,12 @@ function createField(target, typeNative, typeName, memberNative, memberName, sta
   }
 }
 
-function createMethod(target, typeNative, typeName, memberNative, memberName, static) {
+function createMethod(target, typeNative, typeName, memberName, static) {
   dotnet.statistics.methods++;
   var objdest = static ? target : target.prototype;
   var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
-  objdest[memberName] = function() {
+  
+  var prepargs = function() {
     var s = typeSignature(memberName, arguments);
     if(!this._methods) {
       this._methods = {};
@@ -108,24 +109,17 @@ function createMethod(target, typeNative, typeName, memberNative, memberName, st
       var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
     }
-    var args = [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
-    return wrap(dotnet.callMethod.apply(null, args));
+    return [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
+  };
+  objdest[memberName] = function() {
+    return wrap(dotnet.callMethod.apply(null, prepargs.apply(this,arguments)));
   };
   objdest[memberName+"Async"] = function() {
-    var s = typeSignature(memberName, arguments);
-    if(!this._methods) {
-      this._methods = {};
-    }
-    if(!this._methods[s.signature]) {
-      var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
-      this._methods[s.signature] = getobj.apply(null, mArgs);
-    }
-    var args = [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
-    dotnet.callMethodAsync.apply(null, args);
+    dotnet.callMethodAsync.apply(null, prepargs.apply(this,arguments));
   };
 }
 
-function createProperty(target, typeNative, typeName, memberNative, memberName, static) {
+function createProperty(target, typeNative, typeName, memberName, static) {
   dotnet.statistics.properties++;
   var objdest = static ? target : target.prototype;
   Object.defineProperty(objdest, memberName, {
@@ -166,19 +160,19 @@ function createProperty(target, typeNative, typeName, memberNative, memberName, 
 function createMember(target, typeNative, typeName, memberNative, memberName, static) {
   var type = dotnet.execMethod(dotnet.execGetProperty(memberNative, 'MemberType'), 'ToString');
   if(type === "Field") {
-    createField(target, typeNative, typeName, memberNative, memberName, static);
+    createField(target, typeNative, typeName, memberName, static);
   } else if(type === "Method") {
-    if(memberName.substring(0,4) !== "get_") {
-      createMethod(target, typeNative, typeName, memberNative, memberName, static);
+    if(memberName.substring(0,4) !== "get_" && memberName.substring(0,4) !== "set_") {
+      createMethod(target, typeNative, typeName, memberName, static);
     }
   } else if(type === "Property") {
-    createProperty(target, typeNative, typeName, memberNative, memberName, static);
+    createProperty(target, typeNative, typeName, memberName, static);
   }
 }
 
-
 function CLRClass() {
-};
+}
+
 CLRClass.prototype.toString = function() { 
   return (this.pointer ? 'Object ' : 'Class ') + this.className + '';
 };
@@ -209,23 +203,17 @@ function createClass(typeNative, typeName) {
   CLRClassInstance.prototype.classPointer = CLRClassInstance.classPointer = typeNative;
   CLRClassInstance.prototype.className = CLRClassInstance.className = typeName;
 
-  // Find all STATIC members.
-  var typeEnumerator = dotnet.execMethod(dotnet.getStaticMemberTypes(typeNative),'GetEnumerator');
+  var iterateThroughMembers = function(types, static) {
+    var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
+    while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
+      var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
+      var mName = dotnet.execGetProperty(mNative, 'Name');
+      createMember(CLRClassInstance, typeNative, typeName, mNative, mName, static);
+    }
+  };
 
-  while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var mNativeStatic = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var mNameStatic = dotnet.execGetProperty(mNativeStatic, 'Name');
-    createMember(CLRClassInstance, typeNative, typeName, mNativeStatic, mNameStatic, true);
-  }
-
-  // Find all INSTANCE members.
-  typeEnumerator = dotnet.execMethod(dotnet.getMemberTypes(typeNative),'GetEnumerator');
-
-  while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var mName = dotnet.execGetProperty(mNative, 'Name');
-    createMember(CLRClassInstance, typeNative, typeName, mNative, mName, false);
-  }
+  iterateThroughMembers(dotnet.getStaticMemberTypes(typeNative), true);
+  iterateThroughMembers(dotnet.getMemberTypes(typeNative), false);
 
   classCache[qualifiedName] = CLRClassInstance;
   return classCache[qualifiedName];

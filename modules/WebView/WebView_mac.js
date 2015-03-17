@@ -20,7 +20,7 @@ module.exports = (function() {
         console.log(e.stack);
         process.exit(1);
       }
-    }
+    };
     return result;
   }
 
@@ -40,7 +40,7 @@ module.exports = (function() {
         console.log(e.stack);
         process.exit(1);
       }
-    }
+    };
     return result;
   }
 
@@ -467,7 +467,7 @@ module.exports = (function() {
   WebView.prototype.boundsOnWindowOfElement = function(e, cb) {
     this.execute("var rect = document.querySelector('"+e+"').getBoundingClientRect();\n" +
                   "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", function(r) { cb(JSON.parse(r)); });
-  }
+  };
 
   /**
    * @method postMessage
