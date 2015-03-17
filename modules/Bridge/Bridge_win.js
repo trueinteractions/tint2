@@ -154,21 +154,6 @@ function createProperty(target, typeNative, memberName, static) {
   });
 }
 
-/* These are only called on a per class or enum basis, base types of classes and enums
- * are then (as well) lazy loaded as needed.  This should only be called from createClass.
- */
-function createMember(target, typeNative, memberNative, memberName, static) {
-  var type = dotnet.execMethod(dotnet.execGetProperty(memberNative, 'MemberType'), 'ToString');
-  if(type === "Field") {
-    createField(target, typeNative, memberName, static);
-  } else if(type === "Method") {
-    if(memberName.substring(0,4) !== "get_" && memberName.substring(0,4) !== "set_") {
-      createMethod(target, typeNative, memberName, static);
-    }
-  } else if(type === "Property") {
-    createProperty(target, typeNative, memberName, static);
-  }
-}
 
 function CLRClass() {
 }
@@ -208,7 +193,16 @@ function createClass(typeNative, typeName) {
     while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
       var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
       var mName = dotnet.execGetProperty(mNative, 'Name');
-      createMember(CLRClassInstance, typeNative, mNative, mName, static);
+      var type = dotnet.execMethod(dotnet.execGetProperty(mNative, 'MemberType'), 'ToString');
+      if(type === "Field") {
+        createField(CLRClassInstance, typeNative, mName, static);
+      } else if(type === "Method") {
+        if(mName.substring(0,4) !== "get_" && mName.substring(0,4) !== "set_") {
+          createMethod(CLRClassInstance, typeNative, mName, static);
+        }
+      } else if(type === "Property") {
+        createProperty(CLRClassInstance, typeNative, mName, static);
+      }
     }
   };
 
