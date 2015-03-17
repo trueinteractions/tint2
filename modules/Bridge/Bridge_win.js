@@ -74,7 +74,7 @@ function createEnum(typeNative) {
   return obj;
 }
 
-function createField(target, typeNative, typeName, memberName, static) {
+function createField(target, typeNative, memberName, static) {
   dotnet.statistics.fields++;
   var objdest = static ? target : target.prototype;
   if(!objdest.hasOwnProperty(memberName)) {
@@ -95,7 +95,7 @@ function createField(target, typeNative, typeName, memberName, static) {
   }
 }
 
-function createMethod(target, typeNative, typeName, memberName, static) {
+function createMethod(target, typeNative, memberName, static) {
   dotnet.statistics.methods++;
   var objdest = static ? target : target.prototype;
   var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
@@ -119,7 +119,7 @@ function createMethod(target, typeNative, typeName, memberName, static) {
   };
 }
 
-function createProperty(target, typeNative, typeName, memberName, static) {
+function createProperty(target, typeNative, memberName, static) {
   dotnet.statistics.properties++;
   var objdest = static ? target : target.prototype;
   Object.defineProperty(objdest, memberName, {
@@ -157,16 +157,16 @@ function createProperty(target, typeNative, typeName, memberName, static) {
 /* These are only called on a per class or enum basis, base types of classes and enums
  * are then (as well) lazy loaded as needed.  This should only be called from createClass.
  */
-function createMember(target, typeNative, typeName, memberNative, memberName, static) {
+function createMember(target, typeNative, memberNative, memberName, static) {
   var type = dotnet.execMethod(dotnet.execGetProperty(memberNative, 'MemberType'), 'ToString');
   if(type === "Field") {
-    createField(target, typeNative, typeName, memberName, static);
+    createField(target, typeNative, memberName, static);
   } else if(type === "Method") {
     if(memberName.substring(0,4) !== "get_" && memberName.substring(0,4) !== "set_") {
-      createMethod(target, typeNative, typeName, memberName, static);
+      createMethod(target, typeNative, memberName, static);
     }
   } else if(type === "Property") {
-    createProperty(target, typeNative, typeName, memberName, static);
+    createProperty(target, typeNative, memberName, static);
   }
 }
 
@@ -208,7 +208,7 @@ function createClass(typeNative, typeName) {
     while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
       var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
       var mName = dotnet.execGetProperty(mNative, 'Name');
-      createMember(CLRClassInstance, typeNative, typeName, mNative, mName, static);
+      createMember(CLRClassInstance, typeNative, mNative, mName, static);
     }
   };
 
