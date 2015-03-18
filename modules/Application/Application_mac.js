@@ -116,7 +116,7 @@
       }
       var url = $.NSURL('URLWithString',$(path.toString()));
       var data = $.NSData('dataWithContentsOfURL',url);
-      if(data) {
+      if(data && data('length') > 0) {
         return process.bridge.reinterpret(data('bytes'),data('length'),0);
       } else {
         if(this.warn) {
