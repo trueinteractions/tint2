@@ -18,6 +18,7 @@ function run($utils) {
   var data = application.resource('appresources.js');
   /* @hidden */ $utils.assert(fs.statSync('appresources.js').size == data.length); 
   /* @hidden */ $utils.assert(application.resource('doesnotexist.js') === null);
+  /* @hidden */ $utils.assert(application.resource('assets/empty.txt').length === 0);
   /* @hidden */ $utils.ok();
 }
 
