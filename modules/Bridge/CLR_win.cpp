@@ -1286,7 +1286,7 @@ namespace IEWebBrowserFix {
     System::String^ fileName = System::IO::Path::GetFileName(process->MainModule->FileName);
 
     SetBrowserFeatureControlKey(perms, "FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
-    SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 00000); // turn off compatibility mode.
+    SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 0x0000); // turn off compatibility mode.
     SetBrowserFeatureControlKey(perms, "FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
     SetBrowserFeatureControlKey(perms, "FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
     SetBrowserFeatureControlKey(perms, "FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering

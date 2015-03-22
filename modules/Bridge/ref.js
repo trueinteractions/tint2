@@ -859,122 +859,56 @@ types.uint8 = {
 /**
  * The `int16` type.
  */
+ function create_type(name) {
+  var lName = name.toLowerCase();
+  types[lName] = {
+    size: exports.sizeof[lName],
+    indirection: 1,
+    get: function get (buf, offset) {
+      return buf['read' + name + exports.endianness](offset || 0);
+    },
+    set: function set (buf, offset, val) {
+      return buf['write' + name + exports.endianness](val, offset || 0);
+    }
+  };
+ }
 
-types.int16 = {
-  size: exports.sizeof.int16,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readInt16' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeInt16' + exports.endianness](val, offset || 0);
-  }
-};
+ create_type('Int16');
+ create_type('UInt16');
+ create_type('Int32');
+ create_type('UInt32');
+ create_type('Int64');
+ create_type('UInt64');
+ create_type('Float');
+ create_type('Double');
 
 /**
  * The `uint16` type.
  */
 
-types.uint16 = {
-  size: exports.sizeof.uint16,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readUInt16' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeUInt16' + exports.endianness](val, offset || 0);
-  }
-};
-
 /**
  * The `int32` type.
  */
-
-types.int32 = {
-  size: exports.sizeof.int32,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readInt32' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeInt32' + exports.endianness](val, offset || 0);
-  }
-};
 
 /**
  * The `uint32` type.
  */
 
-types.uint32 = {
-  size: exports.sizeof.uint32,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readUInt32' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeUInt32' + exports.endianness](val, offset || 0);
-  }
-};
-
 /**
  * The `int64` type.
  */
-
-types.int64 = {
-  size: exports.sizeof.int64,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readInt64' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeInt64' + exports.endianness](val, offset || 0);
-  }
-};
 
 /**
  * The `uint64` type.
  */
 
-types.uint64 = {
-  size: exports.sizeof.uint64,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readUInt64' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeUInt64' + exports.endianness](val, offset || 0);
-  }
-};
-
 /**
  * The `float` type.
  */
 
-types.float = {
-  size: exports.sizeof.float,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readFloat' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeFloat' + exports.endianness](val, offset || 0);
-  }
-};
-
 /**
  * The `double` type.
  */
-
-types.double = {
-  size: exports.sizeof.double,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf['readDouble' + exports.endianness](offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    return buf['writeDouble' + exports.endianness](val, offset || 0);
-  }
-};
 
 /**
  * The `Object` type. This can be used to read/write regular JS Objects

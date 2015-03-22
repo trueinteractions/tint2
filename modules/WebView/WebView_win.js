@@ -166,7 +166,8 @@ module.exports = (function() {
 
   WebView.prototype.boundsOnWindowOfElement = function(e, cb) {
     this.execute("var rect = document.querySelector('"+e+"').getBoundingClientRect();\n" +
-                  "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", function(r) { cb(JSON.parse(r)); });
+                  "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", 
+                  function(r) { cb(JSON.parse(r)); });
   }
 
   WebView.prototype.postMessage = function(e) {
