@@ -13,6 +13,68 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   $.import('System.Xaml.dll');
 
+
+  function updateLocation() {
+    this.native.HorizontalOffset = 0;
+    this.native.VerticalOffset = 0;
+
+    var transform = "0.0", 
+        rectLeft  = arrowHeight + margin/2,
+        rectTop   = this.private.rect.Height/2 - arrowWidth/2 + margin, 
+        arrowLeft = margin/2, 
+        arrowTop  = rectTop,
+        placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
+
+    if(this.private.side === "left") {
+      transform   = "180.0";
+      rectLeft    = arrowHeight - margin/2;
+      rectTop     = margin;
+      arrowLeft   = this.private.rect.Width + arrowHeight*2 - margin/2;
+      arrowTop    = this.private.rect.Height/2 + arrowWidth/2 + margin;
+      placement   = $.System.Windows.Controls.Primitives.PlacementMode.Left;
+    }  else if (this.private.side === "top") {
+      transform   = "270.0";
+      rectLeft    = margin;
+      rectTop     = arrowHeight - margin/2;
+      arrowLeft   = this.private.rect.Width/2 - arrowWidth/2 + margin;
+      arrowTop    = this.private.rect.Height + arrowHeight*2 - margin/2;
+      placement   = $.System.Windows.Controls.Primitives.PlacementMode.Top;
+    } else if (this.private.side === "bottom") {
+      transform   = "90.0";
+      rectLeft    = margin;
+      rectTop     = arrowHeight + margin/2;
+      arrowLeft   = this.private.rect.Width/2 + arrowWidth/2 + margin;
+      arrowTop    = margin/2;
+      placement   = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
+    }
+
+    this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse(transform));
+    $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, rectLeft);
+    $.System.Windows.Controls.Canvas.SetTop(this.private.rect, rectTop);
+    $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, arrowLeft);
+    $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, arrowTop);
+    this.native.Placement = placement;
+
+    this.native.PlacementTarget = this.private.container.nativeView;
+  }
+
+  function updateLocationChange() {
+    if(this.private.attached) {
+      this.native.VerticalOffset = this.native.VerticalOffset + 1;
+      this.native.VerticalOffset = this.native.VerticalOffset - 1;
+      this.native.HorizontalOffset = this.native.HorizontalOffset + 1;
+      this.native.HorizontalOffset = this.native.HorizontalOffset - 1;
+      updateLocation.call(this);
+    }
+  }  
+  function opened() {
+    this.fireEvent('opened');
+  }
+
+  function closed() {
+    this.fireEvent('closed');
+  }
+
   function PopOver(options) {
     options = options || {};
 
@@ -33,74 +95,8 @@ module.exports = (function() {
 
     this.private.attached = false;
 
-    this.private.updateLocation = function() {
-
-      this.native.HorizontalOffset = 0;
-      this.native.VerticalOffset = 0;
-
-      var transform = "0.0", 
-          rectLeft  = arrowHeight + margin/2,
-          rectTop   = this.private.rect.Height/2 - arrowWidth/2 + margin, 
-          arrowLeft = margin/2, 
-          arrowTop  = rectTop,
-          placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
-
-      if(this.private.side === "left") {
-        transform   = "180.0";
-        rectLeft    = arrowHeight - margin/2;
-        rectTop     = margin;
-        arrowLeft   = this.private.rect.Width + arrowHeight*2 - margin/2;
-        arrowTop    = this.private.rect.Height/2 + arrowWidth/2 + margin;
-        placement   = $.System.Windows.Controls.Primitives.PlacementMode.Left;
-      }  else if (this.private.side === "top") {
-        transform   = "270.0";
-        rectLeft    = margin;
-        rectTop     = arrowHeight - margin/2;
-        arrowLeft   = this.private.rect.Width/2 - arrowWidth/2 + margin;
-        arrowTop    = this.private.rect.Height + arrowHeight*2 - margin/2;
-        placement   = $.System.Windows.Controls.Primitives.PlacementMode.Top;
-      } else if (this.private.side === "bottom") {
-        transform   = "90.0";
-        rectLeft    = margin;
-        rectTop     = arrowHeight + margin/2;
-        arrowLeft   = this.private.rect.Width/2 + arrowWidth/2 + margin;
-        arrowTop    = margin/2;
-        placement   = $.System.Windows.Controls.Primitives.PlacementMode.Bottom;
-      }
-
-      this.private.arrow.RenderTransform = new $.System.Windows.Media.RotateTransform($.System.Double.Parse(transform));
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.rect, rectLeft);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.rect, rectTop);
-      $.System.Windows.Controls.Canvas.SetLeft(this.private.arrow, arrowLeft);
-      $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, arrowTop);
-      this.native.Placement = placement;
-
-      this.native.PlacementTarget = this.private.container.nativeView;
-
-    }.bind(this);
-
-    this.private.locationChange = function() {
-      if(this.private.attached) {
-        this.native.VerticalOffset = this.native.VerticalOffset + 1;
-        this.native.VerticalOffset = this.native.VerticalOffset - 1;
-        this.native.HorizontalOffset = this.native.HorizontalOffset + 1;
-        this.native.HorizontalOffset = this.native.HorizontalOffset - 1;
-        this.private.updateLocation();
-      }
-    }.bind(this);
-      
-    var opened = function() {
-      this.fireEvent('opened');
-    }.bind(this);
-    var closed = function() {
-      this.fireEvent('closed');
-    }.bind(this);
-
-    this.private.callbacks.push(opened);
-    this.private.callbacks.push(closed);
-
-    this.native.addEventListener('Opened', opened);
-    this.native.addEventListener('Closed', closed);
+    this.native.addEventListener('Opened', opened.bind(this));
+    this.native.addEventListener('Closed', closed.bind(this));
     this.native.Placement = $.System.Windows.Controls.Primitives.PlacementMode.Right;
 
     this.height = 300;
@@ -147,9 +143,9 @@ module.exports = (function() {
     this.private.container = container;
     this.private.attached = true;
 
-    targetWindow.addEventListener('LocationChanged', this.private.locationChange);
-    targetWindow.addEventListener('SizeChanged', this.private.locationChange);
-    this.private.updateLocation();
+    targetWindow.addEventListener('LocationChanged', updateLocationChange.bind(this));
+    targetWindow.addEventListener('SizeChanged',  updateLocationChange.bind(this));
+    updateLocation.call(this);
     this.fireEvent('open');
     this.native.IsOpen = true;
   };
