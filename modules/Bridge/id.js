@@ -80,15 +80,10 @@ module.exports = (function() {
     }
   };
 
-  /**
-   * Returns an Array of Strings of the names of the ivars that the current object
-   * contains. This function can iterate through the object's superclasses
-   * recursively, if you specify a `maxDepth` argument.
-   */
-  ID.prototype.ivars = function(maxDepth, sort) {
+  function ivars_methods_rep(type, maxDepth, sort) {
     var rtn=[], c=this.getClass(), md=maxDepth || 1, depth=0;
     while (c && depth++ < md) {
-      var is=c.getInstanceVariables(), i=is.length;
+      var is=c['getInstanceVariables'](), i=is.length;
       while (i--) {
         if (rtn.indexOf(is[i]) === -1) {
           rtn.push(is[i]);
@@ -97,6 +92,15 @@ module.exports = (function() {
       c = c.getSuperclass();
     }
     return sort === false ? rtn : rtn.sort();
+  }
+
+  /**
+   * Returns an Array of Strings of the names of the ivars that the current object
+   * contains. This function can iterate through the object's superclasses
+   * recursively, if you specify a `maxDepth` argument.
+   */
+  ID.prototype.ivars = function(maxDepth, sort) {
+    return ivars_methods_rep('getInstanceVariables', maxDepth, sort);
   };
 
   /**
@@ -105,17 +109,7 @@ module.exports = (function() {
    * recursively, if you specify a `maxDepth` number argument.
    */
   ID.prototype.methods = function(maxDepth, sort) {
-    var rtn=[], c=this.getClass(), md=maxDepth || 1, depth=0;
-    while (c && depth++ < md) {
-      var ms=c.getInstanceMethods(), i=ms.length;
-      while (i--) {
-        if (rtn.indexOf(ms[i]) === -1) {
-          rtn.push(ms[i]);
-        }
-      }
-      c = c.getSuperclass();
-    }
-    return sort === false ? rtn : rtn.sort();
+    return ivars_methods_rep('getInstanceMethods', maxDepth, sort);
   };
 
   /**
