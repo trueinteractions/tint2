@@ -821,66 +821,44 @@ types.void = {
 };
 
 /**
- * The `int8` type.
- */
-
-types.int8 = {
-  size: exports.sizeof.int8, 
-  indirection: 1, 
-  get: function get (buf, offset) {
-    return buf.readInt8(offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    if (typeof val === 'string') {
-      val = val.charCodeAt(0);
-    }
-    return buf.writeInt8(val, offset || 0);
-  }
-};
-
-/**
- * The `uint8` type.
- */
-
-types.uint8 = {
-  size: exports.sizeof.uint8,
-  indirection: 1,
-  get: function get (buf, offset) {
-    return buf.readUInt8(offset || 0);
-  },
-  set: function set (buf, offset, val) {
-    if (typeof val === 'string') {
-      val = val.charCodeAt(0);
-    }
-    return buf.writeUInt8(val, offset || 0);
-  }
-};
-
-/**
  * The `int16` type.
  */
- function create_type(name) {
+ function create_type(name, endianness) {
   var lName = name.toLowerCase();
   types[lName] = {
     size: exports.sizeof[lName],
     indirection: 1,
     get: function get (buf, offset) {
-      return buf['read' + name + exports.endianness](offset || 0);
+      return buf['read' + name + endianness](offset || 0);
     },
     set: function set (buf, offset, val) {
-      return buf['write' + name + exports.endianness](val, offset || 0);
+      if ((lName === "int8" || lName === "uint8") && typeof val === 'string') {
+        val = val.charCodeAt(0);
+      }
+      return buf['write' + name + endianness](val, offset || 0);
     }
   };
  }
 
- create_type('Int16');
- create_type('UInt16');
- create_type('Int32');
- create_type('UInt32');
- create_type('Int64');
- create_type('UInt64');
- create_type('Float');
- create_type('Double');
+ create_type('Int8', '');
+ create_type('UInt8', '');
+ create_type('Int16', exports.endianness);
+ create_type('UInt16', exports.endianness);
+ create_type('Int32', exports.endianness);
+ create_type('UInt32', exports.endianness);
+ create_type('Int64', exports.endianness);
+ create_type('UInt64', exports.endianness);
+ create_type('Float', exports.endianness);
+ create_type('Double', exports.endianness);
+
+/**
+ * The `int8` type.
+ */
+
+
+/**
+ * The `uint8` type.
+ */
 
 /**
  * The `uint16` type.
