@@ -150,7 +150,7 @@ module.exports = (function() {
             layoutObject.firstAttribute = layoutObject.secondAttribute = propertyName;
           } else if (propertyName === "left") {
             layoutObject.firstAttribute = "left";
-            layoutObject.secondAttribute = "right";
+            layoutObject.secondAttribute = "left";
           } else if (propertyName === "right") {
             layoutObject.firstAttribute = "right";
             layoutObject.secondAttribute = "left";
@@ -160,6 +160,12 @@ module.exports = (function() {
           } else if (propertyName === "bottom") {
             layoutObject.firstAttribute = "bottom";
             layoutObject.secondAttribute = "top";
+          } else if (propertyName === "height") {
+            layoutObject.firstAttribute = "height";
+            layoutObject.secondAttribute = "height";
+          } else if (propertyName === "width") {
+            layoutObject.firstAttribute = "width";
+            layoutObject.secondAttribute = "width";
           }
         } 
         if(!layoutObject.secondAttribute) {
