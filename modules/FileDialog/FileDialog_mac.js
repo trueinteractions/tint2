@@ -16,6 +16,7 @@ module.exports = (function() {
     * @description Creates a new FileDialog window that is not shown by default.
     */
   function FileDialog(type) {
+    type = type || "open";
     var $dialog = (type === "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
     var allowedFileTypes = null;
     this.private = {events:{}};
@@ -186,11 +187,11 @@ module.exports = (function() {
           var count = urls('count');
           var result = [];
           for(var i=0; i < count; i++) {
-            result.push(urls('objectAtIndex',i)('absoluteString'));
+            result.push(urls('objectAtIndex',i)('absoluteString')('UTF8String').replace('file://',''));
           }
           return result;
         } else {
-          return $dialog('URL')('absoluteString');
+          return $dialog('URL')('absoluteString')('UTF8String').replace('file://','');
         }
       }
     });
