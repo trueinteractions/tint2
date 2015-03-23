@@ -193,18 +193,20 @@ module.exports = (function() {
     fileMenu.submenu = fileSubmenu;
 
     var editSubmenu = new Menu('Edit');
-    var undo = new MenuItem('Undo', 'u');
+    var undo = new MenuItem('Undo', 'z');
     undo.addEventListener('click', function() { application.undo(); });
     editSubmenu.appendChild(undo);
-    editSubmenu.appendChild(new MenuItem('Redo', 'r'))
+    editSubmenu.appendChild(new MenuItem('Redo', 'Z', 'shift'))
         .addEventListener('click', function() { application.redo(); });
     editSubmenu.appendChild(new MenuItemSeparator());
     editSubmenu.appendChild(new MenuItem('Copy', 'c'))
         .addEventListener('click', function() { application.copy(); });
     editSubmenu.appendChild(new MenuItem('Cut', 'x'))
         .addEventListener('click', function() { application.cut(); });
-    editSubmenu.appendChild(new MenuItem('Paste', 'p'))
+    editSubmenu.appendChild(new MenuItem('Paste', 'v'))
         .addEventListener('click', function() { application.paste(); });
+    editSubmenu.appendChild(new MenuItem('Select All', 'a'))
+        .addEventListener('click', function() { application.selectAll(); });
     editMenu.submenu = editSubmenu;
 
     var windowSubmenu = new Menu('Window');
