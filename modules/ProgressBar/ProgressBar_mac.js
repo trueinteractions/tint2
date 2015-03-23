@@ -22,13 +22,13 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSProgressIndicator;
     this.nativeViewClass = this.nativeViewClass || $.NSProgressIndicator;
     Container.call(this, options);
-    this.native('setUsesThreadedAnimation',$.YES);
-    this.native('startAnimation',this.native);
     this.native('setMinValue', 0);
     this.native('setMaxValue', 1);
     this.native('setDoubleValue', 0);
     this.native('setStyle', $.NSProgressIndicatorBarStyle);
     this.native('setIndeterminate', false);
+    this.native('setUsesThreadedAnimation',$.YES);
+    this.native('startAnimation',this.native);
     //TODO: Implement event for changes to value.
   }
 
