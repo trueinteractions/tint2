@@ -235,7 +235,7 @@ module.exports = (function() {
     Object.defineProperty(obj, name, {
       configurable:true,
       enumerable:true,
-      get:function() { return this.native(getselector); },
+      get:function() { return this.native(getselector)('UTF8String'); },
       set:function(value) { this.native(setselector, $(value ? value.toString() : "")); }
     });
   }
