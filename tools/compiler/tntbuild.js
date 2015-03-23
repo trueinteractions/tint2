@@ -2794,7 +2794,8 @@ function readToBase64(e) {
     process.exit(1);
   }
 }
-
+var totaltickamount = 0;
+var tickamount = 0;
 var build = $tint.loadbuilder(
   argv._[0],
   function error(e, msg) {
@@ -2805,7 +2806,11 @@ var build = $tint.loadbuilder(
     process.exit(1);
   }, 
   function warning(e) { console.warn(e); }, 
-  function progress(e) { console.log(e); }, 
+  function progress(e) { 
+    totaltickamount = build.tasks.length > totaltickamount ? build.tasks.length : totaltickamount;
+    console.log('[' + tickamount + ' of ' + totaltickamount + '] ' + e);
+    tickamount++;
+  }, 
   function success(e) { process.exit(0); }, 
   function start() { }
 );
