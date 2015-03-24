@@ -1,0 +1,20 @@
+<html>
+<head>
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  document.body.innerHTML = "Loaded";
+  var img = new Image();
+  img.onload = function () {
+    window.postMessageToHost('success');
+  }
+  img.onerror = function() {
+    window.postMessageToHost('failure');
+  }
+  img.src = "tintapp.png";
+  document.body.appendChild(img);
+});
+</script>
+<body>
+  Not loaded
+</body>
+</html>
