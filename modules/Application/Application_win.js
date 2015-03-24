@@ -45,10 +45,20 @@
       try {
         var url = new $.System.Uri(path);
         var stream = $.System.Net.WebRequest.Create(url).GetResponse().GetResponseStream();
-        var reader = new $.System.IO.StreamReader(stream);
+        // Windows CLR does not automatically translate byte[] objects to buffers, in addition
+        // it fails when you need to pass an object by reference (arrays and buffers are just copied),
+        // this makes dealing with buffers difficult as many of these systems use pass-by-reference.
+        // One option is convert it to a string and be done with it, this fails at binary data, another
+        // is to convert the enitre stream to base64 and then back into a buffer. This is a hack.
+        // TODO: Fix this so that the CLR understands pass-by-reference (or other equiv fix).
+        var b64stream = new $.System.Security.Cryptography.CryptoStream(stream, new $.System.Security.Cryptography.ToBase64Transform(), $.System.Security.Cryptography.CryptoStreamMode.Read);
+        b64stream.Flush();
+        var reader = new $.System.IO.StreamReader(b64stream);
         var data = reader.ReadToEnd();
         reader.Close();
         stream.Close();
+        b64stream.Close();
+        data = new Buffer(data.toString(),'base64');
         return data;
       } catch (e) { 
         if(this.warn) {
