@@ -150,7 +150,7 @@ module.exports = (function() {
             layoutObject.firstAttribute = layoutObject.secondAttribute = propertyName;
           } else if (propertyName === "left") {
             layoutObject.firstAttribute = "left";
-            layoutObject.secondAttribute = "left";
+            layoutObject.secondAttribute = "right";
           } else if (propertyName === "right") {
             layoutObject.firstAttribute = "right";
             layoutObject.secondAttribute = "left";
