@@ -39,6 +39,7 @@ set noperfctr_msi_arg=1
 set subsystem=console
 set platformtoolset=v110
 set build=
+set buildtoolset=
 
 :next-arg
 if "%1"=="" goto args-done
@@ -69,6 +70,7 @@ if /i "%1"=="msi"           set msi=1&set licensertf=1&goto arg-ok
 if /i "%1"=="upload"        set upload=1&goto arg-ok
 if /i "%1"=="jslint"        set jslint=1&goto arg-ok
 if /i "%1"=="gui"			set subsystem=windows&goto arg-ok
+if /i "%1"=="ninja"			set buildtoolset="--ninja"&goto arg-ok
 
 echo Warning: ignoring invalid command line option `%1`.
 
@@ -151,7 +153,7 @@ SETLOCAL
 		echo Cannot find visual studio VCVarsQueryRegistry.bat
 		goto exit
 	)
-	python tools\tint_conf.py %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
+	python tools\tint_conf.py %buildtoolset% %debug_arg% %nosnapshot_arg% %noetw_arg% %noperfctr_arg% --subsystem=%subsystem% --dest-cpu=%target_arch% --tag=%TAG% > nul
 	if errorlevel 1 goto create-msvs-files-failed
 	if not exist build\msvs\tint.sln goto create-msvs-files-failed
 ENDLOCAL
@@ -191,7 +193,7 @@ SETLOCAL
 :msbuild-found
  	copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
  	set start=%time%
-	msbuild build\msvs\tint.sln /t:%target% /m:2 /p:Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+	msbuild build\msvs\tint.sln /t:%target% /m:%NUMBER_OF_PROCESSORS% /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
 	if errorlevel 1 goto exit
 	set end=%time%
 	set options="tokens=1-4 delims=:."
