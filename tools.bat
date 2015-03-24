@@ -193,7 +193,7 @@ SETLOCAL
 :msbuild-found
  	copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
  	set start=%time%
-	msbuild build\msvs\tint.sln /t:%target% /m:%NUMBER_OF_PROCESSORS% /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+	msbuild build\msvs\tint.sln /t:%target% /m:8 /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
 	if errorlevel 1 goto exit
 	set end=%time%
 	set options="tokens=1-4 delims=:."
