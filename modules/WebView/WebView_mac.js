@@ -102,8 +102,6 @@ module.exports = (function() {
           frameWinObj('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
           this.execute("window.postMessageToHost = function(e) { window.TintMessages.postMessage(e); }");
         }
-      } else {
-        this.execute("window.postMessageToHost = function(e) { window.webkit.messageHandlers.TintMessages.postMessage(e); }");
       }
       var loc = this.location;
       if(this.private.previousUrl !== loc) {
@@ -371,6 +369,12 @@ module.exports = (function() {
       this.native('setNavigationDelegate', this.native);
       this.nativeView('configuration')('userContentController')('removeScriptMessageHandlerForName',$('TintMessages'));
       this.nativeView('configuration')('userContentController')('addScriptMessageHandler',this.nativeView,'name',$('TintMessages'));
+
+      var script = $.WKUserScript('alloc')('initWithSource', $("window.postMessageToHost = function(e) { window.webkit.messageHandlers.TintMessages.postMessage(e); }"),
+        'injectionTime',$.WKUserScriptInjectionTimeAtDocumentStart,
+        'forMainFrameOnly', $.YES);
+      this.nativeView('configuration')('userContentController')('addUserScript',script);
+
     } else {
       this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
       var tintWebKitResponseDelegate = createWebViewBridge();
