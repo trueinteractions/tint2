@@ -8,6 +8,12 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
 
+  function ensureHandle(win) {
+    // We need to force a HWND creatio otherwise setting any
+    // properties on the WPF Windows object will fail. 
+    win.private.hwnd = (new $.System.Windows.Interop.WindowInteropHelper(win.native)).EnsureHandle();
+  }
+
   function Window(options) {
     options = options || {};
     options.width = options.width || 500;
@@ -88,16 +94,6 @@ module.exports = (function() {
     this.native.Width = options.width;
     this.native.Height = options.height;
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
-
-    // We need to force a HWND creatio otherwise setting any
-    // properties on the WPF Windows object will fail. 
-    this.private.hwnd = (new $.System.Windows.Interop.WindowInteropHelper(this.native)).EnsureHandle();
-    // Force directx to not re-draw the background, we already do it anyway.
-    var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
-    mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.White;
-    // Just as above, tell WPF not to redraw the background, The Desktop Window Manager (DWM) will do it 
-    // anyway as long as the style isn't set to "None"
-    this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.White);
 
     // Lets just set our background to white 
     this.backgroundColor = 'rgba(255,255,255,1)';
@@ -273,6 +269,18 @@ module.exports = (function() {
   //  set:function(e) { /* TODO ? */ }
   //});
 
+  util.def(Window.prototype, 'transparent',
+    function() { return this.native.AllowTransparency; },
+    function(e) { 
+      if(e) {
+        this.frame = false;
+        this.native.AllowTransparency = true;
+      } else {
+        this.frame = true;
+        this.native.AllowTransparency = false;
+      }
+    });
+
   // Override Control's definition of visible to a window context.
   util.def(Window.prototype, 'visible',
     function() { return this.native.Visibility === $.System.Windows.Visibility.Visible; },
@@ -362,10 +370,18 @@ module.exports = (function() {
       if(e === 'auto') {
         this.private.background = 'auto';
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
+      } else if (e === 'transparent' || (e.indexOf('rgba') > -1 && e.indexOf('0)') > -1)) {
+        this.transparent = true;
       } else {
         this.private.background = e;
         this.private.backgroundObj = new Color(e);
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush(this.private.backgroundObj.native);
+
+        ensureHandle(this);
+        var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
+        mainWindowSrc.CompositionTarget.BackgroundColor = this.private.backgroundObj.native;
       }
     }
   );
