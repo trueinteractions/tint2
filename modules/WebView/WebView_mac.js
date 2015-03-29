@@ -14,9 +14,7 @@ module.exports = (function() {
       var listener = arguments[6];
       try {
         var presult = this.fireEvent('policy',[request('URL')('absoluteURL')('description')('UTF8String')]);
-        if(typeof(presult) === 'undefined') {
-          presult = true;
-        }
+        presult = typeof(presult) === 'undefined' ? true : presult;
         listener(presult ? 'use' : 'ignore');
       } catch (e) {
         console.log(e.message);
@@ -56,17 +54,20 @@ module.exports = (function() {
       // strings can be passed back-forth. For now, only post message is used.
       var tintWebKitResponseDelegate = $.NSObject.extend('tintWebKitResponseDelegate');
       tintWebKitResponseDelegate.addMethod('initWithJavascriptObject:', ['@',[tintWebKitResponseDelegate, $.selector, '@']], 
-        util.errorwrap(function(self, cmd, id) {
+        util.errorwrap(function() {
+          /* self, cmd, id */
+          var self = arguments[0];
+          var id = arguments[2];
           self.callback = process.bridge.objc.delegates[id.toString()];
           process.bridge.objc.delegates[id.toString()] = null;
           return self;
       }));
       tintWebKitResponseDelegate.addClassMethod('webScriptNameForSelector:','@@::', 
-        util.errorwrap(function(self,_cmd,sel) { 
-          return $("postMessage");
-      }));
+        util.errorwrap(function() { return $("postMessage"); }));
       tintWebKitResponseDelegate.addClassMethod('isSelectorExcludedFromWebScript:','B@::', 
-        util.errorwrap(function(self,_cmd,sel) { 
+        util.errorwrap(function() { 
+          /* self,_cmd,sel */
+          var sel = arguments[2];
           return sel === "postMessage" ? $.NO : $.YES;
       }));
       /**
@@ -76,7 +77,12 @@ module.exports = (function() {
        *              passed into the callback provided as the first argument.
        */
       tintWebKitResponseDelegate.addMethod('postMessage','v@:@',
-          util.errorwrap(function(self, cmd, message) { self.callback.fireEvent('message', [message.toString()]); }));
+          util.errorwrap(function() { 
+            /* self, cmd, message */
+            var self = arguments[0];
+            var message = arguments[2];
+            self.callback.fireEvent('message', [message.toString()]); 
+          }));
       tintWebKitResponseDelegate.register();
     }
     return $.tintWebKitResponseDelegate;
@@ -339,8 +345,8 @@ module.exports = (function() {
       this.native('setNavigationDelegate', this.native);
       this.nativeView('configuration')('userContentController')('removeScriptMessageHandlerForName',$('TintMessages'));
       this.nativeView('configuration')('userContentController')('addScriptMessageHandler',this.nativeView,'name',$('TintMessages'));
-
-      var script = $.WKUserScript('alloc')('initWithSource', $("window.postMessageToHost = function(e) { window.webkit.messageHandlers.TintMessages.postMessage(e); }"),
+      var script = $.WKUserScript('alloc')('initWithSource', 
+        $("window.postMessageToHost = function(e) { window.webkit.messageHandlers.TintMessages.postMessage(e); }"),
         'injectionTime',$.WKUserScriptInjectionTimeAtDocumentStart,
         'forMainFrameOnly', $.YES);
       this.nativeView('configuration')('userContentController')('addUserScript', script);
