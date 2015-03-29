@@ -8,7 +8,10 @@ module.exports = (function() {
   var core = require('core');
 
   function createWebViewPolicyHandler() {
-    var result = function(self, cmd, webview, action, request, frame, listener) {
+    var result = function() {
+      /* self, cmd, webview, action, request, frame, listener */
+      var request = arguments[4];
+      var listener = arguments[6];
       try {
         var presult = this.fireEvent('policy',[request('URL')('absoluteURL')('description')('UTF8String')]);
         if(typeof(presult) === 'undefined') {
@@ -25,12 +28,13 @@ module.exports = (function() {
   }
 
   function createWKWebViewPolicyHandler(pass,fail) {
-    var result = function(self, cmd, webview, navigation, decisionHandler) {
+    var result = function() {
+      /* self, cmd, webview, navigation, decisionHandler */
+      var navigation = arguments[3];
+      var decisionHandler = arguments[4];
       try {
         var presult = this.fireEvent('policy', [navigation('request')('URL')('absoluteURL')('description')('UTF8String')]);
-        if(typeof(presult) === 'undefined') {
-          presult = true;
-        }
+        presult = typeof(presult) === 'undefined' ? true : presult;
         var d = decisionHandler.reinterpret(32);
         var block = new core.__block_literal_1(d);
         var bfunc = core.createUnwrapperFunction(block.invoke,['v',['?','I']]);
@@ -46,9 +50,7 @@ module.exports = (function() {
 
   function createWebViewBridge() {
     if(!$.tintWebKitResponseDelegate) {
-      if(!process.bridge.objc.delegates) {
-        process.bridge.objc.delegates = {};
-      }
+      process.bridge.objc.delegates = process.bridge.objc.delegates || {};
       // This class implements a set of javascript -> objective-c functions on the object window.TintMessages
       // within each webview. This allows communication to-from webkit and our hosting JS instance. Only serializable
       // strings can be passed back-forth. For now, only post message is used.
@@ -80,7 +82,10 @@ module.exports = (function() {
     return $.tintWebKitResponseDelegate;
   }
 
-  function fireError(self, cmd, webview, navigationOrError, error) {
+  function fireError() {
+    /* self, cmd, webview, navigationOrError, error */
+    var navigationOrError = arguments[3];
+    var error = arguments[4];
     try {
       if(this.useWKWebView) {
         this.fireEvent('error',[error('localizedDescription')('UTF8String')]);
@@ -93,7 +98,8 @@ module.exports = (function() {
       process.exit(1);
     }
   }
-  function fireLoad(self, _cmd, frameOrWebview, navigation) { 
+  function fireLoad() { 
+    /* self, _cmd, frameOrWebview, navigation */
     try {
       if(!this.useWKWebView) {
         // Create the comm delegate and assign it to window.TintMessages, then override window.postMessageToHost.
@@ -115,7 +121,9 @@ module.exports = (function() {
       process.exit(1);
     }
   }
-  function fireNewWindow(s,c,webview,config,navAction,features) {
+  function fireNewWindow() {
+    /* self,_cmd,webview,config,navAction,features */
+    var config = arguments[3];
     try {
       var newWebview = new WebView(this.useWKWebView ? {configuration:config} : {});
       return (this.fireEvent('new-window', [newWebview])) === false ? null : newWebview.nativeView;
@@ -154,48 +162,17 @@ module.exports = (function() {
     options.nonStandardEvents = true;
     options.doNotInitialize = true;
 
-    if(!this.useWKWebView) {
-      options.delegates = options.delegates.concat([
-        // DEPRECATED IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
-        // @event cancel
-        // @memberof WebView
-        // @description Fires when a navigation or resource load request was cancelled programmatically or for security reasons.
-        ['webView:didCancelClientRedirectForFrame:','v@:@@', function(self,_cmd,frame) { this.fireEvent('cancel'); }.bind(this)],
-        /**
-         * @event unload
-         * @memberof WebView
-         * @description Fires when a page in the top frame is unloaded.
-         */
-        ['webView:didClearWindowObject:forFrame:','v@:@@@', function(self,_cmd,win,frame) { this.fireEvent('unload'); }.bind(this)],
-        ['webView:didFailLoadWithError:forFrame:','v@:@@', fireError.bind(this)],
-        ['webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', fireError.bind(this)],
-        ['webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function(self, _cmd, title, frame) { this.fireEvent('redirect'); }.bind(this)],
-        // DEPRECATED IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
-        // @event title
-        // @memberof WebView
-        // @description Fires when the title of the HTML document loaded is available.
-        ['webView:didReceiveTitle:forFrame:', 'v@:@@@', function(self, _cmd, title, frame) { this.fireEvent('title'); }.bind(this)],
-        // DEPRECATED IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
-        // @event icon
-        // @memberof WebView
-        // @description Fires when the icon of the HTML document loaded is available.
-        //
-        ['webView:didReceiveIcon:forFrame:', 'v@:@@@', function(self, _cmd, icon, frame) { this.fireEvent('icon'); }.bind(this)],
-        ['webView:didStartProvisionalLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('loading'); }.bind(this)],
-        ['webView:didFinishLoadForFrame:', 'v@:@@', fireLoad.bind(this)],
-        ['webView:didCommitLoadForFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('request'); }.bind(this)],
-        // DEPRECATED IN OSX YOSEMITE, Not entirely sure how useful this is anyways. Most window.close events are ignored
-        // by browsers anyways.
-        // @event close
-        // @memberof WebView
-        // @description Fires when a request to close the frame has occured (e.g., window.close in HTML javascript)
-        ['webView:willCloseFrame:', 'v@:@@', function(self, _cmd, frame) { this.fireEvent('close'); }.bind(this)],
-        //['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { }.bind(this)],
-        ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', function() { this.fireEvent('redirect'); }.bind(this)],
-        ['webView:createWebViewWithRequest:', '@@:@@', fireNewWindow.bind(this)],
-        ['webView:decidePolicyForNavigationAction:request:frame:decisionListener:','v@:@@@@@', createWebViewPolicyHandler().bind(this)]
-      ]);
-    } else {
+    // TODO: auth
+    // TODO: alert
+    // TODO: confirm
+    // TODO: input 
+    // TODO: download
+    // TODO: resize
+    // TOOD: close (new?)
+
+    this.nativeViewClass = this.nativeClass = this.nativeClass || this.useWKWebView ? $.WKWebView : $.WebView;
+
+    if(this.useWKWebView) {
       // WKWebView actions
       options.delegates = options.delegates.concat([
         /**
@@ -205,7 +182,8 @@ module.exports = (function() {
          *              new URL has passed security requirement checks, but has yet to begin making a network request
          *              or render any parts of the page.
          */
-        ['webView:didCommitNavigation:', 'v@:@@', function(self, cmd, webview, navigation) {
+        ['webView:didCommitNavigation:', 'v@:@@', function() {
+          /* self, cmd, webview, navigation */
           if(firstLoad) {
             firstLoad = false;
           } else {
@@ -260,13 +238,13 @@ module.exports = (function() {
          * @memberof WebView
          * @description Fires when a redirect from a server request occurs.
          */
-        ['webView:didReceiveServerRedirectForProvisionalNavigation:', 'v@:@@', function(self, cmd, webview, navigation) { this.fireEvent('redirect'); }.bind(this)],
+        ['webView:didReceiveServerRedirectForProvisionalNavigation:', 'v@:@@', function() { /*self, cmd, webview, navigation*/ this.fireEvent('redirect'); }.bind(this)],
         /**
          * @event request
          * @memberof WebView
          * @description Fires when a new request for a HTML document at the top frame has occured, but before loaded or load has occured.
          */
-        ['webView:didStartProvisionalNavigation:', 'v@:@@', function(self, cmd, webview, navigation) { this.fireEvent('request'); }.bind(this)],
+        ['webView:didStartProvisionalNavigation:', 'v@:@@', function() { /*self, cmd, webview, navigation*/ this.fireEvent('request'); }.bind(this)],
         /**
          * @event policy
          * @memberof WebView
@@ -332,8 +310,10 @@ module.exports = (function() {
          */
          // TODO: TEST ME.
         ['webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:', ['@',['@',':','@','@','@','@']], fireNewWindow.bind(this)],
-        ['userContentController:didReceiveScriptMessage:', 'v@:@@', function(self, cmd, control, message) {
-            this.fireEvent('message',[message('body')('description')('UTF8String')]);
+        ['userContentController:didReceiveScriptMessage:', 'v@:@@', function() {
+          /* self, cmd, control, message */
+          var message = arguments[3];
+          this.fireEvent('message',[message('body')('description')('UTF8String')]);
         }.bind(this)]
         /* TODO
         ['webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:',['v',['@',':','@','@','@','@']], function() {
@@ -348,19 +328,9 @@ module.exports = (function() {
           var result = this.fireEvent('text-input');
         }.bind(this)] */
       ]);
-    }
-    // TODO: auth
-    // TODO: alert
-    // TODO: confirm
-    // TODO: input 
-    // TODO: download
-    // TODO: resize
-    // TOOD: close (new?)
+      
+      Container.call(this, options);
 
-    this.nativeViewClass = this.nativeClass = this.nativeClass || this.useWKWebView ? $.WKWebView : $.WebView;
-    Container.call(this, options);
-
-    if(this.useWKWebView) {
       if(options.configuration) {
         this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480), 'configuration', options.configuration);
       } else {
@@ -373,9 +343,52 @@ module.exports = (function() {
       var script = $.WKUserScript('alloc')('initWithSource', $("window.postMessageToHost = function(e) { window.webkit.messageHandlers.TintMessages.postMessage(e); }"),
         'injectionTime',$.WKUserScriptInjectionTimeAtDocumentStart,
         'forMainFrameOnly', $.YES);
-      this.nativeView('configuration')('userContentController')('addUserScript',script);
+      this.nativeView('configuration')('userContentController')('addUserScript', script);
 
     } else {
+      options.delegates = options.delegates.concat([
+        // DEPRECATED IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
+        // @event cancel
+        // @memberof WebView
+        // @description Fires when a navigation or resource load request was cancelled programmatically or for security reasons.
+        ['webView:didCancelClientRedirectForFrame:','v@:@@', function() { /*self,_cmd,frame*/ this.fireEvent('cancel'); }.bind(this)],
+        /**
+         * @event unload
+         * @memberof WebView
+         * @description Fires when a page in the top frame is unloaded.
+         */
+        ['webView:didClearWindowObject:forFrame:','v@:@@@', function() { /*self,_cmd,win,frame*/ this.fireEvent('unload'); }.bind(this)],
+        ['webView:didFailLoadWithError:forFrame:','v@:@@', fireError.bind(this)],
+        ['webView:didFailProvisionalLoadWithError:forFrame:','v@:@@', fireError.bind(this)],
+        ['webView:didReceiveServerRedirectForProvisionalLoadForFrame:','v@:@@', function() { /*self, _cmd, title, frame*/ this.fireEvent('redirect'); }.bind(this)],
+        // DEPRECATED IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
+        // @event title
+        // @memberof WebView
+        // @description Fires when the title of the HTML document loaded is available.
+        ['webView:didReceiveTitle:forFrame:', 'v@:@@@', function() { /*self, _cmd, title, frame*/ this.fireEvent('title'); }.bind(this)],
+        // DEPRECATED IN OSX YOSEMITE, NOT AVAILABLE ON WINDOWS
+        // @event icon
+        // @memberof WebView
+        // @description Fires when the icon of the HTML document loaded is available.
+        //
+        ['webView:didReceiveIcon:forFrame:', 'v@:@@@', function() { /* self, _cmd, icon, frame */ this.fireEvent('icon'); }.bind(this)],
+        ['webView:didStartProvisionalLoadForFrame:', 'v@:@@', function() { /*self, _cmd, frame*/ this.fireEvent('loading'); }.bind(this)],
+        ['webView:didFinishLoadForFrame:', 'v@:@@', fireLoad.bind(this)],
+        ['webView:didCommitLoadForFrame:', 'v@:@@', function() { /*self, _cmd, frame*/ this.fireEvent('request'); }.bind(this)],
+        // DEPRECATED IN OSX YOSEMITE, Not entirely sure how useful this is anyways. Most window.close events are ignored
+        // by browsers anyways.
+        // @event close
+        // @memberof WebView
+        // @description Fires when a request to close the frame has occured (e.g., window.close in HTML javascript)
+        ['webView:willCloseFrame:', 'v@:@@', function() { /*self, _cmd, frame*/ this.fireEvent('close'); }.bind(this)],
+        //['webView:didChangeLocationWithinPageForFrame:', 'v@:@@', function(self, _cmd, notif) { }.bind(this)],
+        ['webView:willPerformClientRedirectToURL:delay:fireDate:forFrame:', 'v@:@@d@@', function() { this.fireEvent('redirect'); }.bind(this)],
+        ['webView:createWebViewWithRequest:', '@@:@@', fireNewWindow.bind(this)],
+        ['webView:decidePolicyForNavigationAction:request:frame:decisionListener:','v@:@@@@@', createWebViewPolicyHandler().bind(this)]
+      ]);
+
+      Container.call(this, options);
+
       this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
       var tintWebKitResponseDelegate = createWebViewBridge();
       var id = (Math.random()*100000).toString();
@@ -470,7 +483,8 @@ module.exports = (function() {
 
   WebView.prototype.boundsOnWindowOfElement = function(e, cb) {
     this.execute("var rect = document.querySelector('"+e+"').getBoundingClientRect();\n" +
-                  "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", function(r) { cb(JSON.parse(r)); });
+                  "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", 
+                  function(r) { cb(JSON.parse(r)); });
   };
 
   /**
@@ -502,7 +516,6 @@ module.exports = (function() {
    */
   WebView.prototype.execute = function(jscode, cb) {
     if(this.useWKWebView) {
-
       var callback = null;
       if(cb) {
         callback = $(function(obj, result) { if(cb) { cb(result('description')('UTF8String').toString()); } }.bind(this), ['v',['@','@']]);
@@ -529,12 +542,9 @@ module.exports = (function() {
     function() {
       if(!this.useWKWebView) {
         var ico = this.nativeView('mainFrameIcon');
-        if(ico) {
-          return util.makeURIFromNSImage(ico);
-        } else {
-          return null;
-        }
+        return ico ? util.makeURIFromNSImage(ico) : null;
       }
+      return null;
     }
   );
 
