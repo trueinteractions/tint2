@@ -642,6 +642,8 @@ v8::Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
 
 static int countFound = 0;
 
+void clr_callback(uv_async_t* work);
+
 public ref class CLREventHandler {
 public:
   
@@ -650,8 +652,13 @@ public:
     cppobject = new gcroot<CLREventHandler ^>(this);
     countFound = countFound + 12;
     id = (gcnew System::Random())->Next(countFound);
+    loop = uv_default_loop();
+    async = new uv_async_t;
+    uv_async_init(loop, async, clr_callback);
+    uv_ref((uv_handle_t *)async);
   }
   ~CLREventHandler() {
+    uv_unref((uv_handle_t *)async);
     Delete();
     delete cppobject;
   }
@@ -688,8 +695,21 @@ public:
     }
   }
 
+  void EventHandlerOnMain(System::Object^ sender, System::EventArgs^ e) {
+    _sender = sender;
+    _eventargs = e;
+    handle = GCHandle::Alloc(this);
+    void *data = (void *)GCHandle::ToIntPtr(handle).ToPointer();
+    async->data = data;
+    uv_async_send(async);
+  }
+
+  void EventHandlerOnMainCallback() {
+    this->EventHandler(this->_sender, this->_eventargs);
+  }
+
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
-    NanEscapableScope();
+    NanScope();
     v8::Handle<v8::Value> argv[2];
 
     argv[0] = MarshalCLRToV8(sender);
@@ -713,10 +733,20 @@ public:
     return id;
   }
 private:
+  System::Object^ _sender;
+  System::EventArgs^ _eventargs;
+  GCHandle handle;
+  uv_loop_t *loop;
+  uv_async_t *async;
   NanCallback *callback;
   gcroot<CLREventHandler ^> * cppobject;
   int id;
 };
+
+void clr_callback(uv_async_t* work) {
+  CLREventHandler^ handle = (CLREventHandler^)GCHandle::FromIntPtr(System::IntPtr(work->data)).Target;
+  handle->EventHandlerOnMainCallback();
+}
 
 void CLREventHandleCleanupJS(Persistent<Value> object, void *parameter) {
   CLREventHandler ^n = *((gcroot<CLREventHandler ^> *)parameter);
@@ -1092,7 +1122,7 @@ public:
   }
 
   static NAN_METHOD(ExecGetProperty) {
-	NanScope();
+	 NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
@@ -1201,8 +1231,8 @@ public:
       System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
       v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
       CLREventHandler ^handle = gcnew CLREventHandler();
-	  handle->SetCallback(callback);
-      System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandler");
+      handle->SetCallback(callback);
+      System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandlerOnMain");
       System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
       eInfo->AddEventHandler(target, d);
       NanReturnUndefined();
