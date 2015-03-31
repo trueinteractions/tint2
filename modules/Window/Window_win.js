@@ -94,9 +94,6 @@ module.exports = (function() {
     this.native.Width = options.width;
     this.native.Height = options.height;
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
-
-    // Lets just set our background to white 
-    this.backgroundColor = 'rgba(255,255,255,1)';
   }
 
   Window.prototype = Object.create(Container.prototype);
@@ -274,10 +271,10 @@ module.exports = (function() {
     function(e) { 
       if(e) {
         this.frame = false;
-        this.native.AllowTransparency = true;
+        this.native.AllowsTransparency = true;
       } else {
         this.frame = true;
-        this.native.AllowTransparency = false;
+        this.native.AllowsTransparency = false;
       }
     });
 
@@ -373,6 +370,10 @@ module.exports = (function() {
         this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.SystemColors.WindowFrame);
       } else if (e === 'transparent' || (e.indexOf('rgba') > -1 && e.indexOf('0)') > -1)) {
         this.transparent = true;
+        this.private.background = e;
+        this.private.backgroundObj = {native:$.System.Windows.Media.Colors.Transparent};
+        this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
       } else {
         this.private.background = e;
         this.private.backgroundObj = new Color(e);
