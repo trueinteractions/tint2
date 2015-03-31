@@ -1,6 +1,7 @@
 version: 1.0.{build}
 os: Unstable
 clone_depth: 2
+shallow_clone: true
 build_script:
 - tools.bat config x86
 - tools.bat build x86
