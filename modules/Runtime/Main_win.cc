@@ -46,17 +46,16 @@ extern "C" void CLR_Init(v8::Handle<v8::Object> target);
 void uv_noop(uv_async_t* handle, int status) {}
 
 NAN_METHOD(InitBridge) {
-	NanScope();
-	v8::Local<v8::Object> bridge = NanNew<v8::Object>();
-	process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
-	FFI::Init(bridge);
-	REF::Init(bridge);
+  NanScope();
+  v8::Local<v8::Object> bridge = NanNew<v8::Object>();
+  process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
+  FFI::Init(bridge);
+  REF::Init(bridge);
   CLR_Init(bridge);
-	NanReturnValue(NanNew<v8::Object>());
+  NanReturnValue(NanNew<v8::Object>());
 }
 
 void uv_event(void *info) {
-
   while (!embed_closed) {
     uv_update_time(env->event_loop());
     // Unlike Unix, in which we can just rely on one backend fd to determine
@@ -142,14 +141,16 @@ void node_load() {
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, (uv_async_cb)uv_noop);
 
   // Start debug agent when argv has --debug
-  if (node::use_debug_agent)
-	  node::StartDebug(env, node::debug_wait_connect);
+  if (node::use_debug_agent) {
+    node::StartDebug(env, node::debug_wait_connect);
+  }
 
   node::LoadEnvironment(env);
 
   // Enable debugger
-  if (node::use_debug_agent)
-	  node::EnableDebug(env);
+  if (node::use_debug_agent) {
+    node::EnableDebug(env);
+  }
 
   // This must post after the node::Load otherwise we will get infinte
   // timeouts from libuv and if there isn't file descirptor setup yet
@@ -239,11 +240,11 @@ int main(int argc, char *argv[]) {
 
   mainThreadId = GetCurrentThreadId();
 
-
   const char* replaceInvalid = getenv("NODE_INVALID_UTF8");
 
-  if (replaceInvalid == NULL)
-	  node::WRITE_UTF8_FLAGS |= v8::String::REPLACE_INVALID_UTF8;
+  if (replaceInvalid == NULL) {
+    node::WRITE_UTF8_FLAGS |= v8::String::REPLACE_INVALID_UTF8;
+  }
 
   assert(init_argc > 0);
 
@@ -263,25 +264,25 @@ int main(int argc, char *argv[]) {
   v8::V8::Initialize();
   node::node_is_initialized = true;
   {
-	  v8::Locker locker(node::node_isolate);
-	  v8::Isolate::Scope isolate_scope(node::node_isolate);
-	  v8::HandleScope handle_scope(node::node_isolate);
-	  v8::Local<v8::Context> context = v8::Context::New(node::node_isolate);
-	  env = node::CreateEnvironment(
-		  node::node_isolate,
-		  uv_default_loop(),
-		  context,
-		  init_argc,
-		  init_argv,
-		  exec_argc,
-		  exec_argv);
-	  v8::Context::Scope context_scope(context);
+    v8::Locker locker(node::node_isolate);
+    v8::Isolate::Scope isolate_scope(node::node_isolate);
+    v8::HandleScope handle_scope(node::node_isolate);
+    v8::Local<v8::Context> context = v8::Context::New(node::node_isolate);
+    env = node::CreateEnvironment(
+      node::node_isolate,
+      uv_default_loop(),
+      context,
+      init_argc,
+      init_argv,
+      exec_argc,
+      exec_argv);
+    v8::Context::Scope context_scope(context);
 
-	  node_load();
-	  win_msg_loop();
+    node_load();
+    win_msg_loop();
 
-	  env->Dispose();
-	  env = NULL;
+    env->Dispose();
+    env = NULL;
   }
 
   CHECK_NE(node::node_isolate, NULL);

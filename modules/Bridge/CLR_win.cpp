@@ -26,7 +26,7 @@ using namespace System::Threading::Tasks;
 using namespace System::Threading;
 using namespace Microsoft::Win32;
 
-uv_thread_t mainthread;
+DWORD v8Thread;
 
 // This keeps counts of how many objects the CLR is creating and
 // subsequently the callbacks (weak) to destroy them. It tests whether
@@ -697,11 +697,12 @@ public:
   }
 
   void EventHandlerOnMain(System::Object^ sender, System::EventArgs^ e) {
-    uv_thread_t thisthread = uv_thread_self();
-    if(uv_thread_equal(&mainthread, &thisthread) == 1) {   
+    if(GetCurrentThreadId() == v8Thread) {
       this->EventHandler(sender, e);
       return;
     }
+    _sender = sender;
+    _eventargs = e;
     handle = GCHandle::Alloc(this);
     void *data = (void *)GCHandle::ToIntPtr(handle).ToPointer();
     async->data = data;
@@ -1349,7 +1350,7 @@ namespace IEWebBrowserFix {
 
 extern "C" void CLR_Init(Handle<v8::Object> target) {
   NanScope();
-  mainthread = uv_thread_self();
+  v8Thread = GetCurrentThreadId();
   // Fix registry and "FEATURE" controls, these help align IE with a normal behavior
   // expected (on a per app registry setting basis).  This does not set global registry
   // values for anything outside of our application.
