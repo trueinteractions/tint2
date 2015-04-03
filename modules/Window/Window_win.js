@@ -295,10 +295,12 @@ module.exports = (function() {
 
   util.def(Window.prototype, 'maximizeButton',
     function() {
+      ensureHandle(this);
       var hwnd = this.private.hwnd;
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MAXIMIZEBOX;
     },
     function(e) {
+      ensureHandle(this);
       var hwnd = this.private.hwnd;
       var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
@@ -315,10 +317,12 @@ module.exports = (function() {
 
   util.def(Window.prototype, 'minimizeButton',
     function() {
+      ensureHandle(this);
       var hwnd = this.private.hwnd;
       return $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE) & $$.win32.user32.WS_MINIMIZEBOX;
     },
     function(e) {
+      ensureHandle(this);
       var hwnd = this.private.hwnd;
       var value = $$.win32.user32.GetWindowLongA(hwnd.pointer.rawpointer, $$.win32.user32.GWL_STYLE);
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
@@ -336,6 +340,7 @@ module.exports = (function() {
   util.def(Window.prototype, 'closeButton',
     function() { return this.private.closeButton; },
     function(e) {
+      ensureHandle(this);
       this.private.closeButton = e;
       var hwnd = this.private.hwnd;
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
