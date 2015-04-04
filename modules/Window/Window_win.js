@@ -75,6 +75,7 @@ module.exports = (function() {
     this.private.callbacks.push(activated);
     this.private.callbacks.push(stateChanged);
 
+    this.private.textured = false;
     this.private.previousStyle='';
     this.private.previousState='';
     this.private.previousResize = '';
@@ -103,11 +104,24 @@ module.exports = (function() {
   util.makePropertyBoolType(Window.prototype, 'frame', 'WindowStyle', 
     $.System.Windows.WindowStyle.SingleBorderWindow, $.System.Windows.WindowStyle.None);
 
-  //TODO: Implement me
-  //Object.defineProperty(Window.prototype, 'textured', {
-  //  get:function() { },
-  //  set:function(e) { }
-  //});
+  
+  Object.defineProperty(Window.prototype, 'textured', {
+    get:function() { return this.private.textured; },
+    set:function(e) { 
+      if(e) {
+        ensureHandle(this);
+
+        var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
+        mainWindowSrc.CompositionTarget.BackgroundColor = $.System.Windows.Media.Colors.Transparent;
+        this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+        this.native.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Transparent);
+        $.TintInterop.Dwm.Glass(this.private.hwnd, -1);
+      } else {
+
+      }
+      this.private.textured = e ? true : false;
+    }
+  });
 
   //TODO: Implement me
   //Object.defineProperty(Window.prototype, 'shadow', {
@@ -341,7 +355,7 @@ module.exports = (function() {
     function() { return this.private.closeButton; },
     function(e) {
       ensureHandle(this);
-      this.private.closeButton = e;
+      this.private.closeButton = e ? true : false;
       var hwnd = this.private.hwnd;
       var hMenu = $$.win32.user32.GetSystemMenu(hwnd.pointer.rawpointer, false);
       if(e) {

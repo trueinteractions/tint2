@@ -6,6 +6,7 @@
 #include <vector>
 #include <msclr/marshal.h>
 #include <windows.h>
+#include <Dwmapi.h>
 #include "../AutoLayoutPanel.cpp"
 
 #using <mscorlib.dll>
@@ -172,7 +173,16 @@ System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
  ** Supporting WPF / Windows Functions, Methods and Classes
  **/
 
+
 namespace TintInterop {
+  public ref class Dwm {
+  public:
+    static int Glass(IntPtr hwnd, int margin) {
+      MARGINS margins = {margin,margin,margin,margin};
+      return ::DwmExtendFrameIntoClientArea((HWND)hwnd.ToPointer(), &margins);
+    } 
+  };
+
   public ref class WPFAnimator 
   {
   public:
@@ -901,8 +911,9 @@ public:
       System::String^ field = stringV82CLR(args[2]->ToString());
 
       System::Type^ baseType = target->GetType();
-      if(baseType != System::Type::typeid && target == System::Type::typeid)
+      if(baseType != System::Type::typeid && target == System::Type::typeid) {
         baseType = (System::Type ^)target;
+      }
 
       baseType->GetField(field,
         BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->SetValue(target, value);

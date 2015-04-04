@@ -449,7 +449,7 @@
             'PLATFORM="win32"',
             '_UNICODE=1',
           ],
-          'libraries': ['-lpsapi.lib']
+          'libraries': ['-lpsapi.lib','-lDwmapi.lib']
         }, { # POSIX
           'defines': [ 
             '__POSIX__',
@@ -545,7 +545,7 @@
               '$(newincludepath)'
             ],
             'AdditionalOptions': [
-              '/MP', # compile across multiple CPUs
+              #'/MP', # compile across multiple CPUs - this causes deadlocks in VS2013
             ],
           },
           'VCLinkerTool': {
