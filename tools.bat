@@ -165,7 +165,7 @@ if not defined build goto test
 
 SETLOCAL
 
-	if defined VS120COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Using Platform Toolset V120
 		call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
 		set GYP_MSVS_VERSION=2013
