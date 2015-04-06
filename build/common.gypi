@@ -244,8 +244,11 @@
           'PREBINDING': 'NO',                       # No -Wl,-prebind
           'MACOSX_DEPLOYMENT_TARGET': '10.7',       # -mmacosx-version-min=10.7, chng from 10.5
           'USE_HEADERMAP': 'NO',
+          'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',       # required for node module being imported
+          'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',   # required for node module being imported
           'OTHER_CFLAGS': [
-            '-fobjc-runtime=macosx',                # added for Tint, objc runtime
+            '-fno-strict-aliasing',
+            # '-fobjc-runtime=macosx',                # added for Tint, objc runtime
           ],
           'OTHER_LDFLAGS':[
             '-framework Carbon',                    # added for Tint

@@ -489,8 +489,8 @@ def configure_node(o):
     o['variables']['gcc_version'] = 10 * cc_version[0] + cc_version[1]
 
   # clang has always supported -fvisibility=hidden, right?
-  if not is_clang and cc_version < (4,0,0):
-    o['variables']['visibility'] = ''
+  # if not is_clang and cc_version < (4,0,0):
+  #  o['variables']['visibility'] = ''
 
   # By default, enable DTrace on SunOS systems. Don't allow it on other
   # systems, since it won't work.  (The MacOS build process is different than
