@@ -249,7 +249,7 @@
           ],
           'OTHER_LDFLAGS':[
             '-framework Carbon',                    # added for Tint
-            '-framework AppKit'                     # added for Tint
+            '-framework AppKit',                    # added for Tint
           ],
           'WARNING_CFLAGS': [
             '-Wall',
