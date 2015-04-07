@@ -234,7 +234,6 @@ void win_msg_loop() {
 // when executed its possible we came in through WinMain and it called us
 // after initializing the arguments.
 int main(int argc, char *argv[]) {
-  argv = uv_setup_args(argc, argv);
   init_argc = argc;
   init_argv = copy_argv(argc, argv);
 
