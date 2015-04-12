@@ -175,13 +175,6 @@ System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
 namespace TintInterop {
-  public ref class Dwm {
-  public:
-    static int Glass(IntPtr hwnd, int margin) {
-      MARGINS margins = {margin,margin,margin,margin};
-      return ::DwmExtendFrameIntoClientArea((HWND)hwnd.ToPointer(), &margins);
-    } 
-  };
 
   public ref class WPFAnimator 
   {
@@ -773,6 +766,227 @@ class CLR {
 
 public:
 
+static NAN_METHOD(CreateClass) {
+    NanScope();
+    try {
+      System::String^ name = stringV82CLR(args[0]->ToString());
+      System::Type^ base = (System::Type ^)MarshalV8ToCLR(args[1]);
+      cli::array<System::Object^>^ interfaces = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[2]);
+      cli::array<System::Object^>^ abstracts = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[3]);
+
+      System::AppDomain^ domain = System::AppDomain::CurrentDomain;
+      AssemblyName^ aName = gcnew AssemblyName(name);
+      AssemblyBuilder^ ab = domain->DefineDynamicAssembly(aName, AssemblyBuilderAccess::RunAndCollect);
+      ModuleBuilder^ mb = ab->DefineDynamicModule(aName->Name, aName->Name + ".dll");
+      TypeBuilder^ tb = mb->DefineType(name,  TypeAttributes::Public | 
+                                              TypeAttributes::Class | 
+                                              TypeAttributes::AnsiClass |
+                                              TypeAttributes::AutoLayout | 
+                                              TypeAttributes::AutoClass, 
+                                              base);
+      NanReturnValue(MarshalCLRToV8(tb));
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static NAN_METHOD(AddConstructor) {
+    NanScope();
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ accessibility = stringV82CLR(args[1]->ToString());
+      bool defaultConst = ((System::Boolean ^)MarshalV8ToCLR(args[2]))->CompareTo(true);
+      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(args[3]);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[4]);
+
+      CLREventHandler ^handle = gcnew CLREventHandler();
+      handle->SetCallback(callback);
+
+
+      MethodAttributes attr = MethodAttributes::Public;
+      if(accessibility == "private") attr = MethodAttributes::Private;
+
+      ConstructorBuilder^ ctor0;
+
+      if(types->Length == 0) {
+        ctor0 = tb->DefineConstructor(attr, CallingConventions::Standard, System::Type::EmptyTypes);
+      } else {
+        ctor0 = tb->DefineConstructor(attr, CallingConventions::Standard, (cli::array<System::Type^>^)types);
+      }
+
+      ILGenerator ^il = ctor0->GetILGenerator();
+      
+      // Push args
+      for(unsigned short i=0; i < types->Length; i++) {
+        il->Emit(OpCodes::Ldarg_S,i);
+      }
+
+      // Call method CLREventHandler->PassThru
+      il->EmitCall(OpCodes::Call,
+        handle->GetType()->GetMethod("PassThru"),
+        types);
+
+      // Return back.
+      il->Emit(OpCodes::Ret);
+
+      NanReturnUndefined();
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static NAN_METHOD(AddMethodToClass) {
+    NanScope();
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ name = stringV82CLR(args[1]->ToString());
+      System::String^ accessibility = stringV82CLR(args[2]->ToString());
+      bool staticDef = ((bool)MarshalV8ToCLR(args[3]));
+      bool overrideDef = ((bool)MarshalV8ToCLR(args[4]));
+      System::Type^ rettype = (System::Type ^)MarshalV8ToCLR(args[5]);
+      cli::array<System::Object ^>^ objects = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[6]);
+      cli::array<System::Type ^>^ types = gcnew cli::array<System::Type ^>(objects->Length);
+      for(int i=0; i < objects->Length; i++) {
+        types[i] = (System::Type ^)objects[i];
+      }
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[7]);
+
+      CLREventHandler ^handle = gcnew CLREventHandler();
+      handle->SetCallback(callback);
+
+      MethodAttributes attr = MethodAttributes::Public;
+      if(accessibility == "private") attr = MethodAttributes::Private;
+      if(staticDef) attr = attr | MethodAttributes::Static;
+
+      MethodBuilder^ m0;
+
+      if(types->Length == 0) {
+        m0 = tb->DefineMethod(name, attr, rettype, System::Type::EmptyTypes);
+      } else {
+        m0 = tb->DefineMethod(name, attr, rettype, (cli::array<System::Type^>^)types);
+      }
+
+
+
+
+      //ILGenerator ^il = m0->GetILGenerator();
+      //il->Emit(OpCodes::Ldarg_0);
+      // Push args
+      //for(unsigned short i=0; i < types->Length; i++) {
+      //  il->Emit(OpCodes::Ldarg_S, i+1);
+      //}
+      //il->Emit(OpCodes::Arglist);
+      //il->Emit(OpCodes::Call, System::ArgIterator::GetType()->GetConstructor(new Type[] { RuntimeArgumentHandle->GetType() }));
+      // Call method CLREventHandler->PassThru
+      //MethodInfo^ mh = handle->GetType()->GetMethod("PassThru");
+      //if(mh == nullptr) {
+      //  Console::WriteLine("Fatal: cannot execute method info of null.");
+      //  exit(1);
+      //}
+      //il->EmitCall(OpCodes::Call, mh, types); //, types
+      // Return back.
+      //il->Emit(OpCodes::Ret);
+
+      // If we'd like to override the method in the process.
+      MethodInfo^ info = (MethodInfo^)tb->BaseType->GetMethod(name);
+      if(overrideDef && info != nullptr) {
+        tb->DefineMethodOverride(m0,info);
+      }
+
+      NanReturnUndefined();
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static NAN_METHOD(AddPropertyToClass) {
+    NanScope();
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ name = stringV82CLR(args[1]->ToString());
+      System::String^ accessibility = stringV82CLR(args[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
+      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
+      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
+      System::Object ^value = MarshalV8ToCLR(args[6]);
+
+      FieldBuilder^ fieldBuilder = tb->DefineField("_" + name, propType, FieldAttributes::Private);
+
+      MethodAttributes attr = MethodAttributes::Public;
+      if(accessibility == "private") attr = MethodAttributes::Private;
+      if(staticDef) attr = attr | MethodAttributes::Static;
+      attr = attr | MethodAttributes::SpecialName | MethodAttributes::HideBySig;
+
+      PropertyBuilder^ propertyBuilder = tb->DefineProperty(name, PropertyAttributes::HasDefault, propType, nullptr);
+      MethodBuilder^ getPropMthdBldr = tb->DefineMethod("get_" + name, attr, propType, System::Type::EmptyTypes);
+      ILGenerator^ getIl = getPropMthdBldr->GetILGenerator();
+
+      getIl->Emit(OpCodes::Ldarg_0);
+      getIl->Emit(OpCodes::Ldfld, fieldBuilder);
+      getIl->Emit(OpCodes::Ret);
+       
+      cli::array<System::Type ^>^ props = gcnew cli::array<System::Type ^>(1);
+      props[0] = propType;
+      MethodBuilder^ setPropMthdBldr = tb->DefineMethod("set_" + name,
+        MethodAttributes::Public | MethodAttributes::SpecialName | MethodAttributes::HideBySig,
+        nullptr, props);
+
+      ILGenerator^ setIl = setPropMthdBldr->GetILGenerator();
+      Label modifyProperty = setIl->DefineLabel();
+      Label exitSet = setIl->DefineLabel();
+
+      setIl->MarkLabel(modifyProperty);
+      setIl->Emit(OpCodes::Ldarg_0);
+      setIl->Emit(OpCodes::Ldarg_1);
+      setIl->Emit(OpCodes::Stfld, fieldBuilder);
+      setIl->Emit(OpCodes::Nop);
+      setIl->MarkLabel(exitSet);
+      setIl->Emit(OpCodes::Ret);
+
+      propertyBuilder->SetGetMethod(getPropMthdBldr);
+      propertyBuilder->SetSetMethod(setPropMthdBldr);
+
+      NanReturnUndefined();
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static NAN_METHOD(AddFieldToClass) {
+    NanScope();
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::String^ name = stringV82CLR(args[1]->ToString());
+      System::String^ accessibility = stringV82CLR(args[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
+      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
+      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
+      System::Object ^value = MarshalV8ToCLR(args[6]);
+
+      FieldAttributes attr = FieldAttributes::Public;
+      if(accessibility == "private") attr = FieldAttributes::Private;
+      
+      if(staticDef) attr = attr | FieldAttributes::Static;
+      FieldBuilder^ fieldBuilder = tb->DefineField(name, propType, attr);
+      
+      NanReturnUndefined();
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+  static NAN_METHOD(RegisterClass) {
+    NanScope();
+    try {
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      System::Type^ t = tb->CreateType();
+      NanReturnValue(MarshalCLRToV8(t));
+    } catch (System::Exception^ e) {
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+    }
+  }
+
+
 #ifdef GC_DEBUG
   static NAN_METHOD(GetCppClassCount) {
     NanScope();
@@ -791,7 +1005,7 @@ public:
   }
 
   static NAN_METHOD(GetLoadedAssemblies) {
-	NanScope();
+    NanScope();
     try {
       array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
       NanReturnValue(MarshalCLRToV8(assemblies));
@@ -801,7 +1015,7 @@ public:
   }
 
   static NAN_METHOD(LoadAssemblyFromMemory) {
-	NanScope();
+    NanScope();
     try {
       System::String^ assemblyName = stringV82CLR(args[0]->ToString());
       System::Reflection::Assembly^ assembly = System::Reflection::Assembly::Load(assemblyName);
@@ -933,10 +1147,6 @@ public:
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ field = stringV82CLR(args[1]->ToString());
 
-      //System::Type^ baseType = target->GetType();
-      //if(baseType != System::Type::typeid && target == System::Type::typeid)
-      //  baseType = (System::Type ^)target;
-
       System::Reflection::FieldInfo ^fieldinfo = target->GetField(field, 
          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
 
@@ -988,6 +1198,9 @@ public:
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
         nullptr, cshargs, nullptr);
 
+      if(rtn == nullptr) {
+        rtn = target->GetMethod(method);
+      }
       delete method;
       delete cshargs;
       NanReturnValue(MarshalCLRToV8(rtn));
@@ -1007,9 +1220,10 @@ public:
 
       for(int i=0; i < argSize; i++) {
         System::Object^ obj = MarshalV8ToCLR(args[i + 2]);
-        if(obj != nullptr)
-          cshargs->SetValue(obj->GetType(),i);
-        else {
+        if(obj != nullptr) {
+          System::Type^ argtype = obj->GetType();
+          cshargs->SetValue(argtype,i);
+        } else {
           // null was passed in, since we cannot use this to properly get the method overload
           // be reflected types we'll try jut a name match.
           MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
@@ -1020,13 +1234,24 @@ public:
         }
       }
 
+
       MethodInfo^ rtn = target->GetMethod(method, 
         BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
         nullptr,
         cshargs,
         nullptr);
+      
       delete method;
-      NanReturnValue(MarshalCLRToV8(rtn));
+
+      if(rtn == nullptr) {
+        rtn = target->GetMethod(method);
+        if(rtn == nullptr) {
+          NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method)));
+        }
+        NanReturnValue(MarshalCLRToV8(rtn));
+      } else {
+        NanReturnValue(MarshalCLRToV8(rtn));
+      }
     } catch(System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -1077,7 +1302,8 @@ public:
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for (int i = 0; i < argSize; i++) {
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]), i);
+        System::Object^ objectPassed = MarshalV8ToCLR(args[i + 2]);
+        cshargs->SetValue(objectPassed, i);
       }
       System::Object^ rtn = method->Invoke(target, cshargs);
   
@@ -1398,6 +1624,15 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
   NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
 
+  // create classes
+  NODE_SET_METHOD(target, "classCreate", CLR::CreateClass);
+  NODE_SET_METHOD(target, "classAddConstructor", CLR::AddConstructor);
+  NODE_SET_METHOD(target, "classAddMethod", CLR::AddMethodToClass);
+  NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
+  NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
+  NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
+
+  // callback for webviews
   NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
 #ifdef GC_DEBUG
   NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);

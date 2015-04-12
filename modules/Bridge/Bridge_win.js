@@ -16,7 +16,7 @@ if(typeof(process.bridge.ffi) === 'undefined') {
 if(typeof(process.bridge.win32) === 'undefined') {
   process.bridge.win32 = require('win32');
 }
-
+var assert = require('assert');
 var dotnet = process.bridge;
 var assemblyImported = {};
 var classCache = {};
@@ -33,6 +33,18 @@ function unwrap(a) {
   }
 }
 
+function unwrapValues(e) {
+  if(Array.isArray(e)) {
+    var unwrapped = [];
+    for(var i=0; i < e.length; i++) {
+      unwrapped[i] = unwrap(e[i]);
+    }
+    return unwrapped;
+  } else {
+    return unwrap(e);
+  }
+}
+
 function wrap(b) {
   if(Buffer.isBuffer(b) && !b.array) {
     return createJSInstance(b);
@@ -44,10 +56,58 @@ function wrap(b) {
 function typeSignature(memberName, args) {
   var signature = memberName, unwrappedArgs = [];
   for(var i=0; i < args.length; i++) {
-    signature += args[i] ? args[i].className : "null";
+    if(args[i] && args[i].className) {
+      signature += args[i].className;
+    } else if(typeof(args[i]) === 'string') {
+      signature += 'String';
+    } else if (typeof(args[i] === 'number' && args[i] % 1 === 0)) {
+      signature += 'Integer';
+    } else if (typeof(args[i] === 'number' && args[i] % 1 !== 0)) {
+      signature += 'Double';
+    } else if (typeof(args[i]) === 'boolean') {
+      signature += 'Boolean';
+    } else if (typeof(args[i]) === 'undefined' || args[i] === null) {
+      signature += 'null';
+    } else if (Array.isArray(args[i])) {
+      signature += 'Array';
+    } else {
+      signature += 'Object';
+    }
     unwrappedArgs.push(unwrap(args[i]));
   }
   return {signature:signature, unwrappedArgs:unwrappedArgs};
+}
+
+
+/* The proto class is a "non sealed" class that can be used
+ * to create new classes in dotnet, it's just a weak object
+ * that shortens the API */
+function ProtoClass(name, base) {
+  this.protoPointer = dotnet.classCreate(name,unwrap(base),[],[]);
+
+  this.addConstructor = function(public, types, callback) {
+    public = public ? "public" : "private";
+    dotnet.classAddConstructor(this.protoPointer,public,unwrapValues(types),callback);
+  };
+
+  this.addMethod = function(name, static, public, override, retType, types, callback) {
+    public = public ? "public" : "private";
+    dotnet.classAddMethod(this.protoPointer,name,public,static,override,unwrapValues(retType),unwrapValues(types),callback);
+  };
+
+  this.addProperty = function(name, static, public, readOnly, propType, value) {
+    public = public ? "public" : "private";
+    dotnet.classAddProperty(this.protoPointer,name,public,static,readOnly,unwrap(propType),unwrap(value));
+  };
+
+  this.addField = function(name, static, public, readOnly, propType, value) {
+    public = public ? "public" : "private";
+    dotnet.classAddField(this.protoPointer,name,public,static,readOnly,unwrap(propType),unwrap(value));
+  };
+
+  this.register = function() {
+    return createClass(dotnet.classRegister(this.protoPointer), name);
+  }
 }
 
 
@@ -102,6 +162,7 @@ function createMethod(target, typeNative, memberName, static) {
   
   var prepargs = function() {
     var s = typeSignature(memberName, arguments);
+
     if(!this._methods) {
       this._methods = {};
     }
@@ -174,8 +235,8 @@ function createClass(typeNative, typeName) {
   if(classCache[qualifiedName]) {
     return classCache[qualifiedName];
   }
+
   // These must be available on both the static and instance of the class/object.
-  
   var CLRClassInstance = function() {
     var args = [this.classPointer];
     for(var i=0; i < arguments.length; i++) {
@@ -187,6 +248,7 @@ function createClass(typeNative, typeName) {
   CLRClassInstance.prototype.constructor = CLRClassInstance;
   CLRClassInstance.prototype.classPointer = CLRClassInstance.classPointer = typeNative;
   CLRClassInstance.prototype.className = CLRClassInstance.className = typeName;
+  CLRClassInstance.prototype.extend = CLRClassInstance.extend = function(name) { return new ProtoClass(name,typeNative); }
 
   var iterateThroughMembers = function(types, static) {
     var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
