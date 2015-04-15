@@ -23,7 +23,7 @@ module.exports = (function() {
   function writeImageToBase64(image) {
     var bitmapRep = $.NSBitmapImageRep('alloc')('initWithCGImage',image);
     var imageData = bitmapRep('representationUsingType',$.NSPNGFileType, 'properties', null);
-    return imageData('base64EncodedStringWithOptions',0);
+    return imageData('base64EncodedStringWithOptions',0).toString();
   }
   function takeSnapshotOfWindowNumber(windowNumber) {
     var image = $.CGWindowListCreateImage($.CGRectNull, $.kCGWindowListOptionIncludingWindow | $.kCGWindowListExcludeDesktopElements, windowNumber, $.kCGWindowImageDefault);
