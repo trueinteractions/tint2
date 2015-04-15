@@ -53,7 +53,7 @@ var tintexec;
 
 
 ex.writeImage = function writeImageToFile(image, path) {
-    var bf = new Buffer(image, 'base64');
+    var bf = new Buffer(image.toString(), 'base64');
     var fs = require('fs');
     fs.writeFileSync(path,bf);
 }
