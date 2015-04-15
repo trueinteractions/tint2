@@ -449,7 +449,7 @@
             'PLATFORM="win32"',
             '_UNICODE=1',
           ],
-          'libraries': ['-lpsapi.lib'] #,'-lDwmapi.lib'
+          'libraries': ['-lpsapi.lib','-lDwmapi.lib']
         }, { # POSIX
           'defines': [ 
             '__POSIX__',
