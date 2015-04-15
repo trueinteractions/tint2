@@ -185,7 +185,8 @@ module.exports = (function() {
    * @member textured
    * @type {boolean}
    * @memberof Window
-   * @description Gets or sets whether the window's style is textured.  By default this is true.
+   * @description Gets or sets whether the window's style is textured.  By default this is true on
+   *              OSX and false on Microsoft Windows.
    *              Textured windows use the native OS' texture to render the background, on OSX
    *              this is the metal or brushed look, on some Windows platforms this is a glass
    *              look on the frame elements. Setting this to false disables these.
