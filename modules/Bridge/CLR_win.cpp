@@ -175,6 +175,13 @@ System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
 namespace TintInterop {
+  public ref class Dwm {
+    public:
+    static int Glass(IntPtr hwnd, int margin) {
+      MARGINS margins = {margin,margin,margin,margin};
+      return ::DwmExtendFrameIntoClientArea((HWND)hwnd.ToPointer(), &margins);
+    } 
+  };
 
   public ref class WPFAnimator 
   {
@@ -865,11 +872,32 @@ static NAN_METHOD(CreateClass) {
       } else {
         m0 = tb->DefineMethod(name, attr, rettype, (cli::array<System::Type^>^)types);
       }
+/*
+      ILGenerator ^il = m0->GetILGenerator();
+      MethodInfo^ target_mh = (MethodInfo^)handle->GetType()->GetMethod("PassThru");
 
+      if(!target_mh->IsStatic) {
+        il->DeclareLocal(handle->GetType());
+        il->Emit(OpCodes::Ldarg_0);
+        //il->Emit(OpCodes::Ldc_I4_0);
+        //il->Emit(OpCodes::Ldelem_Ref);
 
+        //il->Emit(OpCodes::Ldarg_0);
+        //il->Emit(OpCodes::Castclass, target_mh->DeclaringType);
+        
+        il->Emit(OpCodes::Castclass, handle->GetType());
+      }
 
-
-      //ILGenerator ^il = m0->GetILGenerator();
+      if (target_mh->IsVirtual && !target_mh->IsFinal) {
+        il->EmitCall(OpCodes::Callvirt, target_mh, nullptr);
+      } else {
+        il->EmitCall(OpCodes::Call, target_mh, nullptr);
+      }
+      if (target_mh->ReturnType->IsValueType) {
+        il->Emit(OpCodes::Box, target_mh->ReturnType);
+      }
+      il->Emit(OpCodes::Ret); 
+*/
       //il->Emit(OpCodes::Ldarg_0);
       // Push args
       //for(unsigned short i=0; i < types->Length; i++) {
@@ -885,7 +913,6 @@ static NAN_METHOD(CreateClass) {
       //}
       //il->EmitCall(OpCodes::Call, mh, types); //, types
       // Return back.
-      //il->Emit(OpCodes::Ret);
 
       // If we'd like to override the method in the process.
       MethodInfo^ info = (MethodInfo^)tb->BaseType->GetMethod(name);
