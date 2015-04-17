@@ -1521,6 +1521,7 @@ static NAN_METHOD(CreateClass) {
 
 };
 
+void browser_callback(uv_async_t* work);
 
 namespace IEWebBrowserFix {
   public ref class ScriptInterface
@@ -1529,8 +1530,30 @@ namespace IEWebBrowserFix {
     ScriptInterface(v8::Local<v8::Function> cb) {
       NanEscapableScope();
       callback = new NanCallback(cb);
+      loop = uv_default_loop();
+      async = new uv_async_t;
+      uv_async_init(loop, async, browser_callback);
+      uv_ref((uv_handle_t*)async);
+      sem = gcnew Semaphore(0,1);
     }
-    
+      
+    void postMessageBackOnMain(System::String^ str) {
+      if(GetCurrentThreadId() == v8Thread) {
+        this->postMessageBack(this->_response);
+        return;
+      }
+      _response = str;
+      handle = GCHandle::Alloc(this);
+      void *data = (void *)GCHandle::ToIntPtr(handle).ToPointer();
+      async->data = data;
+      uv_async_send(async);
+      sem->WaitOne();
+    }
+
+    void postMessageBackOnMainCallback() {
+      this->postMessageBack(this->_response);
+    }
+
     [System::Runtime::InteropServices::ComVisibleAttribute(true)]
     void postMessageBack(System::String^ str)
     {
@@ -1543,10 +1566,13 @@ namespace IEWebBrowserFix {
 
       if (this->callback->IsEmpty()) {
         throw gcnew System::Exception("CLR Fatal: Script bridge callback has been garbage collected.");
-		exit(1);
+		    exit(1);
       } else {
         // invoke the registered callback function
         this->callback->Call(1, argv);
+        if(_response != nullptr) {
+          sem->Release();
+        }
       }
       if (try_catch.HasCaught()) {
         throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
@@ -1554,13 +1580,17 @@ namespace IEWebBrowserFix {
       }
     }
 
-  private:
-	NanCallback *callback;
-
+    private:
+      uv_loop_t *loop;
+      uv_async_t *async;
+      NanCallback *callback;
+      GCHandle handle;
+      System::String^ _response;
+      Semaphore^ sem;
   };
 
   static NAN_METHOD(CreateScriptInterface) {
-	NanEscapableScope();
+    NanEscapableScope();
     v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
     NanReturnValue(MarshalCLRToV8(gcnew ScriptInterface(NanEscapeScope(callback))));
   }
@@ -1619,6 +1649,12 @@ namespace IEWebBrowserFix {
     SetBrowserFeatureControlKey(perms, "FEATURE_ZONE_ELEVATION", fileName, 0);
     SetBrowserFeatureControlKey(perms, "FEATURE_SCRIPTURL_MITIGATION", fileName, 0);
   }
+}
+
+
+void browser_callback(uv_async_t* work) {
+  IEWebBrowserFix::ScriptInterface^ handle = (IEWebBrowserFix::ScriptInterface^)GCHandle::FromIntPtr(System::IntPtr(work->data)).Target;
+  handle->postMessageBackOnMainCallback();
 }
 
 extern "C" void CLR_Init(Handle<v8::Object> target) {
