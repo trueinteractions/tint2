@@ -667,6 +667,7 @@ public:
     async = new uv_async_t;
     uv_async_init(loop, async, clr_callback);
     uv_ref((uv_handle_t *)async);
+    sem = gcnew Semaphore(0,1);
   }
   ~CLREventHandler() {
     uv_unref((uv_handle_t *)async);
@@ -692,10 +693,11 @@ public:
       exit(1);
     } else {
       // invoke the registered callback function
-	  callback->Call(args->Length, argv.data());
+	   callback->Call(args->Length, argv.data());
     }
-    if (try_catch.HasCaught())
+    if (try_catch.HasCaught()) {
       try_catch.ReThrow();
+    }
   }
 
   void Delete() {
@@ -708,6 +710,8 @@ public:
 
   void EventHandlerOnMain(System::Object^ sender, System::EventArgs^ e) {
     if(GetCurrentThreadId() == v8Thread) {
+      _sender = nullptr;
+      _eventargs = nullptr;
       this->EventHandler(sender, e);
       return;
     }
@@ -717,6 +721,7 @@ public:
     void *data = (void *)GCHandle::ToIntPtr(handle).ToPointer();
     async->data = data;
     uv_async_send(async);
+    sem->WaitOne();
   }
 
   void EventHandlerOnMainCallback() {
@@ -738,6 +743,9 @@ public:
     } else {
       // invoke the registered callback function
       this->callback->Call(2, argv);
+      if(_sender != nullptr) {
+        sem->Release();
+      }
     }
     if (try_catch.HasCaught()) {
       throw gcnew System::Exception(exceptionV82stringCLR(try_catch.Exception()));
@@ -750,6 +758,7 @@ public:
 private:
   System::Object^ _sender;
   System::EventArgs^ _eventargs;
+  Semaphore^ sem;
   GCHandle handle;
   uv_loop_t *loop;
   uv_async_t *async;
@@ -1148,8 +1157,8 @@ static NAN_METHOD(CreateClass) {
     NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Object^ value = MarshalV8ToCLR(args[3]);
-      System::String^ field = stringV82CLR(args[2]->ToString());
+      System::Object^ value = MarshalV8ToCLR(args[2]);
+      System::String^ field = stringV82CLR(args[1]->ToString());
 
       System::Type^ baseType = target->GetType();
       if(baseType != System::Type::typeid && target == System::Type::typeid) {
