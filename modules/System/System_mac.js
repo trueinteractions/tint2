@@ -1,6 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var utils = require('Utilities');
+  $.import('ApplicationServices');
 
   /**
    * @class System

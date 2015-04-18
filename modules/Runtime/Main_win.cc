@@ -140,6 +140,14 @@ void node_load() {
   uv_async_t dummy_uv_handle_;
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, (uv_async_cb)uv_noop);
 
+  // This must post after the node::Load otherwise we will get infinte
+  // timeouts from libuv and if there isn't file descirptor setup yet
+  // the entire thing will simply never wake back up.
+  embed_closed = 0;
+  
+  uv_sem_init(&embed_sem, 0);
+  uv_thread_create(&embed_thread, uv_event, NULL);
+
   // Start debug agent when argv has --debug
   if (node::use_debug_agent) {
     node::StartDebug(env, node::debug_wait_connect);
@@ -152,13 +160,6 @@ void node_load() {
     node::EnableDebug(env);
   }
 
-  // This must post after the node::Load otherwise we will get infinte
-  // timeouts from libuv and if there isn't file descirptor setup yet
-  // the entire thing will simply never wake back up.
-  embed_closed = 0;
-  
-  uv_sem_init(&embed_sem, 0);
-  uv_thread_create(&embed_thread, uv_event, NULL);
 }
 
 // Externalize this, if we've completely blocked the event loop
@@ -217,8 +218,6 @@ void win_msg_loop() {
     if(bRet == -1) {
       fprintf(stderr, "FATAL ERROR: %i\n",bRet);
       exit(1);
-    
-    //TODO: else if (!TranslateAccelerator(msg.hwnd ?? , hAccelTable ?? , &msg))
     } else {
        TranslateMessage(&msg);
        DispatchMessage(&msg);
