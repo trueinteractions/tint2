@@ -172,7 +172,7 @@ extern "C" void uv_run_nowait() {
 
 void node_terminate() {
   embed_closed = 1;
-  EmitExit(env);
+  code = EmitExit(env);
   RunAtExit(env);
 }
 
@@ -226,7 +226,6 @@ void win_msg_loop() {
 
   // Received WM_QUIT
   node_terminate();
-  exit(0);
 }
 
 // This is the general entry point for everything when /subsystem:console, 
@@ -290,7 +289,6 @@ int main(int argc, char *argv[]) {
 
   delete[] exec_argv;
   exec_argv = NULL;
-
   return code;
 }
 

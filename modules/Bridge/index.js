@@ -228,6 +228,10 @@ module.exports = (function() {
     q = (typeof(q) === 'undefined') ? 99999999 : q;
     Import.import(p,false,NodObjC,q);
   };
+  NodObjC.importOnto =
+  function importOnto (p,q) {
+    Import.import(p,false,q,99999999);
+  }
 
   NodObjC.alloc = Import.allocReference;
   NodObjC.YES = '\x01';

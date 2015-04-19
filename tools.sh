@@ -58,7 +58,7 @@ elif [ "$1" == "dist" ]; then
     fi
   fi
   if [ ! -f "./build/msvs/Release/tint_windows.exe" ]; then
-    read -p "Run 'tools.bat build gui' on Windows... "
+    read -p "Run 'tools.bat config gui & tools.bat build gui' on Windows... "
     if [ ! -f "./build/msvs/Release/tint_windows.exe" ]; then
       echo "Cannot find WIN64 gui binary for tint, exiting."
       exit 1

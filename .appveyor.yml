@@ -3,8 +3,8 @@ os: Unstable
 clone_depth: 2
 shallow_clone: true
 build_script:
-- tools.bat config x86
-- tools.bat build x86
+- tools.bat config build gui
+- tools.bat config build
 test_script:
 - tools.bat test
 deploy: off
