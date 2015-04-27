@@ -1,5 +1,6 @@
 dependencies:
   pre:
+    - sudo apt-get update
     - sudo apt-get install build-essential
     - sudo apt-get install clang
     - sudo apt-get install ninja-build
