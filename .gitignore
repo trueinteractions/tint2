@@ -1,3 +1,4 @@
+build/linux/
 libraries/ffi
 tools/compiler/build
 modules/Bridge/Debug

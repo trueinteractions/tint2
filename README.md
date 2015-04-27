@@ -60,6 +60,21 @@ tools.bat build x86
 tools.bat test
 ```
 
+
+<h3>Linux</h3>
+Ensure you have ninja-build, build-essentials, libgtk-3-dev and clang installed (e.g., using apt-get.)
+
+GTK (Ubuntu) 64-bit build (default)
+
+```bash
+mkdir tint
+cd tint
+git clone https://github.com/trueinteractions/tint2.git .
+./tools.sh config
+./tools.sh build
+./tools.sh test
+```
+
 You can also use ``tools.sh clean`` to clean the build, or ``tools.sh build debug`` for a debug build (these commands also work on tools.bat)
 
 <h3>Post-Build</h3>

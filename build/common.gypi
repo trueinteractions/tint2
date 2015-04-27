@@ -96,7 +96,7 @@
             # pull in V8's postmortem metadata
             'ldflags': [ '-Wl,-z,allextract' ]
           }],
-          ['clang == 0 and gcc_version >= 40', {
+          ['clang == 0 and gcc_version >= 40 and OS!="linux"', {
             'cflags': [ '-fno-tree-vrp' ],  # Work around compiler bug.
           }],
           ['clang == 0 and gcc_version <= 44', {

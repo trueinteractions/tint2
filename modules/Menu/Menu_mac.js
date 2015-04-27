@@ -5,6 +5,12 @@ module.exports = (function() {
    *              To use the menu as the system menu, see Window.menu.
    * @see Window
    * @see DropDown
+   */
+  /**
+   * @new 
+   * @memberof Menu
+   * @param {string} title The text title or label of the menu.
+   * @description Creates a new menu object.
    * @example
    * require('Common');
    * var win = new Window(); // Create a new window.
@@ -78,12 +84,6 @@ module.exports = (function() {
    * helpMenu.submenu = helpSubmenu;
    *
    * win.menu = mainMenu;
-   */
-  /**
-   * @new 
-   * @memberof Menu
-   * @param {string} title The text title or label of the menu.
-   * @description Creates a new menu object.
    */
   function Menu(title) {
     var $ = process.bridge.objc;

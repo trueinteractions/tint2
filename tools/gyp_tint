@@ -28,9 +28,9 @@ if __name__ == '__main__':
   elif 'xcode' in args:
     output_dir = os.path.join(os.path.abspath(node_root), 'build', 'xcode')
   elif 'make' in args:
-    output_dir = os.path.join(os.path.abspath(node_root), 'build', 'make')
+    output_dir = os.path.join(os.path.abspath(node_root), 'build', 'linux')
   else:
-    output_dir = os.path.join(os.path.abspath(node_root), 'build')
+    output_dir = os.path.join(os.path.abspath(node_root), 'build', 'linux')
 
   # GYP bug.
   # On msvs it will crash if it gets an absolute path.

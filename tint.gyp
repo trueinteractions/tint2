@@ -202,7 +202,7 @@
       'dependencies': [
         'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
         'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
-        'libraries/node/deps/v8/tools/gyp/v8.gyp:v8#host',
+        'libraries/node/deps/v8/tools/gyp/v8.gyp:v8',
         'tint_js2c#host',
         'ffi_bindings',
       ],
@@ -469,6 +469,23 @@
             # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
             'PLATFORM="darwin"',
           ],
+        }],
+        [ 'OS=="linux"', {
+          'sources':[
+            'modules/Runtime/Main_gtk.cc',
+          ],
+          'cflags': [
+            '<!@(pkg-config --cflags gtk+-3.0)',
+            '-I /usr/include/kqueue',
+          ],
+          'link_settings': {
+            'ldflags': [
+                '<!@(pkg-config --libs-only-other gtk+-3.0)',
+            ],
+            'libraries': [
+                '<!@(pkg-config --libs-only-l gtk+-3.0)'
+            ],
+          },
         }],
         [ 'OS=="freebsd"', {
           'libraries': [

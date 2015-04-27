@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$1" == "config" ]; then
   git apply build/node.diff 2> /dev/null
@@ -12,7 +12,15 @@ if [ "$1" == "config" ]; then
     git submodule init
     git submodule update
   fi
-  $PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --dest-cpu=x64 --xcode --tag= > /dev/null
+  if [ "$(uname)" == "Darwin" ]; then
+    $PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --dest-cpu=x64 --xcode --tag= > /dev/null
+  else
+    # sudo apt-get install build-essential
+    # sudo apt-get install clang
+    # sudo apt-get install ninja-build
+    # sudo apt-get install libgtk-3-dev
+    $PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --dest-cpu=x64 --ninja --tag= > /dev/null
+  fi
 elif [ "$1" == "build" ]; then
   if [ "$2" == "debug" ]; then
     CONFIG="Debug"
@@ -21,8 +29,8 @@ elif [ "$1" == "build" ]; then
   fi
   if [ "$(uname)" == "Darwin" ]; then
     xcodebuild -configuration $CONFIG -project build/xcode/tint.xcodeproj build
-  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    echo "Linux is not yet supported."
+  elif [ "$(uname)" == "Linux" ]; then
+    ninja -C build/linux/$CONFIG
   elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     cmd tools.bat $CONFIG build
   else
