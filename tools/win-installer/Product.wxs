@@ -18,6 +18,8 @@
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Feature Id="TintRuntime" Level="1" Title="Tint Runtime" Description="Install the core Tint runtime (tint.exe)." Absent="disallow">
       <ComponentRef Id="TintExecutable"/>
+      <ComponentRef Id="TintMsvsr120"/>
+      <ComponentRef Id="TintMsvsp120"/>
       <ComponentRef Id="TintStartMenuAndRegistryEntries"/>
     </Feature>
     <Feature Id="TintBuilder" Level="1" Title="Tint Builder" Description="Install the tntbuild to compile OSX and Windows applications." Absent="disallow">
@@ -40,6 +42,12 @@
     <DirectoryRef Id="INSTALLDIR">
       <Component Id="TintExecutable">
         <File Id="tint.exe" KeyPath="yes" Source="$(var.SourceDir)tint.exe"/>
+      </Component>
+      <Component Id="TintMsvsr120">
+        <File Id="msvcr120.dll" Source="$(var.SourceDir)msvcr120.dll"/>
+      </Component>
+      <Component Id="TintMsvsp120">
+        <File Id="msvcp120.dll" Source="$(var.SourceDir)msvcp120.dll"/>
       </Component>
       <Component Id="TintBuildExecutable">
         <File Id="tntbuild.js" KeyPath="yes" Source="$(var.SourceDir)tntbuild.js"/>
