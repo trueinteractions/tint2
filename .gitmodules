@@ -7,3 +7,8 @@
 	path = libraries/wpf-autolayout
 	url = https://github.com/trueinteractions/wpf-autolayout.git
 	branch = master
+
+[submodule "libraries/gir"]
+	path = libraries/gir
+	url = https://github.com/trueinteractions/node-gir.git
+	branch = master
