@@ -474,9 +474,11 @@
           'sources':[
             'modules/Runtime/Main_gtk.cc',
           ],
+          'dependencies':[
+            'node_gir',
+          ],
           'cflags': [
-            '<!@(pkg-config --cflags gtk+-3.0)',
-            '-I /usr/include/kqueue',
+            '<!@(pkg-config --cflags gtk+-3.0)'
           ],
           'link_settings': {
             'ldflags': [
@@ -587,6 +589,43 @@
         }
       }
     }, #end target tint
+    {
+      'target_name': 'node_gir',
+      'type': 'static_library',
+      'conditions':[
+        ['OS=="linux"', {
+          'include_dirs':[
+            'libraries/gir/src/',
+            'libraries/node/deps/v8/include/',
+            'libraries/node/deps/uv/include/',
+            'libraries/node/src/',
+            'modules/Bridge/',
+          ],
+          'sources':[
+            'libraries/gir/src/arguments.cc',
+            'libraries/gir/src/function.cc',
+            'libraries/gir/src/init.cc',
+            'libraries/gir/src/namespace_loader.cc',
+            'libraries/gir/src/util.cc',
+            'libraries/gir/src/values.cc',
+            #'libraries/gir/src/types/function.cc',
+            'libraries/gir/src/types/object.cc',
+            'libraries/gir/src/types/struct.cc',
+          ],
+          'libraries': [
+            '<!@(pkg-config --libs gobject-2.0 gobject-introspection-1.0)'
+          ],
+          'cflags': [
+            '<!@(pkg-config --cflags gobject-2.0 gobject-introspection-1.0)',
+            '-D_FILE_OFFSET_BITS=64',
+            '-D_LARGEFILE_SOURCE'
+          ],
+          'ldflags': [
+            '<!@(pkg-config --libs gobject-2.0 gobject-introspection-1.0)'
+          ]
+        }]
+      ]
+    },
     {
       'target_name': 'tint_clr',
       'type': 'static_library',
