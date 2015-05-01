@@ -245,8 +245,24 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       this.packageExecSize = winExec.length;
       try {
       this.tasks=this.tasks.concat([
-        function(){ this.pngdata=$tint.read(this.data.icon.windows[0]);this.tick("reading windows icon");}.bind(this),
-        function(){ $tint.parsepng(this.pngdata,function(e){this.onError(e);}.bind(this),function(e){this.windowsiconlrg=e;this.tick("creating icon data"); }.bind(this));}.bind(this),
+        function(){ 
+          this.pngdata=$tint.read(this.data.icon.windows[0]);
+          this.tick("reading windows icon");
+        }.bind(this),
+        function(){
+          try {
+            $tint.parsepng(this.pngdata,function(e){
+                this.onError(e);
+              }.bind(this),
+              function(e){
+                this.windowsiconlrg=e;
+                this.tick("creating icon data"); 
+              }.bind(this));
+          } catch (e) {
+            this.onError(e); 
+            return false; 
+          }
+        }.bind(this),
         function(){ 
           this.onProgress("creating windows application");
           $tint.makedir($tint.dotdot(this.conf.winapp));
