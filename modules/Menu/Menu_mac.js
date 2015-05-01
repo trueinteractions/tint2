@@ -133,7 +133,8 @@ module.exports = (function() {
      * win.menu = mainMenu;
      */
     this.appendChild = function(menuitem) {
-      assert(menuitem.__proto__.constructor.name === "MenuItem", 'Only MenuItem classes can be appended to a menu.');
+      assert(menuitem.__proto__.constructor.name === "MenuItem" || 
+        menuitem.__proto__.constructor.name === "MenuItemSeparator", 'Only MenuItem classes can be appended to a menu.');
       children.push(menuitem);
       $menu('addItem',menuitem.native);
       return menuitem;
