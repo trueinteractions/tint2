@@ -211,6 +211,7 @@ void win_msg_loop() {
 
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
+    //if (msg.message == WM_HOTKEY) 
     if(uv_trip_safety == true || msg.message == WM_APP+1) {
       uv_run_nowait();
       uv_trip_safety = false;

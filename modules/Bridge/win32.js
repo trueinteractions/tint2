@@ -129,7 +129,8 @@ win32.user32 = new ffi.Library('user32.dll', {
   mouse_event: [ VOID, [ DWORD, DWORD, DWORD, DWORD, ULONG_PTR ]],
   keybd_event: [ VOID, [ BYTE, BYTE, DWORD, ULONG_PTR ]],
   DrawIconEx: [ BOOL, [ HDC, int, int, HICON, int, int, UINT, HBRUSH, UINT ]],
-  DestroyIcon: [ BOOL, [ HICON ]]
+  DestroyIcon: [ BOOL, [ HICON ]],
+  RegisterHotKey: [ BOOL, [ HWND, int, UINT, UINT ]]
 });
 win32.user32.GetWindowLong = win32.user32.GetWindowLongW;
 win32.user32.SetWindowLong = win32.user32.SetWindowLongW;

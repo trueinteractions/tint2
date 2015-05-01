@@ -2,6 +2,7 @@ module.exports = (function() {
   if(global.__TINT.MenuItem) {
     return global.__TINT.MenuItem;
   }
+  var assert = require('assert');
   var $ = process.bridge.objc;
   var utilities = require('Utilities');
   var Container = require('Container');
@@ -33,7 +34,7 @@ module.exports = (function() {
      * @description Fires when the user clicks on the menu item or activates it with the keyboard shortcuts/arrows.
      */
     TintMenuItemDelegate.addMethod('click:','v@:@', function(self,_cmd,frame) { 
-        this.fireEvent('click');
+      this.fireEvent('click');
     }.bind(this));
     TintMenuItemDelegate.register();
 
@@ -282,13 +283,13 @@ module.exports = (function() {
   Object.defineProperty(MenuItem.prototype, 'custom', {
     get:function() { return this.private.custom; },
     set:function(e) {
-      if(e instanceof Container) {
-        this.private.custom = e;
-        this.nativeView = e.nativeView;
-        return this.native('setView',e.nativeView);
-      } else {
-        throw new Error("The passed in object was not a valid container or control.");
-      }
+      assert(e.nativeView, 'Item must be a native object with a view.');
+      this.private.custom = e;
+      this.nativeView = e.nativeView;
+      e.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
+      var size = e.nativeView('intrinsicContentSize');
+      e.nativeView('setFrame',$.NSMakeRect(0,0,size.width === -1 ? 300 : size.width, size.height === -1 ? 22 : size.height));
+      return this.native('setView',e.nativeView);
     }
   });
 

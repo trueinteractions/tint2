@@ -14,6 +14,12 @@ module.exports = (function() {
         process.bridge.objc.delegates[id.toString()] = null;
         return self;
     }));
+    /**
+     * @event click
+     * @memberof StatusBar
+     * @description Fires when the user clicks on the statusbar icon, this will not fire if a menu
+     *              is placed on the status bar or if a custom view is set.
+     */
     tintStatusBarDelegate.addMethod('click:','v@:@', 
       utilities.errorwrap(function(self,_cmd,frame) { 
         self.callback.fireEvent('click');
@@ -39,7 +45,7 @@ module.exports = (function() {
     var delegate = tintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
     this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
     this.native('retain'); // required else we'll find it GC'd 
-    this.native('setTarget',delegate);
+    this.native('setTarget', delegate);
     this.native('setAction','click:');
   }
 
@@ -113,12 +119,13 @@ module.exports = (function() {
    * @member menu
    * @type {Menu}
    * @memberof StatusBar
-   * @description Gets or sets the menu to display when the user clicks on the status bar.
+   * @description Gets or sets the menu to display when the user clicks on the status bar. 
+   *              NOTE: When a menu is set the click event is ignored and the menu is opened.
    */
   Object.defineProperty(StatusBar.prototype, 'menu', {
     get:function() { return this.private.submenu; },
-    set:function(e) { 
-      if(e instanceof Menu) {
+    set:function(e) {
+      if(e.__proto__.constructor.name === "Menu") {
         this.private.submenu = e;
         this.native('setMenu',e.native);
       } else {

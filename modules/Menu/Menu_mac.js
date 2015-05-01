@@ -1,4 +1,6 @@
 module.exports = (function() {
+  var MenuItem = require('MenuItem');
+  var assert = require('assert');
   /**
    * @class Menu
    * @description The menu class allows you to create system menus and can be used with a variety of other controls.
@@ -131,6 +133,7 @@ module.exports = (function() {
      * win.menu = mainMenu;
      */
     this.appendChild = function(menuitem) {
+      assert(menuitem.__proto__.constructor.name === "MenuItem", 'Only MenuItem classes can be appended to a menu.');
       children.push(menuitem);
       $menu('addItem',menuitem.native);
       return menuitem;
