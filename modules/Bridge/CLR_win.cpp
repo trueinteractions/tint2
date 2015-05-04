@@ -1506,7 +1506,11 @@ static NAN_METHOD(CreateClass) {
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ event = stringV82CLR(args[1]->ToString());
-      System::Reflection::EventInfo^ eInfo = target->GetType()->GetEvent(event);
+      System::Type^ typeDef = target->GetType();
+      if(typeDef->ToString()->Equals("System.RuntimeType")) {
+        typeDef = (System::Type^)target;
+      }
+      System::Reflection::EventInfo^ eInfo = typeDef->GetEvent(event);
       v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
       CLREventHandler ^handle = gcnew CLREventHandler();
       handle->SetCallback(callback);

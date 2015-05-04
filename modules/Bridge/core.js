@@ -411,7 +411,7 @@ module.exports = (function() {
 
     var wrappedObj = (type === '@') ? new (require('id'))(val) 
                                    : new (require('class'))(val);
-
+  
     var rtn = function() {  return wrappedObj.msgSend(arguments,false); }
     rtn.__proto__ = wrappedObj;
 

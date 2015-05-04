@@ -225,8 +225,8 @@ CLRClass.prototype.toString = function() {
 CLRClass.prototype.inspect = function() { 
   return '\033[33m CLR ' + this.toString() + '\033[39m'; 
 };
-CLRClass.prototype.addEventListener = function(event, callback) { 
-  dotnet.execAddEvent(this.pointer,event,callback); 
+CLRClass.addEventListener = CLRClass.prototype.addEventListener = function(event, callback) {
+  dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback); 
 };
 
 function createClass(typeNative, typeName) {
@@ -249,7 +249,9 @@ function createClass(typeNative, typeName) {
   CLRClassInstance.prototype.classPointer = CLRClassInstance.classPointer = typeNative;
   CLRClassInstance.prototype.className = CLRClassInstance.className = typeName;
   CLRClassInstance.prototype.extend = CLRClassInstance.extend = function(name) { return new ProtoClass(name,typeNative); }
-
+  CLRClassInstance.addEventListener = CLRClassInstance.prototype.addEventListener = function(event, callback) {
+    dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback); 
+  };
   var iterateThroughMembers = function(types, static) {
     var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
     while(dotnet.execMethod(typeEnumerator, "MoveNext")) {

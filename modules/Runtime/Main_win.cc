@@ -211,7 +211,22 @@ void win_msg_loop() {
 
   while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
   {
-    //if (msg.message == WM_HOTKEY) 
+    if (msg.message == WM_HOTKEY) {
+      v8::Isolate *isolate = env->isolate();
+      v8::HandleScope scope(isolate);
+      v8::Handle<v8::Value> tmp = process_l->Get(NanNew<v8::String>("_win32_message"));
+      if(tmp->IsFunction()) {
+        v8::Local<v8::Value> args[2];
+        args[0] = NanNew<v8::Number>(MapVirtualKeyW(msg.lParam >> 16, MAPVK_VK_TO_CHAR));
+        args[1] = NanNew<v8::Number>(msg.lParam & 0x00ff);
+        v8::Local<v8::Function> fn = tmp.As<v8::Function>();
+        v8::TryCatch try_catch;
+        fn->Call(isolate->GetCurrentContext()->Global(), 2, args);
+        if (try_catch.HasCaught()) {
+          node::FatalException(try_catch);
+        }
+      }
+    }
     if(uv_trip_safety == true || msg.message == WM_APP+1) {
       uv_run_nowait();
       uv_trip_safety = false;

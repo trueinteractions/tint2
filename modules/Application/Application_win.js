@@ -15,13 +15,58 @@
   process.bridge.dotnet.import('System.Drawing'); 
 
   var $ = process.bridge.dotnet;
+  var $$ = process.bridge;
+  var assert = require('assert');
 
   function Application() {
     var name = "", 
         badgeText = "", 
         dockmenu = null, 
-        icon = "";
+        icon = "",
+        hotKeys = [];
 
+    process._win32_message = function(keyCode, modifiers) {
+      var alt = $$.win32.user32.MOD_ALT = 0x0001 & modifiers ? true : false,
+        control = $$.win32.user32.MOD_CONTROL = 0x0002 & modifiers ? true : false,
+        shift = $$.win32.user32.MOD_SHIFT = 0x0004 & modifiers ? true : false,
+        cmd = $$.win32.user32.MOD_WIN = 0x0008 & modifiers ? true : false,
+        key = String.fromCharCode(keyCode).toLowerCase();
+
+      hotKeys.forEach(function(item) {
+        if( ((item.modifiers.indexOf('alt') > -1 && alt) || !alt) &&
+            ((item.modifiers.indexOf('ctrl') > -1 && control) || !control) &&
+            ((item.modifiers.indexOf('cmd') > -1 && cmd) || !cmd) &&
+            ((item.modifiers.indexOf('shift') > -1 && shift) || !shift) && 
+            key === item.key) 
+          {
+            item.func();
+          }
+      });
+    }.bind(this);
+  
+    this.registerHotKey = function(func, key, modifiers) {
+      assert(key.length === 1, 'A global hot key may only have one character.');
+      key = key[0].toLowerCase();
+      var mods = (modifiers.indexOf('alt') > -1 ? $$.win32.user32.MOD_ALT : 0) |
+                 (modifiers.indexOf('ctrl') > -1 ? $$.win32.user32.MOD_CONTROL : 0) |
+                 (modifiers.indexOf('cmd') > -1 ? $$.win32.user32.MOD_WIN : 0) |
+                 (modifiers.indexOf('shift') > -1 ? $$.win32.user32.MOD_SHIFT : 0);
+      var hotKeyData = {key:key, modifiers:modifiers, func:func, id:hotKeys.length+1};
+      hotKeys.push(hotKeyData);
+      var result = $$.win32.user32.RegisterHotKey(null, hotKeyData.id, mods, $$.win32.user32.VkKeyScanExW(key, $$.win32.user32.GetKeyboardLayout(0)));
+      return { global:true, successful:result, unregister:function() { 
+        $$.win32.user32.UnregisterHotKey(null, hotKeyData.id);
+        hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
+      }};
+    }.bind(this);
+
+    this.unregisterAllHotKeys = function() {
+      hotKeys.forEach(function(hotKeyData) {
+        $$.win32.user32.UnregisterHotKey(null, hotKeyData.id);
+        hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
+      });
+    }.bind(this);
+  
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
     this.private.windowCount = 0;
     this.native = $.System.Windows.Application.Current;

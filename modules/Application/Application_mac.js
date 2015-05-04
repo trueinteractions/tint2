@@ -13,6 +13,7 @@
   process.bridge.objc.import('AppKit',0);
   process.bridge.objc.import('WebKit',0);
   var util = require('Utilities');
+  var assert = require('assert');
   
   // Help with garbage collection, this allows objective-c to reclaim
   // objective-c objects once we're finished with them. The FFI bridge in
@@ -62,6 +63,65 @@
     $app('setDelegate', delegate);
 
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
+
+    var hotKeys = [];
+    var eventWatchInitialized = false;
+    var eventWatchGlobal = false;
+    var initializeEventWatch = function() {
+      if(eventWatchInitialized) return eventWatchGlobal;
+      eventWatchInitialized = true;
+      eventWatchGlobal = $.AXIsProcessTrusted();
+      var blockCallback = $(function(self, arg) {
+        if(arg('type') == $.NSKeyDown) {
+          var modifierFlags = arg('modifierFlags');
+          var alphashift = modifierFlags & $.NSAlphaShiftKeyMask ? true : false,
+              shift = modifierFlags & $.NSShiftKeyMask ? true : false,
+              control = modifierFlags & $.NSControlKeyMask  ? true : false,
+              cmd = modifierFlags & $.NSCommandKeyMask ? true : false,
+              alt = modifierFlags & $.NSAlternateKeyMask ? true : false,
+              num = modifierFlags & $.NSNumericPadKeyMask ? true : false,
+              help = modifierFlags & $.NSHelpKeyMask ? true : false,
+              fn = modifierFlags & $.NSFunctionKeyMask ? true : false,
+              key = arg('charactersIgnoringModifiers').toString().toLowerCase();
+          hotKeys.forEach(function(item) {
+            if( ((item.modifiers.indexOf('alt') > -1 && alt) || !alt) &&
+                  ((item.modifiers.indexOf('ctrl') > -1 && control) || !control) &&
+                  ((item.modifiers.indexOf('cmd') > -1 && cmd) || !cmd) &&
+                  ((item.modifiers.indexOf('shift') > -1 && shift) || !shift) && 
+                  key === item.key) 
+                {
+                  item.func();
+                }
+          });
+        }
+      }.bind(this), ['@',['@','@']]);
+      if(eventWatchGlobal) {
+        $.NSEvent('addGlobalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', blockCallback);
+      } else {
+        $.NSEvent('addLocalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', blockCallback);
+      }
+      
+      return eventWatchGlobal;
+    }.bind(this);
+
+    this.registerHotKey = function(func, key, modifiers) {
+      assert(key.length === 1, 'A global hot key may only have one character.');
+      key = key[0].toLowerCase();
+      initializeEventWatch();
+      var hotKeyData = {key:key, modifiers:modifiers, func:func};
+      hotKeys.push(hotKeyData);
+      var global = initializeEventWatch();
+      return { global:global, successful:true, unregister:function() {
+        hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
+      }};
+    };
+    this.unregisterAllHotKeys = function() {
+      hotKeys.forEach(function(hotKeyData) {
+        hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
+      });
+    }
+
+  
 
     /**
      * @method addEventListener

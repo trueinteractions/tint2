@@ -34,6 +34,7 @@ function ARRAY(type, length){
 
 var VOID = types.void = ffi.types.void,
  int8 = types.int8 = ffi.types.int8,
+ short = types.int16 = ffi.types.int16,
  char = types.char = ffi.types.char,
  uchar = types.uchar = ffi.types.uchar,
  ushort = types.ushort = ffi.types.ushort,
@@ -42,6 +43,7 @@ var VOID = types.void = ffi.types.void,
  long = types.long = ffi.types.long,
  ulong = types.ulong = ffi.types.ulong,
  DWORD = TYPEDEF('DWORD', ulong),
+ SHORT = TYPEDEF('SHORT', short),
  BOOL = TYPEDEF('BOOL', int),
  BYTE = TYPEDEF('BYTE', uchar),
  TCHAR = TYPEDEF('TCHAR', char),
@@ -130,7 +132,9 @@ win32.user32 = new ffi.Library('user32.dll', {
   keybd_event: [ VOID, [ BYTE, BYTE, DWORD, ULONG_PTR ]],
   DrawIconEx: [ BOOL, [ HDC, int, int, HICON, int, int, UINT, HBRUSH, UINT ]],
   DestroyIcon: [ BOOL, [ HICON ]],
-  RegisterHotKey: [ BOOL, [ HWND, int, UINT, UINT ]]
+  RegisterHotKey: [ BOOL, [ HWND, int, UINT, UINT ]],
+  GetKeyboardLayout: [HANDLE, [DWORD]],
+  VkKeyScanExW: [ SHORT, [TCHAR, HANDLE]]
 });
 win32.user32.GetWindowLong = win32.user32.GetWindowLongW;
 win32.user32.SetWindowLong = win32.user32.SetWindowLongW;
@@ -167,7 +171,13 @@ win32.user32.WM_MOUSELEAVE = 0x02A3;
 win32.user32.WM_MOUSEHOVER = 0x02A1;
 win32.user32.MK_LBUTTON = 0x0001;
 win32.user32.WM_KEYUP = 0x0101;
-win32.user32.WM_KEYDOWN = 0x0100;
+win32.user32.MOD_ALT = 0x0001;
+win32.user32.MOD_CONTROL = 0x0002;
+win32.user32.MOD_SHIFT = 0x0004;
+win32.user32.MOD_WIN = 0x0008;
+win32.user32.IDHOT_SNAPDESKTOP = -2;
+win32.user32.IDHOT_SNAPWINDOW = -1;
+win32.user32.WM_HOTKEY = 0x0312;
 
 /* Import shell 32 low-level c functions */
 win32.shell32 = new ffi.Library('shell32.dll', {

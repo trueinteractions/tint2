@@ -13,3 +13,6 @@ if(!process.bridge.struct) {
 if(!process.bridge.ffi) {
 	process.bridge.ffi = require('ffi');
 }
+if(!process.bridge.core) {
+	process.bridge.core = require('core');
+}
