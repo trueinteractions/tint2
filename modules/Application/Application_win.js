@@ -44,7 +44,7 @@
       });
     }.bind(this);
   
-    this.registerHotKey = function(func, key, modifiers) {
+    this.registerHotKey = function(key, modifiers, func) {
       assert(key.length === 1, 'A global hot key may only have one character.');
       key = key[0].toLowerCase();
       var mods = (modifiers.indexOf('alt') > -1 ? $$.win32.user32.MOD_ALT : 0) |

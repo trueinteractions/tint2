@@ -104,7 +104,27 @@
       return eventWatchGlobal;
     }.bind(this);
 
-    this.registerHotKey = function(func, key, modifiers) {
+    /**
+     * @method registerHotKey
+     * @param {string} key The character for the hot key.
+     * @param {string} modifiers A comma delimited list of modifiers, options are 'alt', 'ctrl', 'cmd', or 'shift'.
+     * @param {function} callback The function executed when the hot key or shortcut is pressed.
+     * @returns {Object} An object with the properites: global (if the hot key successfully registered beyond the
+     *                   application context), successful if the registeration was accepted by the OS, and unregister
+     *                   function that can be executed to remove the hot key registration.
+     * @memberof Application
+     * @description Register hot key ttempts to register a global hot key (or shortcut) for the application. If a global
+     *              hot key cannot be registered it registers it as a local hot key, if that is unsuccessful the successful
+     *              property in the return object is set to false. Note the hot key may not be registered as a globla
+     *              hot key depending on security settings on the computer in addition to accessibility settings on OSX.
+     *              Note that this function returns an object describing the context in which it was registered, and the
+     *              ability to unregister the hot key (see the return object for more information).  Application entitlements
+     *              or manually setting the application as an accessible or elevated privileged application will allow it
+     *              to register a global hot key. To register a normal hot key, see the Menu and MenuItem class.
+     * @see Menu
+     * @see MenuItem
+     */
+    this.registerHotKey = function(key, modifiers, func) {
       assert(key.length === 1, 'A global hot key may only have one character.');
       key = key[0].toLowerCase();
       initializeEventWatch();
@@ -115,13 +135,18 @@
         hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
       }};
     };
+    /**
+     * @method unregisterAllHotKeys
+     * @memberof Application
+     * @description Removes all hot keys assigned by the application (with the exception of Menu related hot keys).
+     * @see Menu
+     * @see MenuItem          
+     */
     this.unregisterAllHotKeys = function() {
       hotKeys.forEach(function(hotKeyData) {
         hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
       });
     }
-
-  
 
     /**
      * @method addEventListener
