@@ -106,21 +106,27 @@
 
     /**
      * @method registerHotKey
-     * @param {string} key The character for the hot key.
-     * @param {string} modifiers A comma delimited list of modifiers, options are 'alt', 'ctrl', 'cmd', or 'shift'.
+     * @param {string} key The character for the hot key, for example copy or ctrl+C, the character would be 'c', case does not matter.
+     * @param {string} modifiers A comma delimited list of modifiers, options are 'alt', 'ctrl', 'cmd', or 'shift'.  For example 'shift,ctrl'
      * @param {function} callback The function executed when the hot key or shortcut is pressed.
-     * @returns {Object} An object with the properites: global (if the hot key successfully registered beyond the
-     *                   application context), successful if the registeration was accepted by the OS, and unregister
+     * @returns {Object} An object with the properites: {global,successful,unregister}. 'global' indicates if the hot key successfully registered beyond the
+     *                   application context, 'successful' if the registeration was accepted by the OS, and 'unregister' is a 
      *                   function that can be executed to remove the hot key registration.
      * @memberof Application
-     * @description Register hot key ttempts to register a global hot key (or shortcut) for the application. If a global
-     *              hot key cannot be registered it registers it as a local hot key, if that is unsuccessful the successful
-     *              property in the return object is set to false. Note the hot key may not be registered as a globla
-     *              hot key depending on security settings on the computer in addition to accessibility settings on OSX.
-     *              Note that this function returns an object describing the context in which it was registered, and the
-     *              ability to unregister the hot key (see the return object for more information).  Application entitlements
-     *              or manually setting the application as an accessible or elevated privileged application will allow it
-     *              to register a global hot key. To register a normal hot key, see the Menu and MenuItem class.
+     * @description The registerHotKey function attempts to assign a global hot key (or shortcut keyboard command) for the application. If a global
+     *              hot key cannot be registered it assignts it as a local (application) hot key, if that is unsuccessful the successful
+     *              property in the return object is set to false. Note the hot key may not be registered as a global
+     *              hot key depending on security settings on Windows, or due to accessibility settings on OSX.
+     *              Application entitlements or manually setting the application as an accessible or elevated privileged application will allow it
+     *              to register a global hot key. To register a normal hot key, it's customary to use the Menu and MenuItem classes.
+     * @example
+     * require('Common');
+     * var returnedObject = application.registerHotKey('m','ctrl',function() { 
+     *  console.log('control m was pressed! ')
+     * });
+     * // note that the returned object can be used to subsequently unregister
+     * // this hot key, e.g., returnedObject.unregister();
+     * @no-screenshot
      * @see Menu
      * @see MenuItem
      */
@@ -140,7 +146,7 @@
      * @memberof Application
      * @description Removes all hot keys assigned by the application (with the exception of Menu related hot keys).
      * @see Menu
-     * @see MenuItem          
+     * @see MenuItem
      */
     this.unregisterAllHotKeys = function() {
       hotKeys.forEach(function(hotKeyData) {

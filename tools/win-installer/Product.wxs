@@ -44,10 +44,10 @@
         <File Id="tint.exe" KeyPath="yes" Source="$(var.SourceDir)tint.exe"/>
       </Component>
       <Component Id="TintMsvsr120">
-        <File Id="msvcr120.dll" Source="$(var.SourceDir)msvcr120.dll"/>
+        <File Id="msvcr120.dll" Source="$(var.SourceDir)..\msvcr120.dll"/>
       </Component>
       <Component Id="TintMsvsp120">
-        <File Id="msvcp120.dll" Source="$(var.SourceDir)msvcp120.dll"/>
+        <File Id="msvcp120.dll" Source="$(var.SourceDir)..\msvcp120.dll"/>
       </Component>
       <Component Id="TintBuildExecutable">
         <File Id="tntbuild.js" KeyPath="yes" Source="$(var.SourceDir)tntbuild.js"/>
