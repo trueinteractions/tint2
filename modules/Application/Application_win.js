@@ -27,20 +27,20 @@
 
     process._win32_message = function(keyCode, modifiers) {
       var alt = $$.win32.user32.MOD_ALT = 0x0001 & modifiers ? true : false,
-        control = $$.win32.user32.MOD_CONTROL = 0x0002 & modifiers ? true : false,
+        ctrl = $$.win32.user32.MOD_CONTROL = 0x0002 & modifiers ? true : false,
         shift = $$.win32.user32.MOD_SHIFT = 0x0004 & modifiers ? true : false,
         cmd = $$.win32.user32.MOD_WIN = 0x0008 & modifiers ? true : false,
         key = String.fromCharCode(keyCode).toLowerCase();
 
       hotKeys.forEach(function(item) {
-        if( ((item.modifiers.indexOf('alt') > -1 && alt) || !alt) &&
-            ((item.modifiers.indexOf('ctrl') > -1 && control) || !control) &&
-            ((item.modifiers.indexOf('cmd') > -1 && cmd) || !cmd) &&
-            ((item.modifiers.indexOf('shift') > -1 && shift) || !shift) && 
-            key === item.key) 
-          {
-            item.func();
-          }
+        if( ((item.modifiers.indexOf('alt') > -1 && alt) || (item.modifiers.indexOf('alt') === -1 && !alt)) &&
+          ((item.modifiers.indexOf('ctrl') > -1 && ctrl) || (item.modifiers.indexOf('ctrl') === -1 && !ctrl)) &&
+          ((item.modifiers.indexOf('cmd') > -1 && cmd) || (item.modifiers.indexOf('cmd') === -1 && !cmd)) &&
+          ((item.modifiers.indexOf('shift') > -1 && shift) || (item.modifiers.indexOf('shift') === -1 && !shift)) && 
+          key === item.key) 
+        {
+          item.func();
+        }
       });
     }.bind(this);
   

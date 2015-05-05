@@ -76,7 +76,7 @@
           var modifierFlags = arg('modifierFlags');
           var alphashift = modifierFlags & $.NSAlphaShiftKeyMask ? true : false,
               shift = modifierFlags & $.NSShiftKeyMask ? true : false,
-              control = modifierFlags & $.NSControlKeyMask  ? true : false,
+              ctrl = modifierFlags & $.NSControlKeyMask  ? true : false,
               cmd = modifierFlags & $.NSCommandKeyMask ? true : false,
               alt = modifierFlags & $.NSAlternateKeyMask ? true : false,
               num = modifierFlags & $.NSNumericPadKeyMask ? true : false,
@@ -84,14 +84,14 @@
               fn = modifierFlags & $.NSFunctionKeyMask ? true : false,
               key = arg('charactersIgnoringModifiers').toString().toLowerCase();
           hotKeys.forEach(function(item) {
-            if( ((item.modifiers.indexOf('alt') > -1 && alt) || !alt) &&
-                  ((item.modifiers.indexOf('ctrl') > -1 && control) || !control) &&
-                  ((item.modifiers.indexOf('cmd') > -1 && cmd) || !cmd) &&
-                  ((item.modifiers.indexOf('shift') > -1 && shift) || !shift) && 
-                  key === item.key) 
-                {
-                  item.func();
-                }
+            if( ((item.modifiers.indexOf('alt') > -1 && alt) || (item.modifiers.indexOf('alt') === -1 && !alt)) &&
+              ((item.modifiers.indexOf('ctrl') > -1 && ctrl) || (item.modifiers.indexOf('ctrl') === -1 && !ctrl)) &&
+              ((item.modifiers.indexOf('cmd') > -1 && cmd) || (item.modifiers.indexOf('cmd') === -1 && !cmd)) &&
+              ((item.modifiers.indexOf('shift') > -1 && shift) || (item.modifiers.indexOf('shift') === -1 && !shift)) && 
+              key === item.key) 
+            {
+              item.func();
+            }
           });
         }
       }.bind(this), ['@',['@','@']]);
