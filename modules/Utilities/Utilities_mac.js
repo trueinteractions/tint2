@@ -5,6 +5,7 @@ module.exports = (function() {
   var assert = require('assert');
   var baseUtilities = require('Utilities_base');
   var $ = process.bridge.objc;
+  var path = require('path');
 
   function nsArrayToArray(nsArray) {
     var count = nsArray('count');
@@ -187,7 +188,12 @@ module.exports = (function() {
     } else if(e.indexOf(':') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e)));
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
-      img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
+      if(e[0] !== '/' && process.mainModule) {
+        img = $.NSImage('alloc')('initWithContentsOfFile',$(path.join(path.dirname(process.mainModule.filename),e)));
+      } else {
+        img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
+      }
+      
     } else {
       var imageRef = getImageFromString(e);
       if(imageRef === null) {

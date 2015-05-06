@@ -6,6 +6,7 @@ module.exports = (function() {
   var $$ = process.bridge.win32;
   var assert = require('assert');
   var baseUtilities = require('Utilities_base');
+  var path = require('path');
 
   function wpfDeviceToLogicalPx(w,p) {
     var t = $.System.Windows.PresentationSource.FromVisual(w).CompositionTarget.TransformFromDevice;
@@ -220,6 +221,9 @@ module.exports = (function() {
       img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(new $.System.Uri(e));
       img.Stretch = stretch;
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
+      if(e[0] !== '/' && process.mainModule) {
+        e = path.join(path.dirname(process.mainModule.filename),e);
+      }
       img = new $.System.Windows.Controls.Image();
       var strm = $.System.IO.File.OpenRead(e);
       img.Source = $.System.Windows.Media.Imaging.BitmapFrame.Create(strm);
