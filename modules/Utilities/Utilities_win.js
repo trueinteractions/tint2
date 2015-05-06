@@ -196,8 +196,11 @@ module.exports = (function() {
       var bmp = new $.System.Drawing.Bitmap(strm1);
       img = $.System.Drawing.Icon.FromHandle(bmp.GetHicon());
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
-      var strm2 = $.System.IO.File.OpenRead(e);
-      img = new $.System.Drawing.Icon(strm2);
+      if(e[0] !== '/' && process.mainModule) {
+        e = path.join(path.dirname(process.mainModule.filename),e);
+      }
+      var bitmap = new $.System.Drawing.Bitmap(e); // or get it from resource
+      img = $.System.Drawing.Icon.FromHandle(bitmap.GetHicon());
     } else {
       var imageRef = getImageFromString(e);
       if(imageRef === null) {
