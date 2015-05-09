@@ -140,10 +140,12 @@ module.exports = (function() {
     get:function() { return this.private.custom; },
     set:function(e) {
       if(this.private.custom !== null) {
-        this.native.Items.Remove(this.private.custom.native);
+        this.native.Header = null;
       }
-      this.private.custom = e;
-      this.native.Items.Add(e.native);
+      var control = e.fireEvent('before-child-attached', [this.private.custom]) || e;
+      control.native.Margin = new $.System.Windows.Thickness(0);
+      this.private.custom = control;
+      this.native.Header = control.native;
     }
   });
   return MenuItem;

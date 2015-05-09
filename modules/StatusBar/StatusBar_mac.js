@@ -87,8 +87,10 @@ module.exports = (function() {
   Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
     get:function() { return this.private.imgOn; },
     set:function(e) { 
-      this.private.imgOn = e; 
+      this.private.imgOn = e;
       e = utilities.makeNSImage(e);
+      var rep = e('representations')('objectAtIndex', 0);
+      rep('setSize', $.NSMakeSize(18,18));
       if(e) {
         this.native('setAlternateImage', e);
       }
@@ -108,6 +110,8 @@ module.exports = (function() {
     set:function(e) { 
       this.private.img = e;
       e = utilities.makeNSImage(e);
+      var rep = e('representations')('objectAtIndex', 0);
+      rep('setSize', $.NSMakeSize(18,18));
       if(e) {
         this.native('setImage', e);
       }
