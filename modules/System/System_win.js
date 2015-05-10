@@ -110,6 +110,47 @@ module.exports = (function() {
     var p = utils.wpfDeviceToLogicalPx(target,control.PointToScreen(new $.System.Windows.Point(0,0)));
     return {x:Math.round(p.X), y:Math.round(p.Y), width:Math.round(bounds.Width), height:Math.round(bounds.Height)};
   }
+  function convertFormat(inType) {
+    switch(inType.toLowerCase()) {
+      case 'html':
+        return $.System.Windows.DataFormats.Html;
+      case 'rtf':
+        return $.System.Windows.DataFormats.Rtf;
+      case 'ascii':
+        return $.System.Windows.DataFormats.Text;
+      case 'bitmap':
+      case 'image':
+        return $.System.Windows.DataFormats.Bitmap;
+      case 'tiff':
+        return $.System.Windows.DataFormats.Tiff;
+      case 'audio':
+        return $.System.Windows.DataFormats.WaveAudio;
+      case 'text':
+        return $.System.Windows.DataFormats.UnicodeText;
+      default:
+        return inType;
+        break;
+    }
+  }
+  System.clipboardClear = function() {
+    $.System.Windows.Clipboard.Clear();
+    $.System.Windows.Clipboard.Flush();
+  }
+  System.clipboardContainsType = function(e) {
+    return $.System.Windows.Clipboard.ContainsData(convertFormat(e));
+  }
+  System.clipboardGet = function(type) {
+    if(type) {
+      return $.System.Windows.Clipboard.GetData(convertFormat(type));
+    }
+    return $.System.Windows.Clipboard.GetText();
+  }
+  System.clipboardSet = function(data, type) {
+    if(type) {
+      return $.System.Windows.Clipboard.SetData(convertFormat(type), data);
+    }
+    return $.System.Windows.Clipboard.SetText(data.toString());
+  }
 
   System.keyAtControl = function(input) {
     var key = keyCodeFromChar(input);
@@ -158,6 +199,22 @@ module.exports = (function() {
     }
     return this.clickAt(Math.round(bounds.x + bounds.width/2) ,Math.round(bounds.y + bounds.height/2));
   };
+
+  System.mouseDownAt = function(x,y) {
+    var dpi = Screens.active.scaleFactor;
+    $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
+    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
+    $w32.user32.ShowCursor(1);
+    $w32.user32.mouse_event(0x0008, 0, 0, 0, 0); //RMOUSEDOWN
+  }
+
+  System.mouseUpAt = function(x,y) {
+    var dpi = Screens.active.scaleFactor;
+    $w32.user32.ShowCursor(0); // On VM's we need to turn off the cursor
+    $w32.user32.SetPhysicalCursorPos(Math.round(x*dpi),Math.round(y*dpi));
+    $w32.user32.ShowCursor(1);
+    $w32.user32.mouse_event(0x0010, 0, 0, 0, 0); //RMOUSEUP
+  }
 
   System.clickAt = function(x,y) {
     var dpi = Screens.active.scaleFactor;
