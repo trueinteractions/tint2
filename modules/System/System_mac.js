@@ -147,6 +147,100 @@ module.exports = (function() {
     exec('defaults write com.apple.CrashReporter DialogType crashreport');
   };
 
+  var NSPasteBoard = null;
+
+  function convertFormat(inType) {
+    return inType;
+  }
+  function lazyInitPasteboard() {
+    if(NSPasteBoard === null) {
+      NSPasteBoard = $.NSPasteboard('generalPasteboard');
+    }
+  }
+  /**
+   * @method clipboardClear
+   * @memberof System
+   * @description Clears the clipboards data.
+   * @static
+   */
+  System.clipboardClear = function() {
+    lazyInitPasteboard();
+    NSPasteBoard('clearContents');
+  }
+  /**
+   * @method clipboardContainsType
+   * @memberof System
+   * @param {string} type The extension file type, mime type or general type of the object (e.g., jpeg, image, image/jpeg)
+   * @description Returns true or false if the type specified is on the clipboard.
+   * @static
+   */
+  System.clipboardContainsType = function(e) {
+    lazyInitPasteboard();
+    var arr = $.NSMutableArray('arrayWithCapacity', 1);
+    arr('insertObject', $(e), 'atIndex', 0);
+    return NSPasteBoard('canReadItemWithDataConformingToTypes', arr) ? true : false;
+  }
+  /**
+   * @method clipboardGet
+   * @memberof System
+   * @param {string} type The extension file type, mime type or general type of the object (e.g., jpeg, image, image/jpeg)
+   * @description Gets the clipboard data, for text data a string is returned, for binary data a Buffer object is.
+   *              In addition, this may return native objects as fully formed javascript objects depending on the type.
+   * @static
+   */
+  System.clipboardGet = function(type) {
+    lazyInitPasteboard();
+    return NSPasteBoard('dataForType', $(convertFormat(type)));
+  }
+  /**
+   * @method clipboardSet
+   * @memberof System
+   * @param {string} data The data to set on the clipboard (Buffer data or string usually).
+   * @param {string} type The extension file type, mime type or general type of the object (e.g., jpeg, image, image/jpeg)
+   * @description Sets the clipboards data and adds the specified type to it. The type is case sensitive.
+   * @static
+   */
+  System.clipboardSet = function(data, type) {
+    lazyInitPasteboard();
+    NSPasteBoard('clearContents');
+    return NSPasteBoard('setData', $(data), 'forType', $(convertFormat(type)));
+  }
+
+  /**
+   * @method mouseDownAt
+   * @memberof System
+   * @param {integer} x The amount of pixels from the left of the virtual screen (e.g., all
+   *                    of the connected monitors normalized into a coordinate system).
+   * @param {integer} y The amount of pixels from the top of the virtual screen (e.g., all
+   *                    of the connected monitors normalized into a coordinate system).
+   * @description Sends a left 'mouse down' at the specified X, Y coordinates. This causes a
+   *              real left click mouse down event within the operating system 
+   *              at the specified coordinates and is not simulated.
+   * @static
+   */
+  System.mouseDownAt = function(x,y) {
+    var point = $.CGPointMake(x, y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
+  };
+  /**
+   * @method mouseUpAt
+   * @memberof System
+   * @param {integer} x The amount of pixels from the left of the virtual screen (e.g., all
+   *                    of the connected monitors normalized into a coordinate system).
+   * @param {integer} y The amount of pixels from the top of the virtual screen (e.g., all
+   *                    of the connected monitors normalized into a coordinate system).
+   * @description Sends a left 'mouse up' at the specified X, Y coordinates. This causes a
+   *              real left click mouse up event within the operating system 
+   *              at the specified coordinates and is not simulated.
+   * @static
+   */
+  System.mouseUpAt = function(x,y) {
+    var point = $.CGPointMake(x, y);
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+    $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
+  };
+
   /**
    * @method keyAtControl
    * @memberof System
