@@ -63,7 +63,7 @@ function run($utils) {
   dialog.open(win);
   $utils.assert(dialog.title == "Dialog Title", dialog.title);
   $utils.assert(dialog.message == "Message dialog", dialog.message);
-  $utils.assert(dialog.icon == "assets/tintcompiler.png", dialog.icon);
+  $utils.assert(dialog.icon == "../assets/tintcompiler.png", dialog.icon);
   $utils.assert(dialog.suppressionChecked == true);
   setTimeout(function() {
     if(ismac) {
