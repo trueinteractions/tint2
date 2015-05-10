@@ -147,7 +147,7 @@ module.exports = (function() {
     exec('defaults write com.apple.CrashReporter DialogType crashreport');
   };
 
-  var NSPasteBoard = null;
+  var NSPasteboard = null;
 
   function convertFormat(inType) {
     switch(inType) {
@@ -173,8 +173,8 @@ module.exports = (function() {
     return inType;
   }
   function lazyInitPasteboard() {
-    if(NSPasteBoard === null) {
-      NSPasteBoard = $.NSPasteboard('generalPasteboard');
+    if(NSPasteboard === null) {
+      NSPasteboard = $.NSPasteboard('generalPasteboard');
     }
   }
   /**
@@ -185,12 +185,12 @@ module.exports = (function() {
    */
   System.clipboardClear = function() {
     lazyInitPasteboard();
-    NSPasteBoard('clearContents');
+    NSPasteboard('clearContents');
   }
   /**
    * @method clipboardContainsType
    * @memberof System
-   * @param {string} type The extension file type, mime type or general type of the object (e.g., jpeg, image, image/jpeg)
+   * @param {string} type The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Returns true or false if the type specified is on the clipboard.
    * @static
    */
@@ -198,32 +198,38 @@ module.exports = (function() {
     lazyInitPasteboard();
     var arr = $.NSMutableArray('arrayWithCapacity', 1);
     arr('insertObject', $(e), 'atIndex', 0);
-    return NSPasteBoard('canReadItemWithDataConformingToTypes', arr) ? true : false;
+    return NSPasteboard('canReadItemWithDataConformingToTypes', arr) ? true : false;
   }
   /**
    * @method clipboardGet
    * @memberof System
-   * @param {string} type The extension file type, mime type or general type of the object (e.g., jpeg, image, image/jpeg)
+   * @param {string} type The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Gets the clipboard data, for text data a string is returned, for binary data a Buffer object is.
    *              In addition, this may return native objects as fully formed javascript objects depending on the type.
+   * @return Buffer A node Buffer object with the requested data.
    * @static
    */
   System.clipboardGet = function(type) {
     lazyInitPasteboard();
-    return NSPasteBoard('dataForType', $(convertFormat(type)));
+    var b = NSPasteboard('dataForType',$(convertFormat(type)));
+    if(b === null) {
+      return null;
+    }
+    var b64 = b('base64EncodedStringWithOptions',0).toString();
+    return new Buffer(b64,'base64');
   }
   /**
    * @method clipboardSet
    * @memberof System
    * @param {string} data The data to set on the clipboard (Buffer data or string usually).
-   * @param {string} type The extension file type, mime type or general type of the object (e.g., jpeg, image, image/jpeg)
+   * @param {string} type The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Sets the clipboards data and adds the specified type to it. The type is case sensitive.
    * @static
    */
   System.clipboardSet = function(data, type) {
     lazyInitPasteboard();
-    NSPasteBoard('clearContents');
-    return NSPasteBoard('setData', $(data), 'forType', $(convertFormat(type)));
+    NSPasteboard('clearContents');
+    return NSPasteboard('setData', $(new Buffer(data)), 'forType', $(convertFormat(type)));
   }
 
   /**

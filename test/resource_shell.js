@@ -54,8 +54,12 @@ function run($utils) {
   } else {
     spawn  = require('child_process').spawn,
     rescBuilder  = spawn('..\\build\\msvs\\Release\\tint.exe', 
-        ['..\\tools\\compiler\\tntbuild.js','--no-osx-build','--windows-runtime=..\\build\\msvs\\Release\\tint_windows.exe','--out=.\\packagetest-build\\','.\\packagetest\\package.json']
-        ); //  ,{ stdio: 'inherit' }
+        [ 
+          '..\\tools\\compiler\\tntbuild.js',
+          '--no-osx-build',
+          '--windows-runtime=..\\build\\msvs\\Release\\tint_windows.exe',
+          '--out=.\\packagetest-build\\','.\\packagetest\\package.json']
+         ,{ stdio: 'inherit' }); // 
     rescBuilder.on('close', function (code, signal) {
         //$utils.assert(code === 0, 'expected code to be 0 but it was: ', code);
         $utils.assert(fs.existsSync('.\\packagetest-build\\'));
