@@ -478,14 +478,16 @@
             'node_gir',
           ],
           'cflags': [
-            '<!@(pkg-config --cflags gtk+-3.0)'
+            '<!@(pkg-config --cflags gtk+-3.0 gobject-2.0 gobject-introspection-1.0)',
+            '-D_FILE_OFFSET_BITS=64',
+            '-D_LARGEFILE_SOURCE'
           ],
           'link_settings': {
             'ldflags': [
-                '<!@(pkg-config --libs-only-other gtk+-3.0)',
+                '<!@(pkg-config --libs gtk+-3.0 gobject-2.0 gobject-introspection-1.0)',
             ],
             'libraries': [
-                '<!@(pkg-config --libs-only-l gtk+-3.0)'
+                '<!@(pkg-config --libs gtk+-3.0 gobject-2.0 gobject-introspection-1.0)'
             ],
           },
         }],
@@ -608,7 +610,7 @@
             'libraries/gir/src/namespace_loader.cc',
             'libraries/gir/src/util.cc',
             'libraries/gir/src/values.cc',
-            #'libraries/gir/src/types/function.cc',
+            'libraries/gir/src/types/function_type.cc',
             'libraries/gir/src/types/object.cc',
             'libraries/gir/src/types/struct.cc',
           ],
