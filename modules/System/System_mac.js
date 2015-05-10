@@ -150,6 +150,26 @@ module.exports = (function() {
   var NSPasteBoard = null;
 
   function convertFormat(inType) {
+    switch(inType) {
+      case 'html':
+        return 'public.html';
+      case 'rtf':
+        return 'public.rtf';
+      case 'bitmap':
+      case 'image':
+        return 'public.tiff';
+      case 'tiff':
+        return 'public.tiff';
+      case 'text':
+      case 'ascii':
+        return 'public.utf8-plain-text';
+      case 'url':
+        return 'public.file-url';
+      default:
+        return 'public.' + inType;
+        break;
+    }
+    
     return inType;
   }
   function lazyInitPasteboard() {
