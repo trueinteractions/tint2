@@ -40,6 +40,7 @@ elif [ "$1" == "clean" ]; then
   rm -rf ./build/msvs/
   rm -rf ./build/ninja/
   rm -rf ./build/xcode/
+  rm -rf ./build/linux/
   rm -rf ./build/Release/
   rm -rf ./build/Debug/
   rm -rf ./build/out/
