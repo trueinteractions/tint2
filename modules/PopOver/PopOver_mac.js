@@ -102,7 +102,8 @@ module.exports = (function() {
     // The timeout is necessary, popover will not show if the view
     // has yet to complete its layout, give it a tick to calculate.
     setTimeout(function() {
-      this.native('showRelativeToRect', $.NSMakeRect(0,0,0,0), 'ofView', container.nativeView, 'preferredEdge', edge);
+      this.native('showRelativeToRect', $.NSMakeRect(0,0,0,0), 
+        'ofView', container.nativeView ? container.nativeView : container.native, 'preferredEdge', edge);
     }.bind(this), 100);
   }
 

@@ -113,6 +113,11 @@ activate (GtkApplication* app,
   uv_thread_create(&embed_thread, uv_event, NULL);
 }
 
+static gint gtk_command_line_cb (GApplication *app, GApplicationCommandLine *cmd, gpointer user_data) {
+  activate((GtkApplication *)app, user_data);
+  return (gint)0;
+}
+
 static void deactivate() {
   EmitExit(env);
   RunAtExit(env);
@@ -150,10 +155,11 @@ static char **copy_argv(int argc, char **argv) {
 }
 
 int main(int argc, char * argv[]) {
-  app = gtk_application_new ("org.trueinteractions.tint", G_APPLICATION_FLAGS_NONE);
+  app = gtk_application_new ("org.trueinteractions.tint", G_APPLICATION_HANDLES_COMMAND_LINE);
   g_application_hold(G_APPLICATION (app));
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
   g_signal_connect (app, "shutdown", G_CALLBACK (deactivate), NULL);
+  g_signal_connect (app, "command-line", G_CALLBACK(gtk_command_line_cb), NULL);
   /*NSBundle *bundle = [NSBundle mainBundle];
   NSString *package = [bundle pathForResource:@"package" ofType:@"json"];
   NSString *identifier = [bundle bundleIdentifier];
