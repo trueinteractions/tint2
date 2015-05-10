@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
 if [ $CI ]; then
  echo -n 'Tint unit tests for: '
  uname -a 
