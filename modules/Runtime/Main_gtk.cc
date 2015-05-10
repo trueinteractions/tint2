@@ -2,6 +2,7 @@
 #include <tint_version.h>
 #include <gtk/gtk.h>
 #include "../Bridge/nan.h"
+#include "../libraries/gir/src/namespace_loader.h"
 
 #include <sys/types.h>
 #include <sys/epoll.h>
@@ -25,14 +26,18 @@ namespace FFI {
 }
 
 v8::Handle<v8::Object> process_l;
+v8::Handle<v8::Object> gobj;
 node::Environment *env;
 
 NAN_METHOD(InitBridge) {
     NanScope();
     v8::Local<v8::Object> bridge = NanNew<v8::Object>();
+    gobj = NanNew<v8::Object>();
     process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
+    bridge->ForceSet(NanNew<v8::String>("gobj"), gobj);
     FFI::Init(bridge);
     REF::Init(bridge);
+    gir::NamespaceLoader::Initialize(gobj);
     NanReturnValue(NanNew<v8::Object>());
 }
 
