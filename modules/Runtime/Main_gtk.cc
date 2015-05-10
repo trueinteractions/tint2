@@ -86,7 +86,7 @@ activate (GtkApplication* app,
   process_l = env->process_object();
 
   // Register the app:// protocol.
-  //[NSURLProtocol registerClass:[AppSchema class]];
+  // TODO: register the gtk app protocol.
 
   // Register the initial bridge objective-c protocols
   NODE_SET_METHOD(process_l, "initbridge", InitBridge);

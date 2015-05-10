@@ -13,6 +13,8 @@ elif [ -f "../tint" ]; then
   TINTEXEC="../tint"
 elif [ -f "./tint"]; then
   TINTEXEC="./tint"
+elif [ -f "../build/linux/Release/tint" ]; then
+  TINTEXEC="../build/linux/Release/tint"
 else
   echo "Cannot find the binary for tint, exiting."
   exit 1
