@@ -18,7 +18,7 @@ function run($utils) {
   var w = new Window();
   application.exitAfterWindowsClose = false;
   w.visible = true;
-  application.icon = 'assets/tintcompiler.png';
+  application.icon = '../assets/tintcompiler.png';
   application.badge = '2';
   var handler;
   setTimeout(function(){
