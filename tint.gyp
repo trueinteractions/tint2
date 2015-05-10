@@ -22,6 +22,9 @@
     'node_prefix': '',
     'node_tag': '',
     'win_subsystem': 'console',
+    'linux_library_files': [
+      'modules/Bridge/Bridge_gtk.js',
+    ],
     'mac_library_files': [
       'modules/Bridge/class.js',
       'modules/Bridge/core.js',
@@ -787,6 +790,9 @@
             '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
           ],
           'conditions': [
+            ['OS=="linux"',{
+              'inputs': ['<@(linux_library_files)'],
+            }],
             ['OS=="mac"',{
               'inputs': ['<@(mac_library_files)'],
             }],
