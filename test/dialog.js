@@ -27,7 +27,7 @@ function run($utils) {
   var dialog = new Dialog();
   dialog.title = "Dialog Title";
   dialog.message = "Message dialog";
-  dialog.icon = "assets/tintcompiler.png";
+  dialog.icon = "../assets/tintcompiler.png";
   dialog.suppression = "Do not show this again.";
   dialog.suppressionChecked = true;
   dialog.mainbutton = "Main";
