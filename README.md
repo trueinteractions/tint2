@@ -61,7 +61,7 @@ tools.bat test
 ```
 
 
-<h3>Linux</h3>
+<h3>Linux (In-Progress)</h3>
 Ensure you have ninja-build, build-essential, libgirepository1.0-dev, systemtap-sdt-dev, libgtk-3-dev and clang installed (e.g., using apt-get.)
 
 GTK (Ubuntu) 64-bit build (default)
