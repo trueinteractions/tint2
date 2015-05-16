@@ -54,6 +54,19 @@ module.exports = (function() {
     };
   }
 
+  function lazyLoadEventListener(target, event, funcAdd, funcRemove) {
+    target.addEventListener('event-listener-added', function(e) {
+      if(e === event) {
+        funcAdd();
+      }
+    }.bind(target));
+    target.removeEventListener('event-listener-removed', function(e) {
+      if(e === event && this.private.events[event].length === 0) {
+        funcRemove();
+      }
+    }.bind(target));
+  }
+
   // Defines the default parameters for all properties within Tint
   // or at least, at some point will be.  The saves as a few lines of
   // code which doesn't seem like a lot but when you have hundreds, 
@@ -208,6 +221,7 @@ module.exports = (function() {
     def:defineProperty,
     defEvents:defineEvents,
     parseUnits:parseUnits,
-    errorwrap:errorwrap
+    errorwrap:errorwrap,
+    lazyLoadEventListener:lazyLoadEventListener
   };
 })();

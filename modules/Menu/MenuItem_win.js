@@ -141,6 +141,7 @@ module.exports = (function() {
     set:function(e) {
       if(this.private.custom !== null) {
         this.native.Header = null;
+        return;
       }
       var control = e.fireEvent('before-child-attached', [this.private.custom]) || e;
       control.native.Margin = new $.System.Windows.Thickness(0);

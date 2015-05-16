@@ -101,7 +101,7 @@ rmdir /S /Q .\build\dist\tint >nul 2>&1
 
 :config
 if not defined gyp goto msbuild
-git apply build/node.diff 2> nul
+git apply --whitespace=fix build/node.diff
 
 IF EXIST "%PROGRAMFILES(X86)%" (GOTO 64BIT) ELSE (GOTO 32BIT)
 
@@ -193,7 +193,10 @@ SETLOCAL
 :msbuild-found
  	copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
  	set start=%time%
-	msbuild build\msvs\tint.sln /t:%target% /m:8 /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /nologo
+ 	
+ 	:: /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal
+
+	msbuild build\msvs\tint.sln /t:%target% /m:8 /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /nologo
 	if errorlevel 1 goto exit
 	set end=%time%
 	set options="tokens=1-4 delims=:."

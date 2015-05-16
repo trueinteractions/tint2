@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "config" ]; then
-  git apply build/node.diff 2> /dev/null
+  git apply --whitespace=fix build/node.diff
   if [ $CC ]; then
     echo "Warning using a pre-set compiler $CC"
   fi

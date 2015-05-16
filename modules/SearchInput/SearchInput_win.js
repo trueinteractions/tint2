@@ -11,6 +11,10 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Border;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Border;
     Control.call(this, options);
+    this.nativeView.MinWidth = 180;
+    this.nativeView.MaxWidth = 2000;
+    this.nativeView.MinHeight = 2;
+    this.nativeView.MaxHeight = 22;
     this.nativeView.Padding = new $.System.Windows.Thickness(2);
     this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.White);
     this.nativeView.Foreground = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Black);

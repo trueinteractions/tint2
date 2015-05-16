@@ -35,10 +35,10 @@ module.exports = (function() {
       if(options.nonStandardEvents) {
         return;
       }
-      this.private.rightMouseUp = function() { this.fireEvent('rightmouseup'); }.bind(this);
-      this.private.rightMouseDown = function() { this.fireEvent('rightmousedown'); }.bind(this);
-      this.private.leftMouseDown =  function() { this.fireEvent('leftmousedown'); }.bind(this);
-      this.private.leftMouseUp = function() { this.fireEvent('leftmouseup'); }.bind(this);
+      this.private.rightMouseUp = this.fireEvent.bind(this,'rightmouseup');
+      this.private.rightMouseDown = this.fireEvent.bind(this,'rightmousedown');
+      this.private.leftMouseDown =  this.fireEvent.bind(this, 'leftmousedown');
+      this.private.leftMouseUp = this.fireEvent.bind(this,'leftmouseup');
       this.private.mouseUp = function() {
         setTimeout(function() {
           this.fireEvent('mouseup');
@@ -49,27 +49,55 @@ module.exports = (function() {
         this.fireEvent('private-pre-mousedown');
         this.fireEvent('mousedown'); 
       }.bind(this);
-      this.private.mouseMove = function() { this.fireEvent('mousemove'); }.bind(this);
-      this.private.mouseEnter = function() { this.fireEvent('mouseenter'); }.bind(this);
-      this.private.mouseLeave = function() { this.fireEvent('mouseexit'); }.bind(this);
-      this.private.keyDown = function() { 
-        setTimeout(function() { this.fireEvent('keydown'); }.bind(this),0);
-      }.bind(this);
-      this.private.keyUp = function() { 
-        setTimeout(function() { this.fireEvent('keyup'); }.bind(this),0);
-      }.bind(this);
+      this.private.mouseMove = this.fireEvent.bind(this,'mousemove');
+      this.private.mouseEnter = this.fireEvent.bind(this, 'mouseenter');
+      this.private.mouseLeave = this.fireEvent.bind(this, 'mouseexit');
+      this.private.keyDown = setTimeout.bind(this, this.fireEvent.bind(this, 'keydown'), 0);
+      this.private.keyUp = setTimeout.bind(this, this.fireEvent.bind(this, 'keyup'), 0);
 
-      this.native.addEventListener('MouseRightButtonUp', this.private.rightMouseUp);
-      this.native.addEventListener('MouseRightButtonDown', this.private.rightMouseDown);
-      this.native.addEventListener('MouseLeftButtonDown', this.private.leftMouseDown);
-      this.native.addEventListener('MouseLeftButtonUp', this.private.leftMouseUp);
-      this.native.addEventListener('PreviewMouseUp', this.private.mouseUp);
-      this.native.addEventListener('PreviewMouseDown', this.private.mouseDown);
-      this.native.addEventListener('MouseMove', this.private.mouseMove);
-      this.native.addEventListener('MouseEnter', this.private.mouseEnter);
-      this.native.addEventListener('MouseLeave', this.private.mouseLeave);
-      this.native.addEventListener('KeyDown', this.private.keyDown);
-      this.native.addEventListener('KeyUp', this.private.keyUp);
+      utils.lazyLoadEventListener(this, 'rightmouseup',
+        this.native.addEventListener.bind(this.native,'MouseRightButtonUp', this.private.rightMouseUp),
+        this.native.removeEventListener.bind(this.native, 'MouseRightButtonUp', this.private.rightMouseUp));
+
+      utils.lazyLoadEventListener(this, 'rightmousedown',
+        this.native.addEventListener.bind(this.native,'MouseRightButtonDown', this.private.rightMouseDown),
+        this.native.removeEventListener.bind(this.native, 'MouseRightButtonDown', this.private.rightMouseDown));
+
+      utils.lazyLoadEventListener(this, 'leftmousedown',
+        this.native.addEventListener.bind(this.native,'MouseLeftButtonDown', this.private.leftMouseDown),
+        this.native.removeEventListener.bind(this.native, 'MouseLeftButtonDown', this.private.leftMouseDown));
+
+      utils.lazyLoadEventListener(this, 'leftmouseup',
+        this.native.addEventListener.bind(this.native,'MouseLeftButtonUp', this.private.leftMouseUp),
+        this.native.removeEventListener.bind(this.native, 'MouseLeftButtonUp', this.private.leftMouseUp));
+
+      utils.lazyLoadEventListener(this, 'mouseup',
+        this.native.addEventListener.bind(this.native,'PreviewMouseUp', this.private.mouseUp),
+        this.native.removeEventListener.bind(this.native, 'PreviewMouseUp', this.private.mouseUp));
+
+      utils.lazyLoadEventListener(this, 'mousedown',
+        this.native.addEventListener.bind(this.native,'PreviewMouseDown', this.private.mouseDown),
+        this.native.removeEventListener.bind(this.native, 'PreviewMouseDown', this.private.mouseDown));
+
+      utils.lazyLoadEventListener(this, 'mousemove',
+        this.native.addEventListener.bind(this.native,'MouseMove', this.private.mouseMove),
+        this.native.removeEventListener.bind(this.native, 'MouseMove', this.private.mouseMove));
+
+      utils.lazyLoadEventListener(this, 'mouseenter',
+        this.native.addEventListener.bind(this.native,'MouseEnter', this.private.mouseEnter),
+        this.native.removeEventListener.bind(this.native, 'MouseEnter', this.private.mouseEnter));
+
+      utils.lazyLoadEventListener(this, 'mouseexit',
+        this.native.addEventListener.bind(this.native,'MouseLeave', this.private.mouseLeave),
+        this.native.removeEventListener.bind(this.native, 'MouseLeave', this.private.mouseLeave));
+
+      utils.lazyLoadEventListener(this, 'keydown',
+        this.native.addEventListener.bind(this.native,'KeyDown', this.private.keyDown),
+        this.native.removeEventListener.bind(this.native, 'KeyDown', this.private.keyDown));
+
+      utils.lazyLoadEventListener(this, 'keyup',
+        this.native.addEventListener.bind(this.native,'KeyUp', this.private.keyUp),
+        this.native.removeEventListener.bind(this.native, 'KeyUp', this.private.keyUp));
     }.bind(this);
 
     addNativeEventHandlers();

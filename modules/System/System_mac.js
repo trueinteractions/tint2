@@ -190,7 +190,7 @@ module.exports = (function() {
   /**
    * @method clipboardContainsType
    * @memberof System
-   * @param {string} type The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
+   * @param {string} datatype The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Returns true or false if the type specified is on the clipboard.
    * @static
    */
@@ -203,10 +203,10 @@ module.exports = (function() {
   /**
    * @method clipboardGet
    * @memberof System
-   * @param {string} type The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
+   * @param {string} datatype The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Gets the clipboard data, for text data a string is returned, for binary data a Buffer object is.
    *              In addition, this may return native objects as fully formed javascript objects depending on the type.
-   * @return Buffer A node Buffer object with the requested data.
+   * @return {Buffer} A node Buffer object with the requested data.
    * @static
    */
   System.clipboardGet = function(type) {
@@ -222,7 +222,7 @@ module.exports = (function() {
    * @method clipboardSet
    * @memberof System
    * @param {string} data The data to set on the clipboard (Buffer data or string usually).
-   * @param {string} type The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
+   * @param {string} datatype The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Sets the clipboards data and adds the specified type to it. The type is case sensitive.
    * @static
    */

@@ -228,6 +228,8 @@ CLRClass.prototype.inspect = function() {
 CLRClass.addEventListener = CLRClass.prototype.addEventListener = function(event, callback) {
   dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback); 
 };
+// TODO:
+CLRClass.removeEventListener = CLRClass.prototype.removeEventListener = function() {}
 
 function createClass(typeNative, typeName) {
   dotnet.statistics.classes++;
