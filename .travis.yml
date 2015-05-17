@@ -1,7 +1,8 @@
-language:
-  - objective-c
-
 before_install:
+  - sudo apt-get install build-essential
+  - sudo apt-get install clang
+  - sudo apt-get install ninja-build
+  - sudo apt-get install libgtk-3-dev
 
 install:
 
@@ -9,3 +10,9 @@ script:
   - ./tools.sh config
   - ./tools.sh build
   - ./tools.sh test
+
+matrix:
+  include:
+    before_install:
+    language:
+      - objective-c
