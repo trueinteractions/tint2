@@ -24,6 +24,9 @@
     'win_subsystem': 'console',
     'linux_library_files': [
       'modules/Bridge/Bridge_gtk.js',
+      'modules/Application/Application_gtk.js',
+      'modules/Utilities/Utilities_gtk.js',
+      'modules/Window/Window_gtk.js',
     ],
     'mac_library_files': [
       'modules/Bridge/class.js',

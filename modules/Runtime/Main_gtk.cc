@@ -34,7 +34,7 @@ NAN_METHOD(InitBridge) {
     v8::Local<v8::Object> bridge = NanNew<v8::Object>();
     gobj = NanNew<v8::Object>();
     process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
-    bridge->ForceSet(NanNew<v8::String>("gobj"), gobj);
+    bridge->ForceSet(NanNew<v8::String>("gir"), gobj);
     FFI::Init(bridge);
     REF::Init(bridge);
     gir::NamespaceLoader::Initialize(gobj);
@@ -52,7 +52,7 @@ static gboolean uv_pump(gpointer user_data) {
       more = true;
   }
   uv_sem_post(&embed_sem);
-  return true;
+  return false;
 }
 
 static void uv_event(void * info) {
@@ -68,6 +68,11 @@ static void uv_event(void * info) {
     do {
       struct epoll_event ev;
       int timeout = uv_backend_timeout(env->event_loop());
+      if(timeout < 0) {
+        timeout = 16;
+      } else if (timeout > 250) {
+        timeout = 250;
+      }
       r = epoll_wait(epoll_, &ev, 1, timeout);
     } while (r == -1 && errno == EINTR);
 
@@ -79,9 +84,7 @@ static void uv_event(void * info) {
 }
 
 
-static void
-activate (GtkApplication* app,
-          gpointer        user_data)
+static void startup (GtkApplication* app, gpointer user_data)
 {
   process_l = env->process_object();
 
@@ -114,7 +117,6 @@ activate (GtkApplication* app,
 }
 
 static gint gtk_command_line_cb (GApplication *app, GApplicationCommandLine *cmd, gpointer user_data) {
-  activate((GtkApplication *)app, user_data);
   return (gint)0;
 }
 
@@ -157,7 +159,7 @@ static char **copy_argv(int argc, char **argv) {
 int main(int argc, char * argv[]) {
   app = gtk_application_new ("org.trueinteractions.tint", G_APPLICATION_HANDLES_COMMAND_LINE);
   g_application_hold(G_APPLICATION (app));
-  g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
+  g_signal_connect (app, "startup", G_CALLBACK (startup), NULL);
   g_signal_connect (app, "shutdown", G_CALLBACK (deactivate), NULL);
   g_signal_connect (app, "command-line", G_CALLBACK(gtk_command_line_cb), NULL);
   /*NSBundle *bundle = [NSBundle mainBundle];

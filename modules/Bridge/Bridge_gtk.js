@@ -2,7 +2,7 @@ if(!process.bridge) {
 	process.initbridge();
 
     var EventEmitter = require('events').EventEmitter,
-    gir = process.bridge.gobj;
+    gir = process.bridge.gir;
 	/******************************************************************************/
 
 	/* BEGIN HELPERS */
@@ -236,6 +236,12 @@ if(!process.bridge) {
 	  //return the brutally overridden object
 	  return obj;
 	};
+
+	process.bridge.gobj = {};
+	process.bridge.gobj.load = function(lib, ver) {
+		var result = process.bridge.gir.load(lib, ver);
+		process.bridge.gobj[lib] = result;
+	}
 }
 if(!process.bridge.ref) {
 	process.bridge.ref = require('ref');
