@@ -55,16 +55,23 @@ module.exports = (function() {
   }
 
   function lazyLoadEventListener(target, event, funcAdd, funcRemove) {
-    target.addEventListener('event-listener-added', function(e) {
-      if(e === event) {
-        funcAdd();
-      }
-    }.bind(target));
-    target.removeEventListener('event-listener-removed', function(e) {
-      if(e === event && this.private.events[event].length === 0) {
-        funcRemove();
-      }
-    }.bind(target));
+    if(Array.isArray(event)) {
+      event.forEach(function(eItem) {
+        lazyLoadEventListener(target, eItem, funcAdd, funcRemove);
+      }.bind(this));
+    } else {
+      target.addEventListener('event-listener-added', function(e) {
+        if(e === event) {
+          funcAdd();
+        }
+      }.bind(target));
+      target.removeEventListener('event-listener-removed', function(e) {
+        if(e === event && this.private.events[event].length === 0) {
+          funcRemove();
+        }
+      }.bind(target));
+    }
+    
   }
 
   // Defines the default parameters for all properties within Tint

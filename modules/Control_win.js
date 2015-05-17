@@ -71,7 +71,7 @@ module.exports = (function() {
         this.native.addEventListener.bind(this.native,'MouseLeftButtonUp', this.private.leftMouseUp),
         this.native.removeEventListener.bind(this.native, 'MouseLeftButtonUp', this.private.leftMouseUp));
 
-      utils.lazyLoadEventListener(this, 'mouseup',
+      utils.lazyLoadEventListener(this, ['mouseup','click'],
         this.native.addEventListener.bind(this.native,'PreviewMouseUp', this.private.mouseUp),
         this.native.removeEventListener.bind(this.native, 'PreviewMouseUp', this.private.mouseUp));
 
