@@ -528,6 +528,23 @@ module.exports = (function() {
   };
 
   /**
+   * @method focus
+   * @memberof Control
+   * @description Focuses the control and subsequently any controls up the chain, if the control is on a 
+   *              hidden item, an OS-level control (tray, menu or statusbar), or has not yet been added
+   *              to a parent the focus method has no effect. NOTE: Giving focus pulls the containing parent
+   *              to the front (including the window) and gives the control keyboard and mouse the rights to
+   *              respond to input first.
+   */
+  Control.prototype.focus = function() {
+    if(this.native('respondsToSelector', 'window')) {
+      if(this.native('window')) {
+        this.native('window')('makeFirstResponder', this.native);
+      }
+    }
+  }
+
+  /**
    * @member top
    * @type {various}
    * @memberof Control

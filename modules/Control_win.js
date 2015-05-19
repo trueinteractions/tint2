@@ -171,6 +171,16 @@ module.exports = (function() {
     }
   );
 
+
+  Control.prototype.focus = function() {
+    if(this.native && this.native.Focus) {  
+      this.native.Focus();
+    }
+    if(this.nativeView && this.nativeView.Focus) {
+      this.nativeView.Focus();
+    }
+  }
+
   utils.defEvents(Control.prototype);
 
   function getConstraintSolver() {
