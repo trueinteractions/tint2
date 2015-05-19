@@ -33,6 +33,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSSplitView;
     this.nativeViewClass = this.nativeViewClass || $.NSSplitView;
     Container.call(this, options);
+    this.private.ignoreConstraints = true;
     this.private.backupAppend = Container.prototype.appendChild;
     this.private.backupRemove = Container.prototype.removeChild;
     this.private.lockedSubviewIndexes = [];
