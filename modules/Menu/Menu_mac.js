@@ -1,6 +1,46 @@
 module.exports = (function() {
+  var $ = process.bridge.objc;
   var MenuItem = require('MenuItem');
   var assert = require('assert');
+  var utilities = require('Utilities');
+
+  if(!$.TintMenuDelegate) {
+    if(!process.bridge.objc.delegates) {
+      process.bridge.objc.delegates = {};
+    }
+    var tintMenuDelegate = $.NSObject.extend('TintMenuDelegate');
+    tintMenuDelegate.addMethod('initWithJavascriptObject:', ['@',[tintMenuDelegate,$.selector,'@']], 
+      utilities.errorwrap(function(self, cmd, id) {
+        self.callback = process.bridge.objc.delegates[id.toString()];
+        process.bridge.objc.delegates[id.toString()] = null;
+        return self;
+    }));
+    tintMenuDelegate.addMethod('menuWillOpen:','v@:@', 
+      utilities.errorwrap(function(self,_cmd,frame) {
+        /**
+         * @event opened
+         * @memberof StatusBar
+         * @description This event fires when the menu has been opened. Due to the nature of
+         *              menu's this event may fire after or before click events on the object
+         *              that caused the menu to open fires.  Do not rely on the event order.
+         */
+        self.callback.fireEvent('opened');
+    }));
+
+    tintMenuDelegate.addMethod('menuDidClose:','v@:@', 
+      utilities.errorwrap(function(self,_cmd,frame) {
+        /**
+         * @event closed
+         * @memberof StatusBar
+         * @description This event fires when the menu has been closed. Due to the nature of
+         *              menu's this event may fire after or before click, blur or focus events on the object
+         *              that caused the menu to close fires.  Do not rely on the event order.
+         */
+        self.callback.fireEvent('closed');
+    }));
+    tintMenuDelegate.register();
+  }
+
   /**
    * @class Menu
    * @description The menu class allows you to create system menus and can be used with a variety of other controls.
@@ -92,8 +132,13 @@ module.exports = (function() {
     if(typeof(title) === 'undefined') {
       title = "";
     }
+    var id = (Math.random()*100000).toString();
+    process.bridge.objc.delegates[id] = this;
+    var delegate = tintMenuDelegate('alloc')('initWithJavascriptObject', $(id));
     var $menu = $.NSMenu('alloc')('initWithTitle',$(title));
+    $menu('setDelegate', delegate);
     var children = [];
+    utilities.defEvents(this);
 
     /**
      * @method appendChild

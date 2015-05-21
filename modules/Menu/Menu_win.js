@@ -1,4 +1,5 @@
 module.exports = (function() {
+  var utilities = require('Utilities');
   
   function Menu(title) {
     if(typeof(title) === 'undefined') {
@@ -25,5 +26,6 @@ module.exports = (function() {
       }
     }
   }
+  utilities.defEvents(Menu.prototype);
   return Menu;
 })();

@@ -69,7 +69,12 @@ module.exports = (function() {
         for(var i=0; i < e.children.length ; i++) {
           this.private.contextMenu.Items.Add(e.children[i].native);
         }
-
+        this.private.contextMenu.addEventListener('Opened', function() {
+          this.private.submenu.fireEvent('opened');
+        }.bind(this));
+        this.private.contextMenu.addEventListener('Closed', function() {
+          this.private.submenu.fireEvent('closed');
+        }.bind(this));
         this.native.addEventListener('MouseDown',this.private.showContextMenu.bind(this));
       } else {
         throw new Error("The passed in object was not a valid menu object.");

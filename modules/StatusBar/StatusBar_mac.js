@@ -18,7 +18,9 @@ module.exports = (function() {
      * @event click
      * @memberof StatusBar
      * @description Fires when the user clicks on the statusbar icon, this will not fire if a menu
-     *              is placed on the status bar or if a custom view is set.
+     *              is placed on the status bar or if a custom view is set. To overcome this see the
+     *              'opened' and 'closed' event on the Menu object (if a menu is set), if a custom view
+     *              is set add the click handler to that view.
      */
     tintStatusBarDelegate.addMethod('click:','v@:@', 
       utilities.errorwrap(function(self,_cmd,frame) { 
@@ -47,11 +49,6 @@ module.exports = (function() {
     this.native('retain'); // required else we'll find it GC'd 
     this.native('setTarget', delegate);
     this.native('setAction','click:');
-    this.addEventListener('event-listener-added', function(eventName) {
-      if(eventName === 'click' && this.private.submenu) {
-        console.warn('Warning: A click event is assigned to the status bar and so is a menu, the click handle will not fire.');
-      }
-    }.bind(this));
   }
 
   /**
@@ -135,11 +132,14 @@ module.exports = (function() {
     get:function() { return this.private.submenu; },
     set:function(e) {
       if(e.__proto__.constructor.name === "Menu") {
-        if(this.private.events['click'] && this.private.events['click'].length > 0 && !application.packaged) {
-          console.warn('Warning: A click event is assigned to the status bar and so is a menu, the click handle will not fire.');
-        }
         this.private.submenu = e;
         this.native('setMenu',e.native);
+        e.addEventListener('opened', function() {
+          this.fireEvent('click');
+        }.bind(this));
+        e.addEventListener('closed', function() {
+          this.fireEvent('click');
+        }.bind(this));
       } else {
         throw new Error("The passed in object was not a valid menu object.");
       }

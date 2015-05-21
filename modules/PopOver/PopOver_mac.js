@@ -101,9 +101,15 @@ module.exports = (function() {
     var edge = side === 'left' ? $.NSMinXEdge : side === 'right' ? $.NSMaxXEdge : side === 'top' ? $.NSMaxYEdge : $.NSMinYEdge;
     // The timeout is necessary, popover will not show if the view
     // has yet to complete its layout, give it a tick to calculate.
+    var containerNative = container.nativeView ? container.nativeView : container.native;
+    if(container.__proto__.constructor.name === "StatusBar") {
+      if(containerNative('respondsToSelector', '_button')) {
+        containerNative = containerNative('_button');
+      }
+    }
     setTimeout(function() {
       this.native('showRelativeToRect', $.NSMakeRect(0,0,0,0), 
-        'ofView', container.nativeView ? container.nativeView : container.native, 'preferredEdge', edge);
+        'ofView', containerNative, 'preferredEdge', edge);
     }.bind(this), 100);
   }
 
