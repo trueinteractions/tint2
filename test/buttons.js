@@ -109,6 +109,6 @@ module.exports = {
   run:run, 
   shutdown:shutdown, 
   shell:false,
-  timeout:false,
+  timeout:1000,
   name:"Buttons",
 };
