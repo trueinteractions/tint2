@@ -5,6 +5,10 @@
 	<script>
 		window.addEventListener('message', function(e) {
 			document.getElementById('foo').innerText = e.data;
+			console.log('log: ', e.data);
+			console.warn('warn: ', e.data);
+			console.info('info: ', e.data);
+			console.error('error: ', e.data);
 			window.postMessageToHost(e.data);
 		});
 	</script>

@@ -319,7 +319,15 @@ module.exports = (function() {
         ['userContentController:didReceiveScriptMessage:', 'v@:@@', function() {
           /* self, cmd, control, message */
           var message = arguments[3];
-          this.fireEvent('message',[message('body')('description')('UTF8String')]);
+          var name = message('name')('description')('UTF8String').toString();
+          if(name === "TintConsole") {
+            try {
+              var args = JSON.parse(message('body')('description')('UTF8String').toString());
+              this.fireEvent('console',[args.type, args.args]);
+            } catch (e) {}
+          } else {
+            this.fireEvent('message',[message('body')('description')('UTF8String').toString()]);
+          }
         }.bind(this)]
         /* TODO
         ['webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:',['v',['@',':','@','@','@','@']], function() {
@@ -345,11 +353,46 @@ module.exports = (function() {
       this.native('setNavigationDelegate', this.native);
       this.nativeView('configuration')('userContentController')('removeScriptMessageHandlerForName',$('TintMessages'));
       this.nativeView('configuration')('userContentController')('addScriptMessageHandler',this.nativeView,'name',$('TintMessages'));
+      this.nativeView('configuration')('userContentController')('removeScriptMessageHandlerForName',$('TintConsole'));
+      this.nativeView('configuration')('userContentController')('addScriptMessageHandler',this.nativeView,'name',$('TintConsole'));
       var script = $.WKUserScript('alloc')('initWithSource', 
         $("window.postMessageToHost = function(e) { window.webkit.messageHandlers.TintMessages.postMessage(e); }"),
         'injectionTime',$.WKUserScriptInjectionTimeAtDocumentStart,
         'forMainFrameOnly', $.YES);
       this.nativeView('configuration')('userContentController')('addUserScript', script);
+      /**
+       * @event console
+       * @memberof WebView
+       * @description Fires when a new console messages appears, the first argument is the type of console
+       *              message (info, log, warn, error) as a string, the second parameter is an array of all the arguments
+       *              the console object was ran with. This only fires for console.warn(), console.log(), console.error() and
+       *              console.info(), it does not fire for console.assert, console.dir, or console.group.
+       * @noscreenshot
+       * @example
+       * require('Common');
+       * var win = new Window();
+       * win.visible = true;
+       * var webView = new WebView();
+       * win.appendChild(webView);
+       * webView.left=webView.top=webView.right=webView.bottom=0;
+       * webView.location = "https://www.google.com";
+       * // redirect all console output to our actual console..
+       * webView.addEventListener('console', function (type, args) {
+       *   if(type === 'log') console.log(args);
+       *   else if(type === 'error') console.error(args);
+       *   else if(type === 'info') console.info(args);
+       *   else if(type === 'warn') console.warn(args);
+       * });
+       */
+      var consoleScript = $.WKUserScript('alloc')('initWithSource', 
+        $("console = console || {};" + 
+          "console.log = function() { try { window.webkit.messageHandlers.TintConsole.postMessage(JSON.stringify({type:'log',args:arguments})); } catch(e) {} };" +
+          "console.warn = function() { try { window.webkit.messageHandlers.TintConsole.postMessage(JSON.stringify({type:'warn',args:arguments})); } catch(e) {} };" +
+          "console.error = function() { try { window.webkit.messageHandlers.TintConsole.postMessage(JSON.stringify({type:'error',args:arguments})); } catch(e) {} };" +
+          "console.info = function() { try { window.webkit.messageHandlers.TintConsole.postMessage(JSON.stringify({type:'info',args:arguments})); } catch(e) {} };"),
+        'injectionTime',$.WKUserScriptInjectionTimeAtDocumentStart,
+        'forMainFrameOnly', $.YES);
+      this.nativeView('configuration')('userContentController')('addUserScript', consoleScript);
 
     } else {
       options.delegates = options.delegates.concat([

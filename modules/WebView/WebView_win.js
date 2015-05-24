@@ -42,7 +42,12 @@ module.exports = (function() {
 
     this.private.documentLoadedHandler = function() {
       try {
-        this.private.browser.Document.InvokeScript("eval",['window.postMessageToHost = function(e) { window.external.postMessageBack(e); };']);
+        this.private.browser.Document.InvokeScript("eval",["window.postMessageToHost = function(e) { try { window.external.postMessageBack(JSON.stringify({type:'message',message:e})); } catch (e) {} }; "]);
+        this.private.browser.Document.InvokeScript("eval",["console = console || {};"]);
+        this.private.browser.Document.InvokeScript("eval",["console.log = function(e) { try { window.external.postMessageBack(JSON.stringify({type:'console',subtype:'log',args:arguments})); } catch (e) {} }; "]);
+        this.private.browser.Document.InvokeScript("eval",["console.warn = function(e) { try { window.external.postMessageBack(JSON.stringify({type:'console',subtype:'warn',args:arguments})); } catch (e) {} }; "]);
+        this.private.browser.Document.InvokeScript("eval",["console.info = function(e) { try { window.external.postMessageBack(JSON.stringify({type:'console',subtype:'info',args:arguments})); } catch (e) {} }; "]);
+        this.private.browser.Document.InvokeScript("eval",["console.error = function(e) { try { window.external.postMessageBack(JSON.stringify({type:'console',subtype:'error',args:arguments})); } catch (e) {} }; "]);
         this.fireEvent('load');
       } catch(e) {
         console.log(e.message);
@@ -136,7 +141,20 @@ module.exports = (function() {
     this.private.browser.addEventListener('Navigating', this.private.navigatingHandler);
     
     // Callback class for IE to call postMessage;
-    function callbackHandle(str) { this.fireEvent('message',[str]); }
+    function callbackHandle(msg) {
+      try {
+        var obj = JSON.parse(msg);
+        if(obj.type === "message") {
+          this.fireEvent('message',[obj.message]); 
+        } else if (obj.type === "console") {
+          this.fireEvent('console',[obj.subtype,obj.args]);
+        }
+      } catch (e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
+    }
     var scriptInterface = process.bridge.createScriptInterface(callbackHandle.bind(this));
     this.private.browser.ObjectForScripting = scriptInterface;
 
