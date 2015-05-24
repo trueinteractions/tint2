@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ "`which npm`" = "" ]
+then
+ echo "You do not have node.js installed, ensure youve installed the latest node.js from https://joyent.com/nodejs and try again.
+fi
+if [ "`which node-debug`" = "" ]
+then
+  echo "You do not have node-debug or node-inspecter installed, run npm -g install node-inspector and try again.
+fi
+tint "`which node-debug`" ${@:1}
