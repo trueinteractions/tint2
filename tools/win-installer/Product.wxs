@@ -22,9 +22,12 @@
       <ComponentRef Id="TintMsvsp120"/>
       <ComponentRef Id="TintStartMenuAndRegistryEntries"/>
     </Feature>
-    <Feature Id="TintBuilder" Level="1" Title="Tint Builder" Description="Install the tntbuild to compile OSX and Windows applications." Absent="disallow">
+    <Feature Id="TintBuilder" Level="1" Title="Tint Builder" Description="Install the tntbuild command to compile OSX and Windows applications." Absent="disallow">
       <ComponentRef Id="TintBuildExecutable"/>
       <ComponentRef Id="TintBuildCommand"/>
+    </Feature>
+    <Feature Id="TintDebugger" Level="1" Title="Tint Debugger" Description="Install the tntdbg command to debug Tint applications." Absent="disallow">
+      <ComponentRef Id="TintDebugCommand"/>
     </Feature>
     <Feature Id="TintEnvironment" Level="1" Title="Environment Variables" Description="Update system path variables to use tint.">
       <ComponentRef Id="EnvironmentPathTint"/>
@@ -54,6 +57,9 @@
       </Component>
       <Component Id="TintBuildCommand">
         <File Id="tntbuild.cmd" KeyPath="yes" Source="$(var.SourceDir)tntbuild.cmd"/>
+      </Component>
+      <Component Id="TintDebugCommand">
+        <File Id="tntdbg.cmd" KeyPath="yes" Source="$(var.SourceDir)tntdbg.cmd"/>
       </Component>
     </DirectoryRef>
 

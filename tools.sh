@@ -100,6 +100,7 @@ elif [ "$1" == "dist" ]; then
   cp -a test/run.sh ./build/dist/tint/test
   cp -a test/run.bat ./build/dist/tint/test
   cp -a tools/compiler/tntbuild.js ./build/dist/tint/tntbuild
+  cp -a tools/tntdbg ./build/dist/tint/tntdbg
   chmod +x ./build/dist/tint/tntbuild
   cat ./build/xcode/Release/tint | openssl base64 | tr -d '\n' > tintb64
   cat ./build/msvs/Release/tint_windows.exe | openssl base64 | tr -d '\n' > tintexeb64
@@ -108,6 +109,7 @@ elif [ "$1" == "dist" ]; then
   perl -pe 's/\@\@\@TINT_OSX_EXECUTABLE\@\@\@/`cat tintb64`/ge' -i ./build/dist/tint/tntbuild
   cp ./build/dist/tint/tntbuild ./build/dist/tint/tntbuild.js
   cp ./tools/compiler/tntbuild.cmd ./build/dist/tint/tntbuild.cmd
+  cp ./tools/compiler/tntdbg.cmd ./build/dist/tint/tntdbg.cmd
   if [ -f "./build/tmp1" ]; then
     rm ./build/tmp1
   fi
@@ -135,6 +137,7 @@ elif [ "$1" == "dist" ]; then
   cp -a ./build/xcode/Release/tint ./build/.osx-pkg-dist/usr/local/bin/
   codesign -s "$DEVELOPERID" ./build/.osx-pkg-dist/usr/local/bin/tint
   cp -a ./build/dist/tint/tntbuild ./build/.osx-pkg-dist/usr/local/bin/
+  cp -a ./build/dist/tint/tntdbg ./build/.osx-pkg-dist/usr/local/bin/
   
   if [ -f "tools/welcome_tmp.txt" ]; then
     rm tools/welcome_tmp.txt
