@@ -1,6 +1,7 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var utils = require('Utilities');
+  var path = require('path');
   $.import('ApplicationServices');
 
   /**
@@ -11,6 +12,15 @@ module.exports = (function() {
   function System() {}
 
   /**
+   * @member home
+   * @memberof System
+   * @description Gets the users home directory, returns it as a string.
+   */
+  Object.defineProperty(System, 'home', {
+    get:function() { return $.NSHomeDirectory().toString(); }
+  });
+
+  /**
    * @method getIconForFile
    * @memberof System
    * @param {string} file The path to the file to return its icon used in the system shell.
@@ -19,6 +29,61 @@ module.exports = (function() {
   System.getIconForFile = function(e) {
     var img = $.NSWorkspace('sharedWorkspace')('iconForFile', $(e));
     return utils.makeURIFromNSImage(img);
+  };
+
+  /**
+   * @method showFile
+   * @memberof System
+   * @param {string} file The path to the file or directory to show and select in the systems shell, explorer or finder.
+   * @description Shows the location of a file or directory in the system's standard shell, explorer or finder.
+   */
+  System.showFile = function(file) {
+    file = "file://"+file.replace("~",System.home);
+    $.NSWorkspace('sharedWorkspace')('activateFileViewerSelectingURLs', utils.arrayToNSArray([$.NSURL('URLWithString',$(file))]));
+  };
+  /**
+   * @method openFile
+   * @memberof System
+   * @param {string} file The file to open in the default file type handler for the OS.
+   * @description Opens the file in the default application thats set to handle it.
+   */
+  System.openFile = function(file) {
+    file = file.replace("~", System.home);
+    $.NSWorkspace('sharedWorkspace')('openFile',$(file));
+  };
+  /**
+   * @method openURL
+   * @memberof System
+   * @param {string} url The url to open in the default web browser.
+   * @description Opens the url in the default web browser installed on the OS.
+   */
+  System.openURL = function(url) {
+    $.NSWorkspace('sharedWorkspace')('openURL',$.NSURL('URLWithString',$(url)));
+  };
+  /**
+   * @method trashFile
+   * @memberof System
+   * @param {string} file The file or directory to move to the trash or recycling bin.
+   * @description Moves the file or directory to the recycling bin or trash on the OS.
+   */
+  System.trashFile = function(file) {
+    file = file.replace("~", System.home);
+    var dir = path.dirname(file);
+    var base = path.basename(file);
+    $.NSWorkspace('sharedWorkspace')('performFileOperation', $("recycle"),
+                                     'source', $(dir),
+                                     'destination', $(""),
+                                     'files', utils.arrayToNSArray([base]),
+                                     'tag', null);
+  };
+  /**
+   * @method beep
+   * @memberof System
+   * @description Plays the default alert noise for the OS. This may produce visual effects if the user
+   *              has accessibility features enabled.
+   */
+  System.beep = function() {
+    $.NSBeep();
   };
 
   function writeImageToBase64(image) {

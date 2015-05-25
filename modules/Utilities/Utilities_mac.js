@@ -19,7 +19,10 @@ module.exports = (function() {
   function arrayToNSArray(arr) {
     var nsarray = $.NSMutableArray('arrayWithCapacity',arr.length);
     for(var i=0; i < arr.length; i++) {
-      nsarray('insertObject', $((arr[i].toString())), 'atIndex', i);
+      if(typeof(arr[i]) === 'string') {
+        arr[i] = $(arr[i]);
+      }
+      nsarray('insertObject', arr[i], 'atIndex', i);
     }
     return nsarray;
   }

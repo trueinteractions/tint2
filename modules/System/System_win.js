@@ -2,7 +2,10 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var Screens = require('Screens');
   var utils = require('Utilities');
+  var path = require('path');
   var $w32 = process.bridge.win32;
+
+  process.bridge.dotnet.import('Microsoft.VisualBasic.dll');
 
   function System() {}
 
@@ -151,6 +154,35 @@ module.exports = (function() {
     }
     return $.System.Windows.Clipboard.SetText(data.toString());
   }
+  
+  Object.defineProperty(System, 'home', {
+    get:function() { return $.System.Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%").toString(); }
+  });
+  function toWindows(file) {
+    file = file.replace(/\//g, "\\").replace("~", System.home);
+    return file; 
+  }
+  System.showFile = function(file) {
+    file = toWindows(file);
+    var dir = path.dirname(file);
+    $.System.Diagnostics.Process.Start(dir);
+  };
+  System.openFile = function(file) {
+    file = toWindows(file);
+    $.System.Diagnostics.Process.Start(file);
+  };
+  System.openURL = function(url) {
+    $.System.Diagnostics.Process.Start(url);
+  };
+  System.trashFile = function(file) {
+    file = toWindows(file);
+    $.Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(file, 
+      $.Microsoft.VisualBasic.FileIO.UIOption.AllDialogs,
+      $.Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+  };
+  System.beep = function() {
+    $.System.Media.SystemSounds.Beep.Play();
+  };
 
   System.keyAtControl = function(input) {
     var key = keyCodeFromChar(input);
