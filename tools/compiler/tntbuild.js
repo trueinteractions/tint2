@@ -1,5 +1,5 @@
 #!/usr/local/bin/tint
-
+var assert = require('assert');
 var tintVersion = '@@@TINT_VERSION@@@', 
   tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
   tintExecutableOSX = '@@@TINT_OSX_EXECUTABLE@@@',
@@ -241,6 +241,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       return true;
     },
     prepwin:function() {
+      assert(tintExecutableWindows !== '@@@TINT_WINDOWS_EXECUTABLE@@@', 'The runtime for windows could not be found.');
       var winExec = new Buffer(tintExecutableWindows, 'base64');
       this.packageExecSize = winExec.length;
       try {
@@ -253,10 +254,16 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
           try {
             $tint.parsepng(this.pngdata,function(e){
                 this.onError(e);
+                return false;
               }.bind(this),
               function(e){
-                this.windowsiconlrg=e;
-                this.tick("creating icon data"); 
+                try {
+                  this.windowsiconlrg=e;
+                  this.tick("creating icon data"); 
+                } catch(e) {
+                  this.onError(e);
+                  return false;
+                }
               }.bind(this));
           } catch (e) {
             this.onError(e); 
@@ -667,12 +674,12 @@ $tint.stampmacosx = function(imgdata, dst) {
   buffer.writeInt32BE(8+imgdata.length,12);
   $tint.write(dst,Buffer.concat([buffer,new Buffer(imgdata)]));
 }
-$tint.parsepng = function(imgdata,errf,succf){ 
+$tint.parsepng = function(imgdata,errf,succf){
   var pngcodec = new PNG({filetype:4});
-  pngcodec.on('metadata',function(meta) { 
-    if(meta.width!=512 || meta.height!=512 || !meta.alpha) { 
-      errf('Icon must be 512 by 512 pixels with an alpha channel.'); 
-      throw new Error('PNGERR');
+  pngcodec.on('metadata',function(meta) {
+    if(meta.width!=512 || meta.height!=512) {
+      errf('Icon must be 512 by 512 pixels. ['+JSON.stringify(meta)+']');
+      //throw new Error('PNGERR');
     } 
   });
   pngcodec.parse(imgdata, function(err,data) { 
@@ -2137,7 +2144,7 @@ WindowsExeFile.prototype.DosHeaderRead = function() {
   var obj = {}
   obj.e_magic = this.USHORT();  // Magic number
   if(obj.e_magic != WindowsConst.IMAGE_DOS_SIGNATURE.value) 
-    throw new {name:'NotWindowsPEFile', message:'This does not appear to be a valid Windows PE file.'};
+    throw new Error('The runtime given for Tint appears to be corrupted, expected legacy MSDOS Signature: ['+WindowsConst.IMAGE_DOS_SIGNATURE.value+'] but got: ['+obj.e_magic+']');
 
   obj.e_cblp = this.USHORT();   // Bytes on last page of file
   obj.e_cp = this.USHORT();   // Pages in file
@@ -2815,10 +2822,14 @@ var tickamount = 0;
 var build = $tint.loadbuilder(
   argv._[0],
   function error(e, msg) {
+
     if(msg) console.error("Error: "+msg);
-    //if(e.stack) console.error(e.stack);
+    if(e.stack) console.error(e.stack);
    // else if(!e) throw new Error('unknown');
     if(e.message) console.error("Error: "+e.message);
+    if(!msg && !e.message) {
+      console.error("Error: "+e+" "+ (msg ? msg : ""));
+    }
     process.exit(1);
   }, 
   function warning(e) { console.warn(e); }, 
@@ -2848,8 +2859,8 @@ build.prepconfig();
 
 if(argv.clean) build.prepclean();
 build.prepobj();
-if(argv['windows-runtime']) tintExecutableWindows = readToBase64(argv['windows-runtime']);
-if(argv['osx-runtime']) tintExecutableOSX = readToBase64(argv['osx-runtime']);
+if(argv['windows-runtime']) tintExecutableWindows = readToBase64(path.normalize(argv['windows-runtime']));
+if(argv['osx-runtime']) tintExecutableOSX = readToBase64(path.normalize(argv['osx-runtime']));
 if(!argv['no-windows-build'] && argv['windows-build'] !== false) {
   build.prepwin();
 }
