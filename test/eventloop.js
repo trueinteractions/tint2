@@ -52,5 +52,6 @@ setup:setup,
 run:run, 
 shutdown:shutdown, 
 shell:false,
+timeout:3000,
 name:"EventLoop",
 };
