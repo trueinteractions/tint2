@@ -81,7 +81,17 @@ module.exports = (function() {
             /* self, cmd, message */
             var self = arguments[0];
             var message = arguments[2];
-            self.callback.fireEvent('message', [message.toString()]); 
+            var args;
+            try {
+              args = JSON.parse(message.toString());
+            } catch (e) { 
+              args = message.toString();
+            }
+            if(args.type === "console") {
+              self.callback.fireEvent('console',[args.subtype, args.args]);
+            } else {
+              self.callback.fireEvent('message',[args.message]);
+            }
           }));
       tintWebKitResponseDelegate.register();
     }
@@ -112,7 +122,12 @@ module.exports = (function() {
         var frameWinObj = this.nativeView('windowScriptObject');
         if(frameWinObj) {
           frameWinObj('setValue',this.private.commDelegate,'forKey',$('TintMessages'));
-          this.execute("window.postMessageToHost = function(e) { window.TintMessages.postMessage(e); }");
+          this.execute("window.postMessageToHost = function(e) { try { window.TintMessages.postMessage(JSON.stringify({type:'message',message:e})); } catch (e) {} }");
+          this.execute("console = console || {};"); 
+          this.execute("console.log = function() { try { window.TintMessages.postMessage(JSON.stringify({type:'console',subtype:'log',args:arguments})); } catch(e) {} };");
+          this.execute("console.warn = function() { try { window.TintMessages.postMessage(JSON.stringify({type:'console',subtype:'warn',args:arguments})); } catch(e) {} };");
+          this.execute("console.error = function() { try { window.TintMessages.postMessage(JSON.stringify({type:'console',subtype:'error',args:arguments})); } catch(e) {} };");
+          this.execute("console.info = function() { try { window.TintMessages.postMessage(JSON.stringify({type:'console',subtype:'info',args:arguments})); } catch(e) {} };");
         }
       }
       var loc = this.location;
