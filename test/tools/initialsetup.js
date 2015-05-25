@@ -28,6 +28,10 @@ exec("killall -9 \"iPhone Simulator\"", {}, function(error,stdout,stderr) {});
 
 
 setTimeout(function() { 
+  var point = $.CGPointMake(728,346);
+  $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
+  $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseDown, point, 0));
+  $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventLeftMouseUp, point, 0));
   // a variety of hacks for travis-ci to remove error messages that sometimes popup on the desktop. 
   var point = $.CGPointMake(650,320);
   $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, point, 0));
