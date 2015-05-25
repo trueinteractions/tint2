@@ -661,7 +661,9 @@ module.exports = (function() {
     function(url) {
       if(this.useWKWebView) {
         if(url.indexOf("app:") > -1) {
-          url = url.replace("app:/","http://127.0.0.1:"+application.private.appSchemaPort+"/");
+          // TODO: Get app schema supported by WKWebView, see bugreport and open RDAR on this.
+          // potentially use private class WKCustomProtocol?..
+          url = url.replace("app://","file://"+process.cwd()+"/");
         }
         this.nativeView('loadRequest', $.NSURLRequest('requestWithURL',$.NSURL('URLWithString',$(url))));
       } else {

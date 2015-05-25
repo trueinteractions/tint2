@@ -57,7 +57,11 @@ module.exports = (function() {
     server.listen(application.private.appSchemaPort, '127.0.0.1');
   }
 
-  runApplicationHost();
+  // Windows is the only platform that technically
+  // needs to be able to see these assets through the server.
+  if(process.platform === 'win32') {
+    runApplicationHost();
+  }
 
   global.__TINT.AppSchema = true;
 })();
