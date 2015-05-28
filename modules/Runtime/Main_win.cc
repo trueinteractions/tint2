@@ -20,7 +20,6 @@
 
 static bool packaged = false;
 static int embed_closed = 0;
-static bool uv_trip_safety = false;
 static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
@@ -55,9 +54,10 @@ NAN_METHOD(InitBridge) {
   NanReturnValue(NanNew<v8::Object>());
 }
 
+static bool uv_trip_winproc_safety = false;
+static bool uv_trip_timer_safety = false;
 void uv_event(void *info) {
   while (!embed_closed) {
-    uv_update_time(env->event_loop());
     // Unlike Unix, in which we can just rely on one backend fd to determine
     // whether we should iterate libuv loop, on Window, IOCP is just one part
     // of the libuv loop, we should also check whether we have other types of
@@ -79,9 +79,12 @@ void uv_event(void *info) {
 
       DWORD timeout = uv_backend_timeout(loop);
       if(timeout == INFINITE) {
-        timeout = 15;
-      } else if (timeout > 100) {
-        timeout = 100;
+        timeout = 16;
+      } else if (timeout > 250) {
+        timeout = 250;
+      } else if (timeout == 0 && uv_trip_timer_safety) {
+        timeout = 150;
+        uv_trip_timer_safety = false;
       }
 
       BOOL success = GetQueuedCompletionStatusEx (loop->iocp, overlappeds, ARRAY_SIZE(overlappeds), &count, timeout, FALSE);
@@ -117,7 +120,7 @@ void uv_event(void *info) {
     // placed after postmessage or if we remove postmessage we take up 
     // extrenous CPU.  This is a fail safe, it must be right here before 
     // semwait.
-    uv_trip_safety = true;
+    uv_trip_winproc_safety = true;
     uv_sem_wait(&embed_sem);
   }
 }
@@ -166,12 +169,23 @@ void node_load() {
 // and need to manually pump uv messages (e.g., WPF took over the
 // loop due to a blocking OS reason)
 extern "C" void uv_run_nowait() {
-  uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+  if (uv_run(env->event_loop(), UV_RUN_NOWAIT) == false && 
+      uv_loop_alive(env->event_loop()) == false) 
+  {
+    EmitBeforeExit(env);
+    uv_trip_timer_safety = true;
+  }
   uv_sem_post(&embed_sem);
 }
 
 void node_terminate() {
   embed_closed = 1;
+  EmitBeforeExit(env);
+  // Emit `beforeExit` if the loop became alive either after emitting
+  // event, or after running some callbacks.
+  if(uv_loop_alive(env->event_loop())) {
+    uv_run(env->event_loop(), UV_RUN_NOWAIT);
+  }
   code = EmitExit(env);
   RunAtExit(env);
 }
@@ -227,9 +241,9 @@ void win_msg_loop() {
         }
       }
     }
-    if(uv_trip_safety == true || msg.message == WM_APP+1) {
+    if(uv_trip_winproc_safety == true || msg.message == WM_APP+1) {
       uv_run_nowait();
-      uv_trip_safety = false;
+      uv_trip_winproc_safety = false;
     }
     if(bRet == -1) {
       fprintf(stderr, "FATAL ERROR: %i\n",bRet);

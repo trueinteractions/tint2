@@ -41,15 +41,12 @@ NAN_METHOD(InitBridge) {
     NanReturnValue(NanNew<v8::Object>());
 }
 
+static bool uv_trip_timer_safety = false;
 static gboolean uv_pump(gpointer user_data) {
-  bool more = uv_run(env->event_loop(), UV_RUN_NOWAIT);
-  if (more == false) {
+  if (uv_run(env->event_loop(), UV_RUN_NOWAIT) == false && 
+      uv_loop_alive(env->event_loop()) == false) {
     EmitBeforeExit(env);
-    // Emit `beforeExit` if the loop became alive either after emitting
-    // event, or after running some callbacks.
-    more = uv_loop_alive(env->event_loop());
-    if (uv_run(env->event_loop(), UV_RUN_NOWAIT) != 0)
-      more = true;
+    uv_trip_timer_safety = true;
   }
   uv_sem_post(&embed_sem);
   return false;
@@ -72,6 +69,9 @@ static void uv_event(void * info) {
         timeout = 16;
       } else if (timeout > 250) {
         timeout = 250;
+      } else if (timeout == 0 && uv_trip_timer_safety) {
+        timeout = 150;
+        uv_trip_timer_safety = false;
       }
       r = epoll_wait(epoll_, &ev, 1, timeout);
     } while (r == -1 && errno == EINTR);
@@ -121,6 +121,13 @@ static gint gtk_command_line_cb (GApplication *app, GApplicationCommandLine *cmd
 }
 
 static void deactivate() {
+  embed_closed = 1;
+  EmitBeforeExit(env);
+  // Emit `beforeExit` if the loop became alive either after emitting
+  // event, or after running some callbacks.
+  if(uv_loop_alive(env->event_loop())) {
+    uv_run(env->event_loop(), UV_RUN_NOWAIT);
+  }
   EmitExit(env);
   RunAtExit(env);
 }

@@ -39,15 +39,13 @@ NAN_METHOD(InitBridge) {
     NanReturnValue(NanNew<v8::Object>());
 }
 
+static bool uv_trip_timer_safety = false;
 static void uv_event(void *info) {
   [[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
 
   int r, timeout, fd;
   struct kevent errors[1];
-
   while (!embed_closed) {
-    uv_update_time(env->event_loop());
-
     fd = uv_backend_fd(env->event_loop());
     timeout = uv_backend_timeout(env->event_loop());
     
@@ -55,7 +53,10 @@ static void uv_event(void *info) {
       timeout = 16;
     else if (timeout > 250)
       timeout = 250;
-
+    else if (timeout == 0 && uv_trip_timer_safety) {
+      timeout = 150;
+      uv_trip_timer_safety = false;
+    }
     do {
       struct timespec ts;
       ts.tv_sec = timeout / 1000;
@@ -67,14 +68,10 @@ static void uv_event(void *info) {
     // then repost the semaphore to allow us to continue. Note, we've
     // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
     dispatch_async(dispatch_get_main_queue(), ^{
-      bool more = uv_run(env->event_loop(), UV_RUN_NOWAIT);
-      if (more == false) {
+      if (uv_run(env->event_loop(), UV_RUN_ONCE) == false && 
+          uv_loop_alive(env->event_loop()) == false) {
         EmitBeforeExit(env);
-        // Emit `beforeExit` if the loop became alive either after emitting
-        // event, or after running some callbacks.
-        more = uv_loop_alive(env->event_loop());
-        if (uv_run(env->event_loop(), UV_RUN_NOWAIT) != 0)
-          more = true;
+        uv_trip_timer_safety = true;
       }
       uv_sem_post(&embed_sem);
     });
@@ -124,6 +121,13 @@ static void uv_event(void *info) {
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
+  embed_closed = 1;
+  EmitBeforeExit(env);
+  // Emit `beforeExit` if the loop became alive either after emitting
+  // event, or after running some callbacks.
+  if(uv_loop_alive(env->event_loop())) {
+    uv_run(env->event_loop(), UV_RUN_NOWAIT);
+  }
   EmitExit(env);
   RunAtExit(env);
 }
@@ -203,8 +207,8 @@ int main(int argc, char * argv[]) {
     init_argv = copy_argv(argc, p_argv);
     packaged = true;
   } else {
-      init_argc = argc;
-      init_argv = copy_argv(argc, argv);
+    init_argc = argc;
+    init_argv = copy_argv(argc, argv);
   }
 
   const char* replaceInvalid = getenv("NODE_INVALID_UTF8");
