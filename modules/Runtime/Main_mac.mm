@@ -46,6 +46,7 @@ static void uv_event(void *info) {
   int r, timeout, fd;
   struct kevent errors[1];
   while (!embed_closed) {
+    uv_update_time(env->event_loop());
     fd = uv_backend_fd(env->event_loop());
     timeout = uv_backend_timeout(env->event_loop());
     
@@ -68,7 +69,7 @@ static void uv_event(void *info) {
     // then repost the semaphore to allow us to continue. Note, we've
     // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
     dispatch_async(dispatch_get_main_queue(), ^{
-      if (uv_run(env->event_loop(), UV_RUN_ONCE) == false && 
+      if (uv_run(env->event_loop(), UV_RUN_NOWAIT) == false && 
           uv_loop_alive(env->event_loop()) == false) {
         EmitBeforeExit(env);
         uv_trip_timer_safety = true;
