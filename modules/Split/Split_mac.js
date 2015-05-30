@@ -9,7 +9,7 @@ module.exports = (function() {
    * @description The Split class can be used to store multiple views horizontally or vertically with a seperator
    *              that can be moved between the two to resize one view or another.  This class is useful for having
    *              a "tools" view on one side and a "content" view on the other allowing the user the option to collapse
-   *              or resize one view as needed.
+   *              or resize one view as needed. IMPORTANT: The Split view will not respond mouse down or mouse up events.
    * @extends Container
    */
   /**
@@ -30,6 +30,7 @@ module.exports = (function() {
       ['splitViewDidResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resized'); }.bind(this)],
       ['splitViewWillResizeSubviews:','v@:@', function(self, selector, notif) { this.fireEvent('resize'); }.bind(this)]
     ]);
+    options.nonStandardEvents = true;
     this.nativeClass = this.nativeClass || $.NSSplitView;
     this.nativeViewClass = this.nativeViewClass || $.NSSplitView;
     Container.call(this, options);
