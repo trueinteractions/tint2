@@ -101,6 +101,22 @@ module.exports = (function() {
       ['windowWillClose:', 'v@:@@', function() { 
         this.fireEvent('closed'); 
         delete this;
+      }.bind(this)],
+      ['windowShouldZoom:toFrame:', ['B',['@',':','@']], function() {
+        /**
+         * @event maximize
+         * @memberof Window
+         * @description Fires when the state of the window becomes maximized, or if the window
+         *              is "zoomed" (e.g., made to its largest window size available) on operating
+         *              systems without the concept of maximize.  Note this does NOT mean fullscreen
+         *              and does not fire during fullscreen transitions.
+         */
+        // Note, we only fire maximize when its transitioning from a regular to "zoomed" state but not
+        // the other way.
+        if(!this.native('isZoomed')) {
+          this.fireEvent('maximize');
+        }
+        return $.YES;
       }.bind(this)]
     ]);
     this.nativeClass = this.nativeClass || $.NSWindow;
