@@ -18,7 +18,7 @@ function run($utils) {
     spawn  = require('child_process').spawn;
     var rescBuilder  = spawn('../build/xcode/Release/tint', 
         ['../tools/compiler/tntbuild.js','--no-windows-build','--osx-runtime=../build/xcode/Release/tint','--out=./packagetest-build/','./packagetest/package.json']
-        ); //,{ stdio: 'inherit' }
+        ,{ stdio: 'inherit' });
     rescBuilder.on('close', function (code, signal) {
         $utils.assert(code === 0, 'expected code to be 0 but it was: ', code);
         $utils.assert(fs.existsSync('./packagetest-build/'));

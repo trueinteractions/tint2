@@ -193,6 +193,17 @@ int main(int argc, char * argv[]) {
 
     main = [[[bundle resourcePath] stringByAppendingString:@"/"] stringByAppendingString:main];
 
+    NSArray *pathComponents = [[NSURL fileURLWithPath:main] pathComponents];
+    NSString *path = @"";
+    for(NSUInteger i=0; i < ([pathComponents count] - 1); i++) {
+      NSString *component = (NSString *)[pathComponents objectAtIndex:i];
+      if(component && ![component isEqualToString:@""] && ![component isEqualToString:@"/"]) {
+        path = [[path  stringByAppendingString:@"/"] stringByAppendingString:component];
+      }
+    }
+
+    [[NSFileManager defaultManager] changeCurrentDirectoryPath:path];
+
     const char *exec = [executable cStringUsingEncoding:NSASCIIStringEncoding];
     const char *pack = [main cStringUsingEncoding:NSASCIIStringEncoding];
     unsigned int exec_len = strlen(exec) + 1;
