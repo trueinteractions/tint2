@@ -151,7 +151,10 @@ module.exports = (function() {
     position = position < 0 ? 0 : position;
     index = index * 2 + 1;
     if(index >= defs.length) {
-      throw new Error('The second argument, the index of the seperator doesnt exist.');
+      // The index doesnt exist, fail silently to adhere to mac behavior.
+      this.nativeView.UpdateLayout();
+      this.fireEvent('resized');
+      return;
     }
 
     // Prior to calculating new layout positions make sure our 

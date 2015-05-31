@@ -241,8 +241,8 @@ module.exports = (function() {
     Object.defineProperty(this, 'selected', {
       set:function(e) { 
         selected = e;
-        container.BorderBrush = e ? highlightColor : container.OriginalBorderBrush;
-        container.Background = e ? highlightColor : container.OriginalBackground;
+        container.BorderBrush = e ? exports.highlightColor : container.OriginalBorderBrush;
+        container.Background = e ? exports.highlightColor : container.OriginalBackground;
       },
       get:function() { return selected; }
     });

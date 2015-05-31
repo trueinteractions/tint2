@@ -20,7 +20,7 @@ module.exports = (function() {
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
     options.delegates = options.delegates || [];
-    
+
     options.nonStandardEvents = true;
     options.delegates = options.delegates.concat([
       ['tableView:viewForTableColumn:row:','@@:@@l', function(self,cmd,table,column,rowIndex) {
@@ -109,10 +109,12 @@ module.exports = (function() {
    */
   Table.prototype.addColumn = function(e) {
     var column = $.NSTableColumn('alloc')('initWithIdentifier', $(e.toString()));
+    column('setResizingMask',$.NSTableColumnAutoresizingMask);
     this.private.columns[e] = column;
     this.private.views[e] = [];
-    column('headerCell')('setStringValue', $(e));
+    column('headerCell')('setStringValue', $(e.toString()));
     this.nativeView('addTableColumn', column);
+    this.nativeView('headerView')('setNeedsLayout', $.YES);
     this.nativeView('reloadData');
   };
 
@@ -247,7 +249,7 @@ module.exports = (function() {
     'large':$.NSTableViewRowSizeStyleLarge
   });
 
-  util.makePropertyBoolType(Table.prototype, 'columnsCanBeMoved','allowsColumnReordering','setAllowsColumnReordering');
+  util.makePropertyBoolType(Table.prototype, 'columnsCanBeMoved','allowsColumnReordering','setAllowsColumnReordering', {display:true});
 
   /**
    * @member columnsCanBeResized
@@ -256,7 +258,7 @@ module.exports = (function() {
    * @description Gets or sets whether the columns can be resized by the user.
    * @default true
    */
-  util.makePropertyBoolType(Table.prototype, 'columnsCanBeResized','allowsColumnResizing','setAllowsColumnResizing');
+  util.makePropertyBoolType(Table.prototype, 'columnsCanBeResized','allowsColumnResizing','setAllowsColumnResizing', {display:true});
 
   /**
    * @member multipleSelection
@@ -265,7 +267,7 @@ module.exports = (function() {
    * @description Gets or sets whether multiple items can be selected, the default value is 
    *              true.
    */
-  util.makePropertyBoolType(Table.prototype, 'multipleSelection','allowsMultipleSelection','setAllowsMultipleSelection');
+  util.makePropertyBoolType(Table.prototype, 'multipleSelection','allowsMultipleSelection','setAllowsMultipleSelection', {display:true});
 
   /**
    * @member emptySelection
@@ -277,7 +279,7 @@ module.exports = (function() {
    *              selection.  This only prevents the user for deselecting an item
    *              it does not prevent no items from being selected.
    */
-  util.makePropertyBoolType(Table.prototype, 'emptySelection','allowsEmptySelection','setAllowsEmptySelection');
+  util.makePropertyBoolType(Table.prototype, 'emptySelection','allowsEmptySelection','setAllowsEmptySelection', {display:true});
 
 
   function setIntercellSpacing(type, obj, value) {

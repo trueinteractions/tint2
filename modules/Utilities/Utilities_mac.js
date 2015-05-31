@@ -224,14 +224,14 @@ module.exports = (function() {
         if(options && options.inverse) {
           return this.native(getselector) === $.NO ? true : false;
         } else {
-          return this.native(getselector) === $.YES ? true : false;
+          return this.native(getselector) ? true : false;
         }
       },
       set:function(value) {
         if(options && options.inverse) {
-          this.native(setselector, value ? $.YES : $.NO);
-        } else {
           this.native(setselector, value ? $.NO : $.YES);
+        } else {
+          this.native(setselector, value ? $.YES : $.NO);
         }
         if(options && options.display) {
           this.nativeView('setNeedsDisplay', $.YES);
