@@ -11,8 +11,7 @@ module.exports = (function() {
    * @class Table
    * @description Creates a table view to place UI elements into a column and row grid system.
    *              It also provides the ability to highlight rows, columns and allow users to
-   *              move items up or down. IMPORTANT: The Table class does not respond to mouse down
-   *              or other click events, instead use select, selected, etc events.
+   *              move items up or down. 
    * @extends Container
    */
   function Table(options) {
@@ -21,7 +20,6 @@ module.exports = (function() {
     options.keyDownBlocks = true;
     options.delegates = options.delegates || [];
 
-    options.nonStandardEvents = true;
     options.delegates = options.delegates.concat([
       ['tableView:viewForTableColumn:row:','@@:@@l', function(self,cmd,table,column,rowIndex) {
         var identifier = column('identifier').toString();
