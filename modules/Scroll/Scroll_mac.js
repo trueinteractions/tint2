@@ -26,7 +26,8 @@ module.exports = (function() {
     this.nativeViewClass = this.nativeViewClass || $.NSScrollView;
     Container.call(this, options);
     this.native('setFrame', $.NSMakeRect(0,0,500,500));
-    this.native('setDrawsBackground',$.NO);
+    // Must be YES otherwise table's with scroll containers have black edges and rendering glitches.
+    this.native('setDrawsBackground',$.YES);
     this.native('setHasVerticalScroller',$.YES);
     this.native('setHasHorizontalScroller',$.YES);
     this.appendChild = null;

@@ -254,7 +254,7 @@ module.exports = (function() {
       configurable:true,
       enumerable:true,
       get:function() { return this.native(getselector); },
-      set:function(value) { this.native(setselector, value ? value : 0); }
+      set:function(value) { this.native(setselector, typeof(value) === "number" ? value : 0); }
     });
   }
 

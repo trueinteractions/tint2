@@ -22,7 +22,7 @@ module.exports = (function() {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
-      ['comboBoxSelectionDidChange:','v@:@', function(self,_cmd,frame) { this.fireEvent('change');  }.bind(this)]
+      ['comboBoxSelectionDidChange:','v@:@', function(self,_cmd,frame) { this.fireEvent('change'); }.bind(this)]
     ]);
     this.nativeClass = this.nativeClass || $.NSComboBox;
     this.nativeViewClass = this.nativeViewClass || $.NSComboBox;

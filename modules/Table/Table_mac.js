@@ -6,13 +6,35 @@ module.exports = (function() {
   var Container = require('Container');
   var TextInput = require('TextInput');
   var util = require('Utilities');
+  var assert = require('assert');
 
   /**
    * @class Table
    * @description Creates a table view to place UI elements into a column and row grid system.
    *              It also provides the ability to highlight rows, columns and allow users to
-   *              move items up or down. 
+   *              move items up or down. NOTE: Tables should almost always be wrapped within
+   *              a Scroll container otherwise the layout may not render properly.
    * @extends Container
+   */
+  /**
+   * @new
+   * @memberof Table
+   * @description Creates a new table.
+   * @example
+   * require('Common');
+   * var scroll = new Scroll();
+   * var win = new Window();
+   * var table = new Table();
+   * table.addColumn('Column One');
+   * table.addRow();
+   * table.addRow();
+   * table.setValueAt('Column One', 1, 'Row 1');
+   * table.setValueAt('Column One', 1, 'Row 2');
+   * scroll.left=scroll.top=scroll.right=scroll.bottom=10;
+   * scroll.setChild(table); // A table should almost always be placed in a scroll container.
+   *                         // otherwise the rendering will not be accurate.
+   * win.appendChild(scroll);
+   * win.visible = true;
    */
   function Table(options) {
     options = options || {};
@@ -85,6 +107,8 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSTableView;
     this.nativeViewClass = this.nativeViewClass || $.NSTableView;
     Container.call(this, options);
+
+    this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.private.views = {};
     this.private.columns = [];
     this.private.selectable = true;
@@ -138,9 +162,25 @@ module.exports = (function() {
    *                 nothing is passed for this value the row is appended to the end of the table.
    * @description Appends a new row to the end of the table, if a index is passed in the row is added
    *              at that location.
+   * @example
+   * require('Common');
+   * var scroll = new Scroll();
+   * var win = new Window();
+   * var table = new Table();
+   * table.addColumn('Column One');
+   * table.addRow();
+   * table.addRow();
+   * table.setValueAt('Column One', 1, 'Row 1');
+   * table.setValueAt('Column One', 1, 'Row 2');
+   * scroll.left=scroll.top=scroll.right=scroll.bottom=10;
+   * scroll.setChild(table); // A table should almost always be placed in a scroll container.
+   *                         // otherwise the rendering will not be accurate.
+   * win.appendChild(scroll);
+   * win.visible = true;
    */
   Table.prototype.addRow = function(ndx) {
     ndx = ndx || this.nativeView('numberOfRows');
+    assert(ndx <= this.nativeView('numberOfRows'), 'The passed in index ' + ndx + ' was greater than the number of rows.');
     this.nativeView('insertRowsAtIndexes', $.NSIndexSet('indexSetWithIndex',ndx),
                 'withAnimation', $.NSTableViewAnimationSlideUp);
   };
@@ -151,9 +191,31 @@ module.exports = (function() {
    * @param {number} rowIndex A positive whole number that represents the index to remove.
    * @description Removes the last row in the table, if an index is passed in the specified row
    *              is removed.
+   * @example
+   * require('Common');
+   * var scroll = new Scroll();
+   * var win = new Window();
+   * var table = new Table();
+   * var btn = new Button();
+   * btn.title = "Hello!";
+   * table.rowHeight = 100;
+   * table.addColumn('Column One');
+   * table.addColumn('Column Two');
+   * table.addRow();
+   * table.addRow();
+   * table.setValueAt('Column One', 0, "Row 1"); // Attach text.
+   * table.setValueAt('Column One', 1, btn); // Attach a control
+   * scroll.left=scroll.top=scroll.right=scroll.bottom=10;
+   * scroll.setChild(table);
+   * win.appendChild(scroll);
+   * win.visible = true;
+   * table.removeRow(); // Remove the last row on the table.
+   * table.removeRow(0); // Remove the row at index 0.
+   * // there shouldn't be any rows left.
    */
   Table.prototype.removeRow = function(ndx) {
-    ndx = ndx || this.nativeView('numberOfRows');
+    ndx = (typeof(ndx) === "number") ? ndx : (this.nativeView('numberOfRows') - 1);
+    assert(ndx < this.nativeView('numberOfRows'), 'The passed in index ' + ndx + ' was greater than the number of rows.');
     this.nativeView('removeRowsAtIndexes', $.NSIndexSet('indexSetWithIndex',ndx),
             'withAnimation', $.NSTableViewAnimationSlideUp);
   };
@@ -204,7 +266,25 @@ module.exports = (function() {
    *        This can be either a string, or any user interface control.
    * @description Set the value of the specified cell at the column indicated by columnName, 
    *              and the row indicated by rowIndex.  The value can be either a user interface control
-   *              string.
+   *              string.  IMPORTANT: It is best practice for performance to reuse table cells
+   *              for large data sets. 
+   * @example
+   * require('Common');
+   * var scroll = new Scroll();
+   * var win = new Window();
+   * var table = new Table();
+   * var btn = new Button();
+   * btn.title = "Hello!";
+   * table.addColumn('Column One');
+   * table.addRow();
+   * table.addRow();
+   * table.setValueAt('Column One', 1, btn); // Use a control as a value
+   * table.setValueAt('Column One', 1, 'Row 2'); // Or use text.
+   * scroll.left=scroll.top=scroll.right=scroll.bottom=10;
+   * scroll.setChild(table); // A table should almost always be placed in a scroll container.
+   *                         // otherwise the rendering will not be accurate.
+   * win.appendChild(scroll);
+   * win.visible = true;
    */
 
   /**
@@ -216,7 +296,25 @@ module.exports = (function() {
    *        This can be either a string, or any user interface control.
    * @description Set the value of the specified cell at the column indicated by columnName, 
    *              and the row indicated by rowIndex.  The value can be either a user interface control
-   *              string.
+   *              string. IMPORTANT: It is best practice for performance to reuse table cells
+   *              for large data sets. 
+   * @example
+   * require('Common');
+   * var scroll = new Scroll();
+   * var win = new Window();
+   * var table = new Table();
+   * var btn = new Button();
+   * btn.title = "Hello!";
+   * table.addColumn('Column One');
+   * table.addRow();
+   * table.addRow();
+   * table.setValueAt('Column One', 1, btn); // Use a control as a value
+   * table.setValueAt('Column One', 1, 'Row 2'); // Or use text.
+   * scroll.left=scroll.top=scroll.right=scroll.bottom=10;
+   * scroll.setChild(table); // A table should almost always be placed in a scroll container.
+   *                         // otherwise the rendering will not be accurate.
+   * win.appendChild(scroll);
+   * win.visible = true;
    */
   Table.prototype.setValueAt = function(columnId,row,value) {
     if(typeof(value) === "string" || typeof(value) === "number") {
@@ -318,9 +416,37 @@ module.exports = (function() {
    * @type {number}
    * @memberof Table
    * @description Gets or sets the height of the rows by pixel value.  Note
-   *              that setting this will override the value of rowHeightStyle.
+   *              that setting this will override the value of rowHeightStyle. IMPORTANT:
+   *              This value should be set before adding rows and columns to a table, otherwise
+   *              (for performance considerations) the table will not be redrawn until an
+   *              item on the table changes.
+   * @example
+   * require('Common');
+   * var scroll = new Scroll();
+   * var win = new Window();
+   * var table = new Table();
+   * var btn = new Button();
+   * btn.title = "Hello!";
+   * table.rowHeight = 100; // Set the row height BEFORE adding columns and rows.
+   *                        // if we need to do this after, add then remove a row after.
+   * table.addColumn('Column One');
+   * table.addColumn('Column Two');
+   * table.addRow();
+   * table.addRow();
+   * table.setValueAt('Column One', 0, "Row 1"); // Attach text.
+   * table.setValueAt('Column One', 1, btn); // Attach a control
+   * scroll.left=scroll.top=scroll.right=scroll.bottom=10;
+   * scroll.setChild(table);
+   * win.appendChild(scroll);
+   * win.visible = true;
    */
-  util.makePropertyBoolType(Table.prototype, 'rowHeight','rowHeight','setRowHeight',{display:true});
+  Object.defineProperty(Table.prototype, 'rowHeight', {
+    get:function() { return this.nativeView('rowHeight'); },
+    set:function(e) { 
+      this.nativeView('setRowSizeStyle', $.NSTableViewRowSizeStyleCustom);
+      this.nativeView('setRowHeight', $(e));
+    }
+  });
 
   /**
    * @member numberOfColumns
