@@ -82,7 +82,7 @@ module.exports = (function() {
   Split.prototype.setPosition = function(position, index) {
     assert(position > 0 && position < 1, 'The position (first parameter) was greater than 1 or less than 0, the value should be between 0 and 1.');
     assert(index === Math.round(index), 'The index (second parameter) wasnt an index but a decimal number: ' + index);
-  
+    assert(index < this.private.children.length, 'The index (second parameter) provided was out of bounds. ' + index);
     // Give this a small timeout, if the view has not gone through a event
     // loop pass it will not be properly set.
     setTimeout(function() {
