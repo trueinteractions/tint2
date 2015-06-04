@@ -24,7 +24,11 @@ module.exports = (function() {
          *              menu's this event may fire after or before click events on the object
          *              that caused the menu to open fires.  Do not rely on the event order.
          */
-        self.callback.fireEvent('opened');
+        if(self.callback && self.callback.fireEvent) {
+          self.callback.fireEvent('opened');
+        } else {
+          console.warn('no fire event existed for ', self, self.callback);
+        }
     }));
 
     tintMenuDelegate.addMethod('menuDidClose:','v@:@', 
@@ -36,7 +40,11 @@ module.exports = (function() {
          *              menu's this event may fire after or before click, blur or focus events on the object
          *              that caused the menu to close fires.  Do not rely on the event order.
          */
-        self.callback.fireEvent('closed');
+        if(self.callback && self.callback.fireEvent) {
+          self.callback.fireEvent('closed');
+        } else {
+          console.warn('no fire event existed for ', self, self.callback);
+        }
     }));
     tintMenuDelegate.register();
   }

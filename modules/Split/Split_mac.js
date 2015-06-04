@@ -38,7 +38,7 @@ module.exports = (function() {
     this.private.backupAppend = Container.prototype.appendChild;
     this.private.backupRemove = Container.prototype.removeChild;
     this.private.lockedSubviewIndexes = [];
-
+    this.native('setWantsLayer', $.YES);
     this.native('setDelegate', this.nativeView);
     this.nativeView('setVertical',$.YES);
     this.nativeView('setDividerStyle', $.NSSplitViewDividerStyleThin);
