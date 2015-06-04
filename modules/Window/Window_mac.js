@@ -128,6 +128,7 @@ module.exports = (function() {
       this.native = this.nativeClass('alloc')('initWithContentRect', $.NSMakeRect(0, 0, options.width, options.height), 'styleMask', options.styleMask, 'backing', $.NSBackingStoreBuffered,'defer', $.YES);
       this.nativeView = this.nativeViewClass('alloc')('init');
       this.native('setContentView',this.nativeView);
+      this.nativeView('setWantsLayer', $.YES);
     } else {
       this.native = options.nativeObject;
       var contentView = this.native('contentView');
@@ -139,7 +140,6 @@ module.exports = (function() {
     // to not having a delegate or responder so its necessary to do this rather than further up the
     // inheritence chain.
 
-    this.nativeView('setWantsLayer', $.YES);
     this.native('setDelegate',this.nativeView);
 
     // We need to set some defaults so we properly behave in a cross-platform compatible way.
