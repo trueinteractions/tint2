@@ -25,17 +25,11 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSScrollView;
     this.nativeViewClass = this.nativeViewClass || $.NSScrollView;
     Container.call(this, options);
-    // The child should not be positioned by anything other than the scroll view.
-    this.private.ignoreConstraints = true;
     this.native('setFrame', $.NSMakeRect(0,0,500,500));
-    // Must be YES otherwise table's with scroll containers have black edges and rendering glitches.
-    this.native('setDrawsBackground',$.YES);
+    this.native('setDrawsBackground',$.NO);
     this.native('setHasVerticalScroller',$.YES);
     this.native('setHasHorizontalScroller',$.YES);
     this.native('setWantsLayer', $.YES);
-    // We must set the auto resizing mask for its subviews otherwise tables and such will be bound
-    // by a bad measure of the scroll height/width and not their own intrinsic content size.
-    //this.native('setAutoresizingMask',$.NSViewWidthSizable | $.NSViewHeightSizable);
     this.appendChild = null;
     this.removeChild = null;
 
@@ -53,8 +47,14 @@ module.exports = (function() {
    *              a generic Box or Container control to append multiple children.
    */
   Scroll.prototype.setChild = function(control) { 
-    control.nativeView('setFrame', this.native('frame'));
-    control.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
+    if(control.__proto__.constructor.name === "Table") {
+      // Must be YES otherwise table's with scroll containers have black edges and rendering glitches.
+      this.native('setDrawsBackground',$.YES);
+      // The child should not be positioned by anything other than the scroll view.
+      this.private.ignoreConstraints = true;
+      control.nativeView('setFrame', this.native('frame'));
+      control.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.YES);
+    }
     this.native('setDocumentView', control.nativeView);
     control.fireEvent('parent-attached', [this]);
     this.fireEvent('child-attached', [control]);
