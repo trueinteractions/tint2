@@ -5,6 +5,7 @@ module.exports = (function() {
 
   var Container = require('Container');
   var $ = process.bridge.dotnet;
+  var assert = require('assert');
 
   function createNewDefinition(split, size) {
     var definition = null;
@@ -139,6 +140,8 @@ module.exports = (function() {
   }
 
   Split.prototype.setPosition = function(position, index) {
+    assert(position > 0 && position < 1, 'The position (first parameter) was greater than 1 or less than 0, the value should be between 0 and 1.');
+    assert(index === Math.round(index), 'The index (second parameter) wasnt an index but a decimal number: ' + index);
     this.fireEvent('resize');
     var isVertical = this.orientation === "vertical" ? true : false,
         defs = this.private.definitions,

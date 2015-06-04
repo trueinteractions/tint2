@@ -30,9 +30,11 @@ module.exports = (function() {
     // Create proxy for click event.
     this.addEventListener('mouseup', function() {
       var ndx = this.nativeView('selectedSegment');
-      this.private.segmentedButtons[ndx].fireEvent('mousedown');
-      this.private.segmentedButtons[ndx].fireEvent('click');
-      this.private.segmentedButtons[ndx].fireEvent('mouseup');
+      if(this.private.segmentedButtons && this.private.segmentedButtons[ndx]) {
+        this.private.segmentedButtons[ndx].fireEvent('mousedown');
+        this.private.segmentedButtons[ndx].fireEvent('click');
+        this.private.segmentedButtons[ndx].fireEvent('mouseup');
+      }
       this.fireEvent('click');
     }.bind(this));
   }

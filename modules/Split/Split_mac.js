@@ -4,6 +4,7 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var $ = process.bridge.objc;
+  var assert = require('assert');
   /**
    * @class Split
    * @description The Split class can be used to store multiple views horizontally or vertically with a seperator
@@ -79,9 +80,9 @@ module.exports = (function() {
    * @description Sets the position (a value of 0 to 1) of a seperator identified by the index.
    */
   Split.prototype.setPosition = function(position, index) {
-    position = position > 1 ? 1 : position;
-    position = position < 0 ? 0 : position;
-
+    assert(position > 0 && position < 1, 'The position (first parameter) was greater than 1 or less than 0, the value should be between 0 and 1.');
+    assert(index === Math.round(index), 'The index (second parameter) wasnt an index but a decimal number: ' + index);
+  
     // Give this a small timeout, if the view has not gone through a event
     // loop pass it will not be properly set.
     setTimeout(function() {

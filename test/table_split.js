@@ -27,7 +27,7 @@ function run($utils) {
   table.setValueAt('Company',0,'Hello');
   split.appendChild(table);
   win.appendChild(split);
-  split.setPosition(0, 0.5);
+  split.setPosition(0.5, 0);
   win.visible = true;
   $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 0) );
 }

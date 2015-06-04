@@ -9,6 +9,7 @@ module.exports = (function() {
 
 
   function FileDialog(type) {
+    type = type || "open";
     var $dialog;
     var $dirDialog = new $.System.Windows.Forms.FolderBrowserDialog();
 
@@ -182,9 +183,14 @@ module.exports = (function() {
         if(canChooseDirectories) {
           return $dirDialog.SelectedPath;
         } else if(type === "open") {
-          return $dialog.FileName;
+          var result = [];
+          var amount = $dialog.FileNames.Length;
+          for(var i=0; i < amount; i++) {
+            result.push($dialog.FileNames.GetValue(i).toString());
+          }
+          return result;
         } else {
-          return $dialog.FileNames[0];
+          return $dialog.FileNames.GetValue(0).toString();
         }
       }
     });
