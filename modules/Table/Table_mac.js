@@ -107,7 +107,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSTableView;
     this.nativeViewClass = this.nativeViewClass || $.NSTableView;
     Container.call(this, options);
-
+    this.native('setWantsLayer', $.YES);
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.private.views = {};
     this.private.columns = [];

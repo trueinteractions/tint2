@@ -22,6 +22,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSProgressIndicator;
     this.nativeViewClass = this.nativeViewClass || $.NSProgressIndicator;
     Container.call(this, options);
+    this.native('setWantsLayer', $.YES);
     this.native('setMinValue', 0);
     this.native('setMaxValue', 1);
     this.native('setDoubleValue', 0);

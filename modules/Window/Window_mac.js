@@ -138,6 +138,8 @@ module.exports = (function() {
     // We need to respond to OS requests, let the OS know we'll be in charge of it. Some controls default
     // to not having a delegate or responder so its necessary to do this rather than further up the
     // inheritence chain.
+
+    this.nativeView('setWantsLayer', $.YES);
     this.native('setDelegate',this.nativeView);
 
     // We need to set some defaults so we properly behave in a cross-platform compatible way.
