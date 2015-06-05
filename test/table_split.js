@@ -28,10 +28,7 @@ function run($utils) {
   split.appendChild(table);
   win.appendChild(split);
   win.visible = true;
-  setTimeout(function() {
-    split.setPosition(0.5, 0);
-    $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 0) );
-  },500)
+  $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 0) );
 }
 
 /**
