@@ -28,7 +28,14 @@ function run($utils) {
   split.appendChild(table);
   win.appendChild(split);
   win.visible = true;
+  $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 30) );
+  console.log(1);
   $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 20) );
+  console.log(2);
+  $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 10) );
+  console.log(3);
+  $utils.clickAt(win.boundsOnScreen.x + 10, win.boundsOnScreen.y + ((process.platform.indexOf('win32') != -1) ? 40 : 0) );
+  console.log(4);
 }
 
 /**

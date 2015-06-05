@@ -66,7 +66,10 @@ module.exports = (function() {
   }
   function mouseMoved(self, cmd, events) { 
     this.fireEvent('mousemove');
-    callSuperForEvent.apply(this,['mouseMoved', self, cmd, events]);
+    callSuperForEvent.apply(this,['mouseMoved', self, cmd, sender]);
+  }
+  function performDragOperation(self, cmd, events) {
+
   }
   /**
    * @class Control
