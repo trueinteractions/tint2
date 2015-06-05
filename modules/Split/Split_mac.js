@@ -93,7 +93,6 @@ module.exports = (function() {
         div = this.bounds.height;
       }
       position = position * div;
-      console.log('position', position, 'index', index);
       this.nativeView('setPosition', position, 'ofDividerAtIndex', index);
     }.bind(this),100);
   }
