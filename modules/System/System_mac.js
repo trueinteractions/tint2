@@ -234,9 +234,11 @@ module.exports = (function() {
         return 'public.' + inType;
         break;
     }
-    
     return inType;
   }
+  // @private, used by Control
+  System.convertFormat = convertFormat;
+
   function lazyInitPasteboard() {
     if(NSPasteboard === null) {
       NSPasteboard = $.NSPasteboard('generalPasteboard');
