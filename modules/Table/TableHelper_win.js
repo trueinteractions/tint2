@@ -140,7 +140,9 @@ module.exports = (function() {
           parent.nativeView.RowDefinitions.Remove(row);
         }
         parent = e; 
-        parent.nativeView.RowDefinitions.Add(row);
+        if(parent) {
+          parent.nativeView.RowDefinitions.Add(row);
+        }
       },
       get:function() { return parent; }
     });
@@ -201,7 +203,9 @@ module.exports = (function() {
     Object.defineProperty(this, 'row', {
       set:function(e) { 
         row = e;
-        container.SetValue($.System.Windows.Controls.Grid.RowProperty, row.index);
+        if(row) {
+          container.SetValue($.System.Windows.Controls.Grid.RowProperty, row.index);
+        }
       },
       get:function() { return row; }
     });
@@ -209,31 +213,40 @@ module.exports = (function() {
     Object.defineProperty(this, 'column', {
       set:function(e) { 
         column = e;
-        container.SetValue($.System.Windows.Controls.Grid.ColumnProperty, column.index * 2);
+        if(column) {
+          container.SetValue($.System.Windows.Controls.Grid.ColumnProperty, column.index * 2);
+        }
       },
       get:function() { return column; }
     });
-
+    Object.defineProperty(this, 'child', {
+      get:function() { return control; },
+      set:function(e) {
+        container.Child = e === null ? null : e.nativeView;
+      }
+    })
     Object.defineProperty(this, 'parent', {
       set:function(e) {
         if(parent) {
-          parent.nativeView.InternalChildren.Remove(parent);
+          parent.nativeView.InternalChildren.Remove(container);
         }
-        parent = e;
-        container.Height = parent.private.rowHeight;
-        container.BorderThickness = new $.System.Windows.Thickness(
-          parent.private.spaceX/2, parent.private.spaceY/2,
-          parent.private.spaceX/2, parent.private.spaceY/2);
-        parent.nativeView.InternalChildren.Add(container);
-        if(row && row.index % 2 === 1 && parent.private.alternatingColors) {
-          container.BorderBrush = exports.oddColor;
-          container.Background = exports.oddColor;
-        } else if (row && parent.private.alternatingColors) {
-          container.BorderBrush = exports.evenColor;
-          container.Background = exports.evenColor;
+        if(e) {
+          parent = e;
+          container.Height = parent.private.rowHeight;
+          container.BorderThickness = new $.System.Windows.Thickness(
+            parent.private.spaceX/2, parent.private.spaceY/2,
+            parent.private.spaceX/2, parent.private.spaceY/2);
+          parent.nativeView.InternalChildren.Add(container);
+          if(row && row.index % 2 === 1 && parent.private.alternatingColors) {
+            container.BorderBrush = exports.oddColor;
+            container.Background = exports.oddColor;
+          } else if (row && parent.private.alternatingColors) {
+            container.BorderBrush = exports.evenColor;
+            container.Background = exports.evenColor;
+          }
+          container.OriginalBorderBrush = container.BorderBrush;
+          container.OriginalBackground = container.Background;
         }
-        container.OriginalBorderBrush = container.BorderBrush;
-        container.OriginalBackground = container.Background;
       },
       get:function() { return parent; }
     });
