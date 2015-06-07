@@ -26,6 +26,7 @@ module.exports = (function() {
         class_addIvar: [ 'uint8', [ 'pointer', 'string', 'size_t', 'uint8', 'string' ] ]
       , class_addMethod: [ 'uint8', [ 'pointer', 'pointer', 'pointer', 'string' ] ]
       , class_addProtocol: [ 'uint8', [ 'pointer', 'pointer' ] ]
+      , class_conformsToProtocol: [ 'uint8', [ 'pointer', 'pointer' ] ]
       , class_copyIvarList: [ 'pointer', [ 'pointer', 'pointer' ] ]
       , class_copyMethodList: [ 'pointer', [ 'pointer', 'pointer' ] ]
       , class_copyPropertyList: [ 'pointer', [ 'pointer', 'pointer' ] ]
