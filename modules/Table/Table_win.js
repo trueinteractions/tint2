@@ -42,19 +42,27 @@ module.exports = (function() {
     }.bind(this);
 
     this.private.setCell = function(cell, column, row) {
-      cell.row = row;
-      cell.column = column;
-      cell.parent = this;
-      //var removed = [];
+      var foundCell = null;
       this.private.items = this.private.items.filter(function(item) {
         if(item.column === column && item.row === row) {
-          //removed.push(item);
           return false;
         } else {
+          foundCell = item;
           return true;
         }
       });
-      this.private.items.push(cell);
+      if(cell === null && foundCell !== null) {
+        foundCell.parent = null;
+        foundCell.row = null;
+        foundCell.column = null;
+        foundCell.child = null;
+        delete foundCell;
+      } else {
+        cell.row = row;
+        cell.column = column;
+        cell.parent = this;
+        this.private.items.push(cell);
+      }
     }.bind(this);
 
     this.private.columnsCanBeResized = true;
@@ -109,9 +117,26 @@ module.exports = (function() {
   };
 
   Table.prototype.removeRow = function(ndx) {
+    for(var i=0; i < this.private.columns.length; i++) {
+      this.private.setCell(null, i, ndx);
+    }
     var row = this.private.findRowByIndex(ndx);
-    row.parent = null;
+    if(row === null) {
+      // hack for zero and null interop with .net, one day we need
+      // to completely redo the win tables here.
+      if(this.private.rows.length === 1) {
+        row = this.private.rows[0];
+      }
+    }
     this.private.rows.splice(this.private.rows.indexOf(row),1);
+    row.parent = null;
+    // readjust the row indexes.
+    for(var i=0; i < this.private.rows.length; i++) {
+      if(this.private.rows[i].index > ndx) {
+        this.private.rows[i].index--;
+      }
+    }
+    
     this.fireEvent('row-removed');
   };
 
@@ -138,6 +163,7 @@ module.exports = (function() {
       value = new TextInput();
       value.value = v.toString();
       value.readonly = true;
+      value.nativeView.Cursor = $.System.Windows.Input.Cursors.Arrow;
     }
     var cell = new tableHelper.Cell(value);
     var column = this.private.findColumnByName(columnId);
