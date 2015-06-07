@@ -8,6 +8,8 @@ module.exports = (function() {
 
   var $ = process.bridge.objc;
   var util = require('Utilities');
+  var System = require('System');
+  var assert = require('assert');
 
   function addTrackingArea() {
     var bounds = this.nativeView('bounds');
@@ -66,11 +68,46 @@ module.exports = (function() {
   }
   function mouseMoved(self, cmd, events) { 
     this.fireEvent('mousemove');
-    callSuperForEvent.apply(this,['mouseMoved', self, cmd, sender]);
+    callSuperForEvent.apply(this,['mouseMoved', self, cmd, events]);
   }
-  function performDragOperation(self, cmd, events) {
+/*
+  
+  function draggingUpdated(self, cmd, sender) {
+    console.log('draggingUpdated:');
+    return $.NSDragOperationCopy;
+  }
+  function draggingEntered(self, cmd, sender) { 
+    console.log('draggedEntered');
+    return $.NSDragOperationCopy;
+  }
+  function draggingExited(self, cmd, sender) { 
+    console.log('draggingExited');
+    return $.NSDragOperationCopy;
+  }
+  function draggingEnded(self, cmd, sender) { 
+    console.log('draggingEnded');
+    return $.NSDragOperationCopy;
+  }
+  function prepareForDragOperation(self, cmd, sender) {
+    console.log('prepareForDragOperation');
+    return $.YES;
+  }
+  function performDragOperation(self, cmd, sender) {
+    console.log('performDragOperation');
+    var values = this.fireEvent('drag');
+    return values ? $.YES : $.NO;
+  }
+  function wantsPeriodicDraggingUpdates(self, cmd) {
+    console.log('wantsPeriodicDraggingUpdates');
+    return $.YES;
+  }
+  function concludeDragOperation(self, cmd) {
+    console.log('concludeDragOperation:');
+  }
+  function updateDraggingItemsForDrag(self, cmd, sender) {
+    console.log('updateDraggingItemsForDrag');
+  }*/
 
-  }
   /**
    * @class Control
    * @description The control class is the base class that provides all common methods used
@@ -87,6 +124,7 @@ module.exports = (function() {
     Object.defineProperty(this, 'private', {
       configurable:false,
       enumerable:false,
+      dragTypes:[],
       value:{
         events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
         user:{width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
@@ -97,6 +135,21 @@ module.exports = (function() {
 
     if(!options.nonStandardEvents) {
       options.delegates = options.delegates.concat([
+        /* ['draggingEntered:', ['I', ['@', ':', '@']], draggingEntered.bind(this)],
+        ['draggingExited:', ['v', ['@', ':', '@']], draggingExited.bind(this)],
+        ['draggingEnded:', ['v', ['@', ':', '@']], draggingEnded.bind(this)],
+        ['performDragOperation:', ['B', ['@', ':', '@']], performDragOperation.bind(this)],
+        ['prepareForDragOperation:', ['B', ['@', ':', '@']], prepareForDragOperation.bind(this)],
+        ['wantsPeriodicDraggingUpdates', 'B@:', wantsPeriodicDraggingUpdates.bind(this)],
+        ['draggingEntered:', 'Q@:@', draggingEntered.bind(this)],
+        ['draggingExited:', 'v@:@', draggingExited.bind(this)],
+        ['draggingEnded:', 'v@:@', draggingEnded.bind(this)],
+        ['draggingUpdated:', 'Q@:@', draggingUpdated.bind(this)],
+        ['performDragOperation:', 'B@:@', performDragOperation.bind(this)],
+        ['prepareForDragOperation:', 'B@:@', prepareForDragOperation.bind(this)],
+        ['concludeDragOperation:', 'v@:@', concludeDragOperation.bind(this)],
+        ['updateDraggingItemsForDrag:', 'v@:@', updateDraggingItemsForDrag.bind(this)],*/
+
         /**
          * @event mousedown
          * @memberof Control
@@ -155,6 +208,7 @@ module.exports = (function() {
     }
 
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
+    //nativeViewExtended.addProtocol('NSDraggingDestination');
     options.delegates.forEach(function(item) { nativeViewExtended.addMethod(item[0],item[1],item[2]); });
     nativeViewExtended.register();
 
@@ -197,6 +251,20 @@ module.exports = (function() {
       }
     }.bind(this));
   }
+/*
+  Object.defineProperty(Control.prototype, 'acceptsDraggedTypes', {
+    get:function() { return this.private.dragTypes; },
+    set:function(e) {
+      //console.log('set.', $.NSImage('imagePasteboardTypes'));
+      //assert(Array.isArray(e), 'The passed in acceptable dragged types must be an array.');
+      //this.private.dragTypes = e;
+      //var convertedTypes = this.private.dragTypes.map(System.convertFormat);
+      //console.log('convertedTypes: ', convertedTypes);
+      //convertedTypes = util.arrayToNSArray(convertedTypes);
+      //this.nativeView('registerForDraggedTypes', convertedTypes);
+      this.nativeView('registerForDraggedTypes', $.NSImage('imagePasteboardTypes'));
+    }
+  });*/
 
   /**
    * @member animateOnSizeChange
