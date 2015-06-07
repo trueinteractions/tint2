@@ -70,7 +70,8 @@ module.exports = (function() {
     this.fireEvent('mousemove');
     callSuperForEvent.apply(this,['mouseMoved', self, cmd, events]);
   }
-/*
+
+
   
   function draggingUpdated(self, cmd, sender) {
     console.log('draggingUpdated:');
@@ -106,7 +107,9 @@ module.exports = (function() {
   }
   function updateDraggingItemsForDrag(self, cmd, sender) {
     console.log('updateDraggingItemsForDrag');
-  }*/
+  }
+
+
 
   /**
    * @class Control
@@ -135,11 +138,6 @@ module.exports = (function() {
 
     if(!options.nonStandardEvents) {
       options.delegates = options.delegates.concat([
-        /* ['draggingEntered:', ['I', ['@', ':', '@']], draggingEntered.bind(this)],
-        ['draggingExited:', ['v', ['@', ':', '@']], draggingExited.bind(this)],
-        ['draggingEnded:', ['v', ['@', ':', '@']], draggingEnded.bind(this)],
-        ['performDragOperation:', ['B', ['@', ':', '@']], performDragOperation.bind(this)],
-        ['prepareForDragOperation:', ['B', ['@', ':', '@']], prepareForDragOperation.bind(this)],
         ['wantsPeriodicDraggingUpdates', 'B@:', wantsPeriodicDraggingUpdates.bind(this)],
         ['draggingEntered:', 'Q@:@', draggingEntered.bind(this)],
         ['draggingExited:', 'v@:@', draggingExited.bind(this)],
@@ -148,7 +146,7 @@ module.exports = (function() {
         ['performDragOperation:', 'B@:@', performDragOperation.bind(this)],
         ['prepareForDragOperation:', 'B@:@', prepareForDragOperation.bind(this)],
         ['concludeDragOperation:', 'v@:@', concludeDragOperation.bind(this)],
-        ['updateDraggingItemsForDrag:', 'v@:@', updateDraggingItemsForDrag.bind(this)],*/
+        ['updateDraggingItemsForDrag:', 'v@:@', updateDraggingItemsForDrag.bind(this)],
 
         /**
          * @event mousedown
@@ -251,7 +249,7 @@ module.exports = (function() {
       }
     }.bind(this));
   }
-/*
+
   Object.defineProperty(Control.prototype, 'acceptsDraggedTypes', {
     get:function() { return this.private.dragTypes; },
     set:function(e) {
@@ -262,9 +260,10 @@ module.exports = (function() {
       //console.log('convertedTypes: ', convertedTypes);
       //convertedTypes = util.arrayToNSArray(convertedTypes);
       //this.nativeView('registerForDraggedTypes', convertedTypes);
+      console.log('registered... ');
       this.nativeView('registerForDraggedTypes', $.NSImage('imagePasteboardTypes'));
     }
-  });*/
+  });
 
   /**
    * @member animateOnSizeChange

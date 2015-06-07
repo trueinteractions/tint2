@@ -15,6 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
+  $utils.ok();
   var win = new Window();
   var split = new Split();
   var table = new Table();
