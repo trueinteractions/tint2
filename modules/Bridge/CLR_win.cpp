@@ -397,7 +397,12 @@ void gchandle_cleanup(char *data, void *hint) {
   GCHandle handle = GCHandle::FromIntPtr(IntPtr(data));
   handle.Free();
 }
-
+NAN_WEAK_CALLBACK(v8_net_collect) {
+  int *ptr = data.GetParameter();
+  GCHandle handle = GCHandle::FromIntPtr(IntPtr((void * )ptr));
+  //Console::WriteLine("recollecting.. " + handle.Target->ToString());
+  handle.Free();
+}
 
 // Extracts a C string from a V8 Utf8Value.
 // static const char* ToCString(const v8::String::Utf8Value& value) {
@@ -520,6 +525,7 @@ v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
       v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
       (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("rawpointer"), bufptr);
     }
+    //NanMakeWeakPersistent(jsdata, (int *)ptr, v8_net_collect);
   }
   return NanEscapeScope(jsdata);
 }
