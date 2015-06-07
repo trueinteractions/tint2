@@ -27,6 +27,94 @@ module.exports = (function() {
     return nsarray;
   }
 
+  function mergeNSArray(arr1, arr2) {
+    var set = $.NSMutableSet('setWithArray',arr1);
+    set('addObjectsFromArray',arr2);
+    return set('allObjects');
+  }
+
+  function convertUTITypesBack(types) {
+    for(var i=0; i < types.length; i++) {
+      var type = (types[i])('description')('UTF8String');
+      type = type.toLowerCase();
+      if(type.indexOf('file') > -1) return 'file';
+      if(type.indexOf('url') > -1 && type !== 'public.url-name') return 'url';
+      if(type.indexOf('bmp') > -1 || type.indexOf('jpeg') > -1  || type.indexOf('jpg') > -1 ||
+         type.indexOf('png') > -1 || type.indexOf('gif') > -1 || type.indexOf('psd') > -1 || 
+         type.indexOf('tif') > -1 || type.indexOf('icns') > -1 || type.indexOf('gif') > -1 ||
+         type.indexOf('tiff') > -1) {
+        return 'image';
+      }
+      if(type.indexOf('mp4') > -1 || type.indexOf('video') > -1 || type.indexOf('avi') > -1 ||
+        type.indexOf('mov') > -1) {
+        return 'video';
+      }
+      if(type.indexOf('html') > -1 || type.indexOf('hyper') > -1) {
+        return 'html';
+      }
+      if(type.indexOf('plain-text') > -1 || type.indexOf('text') > -1) {
+        return 'text';
+      }
+      if(type.indexOf('formatting') > -1) {
+        return 'font';
+      }
+      if(type.indexOf('rtf') > -1 || type.indexOf('rich') > -1) {
+        return 'rtf';
+      }
+      if(type.indexOf('audio') > -1 || type.indexOf('sound') > -1) {
+        return 'audio';
+      }
+    };
+    return 'unknown';
+  }
+
+  function findSuggestedUTIType(types) {
+    for(var i=0; i < types.length; i++) {
+      var type = types[i]('description')('UTF8String');
+      if(type.indexOf('public') === 0 && type !== 'public.url-name') return types[i];
+    }
+    return types[0];
+  }
+
+  function convertDraggedTypes(type) {
+    var result = null;
+    switch(type) {
+      case 'url':
+        result = arrayToNSArray([$('NSURLPboardType')]);
+        break;
+      case 'text':
+        result = arrayToNSArray([$('public.utf8-plain-text')]);
+        break;
+      case 'image':
+        result = $.NSImage('imagePasteboardTypes');
+        break;
+      case 'font':
+        result = arrayToNSArray([$('com.apple.cocoa.pasteboard.character-formatting')]);
+        break;
+      case 'rtf':
+        result = arrayToNSArray([$('NeXT Rich Text Format v1.0 pasteboard type')]);
+        break;
+      case 'html':
+        result = arrayToNSArray([$('public.html')]);
+        break;
+      case 'video':
+        break;
+      case 'audio':
+        result = arrayToNSArray([$('NSSoundPboardType')]);
+        break;
+      case 'file':
+        result = arrayToNSArray([ $('NSFilenamesPboardType') ]);
+        break;
+      default:
+        if(type.indexOf('file:') === 0) {
+          result = arrayToNSArray([$(type.replace('file:', 'NSFilenamesPboardType:'))]);
+        } else {
+          result = arrayToNSArray([$(type)]);
+        }
+    }
+    return result;
+  }
+
   function nsDictionaryToObject(nsdictionary) {
     var allKeys = nsdictionary('allKeys');
     var count = allKeys('count');
@@ -339,6 +427,10 @@ module.exports = (function() {
   baseUtilities.makePropertyColorType = makePropertyColorType;
   baseUtilities.makePropertyFontType = makePropertyFontType;
   baseUtilities.makePropertyNumberType = makePropertyNumberType;
+  baseUtilities.convertDraggedTypes = convertDraggedTypes;
+  baseUtilities.convertUTITypesBack = convertUTITypesBack;
+  baseUtilities.findSuggestedUTIType = findSuggestedUTIType
+  baseUtilities.mergeNSArray = mergeNSArray;
 
   global.__TINT.Utilities = baseUtilities;
   return baseUtilities;

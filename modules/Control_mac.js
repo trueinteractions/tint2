@@ -73,40 +73,70 @@ module.exports = (function() {
 
 
   
-  function draggingUpdated(self, cmd, sender) {
-    console.log('draggingUpdated:');
+  function draggingEntered(self, cmd, sender) {
+    /**
+     * @event dragenter
+     * @memberof Control
+     * @description Fires when acceptsDroppedTypes is set to a type(s) and data of that type is dragged into 
+     *              the view.
+     */
+    this.fireEvent('dragenter');
     return $.NSDragOperationCopy;
   }
-  function draggingEntered(self, cmd, sender) { 
-    console.log('draggedEntered');
+  function draggingExited(self, cmd, sender) {
+    /**
+     * @event dragexit
+     * @memberof Control
+     * @description Fires when acceptsDroppedTypes is set to a type(s) and data of that type was dragged into 
+     *              the view, and is now exiting.
+     */
+    this.fireEvent('dragexit');
     return $.NSDragOperationCopy;
   }
-  function draggingExited(self, cmd, sender) { 
-    console.log('draggingExited');
-    return $.NSDragOperationCopy;
-  }
-  function draggingEnded(self, cmd, sender) { 
-    console.log('draggingEnded');
+  function draggingEnded(self, cmd, sender) {
+    /**
+     * @event dropping
+     * @memberof Control
+     * @description Fires when acceptsDroppedTypes is set to a type(s) and data of that type is dragged into 
+     *              the view and is now ending. Note this does not indicate the success or failure of the drag
+     *              operation, only that it has finished.
+     */
+    this.fireEvent('dropping');
     return $.NSDragOperationCopy;
   }
   function prepareForDragOperation(self, cmd, sender) {
-    console.log('prepareForDragOperation');
+    /**
+     * @event drop
+     * @memberof Control
+     * @description Fires when acceptsDroppedTypes is set to a type(s) and data of that type is dragged into 
+     *              the view and is being dropped into the view.
+     */
+    this.fireEvent('drop');
     return $.YES;
   }
   function performDragOperation(self, cmd, sender) {
-    console.log('performDragOperation');
-    var values = this.fireEvent('drag');
-    return values ? $.YES : $.NO;
-  }
-  function wantsPeriodicDraggingUpdates(self, cmd) {
-    console.log('wantsPeriodicDraggingUpdates');
-    return $.YES;
-  }
-  function concludeDragOperation(self, cmd) {
-    console.log('concludeDragOperation:');
-  }
-  function updateDraggingItemsForDrag(self, cmd, sender) {
-    console.log('updateDraggingItemsForDrag');
+    var types = sender('draggingPasteboard')('pasteboardItems');
+    var num = types('count');
+    var objects = [];
+    for(var i=0; i < num; i++) {
+      var item = types('objectAtIndex', i);
+      var nTypes = util.nsArrayToArray(item('types'));
+      var ourType = util.convertUTITypesBack(nTypes);
+      var data = item('dataForType', util.findSuggestedUTIType(nTypes));
+      objects.push({type:ourType, data:process.bridge.reinterpret(data('bytes'),data('length'),0)});
+    }
+    /**
+     * @event dropped
+     * @memberof Control
+     * @description Fires when acceptsDroppedTypes is set to a type(s) and data of that type is dragged into 
+     *              the view and was dropped into the view's control.  This must return 'true' or 'false' to
+     *              indicate if it accepts or declines the drop request.  The callback for this event is 
+     *              executed with an array passed in of the objects that were dropped.  The object contains
+     *              a type field that is the type of the dropped item, the data field contains a Buffer data
+     *              object for the data that was dropped. IMPORTANT: File and URL types may not necessarily
+     *              contain the contents of the URL or FILE, they have the location of the file or url as a string.
+     */
+    return this.fireEvent('dropped', [objects]) ? $.YES : $.NO;
   }
 
 
@@ -138,15 +168,11 @@ module.exports = (function() {
 
     if(!options.nonStandardEvents) {
       options.delegates = options.delegates.concat([
-        ['wantsPeriodicDraggingUpdates', 'B@:', wantsPeriodicDraggingUpdates.bind(this)],
         ['draggingEntered:', 'Q@:@', draggingEntered.bind(this)],
         ['draggingExited:', 'v@:@', draggingExited.bind(this)],
         ['draggingEnded:', 'v@:@', draggingEnded.bind(this)],
-        ['draggingUpdated:', 'Q@:@', draggingUpdated.bind(this)],
         ['performDragOperation:', 'B@:@', performDragOperation.bind(this)],
         ['prepareForDragOperation:', 'B@:@', prepareForDragOperation.bind(this)],
-        ['concludeDragOperation:', 'v@:@', concludeDragOperation.bind(this)],
-        ['updateDraggingItemsForDrag:', 'v@:@', updateDraggingItemsForDrag.bind(this)],
 
         /**
          * @event mousedown
@@ -206,7 +232,6 @@ module.exports = (function() {
     }
 
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
-    //nativeViewExtended.addProtocol('NSDraggingDestination');
     options.delegates.forEach(function(item) { nativeViewExtended.addMethod(item[0],item[1],item[2]); });
     nativeViewExtended.register();
 
@@ -249,19 +274,35 @@ module.exports = (function() {
       }
     }.bind(this));
   }
-
-  Object.defineProperty(Control.prototype, 'acceptsDraggedTypes', {
+  
+  /**
+   * @member acceptsDroppedTypes
+   * @type {Array}
+   * @memberof Control
+   * @description Is an array of types of content that are accepted for drag and drop operations
+   *              This may be 'text', 'image', 'rtf', 'html', 'video', 'audio', or 'file' types. For
+   *              custom types any unique string identifier may be used. On OSX its typical to use UTI's
+   *              while on windows mime types are preferred. Note this must be set to receive any drop
+   *              events.  See the drop and dropped event for more information on receiving drag and drop items.
+   */
+  Object.defineProperty(Control.prototype, 'acceptsDroppedTypes', {
     get:function() { return this.private.dragTypes; },
     set:function(e) {
-      //console.log('set.', $.NSImage('imagePasteboardTypes'));
-      //assert(Array.isArray(e), 'The passed in acceptable dragged types must be an array.');
-      //this.private.dragTypes = e;
-      //var convertedTypes = this.private.dragTypes.map(System.convertFormat);
-      //console.log('convertedTypes: ', convertedTypes);
-      //convertedTypes = util.arrayToNSArray(convertedTypes);
-      //this.nativeView('registerForDraggedTypes', convertedTypes);
-      console.log('registered... ');
-      this.nativeView('registerForDraggedTypes', $.NSImage('imagePasteboardTypes'));
+      assert(Array.isArray(e), 'The passed in acceptable dragged types must be an array.');
+      this.private.dragTypes = e;
+      var arr = null;
+      var convertedTypes = this.private.dragTypes.forEach(function(item) {
+        if(arr === null) {
+          arr = util.convertDraggedTypes(item);
+        } else {
+          arr = util.mergeNSArray(arr, util.convertDraggedTypes(item));
+        }
+      });
+      if(arr === null) {
+        this.nativeView('unregisterForDraggedTypes');
+      } else {
+        this.nativeView('registerForDraggedTypes', arr);
+      }
     }
   });
 
