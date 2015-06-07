@@ -47,6 +47,18 @@ module.exports = (function() {
     return rtn;
   };
 
+  /** 
+   * Adds a protocol to the class instance. returns true if the operation
+   * was successful or false if it was not.
+   **/
+  Class.prototype.addProtocol = function(protocolName) {
+    return core.class_addProtocol(this.classPointer, core.objc_getProtocol(protocolName));
+  }
+
+  Class.prototype.conformsToProtocol = function(protocolName) {
+    return core.class_conformsToProtocol(this.classPointer, core.objc_getProtocol(protocolName));
+  }
+
   /**
    * Creates a subclass of this class with the given name and optionally a
    * number of extra bytes that will be allocated with each instance. The
