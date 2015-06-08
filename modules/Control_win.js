@@ -8,6 +8,7 @@ module.exports = (function() {
 
   var $ = process.bridge.dotnet;
   var utils = require('Utilities');
+  var assert = require('assert');
 
   function Control(options) {
     options = options || {};
@@ -35,6 +36,43 @@ module.exports = (function() {
       if(options.nonStandardEvents) {
         return;
       }
+      //this.private.drop = this.fireEvent.bind(this,'drop');
+      //this.private.dropping = this.fireEvent.bind(this,'dropping');
+      this.private.dragExit = this.fireEvent.bind(this,'dragexit');
+      this.private.dragEnter = this.fireEvent.bind(this,'dragenter');
+      this.private.dropped = function(sender, eventArgs) {
+        eventArgs = $.fromPointer(eventArgs);
+        var objects = {};
+        var conversions = {
+          'file':$.System.Windows.DataFormats.FileDrop, 
+          'url':$.System.Windows.DataFormats.SymbolicLink, 
+          'image':$.System.Windows.DataFormats.Tiff, 
+          'html':$.System.Windows.DataFormats.Html, 
+          'text':$.System.Windows.DataFormats.UnicodeText, 
+          'rtf':$.System.Windows.DataFormats.Rtf, 
+          'audio':$.System.Windows.DataFormats.WaveAudio,
+          'unknown':$.System.Windows.DataFormats.Serializable
+        };
+        var objects = [];
+        for(var key in conversions) {
+          var values = eventArgs.Data.GetData(conversions[key]);
+          if(values && !values.Length) {
+            objects.push({type:key, data:values});
+          } else if(values && values.Length) {
+            for(var i=0; i < values.Length; i++) {
+              objects.push({type:key, data:values.GetValue(i)});
+            }
+          }
+        }
+        this.fireEvent('dropping');
+        this.fireEvent('drop');
+        if(this.fireEvent('dropped', [objects])) {
+          eventArgs.Effects = $.System.Windows.DragDropEffects.All;
+        } else {
+          eventArgs.Effects = $.System.Windows.DragDropEffects.None;
+        }
+      }.bind(this);
+
       this.private.rightMouseUp = this.fireEvent.bind(this,'rightmouseup');
       this.private.rightMouseDown = this.fireEvent.bind(this,'rightmousedown');
       this.private.leftMouseDown =  this.fireEvent.bind(this, 'leftmousedown');
@@ -98,6 +136,22 @@ module.exports = (function() {
       utils.lazyLoadEventListener(this, 'keyup',
         this.native.addEventListener.bind(this.native,'KeyUp', this.private.keyUp),
         this.native.removeEventListener.bind(this.native, 'KeyUp', this.private.keyUp));
+
+      utils.lazyLoadEventListener(this, 'dragenter',
+        this.native.addEventListener.bind(this.native,'PreviewDragEnter', this.private.dragEnter),
+        this.native.removeEventListener.bind(this.native, 'PreviewDragEnter', this.private.dragEnter));
+      utils.lazyLoadEventListener(this, 'dragexit',
+        this.native.addEventListener.bind(this.native,'PreviewDragLeave', this.private.dragExit),
+        this.native.removeEventListener.bind(this.native, 'PreviewDragLeave', this.private.dragExit));
+      //utils.lazyLoadEventListener(this, 'drop',
+      //  this.native.addEventListener.bind(this.native,'PreviewDragOver', this.private.drop),
+      //  this.native.removeEventListener.bind(this.native, 'PreviewDragOver', this.private.drop));
+      //utils.lazyLoadEventListener(this, 'dropping',
+      //  this.native.addEventListener.bind(this.native,'PreviewDrop', this.private.dropping),
+      //  this.native.removeEventListener.bind(this.native, 'PreviewDrop', this.private.dropping));
+      utils.lazyLoadEventListener(this, 'dropped', 
+        this.native.addEventListener.bind(this.native,'PreviewDrop', this.private.dropped),
+        this.native.removeEventListener.bind(this.native, 'PreviewDrop', this.private.dropped));
     }.bind(this);
 
     addNativeEventHandlers();
@@ -125,6 +179,15 @@ module.exports = (function() {
     $.System.Windows.Visibility.Visible,
     $.System.Windows.Visibility.Hidden);
 
+  Object.defineProperty(Control.prototype, 'acceptsDroppedTypes', {
+    get:function() { return this.private.dragTypes; },
+    set:function(e) {
+      assert(Array.isArray(e), 'The passed in acceptable dragged types must be an array.');
+      this.private.dragTypes = e;
+      this.nativeView.AllowDrop = e ? true : false;
+      this.native.AllowDrop = e ? true : false;
+    }
+  });
   utils.def(Control.prototype, 'boundsOnScreen',
     function() {
       if(!this.native.GetType().Equals($.System.Windows.Window) && !this.private.parent) {
