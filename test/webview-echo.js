@@ -42,8 +42,7 @@ function run($utils) {
     else if (type === 'error' && value[0] === 'error: ') gotError = !gotError;
     else if (type === 'info' && value[0] === 'info: ') gotInfo = !gotInfo;
     else {
-      console.log('here');
-       $utils.assert(false, 'Error, bad console message: ' + type + ' ' + value);
+      $utils.assert(false, 'Error, bad console message: ' + type + ' ' + value);
     }
   });
   webview.location = 'app://assets/webview-echo-test.html';
