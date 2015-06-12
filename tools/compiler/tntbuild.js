@@ -241,7 +241,8 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       return true;
     },
     prepwin:function() {
-      assert(tintExecutableWindows !== '@@@TINT_WINDOWS_EXECUTABLE@@@', 'The runtime for windows could not be found.');
+      // To prevent escaping both the first and second macro, we'll "add this"
+      assert(tintExecutableWindows !== ('@@@' + 'TINT_WINDOWS_EXECUTABLE' + '@@@'), 'The runtime for windows could not be found.');
       var winExec = new Buffer(tintExecutableWindows, 'base64');
       this.packageExecSize = winExec.length;
       try {
