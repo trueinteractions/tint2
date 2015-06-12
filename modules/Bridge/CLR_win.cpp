@@ -389,18 +389,14 @@ namespace TintInterop {
  **/
 #ifdef GC_DEBUG
  static int CppClassCount = 0;
+ static int CppCollectCount = 0;
 #endif
 void gchandle_cleanup(char *data, void *hint) {
 #ifdef GC_DEBUG
   CppClassCount--;
+  CppCollectCount++;
 #endif
   GCHandle handle = GCHandle::FromIntPtr(IntPtr(data));
-  handle.Free();
-}
-NAN_WEAK_CALLBACK(v8_net_collect) {
-  int *ptr = data.GetParameter();
-  GCHandle handle = GCHandle::FromIntPtr(IntPtr((void * )ptr));
-  //Console::WriteLine("recollecting.. " + handle.Target->ToString());
   handle.Free();
 }
 
@@ -525,7 +521,6 @@ v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
       v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
       (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("rawpointer"), bufptr);
     }
-    //NanMakeWeakPersistent(jsdata, (int *)ptr, v8_net_collect);
   }
   return NanEscapeScope(jsdata);
 }
@@ -1032,8 +1027,13 @@ static NAN_METHOD(CreateClass) {
 #ifdef GC_DEBUG
   static NAN_METHOD(GetCppClassCount) {
     NanScope();
-    NanReturnValue(v8::Number::New(CppClassCount));
+    NanReturnValue(NanNew<v8::Number>(CppClassCount));
   }
+  static NAN_METHOD(GetCppCollectCount) {
+    NanScope();
+    NanReturnValue(NanNew<v8::Number>(CppCollectCount));
+  }
+
 #endif
 
   static NAN_METHOD(GetReferencedAssemblies) {
@@ -1718,6 +1718,7 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
 #ifdef GC_DEBUG
   NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);
+  NODE_SET_METHOD(target, "getCppCollectCount", CLR::GetCppCollectCount);
 #endif
 
   // Register the thread handle to communicate back to handle application
