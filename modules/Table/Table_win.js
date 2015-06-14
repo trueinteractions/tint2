@@ -3,172 +3,130 @@ module.exports = (function() {
     return global.__TINT.Table;
   }
   var $ = process.bridge.dotnet;
+  var utils = require('Utilities');
   var Container = require('Container');
-  var TextInput = require('TextInput');
-  var tableHelper = require('TableHelper');
+  var assert = require('assert');
 
   function Table(options) {
     options = options || {};
-    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Grid;
-    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Grid;
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.DataGrid;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.DataGrid;
     Container.call(this, options);
-
-    this.private.findColumnByName = function(name) {
-      for(var i=0; i < this.private.columns.length; i++) {
-        if(this.private.columns[i].title === name) {
-          return this.private.columns[i];
-        }
-      }
-      return null;
-    }.bind(this);
-
-    this.private.findColumnByIndex = function(ndx) {
-      for(var i=0; i < this.private.columns.length; i++) {
-        var column = this.private.columns[i];
-        if(column.index === ndx) {
-          return this.private.columns[i];
-        }
-      }
-      return null;
-    }.bind(this);
-
-    this.private.findRowByIndex = function(ndx) {
-      for(var i=0; i < this.private.rows.length; i++) {
-        if(this.private.rows[i].index === ndx) {
-          return this.private.rows[i];
-        }
-      }
-      return null;
-    }.bind(this);
-
-    this.private.setCell = function(cell, column, row) {
-      var foundCell = null;
-      this.private.items = this.private.items.filter(function(item) {
-        if(item.column === column && item.row === row) {
-          return false;
-        } else {
-          foundCell = item;
-          return true;
-        }
-      });
-      if(cell === null && foundCell !== null) {
-        foundCell.parent = null;
-        foundCell.row = null;
-        foundCell.column = null;
-        foundCell.child = null;
-        delete foundCell;
-      } else {
-        cell.row = row;
-        cell.column = column;
-        cell.parent = this;
-        this.private.items.push(cell);
-      }
-    }.bind(this);
-
-    this.private.columnsCanBeResized = true;
-    this.private.amountSelected = 0;
-    this.private.header = new $.System.Windows.Controls.RowDefinition();
-    this.private.header.Height = new $.System.Windows.GridLength(tableHelper.rowHeight, $.System.Windows.GridLength.Pixel);
-    this.nativeView.RowDefinitions.Add(this.private.header);
-    this.private.rowHeight = tableHelper.rowHeight;
-    this.private.columns = [];
-    this.private.rows = [];
-    this.private.items = [];
-    this.private.multiple = false;
-    this.private.allowEmptySelection = true;
-    this.private.alternatingColors = true;
     this.private.spaceX = 1;
     this.private.spaceY = 1;
+    this.private.columns = {};
+    this.private.rows = 0;
+    this.private.allowEmptySelection = true;
+    this.nativeView.AutoGenerateColumns = false;
+    this.alternatingColors = true;
+    this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
+    this.nativeView.GridLinesVisibility = $.System.Windows.Controls.DataGridGridLinesVisibility.None;
+    this.nativeView.ColumnWidth = new $.System.Windows.Controls.DataGridLength(1, $.System.Windows.Controls.DataGridLengthUnitType.Star);
+
+    // These settings force the grid to act similar to OSX.
+    this.nativeView.VerticalScrollBarVisibility =  $.System.Windows.Controls.ScrollBarVisibility.Disabled;
+    this.nativeView.HorizontalScrollBarVisibility =  $.System.Windows.Controls.ScrollBarVisibility.Disabled;
+    this.nativeView.AlternatingRowBackground = $.System.Windows.SystemColors.ControlLightLightBrush;
+    this.nativeView.RowHeaderWidth = 0.0;
+    this.nativeView.SelectionUnit = $.System.Windows.Controls.DataGridSelectionUnit.FullRow;
+
+    this.private.select = function() { this.fireEvent('select'); }.bind(this);
+    this.private.selected = function() { this.fireEvent('selected'); }.bind(this);
+    this.private.columnMoved = function() { this.fireEvent('column-moved'); }.bind(this);
+    this.private.columnResized = function(name) { this.fireEvent('column-resized', [name]); }
+    this.private.columnClicked = function(name) { this.fireEvent('column-clicked', [name]); }
+    this.private.columnMouseDown = function(name) { this.fireEvent('column-mousedown', [name]); }
+
+    utils.lazyLoadEventListener(this, 'select',
+      this.native.addEventListener.bind(this.native,'SelectionChanged', this.private.select),
+      this.native.removeEventListener.bind(this.native, 'SelectionChanged', this.private.select));
+    utils.lazyLoadEventListener(this, 'selected',
+      this.native.addEventListener.bind(this.native,'SelectionChanged', this.private.selected),
+      this.native.removeEventListener.bind(this.native, 'SelectionChanged', this.private.selected));
+    utils.lazyLoadEventListener(this, 'column-moved',
+      this.native.addEventListener.bind(this.native,'ColumnReordered', this.private.columnMoved),
+      this.native.removeEventListener.bind(this.native, 'ColumnReordered', this.private.columnMoved));
   }
 
   Table.prototype = Object.create(Container.prototype);
   Table.prototype.constructor = Table;
 
-  Table.prototype.addColumn = function(e) {
-    var column = new tableHelper.Column();
-    column.title = e;
-    column.parent = this;
-    this.private.columns.push(column);
-    for(var i=0; i < this.private.rows.length; i++) {
-      var cell = new tableHelper.Cell();
-      var row = this.private.rows[i];
-      this.private.setCell(cell, column, row);
-    }
+  Table.prototype.addColumn = function(name) {
+    var column = new $.TintInterop.TintDataGridColumn();
+    column.Header = name;
+    column.MaxWidth = 2000;
+    column.MinWidth = 20;
+    this.native.Columns.Add(column);
+    this.private.columns[name] = column;
     this.fireEvent('column-added');
+    var crFireFunc = this.private.columnResized.bind(this, name); 
+    utils.lazyLoadEventListener(this, 'column-resized',
+      this.native.addEventListener.bind(column,'ColumnReordered', crFireFunc),
+      this.native.removeEventListener.bind(column, 'ColumnReordered', crFireFunc));
+    var ccFireFunc = this.private.columnClicked.bind(this, name); 
+    utils.lazyLoadEventListener(this, 'column-clicked',
+      this.native.addEventListener.bind(column,'PreviewMouseDown', ccFireFunc),
+      this.native.removeEventListener.bind(column, 'PreviewMouseDown', ccFireFunc));
+    var cmFireFunc = this.private.columnMouseDown.bind(this, name); 
+    utils.lazyLoadEventListener(this, 'column-mousedown',
+      this.native.addEventListener.bind(column,'PreviewMouseDown', cmFireFunc),
+      this.native.removeEventListener.bind(column, 'PreviewMouseDown', cmFireFunc));
   };
 
-  Table.prototype.removeColumn = function(e) {
-    var column = this.private.findColumnByName(e);
-    column.parent = null;
-    this.private.columns.splice(this.private.columns.indexOf(column),1);
+  Table.prototype.removeColumn = function(name) {
+    this.nativeView.Columns.RemoveAt(this.nativeView.Columns.IndexOf(this.private.columns[name]));
+    this.private.columns[name] = null;
     this.fireEvent('column-removed');
   };
 
-  Table.prototype.addRow = function() {
-    var row = new tableHelper.Row();
-    row.parent = this;
-    this.private.rows.push(row);
-    for(var i=0; i < this.private.columns.length; i++) {
-      var cell = new tableHelper.Cell();
-      var column = this.private.findColumnByIndex(i);
-      this.private.setCell(cell, column, row);
+  Table.prototype.addRow = function(ndx) {
+    ndx = ndx || this.numberOfRows;
+    assert(ndx <= this.numberOfRows, 'The passed in index ' + ndx + ' was greater than the number of rows.');
+    var items = this.nativeView.Items;
+    var columnCount = this.nativeView.Columns.Count;
+    for(var i=0; i < columnCount; i++) {
+      var label = new $.System.Windows.Controls.Label();
+      label.Content = '';
+      items.Insert(ndx * columnCount + i, label);
     }
-    this.fireEvent('row-added');
+    this.fireEvent('row-added', [ndx]);
   };
 
   Table.prototype.removeRow = function(ndx) {
-    for(var i=0; i < this.private.columns.length; i++) {
-      this.private.setCell(null, i, ndx);
+    ndx = (typeof(ndx) === "number") ? ndx : this.numberOfRows;
+    assert(ndx < this.numberOfRows, 'The passed in index ' + ndx + ' was greater than the number of rows.');
+    var items = this.nativeView.Items;
+    var columnCount = this.nativeView.Columns.Count;
+    for(var i=0; i < columnCount; i++) {
+      items.RemoveAt(ndx * columnCount);
     }
-    var row = this.private.findRowByIndex(ndx);
-    if(row === null) {
-      // hack for zero and null interop with .net, one day we need
-      // to completely redo the win tables here.
-      if(this.private.rows.length === 1) {
-        row = this.private.rows[0];
-      }
-    }
-    this.private.rows.splice(this.private.rows.indexOf(row),1);
-    row.parent = null;
-    // readjust the row indexes.
-    for(var i=0; i < this.private.rows.length; i++) {
-      if(this.private.rows[i].index > ndx) {
-        this.private.rows[i].index--;
-      }
-    }
-    
-    this.fireEvent('row-removed');
+    this.fireEvent('row-removed',[ndx]);
   };
 
-  Table.prototype.moveColumn = function(ndx, toNdx) {
-    var columnFrom = this.private.findColumnByIndex(ndx);
-    var columnTo = this.private.findColumnByIndex(toNdx);
-    columnFrom.index = toNdx;
-    columnTo.index = ndx;
-  };
+  Table.prototype.moveColumn = function(ndx, toNdx) { this.nativeView.Columns.Move(ndx, toNdx); };
 
   Table.prototype.moveRow = function(ndx, toNdx) {
-    var row = this.private.findRowByIndex(ndx);
-    row.index = toNdx;
-  };
-
-  Table.prototype.setColumnWidth = function(name,e) {
-    var column = this.private.findColumnByName(name);
-    column.width = e;
-  };
-
-  Table.prototype.setValueAt = function(columnId,rowIndex,value) {
-    if(typeof(value) === "string" || typeof(value) === "number") {
-      var v = value;
-      value = new TextInput();
-      value.value = v.toString();
-      value.readonly = true;
-      value.nativeView.Cursor = $.System.Windows.Input.Cursors.Arrow;
+    if(ndx === toNdx) {
+      return;
     }
-    var cell = new tableHelper.Cell(value);
-    var column = this.private.findColumnByName(columnId);
-    var row = this.private.findRowByIndex(rowIndex+1);
-    this.private.setCell(cell, column, row);
+    var item = this.nativeView.Items.Item.GetValue(ndx);
+    this.nativeView.RemoveAt(ndx);
+    this.nativeView.Items.InsertAt((ndx < toNdx) ? (toNdx - 1) : toNdx, item);
+  };
+
+  Table.prototype.setColumnWidth = function(name,width) {
+    this.private.columns[name].Width = width;
+  };
+
+  Table.prototype.setValueAt = function(name,rowIndex,value) {
+    var ndx = this.nativeView.Columns.Count * rowIndex + this.private.columns[name].DisplayIndex;
+    if(typeof(value) === 'string') {
+      var label = new $.System.Windows.Controls.Label();
+      label.Content = value;
+      this.nativeView.Items.Insert(ndx, label);
+    } else {
+      this.nativeView.Items.Insert(ndx, value);
+    }
   };
 
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
@@ -195,104 +153,91 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Table.prototype, 'multipleSelection', {
-    get:function() { return this.private.multiple; },
-    set:function(e) { this.private.multiple = (e ? true : false); }
+    get:function() { return this.nativeView.SelectionMode === $.System.Windows.Controls.DataGridSelectionMode.Extended; },
+    set:function(e) { 
+      this.nativeView.SelectionMode = e ? 
+        $.System.Windows.Controls.DataGridSelectionMode.Extended : 
+        $.System.Windows.Controls.DataGridSelectionMode.Single;
+    }
   });
   
   Object.defineProperty(Table.prototype, 'emptySelection', {
-    get:function() { return this.private.allowEmptySelection; },
-    set:function(e) { this.private.allowEmptySelection = (e ? true : false); }
+    get:function() { this.private.allowEmptySelection },
+    set:function(e) { this.private.allowEmptySelection = e ? true : false; }
   });
 
-  // TODO: Implement me.  User interface to move columns.
-  //Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
-  //  get:function() { },
-  //  set:function(e) { }
-  //});
+  Object.defineProperty(Table.prototype, 'columnsCanBeMoved', {
+    get:function() { return this.nativeView.CanUserReorderColumns ? true : false; },
+    set:function(e) { this.nativeView.CanUserReorderColumns = (e ? true : false); }
+  });
 
   Object.defineProperty(Table.prototype, 'columnsCanBeResized', {
-    get:function() { return this.private.columnsCanBeResized; },
-    set:function(e) { 
-      this.private.columnsCanBeResized = e ? true : false;
-      this.private.columns.forEach(function(column) {
-        column.resizable = this.private.columnsCanBeResized;
-      }.bind(this));
-    }
+    get:function() { return this.nativeView.CanUserResizeColumns ? true : false; },
+    set:function(e) { this.nativeView.CanUserResizeColumns = (e ? true : false); }
   });
 
   Object.defineProperty(Table.prototype, 'spaceX', {
     get:function() { return this.private.spaceX; },
-    set:function(e) {
-      this.private.spaceX = e;
-      this.private.items.forEach(function(e) { 
-        e.native.BorderThickness.Left = (this.private.spaceX / 2);
-        e.native.BorderThickness.Right = (this.private.spaceX / 2);
-      });
-    }
+    set:function(e) { this.private.spaceX = e; }
   });
 
   Object.defineProperty(Table.prototype, 'spaceY', {
     get:function() { return this.private.spaceY; },
-    set:function(e) {
-      this.private.spaceY = e;
-      this.private.rows.forEach(function(e) { 
-        e.height = this.private.rowHeight + this.private.spaceY; 
-      });
+    set:function(e) { 
+      this.private.spaceY = e; 
+      this.nativeView.RowHeight = this.nativeView.RowHeight + (this.private.spaceY * 2); 
     }
   });
 
   Object.defineProperty(Table.prototype, 'rowHeight', {
-    get:function() { return this.private.rowHeight; },
-    set:function(e) { 
-      this.private.rowHeight = e;
-      this.private.rows.forEach(function(e) { 
-        e.height = this.private.rowHeight + this.private.spaceY; 
-      });
-      this.private.items.forEach(function(e) { 
-        e.height = this.private.rowHeight;
-      });
-    }
+    get:function() { return this.nativeView.RowHeight - (this.private.spaceY * 2); },
+    set:function(e) { this.nativeView.RowHeight = e + (this.private.spaceY * 2); }
   });
 
   Object.defineProperty(Table.prototype, 'selectedRows', {
-    get:function() {
-      var rows = [];
-      this.private.rows.forEach(function(row) {
-        if(row.selected) {
-          rows.push(row.index);
-        }
-      });
-      return rows;
+    get:function() { 
+      var selItems = this.nativeView.SelectedItems;
+      var selCount = selItems.Count;
+      var selIndexes = [];
+      for(var i=0; i < selCount; i++) {
+        selIndexes.push(selItems.Item.GetValue(i).GetIndex());
+      }
+      return selIndexes; 
     },
     set:function(rows) {
       this.fireEvent('select');
-      for(var i=0; i < rows.length; i++) {
-        var row = this.private.findRowByIndex(rows[i]);
-        row.selected = true;
+      var selItems = this.nativeView.SelectedItems;
+      var selCount = selItems.Count;
+      for(var i=0; i < selCount; i++) {
+        if(rows.indexOf(i) > -1) {
+          selItems.Items.GetValue(i).IsSelected = true;
+        }
       }
       this.fireEvent('selected');
     }
   });
 
   Object.defineProperty(Table.prototype, 'numberOfColumns', {
-    get:function() { return this.private.columns.length; }
+    get:function() { return this.nativeView.Columns.Count; }
   });
 
   Object.defineProperty(Table.prototype, 'numberOfRows', {
-    get:function() { return this.private.rows.length; }
+    get:function() {
+      var itemCount =  this.nativeView.Items.Count;
+     return (itemCount === 0) ? 0 : (Math.floor(itemCount / this.nativeView.Columns.Count));
+   }
   });
 
   Object.defineProperty(Table.prototype, 'alternatingColors', {
-    get:function() { return this.private.alternatingColors; },
+    get:function() { this.nativeView.AlternationIndex === 2 ? true : false; },
     set:function(e) { 
-      this.private.alternatingColors = e ? true : false;
-      this.private.items.forEach(function(item) {
-        var color = ((item.row.index % 2) === 1 && e) ? tableHelper.oddColor : tableHelper.evenColor;
-        if(!item.selected) {
-          item.native.BorderBrush = item.native.Background = color;
-        }
-        item.native.OriginalBorderBrush = item.native.OriginalBackground = color;
-      });
+      if(e) {
+        this.nativeView.AlternationIndex = 2;
+        this.nativeView.RowBackground = $.System.Windows.SystemColors.ControlBrush;
+      } else {
+        this.nativeView.AlternationIndex = 0;
+        this.nativeView.RowBackground = $.System.Windows.SystemColors.ControlLightLightBrush;
+      } 
     }
   });
 

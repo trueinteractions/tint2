@@ -175,6 +175,20 @@ System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
 namespace TintInterop {
+  public ref class TintDataGridColumn : System::Windows::Controls::DataGridBoundColumn
+  {
+  protected:
+      virtual FrameworkElement^ GenerateElement(System::Windows::Controls::DataGridCell^ cell, System::Object^ dataItem) override
+      {
+          return (FrameworkElement ^)dataItem;
+      }
+
+      virtual FrameworkElement^ GenerateEditingElement(System::Windows::Controls::DataGridCell^ cell, System::Object^ dataItem) override
+      {
+          return (FrameworkElement ^)dataItem;
+      }
+  };
+
   public ref class Dwm {
     public:
     static int Glass(IntPtr hwnd, int margin) {
