@@ -216,20 +216,24 @@ function createProperty(target, typeNative, memberName, static) {
 }
 
 
-function CLRClass() {
-}
-
-CLRClass.prototype.toString = function() { 
-  return (this.pointer ? 'Object ' : 'Class ') + this.className + '';
+function CLRClassDefineMembers(typeNative, target, static) {
+  var types = static ? dotnet.getStaticMemberTypes(typeNative) : dotnet.getMemberTypes(typeNative);
+  var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
+  while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
+    var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
+    var mName = dotnet.execGetProperty(mNative, 'Name');
+    var type = dotnet.execMethod(dotnet.execGetProperty(mNative, 'MemberType'), 'ToString');
+    if(type === "Field") {
+      createField(target, typeNative, mName, static);
+    } else if(type === "Method") {
+      if(mName.substring(0,4) !== "get_" && mName.substring(0,4) !== "set_") {
+        createMethod(target, typeNative, mName, static);
+      }
+    } else if(type === "Property") {
+      createProperty(target, typeNative, mName, static);
+    }
+  }
 };
-CLRClass.prototype.inspect = function() { 
-  return '\033[33m CLR ' + this.toString() + '\033[39m'; 
-};
-CLRClass.addEventListener = CLRClass.prototype.addEventListener = function(event, callback) {
-  dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback); 
-};
-// TODO:
-CLRClass.removeEventListener = CLRClass.prototype.removeEventListener = function() {}
 
 function createClass(typeNative, typeName) {
   dotnet.statistics.classes++;
@@ -246,7 +250,6 @@ function createClass(typeNative, typeName) {
     }
     this.pointer = dotnet.execNew.apply(null,args);
   };
-  CLRClassInstance.prototype = Object.create(CLRClass.prototype);
   CLRClassInstance.prototype.constructor = CLRClassInstance;
   CLRClassInstance.prototype.classPointer = CLRClassInstance.classPointer = typeNative;
   CLRClassInstance.prototype.className = CLRClassInstance.className = typeName;
@@ -254,26 +257,12 @@ function createClass(typeNative, typeName) {
   CLRClassInstance.addEventListener = CLRClassInstance.prototype.addEventListener = function(event, callback) {
     dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback); 
   };
-  var iterateThroughMembers = function(types, static) {
-    var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
-    while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-      var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-      var mName = dotnet.execGetProperty(mNative, 'Name');
-      var type = dotnet.execMethod(dotnet.execGetProperty(mNative, 'MemberType'), 'ToString');
-      if(type === "Field") {
-        createField(CLRClassInstance, typeNative, mName, static);
-      } else if(type === "Method") {
-        if(mName.substring(0,4) !== "get_" && mName.substring(0,4) !== "set_") {
-          createMethod(CLRClassInstance, typeNative, mName, static);
-        }
-      } else if(type === "Property") {
-        createProperty(CLRClassInstance, typeNative, mName, static);
-      }
-    }
-  };
+  CLRClassInstance.removeEventListener = CLRClassInstance.prototype.removeEventListener = function() {}
+  CLRClassInstance.prototype.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + this.className + ''; };
+  CLRClassInstance.prototype.inspect = function() { return '\033[33m CLR ' + this.toString() + '\033[39m'; };
 
-  iterateThroughMembers(dotnet.getStaticMemberTypes(typeNative), true);
-  iterateThroughMembers(dotnet.getMemberTypes(typeNative), false);
+  CLRClassDefineMembers(typeNative, CLRClassInstance, true);
+  CLRClassDefineMembers(typeNative, CLRClassInstance, false);
 
   classCache[qualifiedName] = CLRClassInstance;
   return classCache[qualifiedName];
@@ -321,9 +310,7 @@ function createFromType(nativeType, onto) {
     if(space) {
       var spl = space.split('.');
       for(var i=0; i < spl.length; i++) {
-        if(!info.onto[spl[i]]) {
-          info.onto[spl[i]] = {};
-        }
+        info.onto[spl[i]] = info.onto[spl[i]] || {};
         info.onto = info.onto[spl[i]];
       }
     }
@@ -350,10 +337,8 @@ function importOnto(assembly, onto) {
   if(assembly.toLowerCase().indexOf('.dll') === -1 && assembly.toLowerCase().indexOf('.exe') === -1) {
     assembly += ".dll";
   }
-
   var types = dotnet.loadAssembly(assembly);
   var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");
-
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var type = dotnet.execGetProperty(typeEnumerator,'Current');
     createFromType(type, onto);
