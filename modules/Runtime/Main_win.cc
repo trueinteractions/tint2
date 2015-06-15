@@ -31,6 +31,7 @@ v8::Handle<v8::Object> bridge;
 node::Environment *env;
 
 DWORD mainThreadId = 0;
+int idleTimeNotification = 0;
 
 extern "C" void InitAppRequest();
 namespace REF {
@@ -81,7 +82,10 @@ void uv_event(void *info) {
       if(timeout == INFINITE) {
         timeout = 16;
       } else if (timeout > 250) {
+        idleTimeNotification = timeout;
         timeout = 250;
+        PostMessage(HWND_BROADCAST, WM_APP+2, 0, 0);
+        PostThreadMessage(mainThreadId, WM_APP+2 /* magic GC Idle Notification id */, 0, 0);
       } else if (timeout == 0 && uv_trip_timer_safety) {
         timeout = 150;
         uv_trip_timer_safety = false;
@@ -244,6 +248,8 @@ void win_msg_loop() {
     if(uv_trip_winproc_safety == true || msg.message == WM_APP+1) {
       uv_run_nowait();
       uv_trip_winproc_safety = false;
+    } else if(msg.message == WM_APP+2) {
+      v8::Isolate::GetCurrent()->IdleNotification(idleTimeNotification);
     }
     if(bRet == -1) {
       fprintf(stderr, "FATAL ERROR: %i\n",bRet);

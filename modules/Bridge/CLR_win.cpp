@@ -17,7 +17,9 @@
 #using <WPF/PresentationFramework.dll>
 #using <System.Windows.Forms.dll>
 #using <System.Drawing.dll>
+#include <msclr/marshal.h>
 
+using namespace msclr::interop;
 using namespace v8;
 using namespace System::Collections::Generic;
 using namespace System::Reflection;
@@ -34,7 +36,6 @@ DWORD v8Thread;
 // V8 is actually releasing the C++ wrappers around pinned CLR objects,
 // it however, does not test if the CLR garbage collector is reclaiming
 // them.
-
 // #define GC_DEBUG 1
 
 extern "C" void uv_run_nowait();
@@ -428,16 +429,6 @@ void gchandle_cleanup(char *data, void *hint) {
 // .NET to determine if it needs to be collected.  In otherwords, do nothing.
 void wrap_cb(char *data, void *hint) { }
 
-std::string stringV82STR(Handle<v8::String> text) {
-  NanUtf8String utf8string(text);
-  return std::string(*utf8string);
-}
-
-std::string stringCLR2STR(System::String^ text) {
-  char *utf8string = (char *)Marshal::StringToHGlobalAnsi(text).ToPointer();
-  return std::string(utf8string);
-}
-
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
   NanEscapableScope();
@@ -453,9 +444,10 @@ Handle<v8::String> stringCLR2V8(System::String^ text)
   NanEscapableScope();
   if (text->Length > 0)
   {
-    const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
+    marshal_context ^ context = gcnew marshal_context();
+    const char* str = context->marshal_as<const char*>(text);
     v8::Local<v8::String> v8str = NanNew<v8::String>(str);
-    Marshal::FreeHGlobal(IntPtr((void *)str));
+    delete context;
     return NanEscapeScope(v8str);
   }
   else
@@ -529,10 +521,10 @@ v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
 #endif
     GCHandle handle = GCHandle::Alloc(netdata);
     void *ptr = GCHandle::ToIntPtr(handle).ToPointer();
-    jsdata = NanNewBufferHandle((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
+    jsdata = NanNewBufferHandle((char *)(ptr), sizeof(ptr) * 1024, gchandle_cleanup, NULL);
     if(type == System::IntPtr::typeid) {
       void *rawptr = ((System::IntPtr ^)netdata)->ToPointer();
-      v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
+      v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr) * 1024, wrap_cb, NULL);
       (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("rawpointer"), bufptr);
     }
   }
@@ -585,8 +577,7 @@ System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
   else if (jsdata->IsInt32())       return jsdata->Int32Value();
   else if (jsdata->IsUint32())      return jsdata->Uint32Value();
   else if (jsdata->IsNumber())      return jsdata->NumberValue();
-  else if (jsdata->IsUndefined() || 
-    jsdata->IsNull())               return nullptr;
+  else if (jsdata->IsUndefined() || jsdata->IsNull()) return nullptr;
   else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(NanNew<v8::String>("array"))->BooleanValue()) {
     Handle<v8::Object> jsbuffer = jsdata->ToObject();
     cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
@@ -797,7 +788,7 @@ class CLR {
 
 public:
 
-static NAN_METHOD(CreateClass) {
+  static NAN_METHOD(CreateClass) {
     NanScope();
     try {
       System::String^ name = stringV82CLR(args[0]->ToString());
@@ -1428,15 +1419,17 @@ static NAN_METHOD(CreateClass) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
         delete property;
-		delete target;
+		    delete target;
         NanReturnValue(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
-		NanReturnValue(MarshalCLRToV8(rtn));
+        delete property;
+        delete target;
+		    NanReturnValue(MarshalCLRToV8(rtn));
       }
     } catch (System::Exception^ e) {
-	  NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -1542,7 +1535,11 @@ static NAN_METHOD(CreateClass) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-
+#ifdef GC_DEBUG
+  static NAN_GC_CALLBACK(GCCallback) {
+    System::GC::Collect();
+  }
+#endif
 };
 
 void browser_callback(uv_async_t* work);
@@ -1739,5 +1736,8 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   // specific events when in WPF mode.
   System::Windows::Interop::ComponentDispatcher::ThreadFilterMessage += 
       gcnew System::Windows::Interop::ThreadMessageEventHandler(CLR::HandleMessageLoop);
+#ifdef GC_DEBUG
+  NanAddGCEpilogueCallback(CLR::GCCallback);
+#endif
 }
 
