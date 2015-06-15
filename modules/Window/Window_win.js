@@ -61,11 +61,22 @@ module.exports = (function() {
       }
     }.bind(this);
 
-    this.native.addEventListener('Closing', closing);
-    this.native.addEventListener('Closed', closed);
-    this.native.addEventListener('SizeChanged', sizeChanged);
-    this.native.addEventListener('Deactivated', deactivated);
-    this.native.addEventListener('Activated', activated);
+
+    util.lazyLoadEventListener(this, 'close',
+      this.native.addEventListener.bind(this.native,'Closing', closing),
+      this.native.removeEventListener.bind(this.native, 'Closing', closing));
+    util.lazyLoadEventListener(this, 'closed',
+      this.native.addEventListener.bind(this.native,'Closed', closed),
+      this.native.removeEventListener.bind(this.native, 'Closed', closed));
+    util.lazyLoadEventListener(this, 'resize',
+      this.native.addEventListener.bind(this.native,'SizeChanged', sizeChanged),
+      this.native.removeEventListener.bind(this.native, 'SizeChanged', sizeChanged));
+    util.lazyLoadEventListener(this, 'blur',
+      this.native.addEventListener.bind(this.native,'Deactivated', deactivated),
+      this.native.removeEventListener.bind(this.native, 'Deactivated', deactivated));
+    util.lazyLoadEventListener(this, 'focus',
+      this.native.addEventListener.bind(this.native,'Activated', activated),
+      this.native.removeEventListener.bind(this.native, 'Activated', activated));
     this.native.addEventListener('StateChanged', stateChanged);
 
     this.private.callbacks.push(closing);

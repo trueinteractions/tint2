@@ -665,7 +665,6 @@ public ref class CLREventHandler {
 public:
   
   CLREventHandler() : callback(NULL) {
-    // line below causes a seg fault.
     cppobject = new gcroot<CLREventHandler ^>(this);
     countFound = countFound + 12;
     id = (gcnew System::Random())->Next(countFound);
