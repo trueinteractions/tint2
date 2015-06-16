@@ -686,7 +686,7 @@ public:
     return cppobject;
   }
   void PassThru(... cli::array<System::Object^>^ args) {
-    NanEscapableScope();
+    NanScope();
     std::vector<v8::Handle<v8::Value>> argv;
     v8::TryCatch try_catch;
 
@@ -734,7 +734,7 @@ public:
   }
 
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
-    NanEscapableScope();
+    NanScope();
     v8::Handle<v8::Value> argv[2];
 
     argv[0] = MarshalCLRToV8(sender);

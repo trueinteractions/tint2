@@ -158,7 +158,6 @@ function createField(target, typeNative, memberName, static) {
 function createMethod(target, typeNative, memberName, static) {
   dotnet.statistics.methods++;
   var objdest = static ? target : target.prototype;
-  var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
   
   var prepargs = function() {
     var s = typeSignature(memberName, arguments);
@@ -167,6 +166,7 @@ function createMethod(target, typeNative, memberName, static) {
       this._methods = {};
     }
     if(!this._methods[s.signature]) {
+      var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
       var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
     }
