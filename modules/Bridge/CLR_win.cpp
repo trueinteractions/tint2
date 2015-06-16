@@ -1529,7 +1529,10 @@ public:
       System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandlerOnMain");
       System::Delegate^ d = System::Delegate::CreateDelegate(eInfo->EventHandlerType, handle, eh);
       eInfo->AddEventHandler(target, d);
-      NanReturnUndefined();
+
+      GCHandle gc = GCHandle::Alloc(d);
+      void *ptr = GCHandle::ToIntPtr(gc).ToPointer();
+      NanReturnValue(NanNewBufferHandle((char *)ptr, sizeof(ptr) + 1024, gchandle_cleanup, NULL));
     } catch (System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }

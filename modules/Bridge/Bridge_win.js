@@ -255,7 +255,9 @@ function createClass(typeNative, typeName) {
   CLRClassInstance.prototype.className = CLRClassInstance.className = typeName;
   CLRClassInstance.prototype.extend = CLRClassInstance.extend = function(name) { return new ProtoClass(name,typeNative); }
   CLRClassInstance.addEventListener = CLRClassInstance.prototype.addEventListener = function(event, callback) {
-    dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback); 
+    this._eventHandles = this._eventHandles || {};
+    this._eventHandles[event] = this._eventHandles[event] || [];
+    this._eventHandles[event].push(dotnet.execAddEvent(this.pointer ? this.pointer : this.classPointer, event, callback)); 
   };
   CLRClassInstance.removeEventListener = CLRClassInstance.prototype.removeEventListener = function() {}
   CLRClassInstance.prototype.toString = function() { return (this.pointer ? 'Object ' : 'Class ') + this.className + ''; };
