@@ -5,6 +5,7 @@
  * (and any subsequent modules you'll use.)
  */
 require('Application');
+require('Bridge');
 global.Box = require('Box');
 global.Button = require('Button');
 global.ButtonGroup = require('ButtonGroup');
