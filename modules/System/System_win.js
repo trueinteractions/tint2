@@ -150,9 +150,9 @@ module.exports = (function() {
   }
   System.clipboardSet = function(data, type) {
     if(type) {
-      return $.System.Windows.Clipboard.SetData(convertFormat(type), data);
+      return {release:function() { /* dummy function */ }, native:$.System.Windows.Clipboard.SetData(convertFormat(type), data)};
     }
-    return $.System.Windows.Clipboard.SetText(data.toString());
+    return {release:function() { /* dummy function */ }, native:$.System.Windows.Clipboard.SetText(data.toString())};
   }
   
   Object.defineProperty(System, 'home', {

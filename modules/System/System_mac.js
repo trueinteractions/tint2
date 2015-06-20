@@ -291,12 +291,19 @@ module.exports = (function() {
    * @param {string} data The data to set on the clipboard (Buffer data or string usually).
    * @param {string} datatype The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Sets the clipboards data and adds the specified type to it. The type is case sensitive.
+   * @returns {Object} An object with one function, "release" which releases the data back to memory once
+   *                   it should no longer be available in the clipboard.  IMPORTANT: Data placed in the
+   *                   clipboard is not automatically memory managed on some platforms, ensure you release
+   *                   data before setting new data on the clipboard as a precautionary measure.
    * @static
    */
   System.clipboardSet = function(data, type) {
     lazyInitPasteboard();
     NSPasteboard('clearContents');
-    return NSPasteboard('setData', $(new Buffer(data)), 'forType', $(convertFormat(type)));
+    var data = $(new Buffer(data));
+    data('retain');
+    var e = NSPasteboard('setData', data, 'forType', $(convertFormat(type)));
+    return {release:function() { data('release'); }, native:e};
   }
 
   /**

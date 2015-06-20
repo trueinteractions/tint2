@@ -15,10 +15,11 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  System.clipboardSet('so tell me what you want what you really really want.', 'text');
+  var a = System.clipboardSet('so tell me what you want what you really really want.', 'text');
   var b = System.clipboardGet('text');
   $utils.assert(b.length !== 0);
   $utils.assert(b.toString() === 'so tell me what you want what you really really want.');
+  a.release();
   $utils.ok();
 }
 
