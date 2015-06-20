@@ -115,7 +115,7 @@ module.exports = (function() {
   };
 
   Table.prototype.setColumnWidth = function(name,width) {
-    this.private.columns[name].Width = width;
+    this.private.columns[name].Width = new $.System.Windows.Controls.DataGridLength(width, $.System.Windows.Controls.DataGridLengthUnitType.Pixel);
   };
 
   Table.prototype.setValueAt = function(name,rowIndex,value) {
@@ -125,7 +125,7 @@ module.exports = (function() {
       label.Content = value;
       this.nativeView.Items.Insert(ndx, label);
     } else {
-      this.nativeView.Items.Insert(ndx, value);
+      this.nativeView.Items.Insert(ndx, value.nativeView);
     }
   };
 

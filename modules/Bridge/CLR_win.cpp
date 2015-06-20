@@ -17,7 +17,9 @@
 #using <WPF/PresentationFramework.dll>
 #using <System.Windows.Forms.dll>
 #using <System.Drawing.dll>
-
+#include <msclr/marshal.h>
+ 
+using namespace msclr::interop;
 using namespace v8;
 using namespace System::Collections::Generic;
 using namespace System::Reflection;
@@ -428,16 +430,6 @@ void gchandle_cleanup(char *data, void *hint) {
 // .NET to determine if it needs to be collected.  In otherwords, do nothing.
 void wrap_cb(char *data, void *hint) { }
 
-std::string stringV82STR(Handle<v8::String> text) {
-  NanUtf8String utf8string(text);
-  return std::string(*utf8string);
-}
-
-std::string stringCLR2STR(System::String^ text) {
-  char *utf8string = (char *)Marshal::StringToHGlobalAnsi(text).ToPointer();
-  return std::string(utf8string);
-}
-
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
   NanEscapableScope();
@@ -453,9 +445,12 @@ Handle<v8::String> stringCLR2V8(System::String^ text)
   NanEscapableScope();
   if (text->Length > 0)
   {
-    const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
+    //const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
+    marshal_context ^ context = gcnew marshal_context();
+    const char* str = context->marshal_as<const char*>(text);
     v8::Local<v8::String> v8str = NanNew<v8::String>(str);
-    Marshal::FreeHGlobal(IntPtr((void *)str));
+    delete context;
+    //Marshal::FreeHGlobal(IntPtr((void *)str));
     return NanEscapeScope(v8str);
   }
   else
@@ -1420,7 +1415,7 @@ static NAN_METHOD(CreateClass) {
   }
 
   static NAN_METHOD(ExecGetProperty) {
-	 NanScope();
+    NanScope();
     try {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
@@ -1428,15 +1423,17 @@ static NAN_METHOD(CreateClass) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
         delete property;
-		delete target;
+        delete target;
         NanReturnValue(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
-		NanReturnValue(MarshalCLRToV8(rtn));
+        delete property;
+        delete target;
+        NanReturnValue(MarshalCLRToV8(rtn));
       }
     } catch (System::Exception^ e) {
-	  NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -1446,10 +1443,10 @@ static NAN_METHOD(CreateClass) {
       System::Object^ target = MarshalV8ToCLR(args[0]);
       int argSize = args.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
-
-	  for (int i = 0; i < argSize; i++) {
+ 
+      for (int i = 0; i < argSize; i++) {
         cshargs->SetValue(MarshalV8ToCLR(args[i + 2]), i);
-	  }
+      }
       System::Type^ type = (System::Type ^)target;
       System::String^ method = stringV82CLR(args[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
