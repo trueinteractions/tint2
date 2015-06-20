@@ -4,6 +4,7 @@ module.exports = (function() {
   }
   var $ = process.bridge.objc;
   var util = require('Utilities');
+  var assert = require('assert');
   /**
     * @class FileDialog
     * @description Creates a new file dialog where a user can select a file to open or save.
@@ -104,7 +105,10 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'allowAnyFileType', {
       get:function() { return $dialog('allowsOtherFileTypes') ? true : false; },
-      set:function(val) { $dialog('setAllowedOtherFileTypes', val ? $.YES : $.NO); }
+      set:function(val) { 
+        assert(allowedFileTypes !== null || val, 'Not allowing any file type, yet not setting a file type with allowFileTypes doesnt make sense.');
+        $dialog('setAllowsOtherFileTypes', val ? $.YES : $.NO); 
+      }
     });
 
     /**
@@ -114,9 +118,9 @@ module.exports = (function() {
      * @description Gets or sets an array containing the file types (by extension) that are allowed.
      */
     Object.defineProperty(this, "allowFileTypes", {
-      get:function() { return allowedFileTypes; },
+      get:function() { return allowedFileTypes ? allowedFileTypes : []; },
       set:function(items) { 
-        console.assert(Array.isArray(items));
+        console.assert(Array.isArray(items), 'The allowFileTypes property must be an array of file types to allow, e.g., ["exe","png","jpg"]');
         allowedFileTypes = items;
         var arr = $.NSMutableArray('arrayWithCapacity',items.length);
         items.forEach(function(item,i) {

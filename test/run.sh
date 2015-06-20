@@ -11,7 +11,7 @@ elif [ -f "../build/ninja/out/Release/tint" ]; then
   TINTEXEC="../build/ninja/out/Release/tint"
 elif [ -f "../tint" ]; then
   TINTEXEC="../tint"
-elif [ -f "./tint"]; then
+elif [ -f "./tint" ]; then
   TINTEXEC="./tint"
 elif [ -f "../build/linux/Release/tint" ]; then
   TINTEXEC="../build/linux/Release/tint"

@@ -6,7 +6,7 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   process.bridge.dotnet.import('System.Windows.Forms.dll'); 
   var util = require('Utilities');
-
+  var assert = require('assert');
 
   function FileDialog(type) {
     type = type || "open";
@@ -106,22 +106,27 @@ module.exports = (function() {
     Object.defineProperty(this, 'allowAnyFileType', {
       get:function() { return allowAnyFileType; },
       set:function(val) {
+        assert(allowedFileTypes !== null || val, 'Not allowing all file type, yet not setting a file type with allowFileTypes doesnt make sense.');
         allowAnyFileType = val ? true : false;
-        var b = allowedFileTypes;
-        b = b || [];
-        if(val && !b.indexOf(allfiles)) {
-          b.push(allfiles);
-        } else if(!val && b.indexOf(allfiles)) {
-          b.splice(b.indexOf(allfiles),1);
+        allowedFileTypes = allowedFileTypes || [];
+        if(val && !allowedFileTypes.indexOf(allfiles)) {
+          allowedFileTypes.push(allfiles);
+        } else if(!val && allowedFileTypes.indexOf(allfiles)) {
+          allowedFileTypes.splice(allowedFileTypes.indexOf(allfiles),1);
         }
-        this.allowFileTypes = allowFileTypes;
+        this.allowFileTypes = allowedFileTypes;
       }
     });
 
     Object.defineProperty(this, "allowFileTypes", {
-      get:function() { return allowedFileTypes.filter(function(item) { return item === allfiles; }); },
-      set:function(items) { 
-        console.assert(Array.isArray(items));
+      get:function() { 
+        if(allowedFileTypes)
+          return allowedFileTypes.filter(function(item) { return item === allfiles; });
+        else
+          return [];
+      },
+      set:function(items) {
+        console.assert(Array.isArray(items), 'The allowFileTypes property must be an array of file types to allow, e.g., ["exe","png","jpg"]');
         allowedFileTypes = [];
         for(var i=0; i < items.length ; i++) {
           if(items[i] === "folder") {
@@ -208,10 +213,18 @@ module.exports = (function() {
             this.fireEvent('select');
           }
         } else {
-          if(!$dialog.ShowDialog(z ? z.native : undefined)) {
-            this.fireEvent('cancel');
+          if(z) {
+            if(!$dialog.ShowDialog(z.native)) {
+              this.fireEvent('cancel');
+            } else {
+              this.fireEvent('select');
+            }
           } else {
-            this.fireEvent('select');
+            if(!$dialog.ShowDialog()) {
+              this.fireEvent('cancel');
+            } else {
+              this.fireEvent('select');
+            }
           }
         }
         
