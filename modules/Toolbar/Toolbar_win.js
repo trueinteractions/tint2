@@ -35,7 +35,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ToolBar;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ToolBar;
     Container.call(this, options);
-    this.nativeView.InternalChildren = this.nativeView.Items;
+    this.nativeView.Children = this.nativeView.Items;
     this.nativeView.HorizontalContentAlignment = $.System.Windows.HorizontalAlignment.Stretch;
     this.nativeView.Height = 48;
     this.nativeView.OverflowMode = $.System.Windows.Controls.OverflowMode.Never;

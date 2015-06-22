@@ -1125,11 +1125,35 @@ static NAN_METHOD(CreateClass) {
   static NAN_METHOD(GetStaticMemberTypes) {
     NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Static | 
-        BindingFlags::FlattenHierarchy);
-      NanReturnValue(MarshalCLRToV8(rtn));
+      if(args.Length() < 1) {
+        System::Object^ target = MarshalV8ToCLR(args[0]);
+        System::Type^ type = (System::Type^)(target);
+        System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
+        NanReturnValue(MarshalCLRToV8(rtn));
+      } else {
+        System::String^ type = stringV82CLR(args[1]->ToString());
+        if(type->Equals("events")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetEvents(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        } else if(type->Equals("fields")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetFields(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        } else if(type->Equals("properties")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetProperties(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        } else if(type->Equals("methods")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetMethods(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        }
+      }
     } catch (System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
@@ -1138,11 +1162,35 @@ static NAN_METHOD(CreateClass) {
   static NAN_METHOD(GetMemberTypes) {
     NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Type^ type = (System::Type^)(target);
-      System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::Instance | 
-        BindingFlags::FlattenHierarchy);
-      NanReturnValue(MarshalCLRToV8(rtn));
+      if(args.Length() < 1) {
+        System::Object^ target = MarshalV8ToCLR(args[0]);
+        System::Type^ type = (System::Type^)(target);
+        System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
+        NanReturnValue(MarshalCLRToV8(rtn));
+      } else {
+        System::String^ type = stringV82CLR(args[1]->ToString());
+        if(type->Equals("events")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetEvents(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        } else if(type->Equals("fields")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetFields(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        } else if(type->Equals("properties")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetProperties(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        } else if(type->Equals("methods")) {
+          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Type^ type = (System::Type^)(target);
+          System::Object^ rtn = type->GetMethods(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
+          NanReturnValue(MarshalCLRToV8(rtn));
+        }
+      }
     } catch (System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
@@ -1312,10 +1360,17 @@ static NAN_METHOD(CreateClass) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ property = stringV82CLR(args[1]->ToString());
-      PropertyInfo^ rtn = target->GetProperty(property,  
-        BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
-      delete property;
-      NanReturnValue(MarshalCLRToV8(rtn));
+      try {
+        PropertyInfo^ rtn = target->GetProperty(property, 
+          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
+        delete property;
+        NanReturnValue(MarshalCLRToV8(rtn));
+      } catch (AmbiguousMatchException^ e) {
+        PropertyInfo^ rtn = target->GetProperty(property,
+          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
+        delete property;
+        NanReturnValue(MarshalCLRToV8(rtn));
+      }
     } catch(System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -1365,9 +1420,10 @@ static NAN_METHOD(CreateClass) {
 
   static NAN_METHOD(ExecPropertyGet) {
     NanEscapableScope();
+    System::Object^ target = MarshalV8ToCLR(args[1]);
+    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
     try {
-      PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
-      NanReturnValue(MarshalCLRToV8(prop->GetValue(MarshalV8ToCLR(args[1]))));
+      NanReturnValue(MarshalCLRToV8(prop->GetValue(target)));
     } catch(System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
@@ -1420,7 +1476,7 @@ static NAN_METHOD(CreateClass) {
       System::String^ property = stringV82CLR(args[1]->ToString());
       try {
         System::Object^ rtn = target->GetType()->GetProperty(property,
-          BindingFlags::Instance | BindingFlags::Public | BindingFlags::FlattenHierarchy)->GetValue(target);
+          BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(target);
         delete property;
         delete target;
         NanReturnValue(MarshalCLRToV8(rtn));
@@ -1621,18 +1677,18 @@ namespace IEWebBrowserFix {
   static void SetBrowserFeatureControlKey(System::Security::Permissions::RegistryPermission^ perms, System::String^ feature, System::String^ fileName, DWORD value) {
     System::String^ HKCU = "HKEY_CURRENT_USER\\Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
     System::String^ HKCU32 = "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
-    System::String^ HKLM = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
-    System::String^ HKLM32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    //System::String^ HKLM = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
+    //System::String^ HKLM32 = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\"+feature;
 
     try {
       perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKCU);
       perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKCU32);
-      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM);
-      perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM32);
+      //perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM);
+      //perms->AddPathList(System::Security::Permissions::RegistryPermissionAccess::AllAccess, HKLM32);
       Microsoft::Win32::Registry::SetValue(HKCU, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
       Microsoft::Win32::Registry::SetValue(HKCU32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
-      Microsoft::Win32::Registry::SetValue(HKLM, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
-      Microsoft::Win32::Registry::SetValue(HKLM32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      //Microsoft::Win32::Registry::SetValue(HKLM, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
+      //Microsoft::Win32::Registry::SetValue(HKLM32, fileName, value, Microsoft::Win32::RegistryValueKind::DWord);
     } catch (System::Exception^ e) {
       // Absorb the potential error message coming through and keep moving; its
       // a security exception that will exist on specific policy groups of windows.

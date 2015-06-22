@@ -83,12 +83,12 @@ module.exports = (function() {
       this.private.states['title'] = e;
       if(this.private.label !== null)
       {
-        this.private.stack.InternalChildren.Remove(this.private.label);
+        this.private.stack.Children.Remove(this.private.label);
         this.private.label = null;
       }
       if(e && e !== null) {
         this.private.label = new $.System.Windows.Controls.Label();
-        this.private.stack.InternalChildren.Add(this.private.label);
+        this.private.stack.Children.Add(this.private.label);
         this.private.label.Content = e.toString(); 
       }
     }
@@ -107,7 +107,7 @@ module.exports = (function() {
       var oldNative = this.nativeView;
       var parent = this.native.Parent;
       if(parent !== null) {
-        this.native.Parent.InternalChildren.Remove(this.native);
+        this.native.Parent.Children.Remove(this.native);
       }
 
       if (type === "toggle") {
@@ -121,7 +121,7 @@ module.exports = (function() {
       }
 
       if(parent !== null) {
-        parent.InternalChildren.Add(this.nativeView);
+        parent.Children.Add(this.nativeView);
       }
 
       this.private.remapNaturalStates();

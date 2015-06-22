@@ -6,7 +6,8 @@ module.exports = (function() {
   $.import('System.Windows.Forms.dll');
 
   function Screens() {
-    var scaleFactor = $.System.Windows.SystemParameters.Dpi/96;
+    var _dpi = process.bridge.execGetStaticProperty($.System.Windows.SystemParameters.classPointer, "Dpi");
+    var scaleFactor = _dpi/96;
 
     function getScreenInfo(Screen) {
       var frame = Screen.Bounds;

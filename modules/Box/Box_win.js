@@ -15,13 +15,11 @@ module.exports = (function() {
     Container.call(this, options);
 
     this.native.CornerRadius = new $.System.Windows.CornerRadius(5);
-    var targetColor = $.System.Windows.SystemColors.ControlLightBrush.Clone();
-    targetColor.Opacity = 0.4;
-    this.native.Background = targetColor;
+    this.native.Background = $.System.Windows.SystemColors.ControlLightBrush;
     this.native.Padding = new $.System.Windows.Thickness(0);
     this.native.Margin = new $.System.Windows.Thickness(0);
     this.native.Child = new $.AutoLayout.AutoLayoutPanel();
-    this.native.InternalChildren = this.native.Child.InternalChildren;
+    this.native.Children = this.native.Child.Children;
     this.private.custom = false;
   }
 

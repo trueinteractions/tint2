@@ -1,8 +1,12 @@
 if(typeof(process.bridge) === 'undefined') {
   process.initbridge();
+} else {
+  return;
 }
 if(typeof(process.bridge.dotnet) === 'undefined') {
   process.bridge.dotnet = {};
+} else {
+  return;
 }
 if(typeof(process.bridge.ref) === 'undefined') {
   process.bridge.ref = require('ref');
@@ -22,6 +26,17 @@ var assemblyImported = {};
 var classCache = {};
 dotnet.statistics = {assemblies_hit:0, assemblies_miss:0, enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
+var clrTypeTarget = null;
+var isPublicProperty = null;
+var isEnumProperty = null;
+var isClassProperty = null;
+var isValueTypeProperty = null;
+var nameProperty = null;
+var nameSpaceProperty = null;
+var isCurrentProperty = null;
+var memberNameProperty = {};
+var memberTypeProperty = {};
+var assemblyQualifiedNameProperty = null;
 
 function unwrap(a) {
   if(a && a.pointer) {
@@ -126,8 +141,8 @@ function createEnum(typeNative) {
         dotnet.execMethod(valueEnumerator, 'MoveNext'))
   {
     dotnet.statistics.values++;
-    var ename = dotnet.execGetProperty(nameEnumerator, 'Current');
-    var evalue = dotnet.execGetProperty(valueEnumerator, 'Current');
+    var ename = dotnet.getProperty(isCurrentProperty, nameEnumerator);
+    var evalue = dotnet.getProperty(isCurrentProperty, valueEnumerator);
     obj[ename] = evalue;
     obj[ename].Name = dotnet.execMethod(evalue, "ToString");
   }
@@ -215,29 +230,39 @@ function createProperty(target, typeNative, memberName, static) {
   });
 }
 
-
-function CLRClassDefineMembers(typeNative, target, static) {
-  var types = static ? dotnet.getStaticMemberTypes(typeNative) : dotnet.getMemberTypes(typeNative);
+function defineMembers(typeNative, target, static, memberType) {
+  var types = static ? dotnet.getStaticMemberTypes(typeNative, memberType) : dotnet.getMemberTypes(typeNative, memberType);
   var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var mNative = dotnet.execGetProperty(typeEnumerator, 'Current');
-    var mName = dotnet.execGetProperty(mNative, 'Name');
-    var type = dotnet.execMethod(dotnet.execGetProperty(mNative, 'MemberType'), 'ToString');
-    if(type === "Field") {
+    var mNative = dotnet.getProperty(isCurrentProperty, typeEnumerator);
+    if(memberType === 'fields') {
+      var mName = dotnet.execGetProperty(mNative, 'Name');
       createField(target, typeNative, mName, static);
-    } else if(type === "Method") {
-      if(mName.substring(0,4) !== "get_" && mName.substring(0,4) !== "set_") {
-        createMethod(target, typeNative, mName, static);
+    } else if (memberType === 'methods' || memberType === 'properties') {
+      memberNameProperty[memberType] = memberNameProperty[memberType] || dotnet.getPropertyObject(mNative, "Name");
+      var mName = dotnet.getProperty(memberNameProperty[memberType], mNative);
+      if(memberType === 'methods') {
+        if(mName.substring(0,4) !== "get_" && mName.substring(0,4) !== "set_") {
+          createMethod(target, typeNative, mName, static);
+        }
+      } else if(memberType === 'properties') {
+        createProperty(target, typeNative, mName, static);
       }
-    } else if(type === "Property") {
-      createProperty(target, typeNative, mName, static);
     }
   }
+}
+
+function CLRClassDefineMembers(typeNative, target, static) {
+  //defineMembers(typeNative, target, static, 'events');
+  defineMembers(typeNative, target, static, 'methods');
+  defineMembers(typeNative, target, static, 'properties');
+  defineMembers(typeNative, target, static, 'fields');
 };
 
 function createClass(typeNative, typeName) {
   dotnet.statistics.classes++;
-  var qualifiedName = dotnet.execGetProperty(typeNative,'AssemblyQualifiedName');
+  assemblyQualifiedNameProperty = assemblyQualifiedNameProperty || dotnet.getPropertyObject(typeNative, "AssemblyQualifiedName");
+  var qualifiedName = dotnet.getProperty(assemblyQualifiedNameProperty, typeNative);
   if(classCache[qualifiedName]) {
     return classCache[qualifiedName];
   }
@@ -303,10 +328,18 @@ function createJSInstance(pointer) {
  * used by the user, this costs CPU cycles initially but saves loading all
  * of the meta data from the CLR, initial tests saves 100MB of memory.
  */
+
 function createFromType(nativeType, onto) {
-  if(dotnet.execGetProperty(nativeType, "IsPublic")) {
-    var name = dotnet.execGetProperty(nativeType,"Name");
-    var space = dotnet.execGetProperty(nativeType,"Namespace");
+  clrTypeTarget = clrTypeTarget || nativeType;
+  isPublicProperty = isPublicProperty || dotnet.getPropertyObject(nativeType, "IsPublic");
+  nameProperty = nameProperty || dotnet.getPropertyObject(nativeType, "Name");
+  nameSpaceProperty = nameSpaceProperty || dotnet.getPropertyObject(nativeType, "Namespace");
+  isEnumProperty = isEnumProperty || dotnet.getPropertyObject(nativeType, "IsEnum");
+  isClassProperty = isClassProperty || dotnet.getPropertyObject(nativeType, "IsClass");
+  isValueTypeProperty = isValueTypeProperty || dotnet.getPropertyObject(nativeType, "IsValueType");
+  if(dotnet.getProperty(isPublicProperty, nativeType)) {
+    var space = dotnet.getProperty(nameSpaceProperty, nativeType);
+    var name = dotnet.getProperty(nameProperty, nativeType);
     var info = { onto:onto, type:nativeType, name:name };
     
     if(space) {
@@ -321,9 +354,9 @@ function createFromType(nativeType, onto) {
       configurable:true, enumerable:true,
       get:function() { 
         delete this.onto[this.name];
-        if(dotnet.execGetProperty(this.type, "IsEnum")) {
+        if(dotnet.getProperty(isEnumProperty, this.type)) {
           this.onto[this.name] = createEnum(this.type,this.name);
-        } else if (dotnet.execGetProperty(this.type, "IsClass") || dotnet.execGetProperty(this.type, "IsValueType")) {
+        } else if (dotnet.getProperty(isClassProperty, this.type) || dotnet.getProperty(isValueTypeProperty, this.type)) {
           this.onto[this.name] = createClass(this.type,this.name);
         }
         return this.onto[this.name];
@@ -335,14 +368,17 @@ function createFromType(nativeType, onto) {
 /* Import onto the object specified, this takes an assembly, and loads
  * the classes, enums, fields, properties, etc onto the object passed in (onto)
  */
+
 function importOnto(assembly, onto) {
   if(assembly.toLowerCase().indexOf('.dll') === -1 && assembly.toLowerCase().indexOf('.exe') === -1) {
     assembly += ".dll";
   }
   var types = dotnet.loadAssembly(assembly);
   var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");
+
+  isCurrentProperty = isCurrentProperty || dotnet.getPropertyObject(typeEnumerator, "Current");
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
-    var type = dotnet.execGetProperty(typeEnumerator,'Current');
+    var type = dotnet.getProperty(isCurrentProperty, typeEnumerator);
     createFromType(type, onto);
   }
 }

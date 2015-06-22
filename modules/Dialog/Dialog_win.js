@@ -115,7 +115,7 @@ module.exports = (function() {
       nimg.Stretch = $.System.Windows.Media.Stretch.UniformToFill;
       nimg.Width = 50;
       nimg.Height = 50;
-      w.Content.InternalChildren.Add(nimg);
+      w.Content.Children.Add(nimg);
       w.Content.AddLayoutConstraint(w.Content, 'Top', '=', nimg, 'Top', 1.0, -20);
       w.Content.AddLayoutConstraint(nimg, 'Height', '=', nimg, null, null, 70);
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', nimg, 'Left', 1.0, -20);
@@ -128,7 +128,7 @@ module.exports = (function() {
       w.Content.AddLayoutConstraint(nimg, 'Right', '=', text, 'Left', 1.0, -10);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text, 'Right', 1.0, 0);
       w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -20);
-      w.Content.InternalChildren.Add(text);
+      w.Content.Children.Add(text);
 
       var text2 = new $.System.Windows.Controls.TextBlock();
       text2.TextWrapping = $.System.Windows.TextWrapping.Wrap;
@@ -137,7 +137,7 @@ module.exports = (function() {
       w.Content.AddLayoutConstraint(nimg, 'Right', '=', text2, 'Left', 1.0, -10);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text2, 'Right', 1.0, 0);
       w.Content.AddLayoutConstraint(text2, 'Top', '=', text, 'Bottom', 1.0, 10);
-      w.Content.InternalChildren.Add(text2);
+      w.Content.Children.Add(text2);
 
       if(suppression) {
         var cbox = new $.System.Windows.Controls.CheckBox();
@@ -149,7 +149,7 @@ module.exports = (function() {
         w.Content.AddLayoutConstraint(nimg, 'Right', '=', cbox, 'Left', 1.0, -10);
         w.Content.AddLayoutConstraint(w.Content, 'Right', '=', cbox, 'Right', 1.0, 0);
         w.Content.AddLayoutConstraint(cbox, 'Top', '=', text2, 'Bottom', 1.0, 10);
-        w.Content.InternalChildren.Add(cbox);
+        w.Content.Children.Add(cbox);
       }
 
       var btn = new $.System.Windows.Controls.Button();
@@ -163,11 +163,11 @@ module.exports = (function() {
       var label = new $.System.Windows.Controls.Label();
       label.Content = mainButton.toString();
       label.Padding = new $.System.Windows.Thickness(0);
-      btn.Content.InternalChildren.Add(label);
+      btn.Content.Children.Add(label);
       btn.IsDefault = true;
       btn.Height = 25;
       btn.Padding = new $.System.Windows.Thickness(0);
-      w.Content.InternalChildren.Add(btn);
+      w.Content.Children.Add(btn);
       w.Content.AddLayoutConstraint(w.Content, 'Bottom', '=', btn, 'Bottom', 1.0, 10);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', btn, 'Right', 1.0, 10);
       w.Content.AddLayoutConstraint(btn, 'Left', '=', btn, 'Right', 1.0, -75);
@@ -186,8 +186,8 @@ module.exports = (function() {
         var label2 = new $.System.Windows.Controls.Label();
         label2.Padding = new $.System.Windows.Thickness(0);
         label2.Content = auxButton.toString();
-        btn2.Content.InternalChildren.Add(label2);
-        w.Content.InternalChildren.Add(btn2);
+        btn2.Content.Children.Add(label2);
+        w.Content.Children.Add(btn2);
         w.Content.AddLayoutConstraint(w.Content, 'Bottom', '=', btn2, 'Bottom', 1.0, 10);
         w.Content.AddLayoutConstraint(btn2, 'Right', '=', btn, 'Left', 1.0, -10);
         w.Content.AddLayoutConstraint(btn2, 'Left', '=', btn2, 'Right', 1.0, -75);

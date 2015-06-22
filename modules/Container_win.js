@@ -29,7 +29,7 @@ module.exports = (function() {
     } else {
       control = this.fireEvent('before-child-attached', [control]) || control;
       this.private.children.push(control);
-      this.nativeView.InternalChildren.Add(control.native);
+      this.nativeView.Children.Add(control.native);
       if(control.fireEvent) {
         control.fireEvent('parent-attached', [this]);
       }
@@ -42,7 +42,7 @@ module.exports = (function() {
     if(this.private.children.indexOf(control) !== -1) {
       this.private.children.splice(this.private.children.indexOf(control),1);
     }
-    this.nativeView.InternalChildren.Remove(control.native);
+    this.nativeView.Children.Remove(control.native);
     if(control.fireEvent) {
       control.fireEvent('parent-dettached', [this]);
     }

@@ -90,7 +90,7 @@ module.exports = (function() {
       img.Stretch = $.System.Windows.Media.Stretch.UniformToFill;
       img.Width = 50;
       img.Height = 50;
-      w.Content.InternalChildren.Add(img);
+      w.Content.Children.Add(img);
       w.Content.AddLayoutConstraint(w.Content, 'Top', '=', img, 'Top', 1.0, -5);
       w.Content.AddLayoutConstraint(img, 'Height', '=', img, null, null, 50);
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', img, 'Left', 1.0, 0);
@@ -109,8 +109,8 @@ module.exports = (function() {
       label.Content = actionbuttontitle === "" ? "Dismiss" : actionbuttontitle;
       label.Width = 40;
 
-      btn.Content.InternalChildren.Add(label);
-      w.Content.InternalChildren.Add(btn);
+      btn.Content.Children.Add(label);
+      w.Content.Children.Add(btn);
       w.Content.AddLayoutConstraint(w.Content, 'Top', '=', btn, 'Top', 1.0, -5);
       w.Content.AddLayoutConstraint(w.Content, 'Bottom', '=', btn, 'Bottom', 1.0, 0);
       w.Content.AddLayoutConstraint(btn, 'Left', '=', btn, 'Right', 1.0, -50);
@@ -124,7 +124,7 @@ module.exports = (function() {
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text, 'Left', 1.0, -55);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text, 'Right', 1.0, 60);
       w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -5);
-      w.Content.InternalChildren.Add(text);
+      w.Content.Children.Add(text);
 
       var text2 = new $.System.Windows.Controls.TextBlock();
       text2.TextWrapping = $.System.Windows.TextWrapping.Wrap;
@@ -133,7 +133,7 @@ module.exports = (function() {
       w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text2, 'Left', 1.0, -55);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text2, 'Right', 1.0, 60);
       w.Content.AddLayoutConstraint(text2, 'Top', '=', text, 'Bottom', 1.0, 0);
-      w.Content.InternalChildren.Add(text2);
+      w.Content.Children.Add(text2);
 
       var hwnd = new $.System.Windows.Interop.WindowInteropHelper(w).EnsureHandle();
       var chrome = new $.System.Windows.Shell.WindowChrome();
