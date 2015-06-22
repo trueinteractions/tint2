@@ -33,6 +33,7 @@ var isClassProperty = null;
 var isValueTypeProperty = null;
 var nameProperty = null;
 var nameSpaceProperty = null;
+var fullNameProperty = null;
 var isCurrentProperty = null;
 var memberNameProperty = {};
 var memberTypeProperty = {};
@@ -236,6 +237,7 @@ function defineMembers(typeNative, target, static, memberType) {
   while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
     var mNative = dotnet.getProperty(isCurrentProperty, typeEnumerator);
     if(memberType === 'fields') {
+      // TODO: Figure out a way to stop using execGetProperty so we can remove it..
       var mName = dotnet.execGetProperty(mNative, 'Name');
       createField(target, typeNative, mName, static);
     } else if (memberType === 'methods' || memberType === 'properties') {
@@ -297,11 +299,12 @@ function createClass(typeNative, typeName) {
 
 function createJSInstance(pointer) {
   var typeNative = dotnet.getCLRType(pointer);
-  var typeName = dotnet.execGetProperty(typeNative, 'Name');
+  var typeName = dotnet.getProperty(nameProperty, typeNative);
+  fullNameProperty = fullNameProperty || dotnet.getPropertyObject(typeNative, 'FullName');
 
-  if(dotnet.execGetProperty(typeNative, "IsEnum")) {
+  if(dotnet.getProperty(isEnumProperty, typeNative)) {
     dotnet.statistics.enums++;
-    var fullName = dotnet.execGetProperty(typeNative, "FullName");
+    var fullName = dotnet.getProperty(fullNameProperty, typeNative);
     var v = fullName.split('.');
     var enumValue = dotnet.execMethod(pointer,'ToString');
     v.push(enumValue);
@@ -311,7 +314,7 @@ function createJSInstance(pointer) {
       dst = dst[v[i]];
     }
     return dst;
-  } else if(dotnet.execGetProperty(typeNative, "IsClass") || dotnet.execGetProperty(typeNative, "IsValueType")) {
+  } else if(dotnet.getProperty(isClassProperty, typeNative) || dotnet.getProperty(isValueTypeProperty, typeNative)) {
     dotnet.statistics.classes++;
     var c = createClass(typeNative, typeName);
     var N = function() { this.pointer = pointer; };

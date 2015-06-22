@@ -140,15 +140,11 @@ module.exports = (function() {
       utils.lazyLoadEventListener(this, 'dragenter',
         this.native.addEventListener.bind(this.native,'PreviewDragEnter', this.private.dragEnter),
         this.native.removeEventListener.bind(this.native, 'PreviewDragEnter', this.private.dragEnter));
+
       utils.lazyLoadEventListener(this, 'dragexit',
         this.native.addEventListener.bind(this.native,'PreviewDragLeave', this.private.dragExit),
         this.native.removeEventListener.bind(this.native, 'PreviewDragLeave', this.private.dragExit));
-      //utils.lazyLoadEventListener(this, 'drop',
-      //  this.native.addEventListener.bind(this.native,'PreviewDragOver', this.private.drop),
-      //  this.native.removeEventListener.bind(this.native, 'PreviewDragOver', this.private.drop));
-      //utils.lazyLoadEventListener(this, 'dropping',
-      //  this.native.addEventListener.bind(this.native,'PreviewDrop', this.private.dropping),
-      //  this.native.removeEventListener.bind(this.native, 'PreviewDrop', this.private.dropping));
+  
       utils.lazyLoadEventListener(this, 'dropped', 
         this.native.addEventListener.bind(this.native,'PreviewDrop', this.private.dropped),
         this.native.removeEventListener.bind(this.native, 'PreviewDrop', this.private.dropped));
