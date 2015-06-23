@@ -18,20 +18,9 @@ module.exports = (function() {
     this.nativeView('addTrackingArea',this.private.trackingArea);
   }
 
-  function callSuperForEvent(eventName, self, cmd, events) {
-    var prePointer = self.classPointer;
-    // Cast the object to its super type that we hold.
-    // this is necessary to make sure we dont accidently call 
-    // back to ourself incase we're getting this as a KVO subclass
-    self.classPointer = this.nativeViewClass.classPointer;
-    self.super(eventName, events);
-    // cast it back.
-    self.classPointer = prePointer;
-  }
-
   function mouseDown(self, cmd, events) {
     this.fireEvent('mousedown');
-    callSuperForEvent.apply(this,['mouseDown', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['mouseDown', self, cmd, events]);
     if(this.private.options.mouseDownBlocks) {
       this.fireEvent('mouseup');
       this.fireEvent('click');
@@ -40,35 +29,35 @@ module.exports = (function() {
   function mouseUp(self, cmd, events) { 
     this.fireEvent('mouseup'); 
     this.fireEvent('click');
-    callSuperForEvent.apply(this,['mouseUp', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['mouseUp', self, cmd, events]);
   }
   function rightMouseDown(self, cmd, events) { 
     this.fireEvent('rightmousedown');
-    callSuperForEvent.apply(this,['rightMouseDown', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['rightMouseDown', self, cmd, events]);
   }
   function rightMouseUp(self, cmd, events) {
     this.fireEvent('rightmouseup');
-    callSuperForEvent.apply(this,['rightMouseUp', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['rightMouseUp', self, cmd, events]);
   }
   function keyDown(self, cmd, events) { 
     this.fireEvent('keydown');
-    callSuperForEvent.apply(this,['keyDown', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['keyDown', self, cmd, events]);
   }
   function keyUp(self, cmd, events) {
     this.fireEvent('keyup');
-    callSuperForEvent.apply(this,['keyUp', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['keyUp', self, cmd, events]);
   }
   function mouseEntered(self, cmd, events) { 
     this.fireEvent('mouseenter');
-    callSuperForEvent.apply(this,['mouseEntered', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['mouseEntered', self, cmd, events]);
   }
   function mouseExited(self, cmd, events) { 
     this.fireEvent('mouseexit');
-    callSuperForEvent.apply(this,['mouseExited', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['mouseExited', self, cmd, events]);
   }
   function mouseMoved(self, cmd, events) { 
     this.fireEvent('mousemove');
-    callSuperForEvent.apply(this,['mouseMoved', self, cmd, events]);
+    util.callSuperForEvent.apply(this,['mouseMoved', self, cmd, events]);
   }
 
 

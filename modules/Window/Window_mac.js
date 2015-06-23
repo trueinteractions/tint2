@@ -156,6 +156,9 @@ module.exports = (function() {
     this.native('setReleasedWhenClosed', $.YES);
     this.native('setExcludedFromWindowsMenu', $.NO);
     this.native('center');
+    // This is necessary as tabbing wont work between NSViews unless the window
+    // is explicitly asked to track it.
+    this.native('setAutorecalculatesKeyViewLoop', $.YES);
 
     // This is simply to ensure if we remove our content view we properly adhere
     // to OSX/objective-c behavior. OSX/ObjC requires we notify its removal for

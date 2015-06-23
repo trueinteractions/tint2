@@ -30,13 +30,13 @@ module.exports = (function() {
        *              fire even if the value did not change (e.g., if the user
        *              changes the cursor selection with the arrow keys.)
        */
-      ['controlTextDidChange:','v@:@', function() {
-          // NSTextField's do not allow overriding the keyDown component, however
-          // the input event is fired directly after the event has been processed.
-          this.fireEvent('keydown'); 
-          this.fireEvent('input');
-        }.bind(this)
-      ],
+      ['textDidChange:','v@:@', function(self, cmd, events) {
+        util.callSuperForEvent.apply(this, ['textDidChange', self, cmd, events]);
+        // NSTextField's do not allow overriding the keyDown component, however
+        // the input event is fired directly after the event has been processed.
+        this.fireEvent('keydown'); 
+        this.fireEvent('input');
+      }.bind(this)],
       /**
        * @event inputstart
        * @memberof TextInput
@@ -47,7 +47,10 @@ module.exports = (function() {
        *              to this event to show some sort of in-context dialog or
        *              menu while the user is typing (like an auto-fill menu).
        */
-      ['controlTextDidBeginEditing:','v@:@', function() { this.fireEvent('inputstart'); }.bind(this)],
+      ['textDidBeginEditing:','v@:@', function(self, cmd, events) {
+        util.callSuperForEvent.apply(this, ['textDidBeginEditing', self, cmd, events]);
+        this.fireEvent('inputstart'); 
+      }.bind(this)],
       /**
        * @event inputend
        * @memberof TextInput
@@ -60,12 +63,16 @@ module.exports = (function() {
        *              input field on a browser, only until the user is fully done typing
        *              should we try and load the URL.
        */
-      ['controlTextDidEndEditing:','v@:@', function() { this.fireEvent('inputend'); }.bind(this)]
+      ['textDidEndEditing:','v@:@', function(self, cmd, events) {
+        util.callSuperForEvent.apply(this, ['textDidEndEditing', self, cmd, events]);
+        this.fireEvent('inputend'); 
+      }.bind(this)]
     ]);
     this.nativeClass = this.nativeClass || $.NSTextField;
     this.nativeViewClass = this.nativeViewClass || $.NSTextField;
     Container.call(this, options);
-    this.native('setDelegate', this.nativeView);
+    // unnecessary after sub-classing.
+    //this.native('setDelegate', this.nativeView);
   }
 
   TextInput.prototype = Object.create(Container.prototype);
