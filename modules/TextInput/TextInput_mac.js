@@ -71,8 +71,8 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSTextField;
     this.nativeViewClass = this.nativeViewClass || $.NSTextField;
     Container.call(this, options);
-    // unnecessary after sub-classing.
-    //this.native('setDelegate', this.nativeView);
+    // unnecessary except for when subclassed.
+    this.native('setDelegate', this.nativeView);
   }
 
   TextInput.prototype = Object.create(Container.prototype);
