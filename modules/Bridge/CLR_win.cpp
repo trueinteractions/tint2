@@ -790,7 +790,7 @@ class CLR {
   CLR() { }
 
 public:
-
+// deprecated
 static NAN_METHOD(CreateClass) {
     NanScope();
     try {
@@ -814,7 +814,7 @@ static NAN_METHOD(CreateClass) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-
+  // deprecated
   static NAN_METHOD(AddConstructor) {
     NanScope();
     try {
@@ -859,7 +859,7 @@ static NAN_METHOD(CreateClass) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-
+  // deprecated
   static NAN_METHOD(AddMethodToClass) {
     NanScope();
     try {
@@ -943,7 +943,7 @@ static NAN_METHOD(CreateClass) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-
+  // deprecated
   static NAN_METHOD(AddPropertyToClass) {
     NanScope();
     try {
@@ -996,7 +996,7 @@ static NAN_METHOD(CreateClass) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-
+  // deprecated
   static NAN_METHOD(AddFieldToClass) {
     NanScope();
     try {
@@ -1019,7 +1019,7 @@ static NAN_METHOD(CreateClass) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
-
+  // deprecated
   static NAN_METHOD(RegisterClass) {
     NanScope();
     try {
@@ -1286,23 +1286,44 @@ static NAN_METHOD(CreateClass) {
     try {
       System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
       System::String^ method = stringV82CLR(args[1]->ToString());
+
       int argSize = args.Length() - 2;
       array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
 
-      for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2])->GetType(),i);
+      for(int i=0; i < argSize; i++) {
+        System::Object^ obj = MarshalV8ToCLR(args[i + 2]);
+        if(obj != nullptr) {
+          System::Type^ argtype = obj->GetType();
+          cshargs->SetValue(argtype,i);
+        } else {
+          // null was passed in, since we cannot use this to properly get the method overload
+          // be reflected types we'll try just a name match.
+          MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Static | BindingFlags::Public | BindingFlags::DeclaredOnly);
+          if(rtnl == nullptr)
+            NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
+          else
+            NanReturnValue(MarshalCLRToV8(rtnl));
+        }
+      }
 
       MethodInfo^ rtn = target->GetMethod(method, 
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
-        nullptr, cshargs, nullptr);
+        nullptr,
+        cshargs,
+        nullptr);
+      
+      delete method;
 
       if(rtn == nullptr) {
         rtn = target->GetMethod(method);
+        if(rtn == nullptr) {
+          NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method+" on "+target)));
+        }
+        NanReturnValue(MarshalCLRToV8(rtn));
+      } else {
+        NanReturnValue(MarshalCLRToV8(rtn));
       }
-      delete method;
-      delete cshargs;
-      NanReturnValue(MarshalCLRToV8(rtn));
-    } catch (System::Exception^ e) {
+    } catch(System::Exception^ e) {
       NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
@@ -1310,7 +1331,7 @@ static NAN_METHOD(CreateClass) {
   static NAN_METHOD(ExecGetMethodObject) {
     NanScope();
     try {
-      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
+      System::Object^ target = (System::Object^)MarshalV8ToCLR(args[0]);
       System::String^ method = stringV82CLR(args[1]->ToString());
 
       int argSize = args.Length() - 2;
@@ -1323,8 +1344,8 @@ static NAN_METHOD(CreateClass) {
           cshargs->SetValue(argtype,i);
         } else {
           // null was passed in, since we cannot use this to properly get the method overload
-          // be reflected types we'll try jut a name match.
-          MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
+          // be reflected types we'll try just a name match.
+          MethodInfo^ rtnl = target->GetType()->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
           if(rtnl == nullptr)
             NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
           else
@@ -1332,8 +1353,7 @@ static NAN_METHOD(CreateClass) {
         }
       }
 
-
-      MethodInfo^ rtn = target->GetMethod(method, 
+      MethodInfo^ rtn = target->GetType()->GetMethod(method, 
         BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy,
         nullptr,
         cshargs,
@@ -1342,7 +1362,7 @@ static NAN_METHOD(CreateClass) {
       delete method;
 
       if(rtn == nullptr) {
-        rtn = target->GetMethod(method);
+        rtn = target->GetType()->GetMethod(method);
         if(rtn == nullptr) {
           NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method)));
         }
@@ -1397,7 +1417,6 @@ static NAN_METHOD(CreateClass) {
     }
   }
 
-  // deprecated.
   static NAN_METHOD(ExecMethodObject) {
     NanScope();
     try {
@@ -1440,6 +1459,7 @@ static NAN_METHOD(CreateClass) {
     }
   }
 
+  // deprecated
   static NAN_METHOD(ExecSetProperty) {
     NanScope();
     try {
@@ -1454,6 +1474,7 @@ static NAN_METHOD(CreateClass) {
     }
   }
 
+  // deprecated
   static NAN_METHOD(ExecGetStaticProperty) {
     NanScope();
     try {
@@ -1469,6 +1490,7 @@ static NAN_METHOD(CreateClass) {
     }
   }
 
+  // deprecated
   static NAN_METHOD(ExecGetProperty) {
     NanScope();
     try {
@@ -1492,6 +1514,7 @@ static NAN_METHOD(CreateClass) {
     }
   }
 
+  // deprecated
   static NAN_METHOD(ExecStaticMethod) {
     NanScope();
     try {
@@ -1519,6 +1542,7 @@ static NAN_METHOD(CreateClass) {
     }
   }
 
+  // deprecated
   static NAN_METHOD(ExecMethod) {
     NanScope();
     try {

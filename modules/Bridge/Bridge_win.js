@@ -26,6 +26,7 @@ var assemblyImported = {};
 var classCache = {};
 dotnet.statistics = {assemblies_hit:0, assemblies_miss:0, enums:0,values:0,classes:0,fields:0,properties:0,events:0,methods:0,cachehit:0,cachemiss:0};
 
+// cached property objects
 var clrTypeTarget = null;
 var isPublicProperty = null;
 var isEnumProperty = null;
@@ -38,6 +39,10 @@ var isCurrentProperty = null;
 var memberNameProperty = {};
 var memberTypeProperty = {};
 var assemblyQualifiedNameProperty = null;
+
+// cached method objects
+var getEnumeratorMethod = null;
+var moveNextMethod = null;
 
 function unwrap(a) {
   if(a && a.pointer) {
@@ -132,6 +137,7 @@ function ProtoClass(name, base) {
 
 
 function createEnum(typeNative) {
+  // TODO: Remove calls to deprecated execMethod
   var names = dotnet.execMethod(typeNative,"GetEnumNames");
   var values = dotnet.execMethod(typeNative,"GetEnumValues");
   var nameEnumerator = dotnet.execMethod(names, "GetEnumerator");
@@ -183,10 +189,10 @@ function createMethod(target, typeNative, memberName, static) {
     }
     if(!this._methods[s.signature]) {
       var getobj = static ? dotnet.getStaticMethodObject : dotnet.getMethodObject;
-      var mArgs = [this.classPointer, memberName].concat(s.unwrappedArgs);
+      var mArgs = [static ? this.classPointer : this.pointer, memberName].concat(s.unwrappedArgs);
       this._methods[s.signature] = getobj.apply(null, mArgs);
     }
-    return [this._methods[s.signature], static ? null : this.pointer].concat(s.unwrappedArgs);
+    return [this._methods[s.signature], static ? this.classPointer : this.pointer].concat(s.unwrappedArgs);
   };
   objdest[memberName] = function() {
     return wrap(dotnet.callMethod.apply(null, prepargs.apply(this,arguments)));
@@ -233,8 +239,8 @@ function createProperty(target, typeNative, memberName, static) {
 
 function defineMembers(typeNative, target, static, memberType) {
   var types = static ? dotnet.getStaticMemberTypes(typeNative, memberType) : dotnet.getMemberTypes(typeNative, memberType);
-  var typeEnumerator = dotnet.execMethod(types,'GetEnumerator');
-  while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
+  var typeEnumerator = dotnet.callMethod(getEnumeratorMethod, types);
+  while(dotnet.callMethod(moveNextMethod, typeEnumerator)) { 
     var mNative = dotnet.getProperty(isCurrentProperty, typeEnumerator);
     if(memberType === 'fields') {
       // TODO: Figure out a way to stop using execGetProperty so we can remove it..
@@ -255,7 +261,6 @@ function defineMembers(typeNative, target, static, memberType) {
 }
 
 function CLRClassDefineMembers(typeNative, target, static) {
-  //defineMembers(typeNative, target, static, 'events');
   defineMembers(typeNative, target, static, 'methods');
   defineMembers(typeNative, target, static, 'properties');
   defineMembers(typeNative, target, static, 'fields');
@@ -306,6 +311,7 @@ function createJSInstance(pointer) {
     dotnet.statistics.enums++;
     var fullName = dotnet.getProperty(fullNameProperty, typeNative);
     var v = fullName.split('.');
+    // TODO: Remove calls to deprecated execMethod.
     var enumValue = dotnet.execMethod(pointer,'ToString');
     v.push(enumValue);
     var dst = process.bridge.dotnet;
@@ -377,10 +383,11 @@ function importOnto(assembly, onto) {
     assembly += ".dll";
   }
   var types = dotnet.loadAssembly(assembly);
-  var typeEnumerator = dotnet.execMethod(types, "GetEnumerator");
-
+  getEnumeratorMethod = getEnumeratorMethod || dotnet.getMethodObject(types, "GetEnumerator");
+  var typeEnumerator = dotnet.callMethod(getEnumeratorMethod, types);
+  moveNextMethod = moveNextMethod || dotnet.getMethodObject(typeEnumerator, "MoveNext");
   isCurrentProperty = isCurrentProperty || dotnet.getPropertyObject(typeEnumerator, "Current");
-  while(dotnet.execMethod(typeEnumerator, "MoveNext")) {
+  while(dotnet.callMethod(moveNextMethod, typeEnumerator)) { 
     var type = dotnet.getProperty(isCurrentProperty, typeEnumerator);
     createFromType(type, onto);
   }
