@@ -544,11 +544,35 @@ module.exports = (function() {
    * setTimeout(function() { webView.stop(); }, 1000);
    */
   WebView.prototype.stop = function() { this.loading = false; };
-
-  WebView.prototype.boundsOnWindowOfElement = function(e, cb) {
-    this.execute("var rect = document.querySelector('"+e+"').getBoundingClientRect();\n" +
-                  "'{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}';", 
-                  function(r) { cb(JSON.parse(r)); });
+  
+  /**
+   * @method boundsOfElement
+   * @memberof WebView
+   * @param {string} selector A css selector (e.g., the same as querySelector) to find on the page. (#someid or .someclass)
+   * @param {function} callback The function which is called when the execution finishes.  The result is an object with 
+   *                            width, height, x, and y properties that are passed as the first argument.
+   * @description Returns an object with a x, y, width and height relative to the web view for any css query selector
+   *              passed in for the first argument, the second argument is the callback to receive the result (as its first argument).
+   *              This is mainly useful as a means for unit testing web pages and checking for elements positions.
+   * @noscreenshot
+   * @example
+   * require('Common');
+   * var win = new Window();
+   * win.visible = true;
+   * var webView = new WebView();
+   * win.appendChild(webView);
+   * webView.left=webView.top=webView.right=webView.bottom=0;
+   * webView.location = "somewebpage.html";
+   * webView.addEventListener('load', function() {
+   *   webView.boundsOfElement('.someclass', function(rect) { 
+   *     console.log('.someclass was ' + rect.width + ' wide ' + rect.height + ' tall.'); 
+   *   });
+   * });
+   */
+  WebView.prototype.boundsOfElement = function(e, cb) {
+    this.execute("(function() { var rect = document.querySelector('"+e+"').getBoundingClientRect();\n" +
+                  "return '{\"width\":'+rect.width+',\"height\":'+rect.height+',\"y\":'+rect.top+',\"x\":'+rect.bottom+'}'; })();", 
+                  function(r) { if(cb) { cb(JSON.parse(r)); } });
   };
 
   /**
@@ -582,7 +606,15 @@ module.exports = (function() {
     if(this.useWKWebView) {
       var callback = null;
       if(cb) {
-        callback = $(function(obj, result) { if(cb) { cb(result('description')('UTF8String').toString()); } }.bind(this), ['v',['@','@']]);
+        callback = $(function(obj, result) { 
+          if(cb) {
+            if(result === null) {
+              cb(null); 
+            } else {
+              cb(result('description')('UTF8String').toString()); 
+            }
+          } 
+        }.bind(this), ['v',['@','@']]);
       }
       this.nativeView('evaluateJavaScript', $(jscode.toString()), 'completionHandler', callback);
     } else {
