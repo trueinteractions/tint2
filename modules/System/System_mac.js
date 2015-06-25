@@ -342,16 +342,17 @@ module.exports = (function() {
   };
 
   /**
-   * @method keyAtControl
+   * @method sendKey
    * @memberof System
    * @param {string} input The character to send as a key up and key down event. Note this must be one single character
    *                       e.g., 'a', 'b', or 'A', or 'B'.  For a carrage return use 'ENTER' or 'RETURN', for shift use
    *                       'SHIFT', etc.
    * @description Sends a key down and key up event through the OS, note the currently focused application, window and 
    *              control will receive this event (and may not be the running application).
+   * @alias keyAtControl
    * @static
    */
-  System.keyAtControl = function(input) {
+  System.sendKey = System.keyAtControl = function(input) {
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, keyCodeFromChar(input), true));
     $.CGEventPost($.kCGHIDEventTap, $.CGEventCreateKeyboardEvent(null, keyCodeFromChar(input), false));
   };

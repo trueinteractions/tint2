@@ -184,7 +184,7 @@ module.exports = (function() {
     $.System.Media.SystemSounds.Beep.Play();
   };
 
-  System.keyAtControl = function(input) {
+  System.sendKey = System.keyAtControl = function(input) {
     var key = keyCodeFromChar(input);
     $w32.user32.keybd_event(key, 0, 0, 0);
     $w32.user32.keybd_event(key, 0, 0x0002, 0);
