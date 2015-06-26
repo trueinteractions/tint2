@@ -41,7 +41,7 @@ function run($utils) {
   //$utils.assert(webview.location === null);
   
   webview.addEventListener('load', function() {
-    webview.boundsOnWindowOfElement('#newwin', function(coords) {
+    webview.boundsOfElement('#newwin', function(coords) {
       $utils.clickAt(b.x + coords.x, b.y + coords.y);
     });
 
