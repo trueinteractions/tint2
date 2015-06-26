@@ -100,7 +100,6 @@ module.exports = (function() {
        */
       ['windowWillClose:', 'v@:@@', function() { 
         this.fireEvent('closed'); 
-        delete this;
       }.bind(this)],
       ['windowShouldZoom:toFrame:', ['B',['@',':','@']], function() {
         /**
@@ -119,7 +118,19 @@ module.exports = (function() {
         return $.YES;
       }.bind(this)]
     ]);
-    this.nativeClass = this.nativeClass || $.NSWindow;
+
+    if(!this.nativeClass) {
+      // It is necessary (if no prior class is defined) to override canBecomeKey and MainWindow selectors
+      // to always return yes.  This allows frameless and other decorated windows to accept mouse events.
+      // Back in the OSX 10.0 days memory/cpu time was so important you had to explicitly ask for this ahead
+      // of time, at this point since tracking areas are used and lazy loading for event handling its almost
+      // more of a nuisance not to just override and immediately accept them.  So we do.
+      var nativeClassExtended = $.NSWindow.extend($.NSWindow.getName()+Math.round(Math.random()*10000000));
+      nativeClassExtended.addMethod('canBecomeKeyWindow','B@:',function() { return $.YES; });
+      nativeClassExtended.addMethod('canBecomeMainWindow','B@:',function() { return $.YES; });
+      nativeClassExtended.register();
+      this.nativeClass = nativeClassExtended;
+    }
     this.nativeViewClass = this.nativeViewClass || $.NSView;
     Container.call(this, options);
     // We'll need to first detect if we have an object already initialized, if not we'll do it.
