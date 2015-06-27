@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
   init_argc = argc;
   init_argv = copy_argv(argc, argv);
 
-  if(strncmp(argv[1], "-X,-v", 5) == 0 || strncmp(argv[1], "-X,--version", 12) == 0) {
+  if(argc > 1 && (strncmp(argv[1], "-X,-v", 5) == 0 || strncmp(argv[1], "-X,--version", 12) == 0)) {
     fprintf(stderr, "%i.%i.%i\n", TINT_MAJOR_VERSION, TINT_MINOR_VERSION, TINT_PATCH_VERSION);
     exit(1);
   }

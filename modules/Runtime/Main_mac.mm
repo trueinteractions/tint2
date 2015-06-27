@@ -172,7 +172,7 @@ int main(int argc, char * argv[]) {
   NSString *package = [bundle pathForResource:@"package" ofType:@"json"];
   NSString *identifier = [bundle bundleIdentifier];
 
-  if(strncmp(argv[1], "-X,-v", 5) == 0 || strncmp(argv[1], "-X,--version", 12) == 0) {
+  if(argc > 1 && (strncmp(argv[1], "-X,-v", 5) == 0 || strncmp(argv[1], "-X,--version", 12) == 0)) {
     fprintf(stderr, "%i.%i.%i\n", TINT_MAJOR_VERSION, TINT_MINOR_VERSION, TINT_PATCH_VERSION);
     exit(1);
   }
