@@ -113,20 +113,20 @@ module.exports = (function() {
     this.fireEvent('resize');
     var isVertical = this.orientation === "vertical" ? true : false;
     var index = this.private.children.indexOf(e);
-    if(this.private.children.length < 1) {
+    if(this.private.children.length > 1) {
       if(isVertical) {
         this.nativeView.ColumnDefinitions.RemoveAt(index);
-        this.nativeView.ColumnDefinitions.RemoveAt(index + 1);
+        this.nativeView.ColumnDefinitions.RemoveAt(index - 1);
       } else {
-        this.nativeView.RowDefinitions.RemoveAt(index + 1);
         this.nativeView.RowDefinitions.RemoveAt(index);
+        this.nativeView.RowDefinitions.RemoveAt(index - 1);
       }
       this.private.definitions.splice(index, 1);
-      this.private.definitions.splice(index + 1, 1);
+      this.private.definitions.splice(index - 1, 1);
       // we need to "fake" a regular control element which requires a native field, 
       // take the divider we have and put it into a user object with a native property.
-      this.private.backupRemove.apply(this,[this.private.dividers[index/2]]);
-      this.private.dividers.splice(index/2,1);
+      this.private.backupRemove.apply(this,[this.private.dividers[index/2 - 1]]);
+      this.private.dividers.splice(index/2 - 1,1);
     } else {
       if(isVertical) {
         this.nativeView.ColumnDefinitions.RemoveAt(0);

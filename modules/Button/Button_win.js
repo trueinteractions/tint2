@@ -16,7 +16,7 @@ module.exports = (function() {
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
     this.private.stack = new $.System.Windows.Controls.StackPanel();
-    this.private.stack.Orentation = $.System.Windows.Controls.Horizontal;
+    this.private.stack.Orentation = $.System.Windows.Controls.Vertical;
     this.private.label = null;
     this.private.img = null;
 
@@ -169,6 +169,12 @@ module.exports = (function() {
         this.private.stack.Children.Remove(this.private.img);
       }
       this.private.img = utilities.makeImage(e);
+      var asRatio = this.private.img.Source.Height / this.nativeView.Height;
+      setTimeout(function() {
+        var height = this.private.user.height ? this.private.user.height : (this.private.user.top - this.private.user.bottom);
+        height = height || 16;
+        this.private.img.Height = height;
+      }.bind(this),16);
       //this.private.img.Height = this.private.img.Source.Height * (this.private.img.Source.DpiY/$.System.Windows.SystemParameters.Dpi);
       //this.private.img.Width = this.private.img.Source.Width * (this.private.img.Source.DpiX/$.System.Windows.SystemParameters.Dpi);
       if(this.private.img !== null) {
