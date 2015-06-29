@@ -307,6 +307,21 @@ module.exports = (function() {
   }
 
   /**
+   * @member mousePosition
+   * @memberof System
+   * @description Contains an object with the 'x' and 'y' properties with the current position of
+   *              the mouse cursor in context to the active screen.
+   * @static
+   */
+  Object.defineProperty(System, 'mousePosition', {
+    get:function() {
+      var val = $.NSEvent('mouseLocation');
+      var frame = $.NSScreen('mainScreen')('frame');
+      return {x:(val.x), y:(frame.size.height - val.y)};
+    }
+  });
+
+  /**
    * @method mouseDownAt
    * @memberof System
    * @param {integer} x The amount of pixels from the left of the virtual screen (e.g., all
@@ -315,7 +330,8 @@ module.exports = (function() {
    *                    of the connected monitors normalized into a coordinate system).
    * @description Sends a left 'mouse down' at the specified X, Y coordinates. This causes a
    *              real left click mouse down event within the operating system 
-   *              at the specified coordinates and is not simulated.
+   *              at the specified coordinates and is not simulated. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.mouseDownAt = function(x,y) {
@@ -332,7 +348,8 @@ module.exports = (function() {
    *                    of the connected monitors normalized into a coordinate system).
    * @description Sends a left 'mouse up' at the specified X, Y coordinates. This causes a
    *              real left click mouse up event within the operating system 
-   *              at the specified coordinates and is not simulated.
+   *              at the specified coordinates and is not simulated.  This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.mouseUpAt = function(x,y) {
@@ -348,7 +365,8 @@ module.exports = (function() {
    *                       e.g., 'a', 'b', or 'A', or 'B'.  For a carrage return use 'ENTER' or 'RETURN', for shift use
    *                       'SHIFT', etc.
    * @description Sends a key down and key up event through the OS, note the currently focused application, window and 
-   *              control will receive this event (and may not be the running application).
+   *              control will receive this event (and may not be the running application).  This is mainly used for
+   *              testing and should be avoided in production applications.
    * @alias keyAtControl
    * @static
    */
@@ -365,7 +383,8 @@ module.exports = (function() {
    *                    of the connected monitors normalized into a coordinate system).
    * @param {boolean} upOrDown The direction to scroll vertically up or down (true/false).
    * @description Sends a scroll event through the operating system at the specified X, Y
-   *              coordinates, note this is not simulated.
+   *              coordinates, note this is not simulated. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.scrollAt = function(x, y, upOrDown) {
@@ -378,7 +397,8 @@ module.exports = (function() {
    * @memberof System
    * @param {Control} control The control to scroll.
    * @param {boolean} upOrDown The direction to scroll vertically up or down (true/false).
-   * @description Scrolls a control vertically up or down based on the value of upOrDown.
+   * @description Scrolls a control vertically up or down based on the value of upOrDown. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.scrollAtControl = function(control, upOrDown) {
@@ -399,7 +419,8 @@ module.exports = (function() {
    *                    of the connected monitors normalized into a coordinate system).
    * @description Left clicks at the specified X, Y coordinates. This causes a
    *              real left click mouse event within the operating system 
-   *              at the specified coordinates and is not simulated.
+   *              at the specified coordinates and is not simulated. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.clickAt = function(x,y) {
@@ -414,7 +435,8 @@ module.exports = (function() {
    * @param {Control} control The control to left click at.  The center of the control is 
    *                          calculated as the target click area.
    * @description Left clicks at the center of the specified Tint Control. This causes a
-   *              real left click event within the operating system and is not simulated.
+   *              real left click event within the operating system and is not simulated. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.clickAtControl = function(control) {
@@ -433,7 +455,8 @@ module.exports = (function() {
    *                    of the connected monitors normalized into a coordinate system).
    * @description Right clicks at the specified control. This causes a
    *              real right-click mouse event within the operating system 
-   *              at the specified coordinates and is not simulated.
+   *              at the specified coordinates and is not simulated. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.rightClickAt = function (x,y) {
@@ -449,7 +472,8 @@ module.exports = (function() {
    * @param {Control} control The control to right click at.  The center of the control is 
    *                          calculated as the target click area.
    * @description The right click at control method can be used for testing.  This causes a
-   *              real right-click event within the operating system and is not simulated.
+   *              real right-click event within the operating system and is not simulated. This is mainly used for
+   *              testing and should be avoided in production applications.
    * @static
    */
   System.rightClickAtControl = function(control) {

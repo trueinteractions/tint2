@@ -136,6 +136,7 @@ win32.user32 = new ffi.Library('user32.dll', {
   GetKeyboardLayout: [HANDLE, [DWORD]],
   VkKeyScanExW: [ SHORT, [TCHAR, HANDLE]]
 });
+win32.user32.LPPOINT = LPPOINT;
 win32.user32.GetWindowLong = win32.user32.GetWindowLongW;
 win32.user32.SetWindowLong = win32.user32.SetWindowLongW;
 win32.user32.WM_SYSCOMMAND = 0x0112;

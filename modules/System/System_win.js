@@ -184,6 +184,17 @@ module.exports = (function() {
     $.System.Media.SystemSounds.Beep.Play();
   };
 
+  Object.defineProperty(System, 'mousePosition', {
+    get:function() {
+      var val = process.bridge.ref.alloc($w32.user32.LPPOINT);
+      $w32.user32.GetCursorPos(val);
+      var sf = Screens.active.scaleFactor;
+      var x = val.readUInt32LE(0);
+      var y = val.readUInt32LE(4);
+      return {x:x/sf, y:y/sf};
+    }
+  });
+
   System.sendKey = System.keyAtControl = function(input) {
     var key = keyCodeFromChar(input);
     $w32.user32.keybd_event(key, 0, 0, 0);
