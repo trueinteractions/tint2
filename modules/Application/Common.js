@@ -30,6 +30,7 @@ global.ProgressBar = require('ProgressBar');
 global.Screens = require('Screens');
 global.Scroll = require('Scroll');
 global.SearchInput = require('SearchInput');
+global.SecureTextInput = require('SecureTextInput');
 global.SelectInput = require('SelectInput');
 global.Slider = require('Slider');
 global.Split = require('Split');
