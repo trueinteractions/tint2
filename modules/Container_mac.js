@@ -27,6 +27,13 @@ module.exports = (function() {
   Container.prototype = Object.create(Control.prototype);
   Container.prototype.constructor = Container;
 
+  /**
+   * @member children
+   * @type {Array}
+   * @memberof Container
+   * @description List of children
+   * @default []
+   */
   util.def(Container.prototype, 'children', function() { return this.private.children; });
 
   /**
