@@ -25,9 +25,9 @@ function run($utils) {
         $utils.assert(fs.existsSync('./packagetest-build/MacOS X/shortname.app/Contents/MacOS/Runtime'));
         var resc = spawn('./packagetest-build/MacOS X/shortname.app/Contents/MacOS/Runtime', []);
         resc.on('close', function(code, signal) {
-          $utils.assert(code === 0);
           var rmdir = spawn('rm', ['-rf', './packagetest-build/']);
           var rmpkg = spawn('rm', ['-rm','packagebuild.result']);
+          $utils.assert(code === 0);
           rmdir.on('close', function (code, signal) {
             $utils.assert(code === 0);
             $utils.assert(!fs.existsSync('./packagetest-build/'));
@@ -67,9 +67,9 @@ function run($utils) {
         var resc = spawn('cmd',['/C','.\\packagetest-build\\Windows\\shortname.exe'], { stdio: 'inherit' });
         resc.on('close', function(code, signal) {
           var res = fs.readFileSync('packagebuild.result');
-          $utils.assert(res.toString() === "0", 'Expected code to be 0, instead it was: '+res.toString());
           var rmdir = spawn('cmd', ['/C','rmdir','/Q','/S', '.\\packagetest-build\\']);
           var rmpkg = spawn('cmd', ['/C','del','.\\packagebuild.result']);
+          $utils.assert(res.toString() === "0", 'Expected code to be 0, instead it was: '+res.toString());
           rmdir.on('close', function (code, signal) {
             $utils.assert(code === 0);
             $utils.assert(!fs.existsSync('..\\..\\packagetest-build\\'));

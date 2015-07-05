@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
+#include <libproc.h>
 
 static bool packaged = false;
 static int embed_closed = 0;
@@ -165,6 +166,22 @@ static char **copy_argv(int argc, char **argv) {
   return argv_copy;
 }
 
+int is_the_parent_trusted() {
+  char path_parent[1024];
+  char path_us[1024];
+  int parent_len = proc_pidpath(getppid(), path_parent, sizeof(path_parent));
+  int us_len = proc_pidpath(getpid(), path_us, sizeof(path_us));
+  if (parent_len < 1024 && 
+      parent_len > 0 && 
+      parent_len == us_len && 
+      strncmp(path_parent, path_us, parent_len) == 0) 
+  {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 int main(int argc, char * argv[]) {
   NSApplication *app = [NSApplication sharedApplication];
   AppDelegate *delegate = [[AppDelegate alloc] init];
@@ -177,7 +194,10 @@ int main(int argc, char * argv[]) {
     exit(1);
   }
 
-  if(package && identifier) {
+  // So long as we're not being called by ourselves and were in a 
+  // packaged mode, do not allow us to span up with arbitrary arguments
+  // passed in via the command line.
+  if(package && identifier && is_the_parent_trusted() == 0) {
     NSString *executable = [bundle executablePath];
     NSDictionary *p = [NSJSONSerialization 
                 JSONObjectWithData:[NSData dataWithContentsOfFile:package] 

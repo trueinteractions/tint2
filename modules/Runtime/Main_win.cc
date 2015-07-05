@@ -12,6 +12,9 @@
 #include <io.h>
 #include <fcntl.h>
 #include <windows.h>
+#include <psapi.h>
+#include <tlhelp32.h>
+#include <mbstring.h>
 #include <nan.h>
 #if HAVE_OPENSSL
 # include "node_crypto.h"
@@ -258,6 +261,62 @@ void win_msg_loop() {
   node_terminate();
 }
 
+
+int is_the_parent_trusted() {
+  HANDLE h = NULL;
+  PROCESSENTRY32 pe = { 0 };
+  DWORD ppid = 0;
+  DWORD pid = GetCurrentProcessId();
+  UCHAR parent_name[1024];
+  UCHAR us_name[1024];
+  DWORD parent_len = 0;
+  DWORD us_len = 0;
+  int e = 0;
+
+  h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+  if(h) {
+    us_len = GetProcessImageFileName(h, (LPSTR)us_name, 1024);
+    if(us_len == 0) {
+      CloseHandle(h);
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+  pe.dwSize = sizeof(PROCESSENTRY32);
+  h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if(Process32First(h, &pe)) {
+    do {
+      if(pe.th32ProcessID == pid) {
+        ppid = pe.th32ParentProcessID;
+        break;
+      }
+    } while(Process32Next(h, &pe));
+  }
+  CloseHandle(h);
+
+  h = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, ppid);
+  if(h) {
+    parent_len = GetProcessImageFileName(h, (LPSTR)parent_name, 1024);
+    if (parent_len == 0) {
+      CloseHandle(h);
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+
+  if (parent_len < 1024 && 
+      parent_len > 0 && 
+      parent_len == us_len && 
+      _mbsncmp((const unsigned char *)parent_name, (const unsigned char *)us_name, (size_t)parent_len) == 0) 
+  {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 // This is the general entry point for everything when /subsystem:console, 
 // when executed its possible we came in through WinMain and it called us
 // after initializing the arguments.
@@ -332,118 +391,122 @@ int main(int argc, char *argv[]) {
 // the command prompt.  In this case we'll assign the argc, argv values to the built
 // in package and let the main() entry point load as if its being executed normally.
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-  // TODO: Clean this up, it works but is really ugly and may have unnecessary computations
-  //       and memory hits.
-  char cwBuffer[2048] = { 0 };
-  char cwBase[2048] = { 0 };
-  LPSTR package = cwBuffer;
-  LPSTR basePath = cwBase;
-  DWORD dwMaxChars = _countof(cwBuffer);
-  DWORD dwLength = ::GetModuleFileName(NULL, package, dwMaxChars);
-  unsigned i = dwLength;
+  if(is_the_parent_trusted() == 0) {
+    // TODO: Clean this up, it works but is really ugly and may have unnecessary computations
+    //       and memory hits.
+    char cwBuffer[2048] = { 0 };
+    char cwBase[2048] = { 0 };
+    LPSTR package = cwBuffer;
+    LPSTR basePath = cwBase;
+    DWORD dwMaxChars = _countof(cwBuffer);
+    DWORD dwLength = ::GetModuleFileName(NULL, package, dwMaxChars);
+    unsigned i = dwLength;
 
-  while(package[i] != '\\')
-    i--;
+    while(package[i] != '\\')
+      i--;
 
-  package[i++] = '\\';
-  package[i++] = 'R';
-  package[i++] = 'e';
-  package[i++] = 's';
-  package[i++] = 'o';
-  package[i++] = 'u';
-  package[i++] = 'r';
-  package[i++] = 'c';
-  package[i++] = 'e';
-  package[i++] = 's';
-  package[i++] = '\\';
-  package[i++] = 'p';
-  package[i++] = 'a';
-  package[i++] = 'c';
-  package[i++] = 'k';
-  package[i++] = 'a';
-  package[i++] = 'g';
-  package[i++] = 'e';
-  package[i++] = '.';
-  package[i++] = 'j';
-  package[i++] = 's';
-  package[i++] = 'o';
-  package[i++] = 'n';
-  package[i] = NULL;
+    package[i++] = '\\';
+    package[i++] = 'R';
+    package[i++] = 'e';
+    package[i++] = 's';
+    package[i++] = 'o';
+    package[i++] = 'u';
+    package[i++] = 'r';
+    package[i++] = 'c';
+    package[i++] = 'e';
+    package[i++] = 's';
+    package[i++] = '\\';
+    package[i++] = 'p';
+    package[i++] = 'a';
+    package[i++] = 'c';
+    package[i++] = 'k';
+    package[i++] = 'a';
+    package[i++] = 'g';
+    package[i++] = 'e';
+    package[i++] = '.';
+    package[i++] = 'j';
+    package[i++] = 's';
+    package[i++] = 'o';
+    package[i++] = 'n';
+    package[i] = NULL;
 
-  DWORD h = GetFileAttributesA(package);
+    DWORD h = GetFileAttributesA(package);
 
-  // If we cannot find the package.json file relative to the
-  // executable error out.
-  if(h == INVALID_FILE_ATTRIBUTES) {
-    // Don't bother printing an error, we don't have a
-    // console to error to anyway.
-    exit(1);
-  }
+    // If we cannot find the package.json file relative to the
+    // executable error out.
+    if(h == INVALID_FILE_ATTRIBUTES) {
+      // Don't bother printing an error, we don't have a
+      // console to error to anyway.
+      exit(1);
+    }
 
-  strcpy(basePath, package);
-  i = strlen(package);
-  while(basePath[i] != '\\')
-    i--;
-  basePath[i] = '\\';
-  basePath[i+1] = NULL;
+    strcpy(basePath, package);
+    i = strlen(package);
+    while(basePath[i] != '\\')
+      i--;
+    basePath[i] = '\\';
+    basePath[i+1] = NULL;
 
-  char buffer[2048] = {0};
-  char mainPackage[1024] = {0};
-  int j=0;
-  DWORD lpNumberOfBytesRead = 2048;
+    char buffer[2048] = {0};
+    char mainPackage[1024] = {0};
+    int j=0;
+    DWORD lpNumberOfBytesRead = 2048;
 
-  FILE* handle = fopen(package, "r");
-  lpNumberOfBytesRead = fread(buffer, sizeof(char), lpNumberOfBytesRead, handle);
-  fclose(handle);
+    FILE* handle = fopen(package, "r");
+    lpNumberOfBytesRead = fread(buffer, sizeof(char), lpNumberOfBytesRead, handle);
+    fclose(handle);
 
-  // Search for main entry in package.json, note that we do not have a compotent 
-  // JSON deserializer in Windows, and unfortunately cannot use V8's as its internal.
-  while(i < lpNumberOfBytesRead && buffer[i] != NULL &&
-    strncmp("\"main\"", &buffer[i], 6) != 0 &&
-    strncmp("'main'", &buffer[i], 6) != 0) 
-      i++;
+    // Search for main entry in package.json, note that we do not have a compotent 
+    // JSON deserializer in Windows, and unfortunately cannot use V8's as its internal.
+    while(i < lpNumberOfBytesRead && buffer[i] != NULL &&
+      strncmp("\"main\"", &buffer[i], 6) != 0 &&
+      strncmp("'main'", &buffer[i], 6) != 0) 
+        i++;
 
-  // If we cannot find the main entry in package.json, error out.
-  if(i == lpNumberOfBytesRead-1) {
-    // Don't bother printing an error, we don't have a
-    // console to error to anyway.
-    exit(2);
-  }
+    // If we cannot find the main entry in package.json, error out.
+    if(i == lpNumberOfBytesRead-1) {
+      // Don't bother printing an error, we don't have a
+      // console to error to anyway.
+      exit(2);
+    }
 
-  i = i + 6;
+    i = i + 6;
 
-  while(i < lpNumberOfBytesRead && 
-    (buffer[i] != '\'' && buffer[i] != '\"'))
-      i++;
+    while(i < lpNumberOfBytesRead && 
+      (buffer[i] != '\'' && buffer[i] != '\"'))
+        i++;
 
-  i++;
-
-  while(i < lpNumberOfBytesRead && j < 1024 && 
-    (buffer[i] != '\'' && buffer[i] != '\"' )) 
-  {
-    if(buffer[i] == '/') mainPackage[j] = '\\';
-    else mainPackage[j] = buffer[i];
-    j++;
     i++;
+
+    while(i < lpNumberOfBytesRead && j < 1024 && 
+      (buffer[i] != '\'' && buffer[i] != '\"' )) 
+    {
+      if(buffer[i] == '/') mainPackage[j] = '\\';
+      else mainPackage[j] = buffer[i];
+      j++;
+      i++;
+    }
+    mainPackage[j] = NULL;
+
+    dwLength = ::GetModuleFileName(NULL, package, dwMaxChars);
+    strcat(basePath, mainPackage);
+
+    unsigned int exec_len = strlen(package) + 1;
+    unsigned int main_len = strlen(basePath) + 1;
+    unsigned int buf_len = sizeof(char *) * 2;
+    char **p_argv = (char **)malloc(exec_len + main_len + buf_len);
+    char *base = (char *)p_argv;
+    p_argv[0] = (char *)(base + buf_len);
+    p_argv[1] = (char *)(base + buf_len + exec_len);
+    strncpy(p_argv[0], package, exec_len);
+    strncpy(p_argv[1], basePath, main_len);
+
+    packaged = true;
+
+    return main(2, p_argv);
+  } else {
+    return main(__argc, __argv);
   }
-  mainPackage[j] = NULL;
-
-  dwLength = ::GetModuleFileName(NULL, package, dwMaxChars);
-  strcat(basePath, mainPackage);
-
-  unsigned int exec_len = strlen(package) + 1;
-  unsigned int main_len = strlen(basePath) + 1;
-  unsigned int buf_len = sizeof(char *) * 2;
-  char **p_argv = (char **)malloc(exec_len + main_len + buf_len);
-  char *base = (char *)p_argv;
-  p_argv[0] = (char *)(base + buf_len);
-  p_argv[1] = (char *)(base + buf_len + exec_len);
-  strncpy(p_argv[0], package, exec_len);
-  strncpy(p_argv[1], basePath, main_len);
-
-  packaged = true;
-
-  return main(2, p_argv);
 }
 
 

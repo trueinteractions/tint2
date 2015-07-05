@@ -153,7 +153,7 @@ module.exports = (function() {
       }
 
       var btn = new $.System.Windows.Controls.Button();
-      this.native.mainbutton = btn;
+      //this.native.mainbutton = btn;
       btn.previewMouseDownCallback = function() {
         this.fireEvent('click',['main']);
         w.Close();
@@ -161,7 +161,7 @@ module.exports = (function() {
       btn.addEventListener('PreviewMouseDown', btn.previewMouseDownCallback);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
-      label.Content = mainButton.toString();
+      label.Content = mainButton ? mainButton.toString() : "";
       label.Padding = new $.System.Windows.Thickness(0);
       btn.Content.Children.Add(label);
       btn.IsDefault = true;
