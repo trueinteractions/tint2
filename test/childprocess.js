@@ -77,5 +77,5 @@ module.exports = {
   shutdown:shutdown, 
   shell:false,
   timeout:50000,
-  name:"ResourcesShell",
+  name:"ChildProcess",
 };
