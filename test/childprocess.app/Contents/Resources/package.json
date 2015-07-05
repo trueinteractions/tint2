@@ -9,7 +9,7 @@
     "directory":"."
   },
   "icon": { "windows":["tintruntime.png"], "osx":["tintruntime.png"] },
-  "main": "test.js",
+  "main": "test1.js",
   "license": "MIT",
   "copyright": "2014 True Interactions"
 }
