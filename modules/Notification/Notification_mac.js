@@ -23,7 +23,13 @@ module.exports = (function() {
         soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "";
 
     util.defEvents(this);
-    
+    /**
+     * @event click
+     * @memberof Notification
+     * @description Fires when a user presses a button on the notification, the first parameter passed in
+     *              to the callback on the event indicates the area that was clicked.  The value is either
+     *              'contents', 'button' or 'unknown'.
+     */
     var NSUserNotificationCenterDelegate = $.NSObject.extend('NSUserNotificationCenterDelegate'+Math.round(Math.random()*10000));
     NSUserNotificationCenterDelegate.addMethod('init:', '@@:', function(self) { return self; });
     NSUserNotificationCenterDelegate.addMethod('userNotificationCenter:shouldPresentNotification:','B@:@@', function(self,_cmd,center,notify) { return $.YES; });
