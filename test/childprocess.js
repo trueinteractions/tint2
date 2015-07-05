@@ -16,27 +16,29 @@ function run($utils) {
   var spawnSync = require('child_process').spawnSync;
   var spawn = require('child_process').spawn;
   if(ismac) {
-    spawnSync('cp', ['../build/xcode/Release/tint','./childprocess.app/Contents/MacOS/Runtime']);
-      var resc = spawn('./childprocess.app/Contents/MacOS/Runtime', [], { stdio: 'inherit' });
-      resc.on('close', function(code, signal) {
-        var rmdir = spawn('rm', ['-rf', './childprocess.app/Contents/MacOS/Runtime']);
-        $utils.assert(code === 0, 'The process exited with the code: '+code);
-        rmdir.on('close', function (code, signal) {
-          $utils.assert(code === 0);
-          $utils.assert(!fs.existsSync('./childprocess.app/Contents/MacOS/Runtime'));
-          $utils.ok();
-        });
-        rmdir.on('error', function(err) {
-          console.log('error on rmdir');
-          console.log(err);
-          $utils.notok();
-        });
+    var result = spawnSync('cp', ['../build/xcode/Release/tint','./childprocess.app/Contents/MacOS/Runtime']);
+    console.log(result)
+    
+    var resc = spawn('./childprocess.app/Contents/MacOS/Runtime', [], { stdio: 'inherit' });
+    resc.on('close', function(code, signal) {
+      var rmdir = spawn('rm', ['-rf', './childprocess.app/Contents/MacOS/Runtime']);
+      $utils.assert(code === 0, 'The process exited with the code: '+code);
+      rmdir.on('close', function (code, signal) {
+        $utils.assert(code === 0);
+        $utils.assert(!fs.existsSync('./childprocess.app/Contents/MacOS/Runtime'));
+        $utils.ok();
       });
-      resc.on('error', function(err) {
-        console.log('error on exec');
+      rmdir.on('error', function(err) {
+        console.log('error on rmdir');
         console.log(err);
         $utils.notok();
       });
+    });
+    resc.on('error', function(err) {
+      console.log('error on exec');
+      console.log(err);
+      $utils.notok();
+    });
   } else {
     spawnSync('cmd',['/C','copy', '..\\build\\msvs\\Release\\tint_windows.exe', '.\\childprocess.app\\Contents\\Runtime.exe'], { stdio: 'inherit' });
     var resc = spawn('./childprocess.app/Contents/Runtime.exe', { stdio: 'inherit' });
