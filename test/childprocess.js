@@ -17,8 +17,9 @@ function run($utils) {
   var spawn = require('child_process').spawn;
   if(ismac) {
     var result = spawnSync('cp', ['../build/xcode/Release/tint','./childprocess.app/Contents/MacOS/Runtime']);
-    console.log(result)
-    
+    console.log('cwd: ', process.cwd());
+    console.log('status: ',result.status);
+
     var resc = spawn('./childprocess.app/Contents/MacOS/Runtime', [], { stdio: 'inherit' });
     resc.on('close', function(code, signal) {
       var rmdir = spawn('rm', ['-rf', './childprocess.app/Contents/MacOS/Runtime']);
