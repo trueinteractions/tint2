@@ -16,7 +16,7 @@ function run($utils) {
   var spawnSync = require('child_process').spawnSync;
   var spawn = require('child_process').spawn;
   if(ismac) {
-    var result = spawnSync('cp', ['../build/xcode/Release/tint','./childprocess.app/Contents/MacOS/Runtime']);
+    var result = spawnSync('cp', ['../../build/xcode/Release/tint','./childprocess.app/Contents/MacOS/Runtime']);
     console.log('cwd: ', process.cwd());
     console.log('status: ',result.status);
 
@@ -64,7 +64,6 @@ function run($utils) {
       $utils.notok();
     });
   }
-
 }
 
 /**
