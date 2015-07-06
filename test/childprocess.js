@@ -12,21 +12,24 @@ function baseline() {
 
 function run($utils) {
   var fs = require('fs');
+  var path = require('path');
   var ismac = require('os').platform().toLowerCase() === "darwin";
   var spawnSync = require('child_process').spawnSync;
   var spawn = require('child_process').spawn;
   if(ismac) {
-    var result = spawnSync('cp', ['../../build/xcode/Release/tint','./childprocess.app/Contents/MacOS/Runtime']);
-    console.log('cwd: ', process.cwd());
-    console.log('status: ',result.status);
+    var tintBundle = path.join(process.cwd(), '../build/xcode/Release/tint');
+    var tintRuntime = path.join(process.cwd(), './childprocess.app/Contents/MacOS/Runtime');
+    console.log('tint bundle: ', tintBundle);
+    console.log('tint runtime: ', tintRuntime);
+    var result = spawnSync('cp', [tintBundle, tintRuntime]);
 
-    var resc = spawn('./childprocess.app/Contents/MacOS/Runtime', [], { stdio: 'inherit' });
+    var resc = spawn(tintRuntime, [], { stdio: 'inherit' });
     resc.on('close', function(code, signal) {
-      var rmdir = spawn('rm', ['-rf', './childprocess.app/Contents/MacOS/Runtime']);
+      var rmdir = spawn('rm', ['-rf', tintRuntime]);
       $utils.assert(code === 0, 'The process exited with the code: '+code);
       rmdir.on('close', function (code, signal) {
         $utils.assert(code === 0);
-        $utils.assert(!fs.existsSync('./childprocess.app/Contents/MacOS/Runtime'));
+        $utils.assert(!fs.existsSync(tintRuntime));
         $utils.ok();
       });
       rmdir.on('error', function(err) {
