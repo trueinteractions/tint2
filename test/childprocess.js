@@ -11,6 +11,8 @@ function baseline() {
 }
 
 function run($utils) {
+  // This is a manual test
+  $utils.skip('manual');
   var fs = require('fs');
   var path = require('path');
   var ismac = require('os').platform().toLowerCase() === "darwin";

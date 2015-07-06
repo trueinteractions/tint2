@@ -3,6 +3,7 @@ module.exports = (function() {
     return global.__TINT.Container;
   }
   var Control = require('Control');
+  var assert = require('assert');
   var util = require('Utilities');
   var $ = process.bridge.objc;
 
@@ -69,6 +70,31 @@ module.exports = (function() {
       }
       this.fireEvent('child-attached', [control]);
     }
+  };
+
+  /**
+   * @method appendChildAt
+   * @memberof Container
+   * @param {Control} control A control to add as a child to this control.
+   * @param {number} index  The index spot to add the control tp.
+   * @description Append child adds the passed in control as a child to this control. 
+   * @see removeChild
+   */
+  Container.prototype.appendChildAt = function(control, ndx) {
+    assert(ndx < this.children.length, 'The index specified was out of bounds (e.g., was way too large or small).');
+    var atControl = this.children[ndx];
+    if(this === control) {
+      throw new Error('A control cannot be added as a child to itself.');
+    }
+    control = this.fireEvent('before-child-attached', [control]) || control;
+    this.private.children.splice(ndx, 0, control);
+    if(control.nativeView && this.nativeView) {
+      this.nativeView('addSubview', control.nativeView, 'positioned', $.NSWindowAbove, 'relativeTo', atControl.nativeView);
+    }
+    if(control.fireEvent) {
+      control.fireEvent('parent-attached', [this]);
+    }
+    this.fireEvent('child-attached', [control]);
   };
 
   /**

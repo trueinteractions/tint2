@@ -263,6 +263,28 @@ module.exports = (function() {
       }
     }.bind(this));
   }
+
+  /**
+   * @method moveAbove
+   * @memberof Control
+   * @description Moves the rendering of the control above the z-index of the target control. 
+   *              Passing in null tries to move the control to the very top above all others.
+   */
+  Control.prototype.moveAbove = function(control) {
+    assert(this.private.parent, 'The control is not currently placed on a container.');
+    this.private.parent.nativeView('addSubview', this.nativeView, 'positioned', $.NSWindowAbove, 'relativeTo', control.nativeView);
+  }
+
+  /**
+   * @method moveBelow
+   * @memberof Control
+   * @description Moves the rendering of the control below the z-index of the target control. 
+   *              Passing in null tries to move the control to the very top above all others.
+   */
+  Control.prototype.moveBelow = function(control) {
+    assert(this.private.parent, 'The control is not currently placed on a container.');
+    this.private.parent.nativeView('addSubview', this.nativeView, 'positioned', $.NSWindowBelow, 'relativeTo', control.nativeView);
+  }
   
   /**
    * @member acceptsDroppedTypes

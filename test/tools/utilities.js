@@ -10,6 +10,7 @@ var debugappveyor = true;
 var debug = debugappveyor && isappveyor;
 var successMark = 'Pass';
 var failureMark = 'Fail';
+var warningMark = 'Warning';
 var $;
 var nl = '\r\n';
 
@@ -22,6 +23,7 @@ if(ismac) {
   $ = process.bridge.objc;
   successMark = '✓';
   failureMark = '✕';
+  warningMark = '⚠';
   nl = '\n';
 } else {
   $ = process.bridge.dotnet;
@@ -43,8 +45,9 @@ var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var args = require('./minimist');
 var grayedOutBegin = '\033[90m';
-var brightRedBegin = '\033[31m'
-var brightBlueBegin = '\033[36m'
+var brightRedBegin = '\033[31m';
+var brightBlueBegin = '\033[36m';
+var brightYellowBegin = '\033[33m';
 var colorEnd = '\033[0m';
 var currentTest = null;
 var createBaseline = false;
@@ -137,6 +140,12 @@ ex.ok = function ok() {
   if(currentTest && currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
   log(brightBlueBegin + successMark + colorEnd +nl);
   exit(0);
+}
+ex.skip = function skip(reason) {
+  if(currentTest && currentTest.shell && ismac) ex.shutdownShell(currentTest.name, function() {});
+  log(' test skipped because: ' + brightYellowBegin + warningMark + ' ' + reason + colorEnd +nl);
+  exit(0);
+
 }
 ex.fail = function fail() {
   log('explicit fail thrown'+nl);

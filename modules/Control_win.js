@@ -169,6 +169,23 @@ module.exports = (function() {
   Control.prototype.animateOnSizeChange = false;
   Control.prototype.animateOnPositionChange = false;
 
+  Control.prototype.moveAbove = function(control) {
+    assert(this.private.parent, 'The control is not currently placed on a container.');
+    var zindex = 0;
+    if(control) {
+      zindex = $.System.Windows.Controls.Panel.GetZIndex(control.nativeView);
+    }
+    $.System.Windows.Controls.Panel.SetZIndex(this.nativeView, zindex + 1);
+  }
+  Control.prototype.moveBelow = function(control) {
+    assert(this.private.parent, 'The control is not currently placed on a container.');
+    var zindex = 1;
+    if(control) {
+      zindex = $.System.Windows.Controls.Panel.GetZIndex(control.nativeView);
+    }
+    $.System.Windows.Controls.Panel.SetZIndex(this.nativeView, zindex - 1);
+  }
+
   utils.makePropertyNumberType(Control.prototype, 'alpha', 'Opacity');
 
   utils.makePropertyBoolType(Control.prototype, 'visible', 'Visibility',

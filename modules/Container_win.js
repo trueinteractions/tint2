@@ -37,6 +37,21 @@ module.exports = (function() {
     }
   };
 
+  Container.prototype.appendChildAt = function(control, ndx) {
+    assert(ndx < this.children.length, 'The index specified was out of bounds (e.g., was way too large or small).');
+    var atControl = this.children[ndx];
+    if(this === control) {
+      throw new Error('A control cannot be added as a child to itself.');
+    }
+    control = this.fireEvent('before-child-attached', [control]) || control;
+    this.private.children.splice(ndx, 0, control);
+    this.nativeView.Children.Insert(control, this.nativeView.Children.IndexOf(atControl.native));
+    if(control.fireEvent) {
+      control.fireEvent('parent-attached', [this]);
+    }
+    this.fireEvent('child-attached', [control]);
+  };
+
   Container.prototype.removeChild = function(control) {
     control = this.fireEvent('before-child-dettached', [control]) || control;
     if(this.private.children.indexOf(control) !== -1) {
