@@ -272,7 +272,9 @@ module.exports = (function() {
    */
   Control.prototype.moveAbove = function(control) {
     assert(this.private.parent, 'The control is not currently placed on a container.');
+    this.nativeView('removeFromSuperviewWithoutNeedingDisplay');
     this.private.parent.nativeView('addSubview', this.nativeView, 'positioned', $.NSWindowAbove, 'relativeTo', control.nativeView);
+    reapplyConstraints.apply(this);
   }
 
   /**
@@ -283,7 +285,9 @@ module.exports = (function() {
    */
   Control.prototype.moveBelow = function(control) {
     assert(this.private.parent, 'The control is not currently placed on a container.');
+    this.nativeView('removeFromSuperviewWithoutNeedingDisplay');
     this.private.parent.nativeView('addSubview', this.nativeView, 'positioned', $.NSWindowBelow, 'relativeTo', control.nativeView);
+    reapplyConstraints.apply(this);
   }
   
   /**
@@ -598,6 +602,15 @@ module.exports = (function() {
     '=':$.NSLayoutRelationEqual,
     '==':$.NSLayoutRelationEqual
   };
+
+  function reapplyConstraints() {
+    for(var key in this.private.constraints) {
+      if(this.private.constraints[key]) {
+        this.private.constraints[key] =  null;
+        this[key] = this[key];
+      }
+    }
+  }
 
   Control.prototype.addLayoutConstraint = function(layoutObject) {
     if(this.private.parent !== null && 
