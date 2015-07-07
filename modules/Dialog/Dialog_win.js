@@ -153,7 +153,7 @@ module.exports = (function() {
       }
 
       var btn = new $.System.Windows.Controls.Button();
-      //this.native.mainbutton = btn;
+      this.native.mainbutton = btn;
       btn.previewMouseDownCallback = function() {
         this.fireEvent('click',['main']);
         w.Close();
