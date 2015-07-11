@@ -64,20 +64,20 @@ ex.writeImage = function writeImageToFile(image, path) {
 if (ismac) {
     ex.setupShell = function setupShell(name, cmd) {
       execAndPump("mkdir "+name+"-test", function() {
-        execAndPump("cp -a -p tools/Shell.app "+name+"-test", function() {
-          execAndPump("cp -a -p "+tintexec+" "+name+"-test/Shell.app/Contents/MacOS/Runtime", function() {
-            execAndPump("cp "+name+".js ./"+name+"-test/Shell.app/Contents/Resources/test.js", function() {
-              execAndPump("cat tools/shell-stub.js >> ./"+name+"-test/Shell.app/Contents/Resources/test.js", cmd, notok)
+        execAndPump("cp -a -p tools/Shell.app ./"+name+"-test/"+name+".app", function() {
+          execAndPump("cp -a -p "+tintexec+" ./"+name+"-test/"+name+".app/Contents/MacOS/Runtime", function() {
+            execAndPump("cp "+name+".js ./"+name+"-test/"+name+".app/Contents/Resources/test.js", function() {
+              execAndPump("cat tools/shell-stub.js >> ./"+name+"-test/"+name+".app/Contents/Resources/test.js", cmd, notok)
             }, notok);
           }, notok);
         }, notok);
       }, notok);
     }
     ex.runShell = function runShell(name, cb, err, options) {
-      spawnAndPump("./"+name+"-test/Shell.app/Contents/MacOS/Runtime ./"+name+"-test/Shell.app/Contents/Resources/test.js tests", cb, err, options);
+      spawnAndPump("./"+name+"-test/"+name+".app/Contents/MacOS/Runtime ./"+name+"-test/"+name+".app/Contents/Resources/test.js tests", cb, err, options);
     }
     ex.runBaseline = function runBaseline(name, cb, err, options) {
-      spawnAndPump("./"+name+"-test/Shell.app/Contents/MacOS/Runtime ./"+name+"-test/Shell.app/Contents/Resources/test.js baseline", cb, err, options);
+      spawnAndPump("./"+name+"-test/"+name+".app/Contents/MacOS/Runtime ./"+name+"-test/"+name+".app/Contents/Resources/test.js baseline", cb, err, options);
     }
     ex.shutdownShell = function shutdownShell(name, cb) {
       execAndPump("rm -rf ./"+name+"-test/", cb, function() { console.log('*** FATAL *** Cannot cleanup!'); });

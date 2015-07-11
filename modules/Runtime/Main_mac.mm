@@ -40,6 +40,27 @@ NAN_METHOD(InitBridge) {
     NanReturnValue(NanNew<v8::Object>());
 }
 
+static void openURL(const char *url) {
+  NanScope();
+  NanCallback* osevents = new NanCallback(process_l->Get(NanNew<v8::String>("_osevents")).As<v8::Function>());
+  if(!osevents->GetFunction()->IsUndefined() && !osevents->IsEmpty()) {
+    v8::Handle<v8::Value> args[1];
+    args[0] = NanNew<v8::String>(url);
+    v8::TryCatch try_catch;
+    osevents->Call(1, args);
+    if (try_catch.HasCaught()) {
+      v8::Handle<v8::Value> stack = try_catch.Exception()->ToObject()->Get(NanNew<v8::String>("stack"));
+      if(stack->IsString()) {
+        v8::String::Utf8Value utf8exception(stack->ToString());
+        NSLog(@"%@", [[NSString alloc] initWithUTF8String:(*utf8exception)]);
+        NSLog(@"%@",[NSThread callStackSymbols]);
+      }
+    }
+  }
+  v8::Handle<v8::Array> events = process_l->Get(NanNew<v8::String>("_pending_osevents")).As<v8::Array>();
+  events->Set(events->Length(), NanNew<v8::String>(url));
+}
+
 static bool uv_trip_timer_safety = false;
 static void uv_event(void *info) {
   [[NSThread currentThread] setName:@"Tint EventLoop Watcher"];
@@ -88,38 +109,70 @@ static void uv_event(void *info) {
 @end
 
 @implementation AppDelegate
+- (void)handleURLEvent:(NSAppleEventDescriptor*)event withReplyEvent:(NSAppleEventDescriptor*)replyEvent
+{
+  NSString* url = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+  openURL([url UTF8String]);
+}
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-  [[NSThread currentThread] setName:@"Tint EventLoop"];
-
+- (void)applicationWillFinishLaunching:(NSNotification *)aNotification {
+  // Initialize Tint.
   process_l = env->process_object();
-
-  // Register the app:// protocol.
-  [NSURLProtocol registerClass:[AppSchema class]];
+  process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
+  process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
+  process_l->Set(NanNew<v8::String>("_pending_osevents"), NanNew<v8::Array>());
 
   // Register the initial bridge objective-c protocols
   NODE_SET_METHOD(process_l, "initbridge", InitBridge);
 
-  // Set Version Information
-  process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
-  process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
+  // Inform apple's event manager of our delegate callback for
+  // OS-level events.
+  [[NSAppleEventManager sharedAppleEventManager]
+    setEventHandler:self
+        andSelector:@selector(handleURLEvent:withReplyEvent:)
+      forEventClass:kInternetEventClass
+         andEventID:kAEGetURL];
+
+  // Register the app:// protocol.
+  [NSURLProtocol registerClass:[AppSchema class]];
 
   // Start debug agent when argv has --debug
-  if (node::use_debug_agent)
+  if (node::use_debug_agent) {
     node::StartDebug(env, node::debug_wait_connect);
+  }
 
   node::LoadEnvironment(env);
 
   // Enable debugger
-  if (node::use_debug_agent)
+  if (node::use_debug_agent) {
     node::EnableDebug(env);
+  }
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+  // define the NSThread so we can see it in our debugger
+  [[NSThread currentThread] setName:@"Tint EventLoop"];
 
   // Start worker that will interrupt main loop when having uv events.
   // keep the UV loop in-sync with CFRunLoop.
   embed_closed = 0;
-
   uv_sem_init(&embed_sem, 0);
   uv_thread_create(&embed_thread, uv_event, NULL);
+}
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)app hasVisibleWindows:(BOOL) flag {
+  return YES;
+}
+
+- (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
+  for(unsigned int i=0; i < [filenames count]; i++) {
+    openURL([((NSString *)[filenames objectAtIndex:i]) UTF8String]);
+  }
+}
+
+- (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename {
+  openURL([filename UTF8String]);
+  return YES;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -290,7 +343,7 @@ int main(int argc, char * argv[]) {
     v8::Context::Scope context_scope(context);
 
     [app setDelegate:delegate];
-    [app setActivationPolicy:NSApplicationActivationPolicyAccessory];
+    [app setActivationPolicy:NSApplicationActivationPolicyRegular];
     [app run];
 
     env->Dispose();

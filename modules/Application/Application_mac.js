@@ -39,8 +39,8 @@
    */
   function Application() {
     var name = "", badgeText = "", dockmenu = null, icon = "", terminateWhenLastWindowClosed = $.YES;
-
     var $app = $.NSApplication('sharedApplication');
+
     var delegateClass = $.AppDelegate.extend('AppDelegate2');
     delegateClass.addMethod('applicationShouldTerminateAfterLastWindowClosed:','B@:@',function() {
       return terminateWhenLastWindowClosed;
@@ -61,6 +61,19 @@
     delegateClass.register();
     var delegate = delegateClass('alloc')('init');
     $app('setDelegate', delegate);
+    /**
+     * @member background
+     * @type {boolean}
+     * @memberof process
+     * @description If process.background is set to true prior to using require('Common') or require('Application')
+     *              the application is launched as a background application (e.g., does not appear in the dock or
+     *              taskbar.)
+     * @see Window
+     */
+    if(process.background) {
+      $app('setActivationPolicy', $.NSApplicationActivationPolicyAccessory);
+    }
+    $app('activateIgnoringOtherApps', true);
 
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
 
@@ -100,7 +113,6 @@
       } else {
         $.NSEvent('addLocalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', blockCallback);
       }
-      
       return eventWatchGlobal;
     }.bind(this);
 
@@ -173,6 +185,15 @@
      *              that was originally given as the callback for addEventListener.
      */
     util.defEvents(this);
+
+    this.addEventListener('event-listener-added', function(event) {
+      if( typeof(event) !== 'undefined' && 
+          event === 'open' && 
+          process['_pending_osevents'].length > 0) 
+      {
+        this.fireEvent('open', [process['_pending_osevents']]);
+      }
+    });
 
     // unused, stub to help move us a bit closer to a standard spec
     this.launch = function() { fireEvent('launch'); };
@@ -401,20 +422,32 @@
      */
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
-    /**
-     * @member background
-     * @type {boolean}
-     * @memberof process
-     * @description If process.background is set to true prior to using require('Common') or require('Application')
-     *              the application is launched as a background application (e.g., does not appear in the dock or
-     *              taskbar.)
-     * @see Window
-     */
-    if(!process.background) {
-      $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
-    }
-    $app('activateIgnoringOtherApps', true);
+
+    this.registerForFileType = function(type) {
+      //LSSetDefaultRoleHandlerForContentType
+      var bundleUrl = $.CFStringCreateWithCString($.kCFAllocatorDefault, $.NSBundle('mainBundle')('bundleURL')('absoluteString')('UTF8String'), 0);
+      $.LSRegisterURL($.CFURLCreateWithString($.kCFAllocatorDefault, bundleUrl , null), true);
+    };
+
+
+    this.registerScheme = function(scheme) {
+      var result = $.LSSetDefaultHandlerForURLScheme(
+        $.CFStringCreateWithCString($.kCFAllocatorDefault, scheme, 0),
+        $.CFStringCreateWithCString($.kCFAllocatorDefault, $.NSBundle('mainBundle')('bundleIdentifier')('UTF8String'), 0)
+      );
+      if(result !== 0) {
+        return false;
+      }
+      var bundleUrl = $.CFStringCreateWithCString($.kCFAllocatorDefault, $.NSBundle('mainBundle')('bundleURL')('absoluteString')('UTF8String'), 0);
+      result = $.LSRegisterURL($.CFURLCreateWithString($.kCFAllocatorDefault, bundleUrl , null), true);
+      return result === 0;
+    };
   }
+
+
+  process['_osevents'] = function(url) {
+    application.fireEvent('open', [[url]]);
+  };
 
   global.application = new Application();
 
