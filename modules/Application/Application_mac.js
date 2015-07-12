@@ -72,8 +72,10 @@
      */
     if(process.background) {
       $app('setActivationPolicy', $.NSApplicationActivationPolicyAccessory);
+    } else {
+      $app('setActivationPolicy', $.NSApplicationActivationPolicyRegular);
     }
-    $app('activateIgnoringOtherApps', true);
+    $app('activateIgnoringOtherApps', $.YES);
 
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
 
@@ -443,13 +445,13 @@
       return result === 0;
     };
   }
+  global.application = new Application();
 
 
   process['_osevents'] = function(url) {
-    application.fireEvent('open', [[url]]);
+    global.application.fireEvent('open', [[url]]);
   };
 
-  global.application = new Application();
 
   // Include the app schema. app:// registers on NSURL and for node require().
   require('AppSchema');

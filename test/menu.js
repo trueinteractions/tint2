@@ -17,7 +17,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
+   var ismac = require('os').platform().toLowerCase() == "darwin";
   application.name = "My Program";
   var win = new Window();
   win.visible = true;
@@ -28,7 +28,7 @@ function run($utils) {
   var editMenu = new MenuItem('Edit', '');
   var windowMenu = new MenuItem('Window', '');
   var helpMenu = new MenuItem('Help', '');
-  /* @hidden */ if(ismac)
+   if(ismac)
   mainMenu.appendChild(appleMenu);
   mainMenu.appendChild(fileMenu);
   mainMenu.appendChild(editMenu);
@@ -48,8 +48,8 @@ function run($utils) {
   appleSubmenu.appendChild(new MenuItemSeparator());
   appleSubmenu.appendChild(new MenuItem('Quit '+application.name, 'q'))
       .addEventListener('click', function() { 
-        /* @hidden */ if(ismac) $utils.ok();
-        /* @hidden */ if(ismac) process.exit(0); 
+         if(ismac) $utils.ok();
+         if(ismac) process.exit(0); 
       });
   appleMenu.submenu = appleSubmenu;
 
@@ -61,8 +61,8 @@ function run($utils) {
   fileSubmenu.appendChild(new MenuItemSeparator());
   fileSubmenu.appendChild(new MenuItem('Close', 'c', 'cmd'))
     .addEventListener('click', function() {
-      /* @hidden */ if(!ismac) $utils.ok();
-      /* @hidden */ if(!ismac) process.exit(0);
+       if(!ismac) $utils.ok();
+       if(!ismac) process.exit(0);
     });
   fileMenu.submenu = fileSubmenu;
 
@@ -102,24 +102,22 @@ function run($utils) {
   helpMenu.submenu = helpSubmenu;
 
   win.menu = mainMenu;
-  
-  /* @hidden */ setTimeout(function() { 
-  /* @hidden */   if(ismac) $utils.clickAt(65,15);
-  /* @hidden */   else {
-  /* @hidden */     var x = win.x + 15;
-  /* @hidden */     var y = win.y + 40;
-  /* @hidden */     $utils.clickAt(x,y);
-  /* @hidden */   }
-  /* @hidden */ },1000); 
-  /* @hidden */ setTimeout(function() { 
-  /* @hidden */   if(ismac) $utils.clickAt(65,135); 
-  /* @hidden */   else {
-  /* @hidden */     var x = win.x + 25;
-  /* @hidden */     var y = win.y + 165;
-  /* @hidden */     $utils.clickAt(x,y);
-  /* @hidden */   }
-  /* @hidden */ },2000); 
-
+  setTimeout(function() { 
+   if(ismac) $utils.clickAt(65,15);
+   else {
+     var x = win.x + 15;
+     var y = win.y + 40;
+     $utils.clickAt(x,y);
+   }
+  },1000); 
+  setTimeout(function() { 
+   if(ismac) $utils.clickAt(65,135); 
+   else {
+     var x = win.x + 25;
+     var y = win.y + 165;
+     $utils.clickAt(x,y);
+   }
+  },2000); 
 }
 
 /**

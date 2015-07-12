@@ -32,12 +32,12 @@ v8::Handle<v8::Object> process_l;
 node::Environment *env;
 
 NAN_METHOD(InitBridge) {
-    NanScope();
-    v8::Local<v8::Object> bridge = NanNew<v8::Object>();
-    process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
-    FFI::Init(bridge);
-    REF::Init(bridge);
-    NanReturnValue(NanNew<v8::Object>());
+  NanScope();
+  v8::Local<v8::Object> bridge = NanNew<v8::Object>();
+  process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
+  FFI::Init(bridge);
+  REF::Init(bridge);
+  NanReturnValue(NanNew<v8::Object>());
 }
 
 static void openURL(const char *url) {
@@ -116,11 +116,12 @@ static void uv_event(void *info) {
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification {
-  // Initialize Tint.
-  process_l = env->process_object();
-  process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
-  process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
-  process_l->Set(NanNew<v8::String>("_pending_osevents"), NanNew<v8::Array>());
+  
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+  // define the NSThread so we can see it in our debugger
+  [[NSThread currentThread] setName:@"Tint EventLoop"];
 
   // Register the initial bridge objective-c protocols
   NODE_SET_METHOD(process_l, "initbridge", InitBridge);
@@ -135,7 +136,6 @@ static void uv_event(void *info) {
 
   // Register the app:// protocol.
   [NSURLProtocol registerClass:[AppSchema class]];
-
   // Start debug agent when argv has --debug
   if (node::use_debug_agent) {
     node::StartDebug(env, node::debug_wait_connect);
@@ -147,11 +147,6 @@ static void uv_event(void *info) {
   if (node::use_debug_agent) {
     node::EnableDebug(env);
   }
-}
-
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-  // define the NSThread so we can see it in our debugger
-  [[NSThread currentThread] setName:@"Tint EventLoop"];
 
   // Start worker that will interrupt main loop when having uv events.
   // keep the UV loop in-sync with CFRunLoop.
@@ -266,8 +261,8 @@ int main(int argc, char * argv[]) {
     }
 
     if(main == nil) {
-        fprintf(stderr, "Cannot find main entry within package.json file.\n");
-        exit(1);
+      fprintf(stderr, "Cannot find main entry within package.json file.\n");
+      exit(1);
     }
 
     main = [[[bundle resourcePath] stringByAppendingString:@"/"] stringByAppendingString:main];
@@ -342,8 +337,13 @@ int main(int argc, char * argv[]) {
       exec_argv);
     v8::Context::Scope context_scope(context);
 
+    // Initialize Tint.
+    process_l = env->process_object();
+    process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
+    process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
+    process_l->Set(NanNew<v8::String>("_pending_osevents"), NanNew<v8::Array>());
+
     [app setDelegate:delegate];
-    [app setActivationPolicy:NSApplicationActivationPolicyRegular];
     [app run];
 
     env->Dispose();
