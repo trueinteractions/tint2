@@ -15,7 +15,6 @@ module.exports = (function() {
 
     var name = child.native.toString();
     var maxWidth = intrinsicSize.width, maxHeight = intrinsicSize.height;
-    console.log('maxWidth: ', maxWidth, ' maxHeight ', maxHeight);
     if(child.width !== null && child.width.toString().indexOf('%') === -1) {
       intrinsicSize.width = util.parseUnits(child.width);
     }

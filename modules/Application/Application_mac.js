@@ -189,13 +189,15 @@
     util.defEvents(this);
 
     this.addEventListener('event-listener-added', function(event) {
+      console.log('event-listener-add ', event, process['_pending_osevents']);
       if( typeof(event) !== 'undefined' && 
           event === 'open' && 
+          typeof(process['_pending_osevents']) !== 'undefined' &&
           process['_pending_osevents'].length > 0) 
       {
         this.fireEvent('open', [process['_pending_osevents']]);
       }
-    });
+    }.bind(this));
 
     // unused, stub to help move us a bit closer to a standard spec
     this.launch = function() { fireEvent('launch'); };
@@ -425,10 +427,13 @@
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
 
-    this.registerForFileType = function(type) {
-      //LSSetDefaultRoleHandlerForContentType
-      var bundleUrl = $.CFStringCreateWithCString($.kCFAllocatorDefault, $.NSBundle('mainBundle')('bundleURL')('absoluteString')('UTF8String'), 0);
-      $.LSRegisterURL($.CFURLCreateWithString($.kCFAllocatorDefault, bundleUrl , null), true);
+    this.registerFileType = function(t) {
+      var fsext = $.CFStringCreateWithCString($.kCFAllocatorDefault, "public.filename-extension", 0);
+      var ext = $.CFStringCreateWithCString($.kCFAllocatorDefault, t, 0);
+      var id = $.UTTypeCreatePreferredIdentifierForTag(fsext, ext, null);
+      var bundle = $.CFStringCreateWithCString($.kCFAllocatorDefault, $.NSBundle('mainBundle')('bundleIdentifier')('UTF8String'), 0);
+      var result  = $.LSSetDefaultRoleHandlerForContentType(id, $.kLSRolesAll, bundle);
+      return result === 0;
     };
 
 

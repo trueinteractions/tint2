@@ -23,8 +23,10 @@ module.exports = (function() {
     var img = null, buttonsSet = false, mainButton = null, auxButton = null;
     options = options || {};
     options.delegates = options.delegates || [];
+    options.doNotInitialize = true;
     this.nativeClass = this.nativeClass || $.NSAlert;
-    this.nativeViewClass = this.nativeViewClass || $.NSDatePicker;
+    this.nativeViewClass = this.nativeViewClass || $.NSAlert;
+    this.native = this.nativeClass('alloc')('init');
     Control.call(this, options);
 
    /**

@@ -19,6 +19,7 @@ static uv_thread_t embed_thread;
 static int init_argc;
 static char **init_argv;
 static int code;
+static const char *purl;
 
 namespace REF {
   extern void Init (v8::Handle<v8::Object> target);
@@ -41,24 +42,28 @@ NAN_METHOD(InitBridge) {
 }
 
 static void openURL(const char *url) {
-  NanScope();
-  NanCallback* osevents = new NanCallback(process_l->Get(NanNew<v8::String>("_osevents")).As<v8::Function>());
-  if(!osevents->GetFunction()->IsUndefined() && !osevents->IsEmpty()) {
-    v8::Handle<v8::Value> args[1];
-    args[0] = NanNew<v8::String>(url);
-    v8::TryCatch try_catch;
-    osevents->Call(1, args);
-    if (try_catch.HasCaught()) {
-      v8::Handle<v8::Value> stack = try_catch.Exception()->ToObject()->Get(NanNew<v8::String>("stack"));
-      if(stack->IsString()) {
-        v8::String::Utf8Value utf8exception(stack->ToString());
-        NSLog(@"%@", [[NSString alloc] initWithUTF8String:(*utf8exception)]);
-        NSLog(@"%@",[NSThread callStackSymbols]);
+  purl = url;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    if( !process_l->Get(NanNew<v8::String>("_osevents"))->IsUndefined() &&
+        !process_l->Get(NanNew<v8::String>("_osevents"))->IsNull())
+    {
+      v8::Handle<v8::Value> args[1];
+      NanCallback* osevents = new NanCallback(process_l->Get(NanNew<v8::String>("_osevents")).As<v8::Function>());
+      args[0] = NanNew<v8::String>(purl);
+      v8::TryCatch try_catch;
+      osevents->Call(1, args);
+      if (try_catch.HasCaught()) {
+        v8::Handle<v8::Value> stack = try_catch.Exception()->ToObject()->Get(NanNew<v8::String>("stack"));
+        if(stack->IsString()) {
+          v8::String::Utf8Value utf8exception(stack->ToString());
+          NSLog(@"%@", [[NSString alloc] initWithUTF8String:(*utf8exception)]);
+          NSLog(@"%@",[NSThread callStackSymbols]);
+        }
       }
     }
-  }
-  v8::Handle<v8::Array> events = process_l->Get(NanNew<v8::String>("_pending_osevents")).As<v8::Array>();
-  events->Set(events->Length(), NanNew<v8::String>(url));
+    v8::Handle<v8::Array> events = process_l->Get(NanNew<v8::String>("_pending_osevents")).As<v8::Array>();
+    events->Set(events->Length(), NanNew<v8::String>(purl));
+  });
 }
 
 static bool uv_trip_timer_safety = false;
@@ -112,11 +117,18 @@ static void uv_event(void *info) {
 - (void)handleURLEvent:(NSAppleEventDescriptor*)event withReplyEvent:(NSAppleEventDescriptor*)replyEvent
 {
   NSString* url = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+  [url retain];
   openURL([url UTF8String]);
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification {
-  
+  // Inform apple's event manager of our delegate callback for
+  // OS-level events.
+  [[NSAppleEventManager sharedAppleEventManager]
+    setEventHandler:self
+        andSelector:@selector(handleURLEvent:withReplyEvent:)
+      forEventClass:kInternetEventClass
+         andEventID:kAEGetURL];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
@@ -125,14 +137,6 @@ static void uv_event(void *info) {
 
   // Register the initial bridge objective-c protocols
   NODE_SET_METHOD(process_l, "initbridge", InitBridge);
-
-  // Inform apple's event manager of our delegate callback for
-  // OS-level events.
-  [[NSAppleEventManager sharedAppleEventManager]
-    setEventHandler:self
-        andSelector:@selector(handleURLEvent:withReplyEvent:)
-      forEventClass:kInternetEventClass
-         andEventID:kAEGetURL];
 
   // Register the app:// protocol.
   [NSURLProtocol registerClass:[AppSchema class]];
@@ -147,7 +151,6 @@ static void uv_event(void *info) {
   if (node::use_debug_agent) {
     node::EnableDebug(env);
   }
-
   // Start worker that will interrupt main loop when having uv events.
   // keep the UV loop in-sync with CFRunLoop.
   embed_closed = 0;
@@ -161,11 +164,17 @@ static void uv_event(void *info) {
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
   for(unsigned int i=0; i < [filenames count]; i++) {
-    openURL([((NSString *)[filenames objectAtIndex:i]) UTF8String]);
+    NSString *nsurl = (NSString *)[filenames objectAtIndex:i];
+    // prevent open events from hearing about our passed in at script time argument.
+    if(init_argc > 1 && strncmp(init_argv[1], [nsurl UTF8String], strlen(init_argv[1])) == 0)
+      break;
+    [nsurl retain];
+    openURL([nsurl UTF8String]);
   }
 }
 
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename {
+  [filename retain];
   openURL([filename UTF8String]);
   return YES;
 }
@@ -342,6 +351,7 @@ int main(int argc, char * argv[]) {
     process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
     process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
     process_l->Set(NanNew<v8::String>("_pending_osevents"), NanNew<v8::Array>());
+    process_l->Set(NanNew<v8::String>("_osevents"), NanNull());
 
     [app setDelegate:delegate];
     [app run];
