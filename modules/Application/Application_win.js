@@ -66,6 +66,74 @@
         hotKeys.splice(hotKeys.indexOf(hotKeyData),1);
       });
     }.bind(this);
+
+
+    this.isRegisteredForScheme = function(Scheme) {
+        var KeyName = "URL:"+Scheme.toLowerCase() + " Protocol";
+        var key = $.Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(Scheme);
+        if(key) return true;
+        else return false;
+    }.bind(this);
+
+    this.registerScheme = function(Scheme) {
+      try {
+        var KeyName = "URL:"+Scheme.toLowerCase() + " Protocol";
+        var BaseKey = $.Microsoft.Win32.Registry.ClassesRoot.CreateSubKey(Scheme);
+        BaseKey.SetValue("", KeyName);
+        BaseKey.SetValue("URL Protocol", "");
+
+        var Shell = BaseKey.CreateSubKey("shell");
+        Shell.CreateSubKey("open").CreateSubKey("command").SetValue("", 
+          "\"" + $.System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " \"--open-file %1\"");
+        BaseKey.Close();
+        Shell.Close();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }.bind(this);
+
+    this.isRegisteredForFileType = function(Extension) {
+      var KeyName = Extension.toUpperCase() + '_File_Handler';
+      var BaseKey = $.Microsoft.Win32.Registry.ClassesRoot.OpenSubKey("." + Extension);
+      if(BaseKey) return true;
+      else return false;
+    }.bind(this);
+
+    this.registerFileType = function(Extension) {
+      try {
+        var KeyName = Extension.toUpperCase() + '_File_Handler';
+        var BaseKey = $.Microsoft.Win32.Registry.ClassesRoot.CreateSubKey("." + Extension);
+        BaseKey.SetValue("", KeyName);
+
+        var OpenMethod = $.Microsoft.Win32.Registry.ClassesRoot.CreateSubKey(KeyName);
+        OpenMethod.SetValue("", Extension + " file");
+        OpenMethod.CreateSubKey("DefaultIcon").SetValue("", "\"" + process.execPath + "\",0");
+        var Shell = OpenMethod.CreateSubKey("Shell");
+        Shell.CreateSubKey("edit").CreateSubKey("command").SetValue("", 
+          "\"" + $.System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " \"--open-file %1\"");
+
+        Shell.CreateSubKey("open").CreateSubKey("command").SetValue("", 
+          "\"" + $.System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " \"--open-file %1\"");
+        BaseKey.Close();
+        OpenMethod.Close();
+        Shell.Close();
+
+        var CurrentUser = $.Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
+          "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\." + 
+            FileExtension.toLowerCase());
+        CurrentUser = CurrentUser.OpenSubKey("UserChoice", 
+          $.Microsoft.Win32.RegistryKeyPermissionCheck.ReadWriteSubTree, 
+          $.System.Security.AccessControl.RegistryRights.FullControl);
+        CurrentUser.SetValue("Progid", KeyName, $.Microsoft.Win32.RegistryValueKind.String);
+        CurrentUser.Close();
+
+        $$.win32.SHChangeNotify(0x08000000, 0, $.System.IntPtr.Zero, $.System.IntPtr.Zero);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }.bind(this);
   
     Object.defineProperty(this, 'private', {value:{}, configurable:false, enumerable:false});
     this.private.windowCount = 0;
@@ -75,6 +143,20 @@
     }
 
     util.defEvents(this);
+    this.addEventListener('event-listener-added', function(event) {    
+      if( typeof(event) !== 'undefined' && 
+          event === 'open' && 
+          typeof(process['_original_argv']) !== 'undefined' &&
+          process['_original_argv'].length > 0) 
+      {
+        process['_original_argv'].forEach(function(arg, index, arr) {
+          if(arg.indexOf('--open-file') === 0) {
+            application.fireEvent('open', [[arg.substring('--open-file '.length)]]);
+          }
+        });
+      }
+    }.bind(this));
+
     this.launch = function() { this.fireEvent('launch'); };
     this.uninstall = function() { console.warn('unimplemented'); };
 
@@ -234,4 +316,13 @@
   // Include the app schema. app:// registers on NSURL and for node require().
   require('AppSchema');
 
+  setTimeout(function() {
+    if(process['_original_argv']) {
+      process['_original_argv'].forEach(function(arg, index, arr) {
+        if(arg.indexOf('--open-file') === 0) {
+          application.fireEvent('open', [arg.substring('--open-file '.length)]);
+        }
+      });
+    }
+  }, 500);
 })();

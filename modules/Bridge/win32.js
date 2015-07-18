@@ -105,8 +105,8 @@ POINT = STRUCT('POINT', {
   x:LONG,
   y:LONG
 }),
-LPPOINT = TYPEDEF('POINT', PTR(POINT));
-
+LPPOINT = TYPEDEF('POINT', PTR(POINT)),
+LPCVOID = TYPEDEF('VOID', PTR(VOID));
 
 /* Import windows 32 C functions needed for 
  * low-level operations */
@@ -183,7 +183,8 @@ win32.user32.WM_HOTKEY = 0x0312;
 /* Import shell 32 low-level c functions */
 win32.shell32 = new ffi.Library('shell32.dll', {
   SHGetStockIconInfo:[HRESULT,[UINT,UINT,LPSHSTOCKICONINFO]],
-  SHGetFileInfo:[LPDWORD,[LPCSTR,DWORD,LPSHFILEINFO,UINT,UINT]]
+  SHGetFileInfo:[LPDWORD,[LPCSTR,DWORD,LPSHFILEINFO,UINT,UINT]],
+  SHChangeNotify:[ VOID, [LONG, UINT, LPCVOID, LPCVOID] ]
 });
 
 win32.shell32.SHGFI_ADDOVERLAYS = 0x000000020;

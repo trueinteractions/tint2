@@ -189,7 +189,6 @@
     util.defEvents(this);
 
     this.addEventListener('event-listener-added', function(event) {
-      console.log('event-listener-add ', event, process['_pending_osevents']);
       if( typeof(event) !== 'undefined' && 
           event === 'open' && 
           typeof(process['_pending_osevents']) !== 'undefined' &&
@@ -243,20 +242,6 @@
         return null;
       }
     };
-
-    //
-    // @member windows
-    // @type {array}
-    // @memberof Application
-    // @description Gets an array of windows that the application has ownership of. 
-    //              If you loose your window object or a new one is created by a seperate
-    //              module you can access any window that the application owns from this.
-    //              Note: When you create or remove a window this is automatically updated.
-    //              and subsequently should only be read from, the array should not be changed.
-    //
-    //Object.defineProperty(this, 'windows', {
-    //  get:function() { return nswindows; }
-    //});
     
     /**
      * @member name
@@ -427,6 +412,46 @@
     this.selectAll = function() { $app('sendAction', 'selectAll:', 'to', null, 'from', $app); };
 
 
+    /** 
+     * @method isRegisteredForFileType
+     * @memberof Application
+     * @param {string} A file extention without the leading period (e.g., txt, jpg)
+     * @description Checks to see if the application is responsible for handling open requests from
+     *              the operating system for the specified file type extension (e.g., jpg, txt).
+     *              Returns a true or false boolean to indicate whether the application is registered
+     *              for the file type.  Note: this method has undefined behavior when the application
+     *              has not been bundled or packaged.
+     * @returns boolean
+     */
+    this.isRegisteredForFileType = function(t) {
+      var fsext = $.CFStringCreateWithCString($.kCFAllocatorDefault, "public.filename-extension", 0);
+      var ext = $.CFStringCreateWithCString($.kCFAllocatorDefault, t, 0);
+      var id = $.UTTypeCreatePreferredIdentifierForTag(fsext, ext, null);
+      var theirBundleId  = $.CFStringGetCStringPtr($.LSCopyDefaultRoleHandlerForContentType(id, $.kLSRolesAll));
+      var ourBundleId = $.NSBundle('mainBundle')('bundleIdentifier')('UTF8String');
+      return ourBundleId === theirBundleId;
+    }
+
+    /** 
+     * @method registerFileType
+     * @memberof Application
+     * @param {string} A file extention without the leading period (e.g., txt, jpg)
+     * @description Registers for the specified file type by its extension (e.g., txt, jpg, png). If successful
+     *              the application is launched (if not running) and the application's 'open' event is fired with
+     *              the location of the file when the user requests the file to be opened through the OS. This
+     *              is an expensive operation and should be run sparingly (usually only on install). If
+     *              the application is successfully assigned to the file type the method returns true,
+     *              otherwise false.  This has undefined behavior if the application is not packaged or
+     *              bundled. Note, operating systems may reserve and protect specific file types from 
+     *              being re-assigned for security and user experience reasons. This only needs to be
+     *              executed once in the life time of the application being installed on the system. In
+     *              addition applications that misbehave may find the OS will ignore these requests. It's
+     *              generally best practice to check if the registered file type is already assigned 
+     *              (using isRegisteredForFileType) before requesting assignment. As a general courtesy, 
+     *              ask the user to become the default handler for a file type (unless the file type is 
+     *              exclusive to your application and proprietary) before requesting assignment.
+     * @returns boolean
+     */
     this.registerFileType = function(t) {
       var fsext = $.CFStringCreateWithCString($.kCFAllocatorDefault, "public.filename-extension", 0);
       var ext = $.CFStringCreateWithCString($.kCFAllocatorDefault, t, 0);
@@ -436,7 +461,42 @@
       return result === 0;
     };
 
-
+    /** 
+     * @method isRegisteredForScheme
+     * @memberof Application
+     * @param {string} A URI scheme (e.g., http, https, ftp, mailto, tel, etc)
+     * @description Checks to see if the application is responsible for handling open URI requests from
+     *              the operating system for the specified scheme (e.g., http, ftp, https, etc).
+     *              Returns a true or false boolean to indicate whether the application is registered
+     *              for the scheme.  Note: this method has undefined behavior when the application
+     *              has not been bundled or packaged.
+     * @returns boolean
+     */
+    this.isRegisteredForScheme = function(scheme) {
+      var theirs = $.CFStringGetCStringPtr($.LSCopyDefaultHandlerForURLScheme($.CFStringCreateWithCString($.kCFAllocatorDefault, scheme, 0)));
+      var ours = $.NSBundle('mainBundle')('bundleIdentifier')('UTF8String');
+      return theirs === ours;
+    };
+    /** 
+     * @method registerScheme
+     * @memberof Application
+     * @param {string} A URI scheme as a string (e.g., ftp, https, http)
+     * @description Registers for the specified scheme (e.g., ftp, http, https).  If successful
+     *              the application is launched (if not running) and the application's 'open' event is fired with
+     *              the full URL when the user requests the url to be opened through the OS. This
+     *              is an expensive operation and should be run sparingly (usually only on install). If
+     *              the application is successfully assigned as the opener for the scheme the method returns true,
+     *              otherwise false.  This has undefined behavior if the application is not packaged or
+     *              bundled. Note, operating systems may reserve and protect specific schemes from 
+     *              being re-assigned for security and user experience reasons (such as tel on phones). 
+     *              This only needs to be executed once in the life time of the application being 
+     *              installed on the system. In addition applications that misbehave may find the OS will 
+     *              ignore these requests. It's generally best practice to check if the registered scheme 
+     *              is already assigned (using isRegisteredForScheme) before requesting assignment. As a general courtesy, 
+     *              ask the user to become the default handler for a scheme (unless the scheme is 
+     *              exclusive to your application and proprietary) before requesting assignment.
+     * @returns boolean
+     */
     this.registerScheme = function(scheme) {
       var result = $.LSSetDefaultHandlerForURLScheme(
         $.CFStringCreateWithCString($.kCFAllocatorDefault, scheme, 0),
@@ -453,6 +513,18 @@
   global.application = new Application();
 
 
+  /** 
+   * @event open
+   * @memberof Application
+   * @description The open event is fired when a file type or scheme that the application is assigned
+   *              to handle (through Application.registerScheme or Application.registerFileType) is 
+   *              attempted to be opened through a web browser, file browser, or through a seperate
+   *              application.  The first argument passed in is an array of url's requesting to be
+   *              opened. Note that if your application is not currently running your application is
+   *              automatically opened and the open event is fired immediately when an event handler
+   *              (function callback) is assigned to the open event.
+   * @returns boolean
+   */
   process['_osevents'] = function(url) {
     global.application.fireEvent('open', [[url]]);
   };

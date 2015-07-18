@@ -27,6 +27,8 @@ static uv_sem_t embed_sem;
 static uv_thread_t embed_thread;
 static int init_argc;
 static char **init_argv;
+static int original_argc;
+static char **original_argv;
 static int code;
 
 v8::Handle<v8::Object> process_l;
@@ -134,6 +136,13 @@ void node_load() {
   process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
   // Set whether we're in a packaged or non-packaged environment.
   process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
+  if(packaged) {
+    v8::Handle<v8::Array> originalArgv = NanNew<v8::Array>();
+    process_l->Set(NanNew<v8::String>("_original_argv"), originalArgv);
+    for(int i=0; i < original_argc; i++) {
+      originalArgv->Set(i, NanNew<v8::String>(original_argv[i]));
+    }
+  }
   // Register the app:// schema.
   InitAppRequest();
   // Register the initial bridge: C++/C/C# (CLR) dotnet
@@ -502,7 +511,8 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
     strncpy(p_argv[1], basePath, main_len);
 
     packaged = true;
-
+    original_argv = __argv;
+    original_argc = __argc;
     return main(2, p_argv);
   } else {
     return main(__argc, __argv);
