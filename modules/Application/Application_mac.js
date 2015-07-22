@@ -415,13 +415,13 @@
     /** 
      * @method isRegisteredForFileType
      * @memberof Application
-     * @param {string} A file extention without the leading period (e.g., txt, jpg)
+     * @param {string} filetype A file extention without the leading period (e.g., txt, jpg)
      * @description Checks to see if the application is responsible for handling open requests from
      *              the operating system for the specified file type extension (e.g., jpg, txt).
      *              Returns a true or false boolean to indicate whether the application is registered
      *              for the file type.  Note: this method has undefined behavior when the application
      *              has not been bundled or packaged.
-     * @returns boolean
+     * @returns {boolean} A true or false value if the file type is registered
      */
     this.isRegisteredForFileType = function(t) {
       var fsext = $.CFStringCreateWithCString($.kCFAllocatorDefault, "public.filename-extension", 0);
@@ -435,7 +435,7 @@
     /** 
      * @method registerFileType
      * @memberof Application
-     * @param {string} A file extention without the leading period (e.g., txt, jpg)
+     * @param {string} filetype A file extention without the leading period (e.g., txt, jpg)
      * @description Registers for the specified file type by its extension (e.g., txt, jpg, png). If successful
      *              the application is launched (if not running) and the application's 'open' event is fired with
      *              the location of the file when the user requests the file to be opened through the OS. This
@@ -450,7 +450,7 @@
      *              (using isRegisteredForFileType) before requesting assignment. As a general courtesy, 
      *              ask the user to become the default handler for a file type (unless the file type is 
      *              exclusive to your application and proprietary) before requesting assignment.
-     * @returns boolean
+     * @returns {boolean} A true or false value indicating if the operation was successful.
      */
     this.registerFileType = function(t) {
       var fsext = $.CFStringCreateWithCString($.kCFAllocatorDefault, "public.filename-extension", 0);
@@ -464,13 +464,13 @@
     /** 
      * @method isRegisteredForScheme
      * @memberof Application
-     * @param {string} A URI scheme (e.g., http, https, ftp, mailto, tel, etc)
+     * @param {string} scheme A URI scheme (e.g., http, https, ftp, mailto, tel, etc)
      * @description Checks to see if the application is responsible for handling open URI requests from
      *              the operating system for the specified scheme (e.g., http, ftp, https, etc).
      *              Returns a true or false boolean to indicate whether the application is registered
      *              for the scheme.  Note: this method has undefined behavior when the application
      *              has not been bundled or packaged.
-     * @returns boolean
+     * @returns {boolean} A true or false value if the scheme is registered
      */
     this.isRegisteredForScheme = function(scheme) {
       var theirs = $.CFStringGetCStringPtr($.LSCopyDefaultHandlerForURLScheme($.CFStringCreateWithCString($.kCFAllocatorDefault, scheme, 0)));
@@ -480,7 +480,7 @@
     /** 
      * @method registerScheme
      * @memberof Application
-     * @param {string} A URI scheme as a string (e.g., ftp, https, http)
+     * @param {string} scheme A URI scheme as a string (e.g., ftp, https, http)
      * @description Registers for the specified scheme (e.g., ftp, http, https).  If successful
      *              the application is launched (if not running) and the application's 'open' event is fired with
      *              the full URL when the user requests the url to be opened through the OS. This
@@ -495,7 +495,7 @@
      *              is already assigned (using isRegisteredForScheme) before requesting assignment. As a general courtesy, 
      *              ask the user to become the default handler for a scheme (unless the scheme is 
      *              exclusive to your application and proprietary) before requesting assignment.
-     * @returns boolean
+     * @returns {boolean} A true or false value indicating if the operation was successful.
      */
     this.registerScheme = function(scheme) {
       var result = $.LSSetDefaultHandlerForURLScheme(
@@ -523,7 +523,6 @@
    *              opened. Note that if your application is not currently running your application is
    *              automatically opened and the open event is fired immediately when an event handler
    *              (function callback) is assigned to the open event.
-   * @returns boolean
    */
   process['_osevents'] = function(url) {
     global.application.fireEvent('open', [[url]]);

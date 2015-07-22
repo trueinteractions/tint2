@@ -321,6 +321,8 @@
       process['_original_argv'].forEach(function(arg, index, arr) {
         if(arg.indexOf('--open-file') === 0) {
           application.fireEvent('open', [arg.substring('--open-file '.length)]);
+        } else if (application.packaged && index !== 0 && arg[0] !== '-') {
+          application.fireEvent('open', [arg]);
         }
       });
     }
