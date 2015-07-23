@@ -109,6 +109,7 @@
             }
           });
         }
+        return arg;
       }.bind(this), ['@',['@','@']]);
       if(eventWatchGlobal) {
         $.NSEvent('addGlobalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', blockCallback);
