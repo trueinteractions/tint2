@@ -38,7 +38,6 @@
    * @see process
    */
   function Application() {
-    debugger;
     var name = "", badgeText = "", dockmenu = null, icon = "", terminateWhenLastWindowClosed = $.YES;
     var $app = $.NSApplication('sharedApplication');
 
