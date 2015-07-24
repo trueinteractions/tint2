@@ -189,6 +189,11 @@ module.exports = (function() {
       } else if (node.name === 'struct') {
         var structtype = getType(node);
         onto[name] = core.Types.knownStructs[core.Types.parseStructName(structtype)] = structtype;
+      /*
+      // This is commented out, its not very useful, as constants cannot be pulled
+      // from dlsym, however it's mostly been inert (previously to OSX 10.11) until
+      // the latest OSX version will define classes as constants first.
+      // Filed a bug with apple on el Capitan, https://bugreport.apple.com/ bug id #21976090
       }  else if (node.name === 'constant')  {
         var consttype = getType(node);
         onto.__defineGetter__(name, function () {
@@ -198,7 +203,7 @@ module.exports = (function() {
           delete onto[name];
           onto[name] = derefPtr
           return derefPtr;
-        });
+        });*/
       }
       else if (node.name === 'function')
       {
