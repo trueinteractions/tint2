@@ -33,7 +33,7 @@ module.exports = (function() {
     
     this.native('retain');
     this.nativeView('retain');
-    this.native('setBehavior', $.NSPopoverBehaviorSemitransient);
+    this.native('setBehavior', $.NSPopoverBehaviorTransient);
     this.native('setAppearance', $.NSPopoverAppearanceMinimal);
     this.native('setAnimates', $.YES);
 

@@ -14,6 +14,7 @@
   process.bridge.objc.import('WebKit',0);
   var util = require('Utilities');
   var assert = require('assert');
+  var os = require('os');
   var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
   
   // Help with garbage collection, this allows objective-c to reclaim
