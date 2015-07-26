@@ -10,6 +10,7 @@ module.exports = (function() {
 
   var Container = require('Container');
   var util = require('Utilities');
+  var System = require('System');
   var $ = process.bridge.dotnet;
   $.import('System.Xaml.dll');
 
@@ -55,7 +56,13 @@ module.exports = (function() {
     $.System.Windows.Controls.Canvas.SetTop(this.private.arrow, arrowTop);
     this.native.Placement = placement;
 
-    this.native.PlacementTarget = this.private.container.nativeView;
+    if(this.private.container instanceof StatusBar) {
+      var mPos = System.mousePosition;
+      this.native.VerticalOffset = mPos.y;
+      this.native.HorizontalOffset = ( mPos.x - (this.native.Width / 2) );
+    } else {
+      this.native.PlacementTarget = this.private.container.nativeView;
+    }
   }
 
   function updateLocationChange() {
@@ -104,6 +111,15 @@ module.exports = (function() {
 
     // Scroll, Slide, Fade & None
     this.native.PopupAnimation = $.System.Windows.Controls.Primitives.PopupAnimation.Slide;
+    $.System.Windows.Application.Current.addEventListener('Deactivated', function() {
+      this.native.IsOpen = false;
+    }.bind(this));
+    this.native.addEventListener('LostFocus', function() {
+      this.native.IsOpen = false;
+    }.bind(this));
+    this.native.addEventListener('PreviewLostKeyboardFocus', function() {
+      this.native.IsOpen = false;
+    }.bind(this));
   }
 
   PopOver.prototype = Object.create(Container.prototype);
@@ -135,16 +151,18 @@ module.exports = (function() {
     if(!(container && container.native)) {
       throw new Error('Container wasnt a valid Tint object.');
     }
-    var targetWindow = $.System.Windows.Window.GetWindow(container.native);
-    if(targetWindow === null) {
-      throw new Error('Container wasn\'t attached to a window.');
-    }
     this.private.side = side;
     this.private.container = container;
     this.private.attached = true;
 
-    targetWindow.addEventListener('LocationChanged', updateLocationChange.bind(this));
-    targetWindow.addEventListener('SizeChanged',  updateLocationChange.bind(this));
+    if(!(container instanceof StatusBar)) {
+      var targetWindow = $.System.Windows.Window.GetWindow(container.native);
+      if(targetWindow === null) {
+        throw new Error('Container wasn\'t attached to a window.');
+      }
+      targetWindow.addEventListener('LocationChanged', updateLocationChange.bind(this));
+      targetWindow.addEventListener('SizeChanged',  updateLocationChange.bind(this));
+    }
     updateLocation.call(this);
     this.fireEvent('open');
     this.native.IsOpen = true;
