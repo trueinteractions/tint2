@@ -243,6 +243,20 @@
         return null;
       }
     };
+
+    /**
+     * @member appearance
+     * @type {string}
+     * @memberof Application
+     * @description Returns 'dark' or 'light' if the desktops brightness (e.g., color hue, saturation and
+     *              brightness) should require a status icon or other OS elements that provide contrast to
+     *              other elements.
+     */
+     Object.defineProperty(this, 'appearance', {
+      get:function() {
+        return $.NSUserDefaults('standardUserDefaults')('stringForKey',$("AppleInterfaceStyle")) === null ? "light" : "dark";
+      }
+     });
     
     /**
      * @member name
@@ -510,6 +524,30 @@
       result = $.LSRegisterURL($.CFURLCreateWithString($.kCFAllocatorDefault, bundleUrl , null), true);
       return result === 0;
     };
+
+    /**
+     * @event appearance-changed
+     * @memberof Application
+     * @description The appearance changed event fires when the overall contrast, color or hue of the default colors and
+     *              appearance has changed. The callback is passed one value "light" or "dark" to indicate the new appearance.
+     *              This event is useful for switching the default icons in a status bar, or other interface elements to ensure
+     *              they're still usable.
+     */
+    this['_private_appearance_callback'] = $(function(obj) {
+        var p = this.appearance;
+        if(currentAppearance !== p) {
+          this.fireEvent('appearance-change', [p]);
+        }
+        currentAppearance = p;
+      }.bind(this), ['v',['@']]);
+
+    var currentAppearance = this.appearance;
+    $.NSDistributedNotificationCenter('defaultCenter')(
+      'addObserverForName',$("AppleInterfaceThemeChangedNotification"),
+      'object', null, 'queue', $.NSOperationQueue('mainQueue'),
+      'usingBlock', this['_private_appearance_callback']
+    );
+
   }
   global.application = new Application();
 
