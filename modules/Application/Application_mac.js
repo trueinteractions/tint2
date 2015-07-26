@@ -14,6 +14,7 @@
   process.bridge.objc.import('WebKit',0);
   var util = require('Utilities');
   var assert = require('assert');
+  var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
   
   // Help with garbage collection, this allows objective-c to reclaim
   // objective-c objects once we're finished with them. The FFI bridge in
@@ -254,7 +255,11 @@
      */
      Object.defineProperty(this, 'appearance', {
       get:function() {
-        return $.NSUserDefaults('standardUserDefaults')('stringForKey',$("AppleInterfaceStyle")) === null ? "light" : "dark";
+        if(version > 13) {
+          return $.NSUserDefaults('standardUserDefaults')('stringForKey',$("AppleInterfaceStyle")) === null ? "light" : "dark";
+        } else {
+          return "light";
+        }
       }
      });
     
@@ -533,20 +538,22 @@
      *              This event is useful for switching the default icons in a status bar, or other interface elements to ensure
      *              they're still usable.
      */
-    this['_private_appearance_callback'] = $(function(obj) {
-        var p = this.appearance;
-        if(currentAppearance !== p) {
-          this.fireEvent('appearance-change', [p]);
-        }
-        currentAppearance = p;
-      }.bind(this), ['v',['@']]);
+    if(version > 13) {
+      this['_private_appearance_callback'] = $(function(obj) {
+          var p = this.appearance;
+          if(currentAppearance !== p) {
+            this.fireEvent('appearance-change', [p]);
+          }
+          currentAppearance = p;
+        }.bind(this), ['v',['@']]);
 
-    var currentAppearance = this.appearance;
-    $.NSDistributedNotificationCenter('defaultCenter')(
-      'addObserverForName',$("AppleInterfaceThemeChangedNotification"),
-      'object', null, 'queue', $.NSOperationQueue('mainQueue'),
-      'usingBlock', this['_private_appearance_callback']
-    );
+      var currentAppearance = this.appearance;
+      $.NSDistributedNotificationCenter('defaultCenter')(
+        'addObserverForName',$("AppleInterfaceThemeChangedNotification"),
+        'object', null, 'queue', $.NSOperationQueue('mainQueue'),
+        'usingBlock', this['_private_appearance_callback']
+      );
+    }
 
   }
   global.application = new Application();
