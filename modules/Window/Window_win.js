@@ -95,6 +95,7 @@ module.exports = (function() {
     this.private.titleTextColor = "auto";
     this.private.type = "Window";
     this.private.canBeFullscreen = true;
+    this.private.appearance = "normal";
 
     if(!process.background) {
       this.native.ShowInTaskbar = true;
@@ -357,6 +358,12 @@ module.exports = (function() {
         $$.win32.user32.EnableMenuItem(hMenu, $$.win32.user32.SC_MINIMIZE, $$.win32.user32.MF_BYCOMMAND | $$.win32.user32.MF_GRAYED);
       }
     }
+  );
+
+  // Stub for windows
+  util.def(Window.prototype, 'appearance',
+      function() { return this.private.appearance; },
+      function(e) { this.private.appearance = e; }
   );
 
   util.def(Window.prototype, 'closeButton',

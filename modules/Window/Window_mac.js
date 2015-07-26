@@ -27,8 +27,7 @@ module.exports = (function() {
     // Set defaults that must be set prior to instantiation.
     options.width = options.width || 500;
     options.height = options.height || 500;
-    options.styleMask = options.styleMask || ($.NSTitledWindowMask | $.NSClosableWindowMask | $.NSMiniaturizableWindowMask | 
-                                              $.NSResizableWindowMask | $.NSTexturedBackgroundWindowMask);
+    options.styleMask = options.styleMask || ($.NSTitledWindowMask | $.NSClosableWindowMask | $.NSMiniaturizableWindowMask | $.NSResizableWindowMask);
     // Setup how we will respond to OS requests or inquiries about our window state
     // and behavior. This is done so that we can provide consistant behavior across
     // OSX/Windows, and so we can add functionality and proper events.
@@ -131,7 +130,7 @@ module.exports = (function() {
       nativeClassExtended.register();
       this.nativeClass = nativeClassExtended;
     }
-    this.nativeViewClass = this.nativeViewClass || $.NSView;
+    this.nativeViewClass = this.nativeViewClass || ($.NSVisualEffectView ? $.NSVisualEffectView : $.NSView);
     Container.call(this, options);
     // We'll need to first detect if we have an object already initialized, if not we'll do it.
     // this is a work around to support inheritence in JS.
@@ -163,6 +162,7 @@ module.exports = (function() {
     this.private.menu = null;
     this.private.toolbar = null;
     this.private.defaultStyleMask = options.styleMask;
+    this.private.appearance = "normal";
     this.private.type = "Window";
     this.native('setReleasedWhenClosed', $.YES);
     this.native('setExcludedFromWindowsMenu', $.NO);
@@ -213,6 +213,13 @@ module.exports = (function() {
     }
   );
 
+  function invalidateWindow(win) {
+    win.native('setViewsNeedDisplay', $.YES);
+    win.native('flushWindow');
+    win.native('invalidateShadow');
+    win.native('displayIfNeeded');
+  }
+
   /**
    * @member textured
    * @type {boolean}
@@ -240,17 +247,22 @@ module.exports = (function() {
    */
   util.def(Window.prototype, 'textured',
     function() { return this.native('styleMask') & $.NSTexturedBackgroundWindowMask; },
-    function(e) { 
-      if(e) {
-        this.native('setStyleMask', this.native('styleMask') | $.NSTexturedBackgroundWindowMask);
+    function(e) {
+      if(version < 14) {
+        if(e) {
+          this.native('setStyleMask', this.native('styleMask') | $.NSTexturedBackgroundWindowMask);
+        } else {
+          this.native('setStyleMask', this.native('styleMask') & (~$.NSTexturedBackgroundWindowMask));
+        }
       } else {
-        this.native('setStyleMask', this.native('styleMask') & (~$.NSTexturedBackgroundWindowMask));
+        if(e) {
+          this.native('setStyleMask', this.native('styleMask') | $.NSFullSizeContentViewWindowMask);
+        } else {
+          this.native('setStyleMask', this.native('styleMask') & ~$.NSFullSizeContentViewWindowMask);
+        }
+        this.native('setTitlebarAppearsTransparent', e ? $.YES : $.NO);
       }
-      setTimeout(function() {
-        this.native('setViewsNeedDisplay', $.YES);
-        this.native('contentView')('setNeedsDisplay', $.YES);
-        this.native('flushWindow');
-      }.bind(this),10);
+      setTimeout(invalidateWindow.bind(this, this),10);
     }
   );
 
@@ -564,51 +576,39 @@ module.exports = (function() {
     }
   );
 
-  util.def(Window.prototype, 'titleTransparent',
-    function() {
-      if(version < 14) {
-        return false;
-      } else {
-        return this.native('titlebarAppearsTransparent') === $.YES;
-      }
-    },
-    function(e) {
-      if(version < 14) {
-        console.log('Warning window.titleTransparent (a private property) is not available on this platform.');
-      } else {
-        this.native('setTitlebarAppearsTransparent', e ? $.YES : $.NO);
-      }
-    }
-  );
-
+  /**
+   * @member appearance
+   * @memberof Window
+   * @type string
+   * @description The appearance value changes the coloration, blur or other effects used by the native operating
+   *              system.  Currently this can be "normal", "dark" or "light".  Note this has no effect on functionality
+   *              and is not supported on some operating systems.
+   */ 
   util.def(Window.prototype, 'appearance',
     function() {
       if(version < 14) {
         return "normal";
       } else {
-        return this.private.appearance ? this.private.appearance : "vibrant";
+        return this.private.appearance;
       }
     },
     function(e) {
       if(version < 14) {
         console.log('Warning window.appearance (a private property) is not available on this platform.');
       } else {
-        var appearance = $("NSAppearanceNameAqua");
-        if(e === "vibrant") {
-          appearance = $("NSAppearanceNameAqua");
-        } else if (e === "light") {
-          appearance = $("NSAppearanceNameLightContent");
+        if (e === "light") {
+          appearance = $.NSVisualEffectMaterialLight;
         } else if (e === "dark") {
-          appearance = $("NSAppearanceNameVibrantDark");
-          this.backgroundColor = '#232323';
+          appearance = $.NSVisualEffectMaterialDark;
         } else {
-          appearance = $("NSAppearanceNameVibrantLight");
+          appearance = $.NSVisualEffectMaterialAppearanceBased;
           e = "normal";
         }
         this.private.appearance = e;
-        var a = $.NSAppearance('appearanceNamed', appearance);
-        $.NSAppearance('setCurrentAppearance', a);
-        this.native('setAppearance', a);
+        this.native('contentView')('setMaterial', appearance);
+        this.native('contentView')('setBlendingMode', $.NSVisualEffectBlendingModeBehindWindow);
+        this.native('setStyleMask', this.native('styleMask') | $.NSFullSizeContentViewWindowMask);
+        invalidateWindow(this);
       }
     }
   );
