@@ -19,9 +19,18 @@ module.exports = (function() {
   function FileInput(options) {
     options = options || {};
     options.delegates = options.delegates || [];
+    /*options.delegates = options.delegates.concat([
+
+      ['pathControl:willDisplayOpenPanel:', 'v@:@@', 
+        function() {
+          setTimeout(function() { this.fireEvent('select'); }.bind(this), 2000);
+        }.bind(this)]
+    ]);*/
+
     this.nativeClass = this.nativeClass || $.NSPathControl;
     this.nativeViewClass = this.nativeViewClass || $.NSPathControl;
     Control.call(this, options);
+    //this.nativeView('setDelegate',this.nativeView);
     this.native('setPathStyle', 2); // 2 = NSPathStylePopUp
     this.private.allowedFileTypes = null;
   }
