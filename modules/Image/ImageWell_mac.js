@@ -8,7 +8,7 @@ module.exports = (function() {
    * @extends Container
    */
   /**
-   * @new 
+   * @new
    * @memberof ImageWell
    * @description Creates a new imagewell object.
    */
@@ -40,7 +40,7 @@ module.exports = (function() {
       this.private.currentImage = e;
       var img = utilities.makeNSImage(e);
       if(!img) {
-        console.log('Error, image was invalud: ', e);
+        console.log('Error, image was invalid: ', e);
       }
       this.nativeView('setImage',img);
       img('release');
@@ -49,7 +49,7 @@ module.exports = (function() {
   /*
   TODO: Support this on Windows
   Object.defineProperty(ImageWell.prototype, 'alignment', {
-    get:function() { 
+    get:function() {
       var align = this.nativeView('imageAlignment');
       if(align === $.NSImageAlignCenter) return "center";
       else if (align === $.NSImageAlignTop) return "top";
@@ -82,7 +82,7 @@ module.exports = (function() {
    * @default "constrain"
    */
   Object.defineProperty(ImageWell.prototype, 'scale', {
-    get:function() { 
+    get:function() {
       var scaling = this.nativeView('imageScaling');
       if(scaling === $.NSImageScaleProportionallyDown) {
         return "constrain";
@@ -115,4 +115,3 @@ module.exports = (function() {
 
   return ImageWell;
 })();
-
