@@ -603,6 +603,7 @@ module.exports = (function() {
    *              passed back when the callback is ran. 
    */
   WebView.prototype.execute = function(jscode, cb) {
+    this.callbacks = [];
     if(this.useWKWebView) {
       var callback = null;
       if(cb) {
@@ -611,10 +612,14 @@ module.exports = (function() {
             if(result === null) {
               cb(null); 
             } else {
+              if(this.callbacks.indexOf(callback) > -1) {
+                this.callbacks.splice(callback, 1);
+              }
               cb(result('description')('UTF8String').toString()); 
             }
           } 
         }.bind(this), ['v',['@','@']]);
+        this.callbacks.push(callback);
       }
       this.nativeView('evaluateJavaScript', $(jscode.toString()), 'completionHandler', callback);
     } else {

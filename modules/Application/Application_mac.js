@@ -88,7 +88,7 @@
       if(eventWatchInitialized) return eventWatchGlobal;
       eventWatchInitialized = true;
       eventWatchGlobal = $.AXIsProcessTrusted();
-      var blockCallback = $(function(self, arg) {
+      this.blockCallback = $(function(self, arg) {
         if(arg('type') == $.NSKeyDown) {
           var modifierFlags = arg('modifierFlags');
           var alphashift = modifierFlags & $.NSAlphaShiftKeyMask ? true : false,
@@ -114,9 +114,9 @@
         return arg;
       }.bind(this), ['@',['@','@']]);
       if(eventWatchGlobal) {
-        $.NSEvent('addGlobalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', blockCallback);
+        $.NSEvent('addGlobalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', this.blockCallback);
       } else {
-        $.NSEvent('addLocalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', blockCallback);
+        $.NSEvent('addLocalMonitorForEventsMatchingMask', $.NSKeyDownMask, 'handler', this.blockCallback);
       }
       return eventWatchGlobal;
     }.bind(this);

@@ -38,9 +38,9 @@ module.exports = (function() {
     }.bind(this));
     TintMenuItemDelegate.register();
 
-    var menuDelegate = TintMenuItemDelegate('alloc')('init');
+    this.menuDelegate = TintMenuItemDelegate('alloc')('init');
   	this.native = $.NSMenuItem('alloc')('initWithTitle',$(titlestring),'action','click:','keyEquivalent',$(keystring));
-    this.native('setTarget',menuDelegate);
+    this.native('setTarget',this.menuDelegate);
     this.native('setAction','click:');
     if(titlestring) {
       this.title = titlestring;

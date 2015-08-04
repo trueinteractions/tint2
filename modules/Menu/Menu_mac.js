@@ -142,9 +142,9 @@ module.exports = (function() {
     }
     var id = (Math.random()*100000).toString();
     process.bridge.objc.delegates[id] = this;
-    var delegate = tintMenuDelegate('alloc')('initWithJavascriptObject', $(id));
+    this.menuDelegate = tintMenuDelegate('alloc')('initWithJavascriptObject', $(id));
     var $menu = $.NSMenu('alloc')('initWithTitle',$(title));
-    $menu('setDelegate', delegate);
+    $menu('setDelegate', this.menuDelegate);
     var children = [];
     utilities.defEvents(this);
 
