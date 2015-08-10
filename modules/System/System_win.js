@@ -136,23 +136,39 @@ module.exports = (function() {
     }
   }
   System.clipboardClear = function() {
-    $.System.Windows.Clipboard.Clear();
-    $.System.Windows.Clipboard.Flush();
+    try {
+      $.System.Windows.Clipboard.Clear();
+      $.System.Windows.Clipboard.Flush();
+    } catch(e) {
+      return false;
+    }
   }
   System.clipboardContainsType = function(e) {
-    return $.System.Windows.Clipboard.ContainsData(convertFormat(e));
+    try {
+      return $.System.Windows.Clipboard.ContainsData(convertFormat(e));
+    } catch(e) {
+      return false;
+    }
   }
   System.clipboardGet = function(type) {
-    if(type) {
-      return $.System.Windows.Clipboard.GetData(convertFormat(type));
+    try {
+      if(type) {
+        return $.System.Windows.Clipboard.GetData(convertFormat(type));
+      }
+      return $.System.Windows.Clipboard.GetText();
+    } catch(e) {
+      return false;
     }
-    return $.System.Windows.Clipboard.GetText();
   }
   System.clipboardSet = function(data, type) {
-    if(type) {
-      return {release:function() { /* dummy function */ }, native:$.System.Windows.Clipboard.SetData(convertFormat(type), data)};
+    try {
+      if(type) {
+        return {release:function() { /* dummy function */ }, native:$.System.Windows.Clipboard.SetData(convertFormat(type), data)};
+      }
+      return {release:function() { /* dummy function */ }, native:$.System.Windows.Clipboard.SetText(data.toString())};
+    } catch(e) {
+      return false;
     }
-    return {release:function() { /* dummy function */ }, native:$.System.Windows.Clipboard.SetText(data.toString())};
   }
   
   Object.defineProperty(System, 'home', {

@@ -247,18 +247,21 @@ module.exports = (function() {
   /**
    * @method clipboardClear
    * @memberof System
+   * @return {boolean} Whether the clipboard clear was successful or not.
    * @description Clears the clipboards data.
    * @static
    */
   System.clipboardClear = function() {
     lazyInitPasteboard();
     NSPasteboard('clearContents');
+    return true;
   }
   /**
    * @method clipboardContainsType
    * @memberof System
    * @param {string} datatype The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Returns true or false if the type specified is on the clipboard.
+   * @return {boolean} Whether the clipboard contains the type specified.
    * @static
    */
   System.clipboardContainsType = function(e) {
@@ -273,7 +276,7 @@ module.exports = (function() {
    * @param {string} datatype The type to search for data, 'text', 'image', 'rtf', 'html', 'video', 'audio'
    * @description Gets the clipboard data, for text data a string is returned, for binary data a Buffer object is.
    *              In addition, this may return native objects as fully formed javascript objects depending on the type.
-   * @return {Buffer} A node Buffer object with the requested data.
+   * @return {Buffer} A node Buffer object with the requested data or false if the operation was unsuccessful.
    * @static
    */
   System.clipboardGet = function(type) {
@@ -294,7 +297,8 @@ module.exports = (function() {
    * @returns {Object} An object with one function, "release" which releases the data back to memory once
    *                   it should no longer be available in the clipboard.  IMPORTANT: Data placed in the
    *                   clipboard is not automatically memory managed on some platforms, ensure you release
-   *                   data before setting new data on the clipboard as a precautionary measure.
+   *                   data before setting new data on the clipboard as a precautionary measure. Note if an
+   *                   error occurs this operation returns false.
    * @static
    */
   System.clipboardSet = function(data, type) {
