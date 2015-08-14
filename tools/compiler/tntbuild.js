@@ -186,9 +186,10 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
               {
                 var src = path.normalize(b.absin);
                 var dst = path.normalize(b.absout);
-                //console.log(' -- obsfucating: ' + src.toString());
-                fs.writeFileSync(dst, UglifyJS.minify(fs.readFileSync(src.toString()).toString(), 
-                  {mangle:true, fromString:true}).code);
+                var data = fs.readFileSync(src.toString(), {encoding:'utf8'}).toString('utf8');
+                // uglify chokes on beginning tabs in code.
+                data = data.replace(/\n\t/g,'\n  ');
+                fs.writeFileSync(dst, UglifyJS.minify(data, {mangle:true, fromString:true}).code);
               } else {
                 $tint.copy(b.absin,b.absout);
               }
