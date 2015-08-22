@@ -1727,7 +1727,16 @@ namespace IEWebBrowserFix {
     System::String^ fileName = System::IO::Path::GetFileName(process->MainModule->FileName);
 
     SetBrowserFeatureControlKey(perms, "FEATURE_96DPI_PIXEL", fileName, 1); // enable high-dpi support.
-    SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 0x0000); // turn off compatibility mode.
+    System::Version^ version = System::Environment::OSVersion->Version;
+    if(version->Major < 6) {
+      SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 0x0000); // turn off compatibility mode.
+    } else {
+      // turn off compatibility mode by explicitly requesting IE11.
+      // using 0x00000 doesnt work on windows 10, and IE11 is the fallback and wont
+      // be continued so its safe to hard code this version for now, long term we need
+      // to begin moving to XAML apps and WebView control to take advantage of htmledge.
+      SetBrowserFeatureControlKey(perms, "FEATURE_BROWSER_EMULATION", fileName, 11000); 
+    }
     SetBrowserFeatureControlKey(perms, "FEATURE_AJAX_CONNECTIONEVENTS", fileName, 1);
     SetBrowserFeatureControlKey(perms, "FEATURE_ENABLE_CLIPCHILDREN_OPTIMIZATION", fileName, 1);
     SetBrowserFeatureControlKey(perms, "FEATURE_GPU_RENDERING", fileName, 1); // use GPU rendering

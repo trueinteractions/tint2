@@ -15,17 +15,17 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ var count = 0;
+   var count = 0;
   application.exitAfterWindowsClose = false;
   var win = new Window();
   win.visible = true;
   var buttonNormal = new Button();
   buttonNormal.title = "Hello";
   buttonNormal.addEventListener('mousedown', function() {
-    /* @hidden */ count++;
+     count++;
   });
   buttonNormal.addEventListener('mouseup', function() {
-    /* @hidden */ $utils.clickAtControl(buttonToggle);
+     $utils.clickAtControl(buttonToggle);
   });
   win.appendChild(buttonNormal);
 
@@ -42,8 +42,8 @@ function run($utils) {
   buttonToggle.addEventListener('mouseup', function() {
     $utils.assert(buttonToggle.state == true);
     buttonToggle.title = buttonToggle.state == false ? "Off" : "On";
-    /* @hidden */ count++;
-    /* @hidden */ $utils.clickAtControl(buttonRadio);
+     count++;
+     $utils.clickAtControl(buttonRadio);
   });
   win.appendChild(buttonToggle);
   buttonToggle.top = buttonNormal;
@@ -53,48 +53,48 @@ function run($utils) {
   buttonRadio.type = "radio";
   buttonRadio.state = false;
   buttonRadio.addEventListener('mousedown', function() {
-    /* @hidden */ count++;
+     count++;
   });
   buttonRadio.addEventListener('mouseup', function() {
     buttonRadio1.state = false;
     buttonRadio.state = true;
-    /* @hidden */ $utils.clickAtControl(buttonRadio1);
+     $utils.clickAtControl(buttonRadio1);
   });
   win.appendChild(buttonRadio);
   buttonRadio.top = buttonToggle;
+  buttonRadio.left = 0;
 
   var buttonRadio1 = new Button();
   buttonRadio1.title = 'Radio Box 2 (Selected)';
   buttonRadio1.type = 'radio';
   buttonRadio1.state = 'true';
-
   buttonRadio1.addEventListener('mousedown', function() {
-    /* @hidden */ count++;
-    /* @hidden */ $utils.assert(buttonRadio.title == "Radio Box 1");
-    /* @hidden */ $utils.assert(buttonRadio.type == "radio");
-    /* @hidden */ $utils.assert(buttonRadio.state == true, 'buttonRadio.state should equal true, instead: ',buttonRadio.state);
-    /* @hidden */ $utils.assert(buttonRadio1.title == "Radio Box 2 (Selected)");
-    /* @hidden */ $utils.assert(buttonRadio1.type == "radio");
-    /* @hidden */ $utils.assert(buttonRadio1.state == false);
-    /* @hidden */ $utils.assert(buttonToggle.title == "On");
-    /* @hidden */ $utils.assert(buttonToggle.type == "toggle");
-    /* @hidden */ $utils.assert(buttonToggle.state == true);
-    /* @hidden */ $utils.assert(buttonNormal.title == "Hello");
-    /* @hidden */ $utils.assert(buttonNormal.type == "normal");
-    /* @hidden */ $utils.assert(count == 4);
+     count++;
+     $utils.assert(buttonRadio.title == "Radio Box 1");
+     $utils.assert(buttonRadio.type == "radio");
+     $utils.assert(buttonRadio.state == true, 'buttonRadio.state should equal true, instead: ',buttonRadio.state);
+     $utils.assert(buttonRadio1.title == "Radio Box 2 (Selected)");
+     $utils.assert(buttonRadio1.type == "radio");
+     $utils.assert(buttonRadio1.state == false);
+     $utils.assert(buttonToggle.title == "On");
+     $utils.assert(buttonToggle.type == "toggle");
+     $utils.assert(buttonToggle.state == true);
+     $utils.assert(buttonNormal.title == "Hello");
+     $utils.assert(buttonNormal.type == "normal");
+     $utils.assert(count == 4);
     buttonRadio1.state = true;
     buttonRadio.state = false;
-    /* @hidden */ $utils.assert(buttonRadio1.state == true);
-    /* @hidden */ $utils.assert(buttonRadio.state == false);
-    /* @hidden */ win.destroy();
-    /* @hidden */ $utils.ok();
+     $utils.assert(buttonRadio1.state == true);
+     $utils.assert(buttonRadio.state == false);
+     win.destroy();
+     $utils.ok();
   });
   win.appendChild(buttonRadio1);
-  buttonRadio1.left = buttonRadio;
-  buttonRadio1.middle = buttonRadio;
+  buttonRadio1.left = 0;
+  buttonRadio1.top = buttonRadio;
 
 
-  /* @hidden */ setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 1000);
+   setTimeout(function() { $utils.clickAtControl(buttonNormal); }, 1000);
 }
 
 /**
