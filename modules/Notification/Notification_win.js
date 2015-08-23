@@ -85,16 +85,16 @@ module.exports = (function() {
       if(global.application.icon) {
         img = utils.makeImage(application.icon);
       } else {
-        img = utils.makeImage('info');
+        img = utils.makeImage('application');
       }
       img.Stretch = $.System.Windows.Media.Stretch.UniformToFill;
-      img.Width = 50;
-      img.Height = 50;
+      img.Width = 40;
+      img.Height = 40;
       w.Content.Children.Add(img);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', img, 'Top', 1.0, -5);
-      w.Content.AddLayoutConstraint(img, 'Height', '=', img, null, null, 50);
-      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', img, 'Left', 1.0, 0);
-      w.Content.AddLayoutConstraint(img, 'Right', '=', img, 'Left', 1.0, 50);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', img, 'Top', 1.0, -12.5);
+      w.Content.AddLayoutConstraint(img, 'Height', '=', img, null, null, 40);
+      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', img, 'Left', 1.0, -10);
+      w.Content.AddLayoutConstraint(img, 'Right', '=', img, 'Left', 1.0, 40);
 
       var mouseDownSecond = function() {
         this.fireEvent('click',['button']);
@@ -105,32 +105,39 @@ module.exports = (function() {
       btn.addEventListener('PreviewMouseDown', mouseDownSecond);
       callbacks.push(mouseDownSecond);
       btn.Content = new $.System.Windows.Controls.StackPanel();
+      btn.BorderThickness = new $.System.Windows.Thickness(0);
       var label = new $.System.Windows.Controls.Label();
       label.Content = actionbuttontitle === "" ? "Dismiss" : actionbuttontitle;
-      label.Width = 40;
+      label.Width = 50;
 
       btn.Content.Children.Add(label);
       w.Content.Children.Add(btn);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', btn, 'Top', 1.0, -5);
-      w.Content.AddLayoutConstraint(w.Content, 'Bottom', '=', btn, 'Bottom', 1.0, 0);
-      w.Content.AddLayoutConstraint(btn, 'Left', '=', btn, 'Right', 1.0, -50);
-      w.Content.AddLayoutConstraint(w.Content, 'Right', '=', btn, 'Right', 1.0, 0);
-      btn.BorderBrush = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Colors.Gray);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', btn, 'Top', 1.0, 1);
+      w.Content.AddLayoutConstraint(w.Content, 'Bottom', '=', btn, 'Bottom', 1.0, -1);
+      w.Content.AddLayoutConstraint(btn, 'Left', '=', btn, 'Right', 1.0, -60);
+      w.Content.AddLayoutConstraint(w.Content, 'Right', '=', btn, 'Right', 1.0, -1);
+      btn.Background = new $.System.Windows.Media.SolidColorBrush($.System.Windows.Media.Color.FromArgb(
+        $.System.Convert.ToByte(Math.round(0.05*255)),
+        $.System.Convert.ToByte(Math.round(0)),
+        $.System.Convert.ToByte(Math.round(0)),
+        $.System.Convert.ToByte(Math.round(0))
+      ));
 
       var text = new $.System.Windows.Controls.TextBlock();
       text.Text = titlestring;
       text.FontSize = text.FontSize * 1.1;
       text.FontWeight = $.System.Windows.FontWeight.FromOpenTypeWeight(600);
-      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text, 'Left', 1.0, -55);
-      w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text, 'Right', 1.0, 60);
-      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -5);
+      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text, 'Left', 1.0, -60);
+      w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text, 'Right', 1.0, 75);
+      w.Content.AddLayoutConstraint(w.Content, 'Top', '=', text, 'Top', 1.0, -8);
+
       w.Content.Children.Add(text);
 
       var text2 = new $.System.Windows.Controls.TextBlock();
       text2.TextWrapping = $.System.Windows.TextWrapping.Wrap;
       text2.Text = textstring;
       text2.Width = 225;
-      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text2, 'Left', 1.0, -55);
+      w.Content.AddLayoutConstraint(w.Content, 'Left', '=', text2, 'Left', 1.0, -60);
       w.Content.AddLayoutConstraint(w.Content, 'Right', '=', text2, 'Right', 1.0, 60);
       w.Content.AddLayoutConstraint(text2, 'Top', '=', text, 'Bottom', 1.0, 0);
       w.Content.Children.Add(text2);
