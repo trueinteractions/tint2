@@ -14,12 +14,14 @@ module.exports = (function() {
    */
   function ImageWell(options) {
     options = options || {};
+    options.enableDrawing = true;
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSImageView;
     this.nativeViewClass = this.nativeViewClass || $.NSImageView;
     Container.call(this, options);
     this.native('setEditable', $.YES);
-    this.native('setImageAlignment',$.NSImageAlignCenter);
+    this.native('setImageAlignment', $.NSImageAlignCenter);
+    this.native('setImageFrameStyle', $.NSImageFrameNone);
     this.animates = false;
     this.alignment = "center";
   }
@@ -45,6 +47,11 @@ module.exports = (function() {
       this.nativeView('setImage',img);
       img('release');
     }
+  });
+
+  Object.defineProperty(ImageWell.prototype, 'readonly', {
+    get:function() { return this.nativeView('editable') === $.NO ? true : false; },
+    set:function(e) { this.nativeView('setEditable', e ? $.NO : $.YES); }
   });
   /*
   TODO: Support this on Windows

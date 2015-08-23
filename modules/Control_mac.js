@@ -59,9 +59,6 @@ module.exports = (function() {
     this.fireEvent('mousemove');
     util.callSuperForEvent.apply(this,['mouseMoved', self, cmd, events]);
   }
-
-
-  
   function draggingEntered(self, cmd, sender) {
     /**
      * @event dragenter
@@ -151,7 +148,8 @@ module.exports = (function() {
         events:{}, parent:null, trackingArea:null, needsMouseTracking:0,
         user:{width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
         constraints:{ width:null, height:null, left:null, right:null, top:null, bottom:null, center:null, middle:null },
-        states:{}, options:options
+        states:{}, options:options,
+        borderRadius:[0,0,0,0]
       }
     });
 
@@ -216,10 +214,9 @@ module.exports = (function() {
          * @memberof Control
          * @description Fires when the mouse moves, and only when its moving over the control.
          */
-        ['mouseMoved:','v@:@', mouseMoved.bind(this)]
+        ['mouseMoved:','v@:@', mouseMoved.bind(this)],
       ]);
     }
-
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
     options.delegates.forEach(function(item) { nativeViewExtended.addMethod(item[0],item[1],item[2]); });
     nativeViewExtended.register();
@@ -483,6 +480,40 @@ module.exports = (function() {
       };
     }
   );
+
+  util.def(Control.prototype, 'borderRadius',
+    function() { return this.private.borderRadius.join(' '); },
+    function(e) {
+      if(typeof(e) !== 'string' && typeof(e) !== 'number') {
+        return;
+      }
+      if(typeof(e) === 'number') {
+        e = e.toString();
+      }
+      e = e.replace(/px/g, '');
+      while(e.indexOf('  ') > -1) {
+        e = e.replace(/  /g, ' ');
+      }
+      e = e.split(' ');
+      e.forEach(function(item, ndx) {
+        try {
+          e[ndx] = parseInt(item);
+        } catch (e) {
+          e[ndx] = 0;
+        }
+      });
+      if(e.length === 1) {
+        this.private.borderRadius = [e[0],e[0],e[0],e[0]];
+      } else if (e.length === 2) {
+        this.private.borderRadius = [e[0],e[1],e[0],e[1]];
+      } else if (e.length === 3) {
+        this.private.borderRadius = [e[0],e[1],e[2],e[0]];
+      } else if (e.length >= 4) {
+        this.private.borderRadius = [e[0],e[1],e[2],e[3]];
+      }
+      this.nativeView('setNeedsDisplay', $.YES);
+    }
+  )
 
   /**
    * @member bounds

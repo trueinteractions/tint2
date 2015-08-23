@@ -413,6 +413,17 @@ module.exports = (function() {
       }
     });
   }
+  function callSuper(self, calls) {
+    var prePointer = self.classPointer;
+    // Cast the object to its super type that we hold.
+    // this is necessary to make sure we dont accidently call 
+    // back to ourself incase we're getting this as a KVO subclass
+    self.classPointer = this.nativeViewClass.classPointer;
+    var values = self.super.apply(self, calls);
+    // cast it back.
+    self.classPointer = prePointer;
+    return values;
+  }
   function callSuperForEvent(eventName, self, cmd, events) {
     var prePointer = self.classPointer;
     // Cast the object to its super type that we hold.
@@ -442,7 +453,7 @@ module.exports = (function() {
   baseUtilities.findSuggestedUTIType = findSuggestedUTIType
   baseUtilities.mergeNSArray = mergeNSArray;
   baseUtilities.callSuperForEvent = callSuperForEvent;
-
+  baseUtilities.super = callSuper;
   global.__TINT.Utilities = baseUtilities;
   return baseUtilities;
 })();

@@ -13,10 +13,16 @@ module.exports = (function() {
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Image;
     Container.call(this, options);
     this.scale = "constrain";
+    this.readonly = false;
   }
 
   ImageWell.prototype = Object.create(Container.prototype);
   ImageWell.prototype.constructor = ImageWell;
+
+  Object.defineProperty(ImageWell.prototype, 'readonly', {
+    get:function() { return this.nativeView.AllowDrop === true ? false : true; },
+    set:function(e) { this.nativeView.AllowDrop = e ? false : true; }
+  });
 
   util.makePropertyImageType(ImageWell.prototype, 'image', 'Source');
   util.makePropertyMapType(ImageWell.prototype, 'scale', 'Stretch', {
