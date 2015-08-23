@@ -511,6 +511,10 @@ module.exports = (function() {
       } else if (e.length >= 4) {
         this.private.borderRadius = [e[0],e[1],e[2],e[3]];
       }
+      if(this.nativeView('layer') === null) {
+        this.nativeView('setWantsLayer', $.YES);
+      }
+      this.nativeView('layer')('setCornerRadius', e[0]);
       this.nativeView('setNeedsDisplay', $.YES);
     }
   )

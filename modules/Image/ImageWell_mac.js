@@ -14,7 +14,6 @@ module.exports = (function() {
    */
   function ImageWell(options) {
     options = options || {};
-    options.enableDrawing = true;
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSImageView;
     this.nativeViewClass = this.nativeViewClass || $.NSImageView;
