@@ -481,6 +481,12 @@ module.exports = (function() {
     }
   );
 
+  /**
+   * @member borderRadius
+   * @type number
+   * @memberof Control
+   * @description Sets or gets the border radius of the control. This is in pixels.
+   */
   util.def(Control.prototype, 'borderRadius',
     function() { return this.private.borderRadius.join(' '); },
     function(e) {
