@@ -191,11 +191,11 @@ module.exports = (function() {
           var count = urls('count');
           var result = [];
           for(var i=0; i < count; i++) {
-            result.push(urls('objectAtIndex',i)('absoluteString')('UTF8String').replace('file://',''));
+            result.push(decodeURI(urls('objectAtIndex',i)('absoluteString')('UTF8String').replace('file://','')));
           }
           return result;
         } else {
-          return $dialog('URL')('absoluteString')('UTF8String').replace('file://','');
+          return decodeURI($dialog('URL')('absoluteString')('UTF8String').replace('file://',''));
         }
       }
     });
