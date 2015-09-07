@@ -147,6 +147,10 @@ module.exports = (function() {
       control.native.Margin = new $.System.Windows.Thickness(0);
       this.private.custom = control;
       this.native.Header = control.native;
+      if(textBox.__proto__.constructor.name === 'TextInput' || 
+         textBox.__proto__.constructor.name === 'SearchInput' ) {
+        control.native.Width = 200;
+      }
     }
   });
   return MenuItem;

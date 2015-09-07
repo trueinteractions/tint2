@@ -24,6 +24,13 @@ module.exports = (function() {
 
     this.private.showContextMenu = function() {
       this.private.contextMenu.IsOpen = true;
+      var hwnd = $.System.Windows.PresentationSource.FromVisual(this.private.contextMenu);
+      if(hwnd !== null) {
+        $.TintInterop.WinApi.SetForegroundWindow(hwnd.Handle);
+      }
+    };
+    this.private.hideContextMenu = function() {
+      this.private.contextMenu.IsOpen = false;
     };
   }
 

@@ -7,6 +7,7 @@
 #include <msclr/marshal.h>
 #include <windows.h>
 #include <Dwmapi.h>
+#include <Shellapi.h>
 #include "../AutoLayoutPanel.cpp"
 
 #using <mscorlib.dll>
@@ -177,6 +178,41 @@ System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
 namespace TintInterop {
+
+  public ref class WinApi
+  {
+  public:
+      [DllImport("shell32.Dll", CharSet = CharSet::Unicode)]
+      static bool Shell_NotifyIcon(unsigned int cmd, NOTIFYICONDATA% data);
+
+      [DllImport("USER32.DLL", EntryPoint = "CreateWindowExW", SetLastError = true)]
+      static IntPtr CreateWindowEx(int dwExStyle, LPWSTR lpClassName,
+          LPWSTR lpWindowName, int dwStyle, int x, int y,
+          int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance,
+          IntPtr lpParam);
+
+      [DllImport("USER32.DLL")]
+      static IntPtr DefWindowProc(IntPtr hWnd, unsigned int msg, IntPtr wparam, IntPtr lparam);
+
+      [DllImport("User32.Dll", EntryPoint = "RegisterWindowMessageW")]
+      static unsigned int RegisterWindowMessage(LPWSTR lpString);
+
+      [DllImport("USER32.DLL", SetLastError = true)]
+      static bool DestroyWindow(IntPtr hWnd);
+
+      [DllImport("USER32.DLL")]
+      static bool SetForegroundWindow(IntPtr hWnd);
+
+      [DllImport("user32.dll", CharSet = CharSet::Auto, ExactSpelling = true)]
+      static int GetDoubleClickTime();
+
+      [DllImport("USER32.DLL", SetLastError = true)]
+      static bool GetPhysicalCursorPos(Point% lpPoint);
+
+      [DllImport("USER32.DLL", SetLastError = true)]
+      static bool GetCursorPos(Point% lpPoint);
+  };
+
   public ref class TintDataGridColumn : System::Windows::Controls::DataGridBoundColumn
   {
   protected:
