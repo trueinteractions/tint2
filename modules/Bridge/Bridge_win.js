@@ -49,6 +49,14 @@ function unwrap(a) {
     return a.pointer;
   } else if(a && a.classPointer) {
     return a.classPointer;
+  } else if (!Buffer.isBuffer(a) && typeof(a) === 'object') {
+    var pn = {};
+    for(var key in a) {
+      if(a[key]) {
+        pn[key] = unwrap(a[key]);
+      }
+    }
+    return pn;
   } else {
     return a;
   }
@@ -94,7 +102,7 @@ function typeSignature(memberName, args) {
     } else {
       signature += 'Object';
     }
-    unwrappedArgs.push(unwrap(args[i]));
+    unwrappedArgs.push(unwrapValues(args[i]));
   }
   return {signature:signature, unwrappedArgs:unwrappedArgs};
 }
@@ -232,7 +240,7 @@ function createProperty(target, typeNative, memberName, static) {
           dotnet.getStaticPropertyObject(this.classPointer, memberName) : 
           dotnet.getPropertyObject(this.pointer, memberName);
       }
-      dotnet.setProperty(this.props[memberName], static ? null : this.pointer, unwrap(e));
+      dotnet.setProperty(this.props[memberName], static ? null : this.pointer, unwrapValues(e));
     }
   });
 }
@@ -278,7 +286,7 @@ function createClass(typeNative, typeName) {
   var CLRClassInstance = function() {
     var args = [this.classPointer];
     for(var i=0; i < arguments.length; i++) {
-      args.push(unwrap(arguments[i]));
+      args.push(unwrapValues(arguments[i]));
     }
     this.pointer = dotnet.execNew.apply(null,args);
   };

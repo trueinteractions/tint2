@@ -228,8 +228,7 @@ module.exports = (function() {
    * @description Moves the column specified by fromIndex to the location specified by toIndex.
    */
   Table.prototype.moveColumn = function(ndx, toNdx) {
-    this.native('moveColumn', $.NSIndexSet('indexSetWithIndex',ndx),
-            'toColumn', $.NSIndexSet('indexSetWithIndex',toNdx));
+    this.native('moveColumn', ndx, 'toColumn', toNdx);
   };
 
   /**
@@ -240,8 +239,7 @@ module.exports = (function() {
    * @description Moves the row specified by fromIndex to the location specified by toIndex.
    */
   Table.prototype.moveRow = function(ndx, toNdx) {
-    this.native('moveRowAtIndex', $.NSIndexSet('indexSetWithIndex',ndx),
-            'toIndex', $.NSIndexSet('indexSetWithIndex',toNdx));
+    this.native('moveRowAtIndex', ndx, 'toIndex', toNdx);
   };
 
   /**

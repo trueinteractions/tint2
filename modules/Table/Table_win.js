@@ -15,7 +15,8 @@ module.exports = (function() {
     this.private.spaceX = 1;
     this.private.spaceY = 1;
     this.private.columns = {};
-    this.private.rows = 0;
+    this.private.columnsIndex = {};
+    this.private.rows = [];
     this.private.allowEmptySelection = true;
     this.nativeView.AutoGenerateColumns = false;
     this.alternatingColors = true;
@@ -51,13 +52,17 @@ module.exports = (function() {
   Table.prototype = Object.create(Container.prototype);
   Table.prototype.constructor = Table;
 
+  var columnCount = 0;
   Table.prototype.addColumn = function(name) {
     var column = new $.TintInterop.TintDataGridColumn();
     column.Header = name;
+    column.Binding = new $.System.Windows.Data.Binding(name);
     column.MaxWidth = 2000;
     column.MinWidth = 20;
     this.native.Columns.Add(column);
     this.private.columns[name] = column;
+    column.DisplayIndex = columnCount;
+    columnCount++;
     this.fireEvent('column-added');
     var crFireFunc = this.private.columnResized.bind(this, name); 
     utils.lazyLoadEventListener(this, 'column-resized',
@@ -74,6 +79,7 @@ module.exports = (function() {
   };
 
   Table.prototype.removeColumn = function(name) {
+    assert(amountOfColumns !== 0, 'There are no more columns to be removed.');
     this.nativeView.Columns.RemoveAt(this.nativeView.Columns.IndexOf(this.private.columns[name]));
     this.private.columns[name] = null;
     this.fireEvent('column-removed');
@@ -81,20 +87,25 @@ module.exports = (function() {
 
   Table.prototype.addRow = function(ndx) {
     ndx = ndx || this.numberOfRows;
-    assert(ndx <= this.numberOfRows, 'The passed in index ' + ndx + ' was greater than the number of rows.');
-    var items = this.nativeView.Items;
-    var columnCount = this.nativeView.Columns.Count;
-    for(var i=0; i < columnCount; i++) {
-      var label = new $.System.Windows.Controls.Label();
-      label.Content = '';
-      items.Insert(ndx * columnCount + i, label);
+    assert(ndx <= this.numberOfRows, 
+      'The passed in index ' + ndx + ' was greater than the number of rows.');
+    var itemsRow = {};
+    for(var name in this.private.columns) {
+      if(name) {
+        var label = new $.System.Windows.Controls.Label();
+        label.Content = '';
+        itemsRow[name] = label;
+      }
     }
+    this.private.rows[ndx] = itemsRow;
+    this.nativeView.Items.Insert(ndx, this.private.rows[ndx]);
     this.fireEvent('row-added', [ndx]);
   };
 
   Table.prototype.removeRow = function(ndx) {
     ndx = (typeof(ndx) === "number") ? ndx : this.numberOfRows;
-    assert(ndx < this.numberOfRows, 'The passed in index ' + ndx + ' was greater than the number of rows.');
+    assert(ndx < this.numberOfRows, 
+      'The passed in index ' + ndx + ' was greater than the number of rows.');
     var items = this.nativeView.Items;
     var columnCount = this.nativeView.Columns.Count;
     for(var i=0; i < columnCount; i++) {
@@ -103,30 +114,43 @@ module.exports = (function() {
     this.fireEvent('row-removed',[ndx]);
   };
 
-  Table.prototype.moveColumn = function(ndx, toNdx) { this.nativeView.Columns.Move(ndx, toNdx); };
+  Table.prototype.moveColumn = function(ndx, toNdx) {
+    if(ndx === toNdx) {
+      return;
+    }
+    for(var key in this.private.columns) {
+      if(this.private.columns[key].DisplayIndex === ndx) {
+        this.private.columns[key].DisplayIndex = toNdx;
+        break;
+      }
+    }
+  };
 
   Table.prototype.moveRow = function(ndx, toNdx) {
     if(ndx === toNdx) {
       return;
     }
-    var item = this.nativeView.Items.Item.GetValue(ndx);
-    this.nativeView.RemoveAt(ndx);
-    this.nativeView.Items.InsertAt((ndx < toNdx) ? (toNdx - 1) : toNdx, item);
+    var row = this.private.rows.splice(ndx, 1);
+    this.private.rows.splice(toNdx, row[0]); //(ndx < toNdx) ? (toNdx - 1) : 
+    this.nativeView.Items.RemoveAt(ndx);
+    this.nativeView.Items.Insert(toNdx, row[0]); //(ndx < toNdx) ? (toNdx - 1) : 
   };
 
   Table.prototype.setColumnWidth = function(name,width) {
-    this.private.columns[name].Width = new $.System.Windows.Controls.DataGridLength(width, $.System.Windows.Controls.DataGridLengthUnitType.Pixel);
+    this.private.columns[name].Width = new $.System.Windows.Controls.DataGridLength(width, 
+      $.System.Windows.Controls.DataGridLengthUnitType.Pixel);
   };
 
   Table.prototype.setValueAt = function(name,rowIndex,value) {
-    var ndx = this.nativeView.Columns.Count * rowIndex + this.private.columns[name].DisplayIndex;
     if(typeof(value) === 'string') {
       var label = new $.System.Windows.Controls.Label();
       label.Content = value;
-      this.nativeView.Items.Insert(ndx, label);
+      this.private.rows[rowIndex][name] = label;
     } else {
-      this.nativeView.Items.Insert(ndx, value.nativeView);
+      this.private.rows[rowIndex][name] = value.nativeView;
     }
+    this.nativeView.Items.RemoveAt(rowIndex);
+    this.nativeView.Items.Insert(rowIndex, this.private.rows[rowIndex]);
   };
 
   Object.defineProperty(Table.prototype, 'rowHeightStyle', {
@@ -222,10 +246,7 @@ module.exports = (function() {
   });
 
   Object.defineProperty(Table.prototype, 'numberOfRows', {
-    get:function() {
-      var itemCount =  this.nativeView.Items.Count;
-     return (itemCount === 0) ? 0 : (Math.floor(itemCount / this.nativeView.Columns.Count));
-   }
+    get:function() { return this.nativeView.Items.Count; }
   });
 
   Object.defineProperty(Table.prototype, 'alternatingColors', {

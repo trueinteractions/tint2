@@ -13,6 +13,7 @@
 #using <mscorlib.dll>
 #using <System.dll>
 #using <System.Core.dll>
+#using <System.Xaml.dll>
 #using <WPF/WindowsBase.dll>
 #using <WPF/PresentationCore.dll>
 #using <WPF/PresentationFramework.dll>
@@ -216,15 +217,19 @@ namespace TintInterop {
   public ref class TintDataGridColumn : System::Windows::Controls::DataGridBoundColumn
   {
   protected:
-      virtual FrameworkElement^ GenerateElement(System::Windows::Controls::DataGridCell^ cell, System::Object^ dataItem) override
-      {
-          return (FrameworkElement ^)dataItem;
-      }
+    virtual FrameworkElement^ GenerateElement(System::Windows::Controls::DataGridCell^ cell, System::Object^ dataItem) override
+    {
+      System::String^ name = (System::String^)((System::Windows::Data::Binding^)this->Binding)->Path->Path;
+      System::Collections::Generic::IDictionary<System::String^,System::Object^>^ obj = (System::Collections::Generic::IDictionary<System::String^,System::Object^>^)dataItem;
+      return (FrameworkElement ^)obj->default[name];
+    }
 
-      virtual FrameworkElement^ GenerateEditingElement(System::Windows::Controls::DataGridCell^ cell, System::Object^ dataItem) override
-      {
-          return (FrameworkElement ^)dataItem;
-      }
+    virtual FrameworkElement^ GenerateEditingElement(System::Windows::Controls::DataGridCell^ cell, System::Object^ dataItem) override
+    {
+      System::String^ name = (System::String^)((System::Windows::Data::Binding^)this->Binding)->Path->Path;
+      System::Collections::Generic::IDictionary<System::String^,System::Object^>^ obj = (System::Collections::Generic::IDictionary<System::String^,System::Object^>^)dataItem;
+      return (FrameworkElement ^)obj->default[name];
+    }
   };
 
   public ref class Dwm {
@@ -599,8 +604,9 @@ System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
   {
     Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
     cli::array<System::Object^>^ netarray = gcnew cli::array<System::Object^>(jsarray->Length());
-    for (unsigned int i = 0; i < jsarray->Length(); i++)
-        netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
+    for (unsigned int i = 0; i < jsarray->Length(); i++) {
+      netarray[i] = MarshalV8ToCLR(jsarray->Get(i));
+    }
     return netarray;
   }
   else if (jsdata->IsDate())
@@ -618,7 +624,9 @@ System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
   else if (jsdata->IsNumber())      return jsdata->NumberValue();
   else if (jsdata->IsUndefined() || 
     jsdata->IsNull())               return nullptr;
-  else if (node::Buffer::HasInstance(jsdata) && (v8::Handle<v8::Object>::Cast(jsdata))->Get(NanNew<v8::String>("array"))->BooleanValue()) {
+  else if (node::Buffer::HasInstance(jsdata) && 
+    (v8::Handle<v8::Object>::Cast(jsdata))->Get(NanNew<v8::String>("array"))->BooleanValue()) 
+  {
     Handle<v8::Object> jsbuffer = jsdata->ToObject();
     cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
     if (netbuffer->Length > 0) 
