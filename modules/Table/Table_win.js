@@ -19,6 +19,7 @@ module.exports = (function() {
     this.private.rows = [];
     this.private.allowEmptySelection = true;
     this.nativeView.AutoGenerateColumns = false;
+    this.nativeView.IsReadOnly = true;
     this.alternatingColors = true;
     this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
     this.nativeView.GridLinesVisibility = $.System.Windows.Controls.DataGridGridLinesVisibility.None;
