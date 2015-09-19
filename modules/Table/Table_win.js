@@ -222,23 +222,25 @@ module.exports = (function() {
   Object.defineProperty(Table.prototype, 'selectedRows', {
     get:function() { 
       var selItems = this.nativeView.SelectedItems;
-      var selCount = selItems.Count;
       var selIndexes = [];
-      for(var i=0; i < selCount; i++) {
-        selIndexes.push(selItems.Item.GetValue(i).GetIndex());
+      var enumerator = selItems.GetEnumerator();
+      while(enumerator.MoveNext()) {
+        selIndexes.push(this.nativeView.Items.IndexOf(enumerator.Current));
       }
       return selIndexes; 
     },
     set:function(rows) {
-      this.fireEvent('select');
-      var selItems = this.nativeView.SelectedItems;
-      var selCount = selItems.Count;
-      for(var i=0; i < selCount; i++) {
-        if(rows.indexOf(i) > -1) {
-          selItems.Items.GetValue(i).IsSelected = true;
+      this.nativeView.SelectedItems.Clear();
+      for(var i=0; i < rows.length; i++) {
+        this.nativeView.SelectedItem = this.nativeView.Items.GetItemAt(rows[i]);
+        for(var key in this.private.columns) {
+          if(key && this.private.rows[rows[i]]) {
+            this.nativeView.ScrollIntoView(this.private.rows[rows[i]][key]);
+            this.nativeView.CurrentItem = this.private.rows[rows[i]][key];
+          }
+
         }
       }
-      this.fireEvent('selected');
     }
   });
 
