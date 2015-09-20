@@ -17,20 +17,28 @@ module.exports = (function() {
    * @description Creates a new FileInput control.
    */
   function FileInput(options) {
+    this['_checkInterval'] = null;
+    this['_currentUrl'] = null;
     options = options || {};
     options.delegates = options.delegates || [];
-    /*options.delegates = options.delegates.concat([
-
+    options.delegates = options.delegates.concat([
       ['pathControl:willDisplayOpenPanel:', 'v@:@@', 
-        function() {
-          setTimeout(function() { this.fireEvent('select'); }.bind(this), 2000);
+        function(sender, cmd, pathControl, openPanel) {
+          openPanel('setDelegate', this.nativeView);
+          this['_checkInterval'] = setInterval(function() {
+            var url = this.nativeView('URL');
+            if(this['_currentUrl'] !== url) {
+              this.fireEvent('select');
+              clearInterval(this['_checkInterval']);
+            }
+          }.bind(this), 1000);
         }.bind(this)]
-    ]);*/
+    ]);
 
     this.nativeClass = this.nativeClass || $.NSPathControl;
     this.nativeViewClass = this.nativeViewClass || $.NSPathControl;
     Control.call(this, options);
-    //this.nativeView('setDelegate',this.nativeView);
+    this.nativeView('setDelegate',this.nativeView);
     this.native('setPathStyle', 2); // 2 = NSPathStylePopUp
     this.private.allowedFileTypes = null;
   }
