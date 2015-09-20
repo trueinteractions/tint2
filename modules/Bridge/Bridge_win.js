@@ -49,7 +49,7 @@ function unwrap(a) {
     return a.pointer;
   } else if(a && a.classPointer) {
     return a.classPointer;
-  } else if (!Buffer.isBuffer(a) && typeof(a) === 'object') {
+  } else if (!Buffer.isBuffer(a) && typeof(a) === 'object' && a !== null && a['_expandoObject']) {
     var pn = {};
     for(var key in a) {
       if(a[key]) {

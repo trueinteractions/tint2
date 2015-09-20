@@ -98,6 +98,7 @@ module.exports = (function() {
         itemsRow[name] = label;
       }
     }
+    itemsRow['_expandoObject'] = true;
     this.private.rows[ndx] = itemsRow;
     this.nativeView.Items.Insert(ndx, this.private.rows[ndx]);
     this.fireEvent('row-added', [ndx]);
