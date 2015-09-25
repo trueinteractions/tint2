@@ -162,6 +162,8 @@ module.exports = (function() {
       }
       targetWindow.addEventListener('LocationChanged', updateLocationChange.bind(this));
       targetWindow.addEventListener('SizeChanged',  updateLocationChange.bind(this));
+    } else {
+      this.private.side = 'top';
     }
     updateLocation.call(this);
     this.fireEvent('open');

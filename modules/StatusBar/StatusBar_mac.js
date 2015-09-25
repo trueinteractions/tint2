@@ -39,6 +39,18 @@ module.exports = (function() {
    * @new 
    * @memberof StatusBar
    * @description Creates a new status bar.
+   * @example
+   *  require('Common');
+   *  application.exitAfterWindowsClose = false;
+   *  var webview = new WebView();
+   *  var popOver = new PopOver();
+   *  webview.left = webview.right = webview.top = webview.bottom = 0;
+   *  popOver.appendChild(webview);
+   *  var statusBar = new StatusBar();
+   *  statusBar.image = "./tools/tint.png"
+   *  statusBar.on('click', function() {
+   *    popOver.open(statusBar, 'top');
+   *  });
    */
   function StatusBar() {
     this.private = {events:{},submenu:null,imgOn:null,img:null,custom:null,custommenu:null};
