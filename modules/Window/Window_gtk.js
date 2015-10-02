@@ -2,14 +2,15 @@ module.exports = (function() {
   if(global.__TINT.Window) {
     return global.__TINT.Window;
   }
-  var $ = process.bridge.gobj.gtk;
+  var $ = process.bridge.gobj.Gtk;
 
   function Window(options) {
     options = options || {};
     options.width = options.width || 500;
     options.height = options.height || 500;
-    //this.nativeClass = this.nativeClass || $.System.Windows.Window;
-    //this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
+
+    this.nativeClass = this.nativeClass || $.Window;
+    this.nativeViewClass = this.nativeViewClass || $.Widget;
     //Container.call(this, options);
   }
 

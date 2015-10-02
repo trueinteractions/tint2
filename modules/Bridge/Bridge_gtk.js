@@ -214,7 +214,6 @@ if(!process.bridge) {
 	        case '__methods__':
 	          for (var method_offset in obj[subobj][prop]) {
 	            var method_name = obj[subobj][prop][method_offset];
-	            //debug:console.log(subobj + '.'  + method_name + '() discovered');
 	            //add method handler to object if possible
 	            if (obj[subobj].prototype[method_name] != undefined)
 	              {}//debug:console.warn("[node-gir] " + subobj + " object provides it's own " + method_name + " method. Not replacing existing method. :-(");
@@ -224,7 +223,6 @@ if(!process.bridge) {
 	          break;
 	      }
 	    }
-	    //console.log(subobj, obj[subobj]);
 	  }
 
 	  //keep the loader in the loaded object in case caller wants to reuse the loader
