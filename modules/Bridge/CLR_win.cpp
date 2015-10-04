@@ -169,7 +169,7 @@ typedef enum SHSTOCKICONID
 SHSTDAPI SHGetStockIconInfo(SHSTOCKICONID siid, UINT uFlags, __inout SHSTOCKICONINFO *psii);
 #endif
 
-v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata);
+v8::Local<v8::Value> MarshalCLRToV8(System::Object^ netdata);
 System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception);
 
 
@@ -473,7 +473,6 @@ void wrap_cb(char *data, void *hint) { }
 
 System::String^ stringV82CLR(Handle<v8::String> text)
 {
-  NanEscapableScope();
   v8::String::Utf8Value utf8text(text);
   if (*utf8text)
       return gcnew System::String(*utf8text, 0, utf8text.length(), System::Text::Encoding::UTF8);
@@ -483,52 +482,50 @@ System::String^ stringV82CLR(Handle<v8::String> text)
 
 Handle<v8::String> stringCLR2V8(System::String^ text)
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
   if (text->Length > 0)
   {
-    //const char* str = (const char*)(void*)Marshal::StringToHGlobalAnsi(text);
     marshal_context ^ context = gcnew marshal_context();
     const char* str = context->marshal_as<const char*>(text);
-    v8::Local<v8::String> v8str = NanNew<v8::String>(str);
+    v8::Local<v8::String> v8str = Nan::New<v8::String>(str).ToLocalChecked();
     delete context;
-    //Marshal::FreeHGlobal(IntPtr((void *)str));
-    return NanEscapeScope(v8str);
+    return scope.Escape(v8str);
   }
   else
-    return NanEscapeScope(v8::String::Empty(v8::Isolate::GetCurrent()));
+    return scope.Escape(v8::String::Empty(v8::Isolate::GetCurrent()));
 }
 
 System::String^ exceptionV82stringCLR(v8::Handle<v8::Value> exception)
 {
-  NanEscapableScope();
+  Nan::HandleScope scope;
   if (exception->IsObject())
   {
-	Handle<Value> stack = exception->ToObject()->Get(NanNew<v8::String>("stack"));
+    Handle<Value> stack = exception->ToObject()->Get(Nan::New<v8::String>("stack").ToLocalChecked());
     if (stack->IsString())
       return gcnew System::String(stringV82CLR(stack->ToString()));
   }
   return gcnew System::String(stringV82CLR(Handle<v8::String>::Cast(exception)));
 }
 
-Handle<Value> throwV8Exception(Handle<Value> exception)
+Local<Value> throwV8Exception(Local<Value> exception)
 {
-  NanEscapableScope();
-  NanThrowError(exception);
-  return NanEscapeScope(exception);
+  Nan::HandleScope scope;
+  Nan::ThrowError(exception);
+  return exception;
 }
 
-v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
+v8::Local<v8::Value> MarshalCLRToV8(System::Object^ netdata)
 {
-  NanEscapableScope();
-  v8::Handle<v8::Value> jsdata;
+  Nan::EscapableHandleScope scope;
+  v8::Local<v8::Value> jsdata;
 
   if (netdata == nullptr) {
-	  return NanEscapeScope(v8::Null(v8::Isolate::GetCurrent()));
+	  return Nan::Null();
   }
   System::Type^ type = netdata->GetType();
   if (type == System::String::typeid)         jsdata = stringCLR2V8((System::String^)netdata);
   else if (type == System::Char::typeid)      jsdata = stringCLR2V8(((System::Char^)netdata)->ToString());
-  else if (type == bool::typeid)              jsdata = NanNew<v8::Boolean>((bool)netdata);
+  else if (type == bool::typeid)              jsdata = Nan::New<v8::Boolean>((bool)netdata);
   else if (type == System::Guid::typeid)      jsdata = stringCLR2V8(netdata->ToString());
   else if (type == System::DateTime::typeid)
   {
@@ -543,20 +540,20 @@ v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
     jsdata = v8::Date::New(v8::Isolate::GetCurrent(),(double)value);
   }
   else if (type == System::DateTimeOffset::typeid)  jsdata = stringCLR2V8(netdata->ToString());
-  else if (type == int::typeid)                     jsdata = NanNew<v8::Integer>((int)netdata);
-  else if (type == System::Int64::typeid)           jsdata = NanNew<v8::Number>(((System::IConvertible^)netdata)->ToDouble(nullptr));
-  else if (type == double::typeid)                  jsdata = NanNew<v8::Number>((double)netdata);
-  else if (type == float::typeid)                   jsdata = NanNew<v8::Number>((float)netdata);
+  else if (type == int::typeid)                     jsdata = Nan::New<v8::Integer>((int)netdata);
+  else if (type == System::Int64::typeid)           jsdata = Nan::New<v8::Number>(((System::IConvertible^)netdata)->ToDouble(nullptr));
+  else if (type == double::typeid)                  jsdata = Nan::New<v8::Number>((double)netdata);
+  else if (type == float::typeid)                   jsdata = Nan::New<v8::Number>((float)netdata);
   else if (type == cli::array<byte>::typeid)
   {
     cli::array<byte>^ buffer = (cli::array<byte>^)netdata;
-    v8::Handle<v8::Value> slowBuffer = NanNewBufferHandle(buffer->Length);
+    v8::Local<v8::Value> slowBuffer = Nan::NewBuffer(buffer->Length).ToLocalChecked();
     if (buffer->Length > 0)
     {
       pin_ptr<unsigned char> pinnedBuffer = &buffer[0];
       memcpy(node::Buffer::Data(slowBuffer), pinnedBuffer, buffer->Length);
     }
-    (v8::Handle<v8::Object>::Cast(slowBuffer))->Set(NanNew<v8::String>("array"), NanNew<v8::Boolean>(true));
+    (v8::Handle<v8::Object>::Cast(slowBuffer))->Set(Nan::New<v8::String>("array").ToLocalChecked(), Nan::New<v8::Boolean>(true));
     jsdata = slowBuffer;
   } 
   else {
@@ -565,41 +562,41 @@ v8::Handle<v8::Value> MarshalCLRToV8(System::Object^ netdata)
 #endif
     GCHandle handle = GCHandle::Alloc(netdata);
     void *ptr = GCHandle::ToIntPtr(handle).ToPointer();
-    jsdata = NanNewBufferHandle((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL);
+    jsdata = Nan::NewBuffer((char *)(ptr), sizeof(ptr), gchandle_cleanup, NULL).ToLocalChecked();
     if(type == System::IntPtr::typeid) {
       void *rawptr = ((System::IntPtr ^)netdata)->ToPointer();
-      v8::Handle<v8::Object> bufptr = NanNewBufferHandle((char *)rawptr, sizeof(rawptr), wrap_cb, NULL);
-      (v8::Handle<v8::Object>::Cast(jsdata))->Set(NanNew<v8::String>("rawpointer"), bufptr);
+      v8::Local<v8::Object> bufptr = Nan::NewBuffer((char *)rawptr, sizeof(rawptr), wrap_cb, NULL).ToLocalChecked();
+      (v8::Handle<v8::Object>::Cast(jsdata))->Set(Nan::New<v8::String>("rawpointer").ToLocalChecked(), bufptr);
     }
   }
-  return NanEscapeScope(jsdata);
+  return scope.Escape(jsdata);
 }
 
 Handle<v8::Object> MarshalCLRObjectToV8(System::Object^ netdata)
 {
-  NanEscapableScope();
-  Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
+  Nan::EscapableHandleScope scope;
+  Local<v8::Object> result = Nan::New<v8::Object>();
   System::Type^ type = netdata->GetType();
 
   // Avoid stack overflow due to self-referencing reflection elements
   if (0 == System::String::Compare(type->FullName, "System.Reflection.RuntimeMethodInfo"))
-      return NanEscapeScope(result);
+    return scope.Escape(result);
 
   for each (FieldInfo^ field in type->GetFields(BindingFlags::Public | BindingFlags::Instance))
-      result->Set(stringCLR2V8(field->Name), MarshalCLRToV8(field->GetValue(netdata)));
+    result->Set(stringCLR2V8(field->Name), MarshalCLRToV8(field->GetValue(netdata)));
 
   for each (PropertyInfo^ property in type->GetProperties(BindingFlags::GetProperty | BindingFlags::Public | BindingFlags::Instance))
   {
-      MethodInfo^ getMethod = property->GetGetMethod();
-      if (getMethod != nullptr && getMethod->GetParameters()->Length <= 0)
-          result->Set(stringCLR2V8(property->Name), MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
+    MethodInfo^ getMethod = property->GetGetMethod();
+    if (getMethod != nullptr && getMethod->GetParameters()->Length <= 0)
+      result->Set(stringCLR2V8(property->Name), MarshalCLRToV8(getMethod->Invoke(netdata, nullptr)));
   }
-  return NanEscapeScope(result);
+  return scope.Escape(result);
 }
 
 System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
 {
-  NanEscapableScope();
+  Nan::HandleScope scope;
   if (jsdata->IsArray())
   {
     Handle<v8::Array> jsarray = Handle<v8::Array>::Cast(jsdata);
@@ -625,7 +622,7 @@ System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
   else if (jsdata->IsUndefined() || 
     jsdata->IsNull())               return nullptr;
   else if (node::Buffer::HasInstance(jsdata) && 
-    (v8::Handle<v8::Object>::Cast(jsdata))->Get(NanNew<v8::String>("array"))->BooleanValue()) 
+    (v8::Handle<v8::Object>::Cast(jsdata))->Get(Nan::New<v8::String>("array").ToLocalChecked())->BooleanValue()) 
   {
     Handle<v8::Object> jsbuffer = jsdata->ToObject();
     cli::array<byte>^ netbuffer = gcnew cli::array<byte>((int)node::Buffer::Length(jsbuffer));
@@ -649,11 +646,11 @@ System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
     Handle<v8::Array> propertyNames = jsobject->GetPropertyNames();
     for (unsigned int i = 0; i < propertyNames->Length(); i++)
     {
-        Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
-        v8::String::Utf8Value utf8name(name);
-        System::String^ netname = gcnew System::String(*utf8name);
-        System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
-        netobject->Add(netname, netvalue);
+      Handle<v8::String> name = Handle<v8::String>::Cast(propertyNames->Get(i));
+      v8::String::Utf8Value utf8name(name);
+      System::String^ netname = gcnew System::String(*utf8name);
+      System::Object^ netvalue = MarshalV8ToCLR(jsobject->Get(name));
+      netobject->Add(netname, netvalue);
     }
     return netobject;
   }
@@ -663,30 +660,30 @@ System::Object^ MarshalV8ToCLR(v8::Handle<v8::Value> jsdata)
 
 v8::Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
 {
-  NanEscapableScope();
-  Handle<v8::Object> result;
-  Handle<v8::String> message;
-  Handle<v8::String> name;
+  Nan::EscapableHandleScope scope;
+  Local<v8::Object> result;
+  Local<v8::String> message;
+  Local<v8::String> name;
 
   if (exception == nullptr)
   {
-    result = v8::Object::New(v8::Isolate::GetCurrent());
-    message = NanNew<v8::String>("Unrecognized exception thrown by CLR.");
-    name = NanNew<v8::String>("InternalException");
+    result = Nan::New<v8::Object>();
+    message = Nan::New<v8::String>("Unrecognized exception thrown by CLR.").ToLocalChecked();
+    name = Nan::New<v8::String>("InternalException").ToLocalChecked();
   }
   else
   {
     // Remove AggregateException wrapper from around singleton InnerExceptions
     if (System::AggregateException::typeid->IsAssignableFrom(exception->GetType()))
     {
-        System::AggregateException^ aggregate = (System::AggregateException^)exception;
-        if (aggregate->InnerExceptions->Count == 1)
-            exception = aggregate->InnerExceptions[0];
+      System::AggregateException^ aggregate = (System::AggregateException^)exception;
+      if(aggregate->InnerExceptions->Count == 1)
+        exception = aggregate->InnerExceptions[0];
     }
     else if (System::Reflection::TargetInvocationException::typeid->IsAssignableFrom(exception->GetType())
-        && exception->InnerException != nullptr)
+      && exception->InnerException != nullptr)
     {
-        exception = exception->InnerException;
+      exception = exception->InnerException;
     }
 
     result = MarshalCLRObjectToV8(exception);
@@ -697,12 +694,12 @@ v8::Handle<v8::Value> MarshalCLRExceptionToV8(System::Exception^ exception)
   // Construct an error that is just used for the prototype - not verify efficient
   // but 'typeof Error' should work in JavaScript
   result->SetPrototype(v8::Exception::Error( message));
-  result->Set(NanNew<v8::String>("message"), message);
+  result->Set(Nan::New<v8::String>("message").ToLocalChecked(), message);
   
   // Recording the actual type - 'name' seems to be the common used property
-  result->Set(NanNew<v8::String>("name"), name);
+  result->Set(Nan::New<v8::String>("name").ToLocalChecked(), name);
 
-  return NanEscapeScope(result);
+  return scope.Escape(result);
 }
 
 static int countFound = 0;
@@ -728,14 +725,14 @@ public:
     delete cppobject;
   }
   void SetCallback(v8::Local<v8::Function> cb) {
-    callback = new NanCallback(cb);
+    callback = new Nan::Callback(cb);
   }
   void *GetReference() {
     return cppobject;
   }
   void PassThru(... cli::array<System::Object^>^ args) {
-    NanScope();
-    std::vector<v8::Handle<v8::Value>> argv;
+    Nan::HandleScope scope;
+    std::vector<v8::Local<v8::Value>> argv;
     v8::TryCatch try_catch;
 
     for(int i=0; i < args->Length; i++) 
@@ -782,8 +779,8 @@ public:
   }
 
   void EventHandler(System::Object^ sender, System::EventArgs^ e) {
-    NanScope();
-    v8::Handle<v8::Value> argv[2];
+    Nan::HandleScope scope;
+    v8::Local<v8::Value> argv[2];
 
     argv[0] = MarshalCLRToV8(sender);
     argv[1] = MarshalCLRToV8(e);
@@ -815,7 +812,7 @@ private:
   GCHandle handle;
   uv_loop_t *loop;
   uv_async_t *async;
-  NanCallback *callback;
+  Nan::Callback *callback;
   gcroot<CLREventHandler ^> * cppobject;
   int id;
 };
@@ -834,14 +831,13 @@ class CLR {
   CLR() { }
 
 public:
-// deprecated
-static NAN_METHOD(CreateClass) {
-    NanScope();
+  // deprecated
+  static NAN_METHOD(CreateClass) {
     try {
-      System::String^ name = stringV82CLR(args[0]->ToString());
-      System::Type^ base = (System::Type ^)MarshalV8ToCLR(args[1]);
-      cli::array<System::Object^>^ interfaces = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[2]);
-      cli::array<System::Object^>^ abstracts = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[3]);
+      System::String^ name = stringV82CLR(info[0]->ToString());
+      System::Type^ base = (System::Type ^)MarshalV8ToCLR(info[1]);
+      cli::array<System::Object^>^ interfaces = (cli::array<System::Object ^>^)MarshalV8ToCLR(info[2]);
+      cli::array<System::Object^>^ abstracts = (cli::array<System::Object ^>^)MarshalV8ToCLR(info[3]);
 
       System::AppDomain^ domain = System::AppDomain::CurrentDomain;
       AssemblyName^ aName = gcnew AssemblyName(name);
@@ -853,27 +849,26 @@ static NAN_METHOD(CreateClass) {
                                               TypeAttributes::AutoLayout | 
                                               TypeAttributes::AutoClass, 
                                               base);
-      NanReturnValue(MarshalCLRToV8(tb));
+      info.GetReturnValue().Set(MarshalCLRToV8(tb));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
   // deprecated
   static NAN_METHOD(AddConstructor) {
-    NanScope();
     try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ accessibility = stringV82CLR(args[1]->ToString());
-      bool defaultConst = ((System::Boolean ^)MarshalV8ToCLR(args[2]))->CompareTo(true);
-      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(args[3]);
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[4]);
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(info[0]);
+      System::String^ accessibility = stringV82CLR(info[1]->ToString());
+      bool defaultConst = ((System::Boolean ^)MarshalV8ToCLR(info[2]))->CompareTo(true);
+      cli::array<System::Type ^>^ types = (cli::array<System::Type ^>^)MarshalV8ToCLR(info[3]);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(info[4]);
 
       CLREventHandler ^handle = gcnew CLREventHandler();
       handle->SetCallback(callback);
 
-
       MethodAttributes attr = MethodAttributes::Public;
-      if(accessibility == "private") attr = MethodAttributes::Private;
+      if(accessibility == "private") 
+        attr = MethodAttributes::Private;
 
       ConstructorBuilder^ ctor0;
 
@@ -898,27 +893,26 @@ static NAN_METHOD(CreateClass) {
       // Return back.
       il->Emit(OpCodes::Ret);
 
-      NanReturnUndefined();
+      info.GetReturnValue().Set(Nan::Undefined());
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
   // deprecated
   static NAN_METHOD(AddMethodToClass) {
-    NanScope();
     try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ name = stringV82CLR(args[1]->ToString());
-      System::String^ accessibility = stringV82CLR(args[2]->ToString());
-      bool staticDef = ((bool)MarshalV8ToCLR(args[3]));
-      bool overrideDef = ((bool)MarshalV8ToCLR(args[4]));
-      System::Type^ rettype = (System::Type ^)MarshalV8ToCLR(args[5]);
-      cli::array<System::Object ^>^ objects = (cli::array<System::Object ^>^)MarshalV8ToCLR(args[6]);
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(info[0]);
+      System::String^ name = stringV82CLR(info[1]->ToString());
+      System::String^ accessibility = stringV82CLR(info[2]->ToString());
+      bool staticDef = ((bool)MarshalV8ToCLR(info[3]));
+      bool overrideDef = ((bool)MarshalV8ToCLR(info[4]));
+      System::Type^ rettype = (System::Type ^)MarshalV8ToCLR(info[5]);
+      cli::array<System::Object ^>^ objects = (cli::array<System::Object ^>^)MarshalV8ToCLR(info[6]);
       cli::array<System::Type ^>^ types = gcnew cli::array<System::Type ^>(objects->Length);
       for(int i=0; i < objects->Length; i++) {
         types[i] = (System::Type ^)objects[i];
       }
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[7]);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(info[7]);
 
       CLREventHandler ^handle = gcnew CLREventHandler();
       handle->SetCallback(callback);
@@ -981,23 +975,20 @@ static NAN_METHOD(CreateClass) {
       if(overrideDef && info != nullptr) {
         tb->DefineMethodOverride(m0,info);
       }
-
-      NanReturnUndefined();
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
   // deprecated
   static NAN_METHOD(AddPropertyToClass) {
-    NanScope();
     try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ name = stringV82CLR(args[1]->ToString());
-      System::String^ accessibility = stringV82CLR(args[2]->ToString());
-      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
-      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
-      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
-      System::Object ^value = MarshalV8ToCLR(args[6]);
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(info[0]);
+      System::String^ name = stringV82CLR(info[1]->ToString());
+      System::String^ accessibility = stringV82CLR(info[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(info[3]))->CompareTo(true);
+      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(info[4]))->CompareTo(true);
+      System::Type^ propType = (System::Type^)MarshalV8ToCLR(info[5]);
+      System::Object ^value = MarshalV8ToCLR(info[6]);
 
       FieldBuilder^ fieldBuilder = tb->DefineField("_" + name, propType, FieldAttributes::Private);
 
@@ -1035,22 +1026,21 @@ static NAN_METHOD(CreateClass) {
       propertyBuilder->SetGetMethod(getPropMthdBldr);
       propertyBuilder->SetSetMethod(setPropMthdBldr);
 
-      NanReturnUndefined();
+      info.GetReturnValue().Set(Nan::Undefined());
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
   // deprecated
   static NAN_METHOD(AddFieldToClass) {
-    NanScope();
     try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
-      System::String^ name = stringV82CLR(args[1]->ToString());
-      System::String^ accessibility = stringV82CLR(args[2]->ToString());
-      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(args[3]))->CompareTo(true);
-      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(args[4]))->CompareTo(true);
-      System::Type^ propType = (System::Type^)MarshalV8ToCLR(args[5]);
-      System::Object ^value = MarshalV8ToCLR(args[6]);
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(info[0]);
+      System::String^ name = stringV82CLR(info[1]->ToString());
+      System::String^ accessibility = stringV82CLR(info[2]->ToString());
+      bool staticDef = ((System::Boolean ^)MarshalV8ToCLR(info[3]))->CompareTo(true);
+      bool readOnly = ((System::Boolean ^)MarshalV8ToCLR(info[4]))->CompareTo(true);
+      System::Type^ propType = (System::Type^)MarshalV8ToCLR(info[5]);
+      System::Object ^value = MarshalV8ToCLR(info[6]);
 
       FieldAttributes attr = FieldAttributes::Public;
       if(accessibility == "private") attr = FieldAttributes::Private;
@@ -1058,73 +1048,66 @@ static NAN_METHOD(CreateClass) {
       if(staticDef) attr = attr | FieldAttributes::Static;
       FieldBuilder^ fieldBuilder = tb->DefineField(name, propType, attr);
       
-      NanReturnUndefined();
+      info.GetReturnValue().Set(Nan::Undefined());
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
   // deprecated
   static NAN_METHOD(RegisterClass) {
-    NanScope();
     try {
-      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(args[0]);
+      TypeBuilder^ tb = (TypeBuilder ^)MarshalV8ToCLR(info[0]);
       System::Type^ t = tb->CreateType();
-      NanReturnValue(MarshalCLRToV8(t));
+      info.GetReturnValue().Set(MarshalCLRToV8(t));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
 
 #ifdef GC_DEBUG
   static NAN_METHOD(GetCppClassCount) {
-    NanScope();
-    NanReturnValue(NanNew<v8::Number>(CppClassCount));
+    info.GetReturnValue().Set(Nan::New<v8::Number>(CppClassCount));
   }
   static NAN_METHOD(GetCppCollectCount) {
-    NanScope();
-    NanReturnValue(NanNew<v8::Number>(CppCollectCount));
+    info.GetReturnValue().Set(Nan::New<v8::Number>(CppCollectCount));
   }
 
 #endif
 
   static NAN_METHOD(GetReferencedAssemblies) {
-    NanScope();
     try {
       array<System::Reflection::AssemblyName^>^ assemblies = System::Reflection::Assembly::GetExecutingAssembly()->GetReferencedAssemblies();
-      NanReturnValue(MarshalCLRToV8(assemblies));
+      info.GetReturnValue().Set(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
-		  NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+		  info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(GetLoadedAssemblies) {
-    NanScope();
     try {
       array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
-      NanReturnValue(MarshalCLRToV8(assemblies));
+      info.GetReturnValue().Set(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(LoadAssemblyFromMemory) {
-    NanScope();
     try {
-      System::String^ assemblyName = stringV82CLR(args[0]->ToString());
+      System::String^ assemblyName = stringV82CLR(info[0]->ToString());
       System::Reflection::Assembly^ assembly = System::Reflection::Assembly::Load(assemblyName);
       delete assemblyName;
-      NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
+      info.GetReturnValue().Set(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   /** Load an Execution of DOTNET CLR **/
   static NAN_METHOD(LoadAssembly) {
-    NanScope();
     try {
-      System::String^ userpath = stringV82CLR(args[0]->ToString());
+      System::String^ userpath = stringV82CLR(info[0]->ToString());
 
       System::String^ framworkRegPath = "Software\\Microsoft\\.NetFramework";
       Microsoft::Win32::RegistryKey^ netFramework = Microsoft::Win32::Registry::LocalMachine;
@@ -1150,121 +1133,116 @@ static NAN_METHOD(CreateClass) {
       delete netFramework;
       delete framworkRegPath;
       delete userpath;
-	    NanReturnValue(MarshalCLRToV8(assembly->GetTypes()));
+	    info.GetReturnValue().Set(MarshalCLRToV8(assembly->GetTypes()));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(GetCLRType) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      NanReturnValue(MarshalCLRToV8(target->GetType()));
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      info.GetReturnValue().Set(MarshalCLRToV8(target->GetType()));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
   static NAN_METHOD(GetStaticMemberTypes) {
-    NanScope();
     try {
-      if(args.Length() < 1) {
-        System::Object^ target = MarshalV8ToCLR(args[0]);
+      if(info.Length() < 1) {
+        System::Object^ target = MarshalV8ToCLR(info[0]);
         System::Type^ type = (System::Type^)(target);
         System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       } else {
-        System::String^ type = stringV82CLR(args[1]->ToString());
+        System::String^ type = stringV82CLR(info[1]->ToString());
         if(type->Equals("events")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetEvents(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         } else if(type->Equals("fields")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetFields(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         } else if(type->Equals("properties")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetProperties(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         } else if(type->Equals("methods")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetMethods(BindingFlags::Public | BindingFlags::Static | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         }
       }
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
   static NAN_METHOD(GetMemberTypes) {
-    NanScope();
     try {
-      if(args.Length() < 1) {
-        System::Object^ target = MarshalV8ToCLR(args[0]);
+      if(info.Length() < 1) {
+        System::Object^ target = MarshalV8ToCLR(info[0]);
         System::Type^ type = (System::Type^)(target);
         System::Object^ rtn = type->GetMembers(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       } else {
-        System::String^ type = stringV82CLR(args[1]->ToString());
+        System::String^ type = stringV82CLR(info[1]->ToString());
         if(type->Equals("events")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetEvents(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         } else if(type->Equals("fields")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetFields(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         } else if(type->Equals("properties")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetProperties(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         } else if(type->Equals("methods")) {
-          System::Object^ target = MarshalV8ToCLR(args[0]);
+          System::Object^ target = MarshalV8ToCLR(info[0]);
           System::Type^ type = (System::Type^)(target);
           System::Object^ rtn = type->GetMethods(BindingFlags::Public | BindingFlags::Instance | BindingFlags::FlattenHierarchy);
-          NanReturnValue(MarshalCLRToV8(rtn));
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         }
       }
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e))); 
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e))); 
     }
   }
 
   static NAN_METHOD(ExecNew) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
+      System::Object^ target = MarshalV8ToCLR(info[0]);
 
-      int argSize = args.Length() - 1;
+      int argSize = info.Length() - 1;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 1]),i);
+        cshargs->SetValue(MarshalV8ToCLR(info[i + 1]),i);
 
       System::Type^ type = (System::Type^)(target);
       System::Object^ rtn = System::Activator::CreateInstance(type, cshargs);
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecSetField) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Object^ value = MarshalV8ToCLR(args[2]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      System::Object^ value = MarshalV8ToCLR(info[2]);
+      System::String^ field = stringV82CLR(info[1]->ToString());
 
       System::Type^ baseType = target->GetType();
       if(baseType != System::Type::typeid && target == System::Type::typeid) {
@@ -1277,17 +1255,16 @@ static NAN_METHOD(CreateClass) {
       delete baseType;
       delete field;
 
-      NanReturnUndefined();
+      info.GetReturnValue().Set(Nan::Undefined());
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecGetStaticField) {
-    NanScope();
     try {
-      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(info[0]);
+      System::String^ field = stringV82CLR(info[1]->ToString());
 
       System::Reflection::FieldInfo ^fieldinfo = target->GetField(field, 
          BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
@@ -1295,17 +1272,16 @@ static NAN_METHOD(CreateClass) {
       System::Object^ rtn = fieldinfo->GetValue(nullptr);
       delete fieldinfo;
       delete field;
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecGetField) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      System::String^ field = stringV82CLR(info[1]->ToString());
       System::Type^ baseType = target->GetType();
       if(baseType != System::Type::typeid && target == System::Type::typeid)
         baseType = (System::Type ^)target;
@@ -1319,23 +1295,22 @@ static NAN_METHOD(CreateClass) {
       delete baseType;
       delete field;
 
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecGetStaticMethodObject) {
-    NanScope();
     try {
-      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(info[0]);
+      System::String^ method = stringV82CLR(info[1]->ToString());
 
-      int argSize = args.Length() - 2;
+      int argSize = info.Length() - 2;
       array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
 
       for(int i=0; i < argSize; i++) {
-        System::Object^ obj = MarshalV8ToCLR(args[i + 2]);
+        System::Object^ obj = MarshalV8ToCLR(info[i + 2]);
         if(obj != nullptr) {
           System::Type^ argtype = obj->GetType();
           cshargs->SetValue(argtype,i);
@@ -1344,9 +1319,9 @@ static NAN_METHOD(CreateClass) {
           // be reflected types we'll try just a name match.
           MethodInfo^ rtnl = target->GetMethod(method,BindingFlags::Static | BindingFlags::Public | BindingFlags::DeclaredOnly);
           if(rtnl == nullptr)
-            NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
+            info.GetReturnValue().Set(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
           else
-            NanReturnValue(MarshalCLRToV8(rtnl));
+            info.GetReturnValue().Set(MarshalCLRToV8(rtnl));
         }
       }
 
@@ -1361,39 +1336,40 @@ static NAN_METHOD(CreateClass) {
       if(rtn == nullptr) {
         rtn = target->GetMethod(method);
         if(rtn == nullptr) {
-          NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method+" on "+target)));
+          info.GetReturnValue().Set(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method+" on "+target)));
         }
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       } else {
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecGetMethodObject) {
-    NanScope();
     try {
-      System::Object^ target = (System::Object^)MarshalV8ToCLR(args[0]);
-      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::Object^ target = (System::Object^)MarshalV8ToCLR(info[0]);
+      System::String^ method = stringV82CLR(info[1]->ToString());
 
-      int argSize = args.Length() - 2;
+      int argSize = info.Length() - 2;
       array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
 
       for(int i=0; i < argSize; i++) {
-        System::Object^ obj = MarshalV8ToCLR(args[i + 2]);
+        System::Object^ obj = MarshalV8ToCLR(info[i + 2]);
         if(obj != nullptr) {
           System::Type^ argtype = obj->GetType();
-          cshargs->SetValue(argtype,i);
+          cshargs->SetValue(argtype, i);
         } else {
           // null was passed in, since we cannot use this to properly get the method overload
           // be reflected types we'll try just a name match.
-          MethodInfo^ rtnl = target->GetType()->GetMethod(method,BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
+          MethodInfo^ rtnl = target->GetType()->GetMethod(method, 
+            BindingFlags::Instance | BindingFlags::Public | BindingFlags::DeclaredOnly);
           if(rtnl == nullptr)
-            NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
+            info.GetReturnValue().Set(throwV8Exception(MarshalCLRToV8("Method could not be found: "+method)));
           else
-            NanReturnValue(MarshalCLRToV8(rtnl));
+            info.GetReturnValue().Set(MarshalCLRToV8(rtnl));
+          return;
         }
       }
 
@@ -1408,169 +1384,161 @@ static NAN_METHOD(CreateClass) {
       if(rtn == nullptr) {
         rtn = target->GetType()->GetMethod(method);
         if(rtn == nullptr) {
-          NanReturnValue(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method)));
+          info.GetReturnValue().Set(throwV8Exception(MarshalCLRToV8("Method could not be found (non-null-args): "+method)));
+        } else {
+          info.GetReturnValue().Set(MarshalCLRToV8(rtn));
         }
-        NanReturnValue(MarshalCLRToV8(rtn));
       } else {
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecGetStaticPropertyObject) {
-    NanScope();
     try {
-      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(info[0]);
+      System::String^ property = stringV82CLR(info[1]->ToString());
       try {
         PropertyInfo^ rtn = target->GetProperty(property, 
           BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
         delete property;
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         PropertyInfo^ rtn = target->GetProperty(property,
           BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
         delete property;
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecGetPropertyObject) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      System::String^ property = stringV82CLR(info[1]->ToString());
       try {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property, 
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy);
         delete property;
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         PropertyInfo^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly);
         delete property;
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       }
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecMethodObject) {
-    NanScope();
     try {
-      MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
-      System::Object^ target = MarshalV8ToCLR(args[1]);
-      int argSize = args.Length() - 2;
+      MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(info[0]);
+      System::Object^ target = MarshalV8ToCLR(info[1]);
+      int argSize = info.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for (int i = 0; i < argSize; i++) {
-        System::Object^ objectPassed = MarshalV8ToCLR(args[i + 2]);
+        System::Object^ objectPassed = MarshalV8ToCLR(info[i + 2]);
         cshargs->SetValue(objectPassed, i);
       }
       System::Object^ rtn = method->Invoke(target, cshargs);
   
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecPropertyGet) {
-    NanEscapableScope();
-    System::Object^ target = MarshalV8ToCLR(args[1]);
-    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
+    System::Object^ target = MarshalV8ToCLR(info[1]);
+    PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(info[0]);
     try {
-      NanReturnValue(MarshalCLRToV8(prop->GetValue(target)));
+      info.GetReturnValue().Set(MarshalCLRToV8(prop->GetValue(target)));
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecPropertySet) {
-    NanScope();
     try {
-      PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(args[0]);
-      prop->SetValue(MarshalV8ToCLR(args[1]), MarshalV8ToCLR(args[2]));
-      NanReturnUndefined();
+      PropertyInfo^ prop = (PropertyInfo^)MarshalV8ToCLR(info[0]);
+      prop->SetValue(MarshalV8ToCLR(info[1]), MarshalV8ToCLR(info[2]));
+      info.GetReturnValue().Set(Nan::Undefined());
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated
   static NAN_METHOD(ExecSetProperty) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::Object^ value = MarshalV8ToCLR(args[2]);
-      System::String^ field = stringV82CLR(args[1]->ToString());
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      System::Object^ value = MarshalV8ToCLR(info[2]);
+      System::String^ field = stringV82CLR(info[1]->ToString());
       target->GetType()->GetProperty(field)->SetValue(target, value);
       delete field;
-      NanReturnUndefined();
+      info.GetReturnValue().Set(Nan::Undefined());
     } catch(System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated
   static NAN_METHOD(ExecGetStaticProperty) {
-    NanScope();
     try {
-      System::Type^ target = (System::Type^)MarshalV8ToCLR(args[0]);
-      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Type^ target = (System::Type^)MarshalV8ToCLR(info[0]);
+      System::String^ property = stringV82CLR(info[1]->ToString());
       System::Object^ rtn = target->GetProperty(property,
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(nullptr);
       delete property;
       delete target;
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated
   static NAN_METHOD(ExecGetProperty) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ property = stringV82CLR(args[1]->ToString());
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      System::String^ property = stringV82CLR(info[1]->ToString());
       try {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy)->GetValue(target);
         delete property;
         delete target;
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       } catch (AmbiguousMatchException^ e) {
         System::Object^ rtn = target->GetType()->GetProperty(property,
           BindingFlags::Instance | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::FlattenHierarchy | BindingFlags::DeclaredOnly)->GetValue(target);
         delete property;
         delete target;
-        NanReturnValue(MarshalCLRToV8(rtn));
+        info.GetReturnValue().Set(MarshalCLRToV8(rtn));
       }
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated
   static NAN_METHOD(ExecStaticMethod) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      int argSize = args.Length() - 2;
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      int argSize = info.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
  
       for (int i = 0; i < argSize; i++) {
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]), i);
+        cshargs->SetValue(MarshalV8ToCLR(info[i + 2]), i);
       }
       System::Type^ type = (System::Type ^)target;
-      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::String^ method = stringV82CLR(info[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
         BindingFlags::Static | BindingFlags::Public | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
         nullptr,
@@ -1580,25 +1548,24 @@ static NAN_METHOD(CreateClass) {
       delete cshargs;
       delete type;
       delete method;
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   // deprecated
   static NAN_METHOD(ExecMethod) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      int argSize = args.Length() - 2;
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      int argSize = info.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+        cshargs->SetValue(MarshalV8ToCLR(info[i + 2]),i);
 
       System::Type^ type = target->GetType();
-      System::String^ method = stringV82CLR(args[1]->ToString());
+      System::String^ method = stringV82CLR(info[1]->ToString());
       System::Object^ rtn = type->InvokeMember(method,
         BindingFlags::Public | BindingFlags::Instance | BindingFlags::NonPublic | BindingFlags::InvokeMethod,
         nullptr,
@@ -1607,31 +1574,30 @@ static NAN_METHOD(CreateClass) {
       delete cshargs;
       delete type;
       delete method;
-      NanReturnValue(MarshalCLRToV8(rtn));
+      info.GetReturnValue().Set(MarshalCLRToV8(rtn));
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
   static NAN_METHOD(ExecMethodObjectAsync) {
-    NanScope();
     try {
-      MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(args[0]);
-      System::Object^ target = MarshalV8ToCLR(args[1]);
-      int argSize = args.Length() - 2;
+      MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(info[0]);
+      System::Object^ target = MarshalV8ToCLR(info[1]);
+      int argSize = info.Length() - 2;
       array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
-        cshargs->SetValue(MarshalV8ToCLR(args[i + 2]),i);
+        cshargs->SetValue(MarshalV8ToCLR(info[i + 2]),i);
 
       TintInterop::AsyncEventDelegate^ del = gcnew TintInterop::AsyncEventDelegate(target,method,cshargs);
       System::ComponentModel::BackgroundWorker^ worker = gcnew System::ComponentModel::BackgroundWorker();
       worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(del, &(TintInterop::AsyncEventDelegate::DoWorkHandler));
       worker->RunWorkerAsync();
-      NanReturnUndefined();
+      info.GetReturnValue().Set(Nan::Undefined());
     } 
     catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -1642,16 +1608,15 @@ static NAN_METHOD(CreateClass) {
   }
 
   static NAN_METHOD(ExecAddEvent) {
-    NanScope();
     try {
-      System::Object^ target = MarshalV8ToCLR(args[0]);
-      System::String^ event = stringV82CLR(args[1]->ToString());
+      System::Object^ target = MarshalV8ToCLR(info[0]);
+      System::String^ event = stringV82CLR(info[1]->ToString());
       System::Type^ typeDef = target->GetType();
       if(typeDef->ToString()->Equals("System.RuntimeType")) {
         typeDef = (System::Type^)target;
       }
       System::Reflection::EventInfo^ eInfo = typeDef->GetEvent(event);
-      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[2]);
+      v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(info[2]);
       CLREventHandler ^handle = gcnew CLREventHandler();
       handle->SetCallback(callback);
       System::Reflection::MethodInfo^ eh = handle->GetType()->GetMethod("EventHandlerOnMain");
@@ -1660,9 +1625,9 @@ static NAN_METHOD(CreateClass) {
 
       GCHandle gc = GCHandle::Alloc(d);
       void *ptr = GCHandle::ToIntPtr(gc).ToPointer();
-      NanReturnValue(NanNewBufferHandle((char *)ptr, sizeof(ptr) + 1024, gchandle_cleanup, NULL));
+      info.GetReturnValue().Set(Nan::NewBuffer((char *)ptr, sizeof(ptr) + 1024, gchandle_cleanup, NULL).ToLocalChecked());
     } catch (System::Exception^ e) {
-      NanReturnValue(throwV8Exception(MarshalCLRExceptionToV8(e)));
+      info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
     }
   }
 
@@ -1675,8 +1640,8 @@ namespace IEWebBrowserFix {
   {
   public:
     ScriptInterface(v8::Local<v8::Function> cb) {
-      NanEscapableScope();
-      callback = new NanCallback(cb);
+      Nan::HandleScope scope;
+      callback = new Nan::Callback(cb);
       loop = uv_default_loop();
       async = new uv_async_t;
       uv_async_init(loop, async, browser_callback);
@@ -1704,7 +1669,7 @@ namespace IEWebBrowserFix {
     [System::Runtime::InteropServices::ComVisibleAttribute(true)]
     void postMessageBack(System::String^ str)
     {
-      NanEscapableScope();
+      Nan::EscapableHandleScope scope;
       v8::Handle<v8::Value> argv[1];
 
       argv[0] = MarshalCLRToV8(str);
@@ -1716,7 +1681,7 @@ namespace IEWebBrowserFix {
 		    exit(1);
       } else {
         // invoke the registered callback function
-        this->callback->Call(1, argv);
+        this->callback->Call(1, reinterpret_cast<v8::Local<v8::Value> *>(argv));
         if(_response != nullptr) {
           sem->Release();
         }
@@ -1730,16 +1695,15 @@ namespace IEWebBrowserFix {
     private:
       uv_loop_t *loop;
       uv_async_t *async;
-      NanCallback *callback;
+      Nan::Callback *callback;
       GCHandle handle;
       System::String^ _response;
       Semaphore^ sem;
   };
 
   static NAN_METHOD(CreateScriptInterface) {
-    NanEscapableScope();
-    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
-    NanReturnValue(MarshalCLRToV8(gcnew ScriptInterface(NanEscapeScope(callback))));
+    v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(info[0]);
+    info.GetReturnValue().Set(MarshalCLRToV8(gcnew ScriptInterface(callback)));
   }
 
   static void SetBrowserFeatureControlKey(System::Security::Permissions::RegistryPermission^ perms, System::String^ feature, System::String^ fileName, DWORD value) {
@@ -1814,7 +1778,7 @@ void browser_callback(uv_async_t* work) {
 }
 
 extern "C" void CLR_Init(Handle<v8::Object> target) {
-  NanScope();
+  Nan::HandleScope scope;
   v8Thread = GetCurrentThreadId();
   // Fix registry and "FEATURE" controls, these help align IE with a normal behavior
   // expected (on a per app registry setting basis).  This does not set global registry
@@ -1822,49 +1786,49 @@ extern "C" void CLR_Init(Handle<v8::Object> target) {
   IEWebBrowserFix::SetBrowserFeatureControl();
 
   // OLD, non-optimized execution methods.
-  NODE_SET_METHOD(target, "execNew", CLR::ExecNew);
-  NODE_SET_METHOD(target, "execAddEvent", CLR::ExecAddEvent);
-  NODE_SET_METHOD(target, "execMethod", CLR::ExecMethod);
-  NODE_SET_METHOD(target, "execStaticMethod", CLR::ExecStaticMethod);
-  NODE_SET_METHOD(target, "execSetField", CLR::ExecSetField);
-  NODE_SET_METHOD(target, "execGetField", CLR::ExecGetField);
-  NODE_SET_METHOD(target, "execGetStaticField", CLR::ExecGetStaticField);
-  NODE_SET_METHOD(target, "execSetProperty", CLR::ExecSetProperty);
-  NODE_SET_METHOD(target, "execGetProperty", CLR::ExecGetProperty);
-  NODE_SET_METHOD(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);
+  Nan::SetMethod(target, "execNew", CLR::ExecNew);
+  Nan::SetMethod(target, "execAddEvent", CLR::ExecAddEvent);
+  Nan::SetMethod(target, "execMethod", CLR::ExecMethod);
+  Nan::SetMethod(target, "execStaticMethod", CLR::ExecStaticMethod);
+  Nan::SetMethod(target, "execSetField", CLR::ExecSetField);
+  Nan::SetMethod(target, "execGetField", CLR::ExecGetField);
+  Nan::SetMethod(target, "execGetStaticField", CLR::ExecGetStaticField);
+  Nan::SetMethod(target, "execSetProperty", CLR::ExecSetProperty);
+  Nan::SetMethod(target, "execGetProperty", CLR::ExecGetProperty);
+  Nan::SetMethod(target, "execGetStaticProperty", CLR::ExecGetStaticProperty);
 
   // get programmatic information
-  NODE_SET_METHOD(target, "getReferencedAssemblies", CLR::GetReferencedAssemblies);
-  NODE_SET_METHOD(target, "getLoadedAssemblies", CLR::GetLoadedAssemblies);
-  NODE_SET_METHOD(target, "loadAssemblyFromMemory", CLR::LoadAssemblyFromMemory);
-  NODE_SET_METHOD(target, "loadAssembly", CLR::LoadAssembly);
-  NODE_SET_METHOD(target, "getMemberTypes", CLR::GetMemberTypes);
-  NODE_SET_METHOD(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
-  NODE_SET_METHOD(target, "getCLRType", CLR::GetCLRType);
+  Nan::SetMethod(target, "getReferencedAssemblies", CLR::GetReferencedAssemblies);
+  Nan::SetMethod(target, "getLoadedAssemblies", CLR::GetLoadedAssemblies);
+  Nan::SetMethod(target, "loadAssemblyFromMemory", CLR::LoadAssemblyFromMemory);
+  Nan::SetMethod(target, "loadAssembly", CLR::LoadAssembly);
+  Nan::SetMethod(target, "getMemberTypes", CLR::GetMemberTypes);
+  Nan::SetMethod(target, "getStaticMemberTypes", CLR::GetStaticMemberTypes);
+  Nan::SetMethod(target, "getCLRType", CLR::GetCLRType);
 
   // 2nd gen optimized execution
-  NODE_SET_METHOD(target, "getStaticPropertyObject", CLR::ExecGetStaticPropertyObject);
-  NODE_SET_METHOD(target, "getPropertyObject", CLR::ExecGetPropertyObject);
-  NODE_SET_METHOD(target, "getMethodObject", CLR::ExecGetMethodObject);
-  NODE_SET_METHOD(target, "getStaticMethodObject", CLR::ExecGetStaticMethodObject);
-  NODE_SET_METHOD(target, "getProperty", CLR::ExecPropertyGet);
-  NODE_SET_METHOD(target, "setProperty", CLR::ExecPropertySet);
-  NODE_SET_METHOD(target, "callMethod", CLR::ExecMethodObject);
-  NODE_SET_METHOD(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
+  Nan::SetMethod(target, "getStaticPropertyObject", CLR::ExecGetStaticPropertyObject);
+  Nan::SetMethod(target, "getPropertyObject", CLR::ExecGetPropertyObject);
+  Nan::SetMethod(target, "getMethodObject", CLR::ExecGetMethodObject);
+  Nan::SetMethod(target, "getStaticMethodObject", CLR::ExecGetStaticMethodObject);
+  Nan::SetMethod(target, "getProperty", CLR::ExecPropertyGet);
+  Nan::SetMethod(target, "setProperty", CLR::ExecPropertySet);
+  Nan::SetMethod(target, "callMethod", CLR::ExecMethodObject);
+  Nan::SetMethod(target, "callMethodAsync", CLR::ExecMethodObjectAsync);
 
   // create classes
-  NODE_SET_METHOD(target, "classCreate", CLR::CreateClass);
-  NODE_SET_METHOD(target, "classAddConstructor", CLR::AddConstructor);
-  NODE_SET_METHOD(target, "classAddMethod", CLR::AddMethodToClass);
-  NODE_SET_METHOD(target, "classAddProperty", CLR::AddPropertyToClass);
-  NODE_SET_METHOD(target, "classAddField", CLR::AddFieldToClass);
-  NODE_SET_METHOD(target, "classRegister", CLR::RegisterClass);
+  Nan::SetMethod(target, "classCreate", CLR::CreateClass);
+  Nan::SetMethod(target, "classAddConstructor", CLR::AddConstructor);
+  Nan::SetMethod(target, "classAddMethod", CLR::AddMethodToClass);
+  Nan::SetMethod(target, "classAddProperty", CLR::AddPropertyToClass);
+  Nan::SetMethod(target, "classAddField", CLR::AddFieldToClass);
+  Nan::SetMethod(target, "classRegister", CLR::RegisterClass);
 
   // callback for webviews
-  NODE_SET_METHOD(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
+  Nan::SetMethod(target, "createScriptInterface", IEWebBrowserFix::CreateScriptInterface);
 #ifdef GC_DEBUG
-  NODE_SET_METHOD(target, "getCppClassCount", CLR::GetCppClassCount);
-  NODE_SET_METHOD(target, "getCppCollectCount", CLR::GetCppCollectCount);
+  Nan::SetMethod(target, "getCppClassCount", CLR::GetCppClassCount);
+  Nan::SetMethod(target, "getCppCollectCount", CLR::GetCppCollectCount);
 #endif
 
   // Register the thread handle to communicate back to handle application

@@ -50,13 +50,12 @@ extern "C" void CLR_Init(v8::Handle<v8::Object> target);
 void uv_noop(uv_async_t* handle, int status) {}
 
 NAN_METHOD(InitBridge) {
-  NanScope();
-  v8::Local<v8::Object> bridge = NanNew<v8::Object>();
-  process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
+  v8::Local<v8::Object> bridge = Nan::New<v8::Object>();
+  process_l->ForceSet(Nan::New<v8::String>("bridge").ToLocalChecked(), bridge);
   FFI::Init(bridge);
   REF::Init(bridge);
   CLR_Init(bridge);
-  NanReturnValue(NanNew<v8::Object>());
+  info.GetReturnValue().Set(Nan::New<v8::Object>());
 }
 
 static bool uv_trip_winproc_safety = false;
@@ -133,20 +132,20 @@ void uv_event(void *info) {
 void node_load() {
   process_l = env->process_object();
   // Set version Information
-  process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
+  process_l->Get(Nan::New<v8::String>("versions").ToLocalChecked())->ToObject()->Set(Nan::New<v8::String>("tint").ToLocalChecked(), Nan::New<v8::String>(TINT_VERSION).ToLocalChecked());
   // Set whether we're in a packaged or non-packaged environment.
-  process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
+  process_l->Set(Nan::New<v8::String>("packaged").ToLocalChecked(), Nan::New<v8::Boolean>(packaged));
   if(packaged) {
-    v8::Handle<v8::Array> originalArgv = NanNew<v8::Array>();
-    process_l->Set(NanNew<v8::String>("_original_argv"), originalArgv);
+    v8::Local<v8::Array> originalArgv = Nan::New<v8::Array>();
+    process_l->Set(Nan::New<v8::String>("_original_argv").ToLocalChecked(), originalArgv);
     for(int i=0; i < original_argc; i++) {
-      originalArgv->Set(i, NanNew<v8::String>(original_argv[i]));
+      originalArgv->Set(i, Nan::New<v8::String>(original_argv[i]).ToLocalChecked());
     }
   }
   // Register the app:// schema.
   InitAppRequest();
   // Register the initial bridge: C++/C/C# (CLR) dotnet
-  NODE_SET_METHOD(process_l, "initbridge", InitBridge);
+  Nan::SetMethod(process_l, "initbridge", InitBridge);
 
   // The dummy handle prevents UV from exiting and throwing incorrect
   // timeout values, its necessary since uv can't see many of the app
@@ -240,11 +239,11 @@ void win_msg_loop() {
     if (msg.message == WM_HOTKEY) {
       v8::Isolate *isolate = env->isolate();
       v8::HandleScope scope(isolate);
-      v8::Handle<v8::Value> tmp = process_l->Get(NanNew<v8::String>("_win32_message"));
+      v8::Handle<v8::Value> tmp = process_l->Get(Nan::New<v8::String>("_win32_message").ToLocalChecked());
       if(tmp->IsFunction()) {
         v8::Local<v8::Value> args[2];
-        args[0] = NanNew<v8::Number>(MapVirtualKeyW(msg.lParam >> 16, MAPVK_VK_TO_CHAR));
-        args[1] = NanNew<v8::Number>(msg.lParam & 0x00ff);
+        args[0] = Nan::New<v8::Number>(MapVirtualKeyW(msg.lParam >> 16, MAPVK_VK_TO_CHAR));
+        args[1] = Nan::New<v8::Number>(msg.lParam & 0x00ff);
         v8::Local<v8::Function> fn = tmp.As<v8::Function>();
         v8::TryCatch try_catch;
         fn->Call(isolate->GetCurrentContext()->Global(), 2, args);

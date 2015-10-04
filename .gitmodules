@@ -12,3 +12,6 @@
 	path = libraries/gir
 	url = https://github.com/trueinteractions/node-gir.git
 	branch = v0.12.0
+[submodule "libraries/nan"]
+	path = libraries/nan
+	url = https://github.com/nodejs/nan

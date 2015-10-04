@@ -215,6 +215,7 @@
       ],
 
       'include_dirs': [
+        'libraries/nan',
         'libraries/node/src',
         'libraries/node/tools/msvs/genfiles',
         'libraries/node/deps/uv/src/ares',
@@ -639,6 +640,7 @@
       'target_name': 'tint_clr',
       'type': 'static_library',
       'include_dirs': [
+        'libraries/nan',
         'libraries/node/src',
         'libraries/node/tools/msvs/genfiles',
         'libraries/node/deps/uv/include/',
@@ -829,6 +831,7 @@
           'modules/Bridge/ffi.cc',
       ],
       'include_dirs': [
+        'libraries/nan',
         'libraries/node/deps/uv/include',
         'libraries/node/src',
         'libraries/node/deps/v8/include',
@@ -861,6 +864,7 @@
       'sources': [ 'modules/Bridge/ref.cc' ],
       'include_dirs': [ 
         'modules/Bridge/',
+        'libraries/nan',
         'libraries/node/deps/uv/include',
         'libraries/node/src',
         'libraries/node/deps/v8/include',

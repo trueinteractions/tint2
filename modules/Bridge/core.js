@@ -419,7 +419,7 @@ module.exports = (function() {
     if(type === '#') {
       var refn = new ref.alloc('Object');
       refn.free = false;
-      refn.writeObject(rtn, 0);
+      refn.writeObject(rtn, 0, true);
       objc.objc_setAssociatedObject(val, objc.objcStorageKey, refn, 0);  
     }
     return rtn;

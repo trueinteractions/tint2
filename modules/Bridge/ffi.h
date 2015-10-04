@@ -16,7 +16,7 @@
 #include <node.h>
 #include <node_buffer.h>
 #include <node_version.h>
-#include "nan.h"
+#include <nan.h>
 
 #if __OBJC__ || __OBJC2__
   #include <objc/objc.h>
@@ -49,7 +49,7 @@ class AsyncCallParams {
     char *fn;
     char *res;
     char *argv;
-    NanCallback *callback;
+    Nan::Callback *callback;
 };
 
 class FFI {
@@ -80,7 +80,7 @@ class FFI {
 typedef struct _callback_info {
   ffi_closure closure;           // the actual `ffi_closure` instance get inlined
   void *code;                    // the executable function pointer
-  NanCallback *function;          // JS callback function the closure represents
+  Nan::Callback *function;          // JS callback function the closure represents
   // these two are required for creating proper sized WrapPointer buffer instances
   int argc;                      // the number of arguments this function expects
   size_t resultSize;             // the size of the result pointer

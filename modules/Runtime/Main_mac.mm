@@ -5,7 +5,7 @@
 #import <Cocoa/Cocoa.h>
 
 #include "../AppSchema/AppSchema_mac.h"
-#include "../Bridge/nan.h"
+#include <nan.h>
 
 #include <sys/types.h>
 #include <sys/event.h>
@@ -33,27 +33,27 @@ v8::Handle<v8::Object> process_l;
 node::Environment *env;
 
 NAN_METHOD(InitBridge) {
-  NanScope();
-  v8::Local<v8::Object> bridge = NanNew<v8::Object>();
-  process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
+  v8::Local<v8::Object> bridge = Nan::New<v8::Object>();
+  process_l->ForceSet(Nan::New<v8::String>("bridge").ToLocalChecked(), bridge);
   FFI::Init(bridge);
   REF::Init(bridge);
-  NanReturnValue(NanNew<v8::Object>());
+  info.GetReturnValue().Set(Nan::New<v8::Object>());
 }
 
 static void openURL(const char *url) {
+  Nan::HandleScope scope;
   purl = url;
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-    if( !process_l->Get(NanNew<v8::String>("_osevents"))->IsUndefined() &&
-        !process_l->Get(NanNew<v8::String>("_osevents"))->IsNull())
+    if( !process_l->Get(Nan::New<v8::String>("_osevents").ToLocalChecked())->IsUndefined() &&
+        !process_l->Get(Nan::New<v8::String>("_osevents").ToLocalChecked())->IsNull())
     {
-      v8::Handle<v8::Value> args[1];
-      NanCallback* osevents = new NanCallback(process_l->Get(NanNew<v8::String>("_osevents")).As<v8::Function>());
-      args[0] = NanNew<v8::String>(purl);
+      v8::Local<v8::Value> args[1];
+      Nan::Callback* osevents = new Nan::Callback(process_l->Get(Nan::New<v8::String>("_osevents").ToLocalChecked()).As<v8::Function>());
+      args[0] = Nan::New<v8::String>(purl).ToLocalChecked();
       v8::TryCatch try_catch;
       osevents->Call(1, args);
       if (try_catch.HasCaught()) {
-        v8::Handle<v8::Value> stack = try_catch.Exception()->ToObject()->Get(NanNew<v8::String>("stack"));
+        v8::Handle<v8::Value> stack = try_catch.Exception()->ToObject()->Get(Nan::New<v8::String>("stack").ToLocalChecked());
         if(stack->IsString()) {
           v8::String::Utf8Value utf8exception(stack->ToString());
           NSLog(@"%@", [[NSString alloc] initWithUTF8String:(*utf8exception)]);
@@ -61,8 +61,8 @@ static void openURL(const char *url) {
         }
       }
     }
-    v8::Handle<v8::Array> events = process_l->Get(NanNew<v8::String>("_pending_osevents")).As<v8::Array>();
-    events->Set(events->Length(), NanNew<v8::String>(purl));
+    v8::Handle<v8::Array> events = process_l->Get(Nan::New<v8::String>("_pending_osevents").ToLocalChecked()).As<v8::Array>();
+    events->Set(events->Length(), Nan::New<v8::String>(purl).ToLocalChecked());
   });
 }
 
@@ -136,7 +136,7 @@ static void uv_event(void *info) {
   [[NSThread currentThread] setName:@"Tint EventLoop"];
 
   // Register the initial bridge objective-c protocols
-  NODE_SET_METHOD(process_l, "initbridge", InitBridge);
+  Nan::SetMethod(process_l, "initbridge", InitBridge);
 
   // Register the app:// protocol.
   [NSURLProtocol registerClass:[AppSchema class]];
@@ -348,10 +348,10 @@ int main(int argc, char * argv[]) {
 
     // Initialize Tint.
     process_l = env->process_object();
-    process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
-    process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
-    process_l->Set(NanNew<v8::String>("_pending_osevents"), NanNew<v8::Array>());
-    process_l->Set(NanNew<v8::String>("_osevents"), NanNull());
+    process_l->Get(Nan::New<v8::String>("versions").ToLocalChecked())->ToObject()->Set(Nan::New<v8::String>("tint").ToLocalChecked(), Nan::New<v8::String>(TINT_VERSION).ToLocalChecked());
+    process_l->Set(Nan::New<v8::String>("packaged").ToLocalChecked(), Nan::New<v8::Boolean>(packaged));
+    process_l->Set(Nan::New<v8::String>("_pending_osevents").ToLocalChecked(), Nan::New<v8::Array>());
+    process_l->Set(Nan::New<v8::String>("_osevents").ToLocalChecked(), Nan::Null());
 
     [app setDelegate:delegate];
     [app run];
