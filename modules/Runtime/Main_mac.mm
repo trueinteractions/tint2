@@ -155,7 +155,7 @@ static void uv_event(void *info) {
   // keep the UV loop in-sync with CFRunLoop.
   embed_closed = 0;
   uv_sem_init(&embed_sem, 0);
-  uv_thread_create(&embed_thread, uv_event, NULL);
+  uv_thread_create(&embed_thread, uv_event, nullptr);
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)app hasVisibleWindows:(BOOL) flag {

@@ -191,6 +191,7 @@ if(!process.bridge) {
 	  for (var subobj in obj) {
 	    //task 1: add EventEmitter as needed
 	    //determine whether eventable
+	    /*
 	    var eventable = obj[subobj].__signals__ != undefined
 	                      && makeArray(obj[subobj].__signals__).length>0;
 	    if (eventable) {
@@ -207,6 +208,7 @@ if(!process.bridge) {
 	        };
 	      }
 	    }
+	    */
 
 	    //task 2: expose object methods to objects and make them callable
 	    for (var prop in obj[subobj]) {
@@ -215,10 +217,10 @@ if(!process.bridge) {
 	          for (var method_offset in obj[subobj][prop]) {
 	            var method_name = obj[subobj][prop][method_offset];
 	            //add method handler to object if possible
-	            if (obj[subobj].prototype[method_name] != undefined)
-	              {}//debug:console.warn("[node-gir] " + subobj + " object provides it's own " + method_name + " method. Not replacing existing method. :-(");
-	            else
-	              obj[subobj].prototype[method_name] = CallableMethod(method_name);
+	            //if (obj[subobj].prototype[method_name] != undefined)
+	            //  {}//debug:console.warn("[node-gir] " + subobj + " object provides it's own " + method_name + " method. Not replacing existing method. :-(");
+	            //else
+	            //  obj[subobj].prototype[method_name] = CallableMethod(method_name);
 	          }
 	          break;
 	      }

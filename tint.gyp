@@ -606,6 +606,7 @@
         ['OS=="linux"', {
           'include_dirs':[
             'libraries/gir/src/',
+            'libraries/nan',
             'libraries/node/deps/v8/include/',
             'libraries/node/deps/uv/include/',
             'libraries/node/src/',
@@ -628,7 +629,8 @@
           'cflags': [
             '<!@(pkg-config --cflags gobject-2.0 gobject-introspection-1.0)',
             '-D_FILE_OFFSET_BITS=64',
-            '-D_LARGEFILE_SOURCE'
+            '-D_LARGEFILE_SOURCE',
+            '-std=c++11'
           ],
           'ldflags': [
             '<!@(pkg-config --libs gobject-2.0 gobject-introspection-1.0)'

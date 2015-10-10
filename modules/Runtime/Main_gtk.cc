@@ -1,7 +1,7 @@
 #include "node.cc" // this is a hack to get at node's internal globals.
 #include <tint_version.h>
 #include <gtk/gtk.h>
-#include "../Bridge/nan.h"
+#include <nan.h>
 #include "../libraries/gir/src/namespace_loader.h"
 
 #include <sys/types.h>
@@ -30,15 +30,17 @@ v8::Handle<v8::Object> gobj;
 node::Environment *env;
 
 NAN_METHOD(InitBridge) {
-    NanScope();
-    v8::Local<v8::Object> bridge = NanNew<v8::Object>();
-    gobj = NanNew<v8::Object>();
-    process_l->ForceSet(NanNew<v8::String>("bridge"), bridge);
-    bridge->ForceSet(NanNew<v8::String>("gir"), gobj);
-    FFI::Init(bridge);
-    REF::Init(bridge);
-    gir::NamespaceLoader::Initialize(gobj);
-    NanReturnValue(NanNew<v8::Object>());
+  v8::Local<v8::Object> bridge = Nan::New<v8::Object>();
+  gobj = Nan::New<v8::Object>();
+  process_l->ForceSet(Nan::New<v8::String>("bridge").ToLocalChecked(), bridge);
+  bridge->ForceSet(Nan::New<v8::String>("gir").ToLocalChecked(), gobj);
+  FFI::Init(bridge);
+  REF::Init(bridge);
+  Nan::Set(gobj, Nan::New("load").ToLocalChecked(),
+      Nan::GetFunction(Nan::New<v8::FunctionTemplate>(gir::NamespaceLoader::Load)).ToLocalChecked());
+  Nan::Set(gobj, Nan::New("search_path").ToLocalChecked(),
+      Nan::GetFunction(Nan::New<v8::FunctionTemplate>(gir::NamespaceLoader::SearchPath)).ToLocalChecked());
+  info.GetReturnValue().Set(Nan::New<v8::Object>());
 }
 
 static bool uv_trip_timer_safety = false;
@@ -92,11 +94,11 @@ static void startup (GtkApplication* app, gpointer user_data)
   // TODO: register the gtk app protocol.
 
   // Register the initial bridge objective-c protocols
-  NODE_SET_METHOD(process_l, "initbridge", InitBridge);
+  Nan::SetMethod(process_l, "initbridge", InitBridge);
 
   // Set Version Information
-  process_l->Get(NanNew<v8::String>("versions"))->ToObject()->Set(NanNew<v8::String>("tint"), NanNew<v8::String>(TINT_VERSION));
-  process_l->Set(NanNew<v8::String>("packaged"), NanNew<v8::Boolean>(packaged));
+  process_l->Get(Nan::New<v8::String>("versions").ToLocalChecked())->ToObject()->Set(Nan::New<v8::String>("tint").ToLocalChecked(), Nan::New<v8::String>(TINT_VERSION).ToLocalChecked());
+  process_l->Set(Nan::New<v8::String>("packaged").ToLocalChecked(), Nan::New<v8::Boolean>(packaged));
 
   // Start debug agent when argv has --debug
   if (node::use_debug_agent)

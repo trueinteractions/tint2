@@ -246,6 +246,7 @@
           'USE_HEADERMAP': 'NO',
           'GCC_SYMBOLS_PRIVATE_EXTERN': 'NO',       # required for node module being imported
           'GCC_INLINES_ARE_PRIVATE_EXTERN': 'NO',   # required for node module being imported
+          'CLANG_CXX_LANGUAGE_STANDARD': 'gnu++0x',
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
             # '-fobjc-runtime=macosx',                # added for Tint, objc runtime
