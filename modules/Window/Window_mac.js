@@ -7,6 +7,7 @@ module.exports = (function() {
   var Color = require('Color');
   var $ = process.bridge.objc;
   var os = require('os');
+  var assert = require('assert');
   var version = parseInt(os.release().substring(0,os.release().indexOf('.')));
   /**
    * @class Window
@@ -885,6 +886,71 @@ module.exports = (function() {
       }
     }
   );
+
+  /**
+   * @member minimumWidth
+   * @memberof Window
+   * @description Sets the minimum width of the window in pixels.
+   * @type {number}
+   */
+  util.def(Window.prototype, "minimumWidth",
+    function() { return this.native('minSize').width; },
+    function(e) {
+      assert(typeof e === 'number', 'The minimum width must be a pixel value number');
+      var size = this.native('minSize');
+      size.width = e;
+      this.native('setMinSize', size);
+    }
+  );
+
+  /**
+   * @member minimumHeight
+   * @memberof Window
+   * @description Sets the minimum height of the window in pixels.
+   * @type {number}
+   */
+  util.def(Window.prototype, "minimumHeight",
+    function() { return this.native('minSize').height; },
+    function(e) {
+      assert(typeof e === 'number', 'The minimum height must be a pixel value number');
+      var size = this.native('minSize');
+      size.height = e;
+      this.native('setMinSize', size);
+    }
+  );
+
+  /**
+   * @member maximumWidth
+   * @memberof Window
+   * @description Sets the maximum width of the window in pixels.
+   * @type {number}
+   */
+  util.def(Window.prototype, "maximumWidth",
+    function() { return this.native('maxSize').width; },
+    function(e) {
+      assert(typeof e === 'number', 'The maximum width must be a pixel value number');
+      var size = this.native('maxSize');
+      size.width = e;
+      this.native('setMaxSize', size);
+    }
+  );
+
+  /**
+   * @member maximumHeight
+   * @memberof Window
+   * @description Sets the maximum height of the window in pixels.
+   * @type {number}
+   */
+  util.def(Window.prototype, "maximumHeight",
+    function() { return this.native('maxSize').height; },
+    function(e) {
+      assert(typeof e === 'number', 'The maximum height must be a pixel value number');
+      var size = this.native('maxSize');
+      size.height = e;
+      this.native('setMaxSize', size);
+    }
+  );
+
 
   /**
    * @method destroy

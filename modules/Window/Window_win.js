@@ -5,6 +5,7 @@ module.exports = (function() {
   var Container = require('Container');
   var util = require('Utilities');
   var Color = require('Color');
+  var assert = require('assert');
   var $ = process.bridge.dotnet;
   var $$ = process.bridge;
 
@@ -418,6 +419,38 @@ module.exports = (function() {
         var mainWindowSrc = $.System.Windows.Interop.HwndSource.FromHwnd(this.private.hwnd);
         mainWindowSrc.CompositionTarget.BackgroundColor = this.private.backgroundObj.native;
       }
+    }
+  );
+
+  util.def(Window.prototype, "minimumWidth",
+    function() { return this.native.MinWidth; },
+    function(e) {
+      assert(typeof e === 'number', 'The minimum width must be a pixel value number');
+      this.native.MinWidth = e;
+    }
+  );
+
+  util.def(Window.prototype, "minimumHeight",
+    function() { return this.native.MinHeight; },
+    function(e) {
+      assert(typeof e === 'number', 'The minimum height must be a pixel value number');
+      this.native.MinHeight = e;
+    }
+  );
+
+  util.def(Window.prototype, "maximumWidth",
+    function() { return this.native.MaxWidth; },
+    function(e) {
+      assert(typeof e === 'number', 'The maximum width must be a pixel value number');
+      this.native.MaxWidth = e;
+    }
+  );
+
+  util.def(Window.prototype, "maximumHeight",
+    function() { return this.native.MaxHeight; },
+    function(e) {
+      assert(typeof e === 'number', 'The maximum height must be a pixel value number');
+      this.native.MaxHeight = e;
     }
   );
 
