@@ -17,7 +17,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-   var ismac = require('os').platform().toLowerCase() == "darwin";
+  var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
   application.name = "My Program";
   var win = new Window();
   win.visible = true;

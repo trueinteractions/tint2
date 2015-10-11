@@ -121,9 +121,9 @@
 #define RETAIN_WSALASTERROR
 #endif
 
+#define HAVE_STRUCT_TIMESPEC
 #if defined(_UWIN)
 #define HAVE_MODE_T
-#define HAVE_STRUCT_TIMESPEC
 #endif
 
 #if defined(__GNUC__)

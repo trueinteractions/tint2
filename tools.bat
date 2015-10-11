@@ -134,7 +134,15 @@ if NOT exist .\libraries\node\node.gyp (
 
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 SETLOCAL
-	if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat" (
+	if defined VS140COMNTOOLS if exist "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+		echo Configuring Platform Toolset V140
+		if "%VCVARS_VER%" NEQ "140" (
+		  call "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat"
+		  SET VCVARS_VER=140
+		)
+		set GYP_MSVS_VERSION=2015
+		set platformtoolset=v140
+	) else if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		echo Configuring Platform Toolset V120
 		call "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2013
@@ -164,8 +172,16 @@ ENDLOCAL
 if not defined build goto test
 
 SETLOCAL
-
-	if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	if defined VS140COMNTOOLS if exist "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+		echo Configuring Platform Toolset V140
+		if "%VCVARS_VER%" NEQ "140" (
+		  call "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat"
+		  SET VCVARS_VER=140
+		)
+		set GYP_MSVS_VERSION=2015
+		set platformtoolset=v140
+		goto msbuild-found
+	) else if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Using Platform Toolset V120
 		call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
 		set GYP_MSVS_VERSION=2013
@@ -191,12 +207,12 @@ SETLOCAL
 
 
 :msbuild-found
- 	copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
+ 	:: copy /Y tools\v8_js2c_fix.py libraries\node\deps\v8\tools\js2c.py > nul
  	set start=%time%
  	
  	:: /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal
 
-	msbuild build\msvs\tint.sln /t:%target% /m:8 /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /nologo
+	msbuild build\msvs\tint.sln /t:%target% /m:8 /clp:NoSummary;NoItemAndPropertyList;Verbosity=minimal /p:BuildInParallel=true;Configuration=%config%;PlatformToolset=%platformtoolset%;CreateHardLinksForCopyFilesToOutputDirectoryIfPossible=true;CreateHardLinksForCopyAdditionalFilesIfPossible=true;CreateHardLinksForPublishFilesIfPossible=true;CreateHardLinksForCopyLocalIfPossible=true /nologo
 	if errorlevel 1 goto exit
 	set end=%time%
 	set options="tokens=1-4 delims=:."

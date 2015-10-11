@@ -390,7 +390,7 @@ namespace TintInterop {
 
   public ref class AsyncEventDelegate {
   public:
-    AsyncEventDelegate(System::Object^ target, MethodInfo^ method, array<System::Object^>^ cshargs)
+    AsyncEventDelegate(System::Object^ target, MethodInfo^ method, cli::array<System::Object^>^ cshargs)
     {
       this->target = target;
       this->method = method;
@@ -409,7 +409,7 @@ namespace TintInterop {
   private:
     System::Object^ target;
     MethodInfo^ method;
-    array<System::Object^>^ cshargs;
+    cli::array<System::Object^>^ cshargs;
   };
 }
 
@@ -1077,7 +1077,7 @@ public:
 
   static NAN_METHOD(GetReferencedAssemblies) {
     try {
-      array<System::Reflection::AssemblyName^>^ assemblies = System::Reflection::Assembly::GetExecutingAssembly()->GetReferencedAssemblies();
+      cli::array<System::Reflection::AssemblyName^>^ assemblies = System::Reflection::Assembly::GetExecutingAssembly()->GetReferencedAssemblies();
       info.GetReturnValue().Set(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
 		  info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -1086,7 +1086,7 @@ public:
 
   static NAN_METHOD(GetLoadedAssemblies) {
     try {
-      array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
+      cli::array<System::Reflection::Assembly^>^ assemblies = System::AppDomain::CurrentDomain->GetAssemblies();
       info.GetReturnValue().Set(MarshalCLRToV8(assemblies));
     } catch (System::Exception^ e) {
       info.GetReturnValue().Set(throwV8Exception(MarshalCLRExceptionToV8(e)));
@@ -1225,7 +1225,7 @@ public:
       System::Object^ target = MarshalV8ToCLR(info[0]);
 
       int argSize = info.Length() - 1;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      cli::array<System::Object^>^ cshargs = gcnew cli::array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
         cshargs->SetValue(MarshalV8ToCLR(info[i + 1]),i);
@@ -1307,7 +1307,7 @@ public:
       System::String^ method = stringV82CLR(info[1]->ToString());
 
       int argSize = info.Length() - 2;
-      array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
+      cli::array<System::Type^>^ cshargs = gcnew cli::array<System::Type^>(argSize);
 
       for(int i=0; i < argSize; i++) {
         System::Object^ obj = MarshalV8ToCLR(info[i + 2]);
@@ -1353,7 +1353,7 @@ public:
       System::String^ method = stringV82CLR(info[1]->ToString());
 
       int argSize = info.Length() - 2;
-      array<System::Type^>^ cshargs = gcnew array<System::Type^>(argSize);
+      cli::array<System::Type^>^ cshargs = gcnew cli::array<System::Type^>(argSize);
 
       for(int i=0; i < argSize; i++) {
         System::Object^ obj = MarshalV8ToCLR(info[i + 2]);
@@ -1441,7 +1441,7 @@ public:
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(info[0]);
       System::Object^ target = MarshalV8ToCLR(info[1]);
       int argSize = info.Length() - 2;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      cli::array<System::Object^>^ cshargs = gcnew cli::array<System::Object^>(argSize);
 
       for (int i = 0; i < argSize; i++) {
         System::Object^ objectPassed = MarshalV8ToCLR(info[i + 2]);
@@ -1532,7 +1532,7 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(info[0]);
       int argSize = info.Length() - 2;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      cli::array<System::Object^>^ cshargs = gcnew cli::array<System::Object^>(argSize);
  
       for (int i = 0; i < argSize; i++) {
         cshargs->SetValue(MarshalV8ToCLR(info[i + 2]), i);
@@ -1559,7 +1559,7 @@ public:
     try {
       System::Object^ target = MarshalV8ToCLR(info[0]);
       int argSize = info.Length() - 2;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      cli::array<System::Object^>^ cshargs = gcnew cli::array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
         cshargs->SetValue(MarshalV8ToCLR(info[i + 2]),i);
@@ -1585,7 +1585,7 @@ public:
       MethodInfo^ method = (MethodInfo^)MarshalV8ToCLR(info[0]);
       System::Object^ target = MarshalV8ToCLR(info[1]);
       int argSize = info.Length() - 2;
-      array<System::Object^>^ cshargs = gcnew array<System::Object^>(argSize);
+      cli::array<System::Object^>^ cshargs = gcnew cli::array<System::Object^>(argSize);
 
       for(int i=0; i < argSize; i++)
         cshargs->SetValue(MarshalV8ToCLR(info[i + 2]),i);
@@ -1669,8 +1669,8 @@ namespace IEWebBrowserFix {
     [System::Runtime::InteropServices::ComVisibleAttribute(true)]
     void postMessageBack(System::String^ str)
     {
-      Nan::EscapableHandleScope scope;
-      v8::Handle<v8::Value> argv[1];
+      Nan::HandleScope scope;
+      v8::Local<v8::Value> argv[1];
 
       argv[0] = MarshalCLRToV8(str);
 

@@ -15,7 +15,7 @@ function run($utils) {
   $utils.skip('manual');
   var fs = require('fs');
   var path = require('path');
-  var ismac = require('os').platform().toLowerCase() === "darwin";
+  var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
   var spawnSync = require('child_process').spawnSync;
   var spawn = require('child_process').spawn;
   if(ismac) {

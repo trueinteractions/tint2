@@ -2,7 +2,7 @@ require('Application');
 
 var os = require('os');
 var fs = require('fs');
-var ismac = os.platform().toLowerCase() == "darwin";
+var ismac = (os.platform().toLowerCase() === "darwin" || os.platform().toLowerCase() === "mac");
 var log = function(e) { process.stdout.write(e); };
 var exit = function(code) { process.exit(code); };
 var isappveyor = process.env['APPVEYOR'] ? true : false;

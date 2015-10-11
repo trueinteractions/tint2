@@ -153,6 +153,7 @@ def ExpandMacros(lines, macros):
       start = lines.find(name + '(', end)
   return lines
 
+
 class TextMacro:
   def __init__(self, args, body):
     self.args = args
@@ -237,11 +238,11 @@ static const struct _native natives[] = {
 
 
 NATIVE_DECLARATION = """\
-  { "%(id)s", %(id)s_native, sizeof(%(id)s_native)-1 },
+  { "%(id)s", %(escaped_id)s_native, sizeof(%(escaped_id)s_native)-1 },
 """
 
 SOURCE_DECLARATION = """\
-  const char %(id)s_native[] = { %(data)s };
+  const char %(escaped_id)s_native[] = { %(data)s };
 """
 
 
@@ -292,16 +293,48 @@ def JS2C(source, target):
     lines = ExpandMacros(lines, macros)
     lines = CompressScript(lines, do_jsmin)
     data = ToCArray(s, lines)
-    id = os.path.basename(str(s)).split('.')[0].replace('_mac','').replace('_win','').replace('_linux','').replace('_posix','').replace('_gtk','')
+    if 'node/' in s or 'node\\' in s or 'modules\\' in s or 'modules/' in s:
+      s = s.replace('node/lib/','').replace('node/src/','').replace('node/','').replace('node\\lib\\','').replace('node\\src\\','').replace('node\\','').replace('libraries\\','').replace('libraries/','').replace('../','').replace('../','').replace('..\\','').replace('..\\','')
+
+    if 'modules\\' in s:
+      s = s.split('\\')[len(s.split('\\'))-1]
+
+    # On Windows, "./foo.bar" in the .gyp file is passed as "foo.bar"
+    # so don't assume there is always a slash in the file path.
+    if '/' in s or '\\' in s:
+      id = '/'.join(re.split('/|\\\\', s)[0:])
+    else:
+      id = s
+
+    if '.' in id:
+      id = id.split('.', 1)[0]
+    if '_mac' in s or '_win' in s or '_gtk' in s or 'Bridge' in s or '_base' in s or 'AppSchema' in s or 'Application' in s:
+      id = os.path.basename(str(s)).split('.')[0].replace('_mac','').replace('_win','').replace('_linux','').replace('_posix','').replace('_gtk','')
+
+
     if delay: id = id[:-6]
     if delay:
       delay_ids.append((id, len(lines)))
     else:
       ids.append((id, len(lines)))
-    source_lines.append(SOURCE_DECLARATION % { 'id': id, 'data': data })
-    source_lines_empty.append(SOURCE_DECLARATION % { 'id': id, 'data': 0 })
-    native_lines.append(NATIVE_DECLARATION % { 'id': id })
-  
+
+    escaped_id = id.replace('/', '_')
+
+    source_lines.append(SOURCE_DECLARATION % {
+      'id': id,
+      'escaped_id': escaped_id,
+      'data': data
+    })
+    source_lines_empty.append(SOURCE_DECLARATION % {
+      'id': id,
+      'escaped_id': escaped_id,
+      'data': 0
+    })
+    native_lines.append(NATIVE_DECLARATION % {
+      'id': id,
+      'escaped_id': escaped_id
+    })
+
   # Build delay support functions
   get_index_cases = [ ]
   get_script_source_cases = [ ]

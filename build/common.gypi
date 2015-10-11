@@ -1,5 +1,6 @@
 {
   'variables': {
+    'asan%': 0,
     'werror': '',
     'visibility%': 'hidden',          # V8's visibility setting
     'target_arch%': 'x64',            # set v8's target architecture
@@ -19,6 +20,9 @@
     'v8_optimized_debug': 0,
     'v8_random_seed': 0,
     'want_separate_host_toolset': 0,
+    'node_byteorder': 'big',
+    'v8_use_external_startup_data': 0,
+    'openssl_fips%': '',
 
     # Enable disassembler for `--print-code` v8 options
     'v8_enable_disassembler': 1,
@@ -158,6 +162,8 @@
           }],
         ],
         'GenerateDebugInformation': 'true',
+        'GenerateMapFile': 'true', # /MAP
+        'MapExports': 'true', # /MAPINFO:EXPORTS
         'RandomizedBaseAddress': 2, # enable ASLR
         'DataExecutionPrevention': 2, # enable DEP
         'AllowIsolation': 'true',
@@ -188,6 +194,8 @@
           # ... or that C implementations shouldn't use
           # POSIX names
           '_CRT_NONSTDC_NO_DEPRECATE',
+          # Make sure the STL doesn't try to use exceptions
+          '_HAS_EXCEPTIONS=0',
           'BUILDING_V8_SHARED=1',
           'BUILDING_UV_SHARED=1'
         ],

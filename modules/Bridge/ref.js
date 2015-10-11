@@ -1177,7 +1177,7 @@ Buffer.prototype.writePointer = function writePointer (ptr, offset) {
  */
 
 Buffer.prototype.readCString = function readCString (offset) {
-  return exports.readCString(this, offset);
+  return exports.readCString(this, offset || 0);
 };
 
 /**

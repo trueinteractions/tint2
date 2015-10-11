@@ -12,7 +12,7 @@ function baseline() {
 
 function run($utils) {
   var fs = require('fs');
-  var ismac = require('os').platform().toLowerCase() === "darwin";
+  var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
   var spawn;
   if(ismac) {
     spawn  = require('child_process').spawn;

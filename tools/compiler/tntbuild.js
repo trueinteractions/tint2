@@ -372,7 +372,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
           $tint.write(this.conf.macinfo, $tint.manifest(this.data)); 
           this.tick(); 
         }.bind(this),
-        function(){ if(os.platform()=='darwin') { this.conf.perms.forEach(function(e){ fs.chmodSync(e,'755'); }.bind(this)); } this.tick("fixing permissions"); }.bind(this),
+        function(){ if(os.platform() === 'darwin' || os.platform() === 'mac') { this.conf.perms.forEach(function(e){ fs.chmodSync(e,'755'); }.bind(this)); } this.tick("fixing permissions"); }.bind(this),
         function(){ $tint.stampmacosx(this.macosxicon, this.conf.macicon); this.tick("writing icon for macosx"); }.bind(this)
       ]);
       } catch(e) { this.onError(e); return false; }
@@ -574,7 +574,7 @@ $tint.info=function(_file,_base) {
   }; 
 }
 $tint.iconcache = function(warning) {
-  if (os.platform() != 'darwin') {
+  if (os.platform() !== 'darwin' && os.platform() !== 'mac') {
     $tint.execute('C:\\windows\\system32\\ie4uinit4.exe',['-ClearIconCache'], false, false, function(e){},
       function(e){ if(warning) warning('Unable to refresh icon cache.\n\t'+e.toString()); },function(e){});
     $tint.execute('C:\\windows\\system32\\cmd.exe',['/e:on','/c','DEL','%localappdata%\\IconCache.db','/A'],false,false,function(e){},

@@ -17,7 +17,7 @@ function baseline() {
 function run($utils) {
   var Screens = require('Screens');
   var scn = Screens.active;
-  var ismac = require('os').platform().toLowerCase() == "darwin";
+  var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
   var win = new Window();
   win.visible = true;
   win.x=0;

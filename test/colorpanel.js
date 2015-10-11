@@ -16,7 +16,7 @@ function baseline() {
  */
 function run($utils) {
   if($utils.debug) $utils.ok(); // TOOD: short circuit this for appveyor until we have a better control.
-  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
+  var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
   /* @hidden */ var color = new Color('rgba(40,40,40,0.1)');
   /* @hidden */ $utils.assert(color.red == (40/255*10)/10, 'color.red should be: '+(40/255)+' was: '+color.red);
   /* @hidden */ $utils.assert(color.green == (40/255*10)/10, 'color.green should be: '+(40/255)+' was: '+color.green);

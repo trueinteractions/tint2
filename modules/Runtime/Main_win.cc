@@ -130,6 +130,7 @@ void uv_event(void *info) {
 }
 
 void node_load() {
+  Nan::HandleScope scope;
   process_l = env->process_object();
   // Set version Information
   process_l->Get(Nan::New<v8::String>("versions").ToLocalChecked())->ToObject()->Set(Nan::New<v8::String>("tint").ToLocalChecked(), Nan::New<v8::String>(TINT_VERSION).ToLocalChecked());
@@ -154,6 +155,8 @@ void node_load() {
   uv_async_t dummy_uv_handle_;
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, (uv_async_cb)uv_noop);
 
+  node::LoadEnvironment(env);
+
   // This must post after the node::Load otherwise we will get infinte
   // timeouts from libuv and if there isn't file descirptor setup yet
   // the entire thing will simply never wake back up.
@@ -163,16 +166,14 @@ void node_load() {
   uv_thread_create(&embed_thread, uv_event, NULL);
 
   // Start debug agent when argv has --debug
-  if (node::use_debug_agent) {
-    node::StartDebug(env, node::debug_wait_connect);
-  }
-
-  node::LoadEnvironment(env);
+  //if (node::use_debug_agent) {
+  //  node::StartDebug(env, node::debug_wait_connect);
+  //}
 
   // Enable debugger
-  if (node::use_debug_agent) {
-    node::EnableDebug(env);
-  }
+  //if (node::use_debug_agent) {
+  //  node::EnableDebug(env);
+  //}
 
 }
 
@@ -180,6 +181,7 @@ void node_load() {
 // and need to manually pump uv messages (e.g., WPF took over the
 // loop due to a blocking OS reason)
 extern "C" void uv_run_nowait() {
+  v8::platform::PumpMessageLoop(node::default_platform, node::node_isolate);
   if (uv_run(env->event_loop(), UV_RUN_NOWAIT) == false && 
       uv_loop_alive(env->event_loop()) == false) 
   {
@@ -195,6 +197,7 @@ void node_terminate() {
   // Emit `beforeExit` if the loop became alive either after emitting
   // event, or after running some callbacks.
   if(uv_loop_alive(env->event_loop())) {
+    v8::platform::PumpMessageLoop(node::default_platform, node::node_isolate);
     uv_run(env->event_loop(), UV_RUN_NOWAIT);
   }
   code = EmitExit(env);
@@ -339,13 +342,9 @@ int main(int argc, char *argv[]) {
 
   mainThreadId = GetCurrentThreadId();
 
-  const char* replaceInvalid = getenv("NODE_INVALID_UTF8");
+  node::PlatformInit();
 
-  if (replaceInvalid == NULL) {
-    node::WRITE_UTF8_FLAGS |= v8::String::REPLACE_INVALID_UTF8;
-  }
-
-  assert(init_argc > 0);
+  CHECK_GT(init_argc, 0);
 
   // Hack around with the argv pointer. Used for process.title = "blah".
   argv = uv_setup_args(init_argc, init_argv);
@@ -359,35 +358,84 @@ int main(int argc, char *argv[]) {
   // V8 on Windows doesn't have a good source of entropy. Seed it from
   // OpenSSL's pool.
   v8::V8::SetEntropySource(node::crypto::EntropySource);
-
+  
+  const int thread_pool_size = 4;
+  node::default_platform = v8::platform::CreateDefaultPlatform(thread_pool_size);
+  v8::V8::InitializePlatform(node::default_platform);
   v8::V8::Initialize();
-  node::node_is_initialized = true;
+
+  int exit_code = 1;
   {
-    v8::Locker locker(node::node_isolate);
-    v8::Isolate::Scope isolate_scope(node::node_isolate);
-    v8::HandleScope handle_scope(node::node_isolate);
-    v8::Local<v8::Context> context = v8::Context::New(node::node_isolate);
-    env = node::CreateEnvironment(
-      node::node_isolate,
-      uv_default_loop(),
-      context,
-      init_argc,
-      init_argv,
-      exec_argc,
-      exec_argv);
-    v8::Context::Scope context_scope(context);
+    node::NodeInstanceData instance_data(node::NodeInstanceType::MAIN,
+                                   uv_default_loop(),
+                                   init_argc,
+                                   const_cast<const char**>(init_argv),
+                                   exec_argc,
+                                   exec_argv,
+                                   node::use_debug_agent);
+    node::Isolate::CreateParams params;
+    node::ArrayBufferAllocator* array_buffer_allocator = new node::ArrayBufferAllocator();
+    params.array_buffer_allocator = array_buffer_allocator;
+    v8::Isolate* isolate = v8::Isolate::New(params);
+    if (node::track_heap_objects) {
+      isolate->GetHeapProfiler()->StartTrackingHeapObjects(true);
+    }
 
-    node_load();
-    win_msg_loop();
+    // Fetch a reference to the main isolate, so we have a reference to it
+    // even when we need it to access it from another (debugger) thread.
+    if (instance_data.is_main())
+      node::node_isolate = isolate;
 
-    env->Dispose();
-    env = NULL;
+    {
+      v8::Locker locker(isolate);
+      v8::Isolate::Scope isolate_scope(isolate);
+      v8::HandleScope handle_scope(isolate);
+      v8::Local<v8::Context> context = v8::Context::New(isolate);
+      env = node::CreateEnvironment(isolate, context, &instance_data);
+      array_buffer_allocator->set_env(env);
+      v8::Context::Scope context_scope(context);
+
+      if (instance_data.is_main())
+        env->set_using_abort_on_uncaught_exc(node::abort_on_uncaught_exception);
+
+      // Start debug agent when argv has --debug
+      if (instance_data.use_debug_agent())
+        node::StartDebug(env, node::debug_wait_connect);
+
+      {
+        node::SealHandleScope seal(isolate);
+        node_load();
+        win_msg_loop();
+      }
+
+      env->set_trace_sync_io(false);
+
+      int exit_code = node::EmitExit(env);
+      if (instance_data.is_main())
+        instance_data.set_exit_code(exit_code);
+      node::RunAtExit(env);
+
+#if defined(LEAK_SANITIZER)
+      __lsan_do_leak_check();
+#endif
+
+      array_buffer_allocator->set_env(nullptr);
+      env->Dispose();
+      env = nullptr;
+    }
+
+    CHECK_NE(isolate, nullptr);
+    isolate->Dispose();
+    isolate = nullptr;
+    delete array_buffer_allocator;
+    if (instance_data.is_main())
+      node::node_isolate = nullptr;
+    exit_code = instance_data.exit_code();
   }
-
-  CHECK_NE(node::node_isolate, NULL);
-  node::node_isolate->Dispose();
-  node::node_isolate = NULL;
   v8::V8::Dispose();
+  
+  delete node::default_platform;
+  node::default_platform = nullptr;
 
   delete[] exec_argv;
   exec_argv = NULL;

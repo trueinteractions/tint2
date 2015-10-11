@@ -15,7 +15,7 @@ function baseline() {
  * @example
  */
 function run($utils) {
-  /* @hidden */ var ismac = require('os').platform().toLowerCase() == "darwin";
+  var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
   /* @hidden */ if(ismac) $utils = require('../../../../tools/utilities.js');
   Notification.requestPermission(function(result) {
     /* @hidden */ $utils.assert(result);

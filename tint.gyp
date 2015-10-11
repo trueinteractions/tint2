@@ -18,6 +18,7 @@
     'v8_enable_gdbjit': 0,
     'v8_no_strict_aliasing%': 0,
     'node_unsafe_optimizations': 0,
+    'node_use_lttng%': 'false',
     'node_v8_options': '',
     'node_prefix': '',
     'node_tag': '',
@@ -127,6 +128,7 @@
     ],
     'library_files': [
       'libraries/node/src/node.js',
+      'libraries/node/lib/_debug_agent.js',
       'libraries/node/lib/_debugger.js',
       'libraries/node/lib/_linklist.js',
       'libraries/node/lib/assert.js',
@@ -154,17 +156,18 @@
       'libraries/node/lib/net.js',
       'libraries/node/lib/os.js',
       'libraries/node/lib/path.js',
+      'libraries/node/lib/process.js',
       'libraries/node/lib/punycode.js',
       'libraries/node/lib/querystring.js',
       'libraries/node/lib/readline.js',
       'libraries/node/lib/repl.js',
-      'libraries/node/lib/smalloc.js',
       'libraries/node/lib/stream.js',
       'libraries/node/lib/_stream_readable.js',
       'libraries/node/lib/_stream_writable.js',
       'libraries/node/lib/_stream_duplex.js',
       'libraries/node/lib/_stream_transform.js',
       'libraries/node/lib/_stream_passthrough.js',
+      'libraries/node/lib/_stream_wrap.js',
       'libraries/node/lib/string_decoder.js',
       'libraries/node/lib/sys.js',
       'libraries/node/lib/timers.js',
@@ -175,9 +178,16 @@
       'libraries/node/lib/tty.js',
       'libraries/node/lib/url.js',
       'libraries/node/lib/util.js',
+      'libraries/node/lib/v8.js',
       'libraries/node/lib/vm.js',
       'libraries/node/lib/zlib.js',
-      'libraries/node/deps/debugger-agent/lib/_debugger_agent.js',
+      'libraries/node/lib/internal/child_process.js',
+      'libraries/node/lib/internal/freelist.js',
+      'libraries/node/lib/internal/socket_list.js',
+      'libraries/node/lib/internal/repl.js',
+      'libraries/node/lib/internal/util.js',
+      'libraries/node/lib/internal/streams/lazy_transform.js',
+      #'libraries/node/deps/debugger-agent/lib/_debugger_agent.js',
       # begin common tint files.
       'modules/AppSchema/AppSchema.js',
       'modules/Application/Common.js',
@@ -208,7 +218,8 @@
 
       'dependencies': [
         'libraries/node/deps/v8/tools/gyp/v8.gyp:postmortem-metadata',
-        'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
+        'libraries/node/deps/v8/tools/gyp/v8.gyp:v8_libplatform',
+        # 'libraries/node/deps/debugger-agent/debugger-agent.gyp:debugger-agent',
         'libraries/node/deps/v8/tools/gyp/v8.gyp:v8',
         'tint_js2c#host',
         'ffi_bindings',
@@ -220,6 +231,7 @@
         'libraries/node/tools/msvs/genfiles',
         'libraries/node/deps/uv/src/ares',
         'libraries/node-ffi/src',
+        'libraries/node/deps/v8/',
         'libraries/node/deps/v8/include/',
         'libraries/node/deps/uv/include/',
         'libraries/node/deps/uv/src/',
@@ -228,23 +240,21 @@
         '<(SHARED_INTERMEDIATE_DIR)'
       ],
       'sources': [
-        # not sure why but from upstream..
-        'libraries/node/deps/v8/include/v8.h',
-        'libraries/node/deps/v8/include/v8-debug.h',
-        # regular includes.
+        'libraries/node/src/debug-agent.cc',
         'libraries/node/src/async-wrap.cc',
+        'libraries/node/src/env.cc',
         'libraries/node/src/fs_event_wrap.cc',
         'libraries/node/src/cares_wrap.cc',
         'libraries/node/src/handle_wrap.cc',
-        # We include this with a preprocessor in Main_mac.mm
-        # 'libraries/node/src/node.cc',
+        'libraries/node/src/js_stream.cc',
+        #'libraries/node/src/node.cc',
         'libraries/node/src/node_buffer.cc',
         'libraries/node/src/node_constants.cc',
         'libraries/node/src/node_contextify.cc',
         'libraries/node/src/node_file.cc',
         'libraries/node/src/node_http_parser.cc',
         'libraries/node/src/node_javascript.cc',
-        # 'libraries/node/src/node_main.cc',
+        #'libraries/node/src/node_main.cc',
         'libraries/node/src/node_os.cc',
         'libraries/node/src/node_v8.cc',
         'libraries/node/src/node_stat_watcher.cc',
@@ -253,9 +263,9 @@
         'libraries/node/src/node_i18n.cc',
         'libraries/node/src/pipe_wrap.cc',
         'libraries/node/src/signal_wrap.cc',
-        'libraries/node/src/smalloc.cc',
         'libraries/node/src/spawn_sync.cc',
         'libraries/node/src/string_bytes.cc',
+        'libraries/node/src/stream_base.cc',
         'libraries/node/src/stream_wrap.cc',
         'libraries/node/src/tcp_wrap.cc',
         'libraries/node/src/timer_wrap.cc',
@@ -268,9 +278,11 @@
         'libraries/node/src/async-wrap-inl.h',
         'libraries/node/src/base-object.h',
         'libraries/node/src/base-object-inl.h',
+        'libraries/node/src/debug-agent.h',
         'libraries/node/src/env.h',
         'libraries/node/src/env-inl.h',
         'libraries/node/src/handle_wrap.h',
+        'libraries/node/src/js_stream.h',
         'libraries/node/src/node.h',
         'libraries/node/src/node_buffer.h',
         'libraries/node/src/node_constants.h',
@@ -284,19 +296,22 @@
         'libraries/node/src/node_wrap.h',
         'libraries/node/src/node_i18n.h',
         'libraries/node/src/pipe_wrap.h',
-        'libraries/node/src/queue.h',
-        'libraries/node/src/smalloc.h',
         'libraries/node/src/tty_wrap.h',
         'libraries/node/src/tcp_wrap.h',
         'libraries/node/src/udp_wrap.h',
-        'libraries/node/src/req_wrap.h',
+        'libraries/node/src/req-wrap.h',
+        'libraries/node/src/req-wrap-inl.h',
         'libraries/node/src/string_bytes.h',
+        'libraries/node/src/stream_base.h',
+        'libraries/node/src/stream_base-inl.h',
         'libraries/node/src/stream_wrap.h',
         'libraries/node/src/tree.h',
         'libraries/node/src/util.h',
         'libraries/node/src/util-inl.h',
         'libraries/node/src/util.cc',
         'libraries/node/deps/http_parser/http_parser.h',
+        'libraries/node/deps/v8/include/v8.h',
+        'libraries/node/deps/v8/include/v8-debug.h',
         '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
         # javascript files to make for an even more pleasant IDE experience
         '<@(library_files)',
@@ -304,6 +319,8 @@
         'build/common.gypi',
       ],
       'defines': [
+        'NODE_ARCH="<(target_arch)"',
+        'NODE_PLATFORM="<(OS)"',
         'NODE_WANT_INTERNALS=1',
         'ARCH="<(target_arch)"',
         #'PLATFORM="<(OS)"', # we use conditions to define which OS value to use, GYP changes them, creating havok.
@@ -451,10 +468,13 @@
             'modules/Runtime/Main_win.cc',
             'tools/tint.rc',
           ],
+          'defines!': [
+            'NODE_PLATFORM="win"',
+          ],
           'defines': [
             'FD_SETSIZE=1024',
             # we need to use node's preferred "win32" rather than gyp's preferred "win"
-            'PLATFORM="win32"',
+            'NODE_PLATFORM="win32"',
             '_UNICODE=1',
           ],
           'libraries': ['-lpsapi.lib','-lDwmapi.lib']
@@ -807,11 +827,11 @@
             ['OS=="win"',{
               'inputs': ['<@(win_library_files)'],
             }],
-            [ 'node_use_dtrace=="false"'
-              ' and node_use_etw=="false"'
-              ' and node_use_systemtap=="false"',
-            {
+            [ 'node_use_dtrace=="false" and node_use_etw=="false"', {
               'inputs': ['libraries/node/src/notrace_macros.py']
+            }],
+            ['node_use_lttng=="false"', {
+              'inputs': [ 'libraries/node/src/nolttng_macros.py' ]
             }],
             [ 'node_use_perfctr=="false"', {
               'inputs': [ 'libraries/node/src/perfctr_macros.py' ]
