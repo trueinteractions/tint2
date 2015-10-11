@@ -1,5 +1,5 @@
 version: 1.0.{build}
-os: Unstable
+os: Visual Studio 2015
 clone_depth: 2
 shallow_clone: true
 build_script:
