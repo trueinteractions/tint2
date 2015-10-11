@@ -101,7 +101,6 @@ rmdir /S /Q .\build\dist\tint >nul 2>&1
 
 :config
 if not defined gyp goto msbuild
-git apply --whitespace=fix build/node.diff
 
 IF EXIST "%PROGRAMFILES(X86)%" (GOTO 64BIT) ELSE (GOTO 32BIT)
 
@@ -130,6 +129,7 @@ echo Architecture %arch% (host architecture %hostarch%)
 if NOT exist .\libraries\node\node.gyp (
   git submodule init
   git submodule update
+  git apply --whitespace=fix build/node.diff
 )
 
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
