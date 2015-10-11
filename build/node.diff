@@ -20,10 +20,10 @@ index 1d47360..77f13cf 100644
                    }],
                  ],
                },
-diff --git a/deps/v8/tools/js2c.py b/deps/v8/tools/js2c.py
+diff --git a/libraries/node/deps/v8/tools/js2c.py b/libraries/node/deps/v8/tools/js2c.py
 index b5436f9..10005db 100755
---- a/deps/v8/tools/js2c.py
-+++ b/deps/v8/tools/js2c.py
+--- a/libraries/node/deps/v8/tools/js2c.py
++++ b/libraries/node/deps/v8/tools/js2c.py
 @@ -499,7 +499,7 @@ def BuildMetadata(sources, source_bytes, native_type):
      "get_index_cases": "".join(get_index_cases),
      "get_script_source_cases": "".join(get_script_source_cases),
