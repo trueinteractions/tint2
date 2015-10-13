@@ -77,7 +77,7 @@ module.exports = (function() {
        *              passed into the callback provided as the first argument.
        */
       tintWebKitResponseDelegate.addMethod('postMessage','v@:@',
-          util.errorwrap(function() { 
+          util.errorwrap(function() {
             /* self, cmd, message */
             var self = arguments[0];
             var message = arguments[2];
