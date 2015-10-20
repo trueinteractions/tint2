@@ -585,7 +585,7 @@ module.exports = (function() {
    */
   WebView.prototype.postMessage = function(e) {
     var msg = "var msg=document.createEvent('MessageEvent');\n";
-    msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'")+"');\n";
+    msg += "msg.initMessageEvent('message',true,true,'"+e.toString().replace(/'/g,"\\'").replace(/\n/g, "\\n")+"');\n";
     msg += "window.dispatchEvent(msg);\n";
     if(this.useWKWebView) {
       this.execute(msg);

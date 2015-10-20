@@ -191,7 +191,7 @@ module.exports = (function() {
   WebView.prototype.postMessage = function(e) {
     var msg = "var msg=document.createEvent('MessageEvent');\n";
         msg += "msg.initMessageEvent('message',true,true,'" + 
-                  e.toString().replace(/'/g,"\\'") +  "','*',0,window);\n";
+                  e.toString().replace(/'/g,"\\'").replace(/\n/g, "\\n") +  "','*',0,window);\n";
         msg += "window.dispatchEvent(msg);\n";
     this.private.browser.Document.InvokeScript("eval",[msg]);
   }
