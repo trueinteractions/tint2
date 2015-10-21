@@ -491,11 +491,11 @@
             'modules/Runtime/Main_mac.mm',
           ],
           'defines!': [
-            'PLATFORM="mac"',
+            'NODE_PLATFORM="mac"',
           ],
           'defines': [
             # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
-            'PLATFORM="darwin"',
+            'NODE_PLATFORM="darwin"',
           ],
         }],
         [ 'OS=="linux"', {
