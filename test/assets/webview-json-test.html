@@ -4,16 +4,14 @@
 	<title>Echo</title>
 	<script>
 		window.addEventListener('message', function(e) {
+			var data = {};
 			try {
 				document.getElementById('foo').innerText = e.data;
+				data = JSON.parse(e.data);
 			} catch (e) {
 				console.log(e.message);
 			}
-			console.log('log: ', e.data);
-			console.warn('warn: ', e.data);
-			console.info('info: ', e.data);
-			console.error('error: ', e.data);
-			window.postMessageToHost(e.data);
+			console.log(data.Hello === "Hel\\nlo" && data.Hello2 === "Hello\nf\'oo" && data.foo === "y\tou");
 		});
 	</script>
 </head>
