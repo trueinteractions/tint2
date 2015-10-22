@@ -34,6 +34,7 @@ static int code;
 v8::Handle<v8::Object> process_l;
 v8::Handle<v8::Object> bridge;
 node::Environment *env;
+static node::NodeInstanceData *node_instance;
 
 DWORD mainThreadId = 0;
 
@@ -156,6 +157,12 @@ void node_load() {
   uv_async_init(uv_default_loop(), &dummy_uv_handle_, (uv_async_cb)uv_noop);
 
   node::LoadEnvironment(env);
+
+  env->set_trace_sync_io(node::trace_sync_io);
+
+  // Enable debugger
+  if (node_instance->use_debug_agent())
+      EnableDebug(env);
 
   // This must post after the node::Load otherwise we will get infinte
   // timeouts from libuv and if there isn't file descirptor setup yet
@@ -395,8 +402,7 @@ int main(int argc, char *argv[]) {
       array_buffer_allocator->set_env(env);
       v8::Context::Scope context_scope(context);
 
-      if (instance_data.is_main())
-        env->set_using_abort_on_uncaught_exc(node::abort_on_uncaught_exception);
+      node_instance = &instance_data;
 
       // Start debug agent when argv has --debug
       if (instance_data.use_debug_agent())

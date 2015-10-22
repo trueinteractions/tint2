@@ -371,9 +371,6 @@ int main(int argc, char * argv[]) {
       process_l->Set(Nan::New<v8::String>("_pending_osevents").ToLocalChecked(), Nan::New<v8::Array>());
       process_l->Set(Nan::New<v8::String>("_osevents").ToLocalChecked(), Nan::Null());
 
-      if (instance_data.is_main())
-        env->set_using_abort_on_uncaught_exc(node::abort_on_uncaught_exception);
-
       {
         node::SealHandleScope seal(isolate);
         node_instance = &instance_data;
