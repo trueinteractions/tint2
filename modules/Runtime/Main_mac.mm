@@ -20,6 +20,7 @@ static int init_argc;
 static char **init_argv;
 static int code;
 static const char *purl;
+static node::NodeInstanceData *node_instance;
 
 namespace REF {
   extern void Init (v8::Handle<v8::Object> target);
@@ -142,13 +143,18 @@ static void uv_event(void *info) {
   // Register the app:// protocol.
   [NSURLProtocol registerClass:[AppSchema class]];
 
+  // Start debug agent when argv has --debug
+  if (node_instance->use_debug_agent())
+    node::StartDebug(env, node::debug_wait_connect);
+
   node::LoadEnvironment(env);
   
   env->set_trace_sync_io(node::trace_sync_io);
 
   // Enable debugger
-  // if (node::instance_data.use_debug_agent())
-  //   node::EnableDebug(env);
+  if (node_instance->use_debug_agent())
+      EnableDebug(env);
+
 
   // Start worker that will interrupt main loop when having uv events.
   // keep the UV loop in-sync with CFRunLoop.
@@ -368,13 +374,9 @@ int main(int argc, char * argv[]) {
       if (instance_data.is_main())
         env->set_using_abort_on_uncaught_exc(node::abort_on_uncaught_exception);
 
-      // Start debug agent when argv has --debug
-      if (instance_data.use_debug_agent())
-        node::StartDebug(env, node::debug_wait_connect);
-
       {
         node::SealHandleScope seal(isolate);
-        
+        node_instance = &instance_data;
         [app setDelegate:delegate];
         [app run];
       }
