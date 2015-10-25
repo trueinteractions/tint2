@@ -1115,6 +1115,7 @@ else:
 output = {
   'variables': variables,
   'target_defaults': output,
+  'win_subsystem': options.subsystem,
 }
 if make_global_settings:
   output['make_global_settings'] = make_global_settings
