@@ -19,6 +19,8 @@
     'v8_no_strict_aliasing%': 0,
     'node_unsafe_optimizations': 0,
     'node_use_lttng%': 'false',
+    'openssl_fips':'false',
+    'node_target_type':'executable',
     'node_v8_options': '',
     'node_prefix': '',
     'node_tag': '',
@@ -354,6 +356,9 @@
             'libraries/node/src/tls_wrap.h'
           ],
           'conditions': [
+            ['openssl_fips != ""', {
+              'defines': [ 'NODE_FIPS_MODE' ],
+            }],
             [ 'node_shared_openssl=="false"', {
               'dependencies': [ 
                 './libraries/node/deps/openssl/openssl.gyp:openssl',
@@ -362,15 +367,22 @@
                 # './libraries/node/deps/openssl/openssl.gyp:openssl-cli',
               ],
               # Do not let unused OpenSSL symbols to slip away
-              'xcode_settings': {
-                'OTHER_LDFLAGS': [
-                  '-Wl,-force_load,<(PRODUCT_DIR)/libopenssl.a',
-                ],
-              },
               'conditions': [
-                ['OS in "linux freebsd"', {
-                  'ldflags': [
-                    '-Wl,--whole-archive <(PRODUCT_DIR)/libopenssl.a -Wl,--no-whole-archive',
+                # -force_load or --whole-archive are not applicable for
+                # the static library
+                [ 'node_target_type!="static_library"', {
+                  'xcode_settings': {
+                    'OTHER_LDFLAGS': [
+                      '-Wl,-force_load,<(PRODUCT_DIR)/<(OPENSSL_PRODUCT)',
+                    ],
+                  },
+                  'conditions': [
+                    ['OS in "linux freebsd"', {
+                      'ldflags': [
+                        '-Wl,--whole-archive <(PRODUCT_DIR)/<(OPENSSL_PRODUCT)',
+                        '-Wl,--no-whole-archive',
+                      ],
+                    }],
                   ],
                 }],
               ],

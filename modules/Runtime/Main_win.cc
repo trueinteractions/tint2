@@ -172,16 +172,6 @@ void node_load() {
   uv_sem_init(&embed_sem, 0);
   uv_thread_create(&embed_thread, uv_event, NULL);
 
-  // Start debug agent when argv has --debug
-  //if (node::use_debug_agent) {
-  //  node::StartDebug(env, node::debug_wait_connect);
-  //}
-
-  // Enable debugger
-  //if (node::use_debug_agent) {
-  //  node::EnableDebug(env);
-  //}
-
 }
 
 // Externalize this, if we've completely blocked the event loop

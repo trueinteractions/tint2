@@ -22,7 +22,6 @@
     'want_separate_host_toolset': 0,
     'node_byteorder': 'big',
     'v8_use_external_startup_data': 0,
-    'openssl_fips%': '',
 
     # Enable disassembler for `--print-code` v8 options
     'v8_enable_disassembler': 1,
@@ -48,6 +47,11 @@
       }, {
         'OBJ_DIR': '<(PRODUCT_DIR)/obj.target',
         'V8_BASE': '<(PRODUCT_DIR)/obj.target/deps/v8/tools/gyp/libv8_base.a',
+      }],
+      ['openssl_fips != ""', {
+        'OPENSSL_PRODUCT': 'libcrypto.a',
+      }, {
+        'OPENSSL_PRODUCT': 'libopenssl.a',
       }],
     ],
   },
