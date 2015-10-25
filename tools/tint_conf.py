@@ -360,6 +360,11 @@ parser.add_option('--enable-static',
     dest='enable_static',
     help='build as static library')
 
+parser.add_option("--subsystem",
+    action="store",
+    dest="subsystem",
+    help="The subsystemf or windows to use, either console or windows.")
+
 (options, args) = parser.parse_args()
 
 # Expand ~ in the install prefix now, it gets written to multiple files.
