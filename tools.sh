@@ -13,7 +13,7 @@ if [ "$1" == "config" ]; then
     git submodule update
   fi
   if [ "$(uname)" == "Darwin" ]; then
-    $PYTHON ./tools/tint_conf.py --without-snapshot --dest-cpu=x64 --xcode --tag= > /dev/null
+    $PYTHON ./tools/tint_conf.py --subsystem=console --without-snapshot --dest-cpu=x64 --xcode --tag= > /dev/null
   else
     # sudo apt-get install build-essential
     # sudo apt-get install clang
