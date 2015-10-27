@@ -488,6 +488,30 @@ module.exports = (function() {
   });
 
   /**
+   * @member showHeaders
+   * @type {boolean}
+   * @memberof Table
+   * @description Sets whether the headers for the table are displayed.
+   */
+  var header = null;
+  Object.defineProperty(Table.prototype, 'showHeaders', {
+    get:function() {
+      if(this.nativeView('headerView')) {
+        return true;
+      }
+      return false;
+    },
+    set:function(e) {
+      if(e && header !== null) {
+        this.nativeView('setHeaderView', header);
+      } else if(!e) {
+        var header = this.nativeView('headerView');
+        this.nativeView('setHeaderView', null);
+      }
+    }
+  });
+
+  /**
    * @member alternatingColors
    * @type {boolean}
    * @memberof Table

@@ -286,6 +286,14 @@ namespace TintInterop {
       void set(IntPtr h) { _handle = h; };
     }
 
+    static void ActivatePopup(System::Windows::Controls::Primitives::Popup^ popup)
+    {
+        //try to get a handle on the popup itself (via its child)
+        System::Windows::Interop::HwndSource^ source = (System::Windows::Interop::HwndSource^)System::Windows::PresentationSource::FromVisual(popup->Child);     
+        //activate the popup
+        SetForegroundWindow((HWND)source->Handle.ToPointer());
+    }
+
     Wpf32Window(System::Windows::Window^ wpfWindow)
     {
         this->Handle = (gcnew System::Windows::Interop::WindowInteropHelper(wpfWindow))->Handle;

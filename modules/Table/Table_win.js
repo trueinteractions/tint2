@@ -220,6 +220,21 @@ module.exports = (function() {
     set:function(e) { this.nativeView.RowHeight = e + (this.private.spaceY * 2); }
   });
 
+  Object.defineProperty(Table.prototype, 'showHeaders', {
+    get:function() {
+      if(this.nativeView.HeadersVisibility !== $.System.Windows.Controls.DataGridHeadersVisibility.None) {
+        return true;
+      }
+      return false;
+    },
+    set:function(e) {
+      if(e)
+        this.nativeView.HeadersVisibility = $.System.Windows.Controls.DataGridHeadersVisibility.Column;
+      else
+        this.nativeView.HeadersVisibility = $.System.Windows.Controls.DataGridHeadersVisibility.None;
+    }
+  });
+
   Object.defineProperty(Table.prototype, 'selectedRows', {
     get:function() { 
       var selItems = this.nativeView.SelectedItems;

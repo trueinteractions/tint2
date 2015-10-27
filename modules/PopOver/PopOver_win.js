@@ -90,15 +90,16 @@ module.exports = (function() {
     Container.call(this, options);
 
     this.native.Child = this.private.canvas = $.System.Xaml.XamlServices.Parse("<Canvas xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Margin=\"0,0,0,0\"><Canvas.Effect><DropShadowEffect Opacity=\"1\" BlurRadius=\"3\" ShadowDepth=\"0.5\"/></Canvas.Effect></Canvas>");
-    this.private.rect = $.System.Xaml.XamlServices.Parse("<Rectangle xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"  Stretch=\"Fill\" Fill=\"#f7f7f7\" Opacity=\"1\" Canvas.Left=\"12\" RadiusX=\"6\" RadiusY=\"6\"></Rectangle>");
+    this.private.rect = $.System.Xaml.XamlServices.Parse("<Rectangle xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"  Stretch=\"Fill\" Fill=\"#f7f7f7\" Opacity=\"1\" RadiusX=\"6\" RadiusY=\"6\"></Rectangle>");
     this.private.arrow = $.System.Xaml.XamlServices.Parse("<Path xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Fill=\"#f7f7f7\" Opacity=\"1\" Data=\"M11.7,27.2V0c0,0-0.7,3.4-3.4,5.7C5,8.6,0,11.9,0,13.6s5,5,8.3,7.9C11,23.9,11.7,27.2,11.7,27.2z\" Canvas.Top=\"100\" Canvas.Left=\"0.5\"></Path>");
     this.private.canvas.Children.Add(this.private.rect);
     this.private.canvas.Children.Add(this.private.arrow);
     this.private.canvas.Children.Add(this.nativeView);
     this.native.AllowsTransparency = true;
+    this.native.StaysOpen = false;
 
-    $.System.Windows.Controls.Canvas.SetLeft(this.nativeView, margin + margin/2);
-    $.System.Windows.Controls.Canvas.SetTop(this.nativeView, 2*margin);
+    $.System.Windows.Controls.Canvas.SetLeft(this.nativeView, margin);
+    $.System.Windows.Controls.Canvas.SetTop(this.nativeView, margin);
 
     this.private.attached = false;
 
@@ -111,15 +112,6 @@ module.exports = (function() {
 
     // Scroll, Slide, Fade & None
     this.native.PopupAnimation = $.System.Windows.Controls.Primitives.PopupAnimation.Slide;
-    $.System.Windows.Application.Current.addEventListener('Deactivated', function() {
-      this.native.IsOpen = false;
-    }.bind(this));
-    this.native.addEventListener('LostFocus', function() {
-      this.native.IsOpen = false;
-    }.bind(this));
-    this.native.addEventListener('PreviewLostKeyboardFocus', function() {
-      this.native.IsOpen = false;
-    }.bind(this));
   }
 
   PopOver.prototype = Object.create(Container.prototype);
@@ -131,8 +123,8 @@ module.exports = (function() {
       if(typeof(e) === "number") {
         this.native.Width = e;
         this.private.canvas.Width = e;
-        this.private.rect.Width = e - arrowHeight - margin;
-        this.nativeView.Width = e - margin * 4;
+        this.private.rect.Width = e - margin;
+        this.nativeView.Width = e - margin;
       }
     });
 
@@ -168,6 +160,7 @@ module.exports = (function() {
     updateLocation.call(this);
     this.fireEvent('open');
     this.native.IsOpen = true;
+    $.TintInterop.Wpf32Window.ActivatePopup(this.native);
   };
 
   PopOver.prototype.close = function() {

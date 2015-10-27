@@ -46,7 +46,7 @@ module.exports = (function() {
       this.native.addEventListener('TextInput', this.private.textChanged);
     }
     this.native.addEventListener('KeyDown', this.private.keyDown);
-    this.private.readyonly = false;
+    this.private.readonly = false;
     this.private.previousBackground = this.native.Background;
     this.private.previousBorder = this.native.BorderBrush;
     this.private.previousBorderThickness = this.native.BorderThickness;
@@ -102,8 +102,8 @@ module.exports = (function() {
         this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
         this.native.IsReadOnly = true;
         this.native.AcceptsTab = false;
-        this.native.Focusable = false;
-      } else if(this.private.readonly) {
+        this.native.Focusable = true;
+      } else {
         this.native.Background = this.private.previousBackground;
         this.native.BorderBrush = this.private.previousBorder;
         this.native.BorderThickness = this.private.previousBorderThickness;
