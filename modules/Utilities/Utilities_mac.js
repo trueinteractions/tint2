@@ -271,10 +271,9 @@ module.exports = (function() {
     }
     return imageRef;
   }
-
   function makeNSImage(e) {
     var img = null;
-    if(!e || typeof(e) !== 'string') {
+    if(!e || !e.indexOf) {
       return null;
     } else if(e.indexOf(':') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e)));
@@ -284,7 +283,6 @@ module.exports = (function() {
       } else {
         img = $.NSImage('alloc')('initWithContentsOfFile',$(e));
       }
-      
     } else {
       var imageRef = getImageFromString(e);
       if(imageRef === null) {

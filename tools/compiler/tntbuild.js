@@ -876,6 +876,7 @@ $tint.manifest = function (data) {
       '     <string>Owner</string>'+
       '   </dict>'+
       ' </array>'+
+      ' <key>NSAppTransportSecurity</key><dict><key>NSAllowsArbitraryLoads</key><true/></dict>' +
       ' <key>CFBundleExecutable</key>'+
       ' <string>Runtime</string>'+
       ' <key>CFBundleGetInfoString</key>'+

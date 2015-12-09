@@ -20,7 +20,7 @@ module.exports = (function() {
   {
     var $ = process.bridge.objc;
     var titlestring = "", textstring = "", subtitlestring = "", 
-        soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "";
+        soundEnabled = false, actionbuttontitle = "", otherbuttontitle = "", image = null;
 
     util.defEvents(this);
     /**
@@ -112,6 +112,19 @@ module.exports = (function() {
     });*/
 
     /**
+     * @member image
+     * @type {string}
+     * @memberof Notification
+     * @description Sets the image of the notification that will appear to the user.
+     */
+    Object.defineProperty(this, 'image', {
+      get:function() { return image; },
+      set:function(e) {
+        image = e;
+      }
+    });
+
+    /**
      * @method dispatch
      * @memberof Notification
      * @returns {boolean}
@@ -148,6 +161,10 @@ module.exports = (function() {
         $notify('setSoundName',$.NSUserNotificationDefaultSoundName);
       } else {
         $notify('setSoundName',null);
+      }
+
+      if(image) {
+        $notify('setValue', util.makeNSImage(image), 'forKey', $("_identityImage"));
       }
 
       if(otherbuttontitle !== "" && otherbuttontitle && (!actionbuttontitle || actionbuttontitle === "")) {

@@ -92,19 +92,15 @@ module.exports = (function() {
     this.native('release');
   };
 
-  // TODO: Remove this, its depcreated in OSX and unsupported on Windows.
-  Object.defineProperty(StatusBar.prototype, 'imageHighlighted', {
-    get:function() { return this.private.imgOn; },
-    set:function(e) { 
-      this.private.imgOn = e;
-      e = utilities.makeNSImage(e);
-      var rep = e('representations')('objectAtIndex', 0);
-      rep('setSize', $.NSMakeSize(18,18));
-      if(e) {
-        this.native('setAlternateImage', e);
-      }
+  StatusBar.prototype.makeImageTemplate = function() {
+    var e = utilities.makeNSImage(this.private.img);
+    e('setTemplate', $.YES);
+    var rep = e('representations')('objectAtIndex', 0);
+    rep('setSize', $.NSMakeSize(18,18));
+    if(e) {
+      this.native('setImage', e);
     }
-  });
+  };
 
   /**
    * @member image

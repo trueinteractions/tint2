@@ -11,7 +11,7 @@ module.exports = (function() {
   {
     var titlestring = "", textstring = "", subtitlestring = "", 
         soundEnabled = false, actionbuttontitle = "",
-        timeoutHandle = null, callbacks = [];
+        timeoutHandle = null, callbacks = [], image = null;
 
     utils.defEvents(this);
 
@@ -38,6 +38,13 @@ module.exports = (function() {
     Object.defineProperty(this, 'buttonLabel', {
       get:function() { return actionbuttontitle; },
       set:function(e) { actionbuttontitle = e; }
+    });
+
+    Object.defineProperty(this, 'image', {
+      get:function() { return image; },
+      set:function(e) {
+        image = e;
+      }
     });
 
     this.dispatch = function() {
@@ -82,7 +89,9 @@ module.exports = (function() {
       var bgcolor = new Color('#f7f7f7');
 
       var img;
-      if(global.application.icon) {
+      if(image) {
+        img = utils.makeImage(image);
+      } else if(global.application.icon) {
         img = utils.makeImage(application.icon);
       } else {
         img = utils.makeImage('application');
