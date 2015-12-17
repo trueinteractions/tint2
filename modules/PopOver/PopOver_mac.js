@@ -32,7 +32,6 @@ module.exports = (function() {
     Container.call(this, options);
     
     this.native('retain');
-    this.nativeView('retain');
     this.native('setBehavior', $.NSPopoverBehaviorTransient);
     this.native('setAppearance', $.NSPopoverAppearanceMinimal);
     this.native('setAnimates', $.YES);

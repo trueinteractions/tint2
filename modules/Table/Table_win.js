@@ -17,6 +17,7 @@ module.exports = (function() {
     this.private.columns = {};
     this.private.columnsIndex = {};
     this.private.rows = [];
+    this.private.columnCount = 0;
     this.private.allowEmptySelection = true;
     this.nativeView.AutoGenerateColumns = false;
     this.nativeView.IsReadOnly = true;
@@ -53,7 +54,7 @@ module.exports = (function() {
   Table.prototype = Object.create(Container.prototype);
   Table.prototype.constructor = Table;
 
-  var columnCount = 0;
+  
   Table.prototype.addColumn = function(name) {
     var column = new $.TintInterop.TintDataGridColumn();
     column.Header = name;
@@ -62,8 +63,8 @@ module.exports = (function() {
     column.MinWidth = 20;
     this.native.Columns.Add(column);
     this.private.columns[name] = column;
-    column.DisplayIndex = columnCount;
-    columnCount++;
+    column.DisplayIndex = this.private.columnCount;
+    this.private.columnCount++;
     this.fireEvent('column-added');
     var crFireFunc = this.private.columnResized.bind(this, name); 
     utils.lazyLoadEventListener(this, 'column-resized',
@@ -83,6 +84,7 @@ module.exports = (function() {
     assert(amountOfColumns !== 0, 'There are no more columns to be removed.');
     this.nativeView.Columns.RemoveAt(this.nativeView.Columns.IndexOf(this.private.columns[name]));
     this.private.columns[name] = null;
+    this.private.columnCount--;
     this.fireEvent('column-removed');
   };
 

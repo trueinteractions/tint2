@@ -138,6 +138,13 @@
             'OptimizeReferences': 2, # /OPT:REF
             'EnableCOMDATFolding': 2, # /OPT:ICF
             'LinkIncremental': 1, # /LINKINCREMENTAL:NO
+            #'AdditionalOptions':[
+            #  '/NODEFAULTLIB:msvcrt.lib',
+            #  '/NODEFAULTLIB:libucrt.lib',
+            #  '/NODEFAULTLIB:libvcruntime.lib',
+            #  'vcruntime.lib',
+            #  'ucrt.lib'
+            #],
           },
         },
       }
@@ -261,6 +268,7 @@
           'CLANG_CXX_LANGUAGE_STANDARD': 'gnu++0x',
           'OTHER_CFLAGS': [
             '-fno-strict-aliasing',
+            # '-fobjc-arc',
             # '-fobjc-runtime=macosx',                # added for Tint, objc runtime
           ],
           'OTHER_LDFLAGS':[

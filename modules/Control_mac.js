@@ -17,7 +17,6 @@ module.exports = (function() {
     this.private.trackingArea = $.NSTrackingArea('alloc')('initWithRect', bounds, 'options', options, 'owner', this.nativeView, 'userInfo', null);
     this.nativeView('addTrackingArea',this.private.trackingArea);
   }
-
   function mouseDown(self, cmd, events) {
     this.fireEvent('mousedown');
     util.callSuperForEvent.apply(this,['mouseDown', self, cmd, events]);

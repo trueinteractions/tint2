@@ -134,7 +134,7 @@ if NOT exist .\libraries\node\node.gyp (
 
 if defined NIGHTLY set TAG=nightly-%NIGHTLY%
 SETLOCAL
-	if defined VS140COMNTOOLS if exist "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	if exist "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Configuring Platform Toolset V140
 		if "%VCVARS_VER%" NEQ "140" (
 		  call "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat"
@@ -142,17 +142,17 @@ SETLOCAL
 		)
 		set GYP_MSVS_VERSION=2015
 		set platformtoolset=v140
-	) else if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat" (
+	) else if exist "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		echo Configuring Platform Toolset V120
 		call "%VS120COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2013
 		set platformtoolset=v120
-	) else if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
+	) else if exist "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		echo Configuring Platform Toolset V110
 		call "%VS110COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2012
 		set platformtoolset=v110
-	) else if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
+	) else if exist "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat" (
 		echo Configuring Platform Toolset V100
 		call "%VS100COMNTOOLS%\VCVarsQueryRegistry.bat"
 		set GYP_MSVS_VERSION=2010
@@ -172,7 +172,7 @@ ENDLOCAL
 if not defined build goto test
 
 SETLOCAL
-	if defined VS140COMNTOOLS if exist "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	if exist "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Configuring Platform Toolset V140
 		if "%VCVARS_VER%" NEQ "140" (
 		  call "%VS140COMNTOOLS%\..\..\vc\vcvarsall.bat"
@@ -181,21 +181,21 @@ SETLOCAL
 		set GYP_MSVS_VERSION=2015
 		set platformtoolset=v140
 		goto msbuild-found
-	) else if defined VS120COMNTOOLS if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	) else if exist "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Using Platform Toolset V120
 		call "%VS120COMNTOOLS%\..\..\vc\vcvarsall.bat"
 		set GYP_MSVS_VERSION=2013
 		set platformtoolset=v120
 		goto msbuild-found
 	)
-	if defined VS110COMNTOOLS if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	if exist "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Using Platform Toolset V110
 		call "%VS110COMNTOOLS%\..\..\vc\vcvarsall.bat"
 		set GYP_MSVS_VERSION=2012
 		set platformtoolset=v110
 		goto msbuild-found
 	)
-	if defined VS100COMNTOOLS if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
+	if exist "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat" (
 		echo Using Platform Toolset V100
 		call "%VS100COMNTOOLS%\..\..\vc\vcvarsall.bat"
 		set GYP_MSVS_VERSION=2010

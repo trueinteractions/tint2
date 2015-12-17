@@ -10,4 +10,51 @@ index b5436f9..2ae93cd 100755
 +    "type": native_type.replace('..\..\..\..\..\..\..\..\libraries\\node\\deps\\v8\\tools\\gyp\\',''),
    }
    return metadata
-
+ 
+diff --git a/libraries/node/src/node.js b/libraries/node/src/node.js
+index 7cfd2c0..be5265d 100644
+--- a/libraries/node/src/node.js
++++ b/libraries/node/src/node.js
+@@ -609,8 +609,14 @@
+         break;
+ 
+       default:
+-        // Probably an error on in uv_guess_handle()
+-        throw new Error('Implement me. Unknown stream file type!');
++        if(process.platform === 'win32' && (fd === 1 || fd === 2)) {
++          var fs = NativeModule.require('fs');
++          stream = new fs.SyncWriteStream(fd);
++          stream._type = 'fs'
++        } else {
++          // Probably an error on in uv_guess_handle()
++          throw new Error('Implement me. Unknown stdin file type!');
++        }
+     }
+ 
+     // For supporting legacy API we put the FD here.
+@@ -701,8 +707,14 @@
+           break;
+ 
+         default:
+-          // Probably an error on in uv_guess_handle()
+-          throw new Error('Implement me. Unknown stdin file type!');
++          if(process.platform === 'win32' && (fd === 1 || fd === 2)) {
++            var fs = NativeModule.require('fs');
++            stream = new fs.SyncWriteStream(fd);
++            stream._type = 'fs'
++          } else {
++            // Probably an error on in uv_guess_handle()
++            throw new Error('Implement me. Unknown stdin file type!');
++          }
+       }
+ 
+       // For supporting legacy API we put the FD here.
+@@ -711,7 +723,7 @@
+       // stdin starts out life in a paused state, but node doesn't
+       // know yet.  Explicitly to readStop() it to put it in the
+       // not-reading state.
+-      if (stdin._handle && stdin._handle.readStop) {
++      if (stdin._handle && stdin._handle.readStop && process.platform != 'win32') {
+         stdin._handle.reading = false;
+         stdin.push('');
+         stdin._handle.readStop();

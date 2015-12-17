@@ -11,7 +11,7 @@ module.exports = (function() {
     tintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[tintStatusBarDelegate,$.selector,'@']], 
       utilities.errorwrap(function(self, cmd, id) {
         self.callback = process.bridge.objc.delegates[id.toString()];
-        process.bridge.objc.delegates[id.toString()] = null;
+        //process.bridge.objc.delegates[id.toString()] = null;
         return self;
     }));
     /**

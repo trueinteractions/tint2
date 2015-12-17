@@ -91,7 +91,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       // give a few options to check before giving up.
       var runproc = process.execPath.split(pa.sep);
       // Create build configuration
-      obj.obsfucate = this.data.obsfucate;
+      obj.obfuscate = this.data.obfuscate;
       obj.srcex= !this.data.sources.exclude ? null : this.data.sources.exclude;
       obj.dstdir=outputDirectory;
       obj.manifest = this.manifest;
@@ -181,7 +181,7 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
               $tint.remove(b.absout);
               $tint.makepath($tint.dotdot(b.absout));
               if($tint.file(b.absin) && 
-                this.conf.obsfucate && 
+                this.conf.obfuscate && 
                 b.absin.toLowerCase().indexOf('.js') === (b.absin.length - 3)) 
               {
                 var src = path.normalize(b.absin);

@@ -119,7 +119,7 @@ static void uv_event(void *info) {
 - (void)handleURLEvent:(NSAppleEventDescriptor*)event withReplyEvent:(NSAppleEventDescriptor*)replyEvent
 {
   NSString* url = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
-  [url retain];
+  //[url retain];
   openURL([url UTF8String]);
 }
 
@@ -173,13 +173,13 @@ static void uv_event(void *info) {
     // prevent open events from hearing about our passed in at script time argument.
     if(init_argc > 1 && strncmp(init_argv[1], [nsurl UTF8String], strlen(init_argv[1])) == 0)
       break;
-    [nsurl retain];
+    //[nsurl retain];
     openURL([nsurl UTF8String]);
   }
 }
 
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename {
-  [filename retain];
+  //[filename retain];
   openURL([filename UTF8String]);
   return YES;
 }
