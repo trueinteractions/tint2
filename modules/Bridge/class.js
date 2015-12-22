@@ -18,7 +18,6 @@ module.exports = (function() {
    * instances normally (i.e. `$.NSClassFromString($('NSObject'))`).
    */
   function Class(pointer) { 
-    Function.call(this, pointer);
     this.classPointer = pointer;
     this.pointer = pointer; // TODO: Get rid of this.
     this.isClass = true;

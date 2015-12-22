@@ -63,7 +63,7 @@ function DynamicLibrary (path, mode) {
     // an error message is returned.
 
     // see if the error message is due to an invalid ELF header
-    var match = err.match(/^(([^ \t()])+\.so([^ \t:()])*):([ \t])*invalid ELF header$/);
+    var match = err.match(/^(([^ \t()])+\.so([^ \t:()])*):([ \t])*/);
     if (match) {
       var content = read(match[1], 'ascii');
       // try to find a GROUP ( ... ) command

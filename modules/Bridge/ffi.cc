@@ -6,8 +6,13 @@
 #include <sys/time.h>
 #endif
 
-pthread_t          CallbackInfo::g_mainthread;
-pthread_mutex_t    CallbackInfo::g_queue_mutex;
+
+#ifdef WIN32
+DWORD CallbackInfo::g_threadID;
+#else
+uv_thread_t CallbackInfo::g_mainthread;
+#endif
+uv_mutex_t    CallbackInfo::g_queue_mutex;
 std::queue<ThreadedCallbackInvokation *> CallbackInfo::g_queue;
 uv_async_t         CallbackInfo::g_async;
 
@@ -21,25 +26,25 @@ ThreadedCallbackInvokation::ThreadedCallbackInvokation(callback_info *cbinfo, vo
   m_retval = retval;
   m_parameters = parameters;
 
-  pthread_mutex_init(&m_mutex, NULL);
-  pthread_mutex_lock(&m_mutex);
-  pthread_cond_init(&m_cond, NULL);
+  uv_mutex_init(&m_mutex);
+  uv_mutex_lock(&m_mutex);
+  uv_cond_init(&m_cond);
 }
 
 ThreadedCallbackInvokation::~ThreadedCallbackInvokation() {
-  pthread_mutex_unlock(&m_mutex);
-  pthread_cond_destroy(&m_cond);
-  pthread_mutex_destroy(&m_mutex);
+  uv_mutex_unlock(&m_mutex);
+  uv_cond_destroy(&m_cond);
+  uv_mutex_destroy(&m_mutex);
 }
 
 void ThreadedCallbackInvokation::SignalDoneExecuting() {
-  pthread_mutex_lock(&m_mutex);
-  pthread_cond_signal(&m_cond);
-  pthread_mutex_unlock(&m_mutex);
+  uv_mutex_lock(&m_mutex);
+  uv_cond_signal(&m_cond);
+  uv_mutex_unlock(&m_mutex);
 }
 
 void ThreadedCallbackInvokation::WaitForExecution() {
-  pthread_cond_wait(&m_cond, &m_mutex);
+  uv_cond_wait(&m_cond, &m_mutex);
 }
 
 /*
@@ -53,6 +58,7 @@ void closure_pointer_cb(char *data, void *hint) {
   callback_info *info = reinterpret_cast<callback_info *>(hint);
   // dispose of the Persistent function reference
   delete info->function;
+  info->function = NULL;
   // now we can free the closure data
   ffi_closure_free(info);
 }
@@ -61,50 +67,56 @@ void closure_pointer_cb(char *data, void *hint) {
  * Invokes the JS callback function.
  */
 
-void CallbackInfo::DispatchToV8(callback_info *info, void *retval, void **parameters, bool direct) {
+void CallbackInfo::DispatchToV8(callback_info *info, void *retval, void **parameters, bool dispatched) {
   Nan::HandleScope scope;
 
-  Local<Value> argv[2];
-  argv[0] = WrapPointer((char *)retval, info->resultSize);
-  argv[1] = WrapPointer((char *)parameters, sizeof(char *) * info->argc);
+  static const char* errorMessage = "ffi fatal: callback has been garbage collected!";
 
-  TryCatch try_catch;
-
-  if (info->function->IsEmpty()) {
+  if (info->function == NULL) {
     // throw an error instead of segfaulting.
     // see: https://github.com/rbranson/node-ffi/issues/72
-    Nan::ThrowError("ffi fatal: callback has been garbage collected!");
-    return;
+    if(dispatched) {
+      Local<Value> errorFunctionArgv[1];
+      errorFunctionArgv[0] = Nan::New<String>(errorMessage).ToLocalChecked();
+      info->errorFunction->Call(1, errorFunctionArgv);
+    } else {
+      Nan::ThrowError(errorMessage);
+    }
   } else {
     // invoke the registered callback function
-    info->function->Call(2, argv);
+    Local<Value> functionArgv[2];
+    functionArgv[0] = WrapPointer((char *)retval, info->resultSize);
+    functionArgv[1] = WrapPointer((char *)parameters, sizeof(char *) * info->argc);
+    Local<Value> e = info->function->Call(2, functionArgv);
+
+    if(!e->IsUndefined()) {
+      if(dispatched) {
+        Local<Value> errorFunctionArgv[1];
+        errorFunctionArgv[0] = e;
+        info->errorFunction->Call(1, errorFunctionArgv);
+      } else {
+        Nan::ThrowError(e);
+      }
+    }
 #ifdef __APPLE__
     struct kevent event;
     EV_SET(&event, -1, EVFILT_TIMER | EV_ONESHOT, EV_ADD, NOTE_NSECONDS, 0, 0);
     kevent(uv_backend_fd(uv_default_loop()), &event, 1, NULL, 0, NULL);
 #endif
   }
-
-  if (try_catch.HasCaught()) {
-    if (direct) {
-      try_catch.ReThrow();
-    } else {
-      FatalException(try_catch);
-    }
-  }
 }
 
 void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
-  pthread_mutex_lock(&g_queue_mutex);
+  uv_mutex_lock(&g_queue_mutex);
   while (!g_queue.empty()) {
     ThreadedCallbackInvokation *inv = g_queue.front();
     g_queue.pop();
 
-    DispatchToV8(inv->m_cbinfo, inv->m_retval, inv->m_parameters, false);
+    DispatchToV8(inv->m_cbinfo, inv->m_retval, inv->m_parameters, true);
     inv->SignalDoneExecuting();
   }
 
-  pthread_mutex_unlock(&g_queue_mutex);
+  uv_mutex_unlock(&g_queue_mutex);
 }
 
 /*
@@ -113,7 +125,7 @@ void CallbackInfo::WatcherCallback(uv_async_t *w, int revents) {
  */
 
 NAN_METHOD(CallbackInfo::Callback) {
-  if (info.Length() != 4) {
+  if (info.Length() != 5) {
     return Nan::ThrowError("Not enough arguments.");
   }
 
@@ -122,41 +134,43 @@ NAN_METHOD(CallbackInfo::Callback) {
   ffi_cif *cif = (ffi_cif *)Buffer::Data(info[0]->ToObject());
   size_t resultSize = info[1]->Int32Value();
   int argc = info[2]->Int32Value();
-  Local<Function> callback = Local<Function>::Cast(info[3]);
+  Local<Function> errorReportCallback = Local<Function>::Cast(info[3]);
+  Local<Function> callback = Local<Function>::Cast(info[4]);
 
-  callback_info *cinfo;
+  callback_info *cbInfo;
   ffi_status status;
   void *code;
 
-  cinfo = reinterpret_cast<callback_info *>(ffi_closure_alloc(sizeof(callback_info), &code));
+  cbInfo = reinterpret_cast<callback_info *>(ffi_closure_alloc(sizeof(callback_info), &code));
 
-  if (!cinfo) {
-    return Nan::ThrowError("ffi_closure_alloc() Returned Error");
+  if (!cbInfo) {
+    return THROW_ERROR_EXCEPTION("ffi_closure_alloc() Returned Error");
   }
 
-  cinfo->resultSize = resultSize;
-  cinfo->argc = argc;
-  cinfo->function = new Nan::Callback(callback);
+  cbInfo->resultSize = resultSize;
+  cbInfo->argc = argc;
+  cbInfo->errorFunction = new Nan::Callback(errorReportCallback);
+  cbInfo->function = new Nan::Callback(callback);
 
   // store a reference to the callback function pointer
   // (not sure if this is actually needed...)
-  cinfo->code = code;
+  cbInfo->code = code;
 
   status = ffi_prep_closure_loc(
-    (ffi_closure *)cinfo,
+    (ffi_closure *)cbInfo,
     cif,
     Invoke,
-    (void *)cinfo,
+    (void *)cbInfo,
     code
   );
 
   if (status != FFI_OK) {
-    ffi_closure_free(cinfo);
-    // TODO: return the error code
-    return Nan::ThrowError("ffi_prep_closure() Returned Error");
+    ffi_closure_free(cbInfo);
+    return THROW_ERROR_EXCEPTION_WITH_STATUS_CODE("ffi_prep_closure() Returned Error", status);
   }
-  v8::Local<v8::Object> rtn = Nan::NewBuffer((char *)code, sizeof(void *), closure_pointer_cb, cinfo).ToLocalChecked();
-  info.GetReturnValue().Set(rtn);
+  info.GetReturnValue().Set(
+    Nan::NewBuffer((char *)code, sizeof(void*), closure_pointer_cb, cbInfo).ToLocalChecked()
+  );
 }
 
 /*
@@ -168,23 +182,24 @@ void CallbackInfo::Invoke(ffi_cif *cif, void *retval, void **parameters, void *u
   callback_info *info = reinterpret_cast<callback_info *>(user_data);
 
   // are we executing from another thread?
-  if (pthread_equal(pthread_self(), g_mainthread)) {
+#ifdef WIN32
+  if (g_threadID == GetCurrentThreadId()) {
+#else
+  uv_thread_t self_thread = (uv_thread_t) uv_thread_self();
+  if (uv_thread_equal(&self_thread, &g_mainthread)) {
+#endif
     DispatchToV8(info, retval, parameters, true);
   } else {
     // hold the event loop open while this is executing
-#if NODE_VERSION_AT_LEAST(0, 7, 9)
     uv_ref((uv_handle_t *)&g_async);
-#else
-    uv_ref(uv_default_loop());
-#endif
 
     // create a temporary storage area for our invokation parameters
     ThreadedCallbackInvokation *inv = new ThreadedCallbackInvokation(info, retval, parameters);
 
     // push it to the queue -- threadsafe
-    pthread_mutex_lock(&g_queue_mutex);
+    uv_mutex_lock(&g_queue_mutex);
     g_queue.push(inv);
-    pthread_mutex_unlock(&g_queue_mutex);
+    uv_mutex_unlock(&g_queue_mutex);
 
     // send a message to our main thread to wake up the WatchCallback loop
     uv_async_send(&g_async);
@@ -192,11 +207,7 @@ void CallbackInfo::Invoke(ffi_cif *cif, void *retval, void **parameters, void *u
     // wait for signal from calling thread
     inv->WaitForExecution();
 
-#if NODE_VERSION_AT_LEAST(0, 7, 9)
     uv_unref((uv_handle_t *)&g_async);
-#else
-    uv_unref(uv_default_loop());
-#endif
     delete inv;
   }
 }
@@ -206,37 +217,29 @@ void CallbackInfo::Invoke(ffi_cif *cif, void *retval, void **parameters, void *u
  */
 
 void CallbackInfo::Initialize(Handle<Object> target) {
-  Nan::SetMethod(target, "Callback", Callback);
+  Nan::HandleScope scope;
+
+  Nan::Set(target, Nan::New<String>("Callback").ToLocalChecked(),
+    Nan::New<FunctionTemplate>(Callback)->GetFunction());
 
   // initialize our threaded invokation stuff
-  g_mainthread = pthread_self();
+#ifdef WIN32
+  g_threadID = GetCurrentThreadId();
+#else
+  g_mainthread = (uv_thread_t) uv_thread_self();
+#endif
   uv_async_init(uv_default_loop(), &g_async, (uv_async_cb) CallbackInfo::WatcherCallback);
-  pthread_mutex_init(&g_queue_mutex, NULL);
+  uv_mutex_init(&g_queue_mutex);
 
   // allow the event loop to exit while this is running
-#if NODE_VERSION_AT_LEAST(0, 7, 9)
   uv_unref((uv_handle_t *)&g_async);
-#else
-  uv_unref(uv_default_loop());
-#endif
 }
 
-void wrap_pointer_cb(char *data, void *hint) { }
 
-Handle<Value> WrapPointer(char *ptr) {
-  size_t size = sizeof(ptr);
-  return WrapPointer(ptr, size);
-}
-
-Handle<Value> WrapPointer(char *ptr, size_t length) {
-  Nan::EscapableHandleScope scope;
-  return scope.Escape(Nan::NewBuffer(ptr, length, wrap_pointer_cb, NULL).ToLocalChecked());
-}
 
 ///////////////
 
-void FFI::InitializeStaticFunctions(Handle<Object> target) {
-  Nan::HandleScope scope;
+NAN_MODULE_INIT(FFI::InitializeStaticFunctions) {
   Local<Object> o =  Nan::New<Object>();
 
   // dl functions used by the DynamicLibrary JS class
@@ -250,17 +253,22 @@ void FFI::InitializeStaticFunctions(Handle<Object> target) {
 ///////////////
 
 #define SET_ENUM_VALUE(_value) \
-  target->ForceSet(Nan::New<String>(#_value).ToLocalChecked(), \
-              Nan::New<Number>((ssize_t)_value), \
+  Nan::ForceSet(target, Nan::New<String>(#_value).ToLocalChecked(), \
+              Nan::New<Integer>((uint32_t)_value), \
               static_cast<PropertyAttribute>(ReadOnly|DontDelete))
 
-void FFI::InitializeBindings(Handle<Object> target) {
-  Nan::HandleScope scope;
+NAN_MODULE_INIT(FFI::InitializeBindings) {
+
   // main function exports
-  Nan::SetMethod(target, "ffi_prep_cif", FFIPrepCif);
-  Nan::SetMethod(target, "ffi_prep_cif_var", FFIPrepCifVar);
-  Nan::SetMethod(target, "ffi_call", FFICall);
-  Nan::SetMethod(target, "ffi_call_async", FFICallAsync);
+  Nan::Set(target, Nan::New<String>("ffi_prep_cif").ToLocalChecked(),
+    Nan::New<FunctionTemplate>(FFIPrepCif)->GetFunction());
+  Nan::Set(target, Nan::New<String>("ffi_prep_cif_var").ToLocalChecked(),
+    Nan::New<FunctionTemplate>(FFIPrepCifVar)->GetFunction());
+  Nan::Set(target, Nan::New<String>("ffi_call").ToLocalChecked(),
+    Nan::New<FunctionTemplate>(FFICall)->GetFunction());
+  Nan::Set(target, Nan::New<String>("ffi_call_async").ToLocalChecked(),
+    Nan::New<FunctionTemplate>(FFICallAsync)->GetFunction());
+
 
   // `ffi_status` enum values
   SET_ENUM_VALUE(FFI_OK);
@@ -386,12 +394,12 @@ NAN_METHOD(FFI::FFIPrepCif) {
   ffi_abi abi;
 
   if (info.Length() != 5) {
-    return Nan::ThrowError("ffi_prep_cif() requires 5 arguments!");
+    return THROW_ERROR_EXCEPTION("ffi_prep_cif() requires 5 arguments!");
   }
 
   Handle<Value> cif_buf = info[0];
   if (!Buffer::HasInstance(cif_buf)) {
-    return Nan::ThrowError("prepCif(): Buffer required as first arg");
+    return THROW_ERROR_EXCEPTION("prepCif(): Buffer required as first arg");
   }
 
   cif = Buffer::Data(cif_buf.As<Object>());
@@ -407,8 +415,7 @@ NAN_METHOD(FFI::FFIPrepCif) {
       (ffi_type *)rtype,
       (ffi_type **)atypes);
 
-  v8::Local<Integer> rtn = Nan::New<Integer>(status);
-  info.GetReturnValue().Set(rtn);
+  info.GetReturnValue().Set(Nan::New<Integer>(status));
 }
 
 /*
@@ -432,12 +439,12 @@ NAN_METHOD(FFI::FFIPrepCifVar) {
   ffi_abi abi;
 
   if (info.Length() != 6) {
-    return Nan::ThrowError("ffi_prep_cif() requires 5 arguments!");
+    return THROW_ERROR_EXCEPTION("ffi_prep_cif() requires 5 arguments!");
   }
 
   Handle<Value> cif_buf = info[0];
   if (!Buffer::HasInstance(cif_buf)) {
-    return Nan::ThrowError("prepCifVar(): Buffer required as first arg");
+    return THROW_ERROR_EXCEPTION("prepCifVar(): Buffer required as first arg");
   }
 
   cif = Buffer::Data(cif_buf.As<Object>());
@@ -455,8 +462,7 @@ NAN_METHOD(FFI::FFIPrepCifVar) {
       (ffi_type *)rtype,
       (ffi_type **)atypes);
 
-  v8::Local<Integer> rtn = Nan::New<Integer>(status);
-  info.GetReturnValue().Set(rtn);
+  info.GetReturnValue().Set(Nan::New<Integer>(status));
 }
 
 /*
@@ -470,7 +476,7 @@ NAN_METHOD(FFI::FFIPrepCifVar) {
 
 NAN_METHOD(FFI::FFICall) {
   if (info.Length() != 4) {
-    return Nan::ThrowError("ffi_call() requires 4 arguments!");
+    return THROW_ERROR_EXCEPTION("ffi_call() requires 4 arguments!");
   }
 
   char *cif    = Buffer::Data(info[0]->ToObject());
@@ -489,9 +495,10 @@ NAN_METHOD(FFI::FFICall) {
         );
 #if __OBJC__ || __OBJC2__
     } @catch (id ex) {
-      return ThrowException(WrapPointer((char *)ex));
+      return THROW_ERROR_EXCEPTION(WrapPointer((char *)ex));
     }
 #endif
+  info.GetReturnValue().SetUndefined();
 }
 
 /*
@@ -506,7 +513,7 @@ NAN_METHOD(FFI::FFICall) {
 
 NAN_METHOD(FFI::FFICallAsync) {
   if (info.Length() != 5) {
-    return Nan::ThrowError("ffi_call_async() requires 5 arguments!");
+    return THROW_ERROR_EXCEPTION("ffi_call_async() requires 5 arguments!");
   }
 
   AsyncCallParams *p = new AsyncCallParams();
@@ -527,6 +534,7 @@ NAN_METHOD(FFI::FFICallAsync) {
   uv_queue_work(uv_default_loop(), req,
       FFI::AsyncFFICall,
       (uv_after_work_cb)FFI::FinishAsyncFFICall);
+  info.GetReturnValue().SetUndefined();
 }
 
 /*
@@ -568,7 +576,7 @@ void FFI::FinishAsyncFFICall(uv_work_t *req) {
     argv[0] = WrapPointer(p->err);
   }
 
-  TryCatch try_catch;
+  Nan::TryCatch try_catch;
 
   // invoke the registered callback function
   p->callback->Call(1, argv);
@@ -581,7 +589,7 @@ void FFI::FinishAsyncFFICall(uv_work_t *req) {
   delete req;
 
   if (try_catch.HasCaught()) {
-    FatalException(try_catch);
+    Nan::FatalException(try_catch);
   }
 }
 

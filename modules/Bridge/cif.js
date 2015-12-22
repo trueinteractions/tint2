@@ -75,6 +75,6 @@ function CIF (rtype, types, abi) {
     }
   }
 
-  return cif
+  return cif;
 }
 module.exports = CIF

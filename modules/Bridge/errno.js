@@ -18,20 +18,20 @@ var DynamicLibrary = require('dynamic_library')
   , intPtr = ref.refType(int)
 
 if (process.platform === 'darwin' || process.platform === 'mac') {
-  var __error = DynamicLibrary().get('__error')
-  errnoPtr = ForeignFunction(__error, intPtr, [])
+  var __error = DynamicLibrary().get('__error');
+  errnoPtr = ForeignFunction(__error, intPtr, []);
 } else if (process.platform === 'win32') {
-  var _errno = DynamicLibrary('msvcrt.dll').get('_errno')
-  errnoPtr = ForeignFunction(_errno, intPtr, [])
+  var _errno = DynamicLibrary('msvcrt.dll').get('_errno');
+  errnoPtr = ForeignFunction(_errno, intPtr, []);
 } else {  // linux, sunos, etc.
   var errnoGlobal = DynamicLibrary().get('errno').reinterpret(int.size)
-  errnoPtr = function () { return errnoGlobal }
+  errnoPtr = function () { return errnoGlobal; }
   // set the errno type
-  errnoGlobal.type = int
+  errnoGlobal.type = int;
 }
 
 
 function errno () {
-  return errnoPtr().deref()
+  return errnoPtr().deref();
 }
-module.exports = errno
+module.exports = errno;
