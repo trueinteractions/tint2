@@ -24,8 +24,10 @@ module.exports = (function() {
       dialog.addEventListener('select', function() {
         var sel = dialog.selection;
         this.location = sel[0];
+        this.fireEvent('select');
       }.bind(this));
       dialog.addEventListener('cancel', function() {
+        this.fireEvent('cancel');
         // TODO ?? //
       }.bind(this));
 

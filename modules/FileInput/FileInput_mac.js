@@ -16,6 +16,16 @@ module.exports = (function() {
    * @memberof FileInput
    * @description Creates a new FileInput control.
    */
+  /**
+   * @event select
+   * @memberof FileInput
+   * @description Fires when a user selects the a file or set of files. 
+   */
+  /**
+   * @event cancel
+   * @memberof FileInput
+   * @description Fires when a user cancels the selection. 
+   */
   function FileInput(options) {
     this['_checkInterval'] = null;
     this['_currentUrl'] = null;

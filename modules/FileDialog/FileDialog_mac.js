@@ -16,6 +16,16 @@ module.exports = (function() {
     * @param {string} type The type of file dialog, can be "save" or "open".  Default is open if no parameter is passed in.
     * @description Creates a new FileDialog window that is not shown by default.
     */
+  /**
+   * @event select
+   * @memberof FileDialog
+   * @description Fires when a user selects the a file or set of files. 
+   */
+  /**
+   * @event cancel
+   * @memberof FileDialog
+   * @description Fires when a user cancels the selection. 
+   */
   function FileDialog(type) {
     type = type || "open";
     var $dialog = (type === "save") ? $.NSSavePanel('savePanel') : $.NSOpenPanel('openPanel');
