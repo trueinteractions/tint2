@@ -23,7 +23,7 @@ module.exports = (function() {
       }
       dialog.addEventListener('select', function() {
         var sel = dialog.selection;
-        this.location = sel;
+        this.location = sel[0];
       }.bind(this));
       dialog.addEventListener('cancel', function() {
         // TODO ?? //

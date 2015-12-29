@@ -46,7 +46,7 @@ module.exports = (function() {
         if(child === "space" || child === "flex-space") {
           var spacer = new $.System.Windows.Shapes.Rectangle();
           spacer.MaxWidth = 1000;
-          spacer.Width = 25;
+          spacer.Width = 36;
           spacer.MinWidth = 1;
           spacer.Margin = new $.System.Windows.Thickness(15,0,15,0);
           spacer.HorizontalAlignment = $.System.Windows.HorizontalAlignment.Stretch;
