@@ -12,7 +12,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Image;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Image;
     Container.call(this, options);
-    this.scale = "constrain";
+    this.scale = "contain";
     this.readonly = false;
   }
 
