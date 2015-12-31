@@ -350,7 +350,7 @@ module.exports = (function() {
 
   function updateFont(name) {
     this.nativeView.FontFamily = this.private['_'+name].native.FontFamily;
-    this.nativeView.FontStyle = this.private['_'+name].native.FontStyle;
+    this.nativeView.FontStyle = this.private['_'+name].native.Style;
     this.nativeView.FontWeight = this.private['_'+name].native.Weight;
     this.nativeView.Weight = this.private['_'+name].native.Weight;
     this.nativeView.FontStretch = this.private['_'+name].native.FontStretch;
