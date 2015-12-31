@@ -401,16 +401,26 @@ module.exports = (function() {
       configurable:true,
       enumerable:true,
       get:function() { 
-        var Font = require('Font');
-        return (new Font(this.private['_'+name])); 
+        if(!this.private['_'+name]) {
+          var Font = require('Font');
+          this.private['_'+name] = new Font(this.nativeView(getselector));
+          this.private['_'+name].addEventListener('font-updated', function() {
+            this.nativeView(setselector, this.private['_'+name].native);
+          }.bind(this));
+        }
+        return this.private['_'+name];
       },
       set:function(e) {
         var Font = require('Font');
-        this.private['_'+name] = e;
-        this.nativeView(setselector, e ? ((new Font(e)).native) : null);
+        this.private['_'+name] = new Font(e);
+        this.private['_'+name].addEventListener('font-updated', function() {
+            this.nativeView(setselector, this.private['_'+name].native);
+          }.bind(this));
+        this.nativeView(setselector, this.private['_'+name].native);
       }
     });
   }
+
   function callSuper(self, calls) {
     var prePointer = self.classPointer;
     // Cast the object to its super type that we hold.

@@ -4,6 +4,7 @@ module.exports = (function() {
   }
 
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
   function Font(name, size) {
     console.assert(name, 'A family name was not passed in for the font.');
@@ -55,6 +56,7 @@ module.exports = (function() {
       set:function(e) {
         this.private.face = e;
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     });
 
@@ -63,6 +65,7 @@ module.exports = (function() {
       set:function(e) {
         this.private.size = e;
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     }); 
 
@@ -71,6 +74,7 @@ module.exports = (function() {
       set:function(e) {
         this.private.family = e;
         rebuildNativeFont(this, true);
+        this.fireEvent('font-updated');
       }
     });
 
@@ -79,6 +83,7 @@ module.exports = (function() {
       set:function(e) { 
         this.private.italic = e ? true : false;
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     });
 
@@ -93,6 +98,7 @@ module.exports = (function() {
           this.private.weight = 500;
         }
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     });
 
@@ -101,6 +107,7 @@ module.exports = (function() {
       set:function(e) { 
         this.private.linespacing = e;
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     });
 
@@ -109,6 +116,7 @@ module.exports = (function() {
       set:function(e) { 
         this.private.expanded = e ? true : false;
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     });
 
@@ -136,9 +144,11 @@ module.exports = (function() {
           this.private.bold = false;
         }
         rebuildNativeFont(this);
+        this.fireEvent('font-updated');
       }
     });
   }
+  util.defEvents(Font.prototype);
 
   Font.fromWPFObject = function(obj) {
     var font = new Font(obj.FontFamily.Source, obj.FontSize);

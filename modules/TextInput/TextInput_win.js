@@ -5,6 +5,7 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var Container = require('Container');
   var Color = require('Color');
+  var util = require('Utilities');
 
   function TextInput(options) {
     options = options || {};
@@ -66,6 +67,8 @@ module.exports = (function() {
     set:function(e) { this.native.IsReadOnly = e ? true : false; }
   });
 
+  util.makePropertyFontType(TextInput.prototype, 'font');
+/*
   Object.defineProperty(TextInput.prototype, 'font', {
     get:function() { return Font.fromWPFObject(this.nativeView); },
     set:function(e) {
@@ -77,6 +80,7 @@ module.exports = (function() {
       this.nativeView.FontSize = font.size;
     }
   });
+*/
 
   Object.defineProperty(TextInput.prototype, 'textcolor', {
     get:function() { return new Color(this.nativeView.Foreground.Color); },

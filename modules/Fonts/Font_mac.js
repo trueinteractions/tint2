@@ -3,7 +3,7 @@ module.exports = (function() {
     return global.__TINT.Font;
   }
   var $ = process.bridge.objc;
-  var $utilities = require('Utilities');
+  var util = require('Utilities');
   var fontManager = $.NSFontManager('sharedFontManager');
 
   /**
@@ -37,7 +37,10 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'face', { 
       get:function() { return this.native('fontName').toString(); },
-      set:function(e) { this.native = fontManager('convertFont', this.native,'toFace', $(e.toString())); }
+      set:function(e) { 
+        this.native = fontManager('convertFont', this.native,'toFace', $(e.toString()));
+        this.fireEvent('font-updated');
+      }
     });
 
     /**
@@ -49,7 +52,10 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'size', { 
       get:function() { return this.native('pointSize'); },
-      set:function(e) { this.native = fontManager('convertFont', this.native, 'toSize', $(e.toString())); }
+      set:function(e) {
+        this.native = fontManager('convertFont', this.native, 'toSize', $(e.toString()));
+        this.fireEvent('font-updated');
+      }
     }); 
 
     /**
@@ -61,7 +67,10 @@ module.exports = (function() {
      */
     Object.defineProperty(this, 'family', { 
       get:function() { return this.native('familyName').toString(); },
-      set:function(e) { this.native = fontManager('convertFont', this.native, 'toFamily', $(e.toString())); }
+      set:function(e) {
+        this.native = fontManager('convertFont', this.native, 'toFamily', $(e.toString()));
+        this.fireEvent('font-updated');
+      }
     });
 
     var convertFont = function(boolValue, on, off) {
@@ -72,6 +81,7 @@ module.exports = (function() {
           this.native = fontManager('convertFont', this.native,'toNotHaveTrait', on);
           this.native = fontManager('convertFont', this.native,'toHaveTrait', off);
         }
+        this.fireEvent('font-updated');
     }.bind(this);
 
     /**
@@ -144,9 +154,12 @@ module.exports = (function() {
           traits = traits | $.NSBoldFontMask;
         }
         this.native = fontManager('fontWithFamily', this.native('familyName'), 'traits', traits, 'weight', (weight/100), 'size', this.native('pointSize'));
+        this.fireEvent('font-updated');
       }
     });
   }
+
+  util.defEvents(Font.prototype);
 
   /**
    * @member fonts
@@ -156,7 +169,7 @@ module.exports = (function() {
    *              and does not require creating a font (E.g., Font.fonts).
    */
   Object.defineProperty(Font, 'fonts', {
-    get:function() { return $utilities.nsArrayToArray(fontManager('availableFonts')); }
+    get:function() { return util.nsArrayToArray(fontManager('availableFonts')); }
   });
 
   /**
@@ -167,7 +180,7 @@ module.exports = (function() {
    */
   Object.defineProperty(Font, 'fontFamilies', {
     get:function() { 
-      var fonts = $utilities.nsArrayToArray(fontManager('availableFontFamilies'));
+      var fonts = util.nsArrayToArray(fontManager('availableFontFamilies'));
       for(var i=0; i < fonts.length ; i++) {
         fonts[i] = fonts[i].toString();
       }
@@ -176,11 +189,11 @@ module.exports = (function() {
   });
 /*
   Object.defineProperty(Font, 'fontCollections', {
-    get:function() { return $utilities.nsArrayToArray(fontManager('collectionNames')); }
+    get:function() { return util.nsArrayToArray(fontManager('collectionNames')); }
   });
 
   Font.fontsInFamily = function(family) {
-    var data = $utilities.nsArrayToArray(fontManager('availableMembersOfFontFamily',$(family.toString())));
+    var data = util.nsArrayToArray(fontManager('availableMembersOfFontFamily',$(family.toString())));
     var values = [];
     for(var i=0; i < data.length; i++) {
       var traits = data[i]('objectAtIndex',3);

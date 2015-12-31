@@ -348,6 +348,43 @@ module.exports = (function() {
     });
   }
 
+  function makePropertyFontType(obj,name) {
+    Object.defineProperty(obj, name, {
+      configurable:true,
+      enumerable:true,
+      get:function() { 
+        if(!this.private['_'+name]) {
+          var Font = require('Font');
+          this.private['_'+name] = Font.fromWPFObject(this.nativeView);
+          this.private['_'+name].addEventListener('font-updated', function() {
+            this.nativeView.FontFamily = this.private['_'+name].native.FontFamily;
+            this.nativeView.FontStyle = this.private['_'+name].native.FontStyle;
+            this.nativeView.FontWeight = this.private['_'+name].native.Weight;
+            this.nativeView.Weight = this.private['_'+name].native.Weight;
+            this.nativeView.FontStretch = this.private['_'+name].native.FontStretch;
+            this.nativeView.FontSize = this.private['_'+name].size;
+          }.bind(this));
+        }
+        return this.private['_'+name];
+      },
+      set:function(e) {
+        var font = Font.parseFont(e);
+        this.nativeView.FontFamily = font.native.FontFamily;
+        this.nativeView.FontStyle = font.native.Style;
+        this.nativeView.FontWeight = font.native.Weight;
+        this.nativeView.FontStretch = font.native.Stretch;
+        this.nativeView.FontSize = font.size;
+        font.addEventListener('font-updated', function() {
+          this.nativeView.FontFamily = font.native.FontFamily;
+          this.nativeView.FontStyle = font.native.Style;
+          this.nativeView.FontWeight = font.native.Weight;
+          this.nativeView.FontStretch = font.native.Stretch;
+          this.nativeView.FontSize = font.size;
+        }.bind(this));
+      }
+    });
+  }
+  baseUtilities.makePropertyFontType = makePropertyFontType;
   baseUtilities.forEachItemInControl = forEachItemInControl;
   baseUtilities.getImageFromString = getImageFromString;
   baseUtilities.makeImage = makeImage;
