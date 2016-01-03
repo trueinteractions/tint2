@@ -1,7 +1,7 @@
-diff --git a/deps/v8/tools/js2c.py b/deps/v8/tools/js2c.py
+diff --git a/libraries/node/deps/v8/tools/js2c.py b/libraries/node/deps/v8/tools/js2c.py
 index c280537..746af0f 100755
---- a/deps/v8/tools/js2c.py
-+++ b/deps/v8/tools/js2c.py
+--- a/libraries/node/deps/v8/tools/js2c.py
++++ b/libraries/node/deps/v8/tools/js2c.py
 @@ -589,6 +589,9 @@ def main():
          type: type parameter for NativesCollection template.
          sources.js: JS internal sources or macros.py.""")
@@ -12,10 +12,10 @@ index c280537..746af0f 100755
    JS2C(args[2:],
         args[0],
         args[1],
-diff --git a/src/node.js b/src/node.js
+diff --git a/libraries/node/src/node.js b/libraries/node/src/node.js
 index 34aae93..1a03980 100644
---- a/src/node.js
-+++ b/src/node.js
+--- a/libraries/node/src/node.js
++++ b/libraries/node/src/node.js
 @@ -626,7 +626,14 @@
  
        default:
@@ -59,8 +59,8 @@ index 34aae93..1a03980 100644
          stdin._handle.readStop();
 diff --git a/tools/js2c.py b/tools/js2c.py
 index ec9705e..deb428c 100755
---- a/tools/js2c.py
-+++ b/tools/js2c.py
+--- a/libraries/node/tools/js2c.py
++++ b/libraries/node/tools/js2c.py
 @@ -293,6 +293,11 @@ def JS2C(source, target):
      lines = ExpandMacros(lines, macros)
      lines = CompressScript(lines, do_jsmin)
