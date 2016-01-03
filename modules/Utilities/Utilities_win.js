@@ -372,9 +372,9 @@ module.exports = (function() {
         return this.private['_'+name];
       },
       set:function(e) {
-        var font = Font.parseFont(e);
+        this.private['_'+name] = Font.parseFont(e);
         updateFont.call(this, name);
-        font.addEventListener('font-updated', function() {
+        this.private['_'+name].addEventListener('font-updated', function() {
           updateFont.call(this, name);
         }.bind(this));
       }

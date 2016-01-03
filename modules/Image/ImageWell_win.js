@@ -12,7 +12,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Image;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Image;
     Container.call(this, options);
-    this.scale = "contain";
+    this.scale = "constrain";
     this.readonly = false;
   }
 
@@ -26,9 +26,9 @@ module.exports = (function() {
 
   util.makePropertyImageType(ImageWell.prototype, 'image', 'Source');
   util.makePropertyMapType(ImageWell.prototype, 'scale', 'Stretch', {
-    'constrain':$.System.Windows.Media.Stretch.UniformToFill,
+    'contain':$.System.Windows.Media.Stretch.UniformToFill,
     'fit':$.System.Windows.Media.Stretch.Fill,
-    'contain':$.System.Windows.Media.Stretch.Uniform,
+    'constrain':$.System.Windows.Media.Stretch.Uniform,
     'none':$.System.Windows.Media.Stretch.None
   });
 
