@@ -104,7 +104,7 @@ For the latest updates/news http://www.twitter.com/trevorlinton
 
 Commercial support available at http://www.trueinteractions.com/
 
-Copyright &copy; 2014 True Interactions
+Copyright &copy; 2016 True Interactions
 
 
 
