@@ -6,6 +6,8 @@
     return global.application;
   }
   require('Bridge');
+  var fs = require('fs');
+  var path = require('path');
   var util = require('Utilities');
   process.bridge.dotnet.import('mscorlib');
   process.bridge.dotnet.import('System.dll');
@@ -301,6 +303,28 @@
         $.System.Windows.Input.ApplicationCommands[command].Execute(null,_win);
       }
     }
+
+    Object.defineProperty(this, 'storage', {
+      get:function() {
+        var settingsDirectory = $.System.AppDomain.CurrentDomain.BaseDirectory;
+        if (!$.System.IO.Directory.Exists(settingsDirectory)) {
+          $.System.IO.Directory.CreateDirectory(settingsDirectory);
+        }
+        var fileName = path.join(settingsDirectory, 'tint.json');
+        if (fs.existsSync(fileName)) {
+          return fs.readFileSync(fileName).toString('utf8');
+        }
+        return "";
+      },
+      set:function(e) {
+        var settingsDirectory = $.System.AppDomain.CurrentDomain.BaseDirectory;
+        if (!$.System.IO.Directory.Exists(settingsDirectory)) {
+          $.System.IO.Directory.CreateDirectory(settingsDirectory);
+        }
+        var fileName = path.join(settingsDirectory, 'tint.json');
+        fs.writeFileSync(fileName, e.toString());
+      }
+    })
 
     this.paste = function() { execAppCommand('Paste'); };
     this.copy = function() { execAppCommand('Copy'); };

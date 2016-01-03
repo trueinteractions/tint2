@@ -247,6 +247,31 @@
     };
 
     /**
+     * @member storage
+     * @type {string}
+     * @memberof Application
+     * @description The storage property contains previously stored information as a string
+     *              that persists between startup and shutdown. This is a useful place to
+     *              store user preferences, or light amounts of data unrelated to a specific
+     *              file or task the user is taking. It's recommended to use JSON.parse and
+     *              JSON.stringify to store structure JSON data.
+     */
+    Object.defineProperty(this, 'storage', {
+      get:function() {
+        var obj = $.NSUserDefaults('standardUserDefaults')('stringForKey', $('tint'));
+        if(obj) {
+          return obj.toString();
+        } else {
+          return "";
+        }
+      },
+      set:function(e) {
+        var obj = e.toString();
+        $.NSUserDefaults('standardUserDefaults')('setObject', $(obj), 'forKey', $('tint'));
+      }
+    });
+
+    /**
      * @member appearance
      * @type {string}
      * @memberof Application
