@@ -97,12 +97,15 @@ static void uv_event(void *info) {
     // then repost the semaphore to allow us to continue. Note, we've
     // taken care of the timeout, so never use UV_RUN_ONCE or UV_RUN_DEFAULT.
     dispatch_async(dispatch_get_main_queue(), ^{
-      v8::platform::PumpMessageLoop(node::default_platform, node::node_isolate);
+      v8::Isolate* isolate;
+      isolate = node::node_isolate.exchange(nullptr);
+      v8::platform::PumpMessageLoop(node::default_platform, isolate);
       if (uv_run(env->event_loop(), UV_RUN_NOWAIT) == false && 
           uv_loop_alive(env->event_loop()) == false) {
         EmitBeforeExit(env);
         uv_trip_timer_safety = true;
       }
+      CHECK_EQ(nullptr, node::node_isolate.exchange(isolate));
       uv_sem_post(&embed_sem);
     });
 
@@ -190,8 +193,11 @@ static void uv_event(void *info) {
   // Emit `beforeExit` if the loop became alive either after emitting
   // event, or after running some callbacks.
   if(uv_loop_alive(env->event_loop())) {
-    v8::platform::PumpMessageLoop(node::default_platform, node::node_isolate);
+    v8::Isolate* isolate;
+    isolate = node::node_isolate.exchange(nullptr);
+    v8::platform::PumpMessageLoop(node::default_platform, isolate);
     uv_run(env->event_loop(), UV_RUN_NOWAIT);
+    CHECK_EQ(nullptr, node::node_isolate.exchange(isolate));
   }
   EmitExit(env);
   RunAtExit(env);
@@ -353,8 +359,9 @@ int main(int argc, char * argv[]) {
 
     // Fetch a reference to the main isolate, so we have a reference to it
     // even when we need it to access it from another (debugger) thread.
-    if (instance_data.is_main())
-      node::node_isolate = isolate;
+    if (instance_data.is_main()) {
+      node::node_isolate.exchange(isolate);
+    }
 
     {
       v8::Locker locker(isolate);
@@ -398,8 +405,9 @@ int main(int argc, char * argv[]) {
     isolate->Dispose();
     isolate = nullptr;
     delete array_buffer_allocator;
-    if (instance_data.is_main())
-      node::node_isolate = nullptr;
+    if (instance_data.is_main()) {
+      node::node_isolate.exchange(nullptr);
+    }
     exit_code = instance_data.exit_code();
   }
   v8::V8::Dispose();

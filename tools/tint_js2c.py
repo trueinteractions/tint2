@@ -311,7 +311,6 @@ def JS2C(source, target):
     if '_mac' in s or '_win' in s or '_gtk' in s or 'Bridge' in s or '_base' in s or 'AppSchema' in s or 'Application' in s:
       id = os.path.basename(str(s)).split('.')[0].replace('_mac','').replace('_win','').replace('_linux','').replace('_posix','').replace('_gtk','')
 
-
     if delay: id = id[:-6]
     if delay:
       delay_ids.append((id, len(lines)))
