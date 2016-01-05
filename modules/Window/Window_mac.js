@@ -131,7 +131,7 @@ module.exports = (function() {
       nativeClassExtended.register();
       this.nativeClass = nativeClassExtended;
     }
-    this.nativeViewClass = this.nativeViewClass || ($.NSVisualEffectView ? $.NSVisualEffectView : $.NSView);
+    this.nativeViewClass = this.nativeViewClass || $.NSView;
     Container.call(this, options);
     // We'll need to first detect if we have an object already initialized, if not we'll do it.
     // this is a work around to support inheritence in JS.
