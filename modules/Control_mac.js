@@ -271,7 +271,7 @@ module.exports = (function() {
     this.nativeView('removeFromSuperviewWithoutNeedingDisplay');
     this.private.parent.nativeView('addSubview', this.nativeView, 'positioned', $.NSWindowAbove, 'relativeTo', control.nativeView);
     reapplyConstraints.apply(this);
-  }
+  };
 
   /**
    * @method moveBelow
@@ -284,7 +284,7 @@ module.exports = (function() {
     this.nativeView('removeFromSuperviewWithoutNeedingDisplay');
     this.private.parent.nativeView('addSubview', this.nativeView, 'positioned', $.NSWindowBelow, 'relativeTo', control.nativeView);
     reapplyConstraints.apply(this);
-  }
+  };
   
   /**
    * @member acceptsDroppedTypes
@@ -378,6 +378,14 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
   util.makePropertyBoolType(Control.prototype, 'visible', 'isHidden', 'setHidden', {inverse:true});
+
+  /**
+   * @member visible
+   * @type {boolean}
+   * @memberof Control
+   * @description Gets or sets the tooltip that displays when the cursor hovers over the view.
+   */
+  util.makePropertyStringType(Control.prototype, 'tooltip', 'toolTip', 'setToolTip');
 
   // Helper function to convert OSX coordinate spaces to 
   // top-left.

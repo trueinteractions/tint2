@@ -169,6 +169,8 @@ module.exports = (function() {
 
   Control.prototype.animateOnSizeChange = false;
   Control.prototype.animateOnPositionChange = false;
+  
+  utils.makePropertyStringType(Control.prototype, 'tooltip', 'ToolTip');
 
   Control.prototype.moveAbove = function(control) {
     assert(this.private.parent, 'The control is not currently placed on a container.');
