@@ -4,12 +4,15 @@ module.exports = (function() {
   }
   var Button = require('Button');
   var util = require('Utilities');
+  var $ = process.bridge.dotnet;
 
   function ToolbarItem(options) {
     options = options || {};
     Button.call(this, options);
     this.private.tooltip = "";
     this.private.type = "ToolbarItem"; // needed by Toolbar
+    this.private.ignorePadding = true;
+    this.private.stack.Orientation = $.System.Windows.Controls.Orientation.Vertical;
   }
 
   ToolbarItem.prototype = Object.create(Button.prototype);

@@ -12,20 +12,30 @@ module.exports = (function() {
       var sides = toolbar.nativeView.Height * 0.025;
       child.nativeView.Margin = new $.System.Windows.Thickness(sides,topedges,sides,topedges);
       if(child.private && child.private.type === "ToolbarItem") {
-        if(toolbar.state === "icon") {
-          //child.private.img.Height = toolbar.nativeView.Height - 12;
-          //child.private.img.Width = toolbar.nativeView.Height - 12;
-          child.private.img.Visibility = $.System.Windows.Visibility.Visible;
-          child.private.label.Visibility = $.System.Windows.Visibility.Collapsed;
-        } else if (toolbar.state === "iconandlabel") {
-          //child.private.img.Height = toolbar.nativeView.Height - 24;
-          //child.private.img.Width = toolbar.nativeView.Height - 24;
-          child.private.img.Visibility = $.System.Windows.Visibility.Visible;
-          child.private.label.Visibility = $.System.Windows.Visibility.Visible;
-        } else if (toolbar.state === "label") {
-          child.private.img.Visibility = $.System.Windows.Visibility.Collapsed;
-          child.private.label.Visibility = $.System.Windows.Visibility.Visible;
-        }
+        setTimeout(function() {
+          if(toolbar.state === "icon") {
+            if(child.private.img) {
+              child.private.img.Visibility = $.System.Windows.Visibility.Visible;
+            }
+            if(child.private.label) {
+              child.private.label.Visibility = $.System.Windows.Visibility.Collapsed;
+            }
+          } else if (toolbar.state === "iconandlabel") {
+            if(child.private.img) {
+              child.private.img.Visibility = $.System.Windows.Visibility.Visible;
+            }
+            if(child.private.label) {
+              child.private.label.Visibility = $.System.Windows.Visibility.Visible;
+            }
+          } else if (toolbar.state === "label") {
+            if(child.private.img) {
+              child.private.img.Visibility = $.System.Windows.Visibility.Collapsed;
+            }
+            if(child.private.label) {
+              child.private.label.Visibility = $.System.Windows.Visibility.Visible;
+            }
+          }
+        }.bind(this), 100);
       }
     }
   }
@@ -69,7 +79,7 @@ module.exports = (function() {
         }
         if(child.native.Height > this.nativeView.Height || child.native.MinHeight > this.nativeView.Height) {
           if(child.native.Height) {
-            this.nativeView.Height = child.native.Height  + 10;
+            this.nativeView.Height = child.native.Height + 10;
           }
           if(child.native.MinHeight) {
             this.nativeView.Height = child.native.MinHeight + 10;

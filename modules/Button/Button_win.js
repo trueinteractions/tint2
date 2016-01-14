@@ -16,22 +16,24 @@ module.exports = (function() {
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
     this.private.stack = new $.System.Windows.Controls.StackPanel();
-    this.private.stack.Orentation = $.System.Windows.Controls.Vertical;
+    this.private.stack.Orientation = $.System.Windows.Controls.Orientation.Horizontal;
     this.private.label = null;
     this.private.img = null;
 
     this.private.remapNaturalStates = function() {
       this.native.Content = this.private.stack;
 
-      if(this.type === "normal" || this.type === "toggle") {
+      if(this.type === "toggle") {
         this.native.Padding = new $.System.Windows.Thickness(5.75,1.75,5.75,1.75);
       } else {
         this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
       }
       // convert pxl based measure to point (18/17) * PixelSize
-      this.native.FontSize = this.native.FontSize * 1.05882352941176;
+      // this.native.FontSize = this.native.FontSize * 1.05882352941176;
       this.private.defaultBorder = this.nativeView.BorderThickness;
       this.private.defaultBorderColor = this.nativeView.BorderBrush;
+      this.private.stack.Height = this.nativeView.Height;
+      this.private.stack.Width = this.nativeView.Width;
     }.bind(this);
     this.private.remapNaturalStates();
   }
@@ -168,18 +170,25 @@ module.exports = (function() {
       if(this.private.img !== null) {
         this.private.stack.Children.Remove(this.private.img);
       }
-      this.private.img = utilities.makeImage(e);
-      var asRatio = this.private.img.Source.Height / this.nativeView.Height;
+      if(e) {
+        this.private.img = utilities.makeImage(e, $.System.Windows.Media.Stretch.Uniform);
+      }
       setTimeout(function() {
-        var height = this.private.user.height ? this.private.user.height : (this.private.user.top - this.private.user.bottom);
+        var ratio = this.private.img.Source.Width / this.private.img.Source.Height;
+        var height = this.private.user.height ? this.private.user.height : (
+          this.private.user.bottom && this.private.user.top ? (this.private.user.top - this.private.user.bottom ) : this.nativeView.Height );
         height = height || 16;
+        if(!this.private.ignorePadding)
+          height = height - 7.5; // Used by toolbaritem.
         this.private.img.Height = height;
+        this.private.img.Width = ratio*height;
+        if(this.private.img !== null) {
+          this.private.stack.Children.Insert(0, this.private.img);
+        }
       }.bind(this),16);
       //this.private.img.Height = this.private.img.Source.Height * (this.private.img.Source.DpiY/$.System.Windows.SystemParameters.Dpi);
       //this.private.img.Width = this.private.img.Source.Width * (this.private.img.Source.DpiX/$.System.Windows.SystemParameters.Dpi);
-      if(this.private.img !== null) {
-        this.private.stack.Children.Insert(0,this.private.img);
-      }
+      
     }
   });
 
