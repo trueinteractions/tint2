@@ -181,13 +181,13 @@ module.exports = (function() {
       if(e) {
         this.private.img = utilities.makeImage(e);
       }
+
       var ratio = this.private.img.Source.Width / this.private.img.Source.Height;
       var height = this.private.user.height ? 
                     this.private.user.height : 
                     ( ( this.private.user.bottom && this.private.user.top ) ? 
                       ( this.private.user.top - this.private.user.bottom ) : 
-                      ( this.private.img.Source.Height ) 
-                    );
+                      16 );
       height = height || 16;
       if(this.private.ignorePadding) {
         height = height - 7.5; // Used by toolbaritem.

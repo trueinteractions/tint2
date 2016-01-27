@@ -13,6 +13,9 @@ module.exports = (function() {
     this.private.type = "ToolbarItem"; // needed by Toolbar
     this.private.ignorePadding = true;
     this.private.stack.Orientation = $.System.Windows.Controls.Orientation.Vertical;
+    if(!this.height) {
+      this.height = 18;
+    }
     util.setProperties(this, properties, inherited);
   }
 

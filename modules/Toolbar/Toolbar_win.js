@@ -5,6 +5,7 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.dotnet;
   var util = require('Utilities');
+  var Button = require('Button');
 
   function resetChildNodes(toolbar) {
     for(var i=0; i < toolbar.private.children.length; i++) {
@@ -53,8 +54,16 @@ module.exports = (function() {
     this.private.toolbartype = "iconandlabel";
     this.addEventListener('before-child-attached', function(child) {
       try {
+        if(child instanceof Button) {
+          if(child.private.img) {
+            var ratio = child.private.img.Width/child.private.img.Height;
+            child.private.img.Height = 18;
+            child.private.img.Width = ratio*18;
+            child.height = 18;
+            child.width = 18*ratio + 5;
+          }
         // TODO: Support flex-space
-        if(child === "space" || child === "flex-space") {
+        } else if(child === "space" || child === "flex-space") {
           var spacer = new $.System.Windows.Shapes.Rectangle();
           spacer.MaxWidth = 1000;
           spacer.Width = 36;
