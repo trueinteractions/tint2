@@ -10,7 +10,7 @@ module.exports = (function() {
   var utils = require('Utilities');
   var assert = require('assert');
 
-  function Control(options) {
+  function Control(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
 
@@ -165,6 +165,8 @@ module.exports = (function() {
 
     this.addEventListener('parent-attached', function(p) { this.private.parent = p; }.bind(this));
     this.addEventListener('parent-dettached', function() { this.private.parent = null; }.bind(this));
+
+    utils.setProperties(this, properties, inherited);
   }
 
   Control.prototype.animateOnSizeChange = false;

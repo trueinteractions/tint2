@@ -7,11 +7,11 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function Scroll(options) {
+  function Scroll(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ScrollViewer;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ScrollViewer;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     this.native.HorizontalContentAlignment = $.System.Windows.HorizontalAlignment.Left;
     this.native.VerticalAlignment = $.System.Windows.HorizontalAlignment.Top;
@@ -19,6 +19,7 @@ module.exports = (function() {
     this.appendChild = null;
     this.removeChild = null;
     this.private.background = null;
+    util.setProperties(this, properties, inherited);
   }
 
   Scroll.prototype = Object.create(Container.prototype);

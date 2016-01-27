@@ -7,13 +7,14 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function ImageWell(options) {
+  function ImageWell(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Image;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Image;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.scale = "constrain";
     this.readonly = false;
+    util.setProperties(this, properties, inherited);
   }
 
   ImageWell.prototype = Object.create(Container.prototype);

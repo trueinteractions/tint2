@@ -13,7 +13,7 @@ module.exports = (function() {
    * @memberof ToolbarItem
    * @description Creates a new toolbar item.
    */
-  function ToolbarItem() {
+  function ToolbarItem(properties) {
     var $ = process.bridge.objc;
     this.private = {identifier:Math.round(Math.random()*1000000).toString()};
     this.native = this.nativeView = $.NSToolbarItem('alloc')('initWithItemIdentifier', $(this.private.identifier));
@@ -24,6 +24,7 @@ module.exports = (function() {
     this.private.delegate = delegateClass('alloc')('init');
     this.nativeView('setTarget', this.private.delegate);
     this.nativeView('setAction', 'click:');
+    util.setProperties(this, properties, false);
   }
 
   /**

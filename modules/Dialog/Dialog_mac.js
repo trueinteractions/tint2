@@ -1,7 +1,6 @@
 module.exports = (function() {
   var $ = process.bridge.objc;
   var util = require('Utilities');
-
   var Control = require('Control');
 
   /**
@@ -19,7 +18,7 @@ module.exports = (function() {
    * @memberof Dialog
    * @description Creates a new Dialog window hidden by default.
    */
-  function Dialog(options) {
+  function Dialog(properties, options, inherited) {
     var img = null, buttonsSet = false, mainButton = null, auxButton = null;
     options = options || {};
     options.delegates = options.delegates || [];
@@ -27,7 +26,9 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.NSAlert;
     this.nativeViewClass = this.nativeViewClass || $.NSAlert;
     this.native = this.nativeClass('alloc')('init');
-    Control.call(this, options);
+    Control.call(this, properties, options, inherited || true);
+
+    util.setProperties(this, properties, inherited);
 
    /**
     * @member title

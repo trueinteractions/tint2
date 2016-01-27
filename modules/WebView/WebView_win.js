@@ -8,7 +8,7 @@ module.exports = (function() {
   var $ = process.bridge.dotnet;
   var $$ = process.bridge.win32;
 
-  function WebView(options) {
+  function WebView(properties, options, inherited) {
     $.import('System.Windows.Forms'); 
     $.import('WPF\\WindowsFormsIntegration.dll');
     $.System.Windows.Forms.Application.EnableVisualStyles();
@@ -18,7 +18,7 @@ module.exports = (function() {
     var previousUrl = "";
     this.nativeClass =  this.nativeClass || $.System.Windows.Controls.DockPanel;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.DockPanel;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.private.interop = new $.System.Windows.Forms.Integration.WindowsFormsHost();
     this.private.browser = new $.System.Windows.Forms.WebBrowser();
     this.private.interop.Child = this.private.browser;
@@ -161,6 +161,7 @@ module.exports = (function() {
     // If we don't have a document loaded IE will throw an error if anything
     // other than a location is set, so we'll set an intiial location to prevent this.
     this.private.browser.Navigate(new $.System.Uri("http://127.0.0.1:" + application.private.appSchemaPort + "/blank-page-appschema.html"));
+    util.setProperties(this, properties, inherited);
   }
 
   WebView.prototype = Object.create(Container.prototype);

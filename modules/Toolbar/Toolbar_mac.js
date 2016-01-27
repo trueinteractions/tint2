@@ -81,7 +81,7 @@ module.exports = (function() {
    * urlLocation.value = 'A text input field';
    * @screenshot-window {win}
    */
-  function Toolbar() {
+  function Toolbar(properties) {
     var toolbarCache = [];
     this.native = $.NSToolbar('alloc')('initWithIdentifier',$(global.application.name));
     this.native('setAllowsUserCustomization',$.NO);
@@ -139,6 +139,8 @@ module.exports = (function() {
       delete this.private.identifiers[child.private.identifier];
       delete toolbarCache[child.private.identifier];
     }.bind(this));
+
+    util.setProperties(this, properties, false);
   } 
 
   Toolbar.prototype = Object.create(Container.prototype);

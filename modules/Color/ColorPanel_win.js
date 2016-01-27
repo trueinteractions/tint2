@@ -4,7 +4,7 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function ColorPanel(NativeObjectClass, NativeViewClass, options) {
+  function ColorPanel(NativeObjectClass, NativeViewClass, properties, options, inherited) {
     options = options || {};
 
   //TODO: Color change event!
@@ -21,6 +21,7 @@ module.exports = (function() {
     this.nativeView = this.native = new $.System.Windows.Forms.ColorDialog();
     this.native.FullOpen = true;
     this.native.SolidColorOnly = false;
+    util.setProperties(this, properties, inherited);
   }
 
   ColorPanel.prototype = Object.create(Panel.prototype);

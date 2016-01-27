@@ -7,11 +7,11 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function DropDown(options) {
+  function DropDown(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options, inherited || true);
     this.private.previewMouseDownHandler = function() {
       if(this.private.contextMenu) {
         this.private.contextMenu.IsOpen = !this.private.contextMenu.IsOpen;
@@ -27,6 +27,7 @@ module.exports = (function() {
       'Placement',
       $.System.Windows.Controls.Primitives.PlacementMode.Bottom,
       $.System.Windows.Controls.Primitives.PlacementMode.Center);
+    util.setProperties(this, properties, inherited);
   }
 
   DropDown.prototype = Object.create(TextInput.prototype);

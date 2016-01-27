@@ -82,12 +82,12 @@ module.exports = (function() {
     this.fireEvent('closed');
   }
 
-  function PopOver(options) {
+  function PopOver(properties, options, inherited) {
     options = options || {};
 
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Primitives.Popup;
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     this.native.Child = this.private.canvas = $.System.Xaml.XamlServices.Parse("<Canvas xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Margin=\"0,0,0,0\"><Canvas.Effect><DropShadowEffect Opacity=\"1\" BlurRadius=\"3\" ShadowDepth=\"0.5\"/></Canvas.Effect></Canvas>");
     this.private.rect = $.System.Xaml.XamlServices.Parse("<Rectangle xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"  Stretch=\"Fill\" Fill=\"#f7f7f7\" Opacity=\"1\" RadiusX=\"6\" RadiusY=\"6\"></Rectangle>");
@@ -112,6 +112,7 @@ module.exports = (function() {
 
     // Scroll, Slide, Fade & None
     this.native.PopupAnimation = $.System.Windows.Controls.Primitives.PopupAnimation.Slide;
+    util.setProperties(this, properties, inherited);
   }
 
   PopOver.prototype = Object.create(Container.prototype);

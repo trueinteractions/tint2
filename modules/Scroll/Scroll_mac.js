@@ -19,12 +19,12 @@ module.exports = (function() {
    * @memberof Scroll
    * @description Creates a new scroll container.
    */
-  function Scroll(options) {
+  function Scroll(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSScrollView;
     this.nativeViewClass = this.nativeViewClass || $.NSScrollView;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native('setFrame', $.NSMakeRect(0,0,500,500));
     this.native('setDrawsBackground',$.NO);
     this.native('setHasVerticalScroller',$.YES);
@@ -34,6 +34,7 @@ module.exports = (function() {
     this.removeChild = null;
 
     this.private.background = null;
+    util.setProperties(this, properties, inherited);
   }
 
   Scroll.prototype = Object.create(Container.prototype);

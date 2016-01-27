@@ -6,7 +6,7 @@ module.exports = (function() {
   var utilities = require('Utilities');
   var Menu = require('Menu');
 
-  function StatusBar() {
+  function StatusBar(properties) {
     this.private = {
       events:{},
       submenu:null,
@@ -32,6 +32,7 @@ module.exports = (function() {
     this.private.hideContextMenu = function() {
       this.private.contextMenu.IsOpen = false;
     };
+    utilities.setProperties(this, properties, false);
   }
 
   utilities.defEvents(StatusBar.prototype);

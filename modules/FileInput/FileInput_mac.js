@@ -26,7 +26,7 @@ module.exports = (function() {
    * @memberof FileInput
    * @description Fires when a user cancels the selection. 
    */
-  function FileInput(options) {
+  function FileInput(properties, options, inherited) {
     this['_checkInterval'] = null;
     this['_currentUrl'] = null;
     options = options || {};
@@ -35,6 +35,7 @@ module.exports = (function() {
       ['pathControl:willDisplayOpenPanel:', 'v@:@@', 
         function(sender, cmd, pathControl, openPanel) {
           openPanel('setDelegate', this.nativeView);
+          openPanel('setCanCreateDirectories', $.YES);
           this['_checkInterval'] = setInterval(function() {
             var url = this.nativeView('URL');
             if(this['_currentUrl'] !== url) {
@@ -47,10 +48,11 @@ module.exports = (function() {
 
     this.nativeClass = this.nativeClass || $.NSPathControl;
     this.nativeViewClass = this.nativeViewClass || $.NSPathControl;
-    Control.call(this, options);
+    Control.call(this, properties, options, inherited || true);
     this.nativeView('setDelegate',this.nativeView);
     this.native('setPathStyle', 2); // 2 = NSPathStylePopUp
     this.private.allowedFileTypes = null;
+    util.setProperties(this, properties, inherited);
   }
 
   FileInput.prototype = Object.create(Control.prototype);

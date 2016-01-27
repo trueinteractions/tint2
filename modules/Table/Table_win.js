@@ -7,11 +7,11 @@ module.exports = (function() {
   var Container = require('Container');
   var assert = require('assert');
 
-  function Table(options) {
+  function Table(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.DataGrid;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.DataGrid;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.private.spaceX = 1;
     this.private.spaceY = 1;
     this.private.columns = {};
@@ -49,6 +49,8 @@ module.exports = (function() {
     utils.lazyLoadEventListener(this, 'column-moved',
       this.native.addEventListener.bind(this.native,'ColumnReordered', this.private.columnMoved),
       this.native.removeEventListener.bind(this.native, 'ColumnReordered', this.private.columnMoved));
+
+    utils.setProperties(this, properties, inherited);
   }
 
   Table.prototype = Object.create(Container.prototype);

@@ -3,8 +3,9 @@ module.exports = (function() {
     return global.__TINT.Window;
   }
   var $ = process.bridge.gobj.Gtk;
+  var util = require('Utilities');
 
-  function Window(options) {
+  function Window(properties, options, inherited) {
     options = options || {};
     options.width = options.width || 500;
     options.height = options.height || 500;
@@ -12,6 +13,8 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.Window;
     this.nativeViewClass = this.nativeViewClass || $.Widget;
     //Container.call(this, options);
+
+    util.setProperties(this, properties, inherited);
   }
 
   Window.prototype = Object.create(Container.prototype);

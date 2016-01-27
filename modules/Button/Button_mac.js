@@ -16,18 +16,19 @@ module.exports = (function() {
     * @memberof Button
     * @description Creates a new Button control.
     */
-  function Button(options) {
+  function Button(properties, options, inherited) {
     options = options || {};
     options.mouseDownBlocks = true;
     this.nativeClass = this.nativeClass || $.NSButton;
     this.nativeViewClass = this.nativeViewClass || $.NSButton;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited);
     this.private.img = null;
     this.private.buttonStyle = this.private.buttonType = "normal";
     this.native('setButtonType',$.NSMomentaryLightButton);
     this.native('setBezelStyle',$.NSTexturedRoundedBezelStyle);
     this.native('cell')('setWraps',$.NO);
     this.native('setTitle', $(""));
+    util.setProperties(this, properties, inherited);
   }
 
   Button.prototype = Object.create(Container.prototype);
@@ -126,6 +127,28 @@ module.exports = (function() {
       this.fireEvent('property-change', ['enabled', e]);
       return this.nativeView('setEnabled',e); 
     }
+  );
+
+  /**
+   * @member default
+   * @type {boolean}
+   * @memberof Button
+   * @description Set whether this button is the default button for the window, e.g., what is executed if the 
+   *              user presses enter on the window with no focus on a child element..
+   */
+  util.def(Button.prototype, 'default',
+    function() { return this.private.defaultbutton; },
+    function(e) {
+      this.private.defaultbutton = e ? true : false;
+      if(this.private.defaultbutton) {
+        this.nativeView('setKeyEquivalent',$('\r'));
+        this.nativeView('setNeedsDisplay', $.YES);
+        this.nativeView('setBezelStyle', $.NSRoundedBezelStyle);
+      } else {
+        this.nativeView('setKeyEquivalent',$(''));
+        this.nativeView('setNeedsDisplay', $.YES);
+      }
+    }    
   );
 
   /**

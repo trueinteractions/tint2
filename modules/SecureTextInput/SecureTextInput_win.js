@@ -4,14 +4,16 @@ module.exports = (function() {
   }
   var $ = process.bridge.dotnet;
   var TextInput = require('TextInput');
+  var util = require('Utilities');
 
-  function SecureTextInput(options) {
+  function SecureTextInput(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.PasswordBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.PasswordBox;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options);
     // textChanged was defined in TextInput.
     this.native.addEventListener('PasswordChanged', this.private.textChanged);
+    util.setProperties(this, properties, inherited);
   }
   SecureTextInput.prototype = Object.create(TextInput.prototype);
   SecureTextInput.prototype.constructor = SecureTextInput;

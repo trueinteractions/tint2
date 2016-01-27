@@ -15,14 +15,14 @@ module.exports = (function() {
     win.private.hwnd = (new $.System.Windows.Interop.WindowInteropHelper(win.native)).EnsureHandle();
   }
 
-  function Window(options) {
+  function Window(properties, options, inherited) {
     options = options || {};
     options.width = options.width || 500;
     options.height = options.height || 500;
     global.application.private.windowCount++;
     this.nativeClass = this.nativeClass || $.System.Windows.Window;
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native.Content = new $.System.Windows.Controls.DockPanel();
     this.native.Content.LastChildFill = true;
     this.native.Content.Children.Add(this.nativeView);
@@ -105,6 +105,9 @@ module.exports = (function() {
     this.native.Width = options.width;
     this.native.Height = options.height;
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
+
+
+    util.setProperties(this, properties, inherited);
   }
 
   Window.prototype = Object.create(Container.prototype);

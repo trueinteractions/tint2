@@ -2,6 +2,7 @@ module.exports = (function() {
   var Panel = require('Panel');
   var Font = require('Font');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class FontPanel
@@ -12,19 +13,20 @@ module.exports = (function() {
    * @memberof FontPanel
    * @description Creates a new font panel window that is initially hidden.
    */
-  function FontPanel(options) {
+  function FontPanel(properties, options, inherited) {
     var fontManager = $.NSFontManager('sharedFontManager');
     options = options || {};
     this.nativeClass = this.nativeClass || $.TintFontPanel;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
     options.nativeObject = options.nativeObject || fontManager('fontPanel', $.YES);
-    Panel.call(this, options);
+    Panel.call(this, properties, options, inherited || true);
     fontManager('setDelegate',this.native);
     fontManager('setTarget', this.native);
     $.TintFontPanel.panel.fireEvent = this.fireEvent.bind(this);
 
     this.private.multiple = false;
     this.private.fontManager = fontManager;
+    util.setProperties(this, properties, inherited);
   }
 
   FontPanel.prototype = Object.create(Panel.prototype);

@@ -3,32 +3,6 @@ module.exports = (function() {
   var utilities = require('Utilities');
   var Menu = require('Menu');
 
-  if(!$.TintStatusBarDelegate) {
-    if(!process.bridge.objc.delegates) {
-      process.bridge.objc.delegates = {};
-    }
-    var tintStatusBarDelegate = $.NSObject.extend('TintStatusBarDelegate');
-    tintStatusBarDelegate.addMethod('initWithJavascriptObject:', ['@',[tintStatusBarDelegate,$.selector,'@']], 
-      utilities.errorwrap(function(self, cmd, id) {
-        self.callback = process.bridge.objc.delegates[id.toString()];
-        //process.bridge.objc.delegates[id.toString()] = null;
-        return self;
-    }));
-    /**
-     * @event click
-     * @memberof StatusBar
-     * @description Fires when the user clicks on the statusbar icon, this will not fire if a menu
-     *              is placed on the status bar or if a custom view is set. To overcome this see the
-     *              'opened' and 'closed' event on the Menu object (if a menu is set), if a custom view
-     *              is set add the click handler to that view.
-     */
-    tintStatusBarDelegate.addMethod('click:','v@:@', 
-      utilities.errorwrap(function(self,_cmd,frame) { 
-        self.callback.fireEvent('click');
-    }));
-    tintStatusBarDelegate.register();
-  }
-
   /**
    * @class StatusBar
    * @description The status bar acts as a consistant element in the UI that can be accessed even if all other windows
@@ -52,15 +26,34 @@ module.exports = (function() {
    *    popOver.open(statusBar, 'top');
    *  });
    */
-  function StatusBar() {
+  function StatusBar(properties) {
     this.private = {events:{},submenu:null,imgOn:null,img:null,custom:null,custommenu:null};
-    var id = (Math.random()*100000).toString();
-    process.bridge.objc.delegates[id] = this;
-    var delegate = tintStatusBarDelegate('alloc')('initWithJavascriptObject', $(id));
+    this.private.delegateClass = $.NSObject.extend('StatusBar'+Math.round(Math.random()*10000000).toString());
+    /**
+     * @event click
+     * @memberof StatusBar
+     * @description Fires when the user clicks on the statusbar icon, this will not fire if a menu
+     *              is placed on the status bar or if a custom view is set. To overcome this see the
+     *              'opened' and 'closed' event on the Menu object (if a menu is set), if a custom view
+     *              is set add the click handler to that view.
+     */
+    this.private.clickCallback = function() {
+      try {
+        this.fireEvent('click');
+      } catch (e) {
+        console.error(e.message);
+        console.error(e.stack);
+        process.exit(1);
+      }
+    }.bind(this);
+    this.private.delegateClass.addMethod('click:', 'v@:@', this.private.clickCallback);
+    this.private.delegateRef = this.private.delegateClass.register();
+    this.private.delegate = this.private.delegateClass('alloc')('init');
     this.native = $.NSStatusBar('systemStatusBar')('statusItemWithLength',-1);
     this.native('retain'); // required else we'll find it GC'd 
-    this.native('setTarget', delegate);
+    this.native('setTarget', this.private.delegate);
     this.native('setAction','click:');
+    utilities.setProperties(this, properties, false);
   }
 
   /**

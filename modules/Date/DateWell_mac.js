@@ -5,6 +5,7 @@ module.exports = (function() {
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class DateWell
@@ -17,15 +18,16 @@ module.exports = (function() {
     * @memberof DateWell
     * @description Creates a new DateWell control.
     */
-  function DateWell(options) {
+  function DateWell(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSDatePicker;
     this.nativeViewClass = this.nativeViewClass || $.NSDatePicker;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.nativeView('setDatePickerStyle', $.NSTextFieldDatePickerStyle);
     this.nativeView('setBordered', $.NO);
     this.nativeView('setDateValue', $.NSDate('date'));
+    util.setProperties(this, properties, inherited);
   }
 
   DateWell.prototype = Object.create(Container.prototype);

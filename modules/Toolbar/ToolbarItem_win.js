@@ -6,13 +6,14 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function ToolbarItem(options) {
+  function ToolbarItem(properties, options, inherited) {
     options = options || {};
-    Button.call(this, options);
+    Button.call(this, properties, options, inherited || true);
     this.private.tooltip = "";
     this.private.type = "ToolbarItem"; // needed by Toolbar
     this.private.ignorePadding = true;
     this.private.stack.Orientation = $.System.Windows.Controls.Orientation.Vertical;
+    util.setProperties(this, properties, inherited);
   }
 
   ToolbarItem.prototype = Object.create(Button.prototype);

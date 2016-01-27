@@ -6,11 +6,11 @@ module.exports = (function() {
   var utils = require('Utilities');
   var $ = process.bridge.dotnet;
 
-  function SearchInput(options)  {
+  function SearchInput(properties, options, inherited)  {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Border;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Border;
-    Control.call(this, options);
+    Control.call(this, properties, options, inherited || true);
     this.nativeView.MinWidth = 180;
     this.nativeView.MaxWidth = 2000;
     this.nativeView.MinHeight = 2;
@@ -78,6 +78,7 @@ module.exports = (function() {
     
     //this.private.cancelButton = new Button();
     //this.private.cancelButton.image = 'stop-inverse';
+    utils.setProperties(this, properties, inherited);
   }
 
   SearchInput.prototype = Object.create(TextInput.prototype);

@@ -26,7 +26,7 @@ module.exports = (function() {
    * @memberof Panel
    * @description Creates a new panel that is initially hidden.
    */
-  function Panel(options) {
+  function Panel(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSPanel;
@@ -34,8 +34,9 @@ module.exports = (function() {
     options.styleMask = options.styleMask || ((Panel.initialStyle === "utility") ? utilityStyle : inspectorStyle);
     options.width = options.width || 200;
     options.height = options.height || 250;
-    Window.call(this, options);
+    Window.call(this, properties, options, inherited || true);
     this.native('setFloatingPanel', $.YES);
+    util.setProperties(this, properties, inherited);
   }
   Panel.prototype = Object.create(Window.prototype);
   Panel.prototype.constructor = Panel;

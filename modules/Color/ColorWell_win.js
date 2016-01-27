@@ -2,19 +2,17 @@ module.exports = (function() {
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function ColorWell(NativeObjectClass, NativeViewClass, options) {
+  function ColorWell(properties, options, inherited) {
     options = options || {};
-
-    if(NativeObjectClass) {
-      Container.call(this, NativeObjectClass, NativeViewClass, options);
-    }
-    else {
-      options.initViewOnly = true;
-      Container.call(this, $.System.Windows.Controls.Border, $.System.Windows.Controls.Border, options);
-      this.native.Width = 30;
-      this.native.Height = 20;
-    }
+    options.initViewOnly = true;
+    this.nativeClass = this.nativeClass || $.System.Windows.Controls.Border;
+    this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Border;
+    Container.call(this, properties, options, inherited || true);
+    this.native.Width = 30;
+    this.native.Height = 20;
+    util.setProperties(this, properties, inherited);
   }
 
   ColorWell.prototype = Object.create(Container.prototype);

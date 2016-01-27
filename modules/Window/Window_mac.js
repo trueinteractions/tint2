@@ -22,7 +22,7 @@ module.exports = (function() {
    * @memberof Window
    * @description Creates a new window that is initially hidden.
    */
-  function Window(options) {
+  function Window(properties, options, inherited) {
     options = options || {};
     options.doNotInitialize = true;
     // Set defaults that must be set prior to instantiation.
@@ -132,7 +132,7 @@ module.exports = (function() {
       this.nativeClass = nativeClassExtended;
     }
     this.nativeViewClass = this.nativeViewClass || $.NSView;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     // We'll need to first detect if we have an object already initialized, if not we'll do it.
     // this is a work around to support inheritence in JS.
     if(!options.nativeObject) {
@@ -178,6 +178,8 @@ module.exports = (function() {
     this.addEventListener('before-child-dettached', function(control) { 
       this.native('contentView')('willRemoveSubview',control.nativeView); 
     }.bind(this));
+
+    util.setProperties(this, properties, inherited);
   }
   
   Window.prototype = Object.create(Container.prototype);

@@ -18,11 +18,13 @@ module.exports = (function() {
    *              combining the two into a new control using the container is a good way of reusing controls.
    * @extends Control
    */
-  function Container(options) {
+  function Container(properties, options, inherited) {
     this.nativeClass = this.nativeClass || $.NSView;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
-    Control.call(this, options);
+    Control.call(this, properties, options, inherited || true);
     this.private.children = [];
+
+    util.setProperties(this, properties, inherited);
   }
 
   Container.prototype = Object.create(Control.prototype);

@@ -7,11 +7,11 @@ module.exports = (function() {
   var Color = require('Color');
   var util = require('Utilities');
 
-  function TextInput(options) {
+  function TextInput(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.TextBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.TextBox;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     var first = true;
     this.addEventListener('keyup',function() { 
@@ -52,6 +52,8 @@ module.exports = (function() {
     this.private.previousBorder = this.native.BorderBrush;
     this.private.previousBorderThickness = this.native.BorderThickness;
     this.private.previousPadding = this.native.Padding;
+
+    util.setProperties(this, properties, inherited);
   }
 
   TextInput.prototype = Object.create(Container.prototype);

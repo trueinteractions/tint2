@@ -4,6 +4,7 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class ProgressBar
@@ -16,12 +17,12 @@ module.exports = (function() {
    * @memberof ProgressBar
    * @description Creates a new progress bar control.
    */
-  function ProgressBar(options) {
+  function ProgressBar(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSProgressIndicator;
     this.nativeViewClass = this.nativeViewClass || $.NSProgressIndicator;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native('setWantsLayer', $.YES);
     this.native('setMinValue', 0);
     this.native('setMaxValue', 1);
@@ -31,6 +32,7 @@ module.exports = (function() {
     this.native('setUsesThreadedAnimation',$.YES);
     this.native('startAnimation',this.native);
     //TODO: Implement event for changes to value.
+    util.setProperties(this, properties, inherited);
   }
 
   ProgressBar.prototype = Object.create(Container.prototype);

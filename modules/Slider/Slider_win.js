@@ -4,12 +4,13 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function Slider(options) {
+  function Slider(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Slider;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Slider;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     this.native.Minimum = 0;
     this.native.Maximum = 1;
@@ -17,6 +18,8 @@ module.exports = (function() {
     this.native.SmallChange = 0.05;
     this.native.LargeChange = 0.10;
     this.native.IsMoveToPointEnabled = true;
+
+    util.setProperties(this, properties, inherited);
   }
 
   Slider.prototype = Object.create(Container.prototype);

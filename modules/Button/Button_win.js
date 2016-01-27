@@ -7,11 +7,11 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.dotnet;
 
-  function Button(options) {
+  function Button(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Button;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Button;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited);
 
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
@@ -36,6 +36,7 @@ module.exports = (function() {
       this.private.stack.Width = this.nativeView.Width;
     }.bind(this);
     this.private.remapNaturalStates();
+    utilities.setProperties(this, properties, inherited);
   }
 
   Button.prototype = Object.create(Container.prototype);
@@ -131,6 +132,13 @@ module.exports = (function() {
     }
   });
 
+  utilities.def(Button.prototype, 'default',
+    function() { return this.nativeView.IsDefault; },
+    function(e) {
+      this.nativeView.IsDefault = e ? true : false;
+    }    
+  );
+
   Object.defineProperty(Button.prototype, 'style', {
     get:function() { return this.private.states.style; },
     set:function(type) {
@@ -171,24 +179,22 @@ module.exports = (function() {
         this.private.stack.Children.Remove(this.private.img);
       }
       if(e) {
-        this.private.img = utilities.makeImage(e, $.System.Windows.Media.Stretch.Uniform);
+        this.private.img = utilities.makeImage(e);
       }
-      setTimeout(function() {
-        var ratio = this.private.img.Source.Width / this.private.img.Source.Height;
-        var height = this.private.user.height ? this.private.user.height : (
-          this.private.user.bottom && this.private.user.top ? (this.private.user.top - this.private.user.bottom ) : this.nativeView.Height );
-        height = height || 16;
-        if(!this.private.ignorePadding)
-          height = height - 7.5; // Used by toolbaritem.
-        this.private.img.Height = height;
-        this.private.img.Width = ratio*height;
-        if(this.private.img !== null) {
-          this.private.stack.Children.Insert(0, this.private.img);
-        }
-      }.bind(this),16);
-      //this.private.img.Height = this.private.img.Source.Height * (this.private.img.Source.DpiY/$.System.Windows.SystemParameters.Dpi);
-      //this.private.img.Width = this.private.img.Source.Width * (this.private.img.Source.DpiX/$.System.Windows.SystemParameters.Dpi);
-      
+      var ratio = this.private.img.Source.Width / this.private.img.Source.Height;
+      var height = this.private.user.height ? 
+                    this.private.user.height : 
+                    ( ( this.private.user.bottom && this.private.user.top ) ? 
+                      ( this.private.user.top - this.private.user.bottom ) : 
+                      ( this.private.img.Source.Height ) 
+                    );
+      height = height || 16;
+      if(this.private.ignorePadding) {
+        height = height - 7.5; // Used by toolbaritem.
+      }
+      this.private.img.Height = height;
+      this.private.img.Width = ratio*height;
+      this.private.stack.Children.Insert(0, this.private.img);
     }
   });
 

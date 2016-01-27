@@ -18,11 +18,12 @@ module.exports = (function() {
    * @memberof SecureTextInput
    * @description Creates a new SecureTextInput control.
    */
-  function SecureTextInput(options) {
+  function SecureTextInput(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.NSSecureTextField;
     this.nativeViewClass = this.nativeViewClass || $.NSSecureTextField;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options, inherited || true);
+    util.setProperties(this, properties, inherited);
   }
   SecureTextInput.prototype = Object.create(TextInput.prototype);
   SecureTextInput.prototype.constructor = SecureTextInput;

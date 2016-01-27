@@ -2,8 +2,9 @@ module.exports = (function() {
   var Panel = require('Panel');
   var Font = require('Font');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function FontPanel(NativeObjectClass, NativeViewClass, options) {
+  function FontPanel(NativeObjectClass, NativeViewClass, properties, options, inherited) {
     options = options || {};
 
     this.private = {visible:false,events:{}};
@@ -12,6 +13,7 @@ module.exports = (function() {
     this.native.ShowColor = true;
     this.native.ShowEffects = true;
 
+    util.setProperties(this, properties, inherited);
   }
 
   FontPanel.prototype = Object.create(Panel.prototype);

@@ -146,7 +146,7 @@ module.exports = (function() {
     /* self,_cmd,webview,config,navAction,features */
     var config = arguments[3];
     try {
-      var newWebview = new WebView(this.useWKWebView ? {configuration:config} : {});
+      var newWebview = new WebView({}, this.useWKWebView ? {configuration:config} : {});
       return (this.fireEvent('new-window', [newWebview])) === false ? null : newWebview.nativeView;
     } catch (e) {
       console.log(e.message);
@@ -175,7 +175,7 @@ module.exports = (function() {
    * @screenshot-window {win}
    */
    // TODO: Add progress event
-  function WebView(options) {
+  function WebView(properties, options, inherited) {
     var firstLoad = true;
     this.useWKWebView = ((process.bridge.objc.WKWebView && WebView.useNewWKWebView) ? true : false);
     options = options || {};
@@ -358,7 +358,7 @@ module.exports = (function() {
         }.bind(this)] */
       ]);
       
-      Container.call(this, options);
+      Container.call(this, properties, options, inherited || true);
 
       if(options.configuration) {
         this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480), 'configuration', options.configuration);
@@ -451,7 +451,7 @@ module.exports = (function() {
         ['webView:decidePolicyForNavigationAction:request:frame:decisionListener:','v@:@@@@@', createWebViewPolicyHandler().bind(this)]
       ]);
 
-      Container.call(this, options);
+      Container.call(this, properties, options, inherited);
 
       this.native = this.nativeView = this.nativeViewClass('alloc')('initWithFrame',$.NSMakeRect(0,0,500,480),'frameName',$('main'),'groupName',$('main'));
       var tintWebKitResponseDelegate = createWebViewBridge();
@@ -466,6 +466,8 @@ module.exports = (function() {
     }
     this.nativeView('setUIDelegate', this.nativeView);
     this.nativeView('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
+
+    util.setProperties(this, properties, inherited);
   }
 
   WebView.useNewWKWebView = true;

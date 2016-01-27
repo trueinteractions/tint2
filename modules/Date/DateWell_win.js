@@ -6,16 +6,19 @@ module.exports = (function() {
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function DateWell(options) {
+  function DateWell(properties, options, inherited) {
     options = options || {};
 
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Calendar;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Calendar;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     this.native.SelectedDate = new Date();
     this.nativeView.SelectionMode = $.System.Windows.Controls.CalendarSelectionMode.SingleDate;
+
+    util.setProperties(this, properties, inherited);
   }
 
   DateWell.prototype = Object.create(Container.prototype);

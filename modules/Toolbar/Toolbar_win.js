@@ -4,6 +4,7 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
   function resetChildNodes(toolbar) {
     for(var i=0; i < toolbar.private.children.length; i++) {
@@ -40,11 +41,11 @@ module.exports = (function() {
     }
   }
 
-  function Toolbar(options) {
+  function Toolbar(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ToolBar;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ToolBar;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.nativeView.Children = this.nativeView.Items;
     this.nativeView.HorizontalContentAlignment = $.System.Windows.HorizontalAlignment.Stretch;
     this.nativeView.Height = 48;
@@ -95,6 +96,8 @@ module.exports = (function() {
     this.addEventListener('child-attached', function() {
       resetChildNodes(this);
     }.bind(this));
+
+    util.setProperties(this, properties, inherited);
   }
 
   Toolbar.prototype = Object.create(Container.prototype);

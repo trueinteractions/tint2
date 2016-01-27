@@ -15,7 +15,7 @@ module.exports = (function() {
    * @memberof TextInput
    * @description Creates a new TextInput control.
    */
-  function TextInput(options) {
+  function TextInput(properties, options, inherited) {
     options = options || {};
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
@@ -70,9 +70,11 @@ module.exports = (function() {
     ]);
     this.nativeClass = this.nativeClass || $.NSTextField;
     this.nativeViewClass = this.nativeViewClass || $.NSTextField;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     // unnecessary except for when subclassed.
     this.native('setDelegate', this.nativeView);
+
+    util.setProperties(this, properties, inherited);
   }
 
   TextInput.prototype = Object.create(Container.prototype);

@@ -1,6 +1,7 @@
 module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class Slider
@@ -14,14 +15,15 @@ module.exports = (function() {
    * @memberof Slider
    * @description Creates a new slider control.
    */
-  function Slider(options) {
+  function Slider(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.NSSlider;
     this.nativeViewClass = this.nativeViewClass || $.NSSlider;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native('setMinValue', 0);
     this.native('setMaxValue', 1);
     this.native('setDoubleValue', 0);
+    util.setProperties(this, properties, inherited);
   }
 
   Slider.prototype = Object.create(Container.prototype);

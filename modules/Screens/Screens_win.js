@@ -31,6 +31,11 @@ module.exports = (function() {
       };
       return obj;
     }
+    Object.defineProperty(this, 'scaleFactor', {get:function() {
+      var _dpi = process.bridge.execGetStaticProperty($.System.Windows.SystemParameters.classPointer, "Dpi");
+      var scaleFactor = _dpi/96;
+      return scaleFactor;
+    }});
 
     Object.defineProperty(this, 'active', { get:function() { return getScreenInfo( $.System.Windows.Forms.Screen.PrimaryScreen ); } });
 

@@ -5,6 +5,8 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.objc;
   var assert = require('assert');
+  var util = require('Utilities');
+
   /**
    * @class Split
    * @description The Split class can be used to store multiple views horizontally or vertically with a seperator
@@ -18,7 +20,7 @@ module.exports = (function() {
    * @memberof Split
    * @description Creates a new split view
    */
-  function Split(options) {
+  function Split(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
@@ -34,7 +36,7 @@ module.exports = (function() {
     options.nonStandardEvents = true;
     this.nativeClass = this.nativeClass || $.NSSplitView;
     this.nativeViewClass = this.nativeViewClass || $.NSSplitView;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.private.ignoreConstraints = true;
     this.private.backupAppend = Container.prototype.appendChild;
     this.private.backupRemove = Container.prototype.removeChild;
@@ -43,6 +45,8 @@ module.exports = (function() {
     this.native('setDelegate', this.nativeView);
     this.nativeView('setVertical',$.YES);
     this.nativeView('setDividerStyle', $.NSSplitViewDividerStyleThin);
+
+    util.setProperties(this, properties, inherited);
   }
 
   Split.prototype = Object.create(Container.prototype);

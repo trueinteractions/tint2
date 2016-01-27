@@ -271,6 +271,7 @@ module.exports = (function() {
     }
     return imageRef;
   }
+
   function makeNSImage(e) {
     var img = null;
     if(!e || !e.indexOf) {
@@ -432,6 +433,7 @@ module.exports = (function() {
     self.classPointer = prePointer;
     return values;
   }
+
   function callSuperForEvent(eventName, self, cmd, events) {
     var prePointer = self.classPointer;
     // Cast the object to its super type that we hold.

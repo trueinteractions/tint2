@@ -12,17 +12,18 @@ module.exports = (function() {
    * @memberof ImageWell
    * @description Creates a new imagewell object.
    */
-  function ImageWell(options) {
+  function ImageWell(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSImageView;
     this.nativeViewClass = this.nativeViewClass || $.NSImageView;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native('setEditable', $.YES);
     this.native('setImageAlignment', $.NSImageAlignCenter);
     this.native('setImageFrameStyle', $.NSImageFrameNone);
     this.animates = false;
     this.alignment = "center";
+    utilities.setProperties(this, properties, inherited);
   }
 
   ImageWell.prototype = Object.create(Container.prototype);

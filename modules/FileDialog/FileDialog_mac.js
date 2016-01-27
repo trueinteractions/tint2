@@ -32,6 +32,8 @@ module.exports = (function() {
     var allowedFileTypes = null;
     this.private = {events:{}};
 
+    $dialog('setCanCreateDirectories', $.YES);
+
     /**
      * @method addEventListener
      * @param {string} eventName The name of the dialog event to start listening to.

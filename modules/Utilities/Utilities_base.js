@@ -218,8 +218,20 @@ module.exports = (function() {
   function negate(v) { return -1*v; }
   function capitalize(s) { return s[0].toUpperCase() + s.toLowerCase().substr(1); }
 
+  function setProperties(obj, properties, inherited) {
+    if(inherited) {
+      return;
+    }
+    for(var key in properties) {
+      if(key && typeof(properties[key]) !== 'undefined') {
+        obj[key] = properties[key];
+      }
+    }
+  }
+
   // Exports
   return {
+    setProperties:setProperties,
     capitalize:capitalize,
     createLayoutProperty:createLayoutProperty,
     identity:identity,

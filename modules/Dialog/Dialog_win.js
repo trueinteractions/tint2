@@ -7,7 +7,7 @@ module.exports = (function() {
   var utils = require('Utilities');
   var Color = require('Color');
 
-  function Dialog() {
+  function Dialog(properties, options, inherited) {
     var img = null, 
       mainButton = null, 
       auxButton = null,
@@ -195,6 +195,8 @@ module.exports = (function() {
 
       w.Show();
     }.bind(this);
+
+    utils.setProperties(this, properties, inherited);
   }
 
   //Dialog.prototype = Object.create(Control.prototype);

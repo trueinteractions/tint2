@@ -5,6 +5,7 @@ module.exports = (function() {
 
   var Container = require('Container');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class PopOver
@@ -19,7 +20,7 @@ module.exports = (function() {
     * @memberof PopOver
     * @description Creates a new PopOver control.
     */
-  function PopOver(options) {
+  function PopOver(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
@@ -29,7 +30,7 @@ module.exports = (function() {
     ]);
     this.nativeClass = this.nativeClass || $.NSPopover;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     
     this.native('retain');
     this.native('setBehavior', $.NSPopoverBehaviorTransient);
@@ -47,6 +48,8 @@ module.exports = (function() {
     var popOverControllerInstance = PopOverControllerClass('alloc')('initWithNibName',null,'bundle',null);
 
     this.native('setContentViewController', popOverControllerInstance);
+
+    util.setProperties(this, properties, inherited);
   }
 
   PopOver.prototype = Object.create(Container.prototype);

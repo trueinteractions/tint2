@@ -4,13 +4,16 @@ module.exports = (function() {
   }
   var Control = require('Control');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function Container(options) {
+  function Container(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.AutoLayout.AutoLayoutPanel;
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
-    Control.call(this, options);
+    Control.call(this, properties, options, inherited || true);
     this.private.children = [];
+
+    util.setProperties(this, properties, inherited);
   }
 
   Container.prototype = Object.create(Control.prototype);

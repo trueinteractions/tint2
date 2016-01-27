@@ -5,6 +5,7 @@ module.exports = (function() {
   var Panel = require('Panel');
   var Color = require('Color');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class ColorPanel
@@ -17,7 +18,7 @@ module.exports = (function() {
     * @description Creates a new ColorPanel window that's hidden by default.
     * @extends Panel
     */
-  function ColorPanel(options) {
+  function ColorPanel(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     /**
@@ -29,7 +30,8 @@ module.exports = (function() {
     options.nativeObject = options.nativeObject || $.NSColorPanel('sharedColorPanel');
     this.nativeClass = this.nativeClass || $.NSColorPanel;
     this.nativeViewClass = this.nativeViewClass || $.NSView;
-    Panel.call(this, options);
+    Panel.call(this, properties, options, inherited || true);
+    util.setProperties(this, properties, inherited);
   }
 
   ColorPanel.prototype = Object.create(Panel.prototype);

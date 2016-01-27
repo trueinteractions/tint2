@@ -89,7 +89,7 @@ module.exports = (function() {
     return this.fireEvent('dropped', [objects]) ? $.YES : $.NO;*/
   }
 
-  function Control(options) {
+  function Control(properties, options, inherted) {
     options = options || {};
     options.delegates = options.delegates || [];
 
@@ -160,6 +160,8 @@ module.exports = (function() {
         }
       }
     }.bind(this));
+
+    util.setProperties(this, properties, inherited);
   }
 
   Control.prototype.moveAbove = function(control) {

@@ -5,6 +5,7 @@ module.exports = (function() {
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.objc;
+  var util = require('Utilities');
 
   /**
    * @class ColorWell
@@ -18,12 +19,13 @@ module.exports = (function() {
     * @memberof ColorWell
     * @description Creates a new ColorWell control.
     */
-  function ColorWell(options) {
+  function ColorWell(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSColorWell;
     this.nativeViewClass = this.nativeViewClass || $.NSColorWell;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
+    util.setProperties(this, properties, inherited);
   }
 
   ColorWell.prototype = Object.create(Container.prototype);

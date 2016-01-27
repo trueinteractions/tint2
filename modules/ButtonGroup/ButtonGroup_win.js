@@ -5,13 +5,14 @@ module.exports = (function() {
 
   var Container = require('Container');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function ButtonGroup(options) {
+  function ButtonGroup(properties, options, inherited) {
     options = options || {};
 
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.StackPanel;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.StackPanel;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     //TODO: Switch to ToggleButton in WPF for more common capability.
     this.native.Orientation = $.System.Windows.Controls.Horizontal;
@@ -19,6 +20,7 @@ module.exports = (function() {
     this.native.BorderThickness = new $.System.Windows.Thickness(1);
     this.private.segmentedButtons = [];
     this.private.selected = 0;
+    util.setProperties(this, properties, inherited);
   }
 
   ButtonGroup.prototype = Object.create(Container.prototype);

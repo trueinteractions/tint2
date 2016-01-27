@@ -38,11 +38,11 @@ module.exports = (function() {
     return item;
   }
 
-  function FileInput(options) {
+  function FileInput(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options, inherited || true);
     this.private.previewMouseDownHandler = function() {
       if(this.native.ContextMenu) {
         this.native.ContextMenu.IsOpen = !this.native.ContextMenu.IsOpen;
@@ -64,6 +64,7 @@ module.exports = (function() {
       }.bind(this);
       this.native.addEventListener('SizeChanged', this.private.sizeChangedHandler);
     }.bind(this),0);
+    util.setProperties(this, properties, inherited);
   }
 
   FileInput.prototype = Object.create(TextInput.prototype);

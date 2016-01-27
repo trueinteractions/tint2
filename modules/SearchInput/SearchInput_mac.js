@@ -7,15 +7,16 @@ module.exports = (function() {
   var Control = require('Control');
   var TextInput = require('TextInput');
 
-  function SearchInput(options) {
+  function SearchInput(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSSearchField;
     this.nativeViewClass = this.nativeViewClass || $.NSSearchField;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options, inherited || true);
     this.private.searchButton = null;
     this.private.cancelButton = null;
     this.native('setRecentsAutosaveName',$(application.name));
+    utilities.setProperties(this, properties, inherited);
   }
 
   SearchInput.prototype = Object.create(TextInput.prototype);

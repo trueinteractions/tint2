@@ -6,13 +6,14 @@ module.exports = (function() {
   var Container = require('Container');
   var Color = require('Color');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function Box(options) {
+  function Box(properties, options, inherited) {
     options = options || {};
 
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Border;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Border;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited);
 
     this.native.CornerRadius = new $.System.Windows.CornerRadius(5);
     this.native.Background = $.System.Windows.SystemColors.ControlLightBrush;
@@ -21,6 +22,8 @@ module.exports = (function() {
     this.native.Child = new $.AutoLayout.AutoLayoutPanel();
     this.native.Children = this.native.Child.Children;
     this.private.custom = false;
+
+    util.setProperties(this, properties, inherited);
   }
 
   Box.prototype = Object.create(Container.prototype);

@@ -4,20 +4,23 @@ module.exports = (function() {
   }
   var Window = require('Window');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function Panel(options) {
+  function Panel(properties, options, inherited) {
     options = options || {};
     options.width = options.width || 200;
     options.height = options.height || 250;
     this.nativeClass = this.nativeClass || $.System.Windows.Window;
     this.nativeViewClass = this.nativeViewClass || $.AutoLayout.AutoLayoutPanel;
-    Window.call(this, options);
+    Window.call(this, properties, options, inherited || true);
 
     this.native.WindowStyle = $.System.Windows.WindowStyle.ToolWindow;
 
     this.style = "inspector";
     this.floating = true;
     this.toolbar = null;
+
+    util.setProperties(this, properties, inherited);
   }
 
   Panel.prototype = Object.create(Window.prototype);

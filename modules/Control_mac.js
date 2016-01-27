@@ -135,7 +135,7 @@ module.exports = (function() {
    * @see Container
    * @see Box
    */
-  function Control(options) {
+  function Control(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
 
@@ -216,6 +216,7 @@ module.exports = (function() {
         ['mouseMoved:','v@:@', mouseMoved.bind(this)],
       ]);
     }
+
     var nativeViewExtended = this.nativeViewClass.extend(this.nativeViewClass.getName()+Math.round(Math.random()*10000000));
     options.delegates.forEach(function(item) { nativeViewExtended.addMethod(item[0],item[1],item[2]); });
     nativeViewExtended.register();
@@ -258,6 +259,8 @@ module.exports = (function() {
         }
       }
     }.bind(this));
+
+    util.setProperties(this, properties, inherited);
   }
 
   /**

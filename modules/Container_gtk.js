@@ -7,11 +7,13 @@ module.exports = (function() {
   var util = require('Utilities');
   var $ = process.bridge.gobj.Gtk;
 
-  function Container(options) {
+  function Container(properties, options, inherited) {
     this.nativeClass = this.nativeClass || $.Container;
     this.nativeViewClass = this.nativeViewClass || $.Container;
-    Control.call(this, options);
+    Control.call(this, properties, options, inherited);
     this.private.children = [];
+
+    util.setProperties(this, properties, inherited);
   }
 
   Container.prototype = Object.create(Control.prototype);

@@ -36,7 +36,7 @@ module.exports = (function() {
    * win.appendChild(scroll);
    * win.visible = true;
    */
-  function Table(options) {
+  function Table(properties, options, inherited) {
     options = options || {};
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
@@ -106,7 +106,7 @@ module.exports = (function() {
     ]);
     this.nativeClass = this.nativeClass || $.NSTableView;
     this.nativeViewClass = this.nativeViewClass || $.NSTableView;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native('setWantsLayer', $.YES);
     this.native('setTranslatesAutoresizingMaskIntoConstraints',$.NO);
     this.private.views = {};
@@ -117,6 +117,7 @@ module.exports = (function() {
     this.native('setDataSource', this.nativeView);    
     this.native('setRowSizeStyle', $.NSTableViewRowSizeStyleSmall);
     this.columnsCanBeResized = true;
+    util.setProperties(this, properties, inherited);
   }
 
   Table.prototype = Object.create(Container.prototype);

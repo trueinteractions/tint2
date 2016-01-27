@@ -18,12 +18,12 @@ module.exports = (function() {
    * @memberof ButtonGroup
    * @description Creates a collection that buttons can be added to.
    */
-  function ButtonGroup(options) {
+  function ButtonGroup(properties, options, inherited) {
     options = options || {};
     options.mouseDownBlocks = true;
     this.nativeClass = this.nativeClass || $.NSSegmentedControl;
     this.nativeViewClass = this.nativeViewClass || $.NSSegmentedControl;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
     this.native('setSegmentStyle',$.NSSegmentStyleRounded);
     this.private.segmentedButtons = [];
 
@@ -37,6 +37,7 @@ module.exports = (function() {
       }
       this.fireEvent('click');
     }.bind(this));
+    util.setProperties(this, properties, inherited);
   }
 
   ButtonGroup.prototype = Object.create(Container.prototype);

@@ -4,6 +4,7 @@ module.exports = (function() {
   }
   var $ = process.bridge.objc;
   var TextInput = require('TextInput');
+  var util = require('Utilities');
 
   /**
    * @class SelectInput
@@ -18,7 +19,7 @@ module.exports = (function() {
    * @memberof SelectInput
    * @description Creates a new SelectInput control.
    */
-  function SelectInput(options) {
+  function SelectInput(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     options.delegates = options.delegates.concat([
@@ -26,7 +27,8 @@ module.exports = (function() {
     ]);
     this.nativeClass = this.nativeClass || $.NSComboBox;
     this.nativeViewClass = this.nativeViewClass || $.NSComboBox;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options, inherited || true);
+    util.setProperties(this, properties, inherited);
   }
 
   SelectInput.prototype = Object.create(TextInput.prototype);

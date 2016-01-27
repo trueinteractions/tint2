@@ -6,6 +6,7 @@ module.exports = (function() {
   var Container = require('Container');
   var $ = process.bridge.dotnet;
   var assert = require('assert');
+  var util = require('Utilities');
 
   function createNewDefinition(split, size) {
     var definition = null;
@@ -46,11 +47,11 @@ module.exports = (function() {
     }
   }
 
-  function Split(options) {
+  function Split(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Grid;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Grid;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     this.private.orientation = "vertical";
     this.private.backupAppend = Container.prototype.appendChild;
@@ -58,6 +59,8 @@ module.exports = (function() {
     this.private.definitions = [];
     this.private.dividers = [];
     this.private.dividerWidth = 1;
+
+    util.setProperties(this, properties, inherited);
   }
 
   Split.prototype = Object.create(Container.prototype);

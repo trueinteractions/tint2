@@ -4,13 +4,14 @@ module.exports = (function() {
   }
   var Container = require('Container');
   var $ = process.bridge.dotnet;
+  var util = require('Utilities');
 
-  function ProgressBar(options) {
+  function ProgressBar(properties, options, inherited) {
     options = options || {};
 
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ProgressBar;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ProgressBar;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited || true);
 
     this.native.Maximum = 1.0;
     this.native.Minimum = 0.0;
@@ -19,6 +20,8 @@ module.exports = (function() {
     this.private.border = false;
     this.private.valueCache = 0.0;
     //TODO: Implement event for changes to value.
+
+    util.setProperties(this, properties, inherited);
   }
 
   ProgressBar.prototype = Object.create(Container.prototype);

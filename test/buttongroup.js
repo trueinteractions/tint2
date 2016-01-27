@@ -22,6 +22,16 @@ function run($utils) {
   /* @hidden */ var bounds = win.boundsOnScreen;
   var buttonGroup = new ButtonGroup();
 
+  var winBounds = [5,20,30];
+  var macBounds = [15,45,60];
+  var btnBounds = null;
+
+  if(process.platform === 'darwin') {
+    btnBounds = macBounds;
+  } else {
+    btnBounds = winBounds;
+  }
+
   var button1 = new Button();
   button1.image = "back";
   button1.addEventListener('mousedown', function() {
@@ -32,7 +42,7 @@ function run($utils) {
   button1.addEventListener('mouseup', function() {
     /* @hidden */ countMouseUp++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 0);
-    /* @hidden */ $utils.clickAt(bounds.x + 45, bounds.y + 15); // hope htis hardcoded value works.
+    /* @hidden */ $utils.clickAt(bounds.x + btnBounds[1], bounds.y + 15); // hope htis hardcoded value works.
   });
 
   var button3 = new Button();
@@ -44,7 +54,7 @@ function run($utils) {
   button3.addEventListener('mouseup', function() {
     /* @hidden */ countMouseUp++;
     /* @hidden */ $utils.assert(buttonGroup.selected == 1, 'expected buttonGroup.selected == 1, got: '+(buttonGroup.selected));
-    /* @hidden */ $utils.clickAt(bounds.x + 65, bounds.y + 15); // hope htis hardcoded value works.
+    /* @hidden */ $utils.clickAt(bounds.x + btnBounds[2], bounds.y + 15); // hope htis hardcoded value works.
   });
 
   var button2 = new Button();
@@ -66,9 +76,8 @@ function run($utils) {
   buttonGroup.appendChild(button3);
   buttonGroup.appendChild(button2);
   buttonGroup.left = buttonGroup.top = 0;
-
   firer = setInterval(function() {
-    $utils.clickAt(bounds.x + 15, bounds.y + 15); // hope this hardcoded value works.
+    $utils.clickAt(bounds.x + btnBounds[0], bounds.y + 15); // hope this hardcoded value works.
   }, 1000);
   win.appendChild(buttonGroup);
 }

@@ -23,14 +23,15 @@ module.exports = (function() {
     * @memberof Box
     * @description Creates a new Box generic control.
     */
-  function Box(options) {
+  function Box(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSBox;
     this.nativeViewClass = this.nativeViewClass || $.NSBox;
-    Container.call(this, options);
+    Container.call(this, properties, options, inherited);
     this.nativeView('setBorderType', $.NSLineBorder);
     this.nativeView('setTitle', $(""));
+    util.setProperties(this, properties, inherited);
   }
 
   Box.prototype = Object.create(Container.prototype);

@@ -13,15 +13,16 @@ module.exports = (function() {
     * @memberof DropDown
     * @description Creates a new DropDown control.
     */
-  function DropDown(options) {
+  function DropDown(properties, options, inherited) {
     options = options || {};
     options.delegates = options.delegates || [];
     options.mouseDownBlocks = true;
     options.keyDownBlocks = true;
     this.nativeClass = this.nativeClass || $.NSPopUpButton;
     this.nativeViewClass = this.nativeViewClass || $.NSPopUpButton;
-    Button.call(this, options);
+    Button.call(this, properties, options, inherited || true);
     this.private.menu = null;
+    util.setProperties(this, properties, inherited);
   }
 
   DropDown.prototype = Object.create(Button.prototype);

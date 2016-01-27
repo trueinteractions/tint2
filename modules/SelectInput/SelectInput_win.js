@@ -4,17 +4,19 @@ module.exports = (function() {
   }
   var $ = process.bridge.dotnet;
   var TextInput = require('TextInput');
+  var util = require('Utilities');
 
-  function SelectInput(options) {
+  function SelectInput(properties, options, inherited) {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ComboBox;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ComboBox;
-    TextInput.call(this, options);
+    TextInput.call(this, properties, options, inherited || true);
     this.native.IsEditable = true;
     this.private.selectionChangedHandler = function() {
       this.fireEvent('change');
     }.bind(this);
     this.native.addEventListener('SelectionChanged', this.private.selectionChangedHandler);
+    util.setProperties(this, properties, inherited);
   }
 
   SelectInput.prototype = Object.create(TextInput.prototype);
