@@ -137,7 +137,6 @@ module.exports = (function() {
     this.private.views[e] = [];
     column('headerCell')('setStringValue', $(e.toString()));
     this.nativeView('addTableColumn', column);
-    this.nativeView('headerView')('setNeedsLayout', $.YES);
     this.nativeView('reloadData');
   };
 

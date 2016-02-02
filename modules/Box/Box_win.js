@@ -13,7 +13,7 @@ module.exports = (function() {
 
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Border;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Border;
-    Container.call(this, properties, options, inherited);
+    Container.call(this, properties, options, inherited || true);
 
     this.native.CornerRadius = new $.System.Windows.CornerRadius(5);
     this.native.Background = $.System.Windows.SystemColors.ControlLightBrush;

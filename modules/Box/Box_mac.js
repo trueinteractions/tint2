@@ -28,7 +28,7 @@ module.exports = (function() {
     options.delegates = options.delegates || [];
     this.nativeClass = this.nativeClass || $.NSBox;
     this.nativeViewClass = this.nativeViewClass || $.NSBox;
-    Container.call(this, properties, options, inherited);
+    Container.call(this, properties, options, inherited || true);
     this.nativeView('setBorderType', $.NSLineBorder);
     this.nativeView('setTitle', $(""));
     util.setProperties(this, properties, inherited);

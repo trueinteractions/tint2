@@ -137,8 +137,13 @@ elif [ "$1" == "dist" ]; then
   cp -a ./build/xcode/Release/tint ./build/.osx-pkg-dist/usr/local/bin/
   codesign -s "$DEVELOPERID" ./build/.osx-pkg-dist/usr/local/bin/tint
   cp -a ./build/dist/tint/tntbuild ./build/.osx-pkg-dist/usr/local/bin/
+
+  codesign -s "$DEVELOPERID" ./build/.osx-pkg-dist/usr/local/bin/tntbuild
   cp -a ./build/dist/tint/tntdbg ./build/.osx-pkg-dist/usr/local/bin/
-  
+
+  codesign -s "$DEVELOPERID" ./build/.osx-pkg-dist/usr/local/bin/tntdbg
+  rm -rf ./build/dist/tint.pkg
+
   if [ -f "tools/welcome_tmp.txt" ]; then
     rm tools/welcome_tmp.txt
   fi
@@ -158,7 +163,7 @@ elif [ "$1" == "dist" ]; then
 
   codesign -s "$DEVELOPERID" ./build/dist/tint-$TINT_VERSION-x64-osx.pkg
   read -p "Run tools/msi.bat on Windows... "
-  spctl --assess -vvvv ./build/dist/tint-$TINT_VERSION-x64-osx.pkg
+  spctl --assess -vvvv --raw ./build/dist/tint-$TINT_VERSION-x64-osx.pkg
   mv ./build/dist/tint-$TINT_VERSION-x64.msi ./build/dist/tint-$TINT_VERSION-x64-win.msi
 
 else

@@ -11,7 +11,7 @@ module.exports = (function() {
     options = options || {};
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.Button;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.Button;
-    Container.call(this, properties, options, inherited);
+    Container.call(this, properties, options, inherited || true);
 
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
