@@ -38,7 +38,7 @@ module.exports = (function() {
    * @description Shows the location of a file or directory in the system's standard shell, explorer or finder.
    */
   System.showFile = function(file) {
-    file = "file://"+file.replace("~",System.home);
+    file = "file://"+encodeURI(file.replace("~",System.home));
     $.NSWorkspace('sharedWorkspace')('activateFileViewerSelectingURLs', utils.arrayToNSArray([$.NSURL('URLWithString',$(file))]));
   };
   /**
@@ -203,7 +203,7 @@ module.exports = (function() {
   }
 
   // OSX Specific Types, undocumented on purpose.
-  System.disableCrashReporter = function() { 
+  System.disableCrashReporter = function() {
     var exec = require('child_process').exec;
     exec('defaults write com.apple.CrashReporter DialogType none');
   };
@@ -333,7 +333,7 @@ module.exports = (function() {
    * @param {integer} y The amount of pixels from the top of the virtual screen (e.g., all
    *                    of the connected monitors normalized into a coordinate system).
    * @description Sends a left 'mouse down' at the specified X, Y coordinates. This causes a
-   *              real left click mouse down event within the operating system 
+   *              real left click mouse down event within the operating system
    *              at the specified coordinates and is not simulated. This is mainly used for
    *              testing and should be avoided in production applications.
    * @static
@@ -351,7 +351,7 @@ module.exports = (function() {
    * @param {integer} y The amount of pixels from the top of the virtual screen (e.g., all
    *                    of the connected monitors normalized into a coordinate system).
    * @description Sends a left 'mouse up' at the specified X, Y coordinates. This causes a
-   *              real left click mouse up event within the operating system 
+   *              real left click mouse up event within the operating system
    *              at the specified coordinates and is not simulated.  This is mainly used for
    *              testing and should be avoided in production applications.
    * @static
@@ -368,7 +368,7 @@ module.exports = (function() {
    * @param {string} input The character to send as a key up and key down event. Note this must be one single character
    *                       e.g., 'a', 'b', or 'A', or 'B'.  For a carrage return use 'ENTER' or 'RETURN', for shift use
    *                       'SHIFT', etc.
-   * @description Sends a key down and key up event through the OS, note the currently focused application, window and 
+   * @description Sends a key down and key up event through the OS, note the currently focused application, window and
    *              control will receive this event (and may not be the running application).  This is mainly used for
    *              testing and should be avoided in production applications.
    * @alias keyAtControl
@@ -422,7 +422,7 @@ module.exports = (function() {
    * @param {integer} y The amount of pixels from the top of the virtual screen (e.g., all
    *                    of the connected monitors normalized into a coordinate system).
    * @description Left clicks at the specified X, Y coordinates. This causes a
-   *              real left click mouse event within the operating system 
+   *              real left click mouse event within the operating system
    *              at the specified coordinates and is not simulated. This is mainly used for
    *              testing and should be avoided in production applications.
    * @static
@@ -436,7 +436,7 @@ module.exports = (function() {
   /**
    * @method clickAtControl
    * @memberof System
-   * @param {Control} control The control to left click at.  The center of the control is 
+   * @param {Control} control The control to left click at.  The center of the control is
    *                          calculated as the target click area.
    * @description Left clicks at the center of the specified Tint Control. This causes a
    *              real left click event within the operating system and is not simulated. This is mainly used for
@@ -458,7 +458,7 @@ module.exports = (function() {
    * @param {integer} y The amount of pixels from the top of the virtual screen (e.g., all
    *                    of the connected monitors normalized into a coordinate system).
    * @description Right clicks at the specified control. This causes a
-   *              real right-click mouse event within the operating system 
+   *              real right-click mouse event within the operating system
    *              at the specified coordinates and is not simulated. This is mainly used for
    *              testing and should be avoided in production applications.
    * @static
@@ -473,7 +473,7 @@ module.exports = (function() {
   /**
    * @method rightClickAtControl
    * @memberof System
-   * @param {Control} control The control to right click at.  The center of the control is 
+   * @param {Control} control The control to right click at.  The center of the control is
    *                          calculated as the target click area.
    * @description The right click at control method can be used for testing.  This causes a
    *              real right-click event within the operating system and is not simulated. This is mainly used for
@@ -491,7 +491,7 @@ module.exports = (function() {
    * @method takeSnapshotOfActiveScreen
    * @memberof System
    * @returns {string} A base 64 encoded PNG of the screenshot.
-   * @description Takes a screenshot of the current active screen and returns it as a 
+   * @description Takes a screenshot of the current active screen and returns it as a
    *              string that is a base64 encoded PNG image.
    * @static
    */
