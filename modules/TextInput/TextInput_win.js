@@ -157,7 +157,10 @@ module.exports = (function() {
 
   Object.defineProperty(TextInput.prototype, 'linewrap', {
     get:function() { return this.native.AcceptsReturn; },
-    set:function(e) { this.native.AcceptsReturn = e ? true : false; }
+    set:function(e) { 
+      this.native.AcceptsReturn = e ? true : false;
+      this.native.TextWrapping = e ? $.System.Windows.TextWrapping.Wrap : $.System.Windows.TextWrapping.NoWrap;
+    }
   });
 
   //TODO: Is this 1:1 functionality? Can users still scroll with no visible scrollbar?
