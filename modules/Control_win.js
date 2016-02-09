@@ -84,7 +84,7 @@ module.exports = (function() {
           this.fireEvent('click');
         }.bind(this),0);
       }.bind(this);
-      this.private.mouseDown = function() { 
+      this.private.mouseDown = function() {
         this.fireEvent('private-pre-mousedown');
         this.fireEvent('mousedown'); 
       }.bind(this);
@@ -110,12 +110,12 @@ module.exports = (function() {
         this.native.addEventListener.bind(this.native,'MouseLeftButtonUp', this.private.leftMouseUp),
         this.native.removeEventListener.bind(this.native, 'MouseLeftButtonUp', this.private.leftMouseUp));
 
-      utils.lazyLoadEventListener(this, ['mouseup','click'],
+      utils.lazyLoadEventListener(this, ['mouseup', 'click'],
         this.native.addEventListener.bind(this.native,'PreviewMouseUp', this.private.mouseUp),
         this.native.removeEventListener.bind(this.native, 'PreviewMouseUp', this.private.mouseUp));
 
       utils.lazyLoadEventListener(this, 'mousedown',
-        this.native.addEventListener.bind(this.native,'PreviewMouseDown', this.private.mouseDown),
+        this.native.addEventListener.bind(this.native, 'PreviewMouseDown', this.private.mouseDown),
         this.native.removeEventListener.bind(this.native, 'PreviewMouseDown', this.private.mouseDown));
 
       utils.lazyLoadEventListener(this, 'mousemove',

@@ -108,7 +108,7 @@ module.exports = (function() {
         this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
         this.native.IsReadOnly = true;
         this.native.AcceptsTab = false;
-        this.native.Focusable = true;
+        this.native.Focusable = false;
       } else {
         this.native.Background = this.private.previousBackground;
         this.native.BorderBrush = this.private.previousBorder;

@@ -106,7 +106,6 @@ module.exports = (function() {
     this.native.Height = options.height;
     this.native.WindowStartupLocation = $.System.Windows.WindowStartupLocation.CenterScreen;
 
-
     util.setProperties(this, properties, inherited);
   }
 

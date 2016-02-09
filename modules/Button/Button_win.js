@@ -16,6 +16,7 @@ module.exports = (function() {
     this.private.buttonType = "normal";
     this.private.buttonStyle = "normal";
     this.private.stack = new $.System.Windows.Controls.StackPanel();
+    this.native.Children = this.private.stack.Children;
     this.private.stack.Orientation = $.System.Windows.Controls.Orientation.Horizontal;
     this.private.label = null;
     this.private.img = null;

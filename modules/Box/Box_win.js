@@ -57,6 +57,9 @@ module.exports = (function() {
     set:function(e) {
       this.custom = true;
       this.nativeView.BorderBrush = new $.System.Windows.Media.SolidColorBrush((new Color(e)).native);
+      if(this.nativeView.BorderThickness.Top === 0) {
+        this.borderWidth = 1;
+      }
     }
   });
 
@@ -84,7 +87,7 @@ module.exports = (function() {
       if(e === true && this.private.custom === false) {
         this.private.custom = true;
         this.nativeView.BorderBrush = new $.System.Windows.Media.SolidColorBrush((new Color('transparent')).native);
-        this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
+        //this.nativeView.BorderThickness = new $.System.Windows.Thickness(0);
         this.nativeView.Background = new $.System.Windows.Media.SolidColorBrush((new Color('transparent')).native);
         this.nativeView.CornerRadius = new $.System.Windows.CornerRadius(0);
       }
