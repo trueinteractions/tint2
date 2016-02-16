@@ -196,9 +196,13 @@ module.exports = (function() {
      * @memberof FileDialog
      * @description Gets the selection specified by the user once the dialog has been closed. The result is a URL or file path.
      */
+    var selectedUrls = null;
     Object.defineProperty(this, "selection", {
       get:function() {
         if(type === "open") {
+          if(selectedUrls) {
+            return selectedUrls;
+          }
           var urls = $dialog('URLs');
           var count = urls('count');
           var result = [];
@@ -231,6 +235,9 @@ module.exports = (function() {
         w = w.native ? w.native : w;
         var comp = $(function(self,e) {
           if(e === $.NSFileHandlingPanelOKButton) {
+            if(type === 'open') {
+              selectedUrls = this.selection;
+            }
             this.fireEvent('select');
           } else {
             this.fireEvent('cancel');
@@ -240,6 +247,9 @@ module.exports = (function() {
       } else {
         var e = $dialog('runModal');
         if(e === $.NSFileHandlingPanelOKButton) {
+          if(type === 'open') {
+            selectedUrls = this.selection;
+          }
           this.fireEvent('select');
         } else {
           this.fireEvent('cancel');

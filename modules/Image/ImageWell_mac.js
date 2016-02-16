@@ -42,10 +42,11 @@ module.exports = (function() {
       this.private.currentImage = e;
       var img = utilities.makeNSImage(e);
       if(!img) {
-        console.log('Error, image was invalid: ', e);
+        console.log('Error, image was invalid: \"' + e + '\"');
+      } else {
+        this.nativeView('setImage',img);
+        img('release');
       }
-      this.nativeView('setImage',img);
-      img('release');
     }
   });
 

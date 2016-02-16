@@ -276,7 +276,9 @@ module.exports = (function() {
     var img = null;
     if(!e || !e.indexOf) {
       return null;
-    } else if(e.indexOf(':') > -1) {
+    }
+    e = e.trim();
+    if(e.indexOf(':') > -1) {
       img = $.NSImage('alloc')('initWithContentsOfURL',$.NSURL('URLWithString',$(e)));
     } else if (e.indexOf('/') > -1 || e.indexOf('.') > -1) {
       if(e[0] !== '/' && process.mainModule) {
