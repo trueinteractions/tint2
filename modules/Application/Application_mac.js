@@ -569,6 +569,7 @@
           var p = this.appearance;
           if(currentAppearance !== p) {
             this.fireEvent('appearance-change', [p]);
+            this.fireEvent('appearance-changed', [p]);
           }
           currentAppearance = p;
         }.bind(this), ['v',['@']]);
