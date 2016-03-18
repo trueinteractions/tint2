@@ -42,24 +42,7 @@ import jsmin
 
 
 def ToCArray(filename, lines):
-  result = []
-  row = 1
-  col = 0
-  for chr in lines:
-    col += 1
-    if chr == "\n" or chr == "\r":
-      row += 1
-      col = 0
-
-    value = ord(chr)
-
-    if value >= 128:
-      print 'non-ascii value ' + filename + ':' + str(row) + ':' + str(col)
-      sys.exit(1);
-
-    result.append(str(value))
-  result.append("0")
-  return ", ".join(result)
+  return ','.join(str(ord(c)) for c in lines)
 
 
 def CompressScript(lines, do_jsmin):
@@ -150,7 +133,7 @@ def ExpandMacros(lines, macros):
       result = macro.expand(mapping)
       # Replace the occurrence of the macro with the expansion
       lines = lines[:start] + result + lines[end:]
-      start = lines.find(name + '(', end)
+      start = lines.find(name + '(', start)
   return lines
 
 
@@ -220,17 +203,11 @@ namespace node {
 
 struct _native {
   const char* name;
-  const char* source;
+  const unsigned char* source;
   size_t source_len;
 };
 
-static const struct _native natives[] = {
-
-%(native_lines)s\
-
-  { NULL, NULL, 0 } /* sentinel */
-
-};
+static const struct _native natives[] = { %(native_lines)s };
 
 }
 #endif
@@ -238,11 +215,11 @@ static const struct _native natives[] = {
 
 
 NATIVE_DECLARATION = """\
-  { "%(id)s", %(escaped_id)s_native, sizeof(%(escaped_id)s_native)-1 },
+  { "%(id)s", %(escaped_id)s_native, sizeof(%(escaped_id)s_native) },
 """
 
 SOURCE_DECLARATION = """\
-  const char %(escaped_id)s_native[] = { %(data)s };
+  const unsigned char %(escaped_id)s_native[] = { %(data)s };
 """
 
 
@@ -293,6 +270,7 @@ def JS2C(source, target):
     lines = ExpandMacros(lines, macros)
     lines = CompressScript(lines, do_jsmin)
     data = ToCArray(s, lines)
+    
     if 'node/' in s or 'node\\' in s or 'modules\\' in s or 'modules/' in s:
       s = s.replace('node/lib/','').replace('node/src/','').replace('node/','').replace('node\\lib\\','').replace('node\\src\\','').replace('node\\','').replace('libraries\\','').replace('libraries/','').replace('../','').replace('../','').replace('..\\','').replace('..\\','')
 
@@ -317,8 +295,7 @@ def JS2C(source, target):
     else:
       ids.append((id, len(lines)))
 
-    escaped_id = id.replace('/', '_')
-
+    escaped_id = id.replace('-', '_').replace('/', '_')
     source_lines.append(SOURCE_DECLARATION % {
       'id': id,
       'escaped_id': escaped_id,
