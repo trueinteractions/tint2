@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <installer-gui-script minSpecVersion="2">
-    <background file="tint.png" mime-type="image/png" alignment="topleft" scaling="fit" />
+    <!--<background file="tint.png" mime-type="image/png" alignment="topleft" scaling="fit" />-->
     <license file="license.txt"/>
     <welcome file="welcome_tmp.txt"/>
     <title>Tint</title>

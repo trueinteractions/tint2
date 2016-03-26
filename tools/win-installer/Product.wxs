@@ -121,7 +121,6 @@
 
     <UIRef Id="WixUI_Common"/>
     <WixVariable Id="WixUIBannerBmp" Value="tint-dg.bmp"/>
-    <WixVariable Id="WixUIDialogBmp" Value="tint-bg.bmp"/>
     <WixVariable Id="WixUILicenseRtf" Value="$(var.RepoDir)build\dist\license.rtf"/>
 	</Product>
 
