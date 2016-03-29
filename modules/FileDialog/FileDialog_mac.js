@@ -106,7 +106,10 @@ module.exports = (function() {
      * @description Gets the type of the file dialog (open or save). This is read only.
      */
     Object.defineProperty(this, 'type', {
-      get:function() { return type; }
+      get:function() { return type; },
+      set:function() {
+        console.warn('ERROR! The type for a FileDialog must be set in the constructor, not as a property.');
+      }
     });
 
     /**

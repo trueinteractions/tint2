@@ -8,8 +8,9 @@ module.exports = (function() {
   var util = require('Utilities');
   var assert = require('assert');
 
-  function FileDialog(type) {
-    type = type || "open";
+  var type = null;
+  function FileDialog(t) {
+    type = t || "open";
     var $dialog;
     var $dirDialog = new $.System.Windows.Forms.FolderBrowserDialog();
 
@@ -98,7 +99,10 @@ module.exports = (function() {
     });
 
     Object.defineProperty(this, 'type', {
-      get:function() { return type; }
+      get:function() { return type; },
+      set:function() {
+        console.warn('ERROR! The type for a FileDialog must be set in the constructor, not as a property.');
+      }
     });
 
     var allfiles = "All Files (*.*) | *.*";
@@ -186,7 +190,7 @@ module.exports = (function() {
     Object.defineProperty(this, "selection", {
       get:function() {
         if(canChooseDirectories) {
-          return $dirDialog.SelectedPath;
+          return type === "open" ? [$dirDialog.SelectedPath] : $dirDialog.SelectedPath;
         } else if(type === "open") {
           var result = [];
           var amount = $dialog.FileNames.Length;
