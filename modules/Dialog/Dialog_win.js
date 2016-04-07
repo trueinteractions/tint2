@@ -161,7 +161,7 @@ module.exports = (function() {
       btn.addEventListener('PreviewMouseDown', btn.previewMouseDownCallback);
       btn.Content = new $.System.Windows.Controls.StackPanel();
       var label = new $.System.Windows.Controls.Label();
-      label.Content = mainButton ? mainButton.toString() : "";
+      label.Content = (mainButton || mainButton === '') ? mainButton.toString() : "OK";
       label.Padding = new $.System.Windows.Thickness(0);
       btn.Content.Children.Add(label);
       btn.IsDefault = true;
