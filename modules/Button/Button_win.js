@@ -28,6 +28,7 @@ module.exports = (function() {
         this.native.Padding = new $.System.Windows.Thickness(5.75,1.75,5.75,1.75);
       } else {
         this.native.Padding = new $.System.Windows.Thickness(0,0,0,0);
+        this.native.Margin = new $.System.Windows.Thickness(0,0,0,0);
       }
       // convert pxl based measure to point (18/17) * PixelSize
       // this.native.FontSize = this.native.FontSize * 1.05882352941176;
@@ -92,6 +93,8 @@ module.exports = (function() {
       }
       if(e && e !== null) {
         this.private.label = new $.System.Windows.Controls.Label();
+        this.private.label.Padding = new $.System.Windows.Thickness(0);
+        this.private.label.Margin = new $.System.Windows.Thickness(0);
         this.private.stack.Children.Add(this.private.label);
         this.private.label.Content = e.toString(); 
       }
