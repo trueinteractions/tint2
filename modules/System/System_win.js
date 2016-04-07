@@ -349,6 +349,10 @@ module.exports = (function() {
     }
   };
 
+  System.tmpDirectory = function() {
+    return $.System.IO.Path.GetTempPath();
+  }
+
   System.takeSnapshotOfWindow = function(windowObj) {
     if(windowObj.native) {
       windowObj = windowObj.native;

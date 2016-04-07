@@ -41,6 +41,7 @@ module.exports = (function() {
     file = "file://"+encodeURI(file.replace("~",System.home));
     $.NSWorkspace('sharedWorkspace')('activateFileViewerSelectingURLs', utils.arrayToNSArray([$.NSURL('URLWithString',$(file))]));
   };
+
   /**
    * @method openFile
    * @memberof System
@@ -76,6 +77,18 @@ module.exports = (function() {
                                      'files', utils.arrayToNSArray([base]),
                                      'tag', null);
   };
+
+  /**
+   * @method tmpDirectory
+   * @memberof System
+   * @description Returns the directory path for temporary files that could potentially
+   *              be removed upon restart.
+   * @returns {string} The path of the temporary directory as a string.
+   */
+  System.tmpDirectory = function() {
+    return $.System.IO.Path.GetTempPath();
+  }
+
   /**
    * @method beep
    * @memberof System
