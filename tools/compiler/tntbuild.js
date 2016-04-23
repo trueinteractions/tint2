@@ -3,6 +3,8 @@ var assert = require('assert');
 var tintVersion = '@@@TINT_VERSION@@@', 
   tintExecutableWindows = '@@@TINT_WINDOWS_EXECUTABLE@@@',
   tintExecutableOSX = '@@@TINT_OSX_EXECUTABLE@@@',
+  tintExecutableWindowsMSVCP120 = '@@@TINT_WINDOWS_EXECUTABLE_MSVCP120@@@',
+  tintExecutableWindowsMSVCR120 = '@@@TINT_WINDOWS_EXECUTABLE_MSVCR120@@@',
   tintExecutableLinux = '@@@TINT_LINUX_EXECUTABLE@@@',
   baseDirectory = process.cwd(),
   pa = require('path'),
@@ -100,6 +102,8 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       obj.runtime=$tint.path([obj.rescdir, 'Runtime']);
       obj.macapp=$tint.path([outputDirectory, 'MacOS X', this.data.name + '.app']);
       obj.winapp=$tint.path([outputDirectory, 'Windows', this.data.name + '.exe']);
+      obj.winmsvcr=$tint.path([outputDirectory, 'Windows', 'msvcr120.dll']);
+      obj.winmsvcp=$tint.path([outputDirectory, 'Windows', 'msvcp120.dll']);
       obj.main=$tint.path([this.data.sources.directory,this.data.main]);
       var maccontents = $tint.path([obj.macapp,'Contents']);
       var macresources = $tint.path([maccontents,'Resources']);
@@ -266,7 +270,11 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
     prepwin:function() {
       // To prevent escaping both the first and second macro, we'll "add this"
       assert(tintExecutableWindows !== ('@@@' + 'TINT_WINDOWS_EXECUTABLE' + '@@@'), 'The runtime for windows could not be found.');
+      assert(tintExecutableWindowsMSVCP120 !== ('@@@' + 'TINT_WINDOWS_EXECUTABLE_MSVCP120' + '@@@'), 'The runtime msvcp120 for windows could not be found.');
+      assert(tintExecutableWindowsMSVCR120 !== ('@@@' + 'TINT_WINDOWS_EXECUTABLE_MSVCR120' + '@@@'), 'The runtime msvcr120 for windows could not be found.');
       var winExec = new Buffer(tintExecutableWindows, 'base64');
+      var winExecMSVCP = new Buffer(tintExecutableWindowsMSVCP120, 'base64');
+      var winExecMSVCR = new Buffer(tintExecutableWindowsMSVCR120, 'base64');
       this.packageExecSize = winExec.length;
       try {
       this.tasks=this.tasks.concat([
@@ -298,6 +306,8 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
           this.onProgress("creating windows application");
           $tint.makedir($tint.dotdot(this.conf.winapp));
           fs.writeFileSync(this.conf.winapp, winExec);
+          fs.writeFileSync(this.conf.winmsvcr, winExecMSVCR);
+          fs.writeFileSync(this.conf.winmsvcp, winExecMSVCP);
           this.tick();
           //$tint.copy(this.conf.runtime+'.exe',this.conf.winapp); this.tick("Creating Windows Application"); 
         }.bind(this),

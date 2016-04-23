@@ -104,9 +104,13 @@ elif [ "$1" == "dist" ]; then
   chmod +x ./build/dist/tint/tntbuild
   cat ./build/xcode/Release/tint | openssl base64 | tr -d '\n' > tintb64
   cat ./build/msvs/Release/tint_windows.exe | openssl base64 | tr -d '\n' > tintexeb64
+  cat ./tools/msvcp120.dll | openssl base64 | tr -d '\n' > msvcp120b64
+  cat ./tools/msvcr120.dll | openssl base64 | tr -d '\n' > msvcr120b64
   perl -pe "s/\@\@\@TINT_VERSION\@\@\@/'$TINT_VERSION'/ge" -i ./build/dist/tint/tntbuild
   perl -pe 's/\@\@\@TINT_WINDOWS_EXECUTABLE\@\@\@/`cat tintexeb64`/ge' -i ./build/dist/tint/tntbuild
   perl -pe 's/\@\@\@TINT_OSX_EXECUTABLE\@\@\@/`cat tintb64`/ge' -i ./build/dist/tint/tntbuild
+  perl -pe 's/\@\@\@TINT_WINDOWS_EXECUTABLE_MSVCP120\@\@\@/`cat msvcp120b64`/ge' -i ./build/dist/tint/tntbuild
+  perl -pe 's/\@\@\@TINT_WINDOWS_EXECUTABLE_MSVCR120\@\@\@/`cat msvcr120b64`/ge' -i ./build/dist/tint/tntbuild
   cp ./build/dist/tint/tntbuild ./build/dist/tint/tntbuild.js
   cp ./tools/compiler/tntbuild.cmd ./build/dist/tint/tntbuild.cmd
   cp ./tools/compiler/tntdbg.cmd ./build/dist/tint/tntdbg.cmd
@@ -115,6 +119,8 @@ elif [ "$1" == "dist" ]; then
   fi
   rm tintexeb64
   rm tintb64
+  rm msvcp120b64
+  rm msvcr120b64
 
   if [ -f "./build/tint-$TINT_VERSION.zip" ]; then
     rm ./build/dist/tint-$$TINT_VERSION.zip

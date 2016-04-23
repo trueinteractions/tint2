@@ -93,7 +93,7 @@ module.exports = (function() {
       }
       if(e && e !== null) {
         this.private.label = new $.System.Windows.Controls.Label();
-        this.private.label.Padding = new $.System.Windows.Thickness(0);
+        this.private.label.Padding = new $.System.Windows.Thickness(5,1,5,1);
         this.private.label.Margin = new $.System.Windows.Thickness(0);
         this.private.stack.Children.Add(this.private.label);
         this.private.label.Content = e.toString(); 

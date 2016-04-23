@@ -41,8 +41,10 @@
       </Directory>
     </Directory>
     <DirectoryRef Id="INSTALLDIR">
-      <Component Id="TintExecutable">
+      <Component Id="TintExecutable" Guid="b3e84eff-f41e-4a86-b0f6-143186d3863b">
         <File Id="tint.exe" KeyPath="yes" Source="$(var.SourceDir)tint.exe"/>
+        <File Id="msvcp120" CompanionFile="tint.exe" KeyPath="no" Source="$(var.RepoDir)\tools\msvcp120.dll"/>
+        <File Id="msvcr120" CompanionFile="tint.exe" KeyPath="no" Source="$(var.RepoDir)\tools\msvcr120.dll"/>
       </Component>
       <Component Id="TintBuildExecutable">
         <File Id="tntbuild.js" KeyPath="yes" Source="$(var.SourceDir)tntbuild.js"/>

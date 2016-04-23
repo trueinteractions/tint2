@@ -12,7 +12,7 @@ module.exports = (function() {
     this.nativeClass = this.nativeClass || $.System.Windows.Controls.ProgressBar;
     this.nativeViewClass = this.nativeViewClass || $.System.Windows.Controls.ProgressBar;
     Container.call(this, properties, options, inherited || true);
-
+    this.native.MinHeight = 6.0;
     this.native.Maximum = 1.0;
     this.native.Minimum = 0.0;
     this.native.Value = 0.0;
