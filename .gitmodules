@@ -1,7 +1,7 @@
 [submodule "libraries/node"]
 	path = libraries/node
 	url = https://github.com/nodejs/node.git
-	branch = 79cb1a913f07fee35e6f97b883e9bf1165c46009
+	branch = 7f8213006780ac1953de5f57ce304f890e1eeb02
 
 [submodule "libraries/wpf-autolayout"]
 	path = libraries/wpf-autolayout

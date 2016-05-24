@@ -35,6 +35,9 @@ $tint.loadbuilder=function(path,onError,onWarning,onProgress,onSuccess,onStart) 
     onError(e, 'The format of the package.json file has a syntax error\n'+$tint.read(path));
   }
   b.data=$tint.mergeobjs(b.data,packagejson);
+  if(!b.data.sources || !b.data.sources.directory) {
+    throw new Error('The package file specified does not contain a list of sources to compile! See www.trueinteractions.com/docs/tutorial-gettingstarted.html');
+  }
   b.data.sources.directory=$tint.absolute(b.data.sources.directory,'.');
   sourceDirectory = $tint.absolute($tint.absolute($tint.dotdot(path),b.data.sources.directory),baseDirectory);
   if(b.data.icon && b.data.icon.osx) b.data.icon.osx[0]=$tint.absolute(b.data.icon.osx[0],sourceDirectory);
@@ -62,9 +65,11 @@ $tint.builder = function(onError,onWarning,onProgress,onSuccess,onStart) {
       if (!$tint.exists(resourceDirectory, false)) {
         $tint.makedir(resourceDirectory);
       }
+      if (!this.data.name) throw new Error("The bundle name must be a valid file name without an extension or special characters.");
       if (this.data.name.trim() === "") throw new Error("The bundle name must be a valid file name without an extension or special characters.");
       if (!this.data.version) throw new Error("The version number does not exist.");
       if (!this.data.sources) throw new Error("A source directory has not been selected.");
+      if (!this.data.longname) throw new Error("This package requires a 'longname' property, a human readable name for your application.");
       if (this.data.longname.trim() === "") throw new Error("The long name is invalid");
       if ($tint.ndef(this.data.icon))
         throw new Error("The key 'icon' was not found in package.json.");
