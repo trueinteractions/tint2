@@ -16,7 +16,7 @@
     'uv_library': 'static_library',
     'uv_parent_path': '/libraries/node/deps/uv/',
     'uv_use_dtrace': 'true',
-    'v8_enable_i18n_support': 0,
+    'v8_enable_i18n_support': 1,
     'v8_optimized_debug': 0,
     'v8_random_seed': 0,
     'want_separate_host_toolset': 0,
