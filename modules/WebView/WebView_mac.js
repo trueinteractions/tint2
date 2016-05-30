@@ -5,7 +5,7 @@ module.exports = (function() {
   var $ = process.bridge.objc;
   var util = require('Utilities');
   var Container = require('Container');
-  var core = require('core');
+  var core = require('_core');
 
   function createWebViewPolicyHandler() {
     var result = function() {

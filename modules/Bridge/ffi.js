@@ -83,8 +83,8 @@ exports.ForeignFunction = require('foreign_function');
 exports.VariadicForeignFunction = require('foreign_function_var');
 exports.DynamicLibrary = require('dynamic_library');
 exports.Library = require('library');
-exports.Callback = require('callback');
-exports.errno = require('errno');
+exports.Callback = require('_callback');
+exports.errno = require('_errno');
 exports.ffiType = require('type');
 
 // the shared library extension for this platform

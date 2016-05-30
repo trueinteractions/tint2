@@ -4,8 +4,8 @@ module.exports = (function() {
    * Module dependencies.
    */
 
-  var core  = require('core'),
-      Class = require('class');
+  var core  = require('_core'),
+      Class = require('_class');
 
   /**
    * The 'id' function is essentially the "base class" for all Objective-C

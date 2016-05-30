@@ -10,7 +10,7 @@ if(!process.bridge) {
 var ref = require('ref')
   , assert = require('assert')
   , bindings = process.bridge
-  , Callback = require('callback')
+  , Callback = require('_callback')
   , ForeignFunction = require('foreign_function');
  
 /**

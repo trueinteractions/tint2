@@ -6,7 +6,7 @@ module.exports = (function() {
   /*!
    * Module dependencies.
    */
-  var core = require('core');
+  var core = require('_core');
 
   /**
    * The `Ivar` Class. Wrapper around an Objective-C `ivar` pointer.

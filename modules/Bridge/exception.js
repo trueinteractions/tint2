@@ -52,7 +52,7 @@ module.exports = wrap;
  * Module dependencies.
  */
 
-var core = require('core')
+var core = require('_core')
 	, Exception = require('vm').runInNewContext('Error');
 
 

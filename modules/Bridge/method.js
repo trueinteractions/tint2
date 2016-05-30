@@ -8,7 +8,7 @@ module.exports = (function() {
    * Module dependencies.
    */
 
-  var core = require('core');
+  var core = require('_core');
 
   /**
    * `Method` wrapper class constructor.

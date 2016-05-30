@@ -2,7 +2,7 @@ module.exports = (function() {
   /*!
    * Module dependencies.
    */
-  var core = require('core'),
+  var core = require('_core'),
       method = require('method'),
       ivar = require('ivar'),
       exception = require('exception'),
