@@ -24,6 +24,7 @@
     'node_v8_options': '',
     'node_prefix': '',
     'node_tag': '',
+    'with_intl': 'true',
     'win_subsystem': 'console',
     'linux_library_files': [
       'modules/Bridge/Bridge_gtk.js',

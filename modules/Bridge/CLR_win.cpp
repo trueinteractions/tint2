@@ -5,6 +5,7 @@
 #include <vcclr.h>
 #include <vector>
 #include <msclr/marshal.h>
+#include <msclr/marshal_cppstd.h>
 #include <windows.h>
 #include <Dwmapi.h>
 #include <Shellapi.h>
@@ -493,10 +494,9 @@ Handle<v8::String> stringCLR2V8(System::String^ text)
   Nan::EscapableHandleScope scope;
   if (text->Length > 0)
   {
-    marshal_context ^ context = gcnew marshal_context();
-    const char* str = context->marshal_as<const char*>(text);
-    v8::Local<v8::String> v8str = Nan::New<v8::String>(str).ToLocalChecked();
-    delete context;
+    msclr::interop::marshal_context context;
+    const wchar_t *str = context.marshal_as<const wchar_t *>(text);
+    v8::Local<v8::String> v8str = Nan::New<v8::String>((uint16_t *)str, text->Length).ToLocalChecked();
     return scope.Escape(v8str);
   }
   else
