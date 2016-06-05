@@ -23,7 +23,7 @@ function run($utils) {
   var agent = "This is my user agent.";
   webview.useragent = agent;
   webview.addEventListener('load', function() {
-    webview.execute("document.querySelector('h2.info').innerText", function(response) {
+    webview.execute("document.querySelector('.info-box.user-agent').innerText", function(response) {
       $utils.assert(agent === response, 'agent ['+agent+'] !== response [' + response +']');
       $utils.assert(agent === webview.useragent, 'agent ['+agent+'] !== webview.useragent [' + webview.useragent +']');
       $utils.ok();
